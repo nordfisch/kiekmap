@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import __version__
 from app.api import health
 from app.config import get_settings
+from app.services.watcher import Eingangswaechter
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s %(name)s: %(message)s")
 log = logging.getLogger("photomap")
@@ -20,7 +21,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     settings.ensure_dirs()
     log.info("Datenverzeichnis: %s", settings.data_dir)
-    yield
+
+    waechter = Eingangswaechter(settings)
+    waechter.start()
+    try:
+        yield
+    finally:
+        waechter.stop()
 
 
 app = FastAPI(

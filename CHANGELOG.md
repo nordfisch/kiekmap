@@ -18,3 +18,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Symbole werden mit heruntergeladen, sonst bliebe die Karte offline ohne Beschriftung
 - Grundlayout: Karte mit Zeitschieber darunter, „Hilf mit"-Bereich rechts über die volle Höhe
 - nginx-Konfiguration mit Range-Requests für die Kartendatei und `/api`-Proxy
+- Datenmodell: Fotos mit Zeitintervall statt Zeitpunkt, Herkunft pro Feld, Schlagwörter,
+  Änderungsprotokoll, Ortsverzeichnis, Import-Protokoll
+- Import-Pipeline: SHA-256 als Dateiname und Dublettenschutz, EXIF und IPTC, Vorschaubilder in
+  zwei Größen, Beachtung der EXIF-Ausrichtung, CMYK-Umwandlung
+- **EXIF-Datumsangaben ab 1990 gelten als Scandatum und datieren das Foto nicht** — sonst läge
+  ein Foto von 1932 auf der Zeitleiste bei 2019 und würde nie zur Korrektur vorgelegt
+- Überwachter Eingangsordner: importiert erst, wenn eine Datei fertig geschrieben ist, und räumt
+  sie danach nach `_erledigt/` bzw. `_problem/` — gelöscht wird nie
+- `python -m app.cli import|scan|stats` für Massenimport und Bestandsübersicht

@@ -33,6 +33,14 @@ class Settings(BaseSettings):
     #: Fuer den Admin-Bereich ab Stufe 8. Leer heisst: Admin-API antwortet nicht.
     admin_pin_hash: str = ""
 
+    #: Ab welchem Jahr ein EXIF-Datum als Scandatum gilt und nicht als Aufnahmedatum.
+    #:
+    #: Historische Fotos sind Scans; ihr EXIF traegt das Datum des Scanvorgangs. Wuerde man das
+    #: uebernehmen, laege ein Foto von 1932 auf der Zeitleiste bei 2019 -- und es gaelte als
+    #: datiert, taeuchte also nie im "Hilf mit"-Bereich auf, wo jemand es richtigstellen koennte.
+    #: Hochsetzen, falls die Sammlung auch echte Digitalfotos enthaelt.
+    exif_date_max_year: int = 1990
+
     @property
     def db_path(self) -> Path:
         return self.data_dir / "photomap.db"
