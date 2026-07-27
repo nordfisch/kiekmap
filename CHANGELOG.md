@@ -27,3 +27,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Überwachter Eingangsordner: importiert erst, wenn eine Datei fertig geschrieben ist, und räumt
   sie danach nach `_erledigt/` bzw. `_problem/` — gelöscht wird nie
 - `python -m app.cli import|scan|stats` für Massenimport und Bestandsübersicht
+- Abfrage-API: `/api/photos` mit Kartenausschnitt und Zeitraum, `/histogram` für den Zeitschieber,
+  Auslieferung von Vorschaubild und Original mit dauerhaftem Cache
+- Der Zeitfilter fragt auf **Überlappung** der Intervalle ab — ein auf „1920er" datiertes Foto
+  erscheint damit auch bei der Auswahl 1925–1930
