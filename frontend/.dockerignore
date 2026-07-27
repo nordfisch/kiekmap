@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.vite/
+
+# Die Kartendatei und die Regionsdefinition gehoeren zum Ort, nicht zur Software: gross, selten
+# geaendert, und pro Museum verschieden. Sie werden zur Laufzeit eingehaengt (docker-compose.yml).
+public/tiles/

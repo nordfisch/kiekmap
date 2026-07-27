@@ -85,6 +85,21 @@ entfällt eine ganze Komponente aus dem Betrieb.
 deutlich kleiner, und Beschriftungen und Farben sind im Stil anpassbar statt eingebrannt.
 Preis dafür ist WebGL — auf Pi 4/5 unproblematisch, auf einem Pi 3 wäre Raster die bessere Wahl.
 
+**Der Fallstrick, der Offline-Karten still zerbricht:** Der Protomaps-Stil verweist für
+Beschriftungen (Glyphen) und Symbole (Sprites) standardmäßig auf `protomaps.github.io`. Kacheln
+kämen dann lokal, Schrift und Symbole aber gar nicht — und das fällt erst auf, wenn das Gerät ohne
+Netz im Museum steht. `make tiles` lädt beides deshalb mit herunter (~14 MB) nach
+`frontend/public/basemaps/`, und der Stil zeigt auf diese lokalen Pfade.
+
+Zwei Details, die dabei Zeit kosten, wenn man sie nicht kennt:
+
+- Die **Sprite-URL muss absolut sein**, MapLibre lehnt relative Pfade ab. Sie wird deshalb aus
+  `window.location.origin` gebaut, damit derselbe Bau unter localhost und auf dem Pi funktioniert.
+- Die Glyphen-URL darf relativ bleiben.
+
+Geprüft wird das nicht durch Hinsehen, sondern mit einer Zählung: die Seite darf **null** Anfragen
+an eine fremde Herkunft absetzen (`performance.getEntriesByType('resource')`).
+
 **Ortssuche ohne Internet:** Aus demselben Extrakt entsteht per Skript eine `places.json`
 (Straßennamen, benannte Gebäude, Fluren, Gewässer), die beim Start in die `places`-Tabelle geht.
 Das ersetzt Nominatim für den einen Zweck, den wir haben.

@@ -3,8 +3,11 @@
 /data/*
 !/data/.gitkeep
 
-# Kartenkacheln: zu gross fuers Repo, werden per `make tiles` gebaut
+# Kartendaten: zu gross fuers Repo, werden per `make tiles` gebaut.
+# Versioniert wird nur das Bauskript und tiles/region.json.
 *.pmtiles
+/frontend/public/tiles/
+/frontend/public/basemaps/
 /tiles/*.osm.pbf
 /tiles/places.json
 

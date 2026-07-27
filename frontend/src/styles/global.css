@@ -1,0 +1,111 @@
+/* Grundlayout des Kiosks.
+ *
+ * Aussen eine Zeile aus zwei Spalten: links Karte ueber Zeitschieber gestapelt, rechts der
+ * "Hilf mit"-Bereich ueber die volle Hoehe. Der Schieber gehoert unter die Karte, weil er die
+ * Karte filtert -- er reicht bewusst nicht unter das Seitenpanel.
+ */
+
+:root {
+  --seitenbereich-breite: 22rem;
+  --zeitleiste-hoehe: 9rem;
+
+  --papier: #faf8f4;
+  --tinte: #2b2723;
+  --gedaempft: #6f6862;
+  --linie: #ddd6cc;
+  --akzent: #8c5a2b;
+
+  /* Am grossen Display sitzt der Besucher nicht davor, sondern steht -- alles eine Spur groesser. */
+  font-size: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--tinte);
+  background: var(--papier);
+
+  /* Kiosk-Hygiene: nichts markieren, nichts lange druecken, keine Ueberdehn-Effekte. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+.app {
+  display: flex;
+  height: 100%;
+}
+
+.app__karte {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.map {
+  flex: 1;
+  min-height: 0;
+}
+
+.app__hilf-mit {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 var(--seitenbereich-breite);
+  padding: 1.5rem;
+  border-left: 1px solid var(--linie);
+  background: var(--papier);
+}
+
+.app__hilf-mit h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  color: var(--akzent);
+}
+
+/* --- Vorlaeufiges ------------------------------------------------------- */
+
+.platzhalter {
+  color: var(--gedaempft);
+  font-size: 0.9rem;
+}
+
+.platzhalter--zeit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--zeitleiste-hoehe);
+  border-top: 1px solid var(--linie);
+}
+
+.hinweis {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  color: var(--gedaempft);
+}
+
+.hinweis--fehler {
+  color: #a03030;
+}
+
+/* MapLibre-Bedienelemente fingergerecht vergroessern. */
+.maplibregl-ctrl button {
+  width: 3rem;
+  height: 3rem;
+}

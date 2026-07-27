@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
-.PHONY: help venv dev dev-backend test test-backend migrate revision lint prod prod-down clean
+.PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
+        migrate revision lint tiles build prod prod-down clean
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
-PY      := $(VENV)/bin/python
 PIP     := $(VENV)/bin/pip
 COMPOSE := docker compose -f deploy/docker-compose.yml --env-file .env
 
@@ -11,7 +11,7 @@ help:  ## Diese Uebersicht
 	@grep -hE '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) \
 		| awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
-# --- Entwicklung ------------------------------------------------------------
+# --- Voraussetzungen --------------------------------------------------------
 
 $(VENV):
 	$(PYTHON) -m venv $(VENV)
@@ -20,10 +20,43 @@ $(VENV):
 
 venv: $(VENV)  ## Python-Umgebung anlegen
 
-dev: dev-backend  ## Backend und Frontend mit Hot Reload (Frontend folgt in Stufe 2)
+# Vite 6 laeuft ab Node 18. Node 18 wird allerdings nicht mehr gepflegt, daher der Hinweis --
+# ohne die Pruefung scheitert ein zu altes Node mit einer Syntaxmeldung, der man nicht ansieht,
+# dass nur die Version das Problem ist.
+node-check:
+	@node -e 'const v=+process.versions.node.split(".")[0]; \
+		if (v < 18) { \
+			console.error("\033[31mNode " + process.versions.node + " ist zu alt, gebraucht wird 18 oder neuer.\033[0m"); \
+			console.error("  nvm install 22 && nvm alias default 22"); \
+			process.exit(1); \
+		} else if (v < 20) { \
+			console.error("\033[33mHinweis: Node " + process.versions.node + " wird nicht mehr gepflegt. Empfohlen: nvm install 22\033[0m"); \
+		}'
+
+frontend/node_modules: frontend/package.json | node-check
+	cd frontend && npm install --no-audit --no-fund
+	@touch frontend/node_modules
+
+deps: $(VENV) frontend/node_modules  ## Alle Abhaengigkeiten installieren
+
+# --- Entwicklung ------------------------------------------------------------
+
+dev: deps  ## Backend und Frontend mit Hot Reload
+	@trap 'kill 0' EXIT INT TERM; \
+	( cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000 ) & \
+	( cd frontend && npm run dev ) & \
+	wait
 
 dev-backend: $(VENV)  ## Nur das Backend, Port 8000, Doku unter /api/docs
 	cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000
+
+dev-frontend: frontend/node_modules  ## Nur das Frontend, Port 5173
+	cd frontend && npm run dev
+
+# --- Karte ------------------------------------------------------------------
+
+tiles:  ## Offline-Karte, Schriften und Symbole fuer die Region in tiles/region.json bauen
+	./tiles/build-tiles.sh
 
 # --- Datenbank --------------------------------------------------------------
 
@@ -36,14 +69,20 @@ revision: $(VENV)  ## Neue Migration erzeugen: make revision m="Beschreibung"
 
 # --- Pruefen ----------------------------------------------------------------
 
-test: test-backend  ## Alle Tests
+test: test-backend test-frontend  ## Alle Tests
 
 test-backend: $(VENV)
 	cd backend && .venv/bin/pytest -q
 
+test-frontend: frontend/node_modules
+	cd frontend && npm run typecheck && npm test
+
 lint: $(VENV)  ## Code-Stil pruefen
 	$(VENV)/bin/ruff check backend
 	$(VENV)/bin/ruff format --check backend
+
+build: frontend/node_modules  ## Frontend-Bundle bauen (Ergebnis in frontend/dist)
+	cd frontend && npm run build
 
 # --- Betrieb ----------------------------------------------------------------
 
@@ -57,6 +96,6 @@ prod: .env  ## Alles in Containern, so wie es auf dem Pi laeuft
 prod-down: .env
 	$(COMPOSE) down
 
-clean:  ## Virtuelle Umgebung und Caches entfernen (Daten bleiben unberuehrt)
-	rm -rf $(VENV) backend/.pytest_cache backend/.ruff_cache
+clean:  ## Umgebungen und Caches entfernen (Daten und Karte bleiben unberuehrt)
+	rm -rf $(VENV) backend/.pytest_cache backend/.ruff_cache frontend/node_modules frontend/dist
 	find backend -name __pycache__ -type d -prune -exec rm -rf {} +

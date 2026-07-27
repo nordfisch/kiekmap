@@ -38,6 +38,6 @@ services:
     ports:
       - "80:80"
     volumes:
-      # Die Kartendatei wird nicht ins Image gebacken: sie ist gross, aendert sich selten und
-      # gehoert zum Ort, nicht zur Software.
-      - ../tiles/map.pmtiles:/usr/share/nginx/html/tiles/map.pmtiles:ro
+      # Kartendatei und Regionsdefinition werden nicht ins Image gebacken: sie sind gross bzw.
+      # ortsabhaengig und aendern sich unabhaengig von der Software. Erzeugt von `make tiles`.
+      - ../frontend/public/tiles:/usr/share/nginx/html/tiles:ro

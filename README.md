@@ -15,10 +15,9 @@ man einen USB-Stick einsteckt und einen Knopf drückt.
 │         Fotos an ihrem Aufnahmeort     │  [Foto]      │
 │         Tippen öffnet sie groß         │  "Wo ist     │
 │                                        │   das?"      │
-│                                        │  [Karte][×]  │
-├────────────────────────────────────────┴──────────────┤
-│  1880 ├──●━━━━━━━━━━━━━━━●──┤ 1990                    │
-└───────────────────────────────────────────────────────┘
+├────────────────────────────────────────┤              │
+│  1880 ├──●━━━━━━━━━━━━━━━●──┤ 1990     │  [Karte][×]  │
+└────────────────────────────────────────┴──────────────┘
 ```
 
 Karte zoomen und den Zeitraum-Schieber bewegen filtert die Fotos. Rechts fragt der
