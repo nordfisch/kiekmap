@@ -46,8 +46,17 @@ eval "$(python3 - "$REGION" <<'PY'
 import json, shlex, sys
 
 region = json.load(open(sys.argv[1]))
+min_lon, min_lat, max_lon, max_lat = region["bbox"]
+
+# Etwas Rand um den Ausschnitt herum. Die bbox ist zugleich die Grenze, ueber die hinaus die Karte
+# nicht geschoben werden kann -- ohne Rand liefe der Besucher am Anschlag gegen eine graue Flaeche.
+RAND = 0.10
+pad_lon = (max_lon - min_lon) * RAND
+pad_lat = (max_lat - min_lat) * RAND
+gepolstert = (min_lon - pad_lon, min_lat - pad_lat, max_lon + pad_lon, max_lat + pad_lat)
+
 print(f"NAME={shlex.quote(region['name'])}")
-print(f"BBOX={shlex.quote(','.join(str(x) for x in region['bbox']))}")
+print(f"BBOX={shlex.quote(','.join(f'{x:.5f}' for x in gepolstert))}")
 print(f"MAXZOOM={shlex.quote(str(region['maxZoom']))}")
 PY
 )"

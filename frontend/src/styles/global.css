@@ -6,7 +6,11 @@
  */
 
 :root {
-  --seitenbereich-breite: 22rem;
+  /* Anteilig statt fest: auf einem 1080p-Display rund 420 px, auf einem 4K-Display nicht
+   * mitwachsend ins Absurde, und auf schmalen Fenstern schrumpfbar. Mit einer festen Breite
+   * (flex: 0 0 22rem) faellt die Karte unterhalb von etwa 600 px auf Breite null zusammen --
+   * das Panel gibt dann naemlich nicht nach und verdraengt sie vollstaendig. */
+  --seitenbereich-breite: clamp(16rem, 22%, 28rem);
   --zeitleiste-hoehe: 9rem;
 
   --papier: #faf8f4;
@@ -63,7 +67,8 @@ body {
 .app__hilf-mit {
   display: flex;
   flex-direction: column;
-  flex: 0 0 var(--seitenbereich-breite);
+  flex: 0 1 var(--seitenbereich-breite);
+  min-width: 0;
   padding: 1.5rem;
   border-left: 1px solid var(--linie);
   background: var(--papier);

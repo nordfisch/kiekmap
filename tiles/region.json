@@ -1,15 +1,21 @@
 {
   "$kommentar": [
-    "Die Region, fuer die die Offline-Karte und der Ortsindex gebaut werden.",
-    "PLATZHALTER — bitte durch den tatsaechlichen Ort ersetzen.",
-    "bbox ist [minLon, minLat, maxLon, maxLat] in WGS84.",
-    "Faustregel: grosszuegig waehlen, ca. 15 km Umkreis. Die Datei bleibt klein,",
-    "und ein zu enger Ausschnitt faellt erst am Kiosk auf, wenn jemand hinauszoomt."
+    "Die Region des Museumsorts. Wird von tiles/build-tiles.sh gelesen und zur Laufzeit vom",
+    "Frontend unter /tiles/region.json geholt -- Aenderungen hier brauchen keinen neuen Bau",
+    "des Frontends, nur ein erneutes 'make tiles'.",
+    "",
+    "bbox ist [minLon, minLat, maxLon, maxLat] in WGS84 und dient zugleich als Grenze, ueber die",
+    "hinaus die Karte nicht geschoben werden kann. Die Kacheln werden mit etwas Rand darum",
+    "gebaut, damit am Rand keine graue Flaeche auftaucht.",
+    "",
+    "defaultZoom 14.8 zeigt auf einem 1080p-Display etwa 5,0 x 3,0 km -- also rund 1,5 km um den",
+    "Ortskern. Beim Aufbau am echten Display nachjustieren; Nachkommastellen sind erlaubt.",
+    "minZoom 13 zeigt den gesamten Ausschnitt auf einmal."
   ],
-  "name": "PLATZHALTER",
-  "bbox": [9.9, 51.4, 10.3, 51.7],
-  "center": [10.1, 51.55],
-  "defaultZoom": 13,
-  "minZoom": 10,
+  "name": "Holm",
+  "bbox": [9.60028, 53.57561, 9.75174, 53.66545],
+  "center": [9.67601, 53.62053],
+  "defaultZoom": 14.8,
+  "minZoom": 13,
   "maxZoom": 15
 }
