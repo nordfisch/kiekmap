@@ -18,6 +18,7 @@
   --gedaempft: #6f6862;
   --linie: #ddd6cc;
   --akzent: #8c5a2b;
+  --akzent-hell: #d9b48a;
 
   /* Am grossen Display sitzt der Besucher nicht davor, sondern steht -- alles eine Spur groesser. */
   font-size: 18px;
@@ -47,21 +48,34 @@ body {
   overscroll-behavior: none;
 }
 
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
 .app {
   display: flex;
   height: 100%;
 }
 
 .app__karte {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   min-width: 0;
 }
 
-.map {
+.karte {
+  position: relative;
   flex: 1;
   min-height: 0;
+}
+
+.karte__flaeche {
+  position: absolute;
+  inset: 0;
 }
 
 .app__hilf-mit {
@@ -81,19 +95,310 @@ body {
   color: var(--akzent);
 }
 
+/* --- Marker auf der Karte ------------------------------------------------ */
+
+/* Ein Foto an seinem Ort, wie ein aufgestecktes Bild. Die Unterkante sitzt auf der Koordinate. */
+.marker {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  transition: transform 120ms ease;
+}
+
+.marker:hover,
+.marker:focus-visible {
+  transform: scale(1.08);
+  z-index: 2;
+}
+
+.marker__bild {
+  display: block;
+  height: 4.5rem;
+  width: auto;
+  max-width: 7rem;
+  object-fit: cover;
+  border: 3px solid #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 35%);
+  background: var(--linie);
+}
+
+.marker__jahr {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  text-shadow:
+    0 1px 2px rgb(0 0 0 / 90%),
+    0 0 4px rgb(0 0 0 / 60%);
+}
+
+.cluster {
+  display: grid;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--akzent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  transition: transform 120ms ease;
+}
+
+.cluster:hover,
+.cluster:focus-visible {
+  transform: scale(1.08);
+}
+
+/* --- Meldung ueber der Karte --------------------------------------------- */
+
+.meldung {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--zeitleiste-hoehe) + 1rem);
+  transform: translateX(-50%);
+  z-index: 3;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
+  font-size: 0.85rem;
+  color: var(--gedaempft);
+  white-space: nowrap;
+}
+
+.meldung--fehler {
+  color: #a03030;
+}
+
+/* --- Zeitschieber -------------------------------------------------------- */
+
+.zeitleiste {
+  flex: 0 0 var(--zeitleiste-hoehe);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.75rem 2.5rem 0.5rem;
+  border-top: 1px solid var(--linie);
+  background: var(--papier);
+}
+
+.zeitleiste--leer {
+  align-items: center;
+  color: var(--gedaempft);
+  font-size: 0.9rem;
+}
+
+.zeitleiste__kopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.zeitleiste__auswahl {
+  font-size: 1.35rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.zeitleiste__bis {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--gedaempft);
+  margin: 0 0.15rem;
+}
+
+.zeitleiste__undatiert {
+  font-size: 0.8rem;
+  color: var(--gedaempft);
+}
+
+.zeitleiste__bahn {
+  position: relative;
+  height: 3rem;
+  touch-action: none; /* sonst scrollt die Seite statt den Griff zu bewegen */
+}
+
+.zeitleiste__histogramm {
+  position: absolute;
+  inset: 0 0 0.85rem;
+}
+
+.zeitleiste__balken {
+  position: absolute;
+  bottom: 0;
+  background: var(--linie);
+  border-radius: 2px 2px 0 0;
+}
+
+.zeitleiste__balken--aktiv {
+  background: var(--akzent-hell);
+}
+
+.zeitleiste__schiene,
+.zeitleiste__gewaehlt {
+  position: absolute;
+  bottom: 0.6rem;
+  height: 5px;
+  border-radius: 999px;
+}
+
+.zeitleiste__schiene {
+  left: 0;
+  right: 0;
+  background: var(--linie);
+}
+
+.zeitleiste__gewaehlt {
+  background: var(--akzent);
+}
+
+/* Fingergerecht: die sichtbare Scheibe ist 1,6 rem, die Fasszone ringsum deutlich groesser --
+ * das ist der Unterschied zwischen bedienbar und frustrierend am Touchscreen. */
+.zeitleiste__griff {
+  position: absolute;
+  bottom: 0.6rem;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 0 -1.4rem -1.5rem;
+  border-radius: 50%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.zeitleiste__griff::after {
+  content: "";
+  position: absolute;
+  inset: 0.7rem;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--akzent);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
+  transition: transform 100ms ease;
+}
+
+.zeitleiste__griff--aktiv {
+  cursor: grabbing;
+}
+
+.zeitleiste__griff--aktiv::after,
+.zeitleiste__griff:focus-visible::after {
+  transform: scale(1.2);
+}
+
+.zeitleiste__skala {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--gedaempft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Foto in voller Groesse ---------------------------------------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 2.5rem;
+  background: rgb(20 17 14 / 92%);
+}
+
+.overlay__inhalt {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin: 0;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.overlay__bild {
+  max-width: 68vw;
+  max-height: 85vh;
+  object-fit: contain;
+  background: #000;
+  box-shadow: 0 6px 30px rgb(0 0 0 / 60%);
+}
+
+.overlay__text {
+  flex: 0 1 20rem;
+  color: #f4efe8;
+}
+
+.overlay__titel {
+  margin: 0 0 0.4rem;
+  font-size: 1.7rem;
+  line-height: 1.2;
+}
+
+.overlay__jahr {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+  color: var(--akzent-hell);
+}
+
+.overlay__ort,
+.overlay__beschreibung {
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+  color: #d8d0c6;
+}
+
+.overlay__schlagwoerter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.overlay__schlagwoerter li {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: #d8d0c6;
+}
+
+.overlay__schliessen {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.5rem;
+  padding: 0 1.5rem;
+  border: 2px solid rgb(255 255 255 / 40%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.overlay__schliessen span[aria-hidden] {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.overlay__hinweis {
+  color: #f0c0c0;
+}
+
 /* --- Vorlaeufiges ------------------------------------------------------- */
 
 .platzhalter {
   color: var(--gedaempft);
   font-size: 0.9rem;
-}
-
-.platzhalter--zeit {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--zeitleiste-hoehe);
-  border-top: 1px solid var(--linie);
 }
 
 .hinweis {

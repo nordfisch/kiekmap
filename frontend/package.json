@@ -15,10 +15,12 @@
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.0.0",
+    "@types/supercluster": "^7.1.3",
     "maplibre-gl": "^5.0.0",
     "pmtiles": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "supercluster": "^8.0.1",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

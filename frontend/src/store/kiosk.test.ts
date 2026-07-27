@@ -1,0 +1,43 @@
+import { describe, expect, it } from "vitest";
+
+import { filterFuerAbfrage, gleicherAusschnitt } from "./kiosk";
+
+describe("filterFuerAbfrage", () => {
+  const spanne = { von: 1900, bis: 1980 };
+
+  it("schickt keinen Filter, wenn die ganze Spanne gewählt ist", () => {
+    // Sonst fielen Fotos heraus, deren Datierung über die bekannte Spanne hinausreicht --
+    // ausgerechnet bei dem Besucher, der gar nichts eingestellt hat.
+    expect(filterFuerAbfrage({ von: 1900, bis: 1980 }, spanne)).toBeNull();
+  });
+
+  it("schickt einen Filter, sobald eingeschränkt wurde", () => {
+    expect(filterFuerAbfrage({ von: 1920, bis: 1930 }, spanne)).toEqual({ von: 1920, bis: 1930 });
+    expect(filterFuerAbfrage({ von: 1900, bis: 1930 }, spanne)).toEqual({ von: 1900, bis: 1930 });
+    expect(filterFuerAbfrage({ von: 1920, bis: 1980 }, spanne)).toEqual({ von: 1920, bis: 1980 });
+  });
+
+  it("kommt ohne bekannte Spanne aus", () => {
+    expect(filterFuerAbfrage({ von: 1920, bis: 1930 }, null)).toBeNull();
+    expect(filterFuerAbfrage(null, spanne)).toBeNull();
+  });
+});
+
+describe("gleicherAusschnitt", () => {
+  const bbox = [9.6, 53.57, 9.75, 53.67] as const;
+
+  it("erkennt winzige Unterschiede als gleich", () => {
+    // Beim Antippen der Karte wackelt der Ausschnitt um Bruchteile eines Meters. Ohne diese
+    // Toleranz liefe bei jedem Fingertipp eine neue Abfrage los.
+    expect(gleicherAusschnitt([...bbox], [9.600001, 53.570001, 9.750001, 53.670001])).toBe(true);
+  });
+
+  it("erkennt eine echte Verschiebung", () => {
+    expect(gleicherAusschnitt([...bbox], [9.61, 53.57, 9.76, 53.67])).toBe(false);
+  });
+
+  it("kommt mit fehlendem Ausschnitt zurecht", () => {
+    expect(gleicherAusschnitt(null, [...bbox])).toBe(false);
+    expect(gleicherAusschnitt(null, null)).toBe(true);
+  });
+});

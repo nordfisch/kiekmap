@@ -31,3 +31,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Auslieferung von Vorschaubild und Original mit dauerhaftem Cache
 - Der Zeitfilter fragt auf **Überlappung** der Intervalle ab — ein auf „1920er" datiertes Foto
   erscheint damit auch bei der Auswahl 1925–1930
+- Fotos erscheinen als Vorschaubilder an ihrem Aufnahmeort; bei hoher Dichte fasst supercluster
+  sie zu einem Kreis mit Anzahl zusammen, der beim Antippen aufgeht
+- Foto-Overlay in voller Größe, schließbar per Tippen daneben, Knopf oder Escape
+- Zeitschieber mit zwei Griffen und Jahrzehnt-Histogramm im Hintergrund, fingergerecht bemessen
+- Kartenbewegung und Zeitraum lösen entprellt genau eine Abfrage aus; überholte werden verworfen

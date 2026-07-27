@@ -2,9 +2,12 @@ import { layers, namedFlavor } from "@protomaps/basemaps";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Protocol } from "pmtiles";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import type { Bbox } from "../api/client";
 import type { Region } from "../region";
+import { useKiosk } from "../store/kiosk";
+import { PhotoLayer } from "./PhotoLayer";
 
 // Einmal pro Seitenaufruf: lehrt MapLibre, `pmtiles://`-Quellen per HTTP-Range-Request zu lesen.
 // Genau das macht den Tileserver ueberfluessig -- nginx liefert einfach eine statische Datei aus.
@@ -37,20 +40,19 @@ function buildStyle(region: Region): maplibregl.StyleSpecification {
       },
     },
     layers: layers("protomaps", namedFlavor("light"), { lang: "de" }),
-    // Ueber die gebaute Zoomstufe hinaus wird ueberzoomt statt unscharf zu werden -- der Vorteil
-    // von Vektorkacheln, den wir am Touchscreen brauchen.
     ...{ maxzoom: region.maxZoom },
   } as maplibregl.StyleSpecification;
 }
 
 export function MapView({ region }: { region: Region }) {
   const container = useRef<HTMLDivElement>(null);
-  const map = useRef<maplibregl.Map | null>(null);
+  const [karte, setKarte] = useState<maplibregl.Map | null>(null);
+  const setzeAusschnitt = useKiosk((s) => s.setzeAusschnitt);
 
   useEffect(() => {
-    if (!container.current || map.current) return;
+    if (!container.current) return;
 
-    const instance = new maplibregl.Map({
+    const instanz = new maplibregl.Map({
       container: container.current,
       style: buildStyle(region),
       center: region.center,
@@ -68,15 +70,37 @@ export function MapView({ region }: { region: Region }) {
       touchPitch: false,
       attributionControl: { compact: true },
     });
-    instance.touchZoomRotate.disableRotation();
-    instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    instanz.touchZoomRotate.disableRotation();
+    instanz.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
-    map.current = instance;
+    function meldeAusschnitt() {
+      const grenzen = instanz.getBounds();
+      setzeAusschnitt([
+        grenzen.getWest(),
+        grenzen.getSouth(),
+        grenzen.getEast(),
+        grenzen.getNorth(),
+      ] satisfies Bbox);
+    }
+
+    instanz.on("load", () => {
+      meldeAusschnitt();
+      setKarte(instanz);
+    });
+    // "moveend" statt "move": das Nachladen wird ohnehin entprellt, und waehrend des Wischens
+    // staendig neue Ausschnitte zu melden bringt nichts.
+    instanz.on("moveend", meldeAusschnitt);
+
     return () => {
-      instance.remove();
-      map.current = null;
+      instanz.remove();
+      setKarte(null);
     };
-  }, [region]);
+  }, [region, setzeAusschnitt]);
 
-  return <div ref={container} className="map" />;
+  return (
+    <div className="karte">
+      <div ref={container} className="karte__flaeche" />
+      {karte && <PhotoLayer map={karte} />}
+    </div>
+  );
 }
