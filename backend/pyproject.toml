@@ -1,0 +1,44 @@
+[project]
+name = "photomap-backend"
+version = "0.1.0"
+description = "Bilddatenbank fuer historische Ortsfotos im Heimatmuseum"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sqlalchemy>=2.0",
+    "alembic>=1.14",
+    "pydantic-settings>=2.6",
+    "pillow>=11.0",
+    "watchdog>=6.0",
+    "python-multipart>=0.0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "httpx2",  # von starlette.testclient bevorzugt; httpx loest eine Deprecation-Warnung aus
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# Migrationen sind generiert und importieren op/sa auf Vorrat. Beim Anpassen von Hand ist genau
+# das praktisch -- also nicht anmeckern.
+"alembic/versions/*.py" = ["F401"]

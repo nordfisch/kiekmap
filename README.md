@@ -45,8 +45,10 @@ Voraussetzungen: Python 3.12+, Node 18+, optional Docker.
 make dev
 ```
 
-Startet Backend (Port 8000, API-Doku unter `/docs`) und Frontend (Port 5173) mit Hot Reload.
+Startet Backend (Port 8000, API-Doku unter `/api/docs`) und Frontend (Port 5173) mit Hot Reload.
 Vite leitet `/api` an das Backend weiter, sodass in Entwicklung und Betrieb dieselben Pfade gelten.
+
+`make` ohne Ziel zeigt alle Kommandos.
 
 | Kommando | Zweck |
 |---|---|
