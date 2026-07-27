@@ -1,0 +1,33 @@
+# Laufzeitdaten — der gesamte veraenderliche Zustand, wird nie versioniert.
+# Der Ordner selbst bleibt im Repo, damit ein frischer Clone sofort startet.
+/data/*
+!/data/.gitkeep
+
+# Kartenkacheln: zu gross fuers Repo, werden per `make tiles` gebaut
+*.pmtiles
+/tiles/*.osm.pbf
+/tiles/places.json
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+/frontend/dist/
+*.tsbuildinfo
+
+# Konfiguration mit Geheimnissen (PIN-Hash o. ae.)
+.env
+.env.local
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

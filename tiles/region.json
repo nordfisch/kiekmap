@@ -1,0 +1,15 @@
+{
+  "$kommentar": [
+    "Die Region, fuer die die Offline-Karte und der Ortsindex gebaut werden.",
+    "PLATZHALTER — bitte durch den tatsaechlichen Ort ersetzen.",
+    "bbox ist [minLon, minLat, maxLon, maxLat] in WGS84.",
+    "Faustregel: grosszuegig waehlen, ca. 15 km Umkreis. Die Datei bleibt klein,",
+    "und ein zu enger Ausschnitt faellt erst am Kiosk auf, wenn jemand hinauszoomt."
+  ],
+  "name": "PLATZHALTER",
+  "bbox": [9.9, 51.4, 10.3, 51.7],
+  "center": [10.1, 51.55],
+  "defaultZoom": 13,
+  "minZoom": 10,
+  "maxZoom": 15
+}
