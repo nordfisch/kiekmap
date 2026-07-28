@@ -16,7 +16,18 @@ export type Region = {
   defaultZoom: number;
   minZoom: number;
   maxZoom: number;
+  /**
+   * Range of decades offered in the "Hilf mit" date question.
+   *
+   * Belongs to the collection, not to the software: a museum whose oldest print is from 1890 gains
+   * nothing from a 1860s button. Optional -- ``DEFAULT_DECADES`` applies when absent.
+   */
+  firstDecade?: number;
+  lastDecade?: number;
 };
+
+/** Fallback when region.json says nothing about it. */
+export const DEFAULT_DECADES = { first: 1860, last: 1990 };
 
 export async function loadRegion(signal?: AbortSignal): Promise<Region> {
   const response = await fetch("/tiles/region.json", { signal });

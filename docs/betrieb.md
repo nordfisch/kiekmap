@@ -13,3 +13,5 @@ Geplanter Inhalt:
   [Kuratoren-Anleitung](kuratoren-anleitung.md), hier die Technik dahinter)
 - SD-Karte klonen als Komplettsicherung des Geräts
 - Fehlersuche: Container-Logs, Kiosk-Dienst, Display, Touch, USB-Automount
+
+Das Gerät für einen anderen Ort einrichten: [adaption.md](adaption.md).

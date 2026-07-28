@@ -8,12 +8,13 @@
 
 import { useEffect } from "react";
 
+import type { Region } from "../region";
 import { useContribute } from "../store/contribute";
 import { t } from "../texte/de";
 import { DateTask } from "./DateTask";
 import { LocationTask } from "./LocationTask";
 
-export function HelpPanel() {
+export function HelpPanel({ region }: { region: Region }) {
   const need = useContribute((s) => s.need);
   const task = useContribute((s) => s.task);
   const loading = useContribute((s) => s.loading);
@@ -66,7 +67,7 @@ export function HelpPanel() {
 
           {error && <p className="help-panel__error">{error}</p>}
 
-          {need === "location" ? <LocationTask /> : <DateTask />}
+          {need === "location" ? <LocationTask /> : <DateTask region={region} />}
 
           <button type="button" className="button button--quiet help-panel__next" onClick={skip}>
             {t.help.next}

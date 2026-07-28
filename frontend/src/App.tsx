@@ -50,7 +50,7 @@ export function App() {
         </div>
 
         {/* Right column, full height. */}
-        <HelpPanel />
+        <HelpPanel region={region} />
       </div>
 
       <PhotoOverlay />

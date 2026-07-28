@@ -32,12 +32,19 @@ Wer diese drei nicht kennt, baut etwas, das erst im Museum auffällt:
 |---|---|
 | Bezeichner (Variablen, Funktionen, Klassen, CSS-Klassen, Dateinamen) | **Englisch** |
 | Code-Kommentare und Docstrings | **Englisch** |
+| **Testnamen** (`def test_…`, `class Test…`, `it("…")`) | **Deutsch** |
 | Oberflächentexte | Deutsch, in `frontend/src/texte/de.ts` |
 | Fehlermeldungen, die Besucher oder Kuratoren lesen | Deutsch, direkt im Code |
 | API-Pfade und JSON-Felder | Englisch |
 | Dokumentation (`docs/`, `README.md`, diese Datei) | Deutsch |
 | Commit-Nachrichten | Deutsch |
 | Werte in der Datenbank, die aus OSM stammen (`kind`: `strasse`, `flur` …) | Deutsch, wie geliefert |
+
+**Testnamen sind die bewusste Ausnahme** von der Englisch-Regel. Sie sind keine Bezeichner im
+üblichen Sinn, sondern Spezifikationssätze: `test_scandatum_datiert_das_foto_nicht` sagt einem
+deutschsprachigen Leser sofort, welche Zusage der Test schützt. Das ist hier die wertvollste
+Dokumentation im Repo — englisch übersetzt verlöre sie an Schärfe. Klassennamen ebenso
+(`class TestUeberlappung`).
 
 Deutsche Beispiele in englischen Kommentaren sind erwünscht, wo sie den Fall erklären
 (`so that "muhlenweg" finds the "Mühlenweg"`).
@@ -92,6 +99,20 @@ hier einige (`rshared`-Mount, Sprite-URL muss absolut sein, SQLite `+` ist Addit
 **Zielgruppe im Blick behalten.** Besucher stehen vor einem Touchscreen, oft ältere Menschen.
 Bedienelemente mindestens 48 px. Der Admin-Bereich wird ein- bis zweimal im Jahr von
 Ehrenamtlichen benutzt — dort zählt Klartext mehr als Kompaktheit.
+
+## Nichts Ortsspezifisches gehört in den Code
+
+Der Ausschnitt kommt zur Laufzeit aus `tiles/region.json`, die Kartendatei und der Ortsindex sind
+gebaute Artefakte. Deshalb braucht ein zweites Museum **keinen Fork**, sondern nur eine eigene
+`region.json` und `.env`.
+
+Diese Eigenschaft ist leicht zu zerstören und schwer zurückzugewinnen. Wer beim Arbeiten eine
+Koordinate, einen Ortsnamen oder eine sammlungsabhängige Zahl in den Code schreiben will, gehört
+sie stattdessen nach `region.json` oder in die Einstellungen. Testdaten sind ausgenommen — dort
+sind Holmer Koordinaten erwünscht, weil sie den Fall konkret machen.
+
+Vorgehen beim Adaptieren steht in [docs/adaption.md](docs/adaption.md); dort auch, was eine zweite
+Sprache kosten würde und ab wann sich Modularisierung lohnt.
 
 ## Was man nicht anfassen soll
 

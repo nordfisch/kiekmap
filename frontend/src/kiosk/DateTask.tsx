@@ -9,30 +9,30 @@
  * the time filter queries for overlap.
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { DEFAULT_DECADES, type Region } from "../region";
 import { useContribute } from "../store/contribute";
 import { t } from "../texte/de";
 
-const FIRST_DECADE = 1860;
-const LAST_DECADE = 1990;
-
-const DECADES = Array.from(
-  { length: (LAST_DECADE - FIRST_DECADE) / 10 + 1 },
-  (_, i) => FIRST_DECADE + i * 10,
-);
-
-export function DateTask() {
+export function DateTask({ region }: { region: Region }) {
   const submitDate = useContribute((s) => s.submitDate);
   const loading = useContribute((s) => s.loading);
   const [decade, setDecade] = useState<number | null>(null);
+
+  // Which decades to offer belongs to the collection, not to the software -- see region.json.
+  const decades = useMemo(() => {
+    const first = region.firstDecade ?? DEFAULT_DECADES.first;
+    const last = region.lastDecade ?? DEFAULT_DECADES.last;
+    return Array.from({ length: (last - first) / 10 + 1 }, (_, i) => first + i * 10);
+  }, [region.firstDecade, region.lastDecade]);
 
   if (decade === null) {
     return (
       <div className="task">
         <p className="task__hint">{t.date.askDecade}</p>
         <div className="decades">
-          {DECADES.map((year) => (
+          {decades.map((year) => (
             <button
               key={year}
               type="button"

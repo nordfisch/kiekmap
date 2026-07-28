@@ -59,6 +59,11 @@ Deutsch bleibt für: Oberflächentexte (`frontend/src/texte/de.ts`), Fehlermeldu
 Kuratoren, Dokumentation, Commit-Nachrichten. Deutsche Beispiele in englischen Kommentaren sind
 erwünscht, wo sie den Fall erklären.
 
+**Testnamen sind die Ausnahme und bleiben deutsch.** Sie sind keine Bezeichner im üblichen Sinn,
+sondern Spezifikationssätze — `test_scandatum_datiert_das_foto_nicht` sagt sofort, welche Zusage
+der Test schützt. Übersetzt verlöre das an Schärfe, und gerade diese Sätze sind die wertvollste
+Dokumentation im Repo.
+
 Umlaute werden in Python-Quelltext, Shell-Skripten und Commit-Nachrichten umschrieben
 (`ue`, `oe`, `ae`, `ss`); in Texten für Menschen normal geschrieben.
 
@@ -135,6 +140,20 @@ Fallstricke, die Zeit gekostet haben und im Code kommentiert sind:
 - **Docker-Bind-Mounts zeigen keine später eingehängten Datenträger** ohne `rshared`-Propagation.
   Betrifft die USB-Sicherung in Stufe 9.
 - **Overpass lehnt den Standard-User-Agent von `urllib` ab** (HTTP 406).
+
+## Für einen anderen Ort
+
+Nichts Ortsspezifisches steht im Code — der Ausschnitt kommt zur Laufzeit aus `tiles/region.json`,
+Kartendatei und Ortsindex sind gebaute Artefakte. Ein zweites Museum braucht deshalb keinen Fork,
+sondern eine eigene `region.json` und `.env`.
+
+Diese Eigenschaft ist leicht zu zerstören: Wer eine Koordinate, einen Ortsnamen oder eine
+sammlungsabhängige Zahl in den Code schreiben möchte, gehört sie stattdessen in die Konfiguration.
+Testdaten sind ausgenommen.
+
+Das vollständige Vorgehen — Bounding Box ausrechnen, Zoomstufen bestimmen, Kacheln und Ortsindex
+bauen, prüfen — steht in [adaption.md](adaption.md). Dort auch, was eine zweite Sprache kosten
+würde und ab wann sich Modularisierung lohnt.
 
 ## Veröffentlichen
 
