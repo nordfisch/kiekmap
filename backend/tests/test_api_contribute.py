@@ -19,9 +19,9 @@ WEIT_WEG = {"lat": 48.1372, "lon": 11.5756}  # München
 
 
 class TestNaechsteAufgabe:
-    def test_liefert_foto_ohne_ort(self, client: TestClient, session, lege_an):
-        lege_an(lat=None, lon=None, titel="Ohne Ort", sha="a" * 64)
-        lege_an(titel="Vollstaendig", sha="b" * 64)
+    def test_liefert_foto_ohne_ort(self, client: TestClient, session, make_photo):
+        make_photo(lat=None, lon=None, title="Ohne Ort", sha="a" * 64)
+        make_photo(title="Vollstaendig", sha="b" * 64)
         session.commit()
 
         daten = client.get("/api/contribute/next", params={"need": "location"}).json()
@@ -30,9 +30,9 @@ class TestNaechsteAufgabe:
         assert daten["open_count"] == 1
         assert daten["photo"]["needs_location"] is True
 
-    def test_liefert_foto_ohne_jahr(self, client: TestClient, session, lege_an):
-        lege_an(jahr=None, titel="Ohne Jahr", sha="a" * 64)
-        lege_an(jahr=1932, titel="Datiert", sha="b" * 64)
+    def test_liefert_foto_ohne_jahr(self, client: TestClient, session, make_photo):
+        make_photo(year=None, title="Ohne Jahr", sha="a" * 64)
+        make_photo(year=1932, title="Datiert", sha="b" * 64)
         session.commit()
 
         daten = client.get("/api/contribute/next", params={"need": "date"}).json()
@@ -40,9 +40,11 @@ class TestNaechsteAufgabe:
         assert daten["photo"]["title"] == "Ohne Jahr"
         assert daten["photo"]["date_label"] == "Jahr unbekannt"
 
-    def test_weggetipptes_erscheint_nicht_sofort_wieder(self, client: TestClient, session, lege_an):
-        erst = lege_an(lat=None, lon=None, titel="A", sha="a" * 64)
-        lege_an(lat=None, lon=None, titel="B", sha="b" * 64)
+    def test_weggetipptes_erscheint_nicht_sofort_wieder(
+        self, client: TestClient, session, make_photo
+    ):
+        erst = make_photo(lat=None, lon=None, title="A", sha="a" * 64)
+        make_photo(lat=None, lon=None, title="B", sha="b" * 64)
         session.commit()
 
         daten = client.get(
@@ -51,9 +53,9 @@ class TestNaechsteAufgabe:
 
         assert daten["photo"]["title"] == "B"
 
-    def test_faengt_von_vorn_an_wenn_alles_durch_ist(self, client: TestClient, session, lege_an):
+    def test_faengt_von_vorn_an_wenn_alles_durch_ist(self, client: TestClient, session, make_photo):
         """Lieber wiederholen als "nichts mehr da" melden, solange etwas offen ist."""
-        foto = lege_an(lat=None, lon=None, sha="a" * 64)
+        foto = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
         daten = client.get(
@@ -62,8 +64,8 @@ class TestNaechsteAufgabe:
 
         assert daten["photo"]["id"] == foto.id
 
-    def test_nichts_offen(self, client: TestClient, session, lege_an):
-        lege_an(sha="a" * 64)
+    def test_nichts_offen(self, client: TestClient, session, make_photo):
+        make_photo(sha="a" * 64)
         session.commit()
 
         daten = client.get("/api/contribute/next", params={"need": "location"}).json()
@@ -71,8 +73,8 @@ class TestNaechsteAufgabe:
         assert daten["photo"] is None
         assert daten["open_count"] == 0
 
-    def test_verstecktes_foto_wird_nicht_vorgelegt(self, client: TestClient, session, lege_an):
-        lege_an(lat=None, lon=None, status=PhotoStatus.HIDDEN, sha="a" * 64)
+    def test_verstecktes_foto_wird_nicht_vorgelegt(self, client: TestClient, session, make_photo):
+        make_photo(lat=None, lon=None, status=PhotoStatus.HIDDEN, sha="a" * 64)
         session.commit()
 
         assert (
@@ -81,8 +83,8 @@ class TestNaechsteAufgabe:
 
 
 class TestOrtErgaenzen:
-    def test_uebernimmt_sofort(self, client: TestClient, session, lege_an):
-        foto = lege_an(lat=None, lon=None, sha="a" * 64)
+    def test_uebernimmt_sofort(self, client: TestClient, session, make_photo):
+        foto = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
         antwort = client.post(
@@ -96,8 +98,8 @@ class TestOrtErgaenzen:
         assert daten["place_name"] == "Mühlenweg"
         assert daten["location_source"] == Source.VISITOR
 
-    def test_erscheint_danach_auf_der_karte(self, client: TestClient, session, lege_an):
-        foto = lege_an(lat=None, lon=None, jahr=1932, sha="a" * 64)
+    def test_erscheint_danach_auf_der_karte(self, client: TestClient, session, make_photo):
+        foto = make_photo(lat=None, lon=None, year=1932, sha="a" * 64)
         session.commit()
         assert (
             client.get("/api/photos", params={"bbox": "9.60,53.57,9.75,53.67"}).json()["total"] == 0
@@ -111,8 +113,8 @@ class TestOrtErgaenzen:
             client.get("/api/photos", params={"bbox": "9.60,53.57,9.75,53.67"}).json()["total"] == 1
         )
 
-    def test_wird_protokolliert(self, client: TestClient, session, lege_an):
-        foto = lege_an(lat=None, lon=None, sha="a" * 64)
+    def test_wird_protokolliert(self, client: TestClient, session, make_photo):
+        foto = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
         client.post(f"/api/contribute/{foto.id}/location", json={**IN_HOLM, "session_id": "abc"})
@@ -123,10 +125,12 @@ class TestOrtErgaenzen:
         assert eintrag.session_id == "abc"
         assert "53.62" in eintrag.new_value
 
-    def test_besetztes_feld_wird_nicht_ueberschrieben(self, client: TestClient, session, lege_an):
+    def test_besetztes_feld_wird_nicht_ueberschrieben(
+        self, client: TestClient, session, make_photo
+    ):
         """Was ein Kurator gesetzt hat, ist unantastbar -- und der zweite Besucher darf den
         ersten nicht ueberschreiben."""
-        foto = lege_an(lat=53.61, lon=9.66, sha="a" * 64)
+        foto = make_photo(lat=53.61, lon=9.66, sha="a" * 64)
         session.commit()
 
         antwort = client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
@@ -137,11 +141,11 @@ class TestOrtErgaenzen:
         # Die Meldung soll den Besucher nicht als Stoerenfried behandeln.
         assert "Dank" in antwort.json()["detail"]
 
-    def test_ort_ausserhalb_der_region(self, client: TestClient, session, settings, lege_an):
+    def test_ort_ausserhalb_der_region(self, client: TestClient, session, settings, make_photo):
         (settings.data_dir / "region.json").write_text(
             json.dumps({"bbox": [9.60028, 53.57561, 9.75174, 53.66545]}), encoding="utf-8"
         )
-        foto = lege_an(lat=None, lon=None, sha="a" * 64)
+        foto = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
         antwort = client.post(f"/api/contribute/{foto.id}/location", json=WEIT_WEG)
@@ -150,10 +154,10 @@ class TestOrtErgaenzen:
         assert "ausserhalb" in antwort.json()["detail"].lower()
 
     def test_ohne_hinterlegte_region_wird_nicht_geprueft(
-        self, client: TestClient, session, lege_an
+        self, client: TestClient, session, make_photo
     ):
         # Kein region.json vorhanden: dann lieber annehmen als grundlos ablehnen.
-        foto = lege_an(lat=None, lon=None, sha="a" * 64)
+        foto = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
         assert client.post(f"/api/contribute/{foto.id}/location", json=WEIT_WEG).status_code == 200
@@ -163,8 +167,8 @@ class TestOrtErgaenzen:
 
 
 class TestJahrErgaenzen:
-    def test_jahresangabe(self, client: TestClient, session, lege_an):
-        foto = lege_an(jahr=None, sha="a" * 64)
+    def test_jahresangabe(self, client: TestClient, session, make_photo):
+        foto = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         daten = client.post(
@@ -175,9 +179,9 @@ class TestJahrErgaenzen:
         assert daten["needs_date"] is False
         assert daten["date_source"] == Source.VISITOR
 
-    def test_jahrzehnt_wird_zum_intervall(self, client: TestClient, session, lege_an):
+    def test_jahrzehnt_wird_zum_intervall(self, client: TestClient, session, make_photo):
         """ "Irgendwann in den Zwanzigern" ist die haeufigste ehrliche Antwort."""
-        foto = lege_an(jahr=None, sha="a" * 64)
+        foto = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         daten = client.post(
@@ -188,8 +192,10 @@ class TestJahrErgaenzen:
         assert daten["date_from"] == "1920-01-01"
         assert daten["date_to"] == "1929-12-31"
 
-    def test_so_datiertes_foto_erscheint_bei_ueberlappender_auswahl(self, client, session, lege_an):
-        foto = lege_an(jahr=None, sha="a" * 64)
+    def test_so_datiertes_foto_erscheint_bei_ueberlappender_auswahl(
+        self, client, session, make_photo
+    ):
+        foto = make_photo(year=None, sha="a" * 64)
         session.commit()
         client.post(f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"})
 
@@ -199,8 +205,8 @@ class TestJahrErgaenzen:
 
         assert antwort.json()["total"] == 1
 
-    def test_bereits_datiertes_foto(self, client: TestClient, session, lege_an):
-        foto = lege_an(jahr=1932, sha="a" * 64)
+    def test_bereits_datiertes_foto(self, client: TestClient, session, make_photo):
+        foto = make_photo(year=1932, sha="a" * 64)
         session.commit()
 
         antwort = client.post(
@@ -211,8 +217,8 @@ class TestJahrErgaenzen:
         session.refresh(foto)
         assert foto.date_from == date(1932, 1, 1)
 
-    def test_unsinniges_jahr_wird_abgewiesen(self, client: TestClient, session, lege_an):
-        foto = lege_an(jahr=None, sha="a" * 64)
+    def test_unsinniges_jahr_wird_abgewiesen(self, client: TestClient, session, make_photo):
+        foto = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         assert (
@@ -222,8 +228,8 @@ class TestJahrErgaenzen:
             == 422
         )
 
-    def test_wird_protokolliert(self, client: TestClient, session, lege_an):
-        foto = lege_an(jahr=None, sha="a" * 64)
+    def test_wird_protokolliert(self, client: TestClient, session, make_photo):
+        foto = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         client.post(f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"})
@@ -234,8 +240,8 @@ class TestJahrErgaenzen:
 
 
 class TestZusammenspiel:
-    def test_beide_luecken_nacheinander_fuellen(self, client: TestClient, session, lege_an):
-        foto = lege_an(lat=None, lon=None, jahr=None, sha="a" * 64)
+    def test_beide_luecken_nacheinander_fuellen(self, client: TestClient, session, make_photo):
+        foto = make_photo(lat=None, lon=None, year=None, sha="a" * 64)
         session.commit()
 
         client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
@@ -246,9 +252,9 @@ class TestZusammenspiel:
         assert daten["needs_date"] is False
         assert len(session.scalars(select(Change)).all()) == 2
 
-    def test_offene_zahl_sinkt(self, client: TestClient, session, lege_an):
-        foto = lege_an(lat=None, lon=None, sha="a" * 64)
-        lege_an(lat=None, lon=None, sha="b" * 64)
+    def test_offene_zahl_sinkt(self, client: TestClient, session, make_photo):
+        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        make_photo(lat=None, lon=None, sha="b" * 64)
         session.commit()
 
         assert client.get("/api/contribute/next?need=location").json()["open_count"] == 2
@@ -259,7 +265,7 @@ class TestZusammenspiel:
 class TestOrtssuche:
     def _lege_orte_an(self, session):
         from app.models import Place
-        from app.services.places import normalisiere
+        from app.services.places import normalize
 
         for name, art, lat, lon in [
             ("Mühlenweg", "strasse", 53.62, 9.67),
@@ -268,7 +274,7 @@ class TestOrtssuche:
             ("Hauptstraße", "strasse", 53.64, 9.67),
         ]:
             session.add(
-                Place(name=name, name_normalized=normalisiere(name), lat=lat, lon=lon, kind=art)
+                Place(name=name, name_normalized=normalize(name), lat=lat, lon=lon, kind=art)
             )
         session.commit()
 
@@ -304,7 +310,7 @@ class TestOrtssuche:
 
 class TestOrtsverzeichnisLaden:
     def test_aus_datei(self, session, settings):
-        from app.services.places import lade_aus_datei
+        from app.services.places import load_from_file
 
         settings.places_file.write_text(
             json.dumps(
@@ -321,7 +327,7 @@ class TestOrtsverzeichnisLaden:
             encoding="utf-8",
         )
 
-        anzahl = lade_aus_datei(session, settings.places_file)
+        anzahl = load_from_file(session, settings.places_file)
 
         assert anzahl == 1
         from app.models import Place
@@ -332,6 +338,6 @@ class TestOrtsverzeichnisLaden:
         assert ort.name_normalized == "suderstrasse"
 
     def test_fehlende_datei_ist_kein_fehler(self, session, settings):
-        from app.services.places import lade_aus_datei
+        from app.services.places import load_from_file
 
-        assert lade_aus_datei(session, settings.data_dir / "gibtsnicht.json") == 0
+        assert load_from_file(session, settings.data_dir / "gibtsnicht.json") == 0

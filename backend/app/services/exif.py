@@ -1,15 +1,15 @@
-"""Metadaten aus der Bilddatei lesen.
+"""Read metadata out of the image file.
 
-Der wichtigste Punkt hier ist eine Nichtaktion: **das EXIF-Datum eines Scans wird nicht als
-Aufnahmedatum uebernommen.**
+The most important thing here is an omission: **the EXIF date of a scan is not adopted as the
+capture date.**
 
-Bei einem eingescannten Papierabzug steht im EXIF das Datum des Scans. Uebernaehme man es, laege
-ein Foto von 1932 auf der Zeitleiste bei 2019 -- schlimmer noch, es gaelte als datiert und taeuchte
-nie im "Hilf mit"-Bereich auf, wo jemand es haette richtigstellen koennen. Ein falsches Datum ist
-hier also schaedlicher als gar keines.
+For a scanned paper print, EXIF carries the date of the scan. Adopting it would place a photo from
+1932 at 2019 on the timeline -- worse, it would count as dated and therefore never surface in the
+"Hilf mit" panel where someone could have corrected it. A wrong date does more damage here than no
+date at all.
 
-Deshalb: EXIF-Datumsangaben ab ``exif_date_max_year`` gelten als Scandatum. Sie werden in
-``Photo.exif_datetime`` aufgehoben, damit der Kurator sie sieht, aber sie datieren das Foto nicht.
+Hence: EXIF dates from ``exif_date_max_year`` onwards count as scan dates. They are kept in
+``Photo.exif_datetime`` so the curator can see them, but they do not date the photo.
 """
 
 import logging
@@ -34,127 +34,127 @@ _IPTC_CAPTION = (2, 120)
 
 
 @dataclass
-class Bildinfo:
-    """Was sich aus der Datei selbst herauslesen laesst."""
+class ImageInfo:
+    """What the file reveals about itself."""
 
-    breite: int
-    hoehe: int
+    width: int
+    height: int
     format: str
 
-    titel: str | None = None
-    beschreibung: str | None = None
-    schlagwoerter: list[str] = field(default_factory=list)
+    title: str | None = None
+    description: str | None = None
+    keywords: list[str] = field(default_factory=list)
 
     lat: float | None = None
     lon: float | None = None
 
-    #: Rohes EXIF-Datum. Ob es das Aufnahmedatum ist, entscheidet der Importeur.
+    #: Raw EXIF date. Whether it is the capture date is decided by the importer.
     exif_datetime: datetime | None = None
 
 
-def _text(wert: object) -> str | None:
-    """EXIF-Text kommt als bytes, als UTF-16 oder mit Nullbytes am Ende."""
-    if wert is None:
+def _text(value: object) -> str | None:
+    """EXIF text arrives as bytes, as UTF-16, or padded with null bytes."""
+    if value is None:
         return None
-    if isinstance(wert, bytes):
-        for kodierung in ("utf-16-le", "utf-8", "latin-1"):
+    if isinstance(value, bytes):
+        for encoding in ("utf-16-le", "utf-8", "latin-1"):
             try:
-                wert = wert.decode(kodierung)
+                value = value.decode(encoding)
                 break
             except UnicodeDecodeError:
                 continue
         else:
             return None
-    text = str(wert).replace("\x00", "").strip()
+    text = str(value).replace("\x00", "").strip()
     return text or None
 
 
-def _grad(wert: object, richtung: object) -> float | None:
-    """GPS steht als (Grad, Minuten, Sekunden) im EXIF."""
+def _degrees(value: object, reference: object) -> float | None:
+    """GPS is stored as (degrees, minutes, seconds) in EXIF."""
     try:
-        grad, minuten, sekunden = (float(teil) for teil in wert)  # type: ignore[misc]
+        degrees, minutes, seconds = (float(part) for part in value)  # type: ignore[misc]
     except (TypeError, ValueError):
         return None
 
-    dezimal = grad + minuten / 60 + sekunden / 3600
-    if str(richtung).upper() in ("S", "W"):
-        dezimal = -dezimal
-    return round(dezimal, 7)
+    decimal = degrees + minutes / 60 + seconds / 3600
+    if str(reference).upper() in ("S", "W"):
+        decimal = -decimal
+    return round(decimal, 7)
 
 
-def _exif_datum(exif_ifd: dict) -> datetime | None:
+def _exif_datetime(exif_ifd: dict) -> datetime | None:
     for tag in (ExifTags.Base.DateTimeOriginal, ExifTags.Base.DateTimeDigitized):
-        roh = _text(exif_ifd.get(tag))
-        if not roh:
+        raw = _text(exif_ifd.get(tag))
+        if not raw:
             continue
-        for muster in ("%Y:%m:%d %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y:%m:%d"):
+        for pattern in ("%Y:%m:%d %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y:%m:%d"):
             try:
-                return datetime.strptime(roh, muster)
+                return datetime.strptime(raw, pattern)
             except ValueError:
                 continue
     return None
 
 
-def _iptc(bild: Image.Image, info: Bildinfo) -> None:
+def _read_iptc(image: Image.Image, info: ImageInfo) -> None:
     try:
-        daten = IptcImagePlugin.getiptcinfo(bild)
-    except Exception:  # noqa: BLE001 -- kaputtes IPTC darf den Import nicht aufhalten
+        data = IptcImagePlugin.getiptcinfo(image)
+    except Exception:  # noqa: BLE001 -- broken IPTC must not stop the import
         return
-    if not daten:
+    if not data:
         return
 
-    if titel := _text(daten.get(_IPTC_TITLE)):
-        info.titel = info.titel or titel
-    if beschreibung := _text(daten.get(_IPTC_CAPTION)):
-        info.beschreibung = info.beschreibung or beschreibung
+    if title := _text(data.get(_IPTC_TITLE)):
+        info.title = info.title or title
+    if caption := _text(data.get(_IPTC_CAPTION)):
+        info.description = info.description or caption
 
-    roh = daten.get(_IPTC_KEYWORDS)
-    for eintrag in roh if isinstance(roh, list) else [roh] if roh else []:
-        if wort := _text(eintrag):
-            info.schlagwoerter.append(wort)
+    raw = data.get(_IPTC_KEYWORDS)
+    for entry in raw if isinstance(raw, list) else [raw] if raw else []:
+        if word := _text(entry):
+            info.keywords.append(word)
 
 
-def lies_bildinfo(pfad: Path) -> Bildinfo:
-    """Oeffnet die Datei und liest heraus, was sie ueber sich selbst verraet.
+def read_image_info(path: Path) -> ImageInfo:
+    """Open the file and read what it says about itself.
 
-    Wirft ``OSError``/``Image.UnidentifiedImageError``, wenn es kein lesbares Bild ist -- der
-    Importeur macht daraus einen Eintrag im Import-Protokoll.
+    Raises ``OSError``/``UnidentifiedImageError`` if it is not a readable image -- the importer
+    turns that into an entry in the import log.
     """
-    with Image.open(pfad) as bild:
-        # Ein hochkant gescanntes Bild traegt seine Ausrichtung im EXIF statt in den Pixeln.
-        # Fuer Anzeige und Vorschau zaehlen die Masse nach dieser Drehung.
-        gedreht = bild.size
-        orientierung = bild.getexif().get(ExifTags.Base.Orientation)
-        if orientierung in (5, 6, 7, 8):
-            gedreht = (bild.size[1], bild.size[0])
+    with Image.open(path) as image:
+        # A portrait scan carries its orientation in EXIF rather than in the pixels. For display
+        # and thumbnails the dimensions after that rotation are what count.
+        rotated = image.size
+        orientation = image.getexif().get(ExifTags.Base.Orientation)
+        if orientation in (5, 6, 7, 8):
+            rotated = (image.size[1], image.size[0])
 
-        info = Bildinfo(breite=gedreht[0], hoehe=gedreht[1], format=bild.format or "")
+        info = ImageInfo(width=rotated[0], height=rotated[1], format=image.format or "")
 
-        exif = bild.getexif()
-        info.titel = _text(exif.get(_TAG_XP_TITLE)) or _text(exif.get(_TAG_IMAGE_DESCRIPTION))
-        if woerter := _text(exif.get(_TAG_XP_KEYWORDS)):
-            info.schlagwoerter.extend(t.strip() for t in woerter.split(";") if t.strip())
+        exif = image.getexif()
+        info.title = _text(exif.get(_TAG_XP_TITLE)) or _text(exif.get(_TAG_IMAGE_DESCRIPTION))
+        if words := _text(exif.get(_TAG_XP_KEYWORDS)):
+            info.keywords.extend(w.strip() for w in words.split(";") if w.strip())
 
         exif_ifd = exif.get_ifd(_EXIF_IFD)
-        info.exif_datetime = _exif_datum(exif_ifd)
+        info.exif_datetime = _exif_datetime(exif_ifd)
 
         gps = exif.get_ifd(_GPS_IFD)
         if gps:
-            info.lat = _grad(
+            info.lat = _degrees(
                 gps.get(ExifTags.GPS.GPSLatitude), gps.get(ExifTags.GPS.GPSLatitudeRef)
             )
-            info.lon = _grad(
+            info.lon = _degrees(
                 gps.get(ExifTags.GPS.GPSLongitude), gps.get(ExifTags.GPS.GPSLongitudeRef)
             )
-            # Nur ein vollstaendiges Paar ist brauchbar.
+            # Only a complete pair is usable.
             if info.lat is None or info.lon is None:
                 info.lat = info.lon = None
 
-        _iptc(bild, info)
+        _read_iptc(image, info)
 
     return info
 
 
-def ist_scandatum(zeitpunkt: datetime | None, hoechstes_aufnahmejahr: int) -> bool:
-    """Ob ein EXIF-Datum als Scandatum zu werten ist statt als Aufnahmedatum."""
-    return zeitpunkt is not None and zeitpunkt.year > hoechstes_aufnahmejahr
+def is_scan_date(moment: datetime | None, max_capture_year: int) -> bool:
+    """Whether an EXIF date should count as a scan date rather than a capture date."""
+    return moment is not None and moment.year > max_capture_year

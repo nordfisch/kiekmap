@@ -1,4 +1,4 @@
-"""Einstiegspunkt der Anwendung."""
+"""Application entry point."""
 
 import logging
 from collections.abc import AsyncIterator
@@ -11,8 +11,8 @@ from app import __version__
 from app.api import contribute, health, photos, places
 from app.config import get_settings
 from app.db import SessionLocal
-from app.services.places import lade_wenn_leer as lade_orte_wenn_leer
-from app.services.watcher import Eingangswaechter
+from app.services.places import load_if_empty as load_places_if_empty
+from app.services.watcher import IncomingWatcher
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s %(name)s: %(message)s")
 log = logging.getLogger("photomap")
@@ -22,17 +22,17 @@ log = logging.getLogger("photomap")
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     settings.ensure_dirs()
-    log.info("Datenverzeichnis: %s", settings.data_dir)
+    log.info("Data directory: %s", settings.data_dir)
 
-    with SessionLocal() as sitzung:
-        lade_orte_wenn_leer(sitzung, settings.places_file)
+    with SessionLocal() as session:
+        load_places_if_empty(session, settings.places_file)
 
-    waechter = Eingangswaechter(settings)
-    waechter.start()
+    watcher = IncomingWatcher(settings)
+    watcher.start()
     try:
         yield
     finally:
-        waechter.stop()
+        watcher.stop()
 
 
 app = FastAPI(
@@ -40,15 +40,15 @@ app = FastAPI(
     description="Bilddatenbank fuer historische Ortsfotos im Heimatmuseum",
     version=__version__,
     lifespan=lifespan,
-    # Gleiches Praefix wie im nginx-Proxy, damit Entwicklung und Betrieb dieselben Pfade haben.
+    # Same prefix as in the nginx proxy, so development and production share the same paths.
     root_path="",
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
     redoc_url=None,
 )
 
-# Nur fuer den Vite-Dev-Server noetig. Auf dem Pi liefert nginx Frontend und API unter derselben
-# Herkunft aus, dort greift diese Middleware nie.
+# Only needed for the Vite dev server. On the Pi, nginx serves frontend and API from the same
+# origin, so this middleware never applies there.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_settings().cors_origins,

@@ -1,4 +1,4 @@
-"""Fotos abfragen und ausliefern."""
+"""Query and serve photos."""
 
 import logging
 from datetime import date
@@ -12,23 +12,23 @@ from sqlalchemy.orm import Session, selectinload
 from app.config import Settings, get_settings
 from app.db import get_session
 from app.models import Photo, PhotoStatus, Tag
-from app.schemas import Histogramm, Jahrzehnt, PhotoDetail, PhotoListe, PhotoMarker
-from app.services.storage import THUMBNAIL_GROESSEN, original_pfad, thumbnail_pfad
+from app.schemas import DecadeCount, Histogram, PhotoDetail, PhotoList, PhotoMarker
+from app.services.storage import THUMBNAIL_SIZES, original_path, thumbnail_path
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/photos", tags=["fotos"])
 
-#: Obergrenze pro Abfrage. Mehr Marker als das ergeben auf einer Karte ohnehin keinen Sinn, und die
-#: Antwort soll auf einem Pi in einem Rutsch durchgehen.
-HOECHSTZAHL = 2000
+#: Upper bound per query. More markers than this make no sense on a map anyway, and the response
+#: should go through in one go on a Pi.
+MAX_LIMIT = 2000
 
-#: Dateiname ist der Inhalts-Hash, gleicher Name heisst also garantiert gleicher Inhalt.
-#: Deshalb darf der Browser beliebig lange cachen.
-CACHE_UNVERAENDERLICH = "public, max-age=31536000, immutable"
+#: The file name is the content hash, so an equal name guarantees equal content. The browser may
+#: therefore cache indefinitely.
+CACHE_IMMUTABLE = "public, max-age=31536000, immutable"
 
 
-class Ausschnitt:
-    """Kartenausschnitt und Zeitraum, wie sie aus der Abfragezeichenkette kommen."""
+class Viewport:
+    """Map viewport and time range as they arrive in the query string."""
 
     def __init__(
         self,
@@ -42,11 +42,11 @@ class Ausschnitt:
         von: Annotated[int | None, Query(ge=1800, le=2100, description="Jahr ab")] = None,
         bis: Annotated[int | None, Query(ge=1800, le=2100, description="Jahr bis")] = None,
     ) -> None:
-        teile = bbox.split(",")
-        if len(teile) != 4:
+        parts = bbox.split(",")
+        if len(parts) != 4:
             raise HTTPException(422, "bbox braucht vier durch Komma getrennte Zahlen")
         try:
-            self.min_lon, self.min_lat, self.max_lon, self.max_lat = (float(t) for t in teile)
+            self.min_lon, self.min_lat, self.max_lon, self.max_lat = (float(p) for p in parts)
         except ValueError:
             raise HTTPException(422, "bbox enthaelt keine Zahlen") from None
 
@@ -55,174 +55,164 @@ class Ausschnitt:
 
         if von is not None and bis is not None and von > bis:
             von, bis = bis, von
-        self.von_jahr, self.bis_jahr = von, bis
+        self.from_year, self.to_year = von, bis
 
     @property
-    def zeitraum(self) -> tuple[date, date] | None:
-        if self.von_jahr is None and self.bis_jahr is None:
+    def time_range(self) -> tuple[date, date] | None:
+        if self.from_year is None and self.to_year is None:
             return None
-        return (
-            date(self.von_jahr or 1800, 1, 1),
-            date(self.bis_jahr or 2100, 12, 31),
-        )
+        return (date(self.from_year or 1800, 1, 1), date(self.to_year or 2100, 12, 31))
 
 
-def _im_ausschnitt(ausschnitt: Ausschnitt):
-    """Bedingungen fuer Ort und Zeit.
+def _viewport_filters(viewport: Viewport):
+    """Conditions for place and time.
 
-    Der Zeitfilter fragt auf **Ueberlappung** der Intervalle ab, nicht auf Enthaltensein. Sonst
-    verschwaende ein auf "1920er" datiertes Foto aus der Auswahl 1925-1930 -- also genau die
-    unscharf datierten Fotos, die ein Heimatmuseum ueberwiegend hat. Siehe app/services/dates.py.
+    The time filter queries for **overlap** of the intervals, not containment. Otherwise a photo
+    dated "the 1920s" would vanish from the selection 1925-1930 -- precisely the loosely dated
+    photos a local history museum mostly has. See app/services/dates.py.
     """
-    bedingungen = [
+    filters = [
         Photo.status == PhotoStatus.PUBLISHED,
         Photo.lat.is_not(None),
-        Photo.lat.between(ausschnitt.min_lat, ausschnitt.max_lat),
-        Photo.lon.between(ausschnitt.min_lon, ausschnitt.max_lon),
+        Photo.lat.between(viewport.min_lat, viewport.max_lat),
+        Photo.lon.between(viewport.min_lon, viewport.max_lon),
     ]
-    if (zeitraum := ausschnitt.zeitraum) is not None:
-        auswahl_von, auswahl_bis = zeitraum
-        bedingungen += [
+    if (selection := viewport.time_range) is not None:
+        selected_start, selected_end = selection
+        filters += [
             Photo.date_from.is_not(None),
-            Photo.date_from <= auswahl_bis,
-            Photo.date_to >= auswahl_von,
+            Photo.date_from <= selected_end,
+            Photo.date_to >= selected_start,
         ]
-    return bedingungen
+    return filters
 
 
-@router.get("", response_model=PhotoListe, summary="Fotos im Kartenausschnitt und Zeitraum")
-def liste(
-    ausschnitt: Annotated[Ausschnitt, Depends()],
+@router.get("", response_model=PhotoList, summary="Fotos im Kartenausschnitt und Zeitraum")
+def list_photos(
+    viewport: Annotated[Viewport, Depends()],
     session: Annotated[Session, Depends(get_session)],
-    limit: Annotated[int, Query(ge=1, le=HOECHSTZAHL)] = 500,
-) -> PhotoListe:
-    bedingungen = _im_ausschnitt(ausschnitt)
+    limit: Annotated[int, Query(ge=1, le=MAX_LIMIT)] = 500,
+) -> PhotoList:
+    filters = _viewport_filters(viewport)
 
-    gesamt = session.scalar(select(func.count()).select_from(Photo).where(*bedingungen)) or 0
-    fotos = session.scalars(
-        select(Photo).where(*bedingungen).order_by(Photo.date_from, Photo.id).limit(limit)
+    total = session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
+    photos = session.scalars(
+        select(Photo).where(*filters).order_by(Photo.date_from, Photo.id).limit(limit)
     ).all()
 
-    return PhotoListe(
-        photos=[PhotoMarker.von(foto) for foto in fotos],
-        total=gesamt,
-        truncated=gesamt > len(fotos),
+    return PhotoList(
+        photos=[PhotoMarker.from_photo(photo) for photo in photos],
+        total=total,
+        truncated=total > len(photos),
     )
 
 
-@router.get("/histogram", response_model=Histogramm, summary="Fotos je Jahrzehnt im Ausschnitt")
-def histogramm(
-    ausschnitt: Annotated[Ausschnitt, Depends()],
+@router.get("/histogram", response_model=Histogram, summary="Fotos je Jahrzehnt im Ausschnitt")
+def histogram(
+    viewport: Annotated[Viewport, Depends()],
     session: Annotated[Session, Depends(get_session)],
-) -> Histogramm:
-    """Der Hintergrund des Zeitschiebers.
+) -> Histogram:
+    """The backdrop of the time slider.
 
-    Bewusst ohne den Zeitfilter: der Schieber soll zeigen, wo im Zeitraum ueberhaupt etwas zu
-    finden ist -- auch ausserhalb dessen, was gerade ausgewaehlt ist.
+    Deliberately without the time filter: the slider should show where anything is to be found at
+    all -- including outside the current selection.
     """
-    ausschnitt.von_jahr = ausschnitt.bis_jahr = None
-    bedingungen = _im_ausschnitt(ausschnitt)
+    viewport.from_year = viewport.to_year = None
+    filters = _viewport_filters(viewport)
 
-    # SQLite kennt kein DATE_TRUNC. Aus "1932-05-14" wird ueber die ersten vier Zeichen die Zahl
-    # 1932, abgeschnitten durch zehn geteilt und wieder mal zehn ergibt 1930.
+    # SQLite has no DATE_TRUNC. From "1932-05-14" the first four characters give the number 1932;
+    # truncated division by ten and multiplication by ten yields 1930.
     #
-    # Zwei Fallen sitzen in diesen zwei Zeilen:
-    #   * Nicht mit Zeichenketten rechnen -- in SQLite ist "+" Addition, nicht Verkettung.
-    #     substr(...,1,3) + '0' ergaebe die Zahl 193 statt der Zeichenkette "1930".
-    #   * Der zweite cast ist noetig -- "/" ist in SQLAlchemy echte Division, 1932/10 waere 193.2
-    #     und daraus wuerde wieder 1932. Erst das Abschneiden macht daraus 193.
-    jahr = cast(func.substr(Photo.date_from, 1, 4), Integer)
-    jahrzehnt = cast(jahr / 10, Integer) * 10
+    # Two traps hide in these two lines:
+    #   * Do not compute with strings -- in SQLite "+" is addition, not concatenation.
+    #     substr(...,1,3) + '0' would give the number 193 instead of the string "1930".
+    #   * The second cast is required -- "/" is true division in SQLAlchemy, 1932/10 would be
+    #     193.2 and that would turn back into 1932. Only truncation makes it 193.
+    year = cast(func.substr(Photo.date_from, 1, 4), Integer)
+    decade = cast(year / 10, Integer) * 10
 
-    zeilen = session.execute(
-        select(jahrzehnt.label("jahrzehnt"), func.count().label("anzahl"))
-        .where(*bedingungen, Photo.date_from.is_not(None))
-        .group_by(jahrzehnt)
-        .order_by(jahrzehnt)
+    rows = session.execute(
+        select(decade.label("decade"), func.count().label("count"))
+        .where(*filters, Photo.date_from.is_not(None))
+        .group_by(decade)
+        .order_by(decade)
     ).all()
 
-    undatiert = (
+    undated = (
         session.scalar(
             select(func.count())
             .select_from(Photo)
             .where(
                 Photo.status == PhotoStatus.PUBLISHED,
-                Photo.lat.between(ausschnitt.min_lat, ausschnitt.max_lat),
-                Photo.lon.between(ausschnitt.min_lon, ausschnitt.max_lon),
+                Photo.lat.between(viewport.min_lat, viewport.max_lat),
+                Photo.lon.between(viewport.min_lon, viewport.max_lon),
                 Photo.date_from.is_(None),
             )
         )
         or 0
     )
 
-    jahrzehnte = [Jahrzehnt(decade=int(zeile.jahrzehnt), count=zeile.anzahl) for zeile in zeilen]
-    return Histogramm(
-        decades=jahrzehnte,
-        undated=undatiert,
-        earliest=jahrzehnte[0].decade if jahrzehnte else None,
-        latest=jahrzehnte[-1].decade + 9 if jahrzehnte else None,
+    decades = [DecadeCount(decade=int(row.decade), count=row.count) for row in rows]
+    return Histogram(
+        decades=decades,
+        undated=undated,
+        earliest=decades[0].decade if decades else None,
+        latest=decades[-1].decade + 9 if decades else None,
     )
 
 
-def _hole(session: Session, foto_id: int) -> Photo:
-    foto = session.scalar(
-        select(Photo).where(Photo.id == foto_id).options(selectinload(Photo.tags))
+def _get_photo(session: Session, photo_id: int) -> Photo:
+    photo = session.scalar(
+        select(Photo).where(Photo.id == photo_id).options(selectinload(Photo.tags))
     )
-    if foto is None:
-        raise HTTPException(404, f"Kein Foto mit der Nummer {foto_id}")
-    return foto
+    if photo is None:
+        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+    return photo
 
 
-@router.get("/{foto_id}", response_model=PhotoDetail, summary="Alle Angaben zu einem Foto")
-def detail(foto_id: int, session: Annotated[Session, Depends(get_session)]) -> PhotoDetail:
-    return PhotoDetail.von(_hole(session, foto_id))
+@router.get("/{photo_id}", response_model=PhotoDetail, summary="Alle Angaben zu einem Foto")
+def detail(photo_id: int, session: Annotated[Session, Depends(get_session)]) -> PhotoDetail:
+    return PhotoDetail.from_photo(_get_photo(session, photo_id))
 
 
-@router.get("/{foto_id}/thumb", summary="Vorschaubild")
+@router.get("/{photo_id}/thumb", summary="Vorschaubild")
 def thumbnail(
-    foto_id: int,
+    photo_id: int,
     session: Annotated[Session, Depends(get_session)],
     settings: Annotated[Settings, Depends(get_settings)],
-    size: Annotated[int, Query(description=f"Eine von {THUMBNAIL_GROESSEN}")] = 240,
+    size: Annotated[int, Query(description=f"One of {THUMBNAIL_SIZES}")] = 240,
 ) -> Response:
-    if size not in THUMBNAIL_GROESSEN:
+    if size not in THUMBNAIL_SIZES:
         raise HTTPException(
-            422, f"Groesse {size} gibt es nicht, verfuegbar sind {list(THUMBNAIL_GROESSEN)}"
+            422, f"Groesse {size} gibt es nicht, verfuegbar sind {list(THUMBNAIL_SIZES)}"
         )
 
-    foto = _hole(session, foto_id)
-    pfad = thumbnail_pfad(settings.thumbs_dir, foto.sha256, size)
-    if not pfad.is_file():
-        # Datenbankzeile ohne Datei -- deutet auf eine unvollstaendig zurueckgespielte
-        # Sicherung hin.
-        log.error("Vorschaubild fehlt: %s", pfad)
+    photo = _get_photo(session, photo_id)
+    path = thumbnail_path(settings.thumbs_dir, photo.sha256, size)
+    if not path.is_file():
+        # A database row without files points to an incompletely restored backup.
+        log.error("Thumbnail missing: %s", path)
         raise HTTPException(404, "Vorschaubild fehlt")
 
-    return FileResponse(
-        pfad, media_type="image/webp", headers={"Cache-Control": CACHE_UNVERAENDERLICH}
-    )
+    return FileResponse(path, media_type="image/webp", headers={"Cache-Control": CACHE_IMMUTABLE})
 
 
-@router.get("/{foto_id}/image", summary="Foto in voller Groesse")
-def bild(
-    foto_id: int,
+@router.get("/{photo_id}/image", summary="Foto in voller Groesse")
+def image(
+    photo_id: int,
     session: Annotated[Session, Depends(get_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> Response:
-    foto = _hole(session, foto_id)
-    endung = "." + foto.mime.split("/")[-1].replace("jpeg", "jpg").replace("tiff", "tif")
-    pfad = original_pfad(settings.photos_dir, foto.sha256, endung)
-    if not pfad.is_file():
-        log.error("Originaldatei fehlt: %s", pfad)
+    photo = _get_photo(session, photo_id)
+    suffix = "." + photo.mime.split("/")[-1].replace("jpeg", "jpg").replace("tiff", "tif")
+    path = original_path(settings.photos_dir, photo.sha256, suffix)
+    if not path.is_file():
+        log.error("Original file missing: %s", path)
         raise HTTPException(404, "Originaldatei fehlt")
 
-    return FileResponse(
-        pfad,
-        media_type=foto.mime,
-        headers={"Cache-Control": CACHE_UNVERAENDERLICH},
-    )
+    return FileResponse(path, media_type=photo.mime, headers={"Cache-Control": CACHE_IMMUTABLE})
 
 
 @router.get("/tags/alle", response_model=list[str], summary="Alle vergebenen Schlagwoerter")
-def schlagwoerter(session: Annotated[Session, Depends(get_session)]) -> list[str]:
+def tags(session: Annotated[Session, Depends(get_session)]) -> list[str]:
     return list(session.scalars(select(Tag.name).order_by(Tag.name)).all())

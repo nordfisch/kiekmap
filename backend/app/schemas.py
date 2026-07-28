@@ -1,47 +1,46 @@
-"""Datenformen der API."""
+"""API payload shapes."""
 
 from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models import DatePrecision, Photo
-from app.services.dates import beschriftung
+from app.services.dates import format_label
 
 
 class PhotoMarker(BaseModel):
-    """Was die Karte pro Foto braucht -- und nicht mehr.
+    """What the map needs per photo -- and no more.
 
-    Bewusst schmal gehalten: bei mehreren hundert Markern im Ausschnitt geht es um die Groesse der
-    Antwort, und Beschreibung, Schlagwoerter und Herkunftsangaben werden erst beim Antippen
-    gebraucht.
+    Deliberately narrow: with several hundred markers in view the response size matters, and
+    description, tags and origin fields are only needed once a photo is tapped.
     """
 
     id: int
     lat: float
     lon: float
     title: str | None
-    #: Fertig formuliert ("1932", "1920er"), damit das Frontend keine Datumsarithmetik betreibt.
+    #: Ready-made German label ("1932", "1920er") so the frontend does no date arithmetic.
     date_label: str
     width: int
     height: int
     thumb_url: str
 
     @classmethod
-    def von(cls, foto: Photo) -> "PhotoMarker":
+    def from_photo(cls, photo: Photo) -> "PhotoMarker":
         return cls(
-            id=foto.id,
-            lat=foto.lat,  # type: ignore[arg-type] -- die Abfrage schliesst NULL aus
-            lon=foto.lon,  # type: ignore[arg-type]
-            title=foto.title,
-            date_label=beschriftung(foto.date_from, foto.date_to, foto.date_precision),
-            width=foto.width,
-            height=foto.height,
-            thumb_url=f"/api/photos/{foto.id}/thumb?size=240",
+            id=photo.id,
+            lat=photo.lat,  # type: ignore[arg-type] -- the query excludes NULL
+            lon=photo.lon,  # type: ignore[arg-type]
+            title=photo.title,
+            date_label=format_label(photo.date_from, photo.date_to, photo.date_precision),
+            width=photo.width,
+            height=photo.height,
+            thumb_url=f"/api/photos/{photo.id}/thumb?size=240",
         )
 
 
 class PhotoDetail(BaseModel):
-    """Alles zu einem Foto, fuer das Overlay und den Admin-Bereich."""
+    """Everything about one photo, for the overlay and the admin area."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -62,8 +61,8 @@ class PhotoDetail(BaseModel):
     title_source: str | None
     date_source: str | None
     location_source: str | None
-    #: Bei einem Scan das Datum des Scanvorgangs. Steht hier, damit der Kurator es sieht -- es
-    #: datiert das Foto absichtlich nicht.
+    #: For a scan, the date of the scanning run. Shown so the curator can see it -- it
+    #: deliberately does not date the photo.
     exif_datetime: datetime | None
 
     original_filename: str
@@ -80,61 +79,61 @@ class PhotoDetail(BaseModel):
     thumb_url: str
 
     @classmethod
-    def von(cls, foto: Photo) -> "PhotoDetail":
+    def from_photo(cls, photo: Photo) -> "PhotoDetail":
         return cls(
-            id=foto.id,
-            title=foto.title,
-            description=foto.description,
-            date_from=foto.date_from,
-            date_to=foto.date_to,
-            date_precision=foto.date_precision,
-            date_label=beschriftung(foto.date_from, foto.date_to, foto.date_precision),
-            lat=foto.lat,
-            lon=foto.lon,
-            place_name=foto.place_name,
-            location_accuracy_m=foto.location_accuracy_m,
-            title_source=foto.title_source,
-            date_source=foto.date_source,
-            location_source=foto.location_source,
-            exif_datetime=foto.exif_datetime,
-            original_filename=foto.original_filename,
-            width=foto.width,
-            height=foto.height,
-            bytes=foto.bytes,
-            imported_at=foto.imported_at,
-            tags=[schlagwort.name for schlagwort in foto.tags],
-            needs_location=foto.needs_location,
-            needs_date=foto.needs_date,
-            image_url=f"/api/photos/{foto.id}/image",
-            thumb_url=f"/api/photos/{foto.id}/thumb?size=1200",
+            id=photo.id,
+            title=photo.title,
+            description=photo.description,
+            date_from=photo.date_from,
+            date_to=photo.date_to,
+            date_precision=photo.date_precision,
+            date_label=format_label(photo.date_from, photo.date_to, photo.date_precision),
+            lat=photo.lat,
+            lon=photo.lon,
+            place_name=photo.place_name,
+            location_accuracy_m=photo.location_accuracy_m,
+            title_source=photo.title_source,
+            date_source=photo.date_source,
+            location_source=photo.location_source,
+            exif_datetime=photo.exif_datetime,
+            original_filename=photo.original_filename,
+            width=photo.width,
+            height=photo.height,
+            bytes=photo.bytes,
+            imported_at=photo.imported_at,
+            tags=[tag.name for tag in photo.tags],
+            needs_location=photo.needs_location,
+            needs_date=photo.needs_date,
+            image_url=f"/api/photos/{photo.id}/image",
+            thumb_url=f"/api/photos/{photo.id}/thumb?size=1200",
         )
 
 
-class PhotoListe(BaseModel):
+class PhotoList(BaseModel):
     photos: list[PhotoMarker]
-    #: Gesamtzahl im Ausschnitt, auch wenn ``limit`` weniger geliefert hat.
+    #: Total in the viewport, even if ``limit`` returned fewer.
     total: int
-    #: Wahr, wenn ``limit`` gegriffen hat -- dann sollte die Karte zum Hineinzoomen auffordern.
+    #: True when ``limit`` kicked in -- then the map should invite zooming in.
     truncated: bool
 
 
-class Jahrzehnt(BaseModel):
-    """Ein Balken im Histogramm hinter dem Zeitschieber."""
+class DecadeCount(BaseModel):
+    """One bar in the histogram behind the time slider."""
 
-    decade: int = Field(description="Beginn des Jahrzehnts, z. B. 1920")
+    decade: int = Field(description="Start of the decade, e.g. 1920")
     count: int
 
 
-class Histogramm(BaseModel):
-    decades: list[Jahrzehnt]
-    #: Fotos ohne Datierung. Erscheinen in keiner Zeitauswahl, aber im "Hilf mit"-Bereich.
+class Histogram(BaseModel):
+    decades: list[DecadeCount]
+    #: Photos without a date. In no time selection, but in the "Hilf mit" panel.
     undated: int
     earliest: int | None
     latest: int | None
 
 
-class DatumsAngabe(BaseModel):
-    """Was ein Besucher oder Kurator als Datierung angeben kann."""
+class DateInput(BaseModel):
+    """What a visitor or curator may state as a date."""
 
     year: int = Field(ge=1800, le=2100)
     month: int | None = Field(default=None, ge=1, le=12)
@@ -145,29 +144,29 @@ class DatumsAngabe(BaseModel):
 # --- "Hilf mit" -------------------------------------------------------------
 
 
-class OrtsBeitrag(BaseModel):
-    """Ein Besucher setzt den Pin."""
+class LocationContribution(BaseModel):
+    """A visitor drops the pin."""
 
     lat: float = Field(ge=-90, le=90)
     lon: float = Field(ge=-180, le=180)
     place_name: str | None = Field(default=None, max_length=300)
-    #: Grobe Angabe kennzeichnen ("irgendwo am Dorfteich").
+    #: Mark a rough statement ("somewhere by the village pond").
     accuracy_m: int | None = Field(default=None, ge=0, le=100_000)
-    #: Unterscheidet Besucher am selben Geraet, ohne sie zu identifizieren.
+    #: Distinguishes visitors at the same device without identifying them.
     session_id: str | None = Field(default=None, max_length=64)
 
 
-class DatumsBeitrag(DatumsAngabe):
-    """Ein Besucher gibt ein Jahr an."""
+class DateContribution(DateInput):
+    """A visitor states a year."""
 
     session_id: str | None = Field(default=None, max_length=64)
 
 
-class AufgabeAntwort(BaseModel):
-    """Ein Foto, dem etwas fehlt -- plus wie viele noch offen sind."""
+class TaskResponse(BaseModel):
+    """A photo missing something -- plus how many are still open."""
 
     need: str
-    #: Zum Anzeigen im Panel: "noch 214 Fotos ohne Ort". Das motiviert.
+    #: Shown in the panel: "noch 214 Fotos ohne Ort". It motivates.
     open_count: int
-    #: None heisst: es fehlt nichts mehr. Ein schoener Zustand.
+    #: None means nothing is missing any more. A pleasant state.
     photo: PhotoDetail | None

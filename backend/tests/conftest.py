@@ -1,11 +1,12 @@
-"""Gemeinsame Test-Vorbereitung.
+"""Shared test setup.
 
-Jeder Test bekommt ein frisches, temporaeres Datenverzeichnis. Das muss geschehen, *bevor*
-``app.db`` benutzt wird, denn dort entsteht die Engine beim Import -- daher der
-``get_settings.cache_clear()``-Tanz und das Neubinden der Session.
+Every test gets a fresh, temporary data directory. That has to happen *before* ``app.db`` is used,
+because the engine is created at import time -- hence the ``get_settings.cache_clear()`` dance and
+the rebinding of the session.
 """
 
 import os
+import shutil
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -18,7 +19,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 @pytest.fixture
 def fixtures_dir() -> Path:
-    """Die Testbilder. Erzeugt von ``tests/fixtures/erzeuge_testbilder.py``."""
+    """The test images. Produced by ``tests/fixtures/erzeuge_testbilder.py``."""
     return FIXTURES
 
 
@@ -37,28 +38,28 @@ def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Path]:
 def settings(data_dir: Path):
     from app.config import get_settings
 
-    einstellungen = get_settings()
-    einstellungen.ensure_dirs()
-    return einstellungen
+    configured = get_settings()
+    configured.ensure_dirs()
+    return configured
 
 
 @pytest.fixture
 def session(settings) -> Iterator[Session]:
-    """Frische Datenbank mit allen Tabellen.
+    """Fresh database with all tables.
 
-    Die Tabellen werden direkt aus den Modellen erzeugt statt ueber Alembic -- schneller, und die
-    Migrationen selbst werden ohnehin beim Containerstart gefahren.
+    Tables are created straight from the models rather than through Alembic -- faster, and the
+    migrations themselves run at container start anyway.
     """
     import app.db
     from app.db import Base
-    from app.models import Photo  # noqa: F401 -- registriert alle Tabellen an Base
+    from app.models import Photo  # noqa: F401 -- registers every table on Base
 
     app.db.engine = app.db.create_db_engine()
     app.db.SessionLocal.configure(bind=app.db.engine)
     Base.metadata.create_all(app.db.engine)
 
-    with app.db.SessionLocal() as sitzung:
-        yield sitzung
+    with app.db.SessionLocal() as db_session:
+        yield db_session
 
 
 @pytest.fixture
@@ -70,69 +71,67 @@ def client(session: Session) -> Iterator[TestClient]:
 
 
 @pytest.fixture
-def lege_an(session: Session):
-    """Legt ein Foto ohne Datei an -- fuer Tests, denen es nur um Abfragen geht.
+def make_photo(session: Session):
+    """Create a photo row without files -- for tests that only care about queries.
 
-    Standardmaessig in Holm und auf 1932 datiert; jedes Feld ist ueberschreibbar, ``jahr=None``
-    bzw. ``lat=None`` erzeugt die Luecken, um die es im "Hilf mit"-Bereich geht.
+    Defaults to Holm and the year 1932; every field is overridable. ``year=None`` and ``lat=None``
+    produce the gaps the "Hilf mit" panel is about.
     """
     from app.models import Photo, PhotoStatus, Source
-    from app.services.dates import zeitraum
+    from app.services.dates import date_range
 
-    zaehler = 0
+    counter = 0
 
-    def anlegen(
+    def create(
         *,
         lat: float | None = 53.62,
         lon: float | None = 9.676,
-        jahr: int | None = 1932,
-        genauigkeit=None,
-        titel: str = "Testfoto",
+        year: int | None = 1932,
+        precision=None,
+        title: str = "Testfoto",
         status: str = PhotoStatus.PUBLISHED,
         sha: str | None = None,
     ) -> Photo:
-        nonlocal zaehler
-        zaehler += 1
+        nonlocal counter
+        counter += 1
 
-        von, bis, praezision = zeitraum(jahr, genauigkeit=genauigkeit)
-        foto = Photo(
-            sha256=sha or f"{zaehler:064d}",
-            original_filename=f"{titel}.jpg",
+        start, end, resolved = date_range(year, precision=precision)
+        photo = Photo(
+            sha256=sha or f"{counter:064d}",
+            original_filename=f"{title}.jpg",
             mime="image/jpeg",
             bytes=1000,
             width=900,
             height=640,
-            title=titel,
+            title=title,
             lat=lat,
             lon=lon,
-            date_from=von,
-            date_to=bis,
-            date_precision=praezision,
-            date_source=Source.CURATOR if von else None,
+            date_from=start,
+            date_to=end,
+            date_precision=resolved,
+            date_source=Source.CURATOR if start else None,
             location_source=Source.CURATOR if lat is not None else None,
             status=status,
         )
-        session.add(foto)
+        session.add(photo)
         session.flush()
-        return foto
+        return photo
 
-    return anlegen
+    return create
 
 
 @pytest.fixture
-def bild(tmp_path: Path):
-    """Legt ein Testbild an einen beschreibbaren Ort und gibt den Pfad zurueck.
+def sample_image(tmp_path: Path):
+    """Copy a test image somewhere writable and return the path.
 
-    Kopiert, weil der Import Dateien beiseiteraeumen kann und die Vorlagen im Repo bleiben sollen.
+    Copied because the import may move files aside, and the templates in the repo must stay put.
     """
-    import shutil
+    work_dir = tmp_path / "source"
+    work_dir.mkdir()
 
-    arbeitsordner = tmp_path / "quelle"
-    arbeitsordner.mkdir()
+    def fetch(name: str, as_name: str | None = None) -> Path:
+        target = work_dir / (as_name or name)
+        shutil.copy2(FIXTURES / name, target)
+        return target
 
-    def hole(name: str, als: str | None = None) -> Path:
-        ziel = arbeitsordner / (als or name)
-        shutil.copy2(FIXTURES / name, ziel)
-        return ziel
-
-    return hole
+    return fetch

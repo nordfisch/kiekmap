@@ -1,19 +1,19 @@
-"""Dateiablage.
+"""File storage.
 
-Bilder heissen nach dem SHA-256 ihres Inhalts. Das loest vier Dinge auf einmal: keine
-Namenskollisionen, Dublettenerkennung gratis, beliebig cachebare Auslieferung und -- weil gleicher
-Name garantiert gleichen Inhalt bedeutet -- eine inkrementelle Sicherung, die beim zweiten Mal nur
-noch die neuen Bilder kopiert. Siehe docs/decisions.md, Punkt 3.
+Images are named after the SHA-256 of their content. That solves four things at once: no name
+collisions, duplicate detection for free, arbitrarily cacheable delivery, and -- because an equal
+name guarantees equal content -- an incremental backup that only copies new images on the second
+run. See docs/decisions.md, point 3.
 """
 
 import hashlib
 from pathlib import Path
 
-#: Groessen der vorberechneten Vorschaubilder in Pixeln (laengere Kante).
-THUMBNAIL_GROESSEN = (240, 1200)
+#: Sizes of the pre-rendered thumbnails in pixels (longer edge).
+THUMBNAIL_SIZES = (240, 1200)
 
-#: Was importiert werden darf. Alles andere wird mit Begruendung abgewiesen statt still ignoriert.
-ERLAUBTE_FORMATE = {
+#: What may be imported. Anything else is rejected with a reason rather than silently ignored.
+ALLOWED_FORMATS = {
     "JPEG": ("image/jpeg", ".jpg"),
     "PNG": ("image/png", ".png"),
     "TIFF": ("image/tiff", ".tif"),
@@ -21,27 +21,27 @@ ERLAUBTE_FORMATE = {
 }
 
 
-def sha256_der_datei(pfad: Path, blockgroesse: int = 1024 * 1024) -> str:
-    """Haeppchenweise, damit auch ein 200-MB-TIFF nicht in den Speicher muss."""
+def sha256_of_file(path: Path, block_size: int = 1024 * 1024) -> str:
+    """Chunked, so that even a 200 MB TIFF never has to fit into memory."""
     hasher = hashlib.sha256()
-    with pfad.open("rb") as datei:
-        while block := datei.read(blockgroesse):
+    with path.open("rb") as handle:
+        while block := handle.read(block_size):
             hasher.update(block)
     return hasher.hexdigest()
 
 
-def _gefaechert(sha256: str) -> Path:
-    """``a3f29c…`` wird zu ``a3/f2/``.
+def _fanned_out(sha256: str) -> Path:
+    """``a3f29c…`` becomes ``a3/f2/``.
 
-    Bei einigen tausend Dateien noch gleichgueltig, bei Wachstum der Unterschied zwischen einem
-    Verzeichnis, das sich oeffnen laesst, und einem, das es nicht tut.
+    Irrelevant at a few thousand files, but the difference between a directory that opens and one
+    that does not once the collection grows.
     """
     return Path(sha256[0:2]) / sha256[2:4]
 
 
-def original_pfad(wurzel: Path, sha256: str, endung: str) -> Path:
-    return wurzel / _gefaechert(sha256) / f"{sha256}{endung}"
+def original_path(root: Path, sha256: str, suffix: str) -> Path:
+    return root / _fanned_out(sha256) / f"{sha256}{suffix}"
 
 
-def thumbnail_pfad(wurzel: Path, sha256: str, groesse: int) -> Path:
-    return wurzel / str(groesse) / _gefaechert(sha256) / f"{sha256}.webp"
+def thumbnail_path(root: Path, sha256: str, size: int) -> Path:
+    return root / str(size) / _fanned_out(sha256) / f"{sha256}.webp"

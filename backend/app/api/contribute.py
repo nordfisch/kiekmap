@@ -1,15 +1,15 @@
-"""Der "Hilf mit"-Bereich: Besucher ergaenzen fehlende Angaben.
+"""The "Hilf mit" panel: visitors fill in missing statements.
 
-Bei historischen Scans stehen Ort und Jahr nirgends in der Datei. Wer den Ort kennt, weiss es aber
-oft auf den ersten Blick. Dieser Weg ist deshalb nicht Beiwerk, sondern der Hauptweg, auf dem das
-System an Daten kommt.
+For historical scans, place and year are nowhere in the file. Someone who knows the village often
+knows them at a glance. This path is therefore not a side feature but the main way the system
+acquires data.
 
-Beitraege werden **direkt** uebernommen -- der unmittelbare Effekt ist der Reiz fuer den Besucher.
-Drei Dinge fangen den Missbrauchsfall auf, ohne den Normalfall auszubremsen:
+Contributions are applied **straight away** -- the immediate effect is what makes it appealing.
+Three things catch the abuse case without slowing down the normal one:
 
-  1. Nur leere Felder duerfen gefuellt werden. Was ein Kurator gesetzt hat, ist unantastbar.
-  2. Koordinaten muessen in der Region liegen. Sonst landet ein Foto im Pazifik.
-  3. Jede Aenderung steht in ``changes`` und ist im Admin einzeln zuruecknehmbar.
+  1. Only empty fields may be filled. What a curator set is untouchable.
+  2. Coordinates must lie inside the region. Otherwise a photo ends up in the Pacific.
+  3. Every change lands in ``changes`` and can be reverted individually in the admin area.
 """
 
 import logging
@@ -22,152 +22,160 @@ from sqlalchemy.orm import Session
 from app.config import Settings, get_settings
 from app.db import get_session
 from app.models import Change, DatePrecision, Photo, PhotoStatus, Source
-from app.schemas import AufgabeAntwort, DatumsBeitrag, OrtsBeitrag, PhotoDetail
-from app.services.dates import beschriftung, zeitraum
+from app.schemas import DateContribution, LocationContribution, PhotoDetail, TaskResponse
+from app.services.dates import date_range, format_label
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/contribute", tags=["hilf mit"])
 
-Bedarf = Literal["location", "date"]
+Need = Literal["location", "date"]
 
 
-def _fehlt_bedingung(bedarf: Bedarf):
-    return Photo.lat.is_(None) if bedarf == "location" else Photo.date_from.is_(None)
+def _missing_filter(need: Need):
+    return Photo.lat.is_(None) if need == "location" else Photo.date_from.is_(None)
 
 
-@router.get("/next", response_model=AufgabeAntwort, summary="Ein Foto, dem etwas fehlt")
-def naechste_aufgabe(
+@router.get("/next", response_model=TaskResponse, summary="Ein Foto, dem etwas fehlt")
+def next_task(
     session: Annotated[Session, Depends(get_session)],
-    bedarf: Annotated[Bedarf, Query(alias="need", description="Was fehlen soll")] = "location",
+    need: Annotated[Need, Query(alias="need", description="What should be missing")] = "location",
     exclude: Annotated[
         str, Query(description="Bereits gezeigte Nummern, durch Komma getrennt")
     ] = "",
-) -> AufgabeAntwort:
-    """Liefert zufaellig ein Foto, dem genau dieses Feld fehlt.
+) -> TaskResponse:
+    """Return a random photo that is missing exactly this field.
 
-    ``exclude`` sind die Fotos, die der Besucher gerade schon weggetippt hat. Ohne diese Liste
-    koennte dasselbe Bild sofort wieder erscheinen -- das wirkt kaputt.
+    ``exclude`` holds the photos the visitor has just dismissed. Without that list the same image
+    could reappear immediately, which feels broken.
     """
-    uebersprungen = {int(teil) for teil in exclude.split(",") if teil.strip().isdigit()}
+    skipped = {int(part) for part in exclude.split(",") if part.strip().isdigit()}
 
-    bedingungen = [Photo.status == PhotoStatus.PUBLISHED, _fehlt_bedingung(bedarf)]
-    offen = session.scalar(select(func.count()).select_from(Photo).where(*bedingungen)) or 0
+    filters = [Photo.status == PhotoStatus.PUBLISHED, _missing_filter(need)]
+    open_count = session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
 
-    abfrage = select(Photo).where(*bedingungen)
-    if uebersprungen:
-        abfrage = abfrage.where(Photo.id.notin_(uebersprungen))
+    query = select(Photo).where(*filters)
+    if skipped:
+        query = query.where(Photo.id.notin_(skipped))
 
-    foto = session.scalar(abfrage.order_by(func.random()).limit(1))
+    photo = session.scalar(query.order_by(func.random()).limit(1))
 
-    # Alles durchgesehen: lieber von vorn anfangen als "nichts mehr da" melden, solange es
-    # ueberhaupt offene Fotos gibt.
-    if foto is None and uebersprungen and offen:
-        foto = session.scalar(select(Photo).where(*bedingungen).order_by(func.random()).limit(1))
+    # Everything seen: start over rather than reporting "nothing left", as long as anything is
+    # still open at all.
+    if photo is None and skipped and open_count:
+        photo = session.scalar(select(Photo).where(*filters).order_by(func.random()).limit(1))
 
-    return AufgabeAntwort(
-        need=bedarf,
-        open_count=offen,
-        photo=PhotoDetail.von(foto) if foto else None,
+    return TaskResponse(
+        need=need,
+        open_count=open_count,
+        photo=PhotoDetail.from_photo(photo) if photo else None,
     )
 
 
-def _pruefe_offen(foto: Photo, feld: str) -> None:
-    """Ein Besucher darf nur fuellen, was leer ist.
+def _require_empty(photo: Photo, field: str) -> None:
+    """A visitor may only fill what is empty.
 
-    Kuratierte Angaben sind unantastbar -- und ohne diese Pruefung koennte auch der naechste
-    Besucher die Angabe des vorherigen ueberschreiben, statt dass beide als Bestaetigung zaehlen.
+    Curated statements are untouchable -- and without this check the next visitor could overwrite
+    the previous one's statement instead of both counting as confirmation.
     """
-    besetzt = foto.lat is not None if feld == "location" else foto.date_from is not None
-    if besetzt:
+    taken = photo.lat is not None if field == "location" else photo.date_from is not None
+    if taken:
         raise HTTPException(
             409,
             "Dieses Foto hat inzwischen schon eine Angabe bekommen. Vielen Dank trotzdem!",
         )
 
 
-def _hole_offenes(session: Session, foto_id: int, feld: str) -> Photo:
-    foto = session.get(Photo, foto_id)
-    if foto is None:
-        raise HTTPException(404, f"Kein Foto mit der Nummer {foto_id}")
-    _pruefe_offen(foto, feld)
-    return foto
+def _get_open_photo(session: Session, photo_id: int, field: str) -> Photo:
+    photo = session.get(Photo, photo_id)
+    if photo is None:
+        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+    _require_empty(photo, field)
+    return photo
 
 
-def _protokolliere(
-    session: Session, foto: Photo, feld: str, alt: str | None, neu: str, sitzung: str | None
+def _log_change(
+    session: Session,
+    photo: Photo,
+    field: str,
+    old: str | None,
+    new: str,
+    session_key: str | None,
 ) -> None:
     session.add(
         Change(
-            photo_id=foto.id,
-            field=feld,
-            old_value=alt,
-            new_value=neu,
+            photo_id=photo.id,
+            field=field,
+            old_value=old,
+            new_value=new,
             source=Source.VISITOR,
-            session_id=sitzung,
+            session_id=session_key,
         )
     )
 
 
-@router.post("/{foto_id}/location", response_model=PhotoDetail, summary="Ort ergänzen")
-def ergaenze_ort(
-    foto_id: int,
-    beitrag: OrtsBeitrag,
+@router.post("/{photo_id}/location", response_model=PhotoDetail, summary="Ort ergänzen")
+def add_location(
+    photo_id: int,
+    contribution: LocationContribution,
     session: Annotated[Session, Depends(get_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> PhotoDetail:
-    foto = _hole_offenes(session, foto_id, "location")
+    photo = _get_open_photo(session, photo_id, "location")
 
-    # Der Pin laesst sich nur auf der Karte setzen, die Karte zeigt nur die Region -- trotzdem
-    # pruefen: die API ist erreichbar, und ein Foto im Pazifik waere aus der Ansicht verschwunden,
-    # ohne dass jemand merkt, warum.
+    # The pin can only be dropped on the map, and the map only shows the region -- check anyway:
+    # the API is reachable, and a photo in the Pacific would have vanished from the view without
+    # anyone noticing why.
     if (bbox := settings.region_bbox()) is not None:
         min_lon, min_lat, max_lon, max_lat = bbox
-        if not (min_lat <= beitrag.lat <= max_lat and min_lon <= beitrag.lon <= max_lon):
+        if not (min_lat <= contribution.lat <= max_lat and min_lon <= contribution.lon <= max_lon):
             raise HTTPException(422, "Dieser Ort liegt ausserhalb der Karte.")
 
-    foto.lat = beitrag.lat
-    foto.lon = beitrag.lon
-    foto.location_source = Source.VISITOR
-    if beitrag.place_name:
-        foto.place_name = beitrag.place_name
-    if beitrag.accuracy_m is not None:
-        foto.location_accuracy_m = beitrag.accuracy_m
+    photo.lat = contribution.lat
+    photo.lon = contribution.lon
+    photo.location_source = Source.VISITOR
+    if contribution.place_name:
+        photo.place_name = contribution.place_name
+    if contribution.accuracy_m is not None:
+        photo.location_accuracy_m = contribution.accuracy_m
 
-    _protokolliere(
+    _log_change(
         session,
-        foto,
+        photo,
         "location",
         None,
-        f"{beitrag.lat:.6f},{beitrag.lon:.6f}"
-        + (f" ({beitrag.place_name})" if beitrag.place_name else ""),
-        beitrag.session_id,
+        f"{contribution.lat:.6f},{contribution.lon:.6f}"
+        + (f" ({contribution.place_name})" if contribution.place_name else ""),
+        contribution.session_id,
     )
     session.commit()
-    session.refresh(foto)
+    session.refresh(photo)
 
-    log.info("Besucherbeitrag: Foto %s verortet", foto.id)
-    return PhotoDetail.von(foto)
+    log.info("Visitor contribution: photo %s located", photo.id)
+    return PhotoDetail.from_photo(photo)
 
 
-@router.post("/{foto_id}/date", response_model=PhotoDetail, summary="Jahr ergänzen")
-def ergaenze_datum(
-    foto_id: int,
-    beitrag: DatumsBeitrag,
+@router.post("/{photo_id}/date", response_model=PhotoDetail, summary="Jahr ergänzen")
+def add_date(
+    photo_id: int,
+    contribution: DateContribution,
     session: Annotated[Session, Depends(get_session)],
 ) -> PhotoDetail:
-    foto = _hole_offenes(session, foto_id, "date")
+    photo = _get_open_photo(session, photo_id, "date")
 
-    von, bis, genauigkeit = zeitraum(
-        beitrag.year, beitrag.month, beitrag.day, DatePrecision(beitrag.precision)
+    start, end, precision = date_range(
+        contribution.year,
+        contribution.month,
+        contribution.day,
+        DatePrecision(contribution.precision),
     )
-    foto.date_from, foto.date_to, foto.date_precision = von, bis, genauigkeit
-    foto.date_source = Source.VISITOR
+    photo.date_from, photo.date_to, photo.date_precision = start, end, precision
+    photo.date_source = Source.VISITOR
 
-    _protokolliere(
-        session, foto, "date", None, beschriftung(von, bis, genauigkeit), beitrag.session_id
+    _log_change(
+        session, photo, "date", None, format_label(start, end, precision), contribution.session_id
     )
     session.commit()
-    session.refresh(foto)
+    session.refresh(photo)
 
-    log.info("Besucherbeitrag: Foto %s datiert auf %s", foto.id, foto.date_from)
-    return PhotoDetail.von(foto)
+    log.info("Visitor contribution: photo %s dated to %s", photo.id, photo.date_from)
+    return PhotoDetail.from_photo(photo)

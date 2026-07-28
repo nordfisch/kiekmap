@@ -1,14 +1,13 @@
-"""Ueberwachung des Eingangsordners.
+"""Watching the inbox folder.
 
-Was hier hineinkopiert wird, landet in der Datenbank -- ohne Anmeldung, ohne Oberflaeche. Fuer das
-Museumsteam ist das der bequemste Weg, einen ganzen Stapel Scans einzuspielen.
+Whatever is copied in here ends up in the database -- no login, no interface. For the museum team
+this is the most convenient way to feed in a whole stack of scans.
 
-**Warum abgefragt statt auf Ereignisse gehorcht:** Ein Dateiereignis kommt, sobald die Datei
-angelegt wird -- nicht, wenn sie fertig geschrieben ist. Ein 80-MB-TIFF, ueber das Netz kopiert,
-wuerde also halb importiert. Dazu kaemen Dateien, die waehrend eines Neustarts hineingelegt wurden
-und deren Ereignis niemand gehoert hat. Ein Durchlauf alle paar Sekunden, der nur Dateien anfasst,
-deren Groesse sich seit dem letzten Blick nicht geaendert hat, loest beides auf einmal -- und kostet
-auf einem Pi fuer ein Verzeichnis nichts.
+**Why polling rather than file events:** A file event fires as soon as the file is created, not
+when it has finished being written. An 80 MB TIFF copied over the network would therefore be
+imported half-complete. On top of that, files dropped in while the service was restarting would
+have events nobody heard. A sweep every few seconds that only touches files whose size has not
+changed since the last look solves both at once -- and costs nothing on a Pi for one directory.
 """
 
 import logging
@@ -17,91 +16,90 @@ from pathlib import Path
 
 from app.config import Settings, get_settings
 from app.db import SessionLocal
-from app.services.importer import SONDERORDNER, importiere_datei
+from app.services.importer import SPECIAL_DIRS, import_file
 
 log = logging.getLogger(__name__)
 
-#: Wie oft nachgesehen wird.
-INTERVALL_S = 5.0
+#: How often to look.
+INTERVAL_S = 5.0
 
 
-class Eingangswaechter:
-    def __init__(self, settings: Settings | None = None, intervall: float = INTERVALL_S) -> None:
+class IncomingWatcher:
+    def __init__(self, settings: Settings | None = None, interval: float = INTERVAL_S) -> None:
         self.settings = settings or get_settings()
-        self.intervall = intervall
-        self._stopp = threading.Event()
+        self.interval = interval
+        self._stop = threading.Event()
         self._thread: threading.Thread | None = None
-        #: Dateigroesse beim letzten Durchlauf. Erst wenn sie sich nicht mehr aendert, ist die
-        #: Datei fertig geschrieben.
-        self._groessen: dict[Path, int] = {}
+        #: File size at the previous sweep. Only once it stops changing is the file complete.
+        self._sizes: dict[Path, int] = {}
 
-    # --- Betrieb ------------------------------------------------------------
+    # --- lifecycle ----------------------------------------------------------
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
             return
-        self._stopp.clear()
-        self._thread = threading.Thread(target=self._schleife, name="eingang", daemon=True)
+        self._stop.clear()
+        self._thread = threading.Thread(target=self._loop, name="incoming", daemon=True)
         self._thread.start()
-        log.info("Eingangsordner wird ueberwacht: %s", self.settings.incoming_dir)
+        log.info("Watching inbox folder: %s", self.settings.incoming_dir)
 
     def stop(self, timeout: float = 10.0) -> None:
-        self._stopp.set()
+        self._stop.set()
         if self._thread:
             self._thread.join(timeout=timeout)
             self._thread = None
 
-    def _schleife(self) -> None:
-        while not self._stopp.is_set():
+    def _loop(self) -> None:
+        while not self._stop.is_set():
             try:
-                self.durchlauf()
-            except Exception:  # noqa: BLE001 -- der Waechter darf nie aufgeben
-                log.exception("Fehler beim Durchsehen des Eingangsordners")
-            self._stopp.wait(self.intervall)
+                self.scan_once()
+            except Exception:  # noqa: BLE001 -- the watcher must never give up
+                log.exception("Error while sweeping the inbox folder")
+            self._stop.wait(self.interval)
 
-    # --- Ein Durchlauf ------------------------------------------------------
+    # --- one sweep ----------------------------------------------------------
 
-    def _kandidaten(self) -> list[Path]:
-        eingang = self.settings.incoming_dir
-        if not eingang.is_dir():
+    def _candidates(self) -> list[Path]:
+        inbox = self.settings.incoming_dir
+        if not inbox.is_dir():
             return []
         return [
-            pfad
-            for pfad in sorted(eingang.rglob("*"))
-            if pfad.is_file()
-            and not pfad.name.startswith(".")
-            and not SONDERORDNER & set(pfad.relative_to(eingang).parts)
+            path
+            for path in sorted(inbox.rglob("*"))
+            if path.is_file()
+            and not path.name.startswith(".")
+            and not SPECIAL_DIRS & set(path.relative_to(inbox).parts)
         ]
 
-    def durchlauf(self) -> int:
-        """Importiert, was fertig geschrieben ist. Gibt die Anzahl zurueck."""
-        gesehen: dict[Path, int] = {}
-        fertig: list[Path] = []
+    def scan_once(self) -> int:
+        """Import whatever has finished being written. Returns how many."""
+        seen: dict[Path, int] = {}
+        ready: list[Path] = []
 
-        for pfad in self._kandidaten():
+        for path in self._candidates():
             try:
-                groesse = pfad.stat().st_size
+                size = path.stat().st_size
             except OSError:
-                continue  # zwischenzeitlich verschwunden
-            gesehen[pfad] = groesse
-            # Groesse unveraendert seit dem letzten Blick -- und nicht null, denn eine gerade erst
-            # angelegte Datei ist zunaechst leer.
-            if groesse > 0 and self._groessen.get(pfad) == groesse:
-                fertig.append(pfad)
+                continue  # vanished in the meantime
+            seen[path] = size
+            # Size unchanged since the last look -- and not zero, because a freshly created file
+            # is empty at first.
+            if size > 0 and self._sizes.get(path) == size:
+                ready.append(path)
 
-        self._groessen = gesehen
+        self._sizes = seen
 
-        if not fertig:
+        if not ready:
             return 0
 
-        anzahl = 0
+        count = 0
         with SessionLocal() as session:
-            for pfad in fertig:
-                ergebnis = importiere_datei(session, pfad, self.settings, beiseiteraeumen=True)
-                self._groessen.pop(pfad, None)
-                log.info("%s: %s -- %s", ergebnis.result, pfad.name, ergebnis.message)
-                if ergebnis.erfolgreich:
-                    anzahl += 1
+            for path in ready:
+                outcome = import_file(session, path, self.settings, move_aside=True)
+                self._sizes.pop(path, None)
+                log.info("%s: %s -- %s", outcome.result, path.name, outcome.message)
+                if outcome.succeeded:
+                    count += 1
             session.commit()
 
-        return anzahl
+        return count

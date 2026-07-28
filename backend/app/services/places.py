@@ -1,9 +1,9 @@
-"""Ortsverzeichnis: Suche und Laden.
+"""Gazetteer: loading and search.
 
-Ersetzt Nominatim fuer den einen Zweck, den wir haben -- "Wo ist das?" mit einem Strassennamen
-beantworten, ohne Internet. Ein Dorf hat einige hundert benannte Dinge; die passen in eine Tabelle.
+Replaces Nominatim for the single purpose we have -- answering "where is this?" with a street
+name, without internet. A village has a few hundred named things; they fit in one table.
 
-Erzeugt wird ``data/places.json`` von ``tiles/build-places.py``.
+``data/places.json`` is produced by ``tiles/build-places.py``.
 """
 
 import json
@@ -18,76 +18,75 @@ from app.models import Place
 
 log = logging.getLogger(__name__)
 
-#: Wonach der Besucher am ehesten sucht, kommt zuerst.
-ARTEN_REIHENFOLGE = ["strasse", "ortsteil", "gebaeude", "natur", "flur"]
+#: What the visitor is most likely searching for comes first.
+KIND_ORDER = ["strasse", "ortsteil", "gebaeude", "natur", "flur"]
 
-HOECHSTZAHL_TREFFER = 12
+MAX_RESULTS = 12
 
 
-def normalisiere(name: str) -> str:
-    """Muss mit ``tiles/build-places.py`` uebereinstimmen, sonst findet die Suche nichts.
+def normalize(name: str) -> str:
+    """Must match ``tiles/build-places.py``, otherwise the search finds nothing.
 
-    Das ss fuer ss muss vor dem Zerlegen stehen: NFKD laesst das scharfe s unangetastet.
+    The ss for the sharp s has to happen before decomposing: NFKD leaves it untouched.
     """
-    ohne_scharf = name.replace("ß", "ss").replace("ẞ", "ss")
-    zerlegt = unicodedata.normalize("NFKD", ohne_scharf)
-    return "".join(z for z in zerlegt if not unicodedata.combining(z)).lower().strip()
+    without_sharp_s = name.replace("ß", "ss").replace("ẞ", "ss")
+    decomposed = unicodedata.normalize("NFKD", without_sharp_s)
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).lower().strip()
 
 
-def lade_aus_datei(session: Session, pfad: Path) -> int:
-    """Fuellt die Tabelle aus ``places.json``. Vorhandene Eintraege werden ersetzt."""
-    if not pfad.is_file():
-        log.info("Kein Ortsverzeichnis unter %s -- die Ortssuche bleibt leer.", pfad)
+def load_from_file(session: Session, path: Path) -> int:
+    """Fill the table from ``places.json``. Existing entries are replaced."""
+    if not path.is_file():
+        log.info("No gazetteer at %s -- place search stays empty.", path)
         return 0
 
-    orte = json.loads(pfad.read_text(encoding="utf-8"))
+    places = json.loads(path.read_text(encoding="utf-8"))
     session.query(Place).delete()
 
     session.add_all(
         Place(
-            name=ort["name"],
-            # Nicht der Datei vertrauen: falls sie aelter ist als die aktuelle Normalisierung,
-            # wuerde die Suche sonst stillschweigend nichts finden.
-            name_normalized=normalisiere(ort["name"]),
-            lat=ort["lat"],
-            lon=ort["lon"],
-            kind=ort.get("kind", "flur"),
+            name=place["name"],
+            # Do not trust the file: if it predates the current normalization, the search would
+            # silently come up empty.
+            name_normalized=normalize(place["name"]),
+            lat=place["lat"],
+            lon=place["lon"],
+            kind=place.get("kind", "flur"),
         )
-        for ort in orte
+        for place in places
     )
     session.commit()
 
-    log.info("%d Orte aus %s geladen", len(orte), pfad.name)
-    return len(orte)
+    log.info("Loaded %d places from %s", len(places), path.name)
+    return len(places)
 
 
-def lade_wenn_leer(session: Session, pfad: Path) -> int:
-    """Beim Start: nur laden, wenn noch nichts da ist.
+def load_if_empty(session: Session, path: Path) -> int:
+    """At startup: only load when nothing is there yet.
 
-    So kostet ein Neustart nichts, und ein Kurator, der von Hand nachgepflegt hat, verliert seine
-    Aenderungen nicht.
+    That way a restart costs nothing, and a curator who edited entries by hand does not lose them.
     """
-    vorhanden = session.scalar(select(func.count()).select_from(Place)) or 0
-    if vorhanden:
-        log.info("Ortsverzeichnis enthaelt bereits %d Eintraege", vorhanden)
-        return vorhanden
-    return lade_aus_datei(session, pfad)
+    existing = session.scalar(select(func.count()).select_from(Place)) or 0
+    if existing:
+        log.info("Gazetteer already holds %d entries", existing)
+        return existing
+    return load_from_file(session, path)
 
 
-def suche(session: Session, anfrage: str, limit: int = HOECHSTZAHL_TREFFER) -> list[Place]:
-    """Findet Orte zu einer Eingabe.
+def search(session: Session, query: str, limit: int = MAX_RESULTS) -> list[Place]:
+    """Find places matching an input.
 
-    Treffer am Wortanfang stehen vorn: wer "Muhl" tippt, meint den Muehlenweg und nicht die
-    "Alte Muehlenstrasse". Danach entscheidet die Art -- eine Strasse ist die wahrscheinlichere
-    Antwort auf "Wo ist das?" als eine Flurbezeichnung.
+    Matches at the start of the name come first: whoever types "Muhl" means the Muehlenweg, not
+    the "Alte Muehlenstrasse". After that the kind decides -- a street is the more likely answer
+    to "where is this?" than a field name.
     """
-    begriff = normalisiere(anfrage)
-    if len(begriff) < 2:
+    term = normalize(query)
+    if len(term) < 2:
         return []
 
-    # Rang 0: beginnt mit dem Begriff. Rang 1: enthaelt ihn irgendwo.
-    rang = func.iif(Place.name_normalized.like(f"{begriff}%"), 0, 1)
-    art_rang = func.iif(
+    # Rank 0: starts with the term. Rank 1: contains it somewhere.
+    match_rank = func.iif(Place.name_normalized.like(f"{term}%"), 0, 1)
+    kind_rank = func.iif(
         Place.kind == "strasse",
         0,
         func.iif(Place.kind == "ortsteil", 1, func.iif(Place.kind == "gebaeude", 2, 3)),
@@ -96,8 +95,8 @@ def suche(session: Session, anfrage: str, limit: int = HOECHSTZAHL_TREFFER) -> l
     return list(
         session.scalars(
             select(Place)
-            .where(Place.name_normalized.like(f"%{begriff}%"))
-            .order_by(rang, art_rang, func.length(Place.name), Place.name)
+            .where(Place.name_normalized.like(f"%{term}%"))
+            .order_by(match_rank, kind_rank, func.length(Place.name), Place.name)
             .limit(limit)
         ).all()
     )

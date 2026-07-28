@@ -1,11 +1,11 @@
-"""Vorschaubilder.
+"""Thumbnails.
 
-Zwei Groessen, beide beim Import erzeugt: 240 px fuer die Marker auf der Karte, 1200 px fuer das
-Overlay und den "Hilf mit"-Bereich. Auf einem Pi waere das Rechnen zur Anzeigezeit spuerbar, beim
-Import faellt es nicht auf.
+Two sizes, both created at import time: 240 px for the markers on the map, 1200 px for the overlay
+and the "Hilf mit" panel. Computing them at display time would be noticeable on a Pi; at import
+time nobody notices.
 
-WebP, weil es bei gleicher Qualitaet deutlich kleiner ist als JPEG -- und die Karte laedt schnell
-mal fuenfzig Marker auf einmal.
+WebP, because at equal quality it is considerably smaller than JPEG -- and the map easily loads
+fifty markers at once.
 """
 
 import logging
@@ -13,46 +13,46 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
-from app.services.storage import THUMBNAIL_GROESSEN, thumbnail_pfad
+from app.services.storage import THUMBNAIL_SIZES, thumbnail_path
 
 log = logging.getLogger(__name__)
 
-_QUALITAET = 82
+_QUALITY = 82
 
 
-def _fuer_anzeige(bild: Image.Image) -> Image.Image:
-    """Dreht nach EXIF und bringt in einen Farbraum, den WebP kennt.
+def _for_display(image: Image.Image) -> Image.Image:
+    """Rotate per EXIF and convert into a colour space WebP knows.
 
-    Gescannte Vorlagen kommen oft als CMYK-TIFF oder mit Graustufen-Palette. Ohne Umwandlung
-    scheitert das Speichern -- und zwar erst beim letzten Schritt, nach aller Rechenarbeit.
+    Scanned originals often arrive as CMYK TIFF or with a greyscale palette. Without conversion
+    saving fails -- and only at the very last step, after all the resizing work.
     """
-    bild = ImageOps.exif_transpose(bild) or bild
-    if bild.mode in ("RGBA", "LA"):
-        return bild.convert("RGBA")
-    if bild.mode != "RGB":
-        return bild.convert("RGB")
-    return bild
+    image = ImageOps.exif_transpose(image) or image
+    if image.mode in ("RGBA", "LA"):
+        return image.convert("RGBA")
+    if image.mode != "RGB":
+        return image.convert("RGB")
+    return image
 
 
-def erzeuge_thumbnails(quelle: Path, ziel_wurzel: Path, sha256: str) -> list[Path]:
-    """Erzeugt alle Groessen und gibt die geschriebenen Pfade zurueck."""
-    geschrieben: list[Path] = []
+def create_thumbnails(source: Path, target_root: Path, sha256: str) -> list[Path]:
+    """Create every size and return the paths written."""
+    written: list[Path] = []
 
-    with Image.open(quelle) as roh:
-        anzeige = _fuer_anzeige(roh)
+    with Image.open(source) as raw:
+        display = _for_display(raw)
 
-        for groesse in THUMBNAIL_GROESSEN:
-            ziel = thumbnail_pfad(ziel_wurzel, sha256, groesse)
-            ziel.parent.mkdir(parents=True, exist_ok=True)
+        for size in THUMBNAIL_SIZES:
+            target = thumbnail_path(target_root, sha256, size)
+            target.parent.mkdir(parents=True, exist_ok=True)
 
-            verkleinert = anzeige.copy()
-            verkleinert.thumbnail((groesse, groesse), Image.Resampling.LANCZOS)
-            verkleinert.save(ziel, "WEBP", quality=_QUALITAET, method=6)
-            geschrieben.append(ziel)
+            scaled = display.copy()
+            scaled.thumbnail((size, size), Image.Resampling.LANCZOS)
+            scaled.save(target, "WEBP", quality=_QUALITY, method=6)
+            written.append(target)
 
-    return geschrieben
+    return written
 
 
-def entferne_thumbnails(ziel_wurzel: Path, sha256: str) -> None:
-    for groesse in THUMBNAIL_GROESSEN:
-        thumbnail_pfad(ziel_wurzel, sha256, groesse).unlink(missing_ok=True)
+def remove_thumbnails(target_root: Path, sha256: str) -> None:
+    for size in THUMBNAIL_SIZES:
+        thumbnail_path(target_root, sha256, size).unlink(missing_ok=True)

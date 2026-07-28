@@ -1,8 +1,8 @@
-"""Datenbankanbindung.
+"""Database wiring.
 
-SQLite laeuft hier mit WAL-Journal. Das ist der Modus, in dem Lesen und Schreiben sich nicht
-gegenseitig blockieren -- wichtig, weil der Import-Thread schreibt, waehrend der Kiosk liest --
-und in dem ``VACUUM INTO`` im laufenden Betrieb eine konsistente Sicherungskopie erzeugt.
+SQLite runs with a WAL journal here. That is the mode in which reads and writes do not block each
+other -- important because the import thread writes while the kiosk reads -- and in which
+``VACUUM INTO`` produces a consistent backup copy while the service is running.
 """
 
 from collections.abc import Iterator
@@ -14,7 +14,7 @@ from app.config import get_settings
 
 
 class Base(DeclarativeBase):
-    """Basisklasse aller Tabellen. Die Modelle folgen in Stufe 3."""
+    """Base class for all tables."""
 
 
 @event.listens_for(Engine, "connect")
@@ -22,8 +22,8 @@ def _configure_sqlite(dbapi_connection, connection_record) -> None:
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA journal_mode=WAL")
     cursor.execute("PRAGMA foreign_keys=ON")
-    # Kompromiss aus Geschwindigkeit und Sicherheit; mit WAL bleibt die Datenbank auch bei
-    # Stromausfall konsistent, im schlimmsten Fall fehlt die letzte Transaktion.
+    # Trade-off between speed and safety; with WAL the database stays consistent even on power
+    # loss -- at worst the last transaction is missing.
     cursor.execute("PRAGMA synchronous=NORMAL")
     cursor.close()
 
@@ -33,7 +33,7 @@ def create_db_engine() -> Engine:
     settings.ensure_dirs()
     return create_engine(
         settings.db_url,
-        # Der watchdog-Import laeuft in einem eigenen Thread und braucht dieselbe Verbindung nicht.
+        # The inbox watcher runs in its own thread and does not need the same connection.
         connect_args={"check_same_thread": False},
         pool_pre_ping=True,
     )
@@ -44,6 +44,6 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False
 
 
 def get_session() -> Iterator[Session]:
-    """FastAPI-Dependency."""
+    """FastAPI dependency."""
     with SessionLocal() as session:
         yield session
