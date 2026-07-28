@@ -57,6 +57,9 @@ Vite leitet `/api` an das Backend weiter, sodass in Entwicklung und Betrieb dies
 | `make tiles` | Offline-Karte und Ortsindex für die konfigurierte Region bauen |
 | `make prod` | Alles in Containern, so wie es auf dem Pi läuft |
 
+Einrichtung im Detail, Sprachregelung, Teststrategie und die Fallstricke, die Zeit gekostet haben:
+[docs/entwicklung.md](docs/entwicklung.md). Für Coding-Agents: [CLAUDE.md](CLAUDE.md).
+
 ## Betrieb
 
 Der Pi bootet direkt in die Karte — kein Login, kein Desktop, keine Bedienung nötig.

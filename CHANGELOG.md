@@ -43,3 +43,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - `tiles/build-places.py` baut einen Ortsindex aus OpenStreetMap; die Suche findet „Mühlenweg"
   auch bei Eingabe ohne Umlaut und läuft ohne Internet
 - `make places` baut und lädt den Ortsindex, `python -m app.cli places` lädt ihn neu
+
+### Geändert
+
+- Bezeichner und Code-Kommentare durchgängig auf Englisch; Deutsch bleibt für Oberfläche,
+  Fehlermeldungen, Dokumentation und Commit-Nachrichten
+- Die beiden Migrationen zu einer initialen zusammengefasst, mit englischen Index- und
+  Constraint-Namen — möglich, solange nichts ausgeliefert ist
+- `CLAUDE.md` (für Coding-Agents) und `docs/entwicklung.md` (für Entwickler) ergänzt
