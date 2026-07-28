@@ -55,18 +55,32 @@ export function App() {
 
   return (
     <>
+      {/* Two columns, two rows:
+       *
+       *     Titel  │ Zeitschieber
+       *     ───────┼─────────────
+       *     Hilf   │ Karte
+       *     mit    │
+       *
+       * The slider still sits directly above the map it filters, and the arms head the panel
+       * rather than covering the map. The grid itself is in styles/global.css. */}
       <div className="app">
-        {/* Left column: map with the time slider below it. The slider filters the map, so it sits
-            only under the map -- not under the side panel. */}
+        <header className="app__title">
+          <AdminGate regionName={region.name} />
+          <h1 className="app__heading">
+            <span className="app__heading-lead">{t.app.titleLead}</span>
+            <span className="app__heading-place">{region.name}</span>
+          </h1>
+        </header>
+
+        <TimeSlider />
+
+        <HelpPanel region={region} />
+
         <div className="app__map">
           <MapView region={region} />
-          <AdminGate regionName={region.name} />
           <MapNotice />
-          <TimeSlider />
         </div>
-
-        {/* Right column, full height. */}
-        <HelpPanel region={region} />
       </div>
 
       <PhotoOverlay />

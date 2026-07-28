@@ -73,6 +73,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Faustregel für Meldungen eingeführt: erscheint sie im Kiosk oder Admin-Bereich, ist sie deutsch,
   sonst englisch. OpenAPI-Beschreibungen sind damit englisch, CLI-Ausgaben bleiben deutsch
 - Jahrzehnte der Datumsfrage kommen aus `region.json` statt aus dem Code
+- Kiosk-Aufteilung auf ein Raster aus zwei Spalten und zwei Zeilen: links Titelbereich über
+  „Hilf mit", rechts Zeitschieber über der Karte. Der Schieber steht damit weiterhin genau über
+  der Karte, die er filtert, und das Wappen führt den Bereich an, statt die Karte zu verdecken.
+  Der Ortsname im Titel kommt aus `region.json`
 
 ### Behoben
 

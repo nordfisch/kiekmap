@@ -14,16 +14,23 @@ ergänzen. Vollständig offline auf einem Raspberry Pi, gesichert durch Einsteck
 und einen Knopfdruck.
 
 ```
-┌────────────────────────────────────────┬──────────────┐
-│                                        │  HILF MIT    │
-│         Karte des Ortes                │              │
-│         Fotos an ihrem Aufnahmeort     │  [Foto]      │
-│                                        │  "Wo ist     │
-│                                        │   das?"      │
-├────────────────────────────────────────┤              │
-│  1880 ├──●━━━━━━━━━━━━━━━●──┤ 1990     │  [Karte][×]  │
-└────────────────────────────────────────┴──────────────┘
+┌──────────────┬────────────────────────────────────────┐
+│ [Wappen]     │  1880 ├──●━━━━━━━━━━━━━━━●──┤ 1990     │
+│ Bilder aus   │                                        │
+│ unserem HOLM │                                        │
+├──────────────┼────────────────────────────────────────┤
+│  HILF MIT    │                                        │
+│              │         Karte des Ortes                │
+│  [Foto]      │         Fotos an ihrem Aufnahmeort     │
+│  "Wo ist     │                                        │
+│   das?"      │                                        │
+│              │                                        │
+│  [Karte][×]  │                                        │
+└──────────────┴────────────────────────────────────────┘
 ```
+
+Der Zeitschieber steht über der Karte, die er filtert — nicht über dem „Hilf mit"-Bereich. Das
+Wappen führt die linke Spalte an und ist zugleich der Weg in den Admin-Bereich.
 
 ---
 

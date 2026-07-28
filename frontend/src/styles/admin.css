@@ -8,22 +8,21 @@
 
 /* --- the way in ---------------------------------------------------------- */
 
-/* The village arms over the top left of the map. Deliberately visible -- the PIN is the lock,
- * not the hiding place. */
+/* The village arms in the title bar, next to the name of the place. Deliberately visible -- the
+ * PIN is the lock, not the hiding place.
+ *
+ * No background and no shadow here, unlike when it lay on the map: in the title bar it is a
+ * coat of arms, not a button, and it should not look like one until it is pressed. */
 .admin-gate {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 4;
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 4.5rem;
-  height: 4.5rem;
-  padding: 0.35rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
   border: none;
-  border-radius: 12px;
-  background: rgb(255 255 255 / 88%);
-  box-shadow: 0 2px 10px rgb(0 0 0 / 22%);
+  border-radius: 8px;
+  background: none;
 }
 
 .admin-gate:active {

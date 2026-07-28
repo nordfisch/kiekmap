@@ -11,7 +11,14 @@
 
 export const t = {
   app: {
-    title: "Bilder aus unserem Ort",
+    /**
+     * Der Titel über dem „Hilf mit"-Bereich, zweizeilig neben dem Wappen.
+     *
+     * Der Ortsname steht bewusst nicht hier, sondern kommt aus `region.json` — sonst wäre der
+     * einzige Ort im Projekt, an dem „Holm" im Code stünde, ausgerechnet die größte Schrift
+     * auf dem Bildschirm.
+     */
+    titleLead: "Bilder aus unserem",
     loadingMap: "Karte wird geladen …",
   },
 

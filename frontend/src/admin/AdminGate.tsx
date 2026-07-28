@@ -1,5 +1,5 @@
 /**
- * The way into the admin area: the village arms in the top left corner of the map.
+ * The way into the admin area: the village arms in the title bar, above the "Hilf mit" panel.
  *
  * Visible on purpose -- a hidden gesture is one more thing for volunteers to remember, and the
  * PIN is the actual lock. A visitor who taps the arms out of curiosity gets a number pad and

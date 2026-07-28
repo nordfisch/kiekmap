@@ -1,8 +1,17 @@
 /* Kiosk layout.
  *
- * Outermost a row of two columns: on the left the map stacked above the time slider, on the right
- * the "Hilf mit" panel over the full height. The slider belongs under the map because it filters
- * the map -- it deliberately does not reach under the side panel.
+ * A grid of two columns and two rows:
+ *
+ *     Titel  │ Zeitschieber
+ *     ───────┼──────────────
+ *     Hilf   │ Karte
+ *     mit    │
+ *
+ * Both cells of a column share its width, both cells of a row its height -- which is the whole
+ * reason for a grid here rather than nested flex boxes: the title bar ends exactly where the
+ * slider ends, without either of them being told a number.
+ *
+ * The slider still spans only the map, not the panel: it filters the map and nothing else.
  */
 
 :root {
@@ -55,14 +64,57 @@ button {
 }
 
 .app {
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--timeline-height) 1fr;
+  grid-template-areas:
+    "title timeline"
+    "help  map";
   height: 100%;
 }
 
+/* --- title bar ----------------------------------------------------------- */
+
+.app__title {
+  grid-area: title;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+  padding: 0.75rem 1.25rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.app__heading {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.15;
+}
+
+/* Two lines: a small lead-in over the name of the village. The name is the thing people look for,
+ * so it gets the size -- and it comes from region.json, not from here. */
+.app__heading-lead {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.app__heading-place {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+
+/* Still a flex column, although it now holds only the map: `.map` needs a parent that hands it a
+ * height. Without it MapLibre falls back to its own 300 px and leaves the rest of the cell white. */
 .app__map {
   position: relative;
+  grid-area: map;
   display: flex;
-  flex: 1;
   flex-direction: column;
   min-width: 0;
 }
@@ -81,13 +133,13 @@ button {
 /* --- "Hilf mit" panel ---------------------------------------------------- */
 
 .help-panel {
+  grid-area: help;
   display: flex;
   flex-direction: column;
-  flex: 0 1 var(--sidebar-width);
   min-width: 0;
   padding: 1.25rem;
   overflow-y: auto;
-  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
   background: var(--paper);
 }
 
@@ -387,7 +439,7 @@ button {
 .notice {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--timeline-height) + 1rem);
+  bottom: 1rem;
   transform: translateX(-50%);
   z-index: 3;
   padding: 0.5rem 1rem;
@@ -406,13 +458,14 @@ button {
 /* --- time slider --------------------------------------------------------- */
 
 .timeline {
-  flex: 0 0 var(--timeline-height);
+  grid-area: timeline;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 0.35rem;
+  min-width: 0;
   padding: 0.75rem 2.5rem 0.5rem;
-  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   background: var(--paper);
 }
 
