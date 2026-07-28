@@ -86,6 +86,10 @@ pmtiles extract "$QUELLE" "$ZIEL/tiles/map.pmtiles" \
   --maxzoom="$MAXZOOM"
 
 cp "$REGION" "$ZIEL/tiles/region.json"
+# Auch ins Datenverzeichnis: dort kommt das Backend im Container heran und prueft damit, ob eine
+# Verortung aus dem "Hilf mit"-Bereich ueberhaupt in der Region liegt.
+mkdir -p "$WURZEL/data"
+cp "$REGION" "$WURZEL/data/region.json"
 
 # --- Schriften und Symbole --------------------------------------------------
 

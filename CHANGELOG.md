@@ -36,3 +36,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Foto-Overlay in voller Größe, schließbar per Tippen daneben, Knopf oder Escape
 - Zeitschieber mit zwei Griffen und Jahrzehnt-Histogramm im Hintergrund, fingergerecht bemessen
 - Kartenbewegung und Zeitraum lösen entprellt genau eine Abfrage aus; überholte werden verworfen
+- „Hilf mit"-Bereich: zufällige Fotos ohne Ort oder Jahr, Verortung per Pin auf der Karte oder
+  über die Ortssuche, Datierung über Jahrzehnt und optional Jahr
+- Besucherbeiträge werden direkt übernommen, aber nur in leere Felder — kuratierte Angaben sind
+  unantastbar, und Koordinaten außerhalb der Region werden abgewiesen
+- `tiles/build-places.py` baut einen Ortsindex aus OpenStreetMap; die Suche findet „Mühlenweg"
+  auch bei Eingabe ohne Umlaut und läuft ohne Internet
+- `make places` baut und lädt den Ortsindex, `python -m app.cli places` lädt ihn neu

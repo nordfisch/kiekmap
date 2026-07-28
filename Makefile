@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
-        migrate revision lint tiles build prod prod-down clean
+        migrate revision lint tiles places build prod prod-down clean
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
@@ -57,6 +57,10 @@ dev-frontend: frontend/node_modules  ## Nur das Frontend, Port 5173
 
 tiles:  ## Offline-Karte, Schriften und Symbole fuer die Region in tiles/region.json bauen
 	./tiles/build-tiles.sh
+
+places: $(VENV)  ## Ortsverzeichnis fuer die Ortssuche bauen und einlesen
+	python3 ./tiles/build-places.py
+	cd backend && .venv/bin/python -m app.cli places
 
 # --- Datenbank --------------------------------------------------------------
 

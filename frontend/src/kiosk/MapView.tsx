@@ -8,6 +8,7 @@ import type { Bbox } from "../api/client";
 import type { Region } from "../region";
 import { useKiosk } from "../store/kiosk";
 import { PhotoLayer } from "./PhotoLayer";
+import { PinLayer } from "./PinLayer";
 
 // Einmal pro Seitenaufruf: lehrt MapLibre, `pmtiles://`-Quellen per HTTP-Range-Request zu lesen.
 // Genau das macht den Tileserver ueberfluessig -- nginx liefert einfach eine statische Datei aus.
@@ -101,6 +102,7 @@ export function MapView({ region }: { region: Region }) {
     <div className="karte">
       <div ref={container} className="karte__flaeche" />
       {karte && <PhotoLayer map={karte} />}
+      {karte && <PinLayer map={karte} />}
     </div>
   );
 }

@@ -101,3 +101,72 @@ export function ladeHistogramm(bbox: Bbox, signal?: AbortSignal): Promise<Histog
 export function ladeDetail(id: number, signal?: AbortSignal): Promise<PhotoDetail> {
   return hole<PhotoDetail>(`/api/photos/${id}`, signal);
 }
+
+// --- "Hilf mit" -------------------------------------------------------------
+
+export type Bedarf = "location" | "date";
+
+export type Aufgabe = {
+  need: Bedarf;
+  /** Wie viele Fotos dieser Art noch offen sind. Motiviert. */
+  open_count: number;
+  /** null heißt: es fehlt nichts mehr. Ein schöner Zustand. */
+  photo: PhotoDetail | null;
+};
+
+export type Ort = {
+  id: number;
+  name: string;
+  lat: number;
+  lon: number;
+  kind: string;
+};
+
+export type Genauigkeit = "day" | "month" | "year" | "decade";
+
+async function sende<T>(pfad: string, koerper: unknown): Promise<T> {
+  const antwort = await fetch(pfad, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(koerper),
+  });
+  if (!antwort.ok) {
+    let grund = `HTTP ${antwort.status}`;
+    try {
+      const daten = (await antwort.json()) as { detail?: string };
+      if (daten.detail) grund = daten.detail;
+    } catch {
+      /* Antwort ohne JSON */
+    }
+    throw new Error(grund);
+  }
+  return (await antwort.json()) as T;
+}
+
+export function ladeAufgabe(
+  bedarf: Bedarf,
+  uebersprungen: number[],
+  signal?: AbortSignal,
+): Promise<Aufgabe> {
+  const params = new URLSearchParams({ need: bedarf });
+  if (uebersprungen.length) params.set("exclude", uebersprungen.join(","));
+  return hole<Aufgabe>(`/api/contribute/next?${params}`, signal);
+}
+
+export function sendeOrt(
+  id: number,
+  daten: { lat: number; lon: number; place_name?: string; session_id?: string },
+): Promise<PhotoDetail> {
+  return sende<PhotoDetail>(`/api/contribute/${id}/location`, daten);
+}
+
+export function sendeDatum(
+  id: number,
+  daten: { year: number; precision: Genauigkeit; session_id?: string },
+): Promise<PhotoDetail> {
+  return sende<PhotoDetail>(`/api/contribute/${id}/date`, daten);
+}
+
+export function sucheOrte(anfrage: string, signal?: AbortSignal): Promise<Ort[]> {
+  return hole<Ort[]>(`/api/places?q=${encodeURIComponent(anfrage)}`, signal);
+}

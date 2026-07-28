@@ -70,6 +70,56 @@ def client(session: Session) -> Iterator[TestClient]:
 
 
 @pytest.fixture
+def lege_an(session: Session):
+    """Legt ein Foto ohne Datei an -- fuer Tests, denen es nur um Abfragen geht.
+
+    Standardmaessig in Holm und auf 1932 datiert; jedes Feld ist ueberschreibbar, ``jahr=None``
+    bzw. ``lat=None`` erzeugt die Luecken, um die es im "Hilf mit"-Bereich geht.
+    """
+    from app.models import Photo, PhotoStatus, Source
+    from app.services.dates import zeitraum
+
+    zaehler = 0
+
+    def anlegen(
+        *,
+        lat: float | None = 53.62,
+        lon: float | None = 9.676,
+        jahr: int | None = 1932,
+        genauigkeit=None,
+        titel: str = "Testfoto",
+        status: str = PhotoStatus.PUBLISHED,
+        sha: str | None = None,
+    ) -> Photo:
+        nonlocal zaehler
+        zaehler += 1
+
+        von, bis, praezision = zeitraum(jahr, genauigkeit=genauigkeit)
+        foto = Photo(
+            sha256=sha or f"{zaehler:064d}",
+            original_filename=f"{titel}.jpg",
+            mime="image/jpeg",
+            bytes=1000,
+            width=900,
+            height=640,
+            title=titel,
+            lat=lat,
+            lon=lon,
+            date_from=von,
+            date_to=bis,
+            date_precision=praezision,
+            date_source=Source.CURATOR if von else None,
+            location_source=Source.CURATOR if lat is not None else None,
+            status=status,
+        )
+        session.add(foto)
+        session.flush()
+        return foto
+
+    return anlegen
+
+
+@pytest.fixture
 def bild(tmp_path: Path):
     """Legt ein Testbild an einen beschreibbaren Ort und gibt den Pfad zurueck.
 

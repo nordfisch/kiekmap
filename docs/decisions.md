@@ -117,8 +117,26 @@ und ist im Admin einzeln zurücknehmbar.
 
 **Warum nicht Moderationsqueue?** Der Reiz für den Besucher ist der unmittelbare Effekt — „mein
 Wissen ist jetzt Teil der Karte". Eine Warteschlange nimmt genau das weg und erzeugt zusätzlich
-Arbeit für Ehrenamtliche, die ohnehin knapp ist. Das Protokoll fängt den Missbrauchsfall auf, ohne
-den Normalfall auszubremsen.
+Arbeit für Ehrenamtliche, die ohnehin knapp ist.
+
+Drei Dinge fangen den Missbrauchsfall auf, ohne den Normalfall auszubremsen:
+
+1. **Nur leere Felder dürfen gefüllt werden** (sonst HTTP 409 mit freundlichem Text). Was ein
+   Kurator gesetzt hat, ist unantastbar — und der zweite Besucher kann den ersten nicht
+   überschreiben.
+2. **Koordinaten müssen in der Region liegen.** Der Pin lässt sich zwar nur auf der Karte setzen,
+   aber die API ist erreichbar; ein Foto im Pazifik wäre aus der Ansicht verschwunden, ohne dass
+   jemand merkt, warum. Geprüft wird gegen `data/region.json`, das `make tiles` mit ablegt.
+3. **Jede Änderung steht in `changes`** mit Sitzungskennung und ist einzeln zurücknehmbar.
+
+Die Sitzungskennung ist eine Zufallszahl pro Seitenaufruf, nirgends gespeichert. Der Kurator kann
+damit sehen, ob zehn Angaben von einer Person stammen oder von zehn — mehr soll er nicht können.
+
+**Jahrzehnt vor Jahr.** Die Datumseingabe fragt erst das Jahrzehnt, dann optional das Jahr. Das ist
+nicht Bequemlichkeit, sondern entspricht der ehrlichen Antwort: Wer ein altes Foto sieht, weiß
+meist „die Zwanziger", nicht „1924". Eine Zahlentastatur würde eine Genauigkeit verlangen, die
+niemand hat. „Ganze 1920er Jahre" ist deshalb ein vollwertiges Ergebnis und kein Ausweichen —
+gespeichert als Intervall, gefunden über die Überlappungsabfrage.
 
 ---
 

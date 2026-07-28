@@ -83,6 +83,21 @@ def _befehl_stats(_: argparse.Namespace) -> int:
     return 0
 
 
+def _befehl_places(_: argparse.Namespace) -> int:
+    from app.services.places import lade_aus_datei
+
+    settings = get_settings()
+    with SessionLocal() as session:
+        anzahl = lade_aus_datei(session, settings.places_file)
+
+    if anzahl:
+        print(f"{anzahl} Orte geladen.")
+    else:
+        print(f"Nichts geladen -- {settings.places_file} fehlt.")
+        print("Erzeugen mit: python3 tiles/build-places.py")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)-7s %(message)s")
 
@@ -98,6 +113,9 @@ def main(argv: list[str] | None = None) -> int:
 
     p_stats = unterbefehle.add_parser("stats", help="Bestand und Luecken")
     p_stats.set_defaults(funktion=_befehl_stats)
+
+    p_orte = unterbefehle.add_parser("places", help="Ortsverzeichnis neu laden")
+    p_orte.set_defaults(funktion=_befehl_places)
 
     argumente = parser.parse_args(argv)
     return argumente.funktion(argumente)

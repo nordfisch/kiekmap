@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { HelpPanel } from "./kiosk/HelpPanel";
 import { MapView } from "./kiosk/MapView";
 import { PhotoOverlay } from "./kiosk/PhotoOverlay";
 import { TimeSlider } from "./kiosk/TimeSlider";
@@ -56,12 +57,7 @@ export function App() {
         </div>
 
         {/* Rechte Spalte ueber die volle Hoehe. */}
-        <aside className="app__hilf-mit">
-          <h2>Hilf mit</h2>
-          <p className="platzhalter">
-            Hier werden Fotos gezeigt, bei denen Ort oder Jahr fehlen &middot; Stufe 7
-          </p>
-        </aside>
+        <HelpPanel />
       </div>
 
       <PhotoOverlay />

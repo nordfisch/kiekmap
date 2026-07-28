@@ -8,50 +8,16 @@ lautlos heraus -- und mit ihm der Grossteil eines Heimatmuseumsbestands.
 import pytest
 from fastapi.testclient import TestClient
 
-from app.models import DatePrecision, Photo, PhotoStatus, Source
-from app.services.dates import zeitraum
+from app.models import DatePrecision, PhotoStatus
 
 # Holm und Umgebung.
 BBOX = "9.60,53.57,9.75,53.67"
 BBOX_WOANDERS = "10.50,52.00,10.60,52.10"
 
 
-def lege_an(
-    session,
-    *,
-    lat: float | None = 53.62,
-    lon: float | None = 9.676,
-    jahr: int | None = 1932,
-    genauigkeit: DatePrecision | None = None,
-    titel: str = "Testfoto",
-    status: str = PhotoStatus.PUBLISHED,
-    sha: str | None = None,
-) -> Photo:
-    von, bis, praezision = zeitraum(jahr, genauigkeit=genauigkeit)
-    foto = Photo(
-        sha256=sha or f"{abs(hash((lat, lon, jahr, titel, genauigkeit))):064x}"[:64],
-        original_filename=f"{titel}.jpg",
-        mime="image/jpeg",
-        bytes=1000,
-        width=900,
-        height=640,
-        title=titel,
-        lat=lat,
-        lon=lon,
-        date_from=von,
-        date_to=bis,
-        date_precision=praezision,
-        date_source=Source.CURATOR if von else None,
-        status=status,
-    )
-    session.add(foto)
-    session.flush()
-    return foto
-
-
 class TestKartenausschnitt:
-    def test_foto_im_ausschnitt_erscheint(self, client: TestClient, session):
-        lege_an(session)
+    def test_foto_im_ausschnitt_erscheint(self, client: TestClient, session, lege_an):
+        lege_an()
         session.commit()
 
         antwort = client.get("/api/photos", params={"bbox": BBOX})
@@ -61,21 +27,21 @@ class TestKartenausschnitt:
         assert daten["total"] == 1
         assert daten["photos"][0]["title"] == "Testfoto"
 
-    def test_foto_ausserhalb_erscheint_nicht(self, client: TestClient, session):
-        lege_an(session)
+    def test_foto_ausserhalb_erscheint_nicht(self, client: TestClient, session, lege_an):
+        lege_an()
         session.commit()
 
         assert client.get("/api/photos", params={"bbox": BBOX_WOANDERS}).json()["total"] == 0
 
-    def test_foto_ohne_ort_erscheint_nie(self, client: TestClient, session):
+    def test_foto_ohne_ort_erscheint_nie(self, client: TestClient, session, lege_an):
         # Es gehoert in den "Hilf mit"-Bereich, nicht auf die Karte.
-        lege_an(session, lat=None, lon=None)
+        lege_an(lat=None, lon=None)
         session.commit()
 
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 0
 
-    def test_verstecktes_foto_erscheint_nicht(self, client: TestClient, session):
-        lege_an(session, status=PhotoStatus.HIDDEN)
+    def test_verstecktes_foto_erscheint_nicht(self, client: TestClient, session, lege_an):
+        lege_an(status=PhotoStatus.HIDDEN)
         session.commit()
 
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 0
@@ -86,32 +52,34 @@ class TestKartenausschnitt:
 
 
 class TestZeitfilter:
-    def test_jahrzehnt_erscheint_bei_auswahl_mittendrin(self, client: TestClient, session):
+    def test_jahrzehnt_erscheint_bei_auswahl_mittendrin(self, client: TestClient, session, lege_an):
         """Der Fall, der bei naiver Datumsabfrage still verloren geht."""
-        lege_an(session, jahr=1920, genauigkeit=DatePrecision.DECADE, titel="1920er Jahre")
+        lege_an(jahr=1920, genauigkeit=DatePrecision.DECADE, titel="1920er Jahre")
         session.commit()
 
         antwort = client.get("/api/photos", params={"bbox": BBOX, "von": 1925, "bis": 1930})
 
         assert antwort.json()["total"] == 1, "1920er-Foto muss in 1925-1930 erscheinen"
 
-    def test_jahrzehnt_ausserhalb_erscheint_nicht(self, client: TestClient, session):
-        lege_an(session, jahr=1920, genauigkeit=DatePrecision.DECADE)
+    def test_jahrzehnt_ausserhalb_erscheint_nicht(self, client: TestClient, session, lege_an):
+        lege_an(jahr=1920, genauigkeit=DatePrecision.DECADE)
         session.commit()
 
         antwort = client.get("/api/photos", params={"bbox": BBOX, "von": 1950, "bis": 1960})
         assert antwort.json()["total"] == 0
 
-    def test_genaues_jahr_am_rand_der_auswahl(self, client: TestClient, session):
-        lege_an(session, jahr=1932)
+    def test_genaues_jahr_am_rand_der_auswahl(self, client: TestClient, session, lege_an):
+        lege_an(jahr=1932)
         session.commit()
 
         for von, bis in ((1932, 1932), (1900, 1932), (1932, 2000)):
             antwort = client.get("/api/photos", params={"bbox": BBOX, "von": von, "bis": bis})
             assert antwort.json()["total"] == 1, f"{von}-{bis} muss 1932 enthalten"
 
-    def test_undatiertes_foto_erscheint_in_keiner_zeitauswahl(self, client: TestClient, session):
-        lege_an(session, jahr=None)
+    def test_undatiertes_foto_erscheint_in_keiner_zeitauswahl(
+        self, client: TestClient, session, lege_an
+    ):
+        lege_an(jahr=None)
         session.commit()
 
         mit_zeit = client.get("/api/photos", params={"bbox": BBOX, "von": 1800, "bis": 2100})
@@ -119,8 +87,8 @@ class TestZeitfilter:
         # Ohne Zeitauswahl aber schon -- sonst waere es unsichtbar.
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 1
 
-    def test_vertauschte_jahre_werden_gedreht(self, client: TestClient, session):
-        lege_an(session, jahr=1932)
+    def test_vertauschte_jahre_werden_gedreht(self, client: TestClient, session, lege_an):
+        lege_an(jahr=1932)
         session.commit()
 
         antwort = client.get("/api/photos", params={"bbox": BBOX, "von": 1950, "bis": 1900})
@@ -128,9 +96,9 @@ class TestZeitfilter:
 
 
 class TestBegrenzung:
-    def test_limit_meldet_sich(self, client: TestClient, session):
+    def test_limit_meldet_sich(self, client: TestClient, session, lege_an):
         for nummer in range(5):
-            lege_an(session, titel=f"Foto {nummer}", sha=f"{nummer:064d}")
+            lege_an(titel=f"Foto {nummer}", sha=f"{nummer:064d}")
         session.commit()
 
         antwort = client.get("/api/photos", params={"bbox": BBOX, "limit": 2}).json()
@@ -139,17 +107,17 @@ class TestBegrenzung:
         assert antwort["total"] == 5
         assert antwort["truncated"] is True, "die Karte soll zum Hineinzoomen auffordern koennen"
 
-    def test_ohne_begrenzung_kein_hinweis(self, client: TestClient, session):
-        lege_an(session)
+    def test_ohne_begrenzung_kein_hinweis(self, client: TestClient, session, lege_an):
+        lege_an()
         session.commit()
 
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["truncated"] is False
 
 
 class TestHistogramm:
-    def test_zaehlt_je_jahrzehnt(self, client: TestClient, session):
+    def test_zaehlt_je_jahrzehnt(self, client: TestClient, session, lege_an):
         for jahr, titel in ((1923, "a"), (1927, "b"), (1955, "c")):
-            lege_an(session, jahr=jahr, titel=titel, sha=f"{jahr:064d}")
+            lege_an(jahr=jahr, titel=titel, sha=f"{jahr:064d}")
         session.commit()
 
         daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
@@ -161,10 +129,10 @@ class TestHistogramm:
         assert daten["earliest"] == 1920
         assert daten["latest"] == 1959
 
-    def test_zeigt_auch_ausserhalb_der_auswahl(self, client: TestClient, session):
+    def test_zeigt_auch_ausserhalb_der_auswahl(self, client: TestClient, session, lege_an):
         """Der Schieber soll zeigen, wo ueberhaupt etwas liegt -- auch jenseits der Auswahl."""
-        lege_an(session, jahr=1923, sha=f"{1923:064d}")
-        lege_an(session, jahr=1980, sha=f"{1980:064d}")
+        lege_an(jahr=1923, sha=f"{1923:064d}")
+        lege_an(jahr=1980, sha=f"{1980:064d}")
         session.commit()
 
         daten = client.get(
@@ -173,9 +141,9 @@ class TestHistogramm:
 
         assert len(daten["decades"]) == 2
 
-    def test_undatierte_werden_getrennt_gezaehlt(self, client: TestClient, session):
-        lege_an(session, jahr=None, sha="a" * 64)
-        lege_an(session, jahr=1932, sha="b" * 64)
+    def test_undatierte_werden_getrennt_gezaehlt(self, client: TestClient, session, lege_an):
+        lege_an(jahr=None, sha="a" * 64)
+        lege_an(jahr=1932, sha="b" * 64)
         session.commit()
 
         daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
@@ -190,8 +158,8 @@ class TestHistogramm:
 
 
 class TestEinzelnesFoto:
-    def test_detail(self, client: TestClient, session):
-        foto = lege_an(session, jahr=1920, genauigkeit=DatePrecision.DECADE)
+    def test_detail(self, client: TestClient, session, lege_an):
+        foto = lege_an(jahr=1920, genauigkeit=DatePrecision.DECADE)
         session.commit()
 
         daten = client.get(f"/api/photos/{foto.id}").json()
@@ -207,8 +175,10 @@ class TestEinzelnesFoto:
         assert antwort.status_code == 404
         assert "9999" in antwort.json()["detail"]
 
-    def test_falsche_thumbnailgroesse_nennt_die_richtigen(self, client: TestClient, session):
-        foto = lege_an(session)
+    def test_falsche_thumbnailgroesse_nennt_die_richtigen(
+        self, client: TestClient, session, lege_an
+    ):
+        foto = lege_an()
         session.commit()
 
         antwort = client.get(f"/api/photos/{foto.id}/thumb", params={"size": 999})

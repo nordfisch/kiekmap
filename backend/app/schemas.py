@@ -140,3 +140,34 @@ class DatumsAngabe(BaseModel):
     month: int | None = Field(default=None, ge=1, le=12)
     day: int | None = Field(default=None, ge=1, le=31)
     precision: DatePrecision = DatePrecision.YEAR
+
+
+# --- "Hilf mit" -------------------------------------------------------------
+
+
+class OrtsBeitrag(BaseModel):
+    """Ein Besucher setzt den Pin."""
+
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    place_name: str | None = Field(default=None, max_length=300)
+    #: Grobe Angabe kennzeichnen ("irgendwo am Dorfteich").
+    accuracy_m: int | None = Field(default=None, ge=0, le=100_000)
+    #: Unterscheidet Besucher am selben Geraet, ohne sie zu identifizieren.
+    session_id: str | None = Field(default=None, max_length=64)
+
+
+class DatumsBeitrag(DatumsAngabe):
+    """Ein Besucher gibt ein Jahr an."""
+
+    session_id: str | None = Field(default=None, max_length=64)
+
+
+class AufgabeAntwort(BaseModel):
+    """Ein Foto, dem etwas fehlt -- plus wie viele noch offen sind."""
+
+    need: str
+    #: Zum Anzeigen im Panel: "noch 214 Fotos ohne Ort". Das motiviert.
+    open_count: int
+    #: None heisst: es fehlt nichts mehr. Ein schoener Zustand.
+    photo: PhotoDetail | None

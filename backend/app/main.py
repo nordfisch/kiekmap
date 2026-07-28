@@ -8,8 +8,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
-from app.api import health, photos
+from app.api import contribute, health, photos, places
 from app.config import get_settings
+from app.db import SessionLocal
+from app.services.places import lade_wenn_leer as lade_orte_wenn_leer
 from app.services.watcher import Eingangswaechter
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s %(name)s: %(message)s")
@@ -21,6 +23,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     settings.ensure_dirs()
     log.info("Datenverzeichnis: %s", settings.data_dir)
+
+    with SessionLocal() as sitzung:
+        lade_orte_wenn_leer(sitzung, settings.places_file)
 
     waechter = Eingangswaechter(settings)
     waechter.start()
@@ -54,3 +59,5 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api")
 app.include_router(photos.router, prefix="/api")
+app.include_router(places.router, prefix="/api")
+app.include_router(contribute.router, prefix="/api")

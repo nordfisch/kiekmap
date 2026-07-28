@@ -4,6 +4,7 @@ Alle Pfade haengen an einem einzigen Wurzelverzeichnis ``data_dir``. Das ist Abs
 veraenderliche Zustand liegt darunter, damit Sichern "einen Ordner kopieren" heisst.
 """
 
+import json
 from functools import lru_cache
 from pathlib import Path
 
@@ -62,6 +63,30 @@ class Settings(BaseSettings):
     def incoming_dir(self) -> Path:
         """Ueberwachter Ordner: was hier hineinkopiert wird, wird importiert."""
         return self.data_dir / "incoming"
+
+    @property
+    def places_file(self) -> Path:
+        """Ortsverzeichnis, erzeugt von ``tiles/build-places.py``."""
+        return self.data_dir / "places.json"
+
+    @property
+    def region_file(self) -> Path:
+        """Kopie von ``tiles/region.json``, abgelegt von ``tiles/build-tiles.sh``.
+
+        Liegt im Datenverzeichnis, weil das im Container ohnehin eingehaengt ist -- so gibt es
+        weiterhin genau eine Quelle fuer den Ausschnitt und keine zweite Stelle zum Pflegen.
+        """
+        return self.data_dir / "region.json"
+
+    def region_bbox(self) -> tuple[float, float, float, float] | None:
+        """[minLon, minLat, maxLon, maxLat] oder None, wenn keine Region hinterlegt ist."""
+        if not self.region_file.is_file():
+            return None
+        try:
+            bbox = json.loads(self.region_file.read_text(encoding="utf-8"))["bbox"]
+            return (float(bbox[0]), float(bbox[1]), float(bbox[2]), float(bbox[3]))
+        except (json.JSONDecodeError, KeyError, IndexError, TypeError, ValueError):
+            return None
 
     def ensure_dirs(self) -> None:
         for path in (self.data_dir, self.photos_dir, self.thumbs_dir, self.incoming_dir):

@@ -78,21 +78,249 @@ button {
   inset: 0;
 }
 
-.app__hilf-mit {
+/* --- "Hilf mit" ---------------------------------------------------------- */
+
+.hilf-mit {
   display: flex;
   flex-direction: column;
   flex: 0 1 var(--seitenbereich-breite);
   min-width: 0;
-  padding: 1.5rem;
+  padding: 1.25rem;
+  overflow-y: auto;
   border-left: 1px solid var(--linie);
   background: var(--papier);
 }
 
-.app__hilf-mit h2 {
-  margin: 0 0 1rem;
-  font-size: 1.5rem;
+.hilf-mit__titel {
+  margin: 0 0 0.75rem;
+  font-size: 1.4rem;
   letter-spacing: 0.02em;
   color: var(--akzent);
+}
+
+.hilf-mit__frage {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.hilf-mit__bild {
+  width: 100%;
+  max-height: 30vh;
+  object-fit: contain;
+  background: var(--linie);
+  border: 4px solid #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 22%);
+}
+
+.hilf-mit__bekannt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.6rem 0 0.9rem;
+  font-size: 0.85rem;
+  color: var(--gedaempft);
+}
+
+.hilf-mit__foto-titel {
+  font-weight: 600;
+  color: var(--tinte);
+}
+
+.hilf-mit__leer,
+.hilf-mit__offen {
+  color: var(--gedaempft);
+  font-size: 0.85rem;
+}
+
+.hilf-mit__offen {
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+
+.hilf-mit__fehler {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  background: #f6e9e4;
+  color: #8a3b28;
+  font-size: 0.9rem;
+}
+
+.hilf-mit__weiter {
+  margin-top: 0.75rem;
+}
+
+/* Die Dankesmeldung soll wirken, nicht nur informieren -- sie ist der Lohn fuers Mitmachen. */
+.hilf-mit__dank {
+  display: grid;
+  place-items: center;
+  gap: 0.75rem;
+  margin: auto 0;
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 1.15rem;
+  line-height: 1.4;
+  color: var(--akzent);
+}
+
+.hilf-mit__haken {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: var(--akzent);
+  color: #fff;
+  font-size: 2rem;
+}
+
+/* --- Aufgabe ------------------------------------------------------------- */
+
+.aufgabe__anleitung {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--gedaempft);
+}
+
+.aufgabe__bestaetigen {
+  margin-top: 1rem;
+}
+
+.aufgabe__gewaehlt {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+/* Alle Knoepfe mindestens fingerbreit -- der Kiosk wird stehend und mit der Kuppe bedient. */
+.knopf {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 2px solid var(--linie);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.knopf:active {
+  transform: translateY(1px);
+}
+
+.knopf:disabled {
+  opacity: 0.5;
+}
+
+.knopf--haupt {
+  border-color: var(--akzent);
+  background: var(--akzent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.knopf--leise {
+  border-color: transparent;
+  background: none;
+  color: var(--gedaempft);
+  min-height: 2.75rem;
+  font-size: 0.9rem;
+}
+
+.knopf--jahr {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.jahrzehnte,
+.jahre {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.jahre {
+  margin: 0.75rem 0;
+}
+
+/* --- Ortssuche ----------------------------------------------------------- */
+
+.suche__beschriftung {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--gedaempft);
+}
+
+.suche__feld {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 0.8rem;
+  border: 2px solid var(--linie);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  color: inherit;
+  /* Im Suchfeld muss ausgewaehlt und getippt werden koennen, anders als sonst im Kiosk. */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.suche__feld:focus {
+  outline: none;
+  border-color: var(--akzent);
+}
+
+.suche__treffer {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 16rem;
+  overflow-y: auto;
+  border: 1px solid var(--linie);
+  border-radius: 8px;
+}
+
+.suche__treffer-knopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  border-bottom: 1px solid var(--linie);
+  background: #fff;
+  text-align: left;
+}
+
+.suche__treffer li:last-child .suche__treffer-knopf {
+  border-bottom: none;
+}
+
+.suche__art {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  color: var(--gedaempft);
+}
+
+/* --- Pin auf der Karte --------------------------------------------------- */
+
+.pin {
+  width: 2rem;
+  height: 2rem;
+  border: 4px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--akzent);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+  cursor: grab;
 }
 
 /* --- Marker auf der Karte ------------------------------------------------ */
