@@ -70,7 +70,7 @@ export function queryTimeFilter(
   fullRange: TimeRange | null,
 ): TimeRange | null {
   if (!timeRange || !fullRange) return null;
-  const coversEverything = timeRange.von <= fullRange.von && timeRange.bis >= fullRange.bis;
+  const coversEverything = timeRange.from <= fullRange.from && timeRange.to >= fullRange.to;
   return coversEverything ? null : timeRange;
 }
 
@@ -117,7 +117,7 @@ export const useKiosk = create<KioskState>((set, get) => {
       const { timeRange } = get();
       const span =
         histogram.earliest !== null && histogram.latest !== null
-          ? { von: histogram.earliest, bis: histogram.latest }
+          ? { from: histogram.earliest, to: histogram.latest }
           : null;
 
       set({
@@ -162,7 +162,7 @@ export const useKiosk = create<KioskState>((set, get) => {
 
     setTimeRange(timeRange) {
       const current = get().timeRange;
-      if (current && current.von === timeRange.von && current.bis === timeRange.bis) return;
+      if (current && current.from === timeRange.from && current.to === timeRange.to) return;
       set({ timeRange });
       scheduleLoad();
     },

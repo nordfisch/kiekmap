@@ -200,7 +200,8 @@ class TestJahrErgaenzen:
         client.post(f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"})
 
         antwort = client.get(
-            "/api/photos", params={"bbox": "9.60,53.57,9.75,53.67", "von": 1925, "bis": 1930}
+            "/api/photos",
+            params={"bbox": "9.60,53.57,9.75,53.67", "from_year": 1925, "to_year": 1930},
         )
 
         assert antwort.json()["total"] == 1

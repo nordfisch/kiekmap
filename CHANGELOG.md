@@ -51,3 +51,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Die beiden Migrationen zu einer initialen zusammengefasst, mit englischen Index- und
   Constraint-Namen — möglich, solange nichts ausgeliefert ist
 - `CLAUDE.md` (für Coding-Agents) und `docs/entwicklung.md` (für Entwickler) ergänzt
+- `docs/adaption.md` und `docs/stufenplan.md` ergänzt
+- Query-Parameter `von`/`bis` heißen jetzt `from_year`/`to_year` — die Konvention verlangt
+  Englisch für die API
+- Faustregel für Meldungen eingeführt: erscheint sie im Kiosk oder Admin-Bereich, ist sie deutsch,
+  sonst englisch. OpenAPI-Beschreibungen sind damit englisch, CLI-Ausgaben bleiben deutsch
+- Jahrzehnte der Datumsfrage kommen aus `region.json` statt aus dem Code
+
+### Behoben
+
+- Marker verschwanden gelegentlich von der Karte: der `load`-Rückruf konnte eine bereits entfernte
+  Karteninstanz an die Ebenen weiterreichen. Die Vorschaubilder wurden dann sogar geladen, waren
+  aber nie zu sehen

@@ -34,11 +34,19 @@ Wer diese drei nicht kennt, baut etwas, das erst im Museum auffällt:
 | Code-Kommentare und Docstrings | **Englisch** |
 | **Testnamen** (`def test_…`, `class Test…`, `it("…")`) | **Deutsch** |
 | Oberflächentexte | Deutsch, in `frontend/src/texte/de.ts` |
-| Fehlermeldungen, die Besucher oder Kuratoren lesen | Deutsch, direkt im Code |
-| API-Pfade und JSON-Felder | Englisch |
+| Meldungen, die im Kiosk oder Admin-Bereich erscheinen können | Deutsch, direkt im Code |
+| Meldungen, die nur beim Arbeiten gegen die API auftauchen | Englisch |
+| API-Pfade, Query-Parameter, JSON-Felder, OpenAPI-Beschreibungen | Englisch |
+| Ausgaben der CLI (`python -m app.cli …`) | Deutsch |
 | Dokumentation (`docs/`, `README.md`, diese Datei) | Deutsch |
 | Commit-Nachrichten | Deutsch |
 | Werte in der Datenbank, die aus OSM stammen (`kind`: `strasse`, `flur` …) | Deutsch, wie geliefert |
+
+**Faustregel für Meldungen:** *Kann diese Meldung im Kiosk oder im Admin-Bereich erscheinen? Dann
+Deutsch, sonst Englisch.* Das entscheidet alle Grenzfälle ohne Einzelabwägung — ein 404 auf ein
+gelöschtes Foto landet im Overlay des Besuchers (deutsch), eine kaputte `bbox` sieht nur, wer die
+API selbst aufruft (englisch). Die CLI ist die Ausnahme: sie führt beim Erstbefüllen auch das
+Museumsteam aus, nicht nur Entwickler.
 
 **Testnamen sind die bewusste Ausnahme** von der Englisch-Regel. Sie sind keine Bezeichner im
 üblichen Sinn, sondern Spezifikationssätze: `test_scandatum_datiert_das_foto_nicht` sagt einem

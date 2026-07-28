@@ -51,8 +51,7 @@ export type Histogram = {
 /** [minLon, minLat, maxLon, maxLat] */
 export type Bbox = [number, number, number, number];
 
-/** German field names because they go straight into the query string. */
-export type TimeRange = { von: number; bis: number };
+export type TimeRange = { from: number; to: number };
 
 export type Need = "location" | "date";
 
@@ -114,8 +113,8 @@ export function fetchPhotos(
 ): Promise<PhotoList> {
   const params = new URLSearchParams({ bbox: bboxParam(bbox), limit: String(limit) });
   if (timeRange) {
-    params.set("von", String(timeRange.von));
-    params.set("bis", String(timeRange.bis));
+    params.set("from_year", String(timeRange.from));
+    params.set("to_year", String(timeRange.to));
   }
   return getJson<PhotoList>(`/api/photos?${params}`, signal);
 }

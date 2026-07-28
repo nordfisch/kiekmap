@@ -59,7 +59,9 @@ class TestZeitfilter:
         make_photo(year=1920, precision=DatePrecision.DECADE, title="1920er Jahre")
         session.commit()
 
-        antwort = client.get("/api/photos", params={"bbox": BBOX, "von": 1925, "bis": 1930})
+        antwort = client.get(
+            "/api/photos", params={"bbox": BBOX, "from_year": 1925, "to_year": 1930}
+        )
 
         assert antwort.json()["total"] == 1, "1920er-Foto muss in 1925-1930 erscheinen"
 
@@ -67,7 +69,9 @@ class TestZeitfilter:
         make_photo(year=1920, precision=DatePrecision.DECADE)
         session.commit()
 
-        antwort = client.get("/api/photos", params={"bbox": BBOX, "von": 1950, "bis": 1960})
+        antwort = client.get(
+            "/api/photos", params={"bbox": BBOX, "from_year": 1950, "to_year": 1960}
+        )
         assert antwort.json()["total"] == 0
 
     def test_genaues_jahr_am_rand_der_auswahl(self, client: TestClient, session, make_photo):
@@ -75,7 +79,9 @@ class TestZeitfilter:
         session.commit()
 
         for von, bis in ((1932, 1932), (1900, 1932), (1932, 2000)):
-            antwort = client.get("/api/photos", params={"bbox": BBOX, "von": von, "bis": bis})
+            antwort = client.get(
+                "/api/photos", params={"bbox": BBOX, "from_year": von, "to_year": bis}
+            )
             assert antwort.json()["total"] == 1, f"{von}-{bis} muss 1932 enthalten"
 
     def test_undatiertes_foto_erscheint_in_keiner_zeitauswahl(
@@ -84,7 +90,9 @@ class TestZeitfilter:
         make_photo(year=None)
         session.commit()
 
-        mit_zeit = client.get("/api/photos", params={"bbox": BBOX, "von": 1800, "bis": 2100})
+        mit_zeit = client.get(
+            "/api/photos", params={"bbox": BBOX, "from_year": 1800, "to_year": 2100}
+        )
         assert mit_zeit.json()["total"] == 0
         # Ohne Zeitauswahl aber schon -- sonst waere es unsichtbar.
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 1
@@ -93,7 +101,9 @@ class TestZeitfilter:
         make_photo(year=1932)
         session.commit()
 
-        antwort = client.get("/api/photos", params={"bbox": BBOX, "von": 1950, "bis": 1900})
+        antwort = client.get(
+            "/api/photos", params={"bbox": BBOX, "from_year": 1950, "to_year": 1900}
+        )
         assert antwort.json()["total"] == 1
 
 
@@ -138,7 +148,7 @@ class TestHistogramm:
         session.commit()
 
         daten = client.get(
-            "/api/photos/histogram", params={"bbox": BBOX, "von": 1920, "bis": 1930}
+            "/api/photos/histogram", params={"bbox": BBOX, "from_year": 1920, "to_year": 1930}
         ).json()
 
         assert len(daten["decades"]) == 2
@@ -222,7 +232,9 @@ class TestAuslieferung:
 
     def test_importiertes_foto_erscheint_auf_der_karte(self, client: TestClient, importiertes_foto):
         """Das GPS-Testbild liegt in Holm und traegt ein Aufnahmedatum von 1975."""
-        antwort = client.get("/api/photos", params={"bbox": BBOX, "von": 1970, "bis": 1980}).json()
+        antwort = client.get(
+            "/api/photos", params={"bbox": BBOX, "from_year": 1970, "to_year": 1980}
+        ).json()
 
         assert antwort["total"] == 1
         assert antwort["photos"][0]["date_label"] == "21. Juni 1975"

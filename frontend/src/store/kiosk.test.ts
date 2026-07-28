@@ -3,22 +3,22 @@ import { describe, expect, it } from "vitest";
 import { queryTimeFilter, sameViewport } from "./kiosk";
 
 describe("queryTimeFilter", () => {
-  const fullRange = { von: 1900, bis: 1980 };
+  const fullRange = { from: 1900, to: 1980 };
 
   it("schickt keinen Filter, wenn die ganze Spanne gewählt ist", () => {
     // Sonst fielen Fotos heraus, deren Datierung über die bekannte Spanne hinausreicht --
     // ausgerechnet bei dem Besucher, der gar nichts eingestellt hat.
-    expect(queryTimeFilter({ von: 1900, bis: 1980 }, fullRange)).toBeNull();
+    expect(queryTimeFilter({ from: 1900, to: 1980 }, fullRange)).toBeNull();
   });
 
   it("schickt einen Filter, sobald eingeschränkt wurde", () => {
-    expect(queryTimeFilter({ von: 1920, bis: 1930 }, fullRange)).toEqual({ von: 1920, bis: 1930 });
-    expect(queryTimeFilter({ von: 1900, bis: 1930 }, fullRange)).toEqual({ von: 1900, bis: 1930 });
-    expect(queryTimeFilter({ von: 1920, bis: 1980 }, fullRange)).toEqual({ von: 1920, bis: 1980 });
+    expect(queryTimeFilter({ from: 1920, to: 1930 }, fullRange)).toEqual({ from: 1920, to: 1930 });
+    expect(queryTimeFilter({ from: 1900, to: 1930 }, fullRange)).toEqual({ from: 1900, to: 1930 });
+    expect(queryTimeFilter({ from: 1920, to: 1980 }, fullRange)).toEqual({ from: 1920, to: 1980 });
   });
 
   it("kommt ohne bekannte Spanne aus", () => {
-    expect(queryTimeFilter({ von: 1920, bis: 1930 }, null)).toBeNull();
+    expect(queryTimeFilter({ from: 1920, to: 1930 }, null)).toBeNull();
     expect(queryTimeFilter(null, fullRange)).toBeNull();
   });
 });

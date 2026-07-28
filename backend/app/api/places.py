@@ -22,10 +22,10 @@ class PlaceOut(BaseModel):
     kind: str
 
 
-@router.get("", response_model=list[PlaceOut], summary="Orte im Ortsverzeichnis suchen")
+@router.get("", response_model=list[PlaceOut], summary="Search the gazetteer")
 def search_places(
     session: Annotated[Session, Depends(get_session)],
-    q: Annotated[str, Query(description="Anfang oder Teil eines Namens", min_length=0)] = "",
+    q: Annotated[str, Query(description="Start of a name, or part of one", min_length=0)] = "",
 ) -> list[PlaceOut]:
     """Search streets, districts, buildings, waters and fields of the village.
 

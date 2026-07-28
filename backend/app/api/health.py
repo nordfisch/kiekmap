@@ -14,7 +14,7 @@ from app.db import SessionLocal
 router = APIRouter(tags=["system"])
 
 
-@router.get("/health", summary="Ist das Backend bereit?")
+@router.get("/health", summary="Is the backend ready?")
 def health(response: Response) -> dict[str, str]:
     try:
         with SessionLocal() as session:

@@ -56,9 +56,24 @@ Der Grund ist nicht Konvention um ihrer selbst willen: `def zeitraum(...) -> Dat
 an jeder Grenze zwischen eigenem Code und einer Bibliothek einen Bruch. Und Coding-Agents wie
 spätere Mitstreiter stolpern über gemischten Code messbar häufiger.
 
-Deutsch bleibt für: Oberflächentexte (`frontend/src/texte/de.ts`), Fehlermeldungen an Besucher und
-Kuratoren, Dokumentation, Commit-Nachrichten. Deutsche Beispiele in englischen Kommentaren sind
-erwünscht, wo sie den Fall erklären.
+Deutsch bleibt für: Oberflächentexte (`frontend/src/texte/de.ts`), Meldungen an Besucher und
+Kuratoren, CLI-Ausgaben, Dokumentation, Commit-Nachrichten. Deutsche Beispiele in englischen
+Kommentaren sind erwünscht, wo sie den Fall erklären.
+
+**Für Meldungen gilt eine Faustregel:** *Kann sie im Kiosk oder im Admin-Bereich erscheinen? Dann
+Deutsch, sonst Englisch.*
+
+| Meldung | Wer sieht sie | Sprache |
+|---|---|---|
+| „Dieses Foto hat inzwischen schon eine Angabe bekommen." | Besucher am Kiosk | Deutsch |
+| „Kein Foto mit der Nummer 42" | Besucher im Foto-Overlay | Deutsch |
+| „Aufgenommen, es fehlt noch: Ort und Jahr" | Kurator im Import-Protokoll | Deutsch |
+| `bbox is inverted: min must be smaller than max` | nur wer die API selbst aufruft | Englisch |
+| `No thumbnail size 999; available sizes are [240, 1200]` | dito | Englisch |
+| OpenAPI-`summary`/`description` unter `/api/docs` | Entwickler, neben `open_count` & Co. | Englisch |
+
+Die CLI ist die Ausnahme von der Ausnahme: `python -m app.cli import` führt beim Erstbefüllen auch
+das Museumsteam aus, deshalb bleiben ihre Ausgaben deutsch.
 
 **Testnamen sind die Ausnahme und bleiben deutsch.** Sie sind keine Bezeichner im üblichen Sinn,
 sondern Spezifikationssätze — `test_scandatum_datiert_das_foto_nicht` sagt sofort, welche Zusage

@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="Photomap",
-    description="Bilddatenbank fuer historische Ortsfotos im Heimatmuseum",
+    description="Photo database for historical village photographs in a local museum",
     version=__version__,
     lifespan=lifespan,
     # Same prefix as in the nginx proxy, so development and production share the same paths.

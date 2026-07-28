@@ -40,8 +40,8 @@ und einen Knopfdruck.
 | 6 | Zeitschieber mit Jahrzehnt-Histogramm | ✅ |
 | 7 | „Hilf mit": Verortung, Datierung, Ortssuche | ✅ |
 | 7.5 | Sprachregelung, Textmodul, Entwicklerdoku | ✅ |
-| **7.6** | **Deutsche Texte im Backend nach Konvention ordnen** | **offen** |
-| 8 | Admin-Bereich mit Stapel-Upload | offen |
+| 7.6 | Deutsche Texte im Backend nach Konvention ordnen | ✅ |
+| **8** | **Admin-Bereich mit Stapel-Upload** | **als Nächstes** |
 | 9 | Sicherung und Wiederherstellung auf USB | offen |
 | 10 | Kiosk-Deployment auf dem Pi | offen |
 | 11 | Ausbau nach Bedarf | offen |
@@ -50,99 +50,28 @@ Was in den fertigen Stufen entstanden ist, steht im [CHANGELOG](../CHANGELOG.md)
 
 ---
 
-## Stufe 7.6 — Deutsche Texte im Backend nach Konvention ordnen
+## Stufe 7.6 — Deutsche Texte im Backend nach Konvention ordnen ✅
 
-Eine Bestandsaufnahme nach der Sprachumstellung. Die meisten deutschen Texte im Backend sind
-**konform** — die Konvention sagt ausdrücklich, dass Fehlermeldungen an Besucher und Kuratoren
-deutsch bleiben. Es gibt aber einen klaren Verstoß und drei Lücken in der Regel selbst.
+Bestandsaufnahme nach der Sprachumstellung. Umgesetzt:
 
-### Klarer Verstoß: deutsche Query-Parameter
+- **Query-Parameter englisch.** `?von=…&bis=…` heißt jetzt `?from_year=…&to_year=…` (nicht `from`,
+  das ist in Python reserviert). Zieht sich durch bis in `TimeRange = { from, to }` im Frontend.
+- **Faustregel eingeführt:** *Kann die Meldung im Kiosk oder im Admin-Bereich erscheinen? Dann
+  Deutsch, sonst Englisch.* Damit wurden die `bbox`-Parsefehler und der Thumbnail-Größenfehler
+  englisch, während 404, 409 und die Regionsprüfung deutsch blieben — sie erscheinen im
+  Foto-Overlay bzw. im „Hilf mit"-Bereich.
+- **OpenAPI-Beschreibungen englisch.** Sie stehen *in* der API und werden neben Feldnamen wie
+  `open_count` gelesen.
+- **CLI-Ausgaben bleiben deutsch.** Den Erstimport führt auch das Museumsteam aus.
 
-```
-GET /api/photos?bbox=…&von=1925&bis=1930
-```
+Die Konventionstabellen in [CLAUDE.md](../CLAUDE.md) und [entwicklung.md](entwicklung.md) nennen die
+Regel; ein Kommentar in `app/api/photos.py` erklärt sie an der Stelle, wo beide Sorten Meldungen
+nebeneinander stehen.
 
-Die Konvention sagt „API-Pfade und JSON-Felder: Englisch". `von` und `bis` sind deutsch — und
-ziehen sich bis ins Frontend durch (`TimeRange = { von, bis }`).
-
-Umzubenennen auf `from_year` / `to_year` (nicht `from`, das ist in Python reserviert):
-
-| Datei | Was |
-|---|---|
-| `backend/app/api/photos.py` | `Viewport.__init__`-Parameter und Query-Namen |
-| `backend/app/api/contribute.py` | keine Änderung nötig |
-| `frontend/src/api/client.ts` | `TimeRange`-Felder und `fetchPhotos` |
-| `frontend/src/store/kiosk.ts` | `queryTimeFilter`, `setTimeRange`, Vergleiche |
-| `frontend/src/kiosk/TimeSlider.tsx` | Zugriffe auf `timeRange.von`/`.bis` |
-| Tests beider Seiten | Parameter in den Aufrufen |
-
-Rein mechanisch, durch 104 Tests abgesichert.
-
-### Konform — bleibt deutsch
-
-Nichts zu tun, hier nur zur Klarstellung:
-
-| Was | Beispiel | Wer liest es |
-|---|---|---|
-| Fehler an Besucher | „Dieses Foto hat inzwischen schon eine Angabe bekommen." | Besucher am Kiosk |
-| Fehler an Besucher | „Dieser Ort liegt ausserhalb der Karte." | Besucher am Kiosk |
-| Import-Protokoll | „Aufgenommen, es fehlt noch: Ort und Jahr" | Kurator im Admin-Bereich |
-| Import-Protokoll | „Inhaltsgleich mit Foto 12 (Kirchweih.jpg)" | Kurator im Admin-Bereich |
-| Ordnernamen | `_erledigt`, `_problem` | Museumsteam im Dateimanager |
-| Datumsbeschriftung | „1920er", „Juni 1955", „Jahr unbekannt" | Besucher am Kiosk |
-
-Die Datumsbeschriftung ist inhaltlich richtig, sitzt aber architektonisch auf der falschen Seite —
-siehe [adaption.md](adaption.md), Abschnitt „Andere Sprache".
-
-### Drei Lücken in der Konvention
-
-Hier deckt die Regel den Fall nicht ab. Vorschlag zur Ergänzung, **zu entscheiden bevor umgesetzt
-wird**:
-
-**1. Entwicklerseitige HTTP-Fehler.** Diese Meldungen erreichen nie einen Besucher — das Frontend
-schickt immer eine gültige `bbox`. Sie erscheinen nur beim Arbeiten gegen die API:
-
-```
-"bbox braucht vier durch Komma getrennte Zahlen"
-"bbox enthaelt keine Zahlen"
-"bbox ist verdreht: min muss kleiner als max sein"
-"Groesse 999 gibt es nicht, verfuegbar sind [240, 1200]"
-```
-
-*Vorschlag:* Englisch. Sie gehören zur API-Oberfläche, nicht zur Museumsoberfläche. Faustregel für
-die Konvention: **Kann diese Meldung im Kiosk oder im Admin-Bereich erscheinen? Dann deutsch, sonst
-englisch.**
-
-**2. OpenAPI-Beschreibungen** (`summary=`, `description=`). Sie erscheinen unter `/api/docs`,
-gelesen von Entwicklern:
-
-```python
-summary="Fotos im Kartenausschnitt und Zeitraum"
-description="Bereits gezeigte Nummern, durch Komma getrennt"
-```
-
-*Vorschlag:* Englisch, konsequent zur englischen API. Gegenargument: Es ist Dokumentation, und die
-ist laut Konvention deutsch. Der Unterschied zu `docs/`: Diese Texte stehen *in* der API und werden
-zusammen mit Feldnamen wie `open_count` gelesen — ein Mischmasch fällt dort mehr auf als in einer
-eigenständigen Datei.
-
-**3. CLI-Ausgaben** (`python -m app.cli import|scan|stats|places`):
-
-```
-8 Dateien angesehen:
-  aufgenommen  6
-  Dubletten    0
-```
-
-*Vorschlag:* Deutsch behalten. Diese Kommandos führt das Museumsteam beim Erstbefüllen aus, nicht
-nur Entwickler — und die Zusammenfassung ist genau das, was jemand nach dem Import wissen will.
-
-### Fertig, wenn
-
-- `von`/`bis` heißen in API, Frontend und Tests `from_year`/`to_year`
-- die Konventionstabelle in [CLAUDE.md](../CLAUDE.md) und [entwicklung.md](entwicklung.md) die drei
-  Grenzfälle benennt
-- `make lint && make test` grün, der Kiosk im Browser unverändert bedienbar
+Nicht angefasst und weiterhin richtig so: Fehlermeldungen an Besucher und Kuratoren, das
+Import-Protokoll, die Ordnernamen `_erledigt`/`_problem` und die Datumsbeschriftungen. Letztere
+sitzen architektonisch auf der falschen Seite für Mehrsprachigkeit — siehe
+[adaption.md](adaption.md).
 
 ---
 

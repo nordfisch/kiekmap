@@ -84,7 +84,16 @@ export function MapView({ region }: { region: Region }) {
       ] satisfies Bbox);
     }
 
+    // Guard against a cleanup that has already run.
+    //
+    // "load" fires asynchronously. If the effect is torn down before then -- React's StrictMode
+    // does exactly that on every mount, and a re-render of the region would too -- the callback
+    // would hand a removed map to the layers below. They then add their markers to a dead
+    // instance: the thumbnails are even fetched, but nothing ever appears on screen.
+    let disposed = false;
+
     instance.on("load", () => {
+      if (disposed) return;
       reportViewport();
       setMap(instance);
     });
@@ -93,6 +102,7 @@ export function MapView({ region }: { region: Region }) {
     instance.on("moveend", reportViewport);
 
     return () => {
+      disposed = true;
       instance.remove();
       setMap(null);
     };

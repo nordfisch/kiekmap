@@ -48,7 +48,7 @@ export function TimeSlider() {
 
   const bounds = useMemo(() => {
     if (!fullRange) return null;
-    return { min: roundToDecade(fullRange.von, "down"), max: roundToDecade(fullRange.bis, "up") };
+    return { min: roundToDecade(fullRange.from, "down"), max: roundToDecade(fullRange.to, "up") };
   }, [fullRange]);
 
   const yearToFraction = useCallback(
@@ -74,9 +74,9 @@ export function TimeSlider() {
       if (!timeRange || !bounds) return;
       const year = positionToYear(clientX);
       if (handle === "start") {
-        setTimeRange({ von: Math.min(year, timeRange.bis), bis: timeRange.bis });
+        setTimeRange({ from: Math.min(year, timeRange.to), to: timeRange.to });
       } else {
-        setTimeRange({ von: timeRange.von, bis: Math.max(year, timeRange.von) });
+        setTimeRange({ from: timeRange.from, to: Math.max(year, timeRange.from) });
       }
     },
     [timeRange, bounds, positionToYear, setTimeRange],
@@ -109,7 +109,7 @@ export function TimeSlider() {
     if (!timeRange || draggingRef.current) return;
     const year = positionToYear(event.clientX);
     const handle: Handle =
-      Math.abs(year - timeRange.von) <= Math.abs(year - timeRange.bis) ? "start" : "end";
+      Math.abs(year - timeRange.from) <= Math.abs(year - timeRange.to) ? "start" : "end";
     moveHandle(handle, event.clientX);
   }
 
@@ -122,14 +122,14 @@ export function TimeSlider() {
   }
 
   const tallest = Math.max(1, ...histogram.decades.map((d) => d.count));
-  const startFraction = yearToFraction(timeRange.von);
-  const endFraction = yearToFraction(timeRange.bis);
+  const startFraction = yearToFraction(timeRange.from);
+  const endFraction = yearToFraction(timeRange.to);
 
   return (
     <div className="timeline">
       <div className="timeline__header">
         <span className="timeline__selection">
-          {timeRange.von} <span className="timeline__to">{t.timeline.to}</span> {timeRange.bis}
+          {timeRange.from} <span className="timeline__to">{t.timeline.to}</span> {timeRange.to}
         </span>
         {histogram.undated > 0 && (
           <span className="timeline__undated">{t.timeline.undated(histogram.undated)}</span>
@@ -149,7 +149,7 @@ export function TimeSlider() {
           {histogram.decades.map((bar) => {
             const fraction = yearToFraction(bar.decade);
             const width = 10 / (bounds.max - bounds.min);
-            const inRange = bar.decade + 9 >= timeRange.von && bar.decade <= timeRange.bis;
+            const inRange = bar.decade + 9 >= timeRange.from && bar.decade <= timeRange.to;
             return (
               <div
                 key={bar.decade}
@@ -187,21 +187,21 @@ export function TimeSlider() {
             aria-label={handle === "start" ? t.timeline.startHandle : t.timeline.endHandle}
             aria-valuemin={bounds.min}
             aria-valuemax={bounds.max}
-            aria-valuenow={handle === "start" ? timeRange.von : timeRange.bis}
+            aria-valuenow={handle === "start" ? timeRange.from : timeRange.to}
             onKeyDown={(e) => {
               const step = e.key === "ArrowLeft" ? -1 : e.key === "ArrowRight" ? 1 : 0;
               if (!step) return;
               e.preventDefault();
-              const next = (handle === "start" ? timeRange.von : timeRange.bis) + step;
+              const next = (handle === "start" ? timeRange.from : timeRange.to) + step;
               setTimeRange(
                 handle === "start"
                   ? {
-                      von: Math.max(bounds.min, Math.min(next, timeRange.bis)),
-                      bis: timeRange.bis,
+                      from: Math.max(bounds.min, Math.min(next, timeRange.to)),
+                      to: timeRange.to,
                     }
                   : {
-                      von: timeRange.von,
-                      bis: Math.min(bounds.max, Math.max(next, timeRange.von)),
+                      from: timeRange.from,
+                      to: Math.min(bounds.max, Math.max(next, timeRange.from)),
                     },
               );
             }}

@@ -28,7 +28,13 @@ CACHE_IMMUTABLE = "public, max-age=31536000, immutable"
 
 
 class Viewport:
-    """Map viewport and time range as they arrive in the query string."""
+    """Map viewport and time range as they arrive in the query string.
+
+    Note on the language of error messages, here and elsewhere: the rule is "could this reach
+    the kiosk or the admin area? then German, otherwise English". The bbox errors below can
+    only ever be seen by someone working against the API -- the frontend always sends a valid
+    one. The 404 further down, by contrast, shows up in the visitor's photo overlay.
+    """
 
     def __init__(
         self,
@@ -39,23 +45,27 @@ class Viewport:
                 examples=["9.60,53.57,9.75,53.67"],
             ),
         ],
-        von: Annotated[int | None, Query(ge=1800, le=2100, description="Jahr ab")] = None,
-        bis: Annotated[int | None, Query(ge=1800, le=2100, description="Jahr bis")] = None,
+        from_year: Annotated[
+            int | None, Query(ge=1800, le=2100, description="Earliest year to include")
+        ] = None,
+        to_year: Annotated[
+            int | None, Query(ge=1800, le=2100, description="Latest year to include")
+        ] = None,
     ) -> None:
         parts = bbox.split(",")
         if len(parts) != 4:
-            raise HTTPException(422, "bbox braucht vier durch Komma getrennte Zahlen")
+            raise HTTPException(422, "bbox needs four comma-separated numbers")
         try:
             self.min_lon, self.min_lat, self.max_lon, self.max_lat = (float(p) for p in parts)
         except ValueError:
-            raise HTTPException(422, "bbox enthaelt keine Zahlen") from None
+            raise HTTPException(422, "bbox does not contain numbers") from None
 
         if self.min_lon > self.max_lon or self.min_lat > self.max_lat:
-            raise HTTPException(422, "bbox ist verdreht: min muss kleiner als max sein")
+            raise HTTPException(422, "bbox is inverted: min must be smaller than max")
 
-        if von is not None and bis is not None and von > bis:
-            von, bis = bis, von
-        self.from_year, self.to_year = von, bis
+        if from_year is not None and to_year is not None and from_year > to_year:
+            from_year, to_year = to_year, from_year
+        self.from_year, self.to_year = from_year, to_year
 
     @property
     def time_range(self) -> tuple[date, date] | None:
@@ -87,7 +97,7 @@ def _viewport_filters(viewport: Viewport):
     return filters
 
 
-@router.get("", response_model=PhotoList, summary="Fotos im Kartenausschnitt und Zeitraum")
+@router.get("", response_model=PhotoList, summary="Photos within a viewport and time range")
 def list_photos(
     viewport: Annotated[Viewport, Depends()],
     session: Annotated[Session, Depends(get_session)],
@@ -107,7 +117,9 @@ def list_photos(
     )
 
 
-@router.get("/histogram", response_model=Histogram, summary="Fotos je Jahrzehnt im Ausschnitt")
+@router.get(
+    "/histogram", response_model=Histogram, summary="Photo count per decade in the viewport"
+)
 def histogram(
     viewport: Annotated[Viewport, Depends()],
     session: Annotated[Session, Depends(get_session)],
@@ -170,12 +182,12 @@ def _get_photo(session: Session, photo_id: int) -> Photo:
     return photo
 
 
-@router.get("/{photo_id}", response_model=PhotoDetail, summary="Alle Angaben zu einem Foto")
+@router.get("/{photo_id}", response_model=PhotoDetail, summary="Everything known about one photo")
 def detail(photo_id: int, session: Annotated[Session, Depends(get_session)]) -> PhotoDetail:
     return PhotoDetail.from_photo(_get_photo(session, photo_id))
 
 
-@router.get("/{photo_id}/thumb", summary="Vorschaubild")
+@router.get("/{photo_id}/thumb", summary="Thumbnail")
 def thumbnail(
     photo_id: int,
     session: Annotated[Session, Depends(get_session)],
@@ -184,7 +196,7 @@ def thumbnail(
 ) -> Response:
     if size not in THUMBNAIL_SIZES:
         raise HTTPException(
-            422, f"Groesse {size} gibt es nicht, verfuegbar sind {list(THUMBNAIL_SIZES)}"
+            422, f"No thumbnail size {size}; available sizes are {list(THUMBNAIL_SIZES)}"
         )
 
     photo = _get_photo(session, photo_id)
@@ -197,7 +209,7 @@ def thumbnail(
     return FileResponse(path, media_type="image/webp", headers={"Cache-Control": CACHE_IMMUTABLE})
 
 
-@router.get("/{photo_id}/image", summary="Foto in voller Groesse")
+@router.get("/{photo_id}/image", summary="Photo at full size")
 def image(
     photo_id: int,
     session: Annotated[Session, Depends(get_session)],
@@ -213,6 +225,6 @@ def image(
     return FileResponse(path, media_type=photo.mime, headers={"Cache-Control": CACHE_IMMUTABLE})
 
 
-@router.get("/tags/alle", response_model=list[str], summary="Alle vergebenen Schlagwoerter")
+@router.get("/tags/alle", response_model=list[str], summary="All tags in use")
 def tags(session: Annotated[Session, Depends(get_session)]) -> list[str]:
     return list(session.scalars(select(Tag.name).order_by(Tag.name)).all())

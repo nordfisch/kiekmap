@@ -35,13 +35,11 @@ def _missing_filter(need: Need):
     return Photo.lat.is_(None) if need == "location" else Photo.date_from.is_(None)
 
 
-@router.get("/next", response_model=TaskResponse, summary="Ein Foto, dem etwas fehlt")
+@router.get("/next", response_model=TaskResponse, summary="A photo that is missing something")
 def next_task(
     session: Annotated[Session, Depends(get_session)],
-    need: Annotated[Need, Query(alias="need", description="What should be missing")] = "location",
-    exclude: Annotated[
-        str, Query(description="Bereits gezeigte Nummern, durch Komma getrennt")
-    ] = "",
+    need: Annotated[Need, Query(description="Which field should be missing")] = "location",
+    exclude: Annotated[str, Query(description="Ids already shown, comma-separated")] = "",
 ) -> TaskResponse:
     """Return a random photo that is missing exactly this field.
 
@@ -113,7 +111,7 @@ def _log_change(
     )
 
 
-@router.post("/{photo_id}/location", response_model=PhotoDetail, summary="Ort ergänzen")
+@router.post("/{photo_id}/location", response_model=PhotoDetail, summary="Add a location")
 def add_location(
     photo_id: int,
     contribution: LocationContribution,
@@ -154,7 +152,7 @@ def add_location(
     return PhotoDetail.from_photo(photo)
 
 
-@router.post("/{photo_id}/date", response_model=PhotoDetail, summary="Jahr ergänzen")
+@router.post("/{photo_id}/date", response_model=PhotoDetail, summary="Add a year")
 def add_date(
     photo_id: int,
     contribution: DateContribution,
