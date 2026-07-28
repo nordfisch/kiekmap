@@ -14,4 +14,17 @@ Geplanter Inhalt:
 - SD-Karte klonen als Komplettsicherung des Geräts
 - Fehlersuche: Container-Logs, Kiosk-Dienst, Display, Touch, USB-Automount
 
+Schon jetzt gültig — **die PIN für den Admin-Bereich einrichten**:
+
+```bash
+cd backend && .venv/bin/python -m app.cli pin
+```
+
+Der Befehl fragt die PIN zweimal ab und gibt die Zeile aus, die in die `.env` gehört. Die PIN
+selbst wird nirgends gespeichert; vergessen heißt neu setzen. Danach den Dienst neu starten.
+
+Ist keine PIN eingerichtet, sagt das Zahlenfeld genau das — es lehnt nicht stumm jede Eingabe ab.
+Nach fünf Fehlversuchen sperrt es für eine Minute. Die Sitzung endet nach 30 Minuten ohne
+Bedienung; jede Aktion schiebt sie hinaus, und ein Neustart des Dienstes beendet jede Sitzung.
+
 Das Gerät für einen anderen Ort einrichten: [adaption.md](adaption.md).

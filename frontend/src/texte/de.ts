@@ -80,4 +80,143 @@ export const t = {
     regionMissing: (status: number) =>
       `Die Region konnte nicht geladen werden (HTTP ${status}). Wurde "make tiles" ausgeführt?`,
   },
+
+  /**
+   * Der Admin-Bereich.
+   *
+   * Er wird ein- bis zweimal im Jahr von Ehrenamtlichen benutzt. Deshalb steht hier überall
+   * Klartext statt Kürze: „Foto ist versteckt" ist länger als „ausgeblendet", aber niemand muss
+   * überlegen, was gemeint ist.
+   */
+  admin: {
+    logoLabel: (place: string) => `Wappen von ${place}`,
+    cornerHint: "Verwaltung öffnen",
+
+    pin: {
+      title: "PIN eingeben",
+      hint: "Für Mitarbeiterinnen und Mitarbeiter des Museums.",
+      delete: "Löschen",
+      submit: "Weiter",
+      cancel: "Zurück zur Karte",
+      wrong: "Die PIN stimmt nicht.",
+    },
+
+    shell: {
+      title: "Verwaltung",
+      leave: "Verwaltung beenden",
+      remaining: (minutes: number) =>
+        minutes > 1 ? `Noch ${minutes} Minuten angemeldet` : "Anmeldung läuft gleich ab",
+      sections: {
+        overview: "Übersicht",
+        photos: "Fotos",
+        upload: "Hochladen",
+        changes: "Beiträge",
+        imports: "Import",
+      },
+    },
+
+    overview: {
+      total: "Fotos insgesamt",
+      onMap: "Auf der Karte zu sehen",
+      withoutLocation: "Ohne Ort",
+      withoutDate: "Ohne Jahr",
+      hidden: "Versteckt",
+      visitorChanges: "Beiträge von Besuchern",
+      lastImport: "Zuletzt aufgenommen",
+      never: "noch nichts",
+      toIncomplete: "Unvollständige ansehen",
+    },
+
+    photos: {
+      searchLabel: "Suchen in Titel, Ort und Dateiname",
+      searchPlaceholder: "z. B. Kirchweih",
+      filterAll: "Alle",
+      filterIncomplete: "Unvollständig",
+      filterHidden: "Versteckt",
+      found: (shown: number, total: number) =>
+        shown === total ? `${total} Fotos` : `${shown} von ${total} Fotos`,
+      none: "Keine Fotos gefunden.",
+      untitled: "Ohne Titel",
+      missingLocation: "Ort fehlt",
+      missingDate: "Jahr fehlt",
+      hidden: "Versteckt",
+      edit: "Bearbeiten",
+    },
+
+    editor: {
+      title: "Titel",
+      description: "Beschreibung",
+      year: "Jahr",
+      yearHint: "Leer lassen, wenn das Jahr unbekannt ist.",
+      precisionYear: "genaues Jahr",
+      precisionDecade: "ganzes Jahrzehnt",
+      place: "Ort",
+      placeSearch: "Straße oder Ort suchen",
+      coordinates: "Koordinaten",
+      clearLocation: "Ort entfernen",
+      tags: "Schlagwörter",
+      tagsHint: "Mit Komma getrennt.",
+      visible: "Auf der Karte zeigen",
+      hidden: "Verstecken",
+      hiddenHint: "Versteckte Fotos bleiben erhalten, sind aber für Besucher nicht zu sehen.",
+      fileInfo: (filename: string, width: number, height: number) =>
+        `${filename} · ${width} × ${height} Pixel`,
+      scanDate: (date: string) => `Aufnahmedatum der Datei: ${date} (datiert das Foto nicht)`,
+      save: "Speichern",
+      cancel: "Abbrechen",
+      saved: "Gespeichert.",
+    },
+
+    upload: {
+      title: "Fotos hochladen",
+      step1: "Gilt für alle Bilder dieses Stapels",
+      step1Hint:
+        "Beides ist freiwillig und lässt sich hinterher je Bild ändern. Bei vierzig Bildern " +
+        "derselben Kirchweih spart es vierzig Eingaben.",
+      choose: "Bilder auswählen",
+      chosen: (count: number) => `${count} ${count === 1 ? "Bild" : "Bilder"} ausgewählt`,
+      start: "Hochladen",
+      progress: (done: number, total: number) => `Bild ${done} von ${total}`,
+      summary: (imported: number, duplicates: number, rejected: number) =>
+        [
+          `${imported} aufgenommen`,
+          duplicates > 0 ? `${duplicates} ${duplicates === 1 ? "war" : "waren"} schon da` : null,
+          rejected > 0 ? `${rejected} abgewiesen` : null,
+        ]
+          .filter(Boolean)
+          .join(", "),
+      tableHint:
+        "Die Bilder sind bereits gespeichert. Was hier liegen bleibt, taucht später im " +
+        "„Hilf mit“-Bereich auf.",
+      apply: "Übernehmen",
+      applyAll: "Alle übernehmen",
+      done: "Fertig",
+      more: "Weitere hochladen",
+      allApplied: "Alle Bilder sind bearbeitet.",
+    },
+
+    changes: {
+      title: "Was Besucher beigetragen haben",
+      none: "Zurzeit gibt es nichts zu sichten.",
+      showReverted: "Zurückgenommene mit anzeigen",
+      fieldLocation: "Ort",
+      fieldDate: "Jahr",
+      revert: "Zurücknehmen",
+      reverted: "Zurückgenommen",
+      locked: "Von Hand bearbeitet",
+      revertHint: "Das Foto wird danach im „Hilf mit“-Bereich erneut gezeigt.",
+    },
+
+    imports: {
+      title: "Import-Protokoll",
+      none: "Noch nichts aufgenommen.",
+      all: "Alle",
+      imported: "Aufgenommen",
+      duplicate: "Dublette",
+      rejected: "Abgewiesen",
+    },
+
+    loading: "Wird geladen …",
+    expired: "Die Anmeldung ist abgelaufen.",
+  },
 } as const;

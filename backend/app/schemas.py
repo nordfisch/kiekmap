@@ -4,7 +4,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models import DatePrecision, Photo
+from app.models import DatePrecision, ImportLog, Photo, PhotoStatus
 from app.services.dates import format_label
 
 
@@ -74,6 +74,7 @@ class PhotoDetail(BaseModel):
     tags: list[str]
     needs_location: bool
     needs_date: bool
+    status: str
 
     image_url: str
     thumb_url: str
@@ -104,6 +105,7 @@ class PhotoDetail(BaseModel):
             tags=[tag.name for tag in photo.tags],
             needs_location=photo.needs_location,
             needs_date=photo.needs_date,
+            status=photo.status,
             image_url=f"/api/photos/{photo.id}/image",
             thumb_url=f"/api/photos/{photo.id}/thumb?size=1200",
         )
@@ -170,3 +172,150 @@ class TaskResponse(BaseModel):
     open_count: int
     #: None means nothing is missing any more. A pleasant state.
     photo: PhotoDetail | None
+
+
+# --- admin area -------------------------------------------------------------
+
+
+class LoginRequest(BaseModel):
+    pin: str = Field(min_length=1, max_length=32)
+
+
+class LoginResponse(BaseModel):
+    token: str
+    #: Remaining seconds rather than a point in time -- the Pi's clock is not to be trusted.
+    #: See app/services/auth.py.
+    expires_in_s: int
+
+
+class LocationUpdate(BaseModel):
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    place_name: str | None = Field(default=None, max_length=300)
+    accuracy_m: int | None = Field(default=None, ge=0, le=100_000)
+
+
+class PhotoUpdate(BaseModel):
+    """What a curator may change about one photo.
+
+    Every field is optional in two different ways, and the difference matters: a field that is
+    **absent** stays as it is, a field that is explicitly **null** is cleared. Pydantic keeps the
+    two apart in ``model_fields_set``, which is why the endpoint reads ``exclude_unset``.
+
+    Without that distinction the editor could only ever add, never remove a wrong dating.
+    """
+
+    title: str | None = Field(default=None, max_length=300)
+    description: str | None = None
+    date: DateInput | None = None
+    location: LocationUpdate | None = None
+    tags: list[str] | None = None
+    #: Hidden photos disappear from the map and the "Hilf mit" panel, but are not deleted.
+    status: PhotoStatus | None = None
+
+
+class PhotoAdminItem(BaseModel):
+    """One row of the photo list in the admin area."""
+
+    id: int
+    title: str | None
+    date_label: str
+    place_name: str | None
+    thumb_url: str
+    needs_location: bool
+    needs_date: bool
+    status: str
+    original_filename: str
+    imported_at: datetime
+
+    @classmethod
+    def from_photo(cls, photo: Photo) -> "PhotoAdminItem":
+        return cls(
+            id=photo.id,
+            title=photo.title,
+            date_label=format_label(photo.date_from, photo.date_to, photo.date_precision),
+            place_name=photo.place_name,
+            thumb_url=f"/api/photos/{photo.id}/thumb?size=240",
+            needs_location=photo.needs_location,
+            needs_date=photo.needs_date,
+            status=photo.status,
+            original_filename=photo.original_filename,
+            imported_at=photo.imported_at,
+        )
+
+
+class PhotoAdminList(BaseModel):
+    photos: list[PhotoAdminItem]
+    #: Total matching the filter, not just the page returned.
+    total: int
+
+
+class ChangeItem(BaseModel):
+    """One visitor contribution, as the curator sees it."""
+
+    id: int
+    photo_id: int
+    photo_title: str | None
+    thumb_url: str
+    field: str
+    old_value: str | None
+    new_value: str | None
+    source: str
+    created_at: datetime
+    reverted_at: datetime | None
+    #: False when the field has since been curated -- reverting would then destroy that work.
+    revertable: bool
+
+
+class ImportLogItem(BaseModel):
+    id: int
+    #: Just the file name: the full path leads into a container or a temp folder and helps nobody.
+    filename: str
+    result: str
+    message: str | None
+    photo_id: int | None
+    created_at: datetime
+
+    @classmethod
+    def from_entry(cls, entry: ImportLog) -> "ImportLogItem":
+        return cls(
+            id=entry.id,
+            filename=entry.path.rsplit("/", 1)[-1],
+            result=entry.result,
+            message=entry.message,
+            photo_id=entry.photo_id,
+            created_at=entry.created_at,
+        )
+
+
+class Overview(BaseModel):
+    """The numbers on the admin start page."""
+
+    total: int
+    #: Photos with both a place and a date -- only those appear on the map.
+    on_map: int
+    without_location: int
+    without_date: int
+    hidden: int
+    #: Visitor contributions not yet reverted. Something to look through, not a problem.
+    visitor_changes: int
+    last_import_at: datetime | None
+
+
+class UploadItem(BaseModel):
+    """What became of one uploaded file."""
+
+    filename: str
+    result: str
+    #: German -- this text goes straight into the admin's upload list.
+    message: str
+    #: Set for imported files and for duplicates; the duplicate points at the photo already there.
+    photo: PhotoDetail | None
+
+
+class UploadResult(BaseModel):
+    items: list[UploadItem]
+    imported: int
+    #: Named rather than silently skipped: "3 waren schon da" is information, silence is not.
+    duplicates: int
+    rejected: int

@@ -70,6 +70,50 @@ def client(session: Session) -> Iterator[TestClient]:
         yield test_client
 
 
+#: PIN of the test device. Any four digits will do -- what matters is that it is not the hash.
+TEST_PIN = "4711"
+
+
+@pytest.fixture(autouse=True)
+def reset_admin_auth() -> Iterator[None]:
+    """Sessions and the failure counter live in the process, not in the database.
+
+    Without this the lockout from one test would still be running in the next -- and a test that
+    logs in five times wrongly would take the whole suite down with it.
+    """
+    from app.services import auth
+
+    auth.sessions.clear()
+    auth.attempts.reset()
+    yield
+    auth.sessions.clear()
+    auth.attempts.reset()
+
+
+@pytest.fixture
+def admin_pin(settings, monkeypatch: pytest.MonkeyPatch) -> str:
+    """Set up a PIN for the device -- with far fewer rounds than in production.
+
+    The real 200 000 rounds cost about a tenth of a second per sign-in, on purpose. This suite
+    signs in dozens of times. The round count is stored inside the hash, so verification follows
+    along by itself.
+    """
+    from app.services import auth
+
+    monkeypatch.setattr(auth, "ROUNDS", 1_000)
+    settings.admin_pin_hash = auth.hash_pin(TEST_PIN)
+    return TEST_PIN
+
+
+@pytest.fixture
+def admin_client(client: TestClient, admin_pin: str) -> TestClient:
+    """A signed-in client. The token goes into the header of every following request."""
+    response = client.post("/api/admin/login", json={"pin": admin_pin})
+    assert response.status_code == 200, response.text
+    client.headers["X-Admin-Token"] = response.json()["token"]
+    return client
+
+
 @pytest.fixture
 def make_photo(session: Session):
     """Create a photo row without files -- for tests that only care about queries.

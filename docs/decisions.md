@@ -158,14 +158,17 @@ begrüßt das Museum seine Besucher morgens für ein paar Sekunden mit einer Feh
 
 ---
 
-## 7. Admin: Ecke lang drücken, dann PIN
+## 7. Admin: aufs Wappen tippen, dann PIN
 
-**Entscheidung.** 3 Sekunden Druck auf die untere linke Bildschirmecke öffnet ein Zahlenfeld mit
-großen Tasten. Danach der Admin-Bereich, mit ablaufendem Token.
+**Entscheidung.** Ein Klick auf das Ortswappen über der linken oberen Ecke der Karte öffnet ein
+Zahlenfeld mit großen Tasten. Danach der Admin-Bereich, mit ablaufender Sitzung.
 
-**Warum versteckt statt sichtbarem Knopf?** Ein sichtbares Zahnrad wird von Besuchern garantiert
-angetippt; die Anmeldemaske gehört nicht in eine Museumsausstellung. Für Eingeweihte dauert der
-Weg zwei Sekunden.
+**Warum sichtbar statt versteckt?** *Geändert in Stufe 8.* Ursprünglich war ein drei Sekunden
+langer Druck auf die untere linke Bildschirmecke vorgesehen — unsichtbar für Besucher. Dagegen
+sprach beim Bauen zweierlei: Das Schloss ist die PIN, nicht das Versteck; und eine unsichtbare
+Geste ist genau das, was Ehrenamtliche vergessen, die zweimal im Jahr hier hineinmüssen. Wer aus
+Neugier auf das Wappen tippt, sieht ein Zahlenfeld und tippt „Zurück zur Karte" — das ist der ganze
+Schaden. Das Wappen gehört ohnehin an einen Museumskiosk.
 
 **Warum PIN statt Passwort?** Die Eingabe erfolgt mit dem Finger auf einem Touchscreen, oft von
 älteren Menschen. Ein Zahlenfeld mit großen Tasten ist dafür ungleich besser als eine
@@ -175,9 +178,59 @@ Verzögerung nach Fehlversuchen angemessen.
 **Warum überhaupt am Gerät und nicht nur vom Laptop?** Weil der USB-Stick für die Sicherung im Pi
 steckt. Alles andere wäre umständlich.
 
+**Was eine vierstellige PIN trägt, ist die Sperre, nicht die Länge.** Zehntausend Möglichkeiten
+hätte ein Skript in Sekunden durchprobiert. Nach fünf Fehlversuchen sperrt das Gerät eine Minute —
+das streckt denselben Angriff auf gut zwei Jahre. Der Hash ist PBKDF2 mit 200 000 Runden, damit
+auch ein gestohlener `.env`-Eintrag nicht in Minuten zurückgerechnet ist.
+
+**Sitzungen liegen im Arbeitsspeicher, nicht in der Datenbank.** Ein Neustart des Dienstes beendet
+damit jede Sitzung — auf einem Gerät, das jeden Morgen in den Kiosk bootet, ist das die billigste
+Garantie, dass keine Anmeldung die Nacht übersteht. Gezählt wird in verbleibenden Sekunden statt in
+Zeitpunkten: Der Pi hat keine Echtzeituhr und kein Netz, seine Wanduhr kann nach einem Stromausfall
+um Jahre danebenliegen.
+
 ---
 
-## 8. Sicherung ist eine Funktion, kein Skript
+## 9. Bearbeiten: fehlendes Feld heißt „lassen", leeres Feld heißt „löschen"
+
+**Entscheidung.** Der Metadateneditor unterscheidet zwischen einem Feld, das gar nicht mitgeschickt
+wird, und einem, das ausdrücklich leer ist. Ersteres bleibt unverändert, letzteres wird gelöscht.
+Im Backend trägt das `model_fields_set` von Pydantic, in der Oberfläche das leere Jahresfeld.
+
+**Warum.** Ohne diesen Unterschied könnte eine falsche Datierung nur durch eine andere ersetzt
+werden, nie durch „weiß man nicht". Genau das ist aber der häufige Fall: Jemand merkt, dass 1932
+nicht stimmen kann, weiß aber nicht, was stimmt. Kann er die Angabe herausnehmen, gilt das Foto
+wieder als undatiert — und landet im „Hilf mit"-Bereich, wo es der nächste Besucher beantwortet.
+Das ist der Unterschied zwischen einer Datenbank, die sich selbst korrigiert, und einer, in der
+sich Fehler festsetzen.
+
+**Zurücknehmen eines Besucherbeitrags** löscht das Feld, statt einen alten Wert wiederherzustellen
+— ein Besucher darf ohnehin nur füllen, was leer war (siehe Entscheidung 5), es gibt also nichts
+wiederherzustellen. Hat inzwischen jemand aus dem Team das Feld bearbeitet, wird das Zurücknehmen
+verweigert: Es würde diese Arbeit mit wegwerfen.
+
+---
+
+## 10. Hochgeladene Fotos sind sofort in der Datenbank
+
+**Entscheidung.** Der Stapel-Upload speichert jedes Bild beim Hochladen. Die Tabelle danach ist
+eine Nacharbeitsliste, keine Warteschlange; „Übernehmen" ergänzt nur noch Titel, Jahr und Ort.
+
+**Warum.** Andernfalls wäre ein geschlossener Browser gleichbedeutend mit vierzig verlorenen Scans
+— und ausgerechnet der Moment, in dem jemand zum ersten Mal vierzig Bilder hochlädt, ist der, in
+dem etwas dazwischenkommt. Was in der Liste liegen bleibt, ist nicht verloren, sondern unvollständig
+und taucht damit von selbst im „Hilf mit"-Bereich auf.
+
+Die Stapelangaben (Ort und Jahr für alle) füllen nur, was leer ist. Bringt eine Datei ein
+brauchbares Datum oder GPS mit, gewinnt die Datei — die Zeile lässt sich hinterher trotzdem
+einzeln korrigieren.
+
+Hochgeladen wird **eine Datei je Anfrage**, obwohl der Endpunkt eine Liste nimmt. Nur so lässt sich
+„Bild 7 von 40" anzeigen; eine einzelne Anfrage über ein Gigabyte zeigt minutenlang gar nichts.
+
+---
+
+## 11. Sicherung ist eine Funktion, kein Skript
 
 **Entscheidung.** Sichern und Wiederherstellen sind Bildschirme im Admin-Bereich mit
 Fortschrittsbalken und Klartext, nicht `backup.sh`.

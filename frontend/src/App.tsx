@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 
+import { AdminApp } from "./admin/AdminApp";
+import { AdminGate } from "./admin/AdminGate";
+import { PinPad } from "./admin/PinPad";
 import { HelpPanel } from "./kiosk/HelpPanel";
 import { MapView } from "./kiosk/MapView";
 import { PhotoOverlay } from "./kiosk/PhotoOverlay";
 import { TimeSlider } from "./kiosk/TimeSlider";
 import { type Region, loadRegion } from "./region";
+import { useAdmin } from "./store/admin";
 import { useKiosk } from "./store/kiosk";
 import { t } from "./texte/de";
 
@@ -23,6 +27,8 @@ function MapNotice() {
 export function App() {
   const [region, setRegion] = useState<Region | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const view = useAdmin((s) => s.view);
+  const restore = useAdmin((s) => s.restore);
 
   useEffect(() => {
     const abort = new AbortController();
@@ -35,8 +41,17 @@ export function App() {
     return () => abort.abort();
   }, []);
 
+  // A reload during work should not ask for the PIN again.
+  useEffect(() => {
+    void restore();
+  }, [restore]);
+
   if (error) return <div className="splash splash--error">{error}</div>;
   if (!region) return <div className="splash">{t.app.loadingMap}</div>;
+
+  // The admin area replaces the kiosk rather than covering it: the map would keep loading tiles
+  // behind it for nothing, and on a Pi that is not free.
+  if (view === "admin") return <AdminApp />;
 
   return (
     <>
@@ -45,6 +60,7 @@ export function App() {
             only under the map -- not under the side panel. */}
         <div className="app__map">
           <MapView region={region} />
+          <AdminGate regionName={region.name} />
           <MapNotice />
           <TimeSlider />
         </div>
@@ -54,6 +70,7 @@ export function App() {
       </div>
 
       <PhotoOverlay />
+      {view === "pin" && <PinPad />}
     </>
   );
 }

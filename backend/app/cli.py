@@ -4,6 +4,7 @@
     python -m app.cli scan                       sweep the inbox folder once
     python -m app.cli stats                      what is in there, what is still missing
     python -m app.cli places                     reload the gazetteer
+    python -m app.cli pin                        set the PIN for the admin area
 
 The usual route for the museum team is the watched folder; these commands are for the initial fill
 with a few thousand scans and for troubleshooting.
@@ -99,6 +100,37 @@ def _cmd_places(_: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_pin(_: argparse.Namespace) -> int:
+    """Ask for a PIN twice and print the line that belongs in the .env file.
+
+    Deliberately not written to the file automatically: the .env may hold other settings, and
+    whoever sets up the device should see what they are pasting.
+    """
+    from getpass import getpass
+
+    from app.services.auth import MAX_PIN_LENGTH, MIN_PIN_LENGTH, hash_pin, is_valid_pin
+
+    print(f"PIN fuer den Admin-Bereich, {MIN_PIN_LENGTH} bis {MAX_PIN_LENGTH} Ziffern.")
+    print("Die Eingabe ist nicht zu sehen.\n")
+
+    pin = getpass("PIN:            ")
+    if not is_valid_pin(pin):
+        print(
+            f"\nNur Ziffern, {MIN_PIN_LENGTH} bis {MAX_PIN_LENGTH} Stueck -- "
+            "auf dem Tastenfeld im Museum gibt es keine Buchstaben.",
+            file=sys.stderr,
+        )
+        return 1
+    if getpass("Noch einmal:    ") != pin:
+        print("\nDie beiden Eingaben sind nicht gleich.", file=sys.stderr)
+        return 1
+
+    print("\nDiese Zeile in die Datei .env eintragen (vorhandene ersetzen):\n")
+    print(f"PHOTOMAP_ADMIN_PIN_HASH={hash_pin(pin)}\n")
+    print("Danach den Dienst neu starten. Die PIN selbst wird nirgends gespeichert.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)-7s %(message)s")
 
@@ -117,6 +149,9 @@ def main(argv: list[str] | None = None) -> int:
 
     p_places = commands.add_parser("places", help="Ortsverzeichnis neu laden")
     p_places.set_defaults(handler=_cmd_places)
+
+    p_pin = commands.add_parser("pin", help="PIN fuer den Admin-Bereich setzen")
+    p_pin.set_defaults(handler=_cmd_pin)
 
     args = parser.parse_args(argv)
     return args.handler(args)

@@ -1,0 +1,217 @@
+/**
+ * Backend access for the admin area. The types mirror backend/app/schemas.py.
+ *
+ * Everything except signing in goes through `adminFetch`, for one reason: a session that has
+ * expired must not surface as an error message somewhere in a list. It has to put the PIN pad
+ * back on screen -- which is what `onAdminSignedOut` is for.
+ */
+
+import { t } from "../texte/de";
+import { type PhotoDetail, readError } from "./client";
+
+export type AdminSession = { token: string; expires_in_s: number };
+
+export type Overview = {
+  total: number;
+  on_map: number;
+  without_location: number;
+  without_date: number;
+  hidden: number;
+  visitor_changes: number;
+  last_import_at: string | null;
+};
+
+export type PhotoAdminItem = {
+  id: number;
+  title: string | null;
+  date_label: string;
+  place_name: string | null;
+  thumb_url: string;
+  needs_location: boolean;
+  needs_date: boolean;
+  status: string;
+  original_filename: string;
+  imported_at: string;
+};
+
+export type PhotoAdminList = { photos: PhotoAdminItem[]; total: number };
+
+export type ChangeItem = {
+  id: number;
+  photo_id: number;
+  photo_title: string | null;
+  thumb_url: string;
+  field: string;
+  old_value: string | null;
+  new_value: string | null;
+  source: string;
+  created_at: string;
+  reverted_at: string | null;
+  revertable: boolean;
+};
+
+export type ImportLogItem = {
+  id: number;
+  filename: string;
+  result: string;
+  message: string | null;
+  photo_id: number | null;
+  created_at: string;
+};
+
+export type UploadItem = {
+  filename: string;
+  result: string;
+  message: string;
+  photo: PhotoDetail | null;
+};
+
+export type UploadResult = {
+  items: UploadItem[];
+  imported: number;
+  duplicates: number;
+  rejected: number;
+};
+
+/** Batch statements that apply to every file of one upload. */
+export type BatchDefaults = {
+  year?: number;
+  precision?: "year" | "decade";
+  lat?: number;
+  lon?: number;
+  placeName?: string;
+};
+
+export type PhotoPatch = {
+  title?: string | null;
+  description?: string | null;
+  /** null clears the dating; leaving the key out keeps it. See backend PhotoUpdate. */
+  date?: { year: number; month?: number; day?: number; precision: string } | null;
+  location?: { lat: number; lon: number; place_name?: string | null } | null;
+  tags?: string[];
+  status?: "published" | "hidden";
+};
+
+export type Selection = "all" | "incomplete" | "hidden";
+
+let token: string | null = null;
+let signedOutHandler: (() => void) | null = null;
+let activityHandler: (() => void) | null = null;
+
+export function setAdminToken(next: string | null): void {
+  token = next;
+}
+
+/** Called when the backend refuses the token -- the UI has to ask for the PIN again. */
+export function onAdminSignedOut(handler: () => void): void {
+  signedOutHandler = handler;
+}
+
+/** Called after every accepted request: the backend has just pushed the expiry back too. */
+export function onAdminActivity(handler: () => void): void {
+  activityHandler = handler;
+}
+
+async function adminFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(`/api/admin${path}`, {
+    ...init,
+    headers: {
+      ...(init.headers ?? {}),
+      ...(token ? { "X-Admin-Token": token } : {}),
+    },
+  });
+
+  if (response.status === 401) {
+    setAdminToken(null);
+    signedOutHandler?.();
+    throw new Error(t.admin.expired);
+  }
+  if (!response.ok) throw new Error(await readError(response));
+
+  activityHandler?.();
+  // 204: logout has no body.
+  return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
+}
+
+/** Not via adminFetch: there is no token yet, and a 401 here means "wrong PIN", not "expired". */
+export async function signIn(pin: string): Promise<AdminSession> {
+  const response = await fetch("/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pin }),
+  });
+  if (!response.ok) throw new Error(await readError(response));
+  return (await response.json()) as AdminSession;
+}
+
+export function signOut(): Promise<void> {
+  return adminFetch<void>("/logout", { method: "POST" });
+}
+
+/** After a page reload: is the stored token still good? */
+export function checkSession(): Promise<AdminSession> {
+  return adminFetch<AdminSession>("/session");
+}
+
+export function fetchOverview(): Promise<Overview> {
+  return adminFetch<Overview>("/overview");
+}
+
+export function fetchAdminPhotos(
+  show: Selection,
+  query: string,
+  limit = 60,
+): Promise<PhotoAdminList> {
+  const params = new URLSearchParams({ show, limit: String(limit) });
+  if (query.trim()) params.set("q", query.trim());
+  return adminFetch<PhotoAdminList>(`/photos?${params}`);
+}
+
+export function fetchAdminPhoto(id: number): Promise<PhotoDetail> {
+  return adminFetch<PhotoDetail>(`/photos/${id}`);
+}
+
+export function patchPhoto(id: number, patch: PhotoPatch): Promise<PhotoDetail> {
+  return adminFetch<PhotoDetail>(`/photos/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+}
+
+export function fetchChanges(includeReverted = false): Promise<ChangeItem[]> {
+  return adminFetch<ChangeItem[]>(`/changes?include_reverted=${includeReverted}`);
+}
+
+export function revertChange(id: number): Promise<PhotoDetail> {
+  return adminFetch<PhotoDetail>(`/changes/${id}/revert`, { method: "POST" });
+}
+
+export function fetchImportLog(result?: string): Promise<ImportLogItem[]> {
+  const params = new URLSearchParams({ limit: "100" });
+  if (result) params.set("result", result);
+  return adminFetch<ImportLogItem[]>(`/imports?${params}`);
+}
+
+/**
+ * Upload a single file.
+ *
+ * One request per file, although the endpoint would take a list: this is what lets the screen
+ * count "Bild 7 von 40". A batch of scans is quickly a gigabyte, and one request that large would
+ * show nothing at all for minutes.
+ */
+export function uploadPhoto(file: File, defaults: BatchDefaults): Promise<UploadResult> {
+  const form = new FormData();
+  form.append("files", file, file.name);
+  if (defaults.year !== undefined) {
+    form.append("year", String(defaults.year));
+    form.append("precision", defaults.precision ?? "year");
+  }
+  if (defaults.lat !== undefined && defaults.lon !== undefined) {
+    form.append("lat", String(defaults.lat));
+    form.append("lon", String(defaults.lon));
+  }
+  if (defaults.placeName) form.append("place_name", defaults.placeName);
+
+  return adminFetch<UploadResult>("/upload", { method: "POST", body: form });
+}

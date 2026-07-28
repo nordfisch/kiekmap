@@ -82,7 +82,22 @@ eine Gemeinde mit 5 km Umkreis: 4–5 MB Kacheln, 14 MB Schriften und Symbole, r
 damit, ob eine Verortung aus dem „Hilf mit"-Bereich überhaupt in der Region liegt. **Ohne diese
 Datei greift der Schutz nicht** (er lässt dann alles durch, statt grundlos abzulehnen).
 
-### 3. Sammlungsspezifisches prüfen
+### 3. Wappen austauschen
+
+[`frontend/public/logo.png`](../frontend/public/logo.png) durch das eigene ersetzen — gleicher
+Dateiname, sonst nichts. Das Bild liegt über der linken oberen Ecke der Karte und ist zugleich der
+Weg in den Admin-Bereich. Im Code steht nirgends, was darauf zu sehen ist; die Beschriftung für
+Vorlesewerkzeuge setzt sich aus `name` in der `region.json` zusammen.
+
+Hochkant oder quer ist gleich, das Bild wird in ein Quadrat von 4,5 rem eingepasst. Sinnvoll sind
+etwa 400 px Kantenlänge; PNG mit Transparenz sieht auf der Karte am besten aus.
+
+Ein Hinweis zum Recht: Gemeindewappen sind meist gemeinfrei im urheberrechtlichen Sinn, ihre
+Führung ist davon aber unabhängig geregelt. Für ein Heimatmuseum am Ort ist das in aller Regel
+unproblematisch — im Zweifel kurz bei der Gemeinde nachfragen. Das mitgelieferte Holmer Wappen
+stammt aus der Wikipedia (Public Domain, Hans-Frieder Kühne).
+
+### 4. Sammlungsspezifisches prüfen
 
 In der `.env`:
 
@@ -94,7 +109,16 @@ PHOTOMAP_ADMIN_PIN_HASH=...        # PIN für den Admin-Bereich
 `exif_date_max_year` hochsetzen, falls die Sammlung auch echte Digitalfotos enthält — sonst
 verlieren die ihr Aufnahmedatum. Herunterlassen, wenn ausschließlich Scans erwartet werden.
 
-### 4. Prüfen
+Den PIN-Hash erzeugt:
+
+```bash
+cd backend && .venv/bin/python -m app.cli pin
+```
+
+Die PIN selbst wird nirgends gespeichert. Ist `PHOTOMAP_ADMIN_PIN_HASH` leer, sagt der
+Admin-Bereich das im Klartext, statt jede Eingabe abzulehnen.
+
+### 5. Prüfen
 
 ```bash
 make dev

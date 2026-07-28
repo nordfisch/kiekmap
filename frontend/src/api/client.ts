@@ -23,17 +23,27 @@ export type PhotoDetail = {
   id: number;
   title: string | null;
   description: string | null;
+  date_from: string | null;
+  date_to: string | null;
   date_label: string;
   date_precision: string;
   lat: number | null;
   lon: number | null;
   place_name: string | null;
+  location_accuracy_m: number | null;
+  title_source: string | null;
+  date_source: string | null;
+  location_source: string | null;
+  /** For a scan, the date of the scanning run -- shown to the curator, never used as a dating. */
+  exif_datetime: string | null;
   original_filename: string;
+  imported_at: string;
   width: number;
   height: number;
   tags: string[];
   needs_location: boolean;
   needs_date: boolean;
+  status: string;
   image_url: string;
   thumb_url: string;
 };
@@ -73,7 +83,8 @@ export type Place = {
 
 export type Precision = "day" | "month" | "year" | "decade";
 
-async function readError(response: Response): Promise<string> {
+/** The backend's `detail` if there is one -- it is written for the reader, the status code is not. */
+export async function readError(response: Response): Promise<string> {
   try {
     const body = (await response.json()) as { detail?: string };
     if (body.detail) return body.detail;

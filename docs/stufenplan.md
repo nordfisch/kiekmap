@@ -41,8 +41,8 @@ und einen Knopfdruck.
 | 7 | „Hilf mit": Verortung, Datierung, Ortssuche | ✅ |
 | 7.5 | Sprachregelung, Textmodul, Entwicklerdoku | ✅ |
 | 7.6 | Deutsche Texte im Backend nach Konvention ordnen | ✅ |
-| **8** | **Admin-Bereich mit Stapel-Upload** | **als Nächstes** |
-| 9 | Sicherung und Wiederherstellung auf USB | offen |
+| 8 | Admin-Bereich mit Stapel-Upload | ✅ |
+| **9** | **Sicherung und Wiederherstellung auf USB** | **als Nächstes** |
 | 10 | Kiosk-Deployment auf dem Pi | offen |
 | 11 | Ausbau nach Bedarf | offen |
 
@@ -77,10 +77,19 @@ sitzen architektonisch auf der falschen Seite für Mehrsprachigkeit — siehe
 
 ## Stufe 8 — Admin-Bereich mit Stapel-Upload
 
-**Einstieg.** 3 Sekunden Druck auf die untere linke Bildschirmecke öffnet ein Zahlenfeld mit großen
-Tasten; nach der PIN der Admin-Bereich. Für Besucher unsichtbar, für Eingeweihte in zwei Sekunden
-erreichbar. PIN statt Passwort, weil am Touchscreen getippt wird. Token mit Ablauf, damit ein
-vergessener Login nicht über Nacht offen bleibt.
+**Einstieg.** Ein Klick auf das Ortswappen über der linken oberen Ecke der Karte öffnet ein
+Zahlenfeld mit großen Tasten; nach der PIN der Admin-Bereich. PIN statt Passwort, weil am
+Touchscreen getippt wird. Token mit Ablauf, damit ein vergessener Login nicht über Nacht offen
+bleibt.
+
+> Ursprünglich war ein drei Sekunden langer Druck auf die untere linke Bildschirmecke geplant —
+> für Besucher unsichtbar. Das sichtbare Wappen hat gewonnen: das Schloss ist die PIN, nicht das
+> Versteck, und eine unsichtbare Geste ist etwas, das Ehrenamtliche sich merken müssten. Wer aus
+> Neugier tippt, sieht ein Zahlenfeld und tippt „Zurück zur Karte".
+>
+> Eine vierstellige PIN sind zehntausend Möglichkeiten, die ein Skript in Sekunden durchprobiert
+> hätte. Das Gegengewicht ist die Sperre nach fünf Fehlversuchen — sie macht aus Sekunden Jahre
+> und ist damit der eigentliche Schutz, nicht die Länge der PIN.
 
 **Fotopflege.** Liste mit Filter „unvollständig", Metadateneditor, Besucheränderungen sichten und
 einzeln zurücknehmen, Import-Protokoll, Statusübersicht.
@@ -110,7 +119,13 @@ benannt („3 waren schon da") statt still übersprungen.
 
 **Fertig, wenn:** du am Touchscreen ohne Tastatur hinein- und wieder hinauskommst, einen Stapel
 hochladen und dabei Ort und Jahr für alle setzen kannst, und ein Foto vollständig über die
-Oberfläche pflegen kannst.
+Oberfläche pflegen kannst. ✅
+
+Beim Bauen dazugekommen, weil es sonst still gebrochen wäre: Beim Bearbeiten heißt ein
+**fehlendes** Feld „unverändert lassen" und ein **leeres** Feld „löschen". Ohne diesen Unterschied
+ließe sich eine falsche Datierung nur durch eine andere ersetzen, nie durch „weiß man nicht" — und
+das Foto käme nie wieder in den „Hilf mit"-Bereich. Zurücknehmen eines Besucherbeitrags wird
+verweigert, sobald das Feld inzwischen von Hand bearbeitet wurde.
 
 ---
 

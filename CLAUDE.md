@@ -132,9 +132,12 @@ Sprache kosten würde und ab wann sich Modularisierung lohnt.
 
 ## Stand
 
-Fertig: Stufen 0–7.5 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
-Zeitschieber, „Hilf mit", Sprachregelung). Als Nächstes 7.6 (deutsche Texte im Backend ordnen),
-dann Admin-Bereich mit Stapel-Upload (8), USB-Sicherung (9), Kiosk-Deployment (10).
+Fertig: Stufen 0–8 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
+Zeitschieber, „Hilf mit", Sprachregelung, Admin-Bereich mit Stapel-Upload). Als Nächstes
+USB-Sicherung (9), dann Kiosk-Deployment (10).
+
+Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
+Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.
 
 **Der vollständige Bauplan mit Abnahmekriterien steht in [docs/stufenplan.md](docs/stufenplan.md).**
 Was schon entstanden ist, im Änderungsprotokoll [CHANGELOG.md](CHANGELOG.md).

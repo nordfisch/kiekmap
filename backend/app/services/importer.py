@@ -14,8 +14,10 @@ Files from the watched folder are moved aside afterwards, never deleted:
 
 import logging
 import shutil
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import BinaryIO
 
 from PIL import Image, UnidentifiedImageError
 from sqlalchemy import select
@@ -211,6 +213,37 @@ def import_file(
         _move_aside(path, inbox, DONE_DIR)
 
     return outcome
+
+
+def upload_name(filename: str) -> str:
+    """Strip everything but the bare file name off a browser-supplied name.
+
+    Two things are being fended off. A name like ``../../etc/passwd`` must not escape the
+    directory -- and a Windows browser sends ``C:\\Scans\\Kirchweih\\bild.jpg``, which
+    ``Path().name`` leaves untouched on Linux because a backslash is an ordinary character there.
+    """
+    return Path(filename.replace("\\", "/")).name or "upload"
+
+
+def import_upload(
+    session: Session,
+    filename: str,
+    stream: BinaryIO,
+    settings: Settings,
+) -> ImportOutcome:
+    """Take in a file that arrived over HTTP.
+
+    Written to disk first rather than held in memory: a batch of scans is a gigabyte in no time,
+    and the Pi has less RAM than that. From there on it is the ordinary import -- the watched
+    folder, the CLI and the upload all go through the same code.
+    """
+    settings.ensure_dirs()
+    # Inside the data directory, so the later copy to photos/ stays on one filesystem.
+    with tempfile.TemporaryDirectory(dir=settings.data_dir, prefix="upload-") as temporary:
+        path = Path(temporary) / upload_name(filename)
+        with path.open("wb") as target:
+            shutil.copyfileobj(stream, target)
+        return import_file(session, path, settings)
 
 
 def import_directory(

@@ -43,6 +43,22 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - `tiles/build-places.py` baut einen Ortsindex aus OpenStreetMap; die Suche findet „Mühlenweg"
   auch bei Eingabe ohne Umlaut und läuft ohne Internet
 - `make places` baut und lädt den Ortsindex, `python -m app.cli places` lädt ihn neu
+- Admin-Bereich: Klick auf das Ortswappen über der Karte, PIN auf einem Zahlenfeld mit großen
+  Tasten, Sitzung mit Ablauf. Die Sperre nach fünf Fehlversuchen ist der eigentliche Schutz einer
+  vierstelligen PIN — sie macht aus Sekunden Jahre
+- `python -m app.cli pin` erzeugt den PIN-Hash für die `.env`; die PIN selbst wird nie gespeichert
+- Statusübersicht, Fotoliste mit Filter „unvollständig" und Suche, Metadateneditor mit Ortssuche,
+  Besucherbeiträge sichten und einzeln zurücknehmen, Import-Protokoll
+- Beim Bearbeiten heißt ein **fehlendes** Feld „unverändert lassen", ein **leeres** Feld „löschen" —
+  sonst ließe sich eine falsche Datierung nur ersetzen, nie herausnehmen
+- Ein Besucherbeitrag lässt sich nicht mehr zurücknehmen, wenn das Feld inzwischen von Hand
+  bearbeitet wurde; das würde die Arbeit des Kurators mit wegwerfen
+- Stapel-Upload: Ort und Jahr optional für den ganzen Stapel, danach eine Tabelle mit Vorschau,
+  Titel aus dem Dateinamen, Jahr und Ort je Bild änderbar, „Übernehmen" und „Alle übernehmen".
+  Die Fotos sind schon **nach dem Hochladen** in der Datenbank — ein geschlossener Browser darf
+  keine Uploads kosten. Dubletten werden benannt („3 waren schon da")
+- Das Ortswappen liegt als austauschbare Datei unter `frontend/public/logo.png`; im Code steht
+  nirgends, was darauf zu sehen ist
 
 ### Geändert
 

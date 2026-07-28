@@ -1,0 +1,583 @@
+/* The admin area.
+ *
+ * Used once or twice a year, by volunteers, standing at the same touchscreen the visitors use.
+ * That is why nothing here is compact: labels above their fields instead of beside them, buttons
+ * of at least 3 rem, and one column rather than a dense grid. Someone who does this twice a year
+ * should not have to remember anything.
+ */
+
+/* --- the way in ---------------------------------------------------------- */
+
+/* The village arms over the top left of the map. Deliberately visible -- the PIN is the lock,
+ * not the hiding place. */
+.admin-gate {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0.35rem;
+  border: none;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 88%);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 22%);
+}
+
+.admin-gate:active {
+  transform: translateY(1px);
+}
+
+.admin-gate__logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* --- number pad ---------------------------------------------------------- */
+
+.pinpad {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(20 18 16 / 70%);
+}
+
+.pinpad__box {
+  width: min(24rem, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 0 8px 40px rgb(0 0 0 / 45%);
+  text-align: center;
+}
+
+.pinpad__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+
+.pinpad__hint {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.pinpad__display {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.pinpad__dot {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+}
+
+.pinpad__dot--filled {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.pinpad__error {
+  margin: 0 0 0.75rem;
+  color: #a33;
+  font-size: 0.95rem;
+}
+
+.pinpad__keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+/* 4.5 rem: hit standing, with the pad of a finger, through reading glasses. */
+.pinpad__key {
+  min-height: 4.5rem;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pinpad__key:active {
+  transform: translateY(1px);
+}
+
+.pinpad__key:disabled {
+  opacity: 0.4;
+}
+
+.pinpad__key--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.pinpad__key--quiet {
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+/* --- shell --------------------------------------------------------------- */
+
+.admin {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--paper);
+  /* Unlike the kiosk, this area is worked in: text may be selected and fields typed into. */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.admin__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin__title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+
+.admin__remaining {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.admin__leave {
+  width: auto;
+  margin: 0;
+}
+
+.admin__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+  /* Long lines are hard to read and harder to fill in. */
+  max-width: 60rem;
+  width: 100%;
+}
+
+.admin__heading {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.admin__note {
+  margin: 0.35rem 0 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.admin__error {
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: #fbeaea;
+  color: #a33;
+  font-size: 0.95rem;
+}
+
+/* --- tabs ---------------------------------------------------------------- */
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs--filters {
+  padding: 0.6rem 0;
+  border-bottom: none;
+}
+
+.tab {
+  min-height: 3rem;
+  padding: 0.5rem 1.1rem;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 1rem;
+}
+
+.tab--active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* --- fields -------------------------------------------------------------- */
+
+.field__label {
+  display: block;
+  margin: 0.9rem 0 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.field__input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.5rem 0.8rem;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  color: inherit;
+}
+
+.field__input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field__input--area {
+  min-height: 5rem;
+  line-height: 1.4;
+}
+
+.field__input--year {
+  max-width: 9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.field__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.field__row > * {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.field__group {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.field__check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  font-size: 1rem;
+}
+
+.field__check input {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.link-button {
+  border: none;
+  background: none;
+  padding: 0.5rem;
+  color: var(--accent);
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+/* --- place search -------------------------------------------------------- */
+
+.place-field__current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.place-field__results {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 14rem;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.place-field__result {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+  text-align: left;
+}
+
+.place-field__results li:last-child .place-field__result {
+  border-bottom: none;
+}
+
+.place-field__kind {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* --- overview ------------------------------------------------------------ */
+
+.overview__figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.figure {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.figure--muted {
+  background: none;
+}
+
+.figure__value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.figure__label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* --- photo rows ---------------------------------------------------------- */
+
+.photo-rows,
+.upload-rows,
+.log-rows {
+  margin: 0.5rem 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.photo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.photo-row__thumb {
+  flex: 0 0 auto;
+  width: 5rem;
+  height: 4rem;
+  object-fit: cover;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  background: var(--line);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
+}
+
+.photo-row__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.photo-row__title {
+  font-weight: 600;
+}
+
+.photo-row__meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.photo-row__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.photo-row .button,
+.upload-row .button {
+  width: auto;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.flag {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--accent-light);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.flag--muted,
+.flag--duplicate {
+  background: var(--line);
+  color: var(--muted);
+}
+
+.flag--imported {
+  background: #d8e8d0;
+}
+
+.flag--rejected {
+  background: #f2d6d6;
+}
+
+/* --- upload -------------------------------------------------------------- */
+
+.progress {
+  height: 1rem;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.progress__bar {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 200ms ease;
+}
+
+.upload-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.upload-row__thumb {
+  flex: 0 0 auto;
+  width: 6rem;
+  height: 5rem;
+  object-fit: cover;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  background: var(--line);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
+}
+
+.upload-row__thumb--empty {
+  display: block;
+}
+
+.upload-row__fields {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.upload-row__filename {
+  font-size: 0.8rem;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.upload-row__message {
+  font-size: 0.95rem;
+}
+
+.upload__actions,
+.editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.upload__actions .button,
+.editor__actions .button {
+  width: auto;
+  margin: 0;
+  min-width: 12rem;
+}
+
+/* --- editor -------------------------------------------------------------- */
+
+.editor__image {
+  max-width: 100%;
+  max-height: 30vh;
+  object-fit: contain;
+  border: 4px solid #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 22%);
+  background: var(--line);
+}
+
+/* --- import log ---------------------------------------------------------- */
+
+.log-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.log-row__filename {
+  flex: 0 0 auto;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.log-row__message {
+  flex: 1;
+  min-width: 0;
+  color: var(--muted);
+}
+
+.log-row__time {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
