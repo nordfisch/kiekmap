@@ -1,26 +1,26 @@
-/* Grundlayout des Kiosks.
+/* Kiosk layout.
  *
- * Aussen eine Zeile aus zwei Spalten: links Karte ueber Zeitschieber gestapelt, rechts der
- * "Hilf mit"-Bereich ueber die volle Hoehe. Der Schieber gehoert unter die Karte, weil er die
- * Karte filtert -- er reicht bewusst nicht unter das Seitenpanel.
+ * Outermost a row of two columns: on the left the map stacked above the time slider, on the right
+ * the "Hilf mit" panel over the full height. The slider belongs under the map because it filters
+ * the map -- it deliberately does not reach under the side panel.
  */
 
 :root {
-  /* Anteilig statt fest: auf einem 1080p-Display rund 420 px, auf einem 4K-Display nicht
-   * mitwachsend ins Absurde, und auf schmalen Fenstern schrumpfbar. Mit einer festen Breite
-   * (flex: 0 0 22rem) faellt die Karte unterhalb von etwa 600 px auf Breite null zusammen --
-   * das Panel gibt dann naemlich nicht nach und verdraengt sie vollstaendig. */
-  --seitenbereich-breite: clamp(16rem, 22%, 28rem);
-  --zeitleiste-hoehe: 9rem;
+  /* Proportional rather than fixed: about 420 px on a 1080p display, not growing absurdly on a
+   * 4K one, and shrinkable in narrow windows. With a fixed width (flex: 0 0 22rem) the map
+   * collapses to zero below roughly 600 px -- the panel refuses to give way and squeezes it out
+   * entirely. */
+  --sidebar-width: clamp(16rem, 22%, 28rem);
+  --timeline-height: 9rem;
 
-  --papier: #faf8f4;
-  --tinte: #2b2723;
-  --gedaempft: #6f6862;
-  --linie: #ddd6cc;
-  --akzent: #8c5a2b;
-  --akzent-hell: #d9b48a;
+  --paper: #faf8f4;
+  --ink: #2b2723;
+  --muted: #6f6862;
+  --line: #ddd6cc;
+  --accent: #8c5a2b;
+  --accent-light: #d9b48a;
 
-  /* Am grossen Display sitzt der Besucher nicht davor, sondern steht -- alles eine Spur groesser. */
+  /* At a large display the visitor stands rather than sits -- everything a notch larger. */
   font-size: 18px;
 }
 
@@ -37,10 +37,10 @@ body,
 
 body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: var(--tinte);
-  background: var(--papier);
+  color: var(--ink);
+  background: var(--paper);
 
-  /* Kiosk-Hygiene: nichts markieren, nichts lange druecken, keine Ueberdehn-Effekte. */
+  /* Kiosk hygiene: no selecting, no long-press menus, no overscroll bounce. */
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -59,7 +59,7 @@ button {
   height: 100%;
 }
 
-.app__karte {
+.app__map {
   position: relative;
   display: flex;
   flex: 1;
@@ -67,79 +67,79 @@ button {
   min-width: 0;
 }
 
-.karte {
+.map {
   position: relative;
   flex: 1;
   min-height: 0;
 }
 
-.karte__flaeche {
+.map__canvas {
   position: absolute;
   inset: 0;
 }
 
-/* --- "Hilf mit" ---------------------------------------------------------- */
+/* --- "Hilf mit" panel ---------------------------------------------------- */
 
-.hilf-mit {
+.help-panel {
   display: flex;
   flex-direction: column;
-  flex: 0 1 var(--seitenbereich-breite);
+  flex: 0 1 var(--sidebar-width);
   min-width: 0;
   padding: 1.25rem;
   overflow-y: auto;
-  border-left: 1px solid var(--linie);
-  background: var(--papier);
+  border-left: 1px solid var(--line);
+  background: var(--paper);
 }
 
-.hilf-mit__titel {
+.help-panel__title {
   margin: 0 0 0.75rem;
   font-size: 1.4rem;
   letter-spacing: 0.02em;
-  color: var(--akzent);
+  color: var(--accent);
 }
 
-.hilf-mit__frage {
+.help-panel__question {
   margin: 0 0 0.75rem;
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.25;
 }
 
-.hilf-mit__bild {
+.help-panel__image {
   width: 100%;
   max-height: 30vh;
   object-fit: contain;
-  background: var(--linie);
+  background: var(--line);
   border: 4px solid #fff;
   box-shadow: 0 2px 8px rgb(0 0 0 / 22%);
 }
 
-.hilf-mit__bekannt {
+.help-panel__known {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin: 0.6rem 0 0.9rem;
   font-size: 0.85rem;
-  color: var(--gedaempft);
+  color: var(--muted);
 }
 
-.hilf-mit__foto-titel {
+.help-panel__photo-title {
   font-weight: 600;
-  color: var(--tinte);
+  color: var(--ink);
 }
 
-.hilf-mit__leer,
-.hilf-mit__offen {
-  color: var(--gedaempft);
+.help-panel__empty,
+.help-panel__open {
+  color: var(--muted);
   font-size: 0.85rem;
 }
 
-.hilf-mit__offen {
+.help-panel__open {
   margin: 0.75rem 0 0;
   text-align: center;
 }
 
-.hilf-mit__fehler {
+.help-panel__error {
   margin: 0 0 0.75rem;
   padding: 0.6rem 0.8rem;
   border-radius: 6px;
@@ -148,12 +148,12 @@ button {
   font-size: 0.9rem;
 }
 
-.hilf-mit__weiter {
+.help-panel__next {
   margin-top: 0.75rem;
 }
 
-/* Die Dankesmeldung soll wirken, nicht nur informieren -- sie ist der Lohn fuers Mitmachen. */
-.hilf-mit__dank {
+/* The thank-you note should land, not merely inform -- it is the reward for joining in. */
+.help-panel__thanks {
   display: grid;
   place-items: center;
   gap: 0.75rem;
@@ -162,131 +162,131 @@ button {
   text-align: center;
   font-size: 1.15rem;
   line-height: 1.4;
-  color: var(--akzent);
+  color: var(--accent);
 }
 
-.hilf-mit__haken {
+.help-panel__check {
   display: grid;
   place-items: center;
   width: 4rem;
   height: 4rem;
   border-radius: 50%;
-  background: var(--akzent);
+  background: var(--accent);
   color: #fff;
   font-size: 2rem;
 }
 
-/* --- Aufgabe ------------------------------------------------------------- */
+/* --- task ---------------------------------------------------------------- */
 
-.aufgabe__anleitung {
+.task__hint {
   margin: 0 0 0.75rem;
   font-size: 0.95rem;
   line-height: 1.4;
-  color: var(--gedaempft);
+  color: var(--muted);
 }
 
-.aufgabe__bestaetigen {
+.task__confirm {
   margin-top: 1rem;
 }
 
-.aufgabe__gewaehlt {
+.task__chosen {
   margin: 0 0 0.5rem;
   font-weight: 600;
 }
 
-/* Alle Knoepfe mindestens fingerbreit -- der Kiosk wird stehend und mit der Kuppe bedient. */
-.knopf {
+/* Every button at least a fingertip wide -- the kiosk is used standing, with the pad of a finger. */
+.button {
   display: block;
   width: 100%;
   min-height: 3rem;
   margin-bottom: 0.5rem;
   padding: 0.6rem 1rem;
-  border: 2px solid var(--linie);
+  border: 2px solid var(--line);
   border-radius: 8px;
   background: #fff;
   font-size: 1rem;
   text-align: center;
 }
 
-.knopf:active {
+.button:active {
   transform: translateY(1px);
 }
 
-.knopf:disabled {
+.button:disabled {
   opacity: 0.5;
 }
 
-.knopf--haupt {
-  border-color: var(--akzent);
-  background: var(--akzent);
+.button--primary {
+  border-color: var(--accent);
+  background: var(--accent);
   color: #fff;
   font-weight: 600;
   font-size: 1.1rem;
 }
 
-.knopf--leise {
+.button--quiet {
   border-color: transparent;
   background: none;
-  color: var(--gedaempft);
+  color: var(--muted);
   min-height: 2.75rem;
   font-size: 0.9rem;
 }
 
-.knopf--jahr {
+.button--year {
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
 
-.jahrzehnte,
-.jahre {
+.decades,
+.years {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
   gap: 0.5rem;
 }
 
-.jahre {
+.years {
   margin: 0.75rem 0;
 }
 
-/* --- Ortssuche ----------------------------------------------------------- */
+/* --- place search -------------------------------------------------------- */
 
-.suche__beschriftung {
+.search__label {
   display: block;
   margin-bottom: 0.3rem;
   font-size: 0.85rem;
-  color: var(--gedaempft);
+  color: var(--muted);
 }
 
-.suche__feld {
+.search__field {
   width: 100%;
   min-height: 3rem;
   padding: 0 0.8rem;
-  border: 2px solid var(--linie);
+  border: 2px solid var(--line);
   border-radius: 8px;
   background: #fff;
   font: inherit;
   color: inherit;
-  /* Im Suchfeld muss ausgewaehlt und getippt werden koennen, anders als sonst im Kiosk. */
+  /* The search field must allow selecting and typing, unlike the rest of the kiosk. */
   -webkit-user-select: text;
   user-select: text;
 }
 
-.suche__feld:focus {
+.search__field:focus {
   outline: none;
-  border-color: var(--akzent);
+  border-color: var(--accent);
 }
 
-.suche__treffer {
+.search__results {
   margin: 0.5rem 0 0;
   padding: 0;
   list-style: none;
   max-height: 16rem;
   overflow-y: auto;
-  border: 1px solid var(--linie);
+  border: 1px solid var(--line);
   border-radius: 8px;
 }
 
-.suche__treffer-knopf {
+.search__result {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -295,22 +295,22 @@ button {
   min-height: 3rem;
   padding: 0.5rem 0.8rem;
   border: none;
-  border-bottom: 1px solid var(--linie);
+  border-bottom: 1px solid var(--line);
   background: #fff;
   text-align: left;
 }
 
-.suche__treffer li:last-child .suche__treffer-knopf {
+.search__results li:last-child .search__result {
   border-bottom: none;
 }
 
-.suche__art {
+.search__kind {
   flex: 0 0 auto;
   font-size: 0.75rem;
-  color: var(--gedaempft);
+  color: var(--muted);
 }
 
-/* --- Pin auf der Karte --------------------------------------------------- */
+/* --- pin on the map ------------------------------------------------------ */
 
 .pin {
   width: 2rem;
@@ -318,14 +318,14 @@ button {
   border: 4px solid #fff;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
-  background: var(--akzent);
+  background: var(--accent);
   box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
   cursor: grab;
 }
 
-/* --- Marker auf der Karte ------------------------------------------------ */
+/* --- markers on the map -------------------------------------------------- */
 
-/* Ein Foto an seinem Ort, wie ein aufgestecktes Bild. Die Unterkante sitzt auf der Koordinate. */
+/* A photo at its place, like a pinned print. The lower edge sits on the coordinate. */
 .marker {
   display: block;
   padding: 0;
@@ -340,7 +340,7 @@ button {
   z-index: 2;
 }
 
-.marker__bild {
+.marker__image {
   display: block;
   height: 4.5rem;
   width: auto;
@@ -349,10 +349,10 @@ button {
   border: 3px solid #fff;
   border-radius: 2px;
   box-shadow: 0 2px 6px rgb(0 0 0 / 35%);
-  background: var(--linie);
+  background: var(--line);
 }
 
-.marker__jahr {
+.marker__year {
   display: block;
   margin-top: 2px;
   font-size: 0.7rem;
@@ -369,7 +369,7 @@ button {
   place-items: center;
   border: 3px solid #fff;
   border-radius: 50%;
-  background: var(--akzent);
+  background: var(--accent);
   color: #fff;
   font-weight: 700;
   font-size: 1.05rem;
@@ -382,12 +382,12 @@ button {
   transform: scale(1.08);
 }
 
-/* --- Meldung ueber der Karte --------------------------------------------- */
+/* --- notice above the map ------------------------------------------------ */
 
-.meldung {
+.notice {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--zeitleiste-hoehe) + 1rem);
+  bottom: calc(var(--timeline-height) + 1rem);
   transform: translateX(-50%);
   z-index: 3;
   padding: 0.5rem 1rem;
@@ -395,100 +395,100 @@ button {
   background: rgb(255 255 255 / 92%);
   box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
   font-size: 0.85rem;
-  color: var(--gedaempft);
+  color: var(--muted);
   white-space: nowrap;
 }
 
-.meldung--fehler {
+.notice--error {
   color: #a03030;
 }
 
-/* --- Zeitschieber -------------------------------------------------------- */
+/* --- time slider --------------------------------------------------------- */
 
-.zeitleiste {
-  flex: 0 0 var(--zeitleiste-hoehe);
+.timeline {
+  flex: 0 0 var(--timeline-height);
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 0.35rem;
   padding: 0.75rem 2.5rem 0.5rem;
-  border-top: 1px solid var(--linie);
-  background: var(--papier);
+  border-top: 1px solid var(--line);
+  background: var(--paper);
 }
 
-.zeitleiste--leer {
+.timeline--empty {
   align-items: center;
-  color: var(--gedaempft);
+  color: var(--muted);
   font-size: 0.9rem;
 }
 
-.zeitleiste__kopf {
+.timeline__header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
 }
 
-.zeitleiste__auswahl {
+.timeline__selection {
   font-size: 1.35rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.zeitleiste__bis {
+.timeline__to {
   font-size: 0.85rem;
   font-weight: 400;
-  color: var(--gedaempft);
+  color: var(--muted);
   margin: 0 0.15rem;
 }
 
-.zeitleiste__undatiert {
+.timeline__undated {
   font-size: 0.8rem;
-  color: var(--gedaempft);
+  color: var(--muted);
 }
 
-.zeitleiste__bahn {
+.timeline__track {
   position: relative;
   height: 3rem;
-  touch-action: none; /* sonst scrollt die Seite statt den Griff zu bewegen */
+  touch-action: none; /* otherwise the page scrolls instead of moving the handle */
 }
 
-.zeitleiste__histogramm {
+.timeline__histogram {
   position: absolute;
   inset: 0 0 0.85rem;
 }
 
-.zeitleiste__balken {
+.timeline__bar {
   position: absolute;
   bottom: 0;
-  background: var(--linie);
+  background: var(--line);
   border-radius: 2px 2px 0 0;
 }
 
-.zeitleiste__balken--aktiv {
-  background: var(--akzent-hell);
+.timeline__bar--active {
+  background: var(--accent-light);
 }
 
-.zeitleiste__schiene,
-.zeitleiste__gewaehlt {
+.timeline__rail,
+.timeline__selected {
   position: absolute;
   bottom: 0.6rem;
   height: 5px;
   border-radius: 999px;
 }
 
-.zeitleiste__schiene {
+.timeline__rail {
   left: 0;
   right: 0;
-  background: var(--linie);
+  background: var(--line);
 }
 
-.zeitleiste__gewaehlt {
-  background: var(--akzent);
+.timeline__selected {
+  background: var(--accent);
 }
 
-/* Fingergerecht: die sichtbare Scheibe ist 1,6 rem, die Fasszone ringsum deutlich groesser --
- * das ist der Unterschied zwischen bedienbar und frustrierend am Touchscreen. */
-.zeitleiste__griff {
+/* Finger-sized: the visible disc is 1.6 rem, the grab zone around it considerably larger --
+ * that is the difference between usable and infuriating on a touchscreen. */
+.timeline__handle {
   position: absolute;
   bottom: 0.6rem;
   width: 3rem;
@@ -499,35 +499,35 @@ button {
   cursor: grab;
 }
 
-.zeitleiste__griff::after {
+.timeline__handle::after {
   content: "";
   position: absolute;
   inset: 0.7rem;
   border-radius: 50%;
   background: #fff;
-  border: 4px solid var(--akzent);
+  border: 4px solid var(--accent);
   box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
   transition: transform 100ms ease;
 }
 
-.zeitleiste__griff--aktiv {
+.timeline__handle--active {
   cursor: grabbing;
 }
 
-.zeitleiste__griff--aktiv::after,
-.zeitleiste__griff:focus-visible::after {
+.timeline__handle--active::after,
+.timeline__handle:focus-visible::after {
   transform: scale(1.2);
 }
 
-.zeitleiste__skala {
+.timeline__scale {
   display: flex;
   justify-content: space-between;
   font-size: 0.75rem;
-  color: var(--gedaempft);
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
-/* --- Foto in voller Groesse ---------------------------------------------- */
+/* --- photo at full size -------------------------------------------------- */
 
 .overlay {
   position: fixed;
@@ -539,7 +539,7 @@ button {
   background: rgb(20 17 14 / 92%);
 }
 
-.overlay__inhalt {
+.overlay__content {
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -548,7 +548,7 @@ button {
   max-height: 100%;
 }
 
-.overlay__bild {
+.overlay__image {
   max-width: 68vw;
   max-height: 85vh;
   object-fit: contain;
@@ -561,26 +561,26 @@ button {
   color: #f4efe8;
 }
 
-.overlay__titel {
+.overlay__title {
   margin: 0 0 0.4rem;
   font-size: 1.7rem;
   line-height: 1.2;
 }
 
-.overlay__jahr {
+.overlay__year {
   margin: 0 0 1rem;
   font-size: 1.2rem;
-  color: var(--akzent-hell);
+  color: var(--accent-light);
 }
 
-.overlay__ort,
-.overlay__beschreibung {
+.overlay__place,
+.overlay__description {
   margin: 0 0 0.75rem;
   line-height: 1.5;
   color: #d8d0c6;
 }
 
-.overlay__schlagwoerter {
+.overlay__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -589,7 +589,7 @@ button {
   list-style: none;
 }
 
-.overlay__schlagwoerter li {
+.overlay__tags li {
   padding: 0.2rem 0.6rem;
   border: 1px solid rgb(255 255 255 / 25%);
   border-radius: 999px;
@@ -597,7 +597,7 @@ button {
   color: #d8d0c6;
 }
 
-.overlay__schliessen {
+.overlay__close {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
@@ -613,36 +613,31 @@ button {
   font-size: 1.05rem;
 }
 
-.overlay__schliessen span[aria-hidden] {
+.overlay__close span[aria-hidden] {
   font-size: 1.6rem;
   line-height: 1;
 }
 
-.overlay__hinweis {
+.overlay__notice {
   color: #f0c0c0;
 }
 
-/* --- Vorlaeufiges ------------------------------------------------------- */
+/* --- misc ---------------------------------------------------------------- */
 
-.platzhalter {
-  color: var(--gedaempft);
-  font-size: 0.9rem;
-}
-
-.hinweis {
+.splash {
   display: grid;
   place-items: center;
   height: 100%;
   padding: 2rem;
   text-align: center;
-  color: var(--gedaempft);
+  color: var(--muted);
 }
 
-.hinweis--fehler {
+.splash--error {
   color: #a03030;
 }
 
-/* MapLibre-Bedienelemente fingergerecht vergroessern. */
+/* Enlarge MapLibre's own controls to finger size. */
 .maplibregl-ctrl button {
   width: 3rem;
   height: 3rem;

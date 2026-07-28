@@ -1,204 +1,217 @@
 /**
- * Zeitraum-Schieber mit zwei Griffen.
+ * Time range slider with two handles.
  *
- * Eigenbau statt Bibliothek, aus drei Gruenden, die jeder fuer sich schon reichen wuerde:
+ * Hand-built rather than a library, for three reasons, any one of which would suffice:
  *
- *   - Die Griffe muessen fuer Finger gross sein. Ein Bereichsregler mit 16-px-Knopf ist am
- *     Touchscreen unbedienbar; die Fasszone ist hier so gross wie eine Fingerkuppe.
- *   - Hinter dem Balken liegt das Histogramm. Es zeigt dem Besucher, wo im Zeitraum ueberhaupt
- *     etwas zu finden ist -- ohne das schiebt man blind.
- *   - Zwei Griffe auf einer Achse mit Zeigerereignissen sind ueberschaubar; die Anpassung einer
- *     fremden Komponente an all das waere mehr Arbeit als das hier.
+ *   - The handles have to be large for fingers. A range input with a 16 px knob is unusable on a
+ *     touchscreen; the grab zone here is the size of a fingertip.
+ *   - The histogram sits behind the track. It shows the visitor where anything is to be found at
+ *     all -- without it you are pushing blind.
+ *   - Two handles on one axis driven by pointer events are manageable; bending a foreign component
+ *     to all of the above would be more work than this.
  */
 
-import { type PointerEvent as ReactPointerEvent, useCallback, useMemo, useRef, useState } from "react";
+import {
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { useKiosk } from "../store/kiosk";
+import { t } from "../texte/de";
 
-type Griff = "von" | "bis";
+type Handle = "start" | "end";
 
-/** Auf ganze Jahre runden, aber die Spanne auf Jahrzehnte aufrunden -- das liest sich besser. */
-function aufJahrzehnt(jahr: number, richtung: "ab" | "auf"): number {
-  return richtung === "ab" ? Math.floor(jahr / 10) * 10 : Math.ceil(jahr / 10) * 10;
+/** Round to whole years, but widen the span to decades -- that simply reads better. */
+function roundToDecade(year: number, direction: "down" | "up"): number {
+  return direction === "down" ? Math.floor(year / 10) * 10 : Math.ceil(year / 10) * 10;
 }
 
 export function TimeSlider() {
-  const histogramm = useKiosk((s) => s.histogramm);
-  const spanne = useKiosk((s) => s.spanne);
-  const zeitraum = useKiosk((s) => s.zeitraum);
-  const setzeZeitraum = useKiosk((s) => s.setzeZeitraum);
+  const histogram = useKiosk((s) => s.histogram);
+  const fullRange = useKiosk((s) => s.fullRange);
+  const timeRange = useKiosk((s) => s.timeRange);
+  const setTimeRange = useKiosk((s) => s.setTimeRange);
 
-  const bahn = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
 
-  // Der gezogene Griff steht in einem Ref, nicht nur im State.
+  // The handle being dragged lives in a ref, not only in state.
   //
-  // Zeigerereignisse kommen schneller, als React neu rendert: bei einer zuegigen Wischbewegung
-  // treffen die ersten pointermove-Ereignisse ein, bevor der State-Wechsel sichtbar ist. Ein
-  // Handler, der dann noch den alten Wert liest, verwirft die Bewegung -- der Griff bleibt kleben.
-  // Das Ref wird synchron gesetzt, der State dient nur der Darstellung.
-  const gezogenRef = useRef<Griff | null>(null);
-  const [gezogen, setGezogen] = useState<Griff | null>(null);
+  // Pointer events arrive faster than React re-renders: on a brisk swipe the first pointermove
+  // events land before the state change is visible. A handler reading the old value discards the
+  // movement -- the handle appears stuck. The ref is set synchronously; the state only drives
+  // appearance.
+  const draggingRef = useRef<Handle | null>(null);
+  const [dragging, setDragging] = useState<Handle | null>(null);
 
-  const grenzen = useMemo(() => {
-    if (!spanne) return null;
-    return { min: aufJahrzehnt(spanne.von, "ab"), max: aufJahrzehnt(spanne.bis, "auf") };
-  }, [spanne]);
+  const bounds = useMemo(() => {
+    if (!fullRange) return null;
+    return { min: roundToDecade(fullRange.von, "down"), max: roundToDecade(fullRange.bis, "up") };
+  }, [fullRange]);
 
-  const jahrZuAnteil = useCallback(
-    (jahr: number) => {
-      if (!grenzen || grenzen.max === grenzen.min) return 0;
-      return (jahr - grenzen.min) / (grenzen.max - grenzen.min);
+  const yearToFraction = useCallback(
+    (year: number) => {
+      if (!bounds || bounds.max === bounds.min) return 0;
+      return (year - bounds.min) / (bounds.max - bounds.min);
     },
-    [grenzen],
+    [bounds],
   );
 
-  const positionZuJahr = useCallback(
+  const positionToYear = useCallback(
     (clientX: number): number => {
-      if (!bahn.current || !grenzen) return 0;
-      const kasten = bahn.current.getBoundingClientRect();
-      const anteil = Math.min(1, Math.max(0, (clientX - kasten.left) / kasten.width));
-      return Math.round(grenzen.min + anteil * (grenzen.max - grenzen.min));
+      if (!track.current || !bounds) return 0;
+      const box = track.current.getBoundingClientRect();
+      const fraction = Math.min(1, Math.max(0, (clientX - box.left) / box.width));
+      return Math.round(bounds.min + fraction * (bounds.max - bounds.min));
     },
-    [grenzen],
+    [bounds],
   );
 
-  const verschiebe = useCallback(
-    (griff: Griff, clientX: number) => {
-      if (!zeitraum || !grenzen) return;
-      const jahr = positionZuJahr(clientX);
-      if (griff === "von") {
-        setzeZeitraum({ von: Math.min(jahr, zeitraum.bis), bis: zeitraum.bis });
+  const moveHandle = useCallback(
+    (handle: Handle, clientX: number) => {
+      if (!timeRange || !bounds) return;
+      const year = positionToYear(clientX);
+      if (handle === "start") {
+        setTimeRange({ von: Math.min(year, timeRange.bis), bis: timeRange.bis });
       } else {
-        setzeZeitraum({ von: zeitraum.von, bis: Math.max(jahr, zeitraum.von) });
+        setTimeRange({ von: timeRange.von, bis: Math.max(year, timeRange.von) });
       }
     },
-    [zeitraum, grenzen, positionZuJahr, setzeZeitraum],
+    [timeRange, bounds, positionToYear, setTimeRange],
   );
 
-  function beiZeigerStart(griff: Griff) {
-    return (ereignis: ReactPointerEvent<HTMLElement>) => {
-      ereignis.preventDefault();
-      ereignis.stopPropagation();
-      // Zeiger einfangen: der Finger darf beim Ziehen den Griff verlassen, ohne dass die Bewegung
-      // abreisst. Ohne das rutscht man am Touchscreen staendig heraus.
-      ereignis.currentTarget.setPointerCapture(ereignis.pointerId);
-      gezogenRef.current = griff;
-      setGezogen(griff);
+  function onHandleDown(handle: Handle) {
+    return (event: ReactPointerEvent<HTMLElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      // Capture the pointer: the finger may leave the handle while dragging without the movement
+      // breaking off. Without it you slip out constantly on a touchscreen.
+      event.currentTarget.setPointerCapture(event.pointerId);
+      draggingRef.current = handle;
+      setDragging(handle);
     };
   }
 
-  function beiZeigerBewegung(ereignis: ReactPointerEvent<HTMLElement>) {
-    if (!gezogenRef.current) return;
-    verschiebe(gezogenRef.current, ereignis.clientX);
+  function onPointerMove(event: ReactPointerEvent<HTMLElement>) {
+    if (!draggingRef.current) return;
+    moveHandle(draggingRef.current, event.clientX);
   }
 
-  function beiZeigerEnde() {
-    gezogenRef.current = null;
-    setGezogen(null);
+  function onPointerUp() {
+    draggingRef.current = null;
+    setDragging(null);
   }
 
-  /** Tippen auf die Bahn bewegt den naeheren Griff dorthin. */
-  function beiBahnKlick(ereignis: ReactPointerEvent<HTMLDivElement>) {
-    if (!zeitraum || gezogenRef.current) return;
-    const jahr = positionZuJahr(ereignis.clientX);
-    const griff: Griff =
-      Math.abs(jahr - zeitraum.von) <= Math.abs(jahr - zeitraum.bis) ? "von" : "bis";
-    verschiebe(griff, ereignis.clientX);
+  /** Tapping the track moves the nearer handle there. */
+  function onTrackDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!timeRange || draggingRef.current) return;
+    const year = positionToYear(event.clientX);
+    const handle: Handle =
+      Math.abs(year - timeRange.von) <= Math.abs(year - timeRange.bis) ? "start" : "end";
+    moveHandle(handle, event.clientX);
   }
 
-  if (!grenzen || !zeitraum || !histogramm) {
+  if (!bounds || !timeRange || !histogram) {
     return (
-      <div className="zeitleiste zeitleiste--leer">
-        {histogramm ? "Für diesen Ausschnitt gibt es keine datierten Fotos." : "…"}
+      <div className="timeline timeline--empty">
+        {histogram ? t.timeline.empty : t.timeline.loading}
       </div>
     );
   }
 
-  const hoechster = Math.max(1, ...histogramm.decades.map((d) => d.count));
-  const vonAnteil = jahrZuAnteil(zeitraum.von);
-  const bisAnteil = jahrZuAnteil(zeitraum.bis);
+  const tallest = Math.max(1, ...histogram.decades.map((d) => d.count));
+  const startFraction = yearToFraction(timeRange.von);
+  const endFraction = yearToFraction(timeRange.bis);
 
   return (
-    <div className="zeitleiste">
-      <div className="zeitleiste__kopf">
-        <span className="zeitleiste__auswahl">
-          {zeitraum.von} <span className="zeitleiste__bis">bis</span> {zeitraum.bis}
+    <div className="timeline">
+      <div className="timeline__header">
+        <span className="timeline__selection">
+          {timeRange.von} <span className="timeline__to">{t.timeline.to}</span> {timeRange.bis}
         </span>
-        {histogramm.undated > 0 && (
-          <span className="zeitleiste__undatiert">
-            {histogramm.undated} {histogramm.undated === 1 ? "Foto" : "Fotos"} ohne Jahr
-          </span>
+        {histogram.undated > 0 && (
+          <span className="timeline__undated">{t.timeline.undated(histogram.undated)}</span>
         )}
       </div>
 
       <div
-        ref={bahn}
-        className="zeitleiste__bahn"
-        onPointerDown={beiBahnKlick}
-        onPointerMove={beiZeigerBewegung}
-        onPointerUp={beiZeigerEnde}
-        onPointerCancel={beiZeigerEnde}
+        ref={track}
+        className="timeline__track"
+        onPointerDown={onTrackDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
       >
-        {/* Histogramm: wo liegt ueberhaupt etwas? */}
-        <div className="zeitleiste__histogramm" aria-hidden="true">
-          {histogramm.decades.map((balken) => {
-            const anteil = jahrZuAnteil(balken.decade);
-            const breite = 10 / (grenzen.max - grenzen.min);
-            const innerhalb = balken.decade + 9 >= zeitraum.von && balken.decade <= zeitraum.bis;
+        {/* Histogram: where is anything at all? */}
+        <div className="timeline__histogram" aria-hidden="true">
+          {histogram.decades.map((bar) => {
+            const fraction = yearToFraction(bar.decade);
+            const width = 10 / (bounds.max - bounds.min);
+            const inRange = bar.decade + 9 >= timeRange.von && bar.decade <= timeRange.bis;
             return (
               <div
-                key={balken.decade}
-                className={`zeitleiste__balken${innerhalb ? " zeitleiste__balken--aktiv" : ""}`}
+                key={bar.decade}
+                className={`timeline__bar${inRange ? " timeline__bar--active" : ""}`}
                 style={{
-                  left: `${anteil * 100}%`,
-                  width: `${breite * 100}%`,
-                  height: `${Math.max(6, (balken.count / hoechster) * 100)}%`,
+                  left: `${fraction * 100}%`,
+                  width: `${width * 100}%`,
+                  height: `${Math.max(6, (bar.count / tallest) * 100)}%`,
                 }}
-                title={`${balken.decade}er: ${balken.count}`}
+                title={`${bar.decade}er: ${bar.count}`}
               />
             );
           })}
         </div>
 
-        <div className="zeitleiste__schiene" />
+        <div className="timeline__rail" />
         <div
-          className="zeitleiste__gewaehlt"
-          style={{ left: `${vonAnteil * 100}%`, right: `${(1 - bisAnteil) * 100}%` }}
+          className="timeline__selected"
+          style={{ left: `${startFraction * 100}%`, right: `${(1 - endFraction) * 100}%` }}
         />
 
-        {(["von", "bis"] as const).map((griff) => (
+        {(["start", "end"] as const).map((handle) => (
           <div
-            key={griff}
-            className={`zeitleiste__griff${gezogen === griff ? " zeitleiste__griff--aktiv" : ""}`}
-            style={{ left: `${(griff === "von" ? vonAnteil : bisAnteil) * 100}%` }}
-            onPointerDown={beiZeigerStart(griff)}
-            onPointerMove={beiZeigerBewegung}
-            onPointerUp={beiZeigerEnde}
-            onPointerCancel={beiZeigerEnde}
+            key={handle}
+            className={`timeline__handle${dragging === handle ? " timeline__handle--active" : ""}`}
+            style={{
+              left: `${(handle === "start" ? startFraction : endFraction) * 100}%`,
+            }}
+            onPointerDown={onHandleDown(handle)}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
             role="slider"
             tabIndex={0}
-            aria-label={griff === "von" ? "Anfangsjahr" : "Endjahr"}
-            aria-valuemin={grenzen.min}
-            aria-valuemax={grenzen.max}
-            aria-valuenow={griff === "von" ? zeitraum.von : zeitraum.bis}
+            aria-label={handle === "start" ? t.timeline.startHandle : t.timeline.endHandle}
+            aria-valuemin={bounds.min}
+            aria-valuemax={bounds.max}
+            aria-valuenow={handle === "start" ? timeRange.von : timeRange.bis}
             onKeyDown={(e) => {
-              const schritt = e.key === "ArrowLeft" ? -1 : e.key === "ArrowRight" ? 1 : 0;
-              if (!schritt) return;
+              const step = e.key === "ArrowLeft" ? -1 : e.key === "ArrowRight" ? 1 : 0;
+              if (!step) return;
               e.preventDefault();
-              const neu = (griff === "von" ? zeitraum.von : zeitraum.bis) + schritt;
-              setzeZeitraum(
-                griff === "von"
-                  ? { von: Math.max(grenzen.min, Math.min(neu, zeitraum.bis)), bis: zeitraum.bis }
-                  : { von: zeitraum.von, bis: Math.min(grenzen.max, Math.max(neu, zeitraum.von)) },
+              const next = (handle === "start" ? timeRange.von : timeRange.bis) + step;
+              setTimeRange(
+                handle === "start"
+                  ? {
+                      von: Math.max(bounds.min, Math.min(next, timeRange.bis)),
+                      bis: timeRange.bis,
+                    }
+                  : {
+                      von: timeRange.von,
+                      bis: Math.min(bounds.max, Math.max(next, timeRange.von)),
+                    },
               );
             }}
           />
         ))}
       </div>
 
-      <div className="zeitleiste__skala" aria-hidden="true">
-        <span>{grenzen.min}</span>
-        <span>{grenzen.max}</span>
+      <div className="timeline__scale" aria-hidden="true">
+        <span>{bounds.min}</span>
+        <span>{bounds.max}</span>
       </div>
     </div>
   );

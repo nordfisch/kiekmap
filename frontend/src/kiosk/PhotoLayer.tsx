@@ -1,11 +1,10 @@
 /**
- * Fotos an ihrem Aufnahmeort auf der Karte.
+ * Photos at their capture location on the map.
  *
- * Echte Vorschaubilder als Marker sind das Ziel -- ein Bild an seinem Ort ist unmittelbar
- * verstaendlich, ein Punkt ist es nicht. Bei hoher Dichte werden daraus aber hunderte Bildelemente,
- * die der Pi beim Schieben nicht mehr fluessig bewegt. Deshalb fasst supercluster nahe
- * beieinanderliegende Fotos zu einem Kreis mit Anzahl zusammen; beim Hineinzoomen loesen sie sich
- * wieder auf. Das ist zugleich die natuerlichste Geste am Touchscreen.
+ * Real thumbnails as markers are the goal -- an image at its place is immediately understandable,
+ * a dot is not. At high density that turns into hundreds of image elements, which the Pi can no
+ * longer pan smoothly. supercluster therefore merges nearby photos into a circle with a count;
+ * zooming in dissolves them again. That is also the most natural gesture on a touchscreen.
  */
 
 import type maplibregl from "maplibre-gl";
@@ -15,144 +14,141 @@ import Supercluster from "supercluster";
 
 import type { PhotoMarker } from "../api/client";
 import { useKiosk } from "../store/kiosk";
+import { t } from "../texte/de";
 
-/** Radius in Pixeln, innerhalb dessen zusammengefasst wird. Etwa eine Daumenbreite. */
+/** Radius in pixels within which photos are merged. About a thumb's width. */
 const CLUSTER_RADIUS = 70;
 
-/** Ab hier wird nicht mehr zusammengefasst -- naeher beieinander liegen Fotos selten sinnvoll. */
+/** Beyond this zoom nothing is merged -- closer together than that is rarely meaningful. */
 const CLUSTER_MAXZOOM = 17;
 
-type FotoEigenschaften = { foto: PhotoMarker };
+type PhotoProps = { photo: PhotoMarker };
 
-/** getClusters liefert Zusammenfassungen und Einzelfotos gemischt zurueck. */
-type Gruppe = Supercluster.PointFeature<FotoEigenschaften | Supercluster.ClusterProperties>;
+/** getClusters returns merged groups and single photos mixed together. */
+type Group = Supercluster.PointFeature<PhotoProps | Supercluster.ClusterProperties>;
 
-function istCluster(
-  gruppe: Gruppe,
-): gruppe is Supercluster.PointFeature<Supercluster.ClusterProperties> {
-  return "cluster" in gruppe.properties && gruppe.properties.cluster;
+function isCluster(
+  group: Group,
+): group is Supercluster.PointFeature<Supercluster.ClusterProperties> {
+  return "cluster" in group.properties && group.properties.cluster;
 }
 
-function baueIndex(photos: PhotoMarker[]): Supercluster<FotoEigenschaften> {
-  const index = new Supercluster<FotoEigenschaften>({
+function buildIndex(photos: PhotoMarker[]): Supercluster<PhotoProps> {
+  const index = new Supercluster<PhotoProps>({
     radius: CLUSTER_RADIUS,
     maxZoom: CLUSTER_MAXZOOM,
   });
   index.load(
-    photos.map((foto) => ({
+    photos.map((photo) => ({
       type: "Feature" as const,
-      properties: { foto },
-      geometry: { type: "Point" as const, coordinates: [foto.lon, foto.lat] },
+      properties: { photo },
+      geometry: { type: "Point" as const, coordinates: [photo.lon, photo.lat] },
     })),
   );
   return index;
 }
 
-function fotoElement(foto: PhotoMarker, beiKlick: () => void): HTMLElement {
-  const wurzel = document.createElement("button");
-  wurzel.type = "button";
-  wurzel.className = "marker";
-  wurzel.setAttribute(
-    "aria-label",
-    `${foto.title ?? "Foto"}, ${foto.date_label} — groß anzeigen`,
-  );
+function photoElement(photo: PhotoMarker, onSelect: () => void): HTMLElement {
+  const root = document.createElement("button");
+  root.type = "button";
+  root.className = "marker";
+  root.setAttribute("aria-label", t.map.markerLabel(photo.title ?? "Foto", photo.date_label));
 
-  const bild = document.createElement("img");
-  bild.className = "marker__bild";
-  bild.src = foto.thumb_url;
-  bild.alt = "";
-  bild.loading = "lazy";
-  bild.decoding = "async";
-  // Hochkant und quer sollen gleich gross wirken, deshalb feste Hoehe statt fester Breite.
-  bild.style.aspectRatio = `${foto.width} / ${foto.height}`;
-  wurzel.appendChild(bild);
+  const image = document.createElement("img");
+  image.className = "marker__image";
+  image.src = photo.thumb_url;
+  image.alt = "";
+  image.loading = "lazy";
+  image.decoding = "async";
+  // Portrait and landscape should look equally large, hence a fixed height rather than width.
+  image.style.aspectRatio = `${photo.width} / ${photo.height}`;
+  root.appendChild(image);
 
-  const jahr = document.createElement("span");
-  jahr.className = "marker__jahr";
-  jahr.textContent = foto.date_label;
-  wurzel.appendChild(jahr);
+  const year = document.createElement("span");
+  year.className = "marker__year";
+  year.textContent = photo.date_label;
+  root.appendChild(year);
 
-  wurzel.addEventListener("click", (ereignis) => {
-    ereignis.stopPropagation();
-    beiKlick();
+  root.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onSelect();
   });
-  return wurzel;
+  return root;
 }
 
-function clusterElement(anzahl: number, beiKlick: () => void): HTMLElement {
-  const wurzel = document.createElement("button");
-  wurzel.type = "button";
-  wurzel.className = "cluster";
-  wurzel.setAttribute("aria-label", `${anzahl} Fotos — hineinzoomen`);
-  wurzel.textContent = String(anzahl);
-  // Bei vielen Fotos etwas groesser, damit die Verteilung auf einen Blick lesbar ist.
-  const groesse = Math.min(88, 48 + Math.log10(anzahl) * 26);
-  wurzel.style.width = wurzel.style.height = `${Math.round(groesse)}px`;
+function clusterElement(count: number, onSelect: () => void): HTMLElement {
+  const root = document.createElement("button");
+  root.type = "button";
+  root.className = "cluster";
+  root.setAttribute("aria-label", t.map.clusterLabel(count));
+  root.textContent = String(count);
+  // Slightly larger for many photos, so the distribution reads at a glance.
+  const size = Math.min(88, 48 + Math.log10(count) * 26);
+  root.style.width = root.style.height = `${Math.round(size)}px`;
 
-  wurzel.addEventListener("click", (ereignis) => {
-    ereignis.stopPropagation();
-    beiKlick();
+  root.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onSelect();
   });
-  return wurzel;
+  return root;
 }
 
 export function PhotoLayer({ map }: { map: maplibregl.Map }) {
   const photos = useKiosk((s) => s.photos);
-  const oeffneFoto = useKiosk((s) => s.oeffneFoto);
-  const marker = useRef<Marker[]>([]);
+  const openPhoto = useKiosk((s) => s.openPhoto);
+  const markers = useRef<Marker[]>([]);
 
-  const index = useMemo(() => baueIndex(photos), [photos]);
+  const index = useMemo(() => buildIndex(photos), [photos]);
 
   useEffect(() => {
-    function zeichne() {
-      // Marker werden vollstaendig neu gesetzt statt abgeglichen. Bei hoechstens einigen Dutzend
-      // sichtbaren Elementen ist das guenstiger als der Abgleich -- und deutlich weniger Code,
-      // in dem sich ein Zustandsfehler verstecken koennte.
-      for (const alt of marker.current) alt.remove();
-      marker.current = [];
+    function draw() {
+      // Markers are rebuilt wholesale rather than diffed. With at most a few dozen visible
+      // elements that is cheaper than reconciling -- and far less code for a state bug to hide in.
+      for (const old of markers.current) old.remove();
+      markers.current = [];
 
-      const grenzen = map.getBounds();
+      const bounds = map.getBounds();
       const zoom = Math.round(map.getZoom());
-      const gruppen = index.getClusters(
-        [grenzen.getWest(), grenzen.getSouth(), grenzen.getEast(), grenzen.getNorth()],
+      const groups = index.getClusters(
+        [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
         zoom,
       );
 
-      for (const gruppe of gruppen) {
-        const [lon, lat] = gruppe.geometry.coordinates as [number, number];
+      for (const group of groups) {
+        const [lon, lat] = group.geometry.coordinates as [number, number];
 
-        if (istCluster(gruppe)) {
-          const { cluster_id: clusterId, point_count: anzahl } = gruppe.properties;
-          const element = clusterElement(anzahl, () => {
-            // So weit hineinzoomen, dass diese Gruppe sich aufloest.
+        if (isCluster(group)) {
+          const { cluster_id: clusterId, point_count: count } = group.properties;
+          const element = clusterElement(count, () => {
+            // Zoom in far enough for this group to dissolve.
             map.easeTo({
               center: [lon, lat],
               zoom: Math.min(index.getClusterExpansionZoom(clusterId), CLUSTER_MAXZOOM + 1),
               duration: 500,
             });
           });
-          marker.current.push(new Marker({ element }).setLngLat([lon, lat]).addTo(map));
+          markers.current.push(new Marker({ element }).setLngLat([lon, lat]).addTo(map));
         } else {
-          const foto = gruppe.properties.foto;
-          const element = fotoElement(foto, () => oeffneFoto(foto.id));
-          marker.current.push(
-            // Der Marker sitzt mit seiner Unterkante auf dem Ort, wie eine Stecknadel.
+          const photo = group.properties.photo;
+          const element = photoElement(photo, () => openPhoto(photo.id));
+          markers.current.push(
+            // The marker sits with its lower edge on the location, like a pin.
             new Marker({ element, anchor: "bottom" }).setLngLat([lon, lat]).addTo(map),
           );
         }
       }
     }
 
-    zeichne();
-    map.on("move", zeichne);
-    map.on("zoom", zeichne);
+    draw();
+    map.on("move", draw);
+    map.on("zoom", draw);
     return () => {
-      map.off("move", zeichne);
-      map.off("zoom", zeichne);
-      for (const alt of marker.current) alt.remove();
-      marker.current = [];
+      map.off("move", draw);
+      map.off("zoom", draw);
+      for (const old of markers.current) old.remove();
+      markers.current = [];
     };
-  }, [map, index, oeffneFoto]);
+  }, [map, index, openPhoto]);
 
   return null;
 }

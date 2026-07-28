@@ -1,89 +1,90 @@
 /**
- * Das gross angezeigte Foto.
+ * The photo shown full screen.
  *
- * Gezeigt wird die 1200-px-Vorschau, nicht das Original: ein Scan kann 80 MB haben, und auf einem
- * Display mit 1080 oder 2160 Pixeln Hoehe sieht man davon nichts. Der Unterschied ist der zwischen
- * sofort und mehreren Sekunden -- und im Museum bricht ein Besucher nach zwei Sekunden ab.
+ * What is shown is the 1200 px thumbnail, not the original: a scan can be 80 MB, and on a display
+ * 1080 or 2160 pixels tall none of that is visible. The difference is between instant and several
+ * seconds -- and in a museum a visitor gives up after two.
  *
- * Geschlossen wird ueberall: Tippen daneben, der Knopf, Escape. Wer nicht weiterweiss, tippt
- * irgendwohin, und das muss zurueckfuehren.
+ * It closes everywhere: tapping beside it, the button, Escape. Whoever is stuck taps somewhere,
+ * and that has to lead back.
  */
 
 import { useEffect, useState } from "react";
 
-import { type PhotoDetail, ladeDetail } from "../api/client";
+import { type PhotoDetail, fetchPhoto } from "../api/client";
 import { useKiosk } from "../store/kiosk";
+import { t } from "../texte/de";
 
 export function PhotoOverlay() {
-  const offenesFoto = useKiosk((s) => s.offenesFoto);
-  const oeffneFoto = useKiosk((s) => s.oeffneFoto);
+  const openPhotoId = useKiosk((s) => s.openPhotoId);
+  const openPhoto = useKiosk((s) => s.openPhoto);
   const [detail, setDetail] = useState<PhotoDetail | null>(null);
-  const [fehler, setFehler] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (offenesFoto === null) {
+    if (openPhotoId === null) {
       setDetail(null);
-      setFehler(null);
+      setError(null);
       return;
     }
 
-    const abbruch = new AbortController();
-    ladeDetail(offenesFoto, abbruch.signal)
+    const abort = new AbortController();
+    fetchPhoto(openPhotoId, abort.signal)
       .then(setDetail)
       .catch((e: unknown) => {
-        if (abbruch.signal.aborted) return;
-        setFehler(e instanceof Error ? e.message : String(e));
+        if (abort.signal.aborted) return;
+        setError(e instanceof Error ? e.message : String(e));
       });
-    return () => abbruch.abort();
-  }, [offenesFoto]);
+    return () => abort.abort();
+  }, [openPhotoId]);
 
   useEffect(() => {
-    if (offenesFoto === null) return;
-    function beiTaste(ereignis: KeyboardEvent) {
-      if (ereignis.key === "Escape") oeffneFoto(null);
+    if (openPhotoId === null) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") openPhoto(null);
     }
-    window.addEventListener("keydown", beiTaste);
-    return () => window.removeEventListener("keydown", beiTaste);
-  }, [offenesFoto, oeffneFoto]);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openPhotoId, openPhoto]);
 
-  if (offenesFoto === null) return null;
+  if (openPhotoId === null) return null;
 
-  const schliessen = () => oeffneFoto(null);
+  const close = () => openPhoto(null);
 
   return (
     <div
       className="overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="Foto in voller Größe"
-      onClick={schliessen}
+      aria-label={t.overlay.dialogLabel}
+      onClick={close}
     >
-      <button type="button" className="overlay__schliessen" onClick={schliessen}>
+      <button type="button" className="overlay__close" onClick={close}>
         <span aria-hidden="true">×</span>
-        <span className="overlay__schliessen-text">Schließen</span>
+        <span className="overlay__close-text">{t.overlay.close}</span>
       </button>
 
-      {fehler && <p className="overlay__hinweis">{fehler}</p>}
+      {error && <p className="overlay__notice">{error}</p>}
 
       {detail && (
-        // Klicks auf das Bild selbst sollen nicht schliessen -- sonst kann man es nicht ansehen,
-        // ohne es zu verlieren.
-        <figure className="overlay__inhalt" onClick={(e) => e.stopPropagation()}>
+        // Clicks on the image itself must not close -- otherwise you cannot look at it without
+        // losing it.
+        <figure className="overlay__content" onClick={(e) => e.stopPropagation()}>
           <img
-            className="overlay__bild"
+            className="overlay__image"
             src={detail.thumb_url}
-            alt={detail.title ?? "Historisches Foto"}
+            alt={detail.title ?? t.map.photoAlt}
             style={{ aspectRatio: `${detail.width} / ${detail.height}` }}
           />
           <figcaption className="overlay__text">
-            <h2 className="overlay__titel">{detail.title ?? "Ohne Titel"}</h2>
-            <p className="overlay__jahr">{detail.date_label}</p>
-            {detail.place_name && <p className="overlay__ort">{detail.place_name}</p>}
-            {detail.description && <p className="overlay__beschreibung">{detail.description}</p>}
+            <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
+            <p className="overlay__year">{detail.date_label}</p>
+            {detail.place_name && <p className="overlay__place">{detail.place_name}</p>}
+            {detail.description && <p className="overlay__description">{detail.description}</p>}
             {detail.tags.length > 0 && (
-              <ul className="overlay__schlagwoerter">
-                {detail.tags.map((wort) => (
-                  <li key={wort}>{wort}</li>
+              <ul className="overlay__tags">
+                {detail.tags.map((tag) => (
+                  <li key={tag}>{tag}</li>
                 ))}
               </ul>
             )}

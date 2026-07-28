@@ -1,10 +1,12 @@
 /**
- * Die Region des Museumsorts.
+ * The region of the museum's village.
  *
- * Wird zur Laufzeit von `/tiles/region.json` geholt und nicht ins Bundle gebacken -- aus demselben
- * Grund wie die Kartendatei selbst: sie gehoert zum Ort, nicht zur Software. So laesst sich der
- * Kartenausschnitt auf dem Pi anpassen, ohne das Frontend neu zu bauen.
+ * Fetched at runtime from `/tiles/region.json` rather than baked into the bundle -- for the same
+ * reason as the map file itself: it belongs to the place, not to the software. That way the
+ * viewport can be adjusted on the Pi without rebuilding the frontend.
  */
+
+import { t } from "./texte/de";
 
 export type Region = {
   name: string;
@@ -19,10 +21,7 @@ export type Region = {
 export async function loadRegion(signal?: AbortSignal): Promise<Region> {
   const response = await fetch("/tiles/region.json", { signal });
   if (!response.ok) {
-    throw new Error(
-      `Die Region konnte nicht geladen werden (HTTP ${response.status}). ` +
-        `Wurde "make tiles" ausgefuehrt?`,
-    );
+    throw new Error(t.errors.regionMissing(response.status));
   }
   return (await response.json()) as Region;
 }

@@ -10,22 +10,22 @@ import { useKiosk } from "../store/kiosk";
 import { PhotoLayer } from "./PhotoLayer";
 import { PinLayer } from "./PinLayer";
 
-// Einmal pro Seitenaufruf: lehrt MapLibre, `pmtiles://`-Quellen per HTTP-Range-Request zu lesen.
-// Genau das macht den Tileserver ueberfluessig -- nginx liefert einfach eine statische Datei aus.
+// Once per page load: teaches MapLibre to read `pmtiles://` sources via HTTP range requests.
+// That is exactly what makes a tile server unnecessary -- nginx just serves a static file.
 const protocol = new Protocol();
 maplibregl.addProtocol("pmtiles", protocol.tile);
 
 /**
- * Schriften und Symbole liegen lokal unter /basemaps/.
+ * Fonts and icons live locally under /basemaps/.
  *
- * Das ist der Punkt, an dem eine Offline-Karte sonst still zerbricht: Kacheln und Stil kaemen aus
- * der PMTiles-Datei, aber Beschriftungen und Symbole wuerden weiterhin von protomaps.github.io
- * geholt. Ohne Netz bliebe eine Karte ohne jede Schrift uebrig.
+ * This is where an offline map otherwise breaks silently: tiles and style would come from the
+ * PMTiles file, but labels and icons would still be fetched from protomaps.github.io. Without a
+ * network what remains is a map without a single word on it.
  */
 const GLYPHS = "/basemaps/fonts/{fontstack}/{range}.pbf";
-// Sprites verlangt MapLibre absolut -- relative Pfade lehnt es ab. Die Herkunft kommt aus dem
-// Browser statt aus der Konfiguration, damit derselbe Bau unter localhost, im Museums-WLAN und
-// hinter dem nginx des Pi funktioniert.
+// MapLibre demands an absolute sprite URL -- it rejects relative paths. The origin comes from the
+// browser rather than from configuration, so the same build works on localhost, in the museum's
+// wifi and behind the Pi's nginx.
 const SPRITE = `${window.location.origin}/basemaps/sprites/v4/light`;
 
 function buildStyle(region: Region): maplibregl.StyleSpecification {
@@ -47,62 +47,62 @@ function buildStyle(region: Region): maplibregl.StyleSpecification {
 
 export function MapView({ region }: { region: Region }) {
   const container = useRef<HTMLDivElement>(null);
-  const [karte, setKarte] = useState<maplibregl.Map | null>(null);
-  const setzeAusschnitt = useKiosk((s) => s.setzeAusschnitt);
+  const [map, setMap] = useState<maplibregl.Map | null>(null);
+  const setViewport = useKiosk((s) => s.setViewport);
 
   useEffect(() => {
     if (!container.current) return;
 
-    const instanz = new maplibregl.Map({
+    const instance = new maplibregl.Map({
       container: container.current,
       style: buildStyle(region),
       center: region.center,
       zoom: region.defaultZoom,
       minZoom: region.minZoom,
-      // Ueber die Region hinaus gibt es keine Kacheln. Ohne diese Grenze koennte der Besucher in
-      // eine graue Flaeche hinauswandern und faende allein nicht zurueck.
+      // Beyond the region there are no tiles. Without this bound a visitor could wander into a
+      // grey plane and would not find the way back on their own.
       maxBounds: [
         [region.bbox[0], region.bbox[1]],
         [region.bbox[2], region.bbox[3]],
       ],
-      // Drehen und Neigen sind am Museums-Touchscreen nur Wege, die Karte zu verstellen.
+      // Rotating and tilting are only ways to misalign the map on a museum touchscreen.
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,
       attributionControl: { compact: true },
     });
-    instanz.touchZoomRotate.disableRotation();
-    instanz.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    instance.touchZoomRotate.disableRotation();
+    instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
-    function meldeAusschnitt() {
-      const grenzen = instanz.getBounds();
-      setzeAusschnitt([
-        grenzen.getWest(),
-        grenzen.getSouth(),
-        grenzen.getEast(),
-        grenzen.getNorth(),
+    function reportViewport() {
+      const bounds = instance.getBounds();
+      setViewport([
+        bounds.getWest(),
+        bounds.getSouth(),
+        bounds.getEast(),
+        bounds.getNorth(),
       ] satisfies Bbox);
     }
 
-    instanz.on("load", () => {
-      meldeAusschnitt();
-      setKarte(instanz);
+    instance.on("load", () => {
+      reportViewport();
+      setMap(instance);
     });
-    // "moveend" statt "move": das Nachladen wird ohnehin entprellt, und waehrend des Wischens
-    // staendig neue Ausschnitte zu melden bringt nichts.
-    instanz.on("moveend", meldeAusschnitt);
+    // "moveend" rather than "move": loading is debounced anyway, and reporting new viewports
+    // continuously while swiping achieves nothing.
+    instance.on("moveend", reportViewport);
 
     return () => {
-      instanz.remove();
-      setKarte(null);
+      instance.remove();
+      setMap(null);
     };
-  }, [region, setzeAusschnitt]);
+  }, [region, setViewport]);
 
   return (
-    <div className="karte">
-      <div ref={container} className="karte__flaeche" />
-      {karte && <PhotoLayer map={karte} />}
-      {karte && <PinLayer map={karte} />}
+    <div className="map">
+      <div ref={container} className="map__canvas" />
+      {map && <PhotoLayer map={map} />}
+      {map && <PinLayer map={map} />}
     </div>
   );
 }

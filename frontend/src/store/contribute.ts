@@ -1,0 +1,173 @@
+/**
+ * State of the "Hilf mit" panel.
+ *
+ * Kept apart from the map state because both run independently: the visitor can explore the map
+ * while a question stands on the right, and the other way round.
+ *
+ * One exception -- locating a photo. There the pin is dropped on the very same map that shows the
+ * photos. The pin therefore lives here and the map layer reads it.
+ */
+
+import { create } from "zustand";
+
+import {
+  type Need,
+  type PhotoDetail,
+  type Precision,
+  type Task,
+  fetchTask,
+  postDate,
+  postLocation,
+} from "../api/client";
+import { t } from "../texte/de";
+
+/** How long the thank-you note stays before the next question arrives. */
+const THANKS_MS = 2200;
+
+/**
+ * Session key.
+ *
+ * Distinguishes visitors at the same device without identifying them: a random value per page
+ * load, stored nowhere. The curator can tell whether ten statements came from one person or from
+ * ten -- and should not be able to do more than that.
+ */
+const SESSION_ID = Math.random().toString(36).slice(2, 12);
+
+/** Remember only the last few skipped photos, otherwise nothing would be left to show. */
+const SKIP_MEMORY = 20;
+
+type ContributeState = {
+  need: Need;
+  task: Task | null;
+  loading: boolean;
+  error: string | null;
+  /** Right after a contribution: thank-you note instead of the next question. */
+  thanks: string | null;
+
+  /** Photos the visitor has just dismissed. This session only. */
+  skipped: number[];
+
+  /** Pin dropped on the map while the location question is running. */
+  pin: { lat: number; lon: number } | null;
+  /** Name from the place search, when set that way. */
+  pinLabel: string | null;
+
+  load: (need?: Need) => Promise<void>;
+  skip: () => void;
+  setPin: (pin: { lat: number; lon: number } | null, label?: string | null) => void;
+  submitLocation: () => Promise<void>;
+  submitDate: (year: number, precision: Precision) => Promise<void>;
+  reset: () => void;
+};
+
+let abort: AbortController | null = null;
+let thanksTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** After a contribution, the other question is the welcome change of pace. */
+function otherNeed(current: Need): Need {
+  return current === "location" ? "date" : "location";
+}
+
+export const useContribute = create<ContributeState>((set, get) => {
+  async function load(need: Need) {
+    abort?.abort();
+    abort = new AbortController();
+    const signal = abort.signal;
+
+    set({ loading: true, error: null, pin: null, pinLabel: null });
+    try {
+      const task = await fetchTask(need, get().skipped, signal);
+      set({ task, need, loading: false });
+    } catch (e) {
+      if (signal.aborted) return;
+      set({ loading: false, error: e instanceof Error ? e.message : String(e) });
+    }
+  }
+
+  function showThanks(text: string, next: Need) {
+    if (thanksTimer) clearTimeout(thanksTimer);
+    set({ thanks: text });
+    thanksTimer = setTimeout(() => {
+      thanksTimer = null;
+      set({ thanks: null });
+      void load(next);
+    }, THANKS_MS);
+  }
+
+  async function contribute(
+    action: (photo: PhotoDetail) => Promise<PhotoDetail>,
+    thanksText: string,
+  ) {
+    const { task, need } = get();
+    if (!task?.photo) return;
+
+    set({ loading: true, error: null });
+    try {
+      await action(task.photo);
+      set({ loading: false, pin: null, pinLabel: null });
+      showThanks(thanksText, otherNeed(need));
+    } catch (e) {
+      // Most common case: somebody else was quicker (HTTP 409). The backend already phrases that
+      // message kindly.
+      set({ loading: false, error: e instanceof Error ? e.message : String(e) });
+    }
+  }
+
+  return {
+    need: "location",
+    task: null,
+    loading: false,
+    error: null,
+    thanks: null,
+    skipped: [],
+    pin: null,
+    pinLabel: null,
+
+    load: (need) => load(need ?? get().need),
+
+    skip() {
+      const { task, need, skipped } = get();
+      const id = task?.photo?.id;
+      set({
+        skipped: id ? [...skipped, id].slice(-SKIP_MEMORY) : skipped,
+        pin: null,
+        pinLabel: null,
+      });
+      void load(need);
+    },
+
+    setPin(pin, label = null) {
+      set({ pin, pinLabel: label });
+    },
+
+    async submitLocation() {
+      const { pin, pinLabel } = get();
+      if (!pin) return;
+      await contribute(
+        (photo) =>
+          postLocation(photo.id, {
+            lat: pin.lat,
+            lon: pin.lon,
+            ...(pinLabel ? { place_name: pinLabel } : {}),
+            session_id: SESSION_ID,
+          }),
+        t.help.thanksLocation,
+      );
+    },
+
+    async submitDate(year, precision) {
+      await contribute(
+        (photo) => postDate(photo.id, { year, precision, session_id: SESSION_ID }),
+        t.help.thanksDate,
+      );
+    },
+
+    /** For the idle reset: forget everything and start over. */
+    reset() {
+      if (thanksTimer) clearTimeout(thanksTimer);
+      thanksTimer = null;
+      set({ skipped: [], pin: null, pinLabel: null, thanks: null, error: null });
+      void load("location");
+    },
+  };
+});

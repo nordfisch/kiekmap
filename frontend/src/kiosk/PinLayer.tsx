@@ -1,44 +1,47 @@
 /**
- * Der Pin, mit dem ein Besucher ein Foto verortet.
+ * The pin a visitor uses to locate a photo.
  *
- * Liegt auf derselben Karte wie die Fotos -- das ist der Punkt der ganzen Uebung: man sieht die
- * Umgebung, erkennt die Straße wieder und setzt den Pin dorthin.
+ * It lives on the same map as the photos -- that is the whole point of the exercise: you see the
+ * surroundings, recognise the street and drop the pin there.
  *
- * Antippen der Karte setzt ihn, Ziehen verschiebt ihn. Beides muss gehen: manche tippen erst grob
- * und korrigieren dann, andere treffen sofort.
+ * Tapping the map drops it, dragging moves it. Both have to work: some tap roughly first and
+ * correct afterwards, others hit it straight away.
  */
 
 import type maplibregl from "maplibre-gl";
 import { Marker } from "maplibre-gl";
 import { useEffect, useRef } from "react";
 
-import { useHilfMit } from "../store/hilfmit";
+import { useContribute } from "../store/contribute";
+import { t } from "../texte/de";
 
 export function PinLayer({ map }: { map: maplibregl.Map }) {
-  const aktiv = useHilfMit((s) => s.bedarf === "location" && s.aufgabe?.photo != null && !s.dank);
-  const pin = useHilfMit((s) => s.pin);
-  const setzePin = useHilfMit((s) => s.setzePin);
+  const active = useContribute(
+    (s) => s.need === "location" && s.task?.photo != null && !s.thanks,
+  );
+  const pin = useContribute((s) => s.pin);
+  const setPin = useContribute((s) => s.setPin);
   const marker = useRef<Marker | null>(null);
 
-  // Tippen auf die Karte setzt den Pin.
+  // Tapping the map drops the pin.
   useEffect(() => {
-    if (!aktiv) return;
+    if (!active) return;
 
-    function beiKlick(ereignis: maplibregl.MapMouseEvent) {
-      setzePin({ lat: ereignis.lngLat.lat, lon: ereignis.lngLat.lng });
+    function onClick(event: maplibregl.MapMouseEvent) {
+      setPin({ lat: event.lngLat.lat, lon: event.lngLat.lng });
     }
 
-    map.on("click", beiKlick);
+    map.on("click", onClick);
     map.getCanvas().style.cursor = "crosshair";
     return () => {
-      map.off("click", beiKlick);
+      map.off("click", onClick);
       map.getCanvas().style.cursor = "";
     };
-  }, [map, aktiv, setzePin]);
+  }, [map, active, setPin]);
 
-  // Pin anlegen, verschieben, entfernen.
+  // Create, move, remove the pin.
   useEffect(() => {
-    if (!pin || !aktiv) {
+    if (!pin || !active) {
       marker.current?.remove();
       marker.current = null;
       return;
@@ -47,22 +50,22 @@ export function PinLayer({ map }: { map: maplibregl.Map }) {
     if (!marker.current) {
       const element = document.createElement("div");
       element.className = "pin";
-      element.setAttribute("aria-label", "Gesetzter Ort, verschiebbar");
+      element.setAttribute("aria-label", t.map.pinLabel);
 
       marker.current = new Marker({ element, anchor: "bottom", draggable: true })
         .setLngLat([pin.lon, pin.lat])
         .addTo(map);
 
       marker.current.on("dragend", () => {
-        const ort = marker.current?.getLngLat();
-        // Beim Verschieben faellt ein zuvor gewaehlter Ortsname weg: der Name gehoert zu der
-        // Stelle, die die Suche geliefert hat, nicht zu der, wohin gezogen wurde.
-        if (ort) setzePin({ lat: ort.lat, lon: ort.lng }, null);
+        const position = marker.current?.getLngLat();
+        // Dragging drops a previously chosen place name: the name belongs to the spot the search
+        // returned, not to wherever the pin was dragged.
+        if (position) setPin({ lat: position.lat, lon: position.lng }, null);
       });
     } else {
       marker.current.setLngLat([pin.lon, pin.lat]);
     }
-  }, [map, pin, aktiv, setzePin]);
+  }, [map, pin, active, setPin]);
 
   useEffect(
     () => () => {

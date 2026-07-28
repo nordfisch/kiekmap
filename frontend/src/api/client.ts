@@ -1,21 +1,21 @@
-/** Zugriff auf das Backend. Die Typen spiegeln backend/app/schemas.py. */
+/** Backend access. The types mirror backend/app/schemas.py. */
 
 export type PhotoMarker = {
   id: number;
   lat: number;
   lon: number;
   title: string | null;
-  /** Fertig formuliert ("1932", "1920er") -- das Frontend rechnet nicht mit Daten. */
+  /** Ready-made German label ("1932", "1920er") -- the frontend does no date arithmetic. */
   date_label: string;
   width: number;
   height: number;
   thumb_url: string;
 };
 
-export type PhotoListe = {
+export type PhotoList = {
   photos: PhotoMarker[];
   total: number;
-  /** Wahr, wenn die Obergrenze gegriffen hat: dann sollte zum Hineinzoomen aufgefordert werden. */
+  /** True when the limit kicked in: then the map should invite zooming in. */
   truncated: boolean;
 };
 
@@ -38,11 +38,11 @@ export type PhotoDetail = {
   thumb_url: string;
 };
 
-export type Jahrzehnt = { decade: number; count: number };
+export type DecadeCount = { decade: number; count: number };
 
-export type Histogramm = {
-  decades: Jahrzehnt[];
-  /** Fotos ohne Datierung: nicht auf der Zeitleiste, aber im "Hilf mit"-Bereich. */
+export type Histogram = {
+  decades: DecadeCount[];
+  /** Photos without a date: not on the timeline, but in the "Hilf mit" panel. */
   undated: number;
   earliest: number | null;
   latest: number | null;
@@ -51,70 +51,20 @@ export type Histogramm = {
 /** [minLon, minLat, maxLon, maxLat] */
 export type Bbox = [number, number, number, number];
 
-export type Zeitraum = { von: number; bis: number };
+/** German field names because they go straight into the query string. */
+export type TimeRange = { von: number; bis: number };
 
-async function hole<T>(pfad: string, signal?: AbortSignal): Promise<T> {
-  const antwort = await fetch(pfad, { signal });
-  if (!antwort.ok) {
-    let grund = `HTTP ${antwort.status}`;
-    try {
-      const koerper = (await antwort.json()) as { detail?: string };
-      if (koerper.detail) grund = koerper.detail;
-    } catch {
-      /* Antwort ohne JSON -- der Statuscode muss reichen. */
-    }
-    throw new Error(grund);
-  }
-  return (await antwort.json()) as T;
-}
+export type Need = "location" | "date";
 
-function bboxParam(bbox: Bbox): string {
-  // Fünf Nachkommastellen sind gut einen Meter genau. Mehr macht die URL nur lang und verhindert,
-  // dass gleiche Ausschnitte als gleich erkannt werden.
-  return bbox.map((wert) => wert.toFixed(5)).join(",");
-}
-
-function mitZeitraum(params: URLSearchParams, zeitraum: Zeitraum | null): URLSearchParams {
-  if (zeitraum) {
-    params.set("von", String(zeitraum.von));
-    params.set("bis", String(zeitraum.bis));
-  }
-  return params;
-}
-
-export function ladePhotos(
-  bbox: Bbox,
-  zeitraum: Zeitraum | null,
-  limit: number,
-  signal?: AbortSignal,
-): Promise<PhotoListe> {
-  const params = mitZeitraum(new URLSearchParams({ bbox: bboxParam(bbox) }), zeitraum);
-  params.set("limit", String(limit));
-  return hole<PhotoListe>(`/api/photos?${params}`, signal);
-}
-
-/** Ohne Zeitraum: der Schieber soll zeigen, wo überhaupt etwas liegt. */
-export function ladeHistogramm(bbox: Bbox, signal?: AbortSignal): Promise<Histogramm> {
-  return hole<Histogramm>(`/api/photos/histogram?bbox=${bboxParam(bbox)}`, signal);
-}
-
-export function ladeDetail(id: number, signal?: AbortSignal): Promise<PhotoDetail> {
-  return hole<PhotoDetail>(`/api/photos/${id}`, signal);
-}
-
-// --- "Hilf mit" -------------------------------------------------------------
-
-export type Bedarf = "location" | "date";
-
-export type Aufgabe = {
-  need: Bedarf;
-  /** Wie viele Fotos dieser Art noch offen sind. Motiviert. */
+export type Task = {
+  need: Need;
+  /** How many photos of this kind are still open. It motivates. */
   open_count: number;
-  /** null heißt: es fehlt nichts mehr. Ein schöner Zustand. */
+  /** null means nothing is missing any more. A pleasant state. */
   photo: PhotoDetail | null;
 };
 
-export type Ort = {
+export type Place = {
   id: number;
   name: string;
   lat: number;
@@ -122,51 +72,83 @@ export type Ort = {
   kind: string;
 };
 
-export type Genauigkeit = "day" | "month" | "year" | "decade";
+export type Precision = "day" | "month" | "year" | "decade";
 
-async function sende<T>(pfad: string, koerper: unknown): Promise<T> {
-  const antwort = await fetch(pfad, {
+async function readError(response: Response): Promise<string> {
+  try {
+    const body = (await response.json()) as { detail?: string };
+    if (body.detail) return body.detail;
+  } catch {
+    /* response without JSON -- the status code has to do */
+  }
+  return `HTTP ${response.status}`;
+}
+
+async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(path, { signal });
+  if (!response.ok) throw new Error(await readError(response));
+  return (await response.json()) as T;
+}
+
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(koerper),
+    body: JSON.stringify(body),
   });
-  if (!antwort.ok) {
-    let grund = `HTTP ${antwort.status}`;
-    try {
-      const daten = (await antwort.json()) as { detail?: string };
-      if (daten.detail) grund = daten.detail;
-    } catch {
-      /* Antwort ohne JSON */
-    }
-    throw new Error(grund);
-  }
-  return (await antwort.json()) as T;
+  if (!response.ok) throw new Error(await readError(response));
+  return (await response.json()) as T;
 }
 
-export function ladeAufgabe(
-  bedarf: Bedarf,
-  uebersprungen: number[],
+function bboxParam(bbox: Bbox): string {
+  // Five decimal places is about a metre. More only makes the URL long and stops equal viewports
+  // from being recognised as equal.
+  return bbox.map((value) => value.toFixed(5)).join(",");
+}
+
+export function fetchPhotos(
+  bbox: Bbox,
+  timeRange: TimeRange | null,
+  limit: number,
   signal?: AbortSignal,
-): Promise<Aufgabe> {
-  const params = new URLSearchParams({ need: bedarf });
-  if (uebersprungen.length) params.set("exclude", uebersprungen.join(","));
-  return hole<Aufgabe>(`/api/contribute/next?${params}`, signal);
+): Promise<PhotoList> {
+  const params = new URLSearchParams({ bbox: bboxParam(bbox), limit: String(limit) });
+  if (timeRange) {
+    params.set("von", String(timeRange.von));
+    params.set("bis", String(timeRange.bis));
+  }
+  return getJson<PhotoList>(`/api/photos?${params}`, signal);
 }
 
-export function sendeOrt(
+/** Without a time range: the slider should show where anything is at all. */
+export function fetchHistogram(bbox: Bbox, signal?: AbortSignal): Promise<Histogram> {
+  return getJson<Histogram>(`/api/photos/histogram?bbox=${bboxParam(bbox)}`, signal);
+}
+
+export function fetchPhoto(id: number, signal?: AbortSignal): Promise<PhotoDetail> {
+  return getJson<PhotoDetail>(`/api/photos/${id}`, signal);
+}
+
+export function fetchTask(need: Need, skipped: number[], signal?: AbortSignal): Promise<Task> {
+  const params = new URLSearchParams({ need });
+  if (skipped.length) params.set("exclude", skipped.join(","));
+  return getJson<Task>(`/api/contribute/next?${params}`, signal);
+}
+
+export function postLocation(
   id: number,
-  daten: { lat: number; lon: number; place_name?: string; session_id?: string },
+  body: { lat: number; lon: number; place_name?: string; session_id?: string },
 ): Promise<PhotoDetail> {
-  return sende<PhotoDetail>(`/api/contribute/${id}/location`, daten);
+  return postJson<PhotoDetail>(`/api/contribute/${id}/location`, body);
 }
 
-export function sendeDatum(
+export function postDate(
   id: number,
-  daten: { year: number; precision: Genauigkeit; session_id?: string },
+  body: { year: number; precision: Precision; session_id?: string },
 ): Promise<PhotoDetail> {
-  return sende<PhotoDetail>(`/api/contribute/${id}/date`, daten);
+  return postJson<PhotoDetail>(`/api/contribute/${id}/date`, body);
 }
 
-export function sucheOrte(anfrage: string, signal?: AbortSignal): Promise<Ort[]> {
-  return hole<Ort[]>(`/api/places?q=${encodeURIComponent(anfrage)}`, signal);
+export function searchPlaces(query: string, signal?: AbortSignal): Promise<Place[]> {
+  return getJson<Place[]>(`/api/places?q=${encodeURIComponent(query)}`, signal);
 }
