@@ -72,6 +72,7 @@ Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen ist
 [docs/kuratoren-anleitung.md](docs/kuratoren-anleitung.md).
 
 Warum die Technik so gewählt ist, steht in [docs/decisions.md](docs/decisions.md).
+Was noch kommt, im [Stufenplan](docs/stufenplan.md).
 
 ## Lizenz
 

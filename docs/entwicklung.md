@@ -1,7 +1,8 @@
 # Entwicklung
 
 Für Menschen, die an Photomap arbeiten. Warum die Dinge so sind, steht in
-[decisions.md](decisions.md); wie man hier arbeitet, hier.
+[decisions.md](decisions.md); was noch kommt, im [Stufenplan](stufenplan.md); wie man hier
+arbeitet, hier.
 
 ## Einrichtung
 

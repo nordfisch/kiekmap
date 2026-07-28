@@ -124,6 +124,9 @@ Sprache kosten würde und ab wann sich Modularisierung lohnt.
 
 ## Stand
 
-Fertig: Stufen 0–7 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
-Zeitschieber, „Hilf mit"). Offen: Admin-Bereich mit Stapel-Upload (8), USB-Sicherung (9),
-Kiosk-Deployment auf dem Pi (10). Details im Änderungsprotokoll [CHANGELOG.md](CHANGELOG.md).
+Fertig: Stufen 0–7.5 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
+Zeitschieber, „Hilf mit", Sprachregelung). Als Nächstes 7.6 (deutsche Texte im Backend ordnen),
+dann Admin-Bereich mit Stapel-Upload (8), USB-Sicherung (9), Kiosk-Deployment (10).
+
+**Der vollständige Bauplan mit Abnahmekriterien steht in [docs/stufenplan.md](docs/stufenplan.md).**
+Was schon entstanden ist, im Änderungsprotokoll [CHANGELOG.md](CHANGELOG.md).
