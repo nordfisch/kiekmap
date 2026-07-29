@@ -46,6 +46,7 @@ type KioskState = {
   setViewport: (bbox: Bbox) => void;
   setTimeRange: (timeRange: TimeRange) => void;
   openPhoto: (id: number | null) => void;
+  refresh: () => void;
   reset: () => void;
 };
 
@@ -169,6 +170,27 @@ export const useKiosk = create<KioskState>((set, get) => {
 
     openPhoto(id) {
       set({ openPhotoId: id });
+    },
+
+    /**
+     * Reload after something outside the map changed the collection.
+     *
+     * The "Hilf mit" panel is the case this exists for. It promises "Das Foto ist jetzt auf der
+     * Karte" -- and without this the promise only came true once somebody happened to pan the
+     * map, which is exactly what the older visitors it is written for do not do.
+     *
+     * The histogram goes along: a photo that has just been dated moves out of ``undated`` and
+     * into a decade bar. Whatever time range the visitor has set stays untouched -- see
+     * ``loadHistogram``.
+     *
+     * Not debounced, unlike the map: a contribution is one deliberate act, and the whole point is
+     * that it shows up immediately.
+     */
+    refresh() {
+      const { bbox } = get();
+      if (!bbox) return;
+      void loadPhotos();
+      void loadHistogram(bbox);
     },
 
     /** For the idle reset: back to the state the device should be in each morning. */

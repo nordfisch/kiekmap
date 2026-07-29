@@ -20,6 +20,7 @@ import {
   postLocation,
 } from "../api/client";
 import { t } from "../texte/de";
+import { useKiosk } from "./kiosk";
 
 /** How long the thank-you note stays before the next question arrives. */
 const THANKS_MS = 2200;
@@ -126,6 +127,11 @@ export const useContribute = create<ContributeState>((set, get) => {
     try {
       await action(task.photo);
       set({ loading: false, pin: null, pinLabel: null });
+
+      // Map and timeline have to show it now. The thank-you note promises exactly that -- and
+      // before this line it only came true once somebody happened to pan the map.
+      useKiosk.getState().refresh();
+
       showThanks(thanksText, otherNeed(need));
     } catch (e) {
       // Most common case: somebody else was quicker (HTTP 409). The backend already phrases that

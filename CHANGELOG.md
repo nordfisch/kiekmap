@@ -101,3 +101,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Marker verschwanden gelegentlich von der Karte: der `load`-Rückruf konnte eine bereits entfernte
   Karteninstanz an die Ebenen weiterreichen. Die Vorschaubilder wurden dann sogar geladen, waren
   aber nie zu sehen
+- Karte und Zeitleiste blieben nach einem Besucherbeitrag stehen. Der Dank versprach „Das Foto ist
+  jetzt auf der Karte", zu sehen war es aber erst, wenn jemand die Karte verschob — also gerade bei
+  den älteren Besuchern, für die der Bereich gebaut ist, gar nicht. Ein Beitrag stößt jetzt ein
+  Nachladen von Markern und Histogramm an

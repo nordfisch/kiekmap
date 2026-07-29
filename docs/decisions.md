@@ -119,6 +119,12 @@ und ist im Admin einzeln zurücknehmbar.
 Wissen ist jetzt Teil der Karte". Eine Warteschlange nimmt genau das weg und erzeugt zusätzlich
 Arbeit für Ehrenamtliche, die ohnehin knapp ist.
 
+*„Sofort auf der Karte" heißt auch: sofort zu sehen.* Das war eine Weile nur die halbe Wahrheit —
+der Beitrag stand in der Datenbank, aber die Karte lud erst nach, wenn jemand sie verschob.
+Ausgerechnet die älteren Besucher, für die der Bereich gebaut ist, tun das nicht. Ein Beitrag
+stößt deshalb im Kiosk-Store ein Nachladen an (`useKiosk.refresh()`), Marker und Histogramm
+zusammen. Die Zeitraumauswahl des Besuchers bleibt dabei unangetastet.
+
 Drei Dinge fangen den Missbrauchsfall auf, ohne den Normalfall auszubremsen:
 
 1. **Nur leere Felder dürfen gefüllt werden** (sonst HTTP 409 mit freundlichem Text). Was ein

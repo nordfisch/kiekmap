@@ -4,12 +4,27 @@ vi.mock("../api/client", () => ({
   fetchTask: vi.fn(),
   postLocation: vi.fn(),
   postDate: vi.fn(),
+  // Der Kiosk-Store haengt an derselben Schicht -- ein Beitrag laesst ihn nachladen.
+  fetchPhotos: vi.fn(),
+  fetchHistogram: vi.fn(),
 }));
 
-import { type Need, type PhotoDetail, type Task, fetchTask } from "../api/client";
+import {
+  type Need,
+  type PhotoDetail,
+  type Task,
+  fetchHistogram,
+  fetchPhotos,
+  fetchTask,
+  postLocation,
+} from "../api/client";
 import { useContribute } from "./contribute";
+import { useKiosk } from "./kiosk";
 
 const geholt = vi.mocked(fetchTask);
+const fotosGeholt = vi.mocked(fetchPhotos);
+const histogrammGeholt = vi.mocked(fetchHistogram);
+const ortGesendet = vi.mocked(postLocation);
 
 function aufgabe(need: Need, fotoId: number | null, offen = 3): Task {
   return {
@@ -28,6 +43,12 @@ function bestand(nachOrt: Task, nachJahr: Task) {
 
 beforeEach(() => {
   geholt.mockReset();
+  fotosGeholt.mockReset().mockResolvedValue({ photos: [], total: 0, truncated: false });
+  histogrammGeholt
+    .mockReset()
+    .mockResolvedValue({ decades: [], undated: 0, earliest: null, latest: null });
+  ortGesendet.mockReset().mockResolvedValue({ id: 1 } as PhotoDetail);
+
   useContribute.setState({
     need: "location",
     task: null,
@@ -38,6 +59,8 @@ beforeEach(() => {
     pin: null,
     pinLabel: null,
   });
+  // Ein Ausschnitt muss stehen, sonst gaebe es nichts nachzuladen.
+  useKiosk.setState({ bbox: [9.6, 53.57, 9.75, 53.67] });
 });
 
 describe("„Weiß ich nicht“", () => {
@@ -106,5 +129,48 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
 
     expect(useContribute.getState().need).toBe("date");
     expect(useContribute.getState().task?.photo?.id).toBe(9);
+  });
+});
+
+describe("Karte und Zeitleiste nach einem Beitrag", () => {
+  beforeEach(() => {
+    bestand(aufgabe("location", 2), aufgabe("date", 3));
+    useContribute.setState({
+      need: "location",
+      task: aufgabe("location", 1),
+      pin: { lat: 53.62, lon: 9.676 },
+    });
+  });
+
+  it("laedt beide nach, sobald ein Beitrag angekommen ist", async () => {
+    // Der Dank verspricht „Das Foto ist jetzt auf der Karte". Ohne dieses Nachladen wurde das
+    // erst wahr, wenn jemand die Karte verschob -- also gerade bei den aelteren Besuchern, fuer
+    // die der Bereich gebaut ist, gar nicht.
+    await useContribute.getState().submitLocation();
+
+    expect(fotosGeholt).toHaveBeenCalled();
+    // Das Histogramm gehoert dazu: ein verortetes Foto wandert aus "ohne Ort" heraus, ein
+    // datiertes aus "ohne Jahr" in einen Jahrzehnt-Balken.
+    expect(histogrammGeholt).toHaveBeenCalled();
+  });
+
+  it("laedt nicht nach, wenn der Beitrag abgelehnt wurde", async () => {
+    // Haeufigster Fall: jemand anders war schneller (HTTP 409). Dann hat sich nichts geaendert,
+    // und ein Nachladen waere nur Last auf dem Pi.
+    ortGesendet.mockRejectedValue(new Error("Dieses Foto hat inzwischen schon eine Angabe."));
+
+    await useContribute.getState().submitLocation();
+
+    expect(useContribute.getState().error).toContain("inzwischen");
+    expect(fotosGeholt).not.toHaveBeenCalled();
+  });
+
+  it("laedt nicht nach, solange kein Ausschnitt bekannt ist", async () => {
+    // Vor dem ersten Kartenaufbau gibt es keine bbox -- dann gibt es auch nichts abzufragen.
+    useKiosk.setState({ bbox: null });
+
+    await useContribute.getState().submitLocation();
+
+    expect(fotosGeholt).not.toHaveBeenCalled();
   });
 });
