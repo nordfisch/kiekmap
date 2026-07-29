@@ -51,7 +51,7 @@ Wappen führt die linke Spalte an und ist zugleich der Weg in den Admin-Bereich.
 | 8 | Admin-Bereich mit Stapel-Upload | ✅ |
 | 9 | Sicherung und Wiederherstellung auf USB | ✅ (Einhängen auf dem Pi offen, siehe unten) |
 | **10** | **Kiosk-Deployment auf dem Pi** | **als Nächstes** |
-| — | [Vorgemerkt](#vorgemerkt): Hausnummern, Import vom Stick | gewollt, nicht eingeplant |
+| — | [Vorgemerkt](#vorgemerkt): Hausnummern, historische Karte, Import vom Stick | gewollt, nicht eingeplant |
 | 11 | Ausbau nach Bedarf | offen |
 
 Was in den fertigen Stufen entstanden ist, steht im [CHANGELOG](../CHANGELOG.md).
@@ -376,6 +376,38 @@ zurückfallen — sonst stünde „Zurzeit ist alles vollständig" auf dem Schir
 auf eine Jahreszahl warten. Der Rückfall greift jetzt bei jedem Laden, nicht nur beim Wechseln, und
 behebt denselben Fehler auch nach einem abgegebenen Beitrag.
 
+### Historische Karte als Grundkarte
+
+**Warum.** Historische Fotos auf einer historischen Karte. Der Besucher sähe das Foto *und* den
+Ort, wie er damals aussah — und der Zeitschieber, der bisher nur filtert, bekäme eine zweite
+Bedeutung. Das ist die einzige Idee auf dieser Seite, die aus einer schönen Karte eine Aussage
+macht.
+
+**Woher.** Preußische Landesaufnahme (um 1880) oder Urkataster. Schleswig-Holstein stellt
+Geobasisdaten über sein Open-Data-Portal bereit; ob die historischen Blätter für Kreis Pinneberg
+dabei und in brauchbarer Auflösung sind, ist **ungeprüft**. Das ist der erste Schritt, nicht der
+Code.
+
+**Wie es ins Projekt passt.** Rasterkacheln, einmal heruntergeladen und als zweite PMTiles-Datei
+verpackt — dasselbe Muster wie die heutige Kartendatei, kein neuer Datenweg und kein Bruch mit
+dem Offline-Betrieb. `make tiles` bekäme einen zweiten Schritt.
+
+**Der Haken, der die Form bestimmt.** Auf einer Karte von 1880 fehlen die Straßen, die es heute
+gibt. Ortssuche und Verortung durch Besucher hängen aber an heutigen Straßennamen. Also
+**umschaltbar**: heutige Karte zum Verorten, historische zum Anschauen. Ein Knopf auf der Karte,
+kein Ersatz.
+
+**Vorher zu klären:**
+
+- Gibt es die Blätter für Holm, und in welcher Auflösung?
+- Lizenz — meist DL-DE/BY-2.0 oder CC-BY, also mit Namensnennung nutzbar. Nachlesen, nicht
+  annehmen. Die Nennung gehört dann neben die OpenStreetMap-Zeile.
+- Größe. Raster ist um ein Vielfaches schwerer als Vektor; für 5 km Umkreis und Zoom 13–16 sollte
+  es im zweistelligen Megabyte-Bereich bleiben, das ist zu messen.
+
+*Bis dahin steht der billige Teil zur Verfügung: ein eigener Farb-Flavor für die heutige Karte,
+siehe die Farbvorschläge in der Sitzung vom 29. Juli 2026 (Papier / Sepia / Zurückgenommen).*
+
 ### Import vom USB-Stick im Admin-Bereich
 
 **Was.** Im Admin-Bereich Bilder von einem eingesteckten Stick aufnehmen, im Ablauf so wie der
@@ -406,7 +438,6 @@ Nichts davon ist eingeplant, alles ist naheliegend:
   SHA-256 erkennt die nicht.
 - **Jahreszahl aus dem Dateinamen** raten (`Kirchweih_1932_Muehle.jpg`). Vorsicht: `IMG_1932.jpg`
   ist ein Kamerazähler. Nur als Vorschlag markieren, nie als Tatsache.
-- **Historische Karte** als umschaltbares Overlay (Urkataster o. ä.).
 - **Attract-Mode**: Diashow bei Leerlauf statt Standardansicht.
 - **Rechte und Herkunft** pro Foto — im Museumskontext oft relevant.
 - **Volltextsuche** über SQLite FTS5.
