@@ -11,6 +11,14 @@ import { type PhotoDetail, readError } from "./client";
 
 export type AdminSession = { token: string; expires_in_s: number };
 
+export type BackupReminder = {
+  last_backup_at: string | null;
+  last_drive: string;
+  days_since: number | null;
+  /** True when it is time -- and also when there has never been a backup at all. */
+  overdue: boolean;
+};
+
 export type Overview = {
   total: number;
   on_map: number;
@@ -19,6 +27,41 @@ export type Overview = {
   hidden: number;
   visitor_changes: number;
   last_import_at: string | null;
+  backup: BackupReminder;
+};
+
+export type BackupOnDrive = {
+  created_at: string;
+  photos: number;
+  bytes: number;
+  place: string;
+};
+
+export type DriveItem = {
+  path: string;
+  name: string;
+  total_bytes: number;
+  free_bytes: number;
+  /** Room for the whole collection, not just for what is still missing. */
+  enough_space: boolean;
+  backup: BackupOnDrive | null;
+};
+
+export type DriveList = {
+  drives: DriveItem[];
+  photos: number;
+  needed_bytes: number;
+  reminder: BackupReminder;
+};
+
+/** How far along backup or restore is. `phase` is idle | running | done | error. */
+export type JobState = {
+  kind: string;
+  phase: string;
+  done: number;
+  total: number;
+  message: string;
+  error: string | null;
 };
 
 export type PhotoAdminItem = {
@@ -191,6 +234,41 @@ export function fetchImportLog(result?: string): Promise<ImportLogItem[]> {
   const params = new URLSearchParams({ limit: "100" });
   if (result) params.set("result", result);
   return adminFetch<ImportLogItem[]>(`/imports?${params}`);
+}
+
+// --- backup onto a USB stick ------------------------------------------------
+//
+// Backup and restore run in a thread on the device and take minutes. The screen therefore starts
+// them and then asks how far along they are -- one request could not carry that, and it would run
+// into a proxy timeout on the way.
+
+export function fetchDrives(): Promise<DriveList> {
+  return adminFetch<DriveList>("/backup/drives");
+}
+
+export function startBackup(path: string): Promise<JobState> {
+  return adminFetch<JobState>("/backup/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path }),
+  });
+}
+
+export function startRestore(path: string): Promise<JobState> {
+  return adminFetch<JobState>("/backup/restore", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path }),
+  });
+}
+
+export function fetchJob(): Promise<JobState> {
+  return adminFetch<JobState>("/backup/status");
+}
+
+/** Tell the device the result has been seen, so the screen goes back to the start. */
+export function acknowledgeJob(): Promise<JobState> {
+  return adminFetch<JobState>("/backup/acknowledge", { method: "POST" });
 }
 
 /**

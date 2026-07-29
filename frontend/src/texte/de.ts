@@ -119,6 +119,7 @@ export const t = {
         upload: "Hochladen",
         changes: "Beiträge",
         imports: "Import",
+        backup: "Sicherung",
       },
     },
 
@@ -221,6 +222,54 @@ export const t = {
       imported: "Aufgenommen",
       duplicate: "Dublette",
       rejected: "Abgewiesen",
+    },
+
+    /**
+     * Sicherung auf USB-Stick.
+     *
+     * Hier steht bewusst mehr Text als anderswo. Wer einmal im Jahr eine Sicherung macht, soll
+     * nach jedem Schritt lesen können, was gerade passiert ist und was als Nächstes zu tun ist —
+     * bis hin zu „Sie können den Stick jetzt abziehen".
+     */
+    backup: {
+      title: "Sicherung auf USB-Stick",
+      intro:
+        "Die Sicherung schreibt alle Fotos und alle Angaben auf einen USB-Stick. " +
+        "Der Stick lässt sich an jedem Rechner öffnen; die Bilder liegen dort als Dateien.",
+
+      noDrive: "Bitte USB-Stick einstecken.",
+      noDriveHint: "Sobald der Stick steckt, erscheint er hier von allein.",
+      searching: "Es wird nach einem Stick gesucht …",
+
+      free: (free: string) => `${free} frei`,
+      enough: (photos: string) => `genug für ${photos} Fotos`,
+      notEnough: (needed: string) => `reicht nicht — gebraucht werden ${needed}`,
+      existing: (date: string, photos: string) =>
+        `Auf dem Stick liegt bereits eine Sicherung vom ${date} mit ${photos} Fotos.`,
+
+      start: "Sicherung starten",
+      startAgain: "Sicherung erneuern",
+      done: "Fertig",
+      cancelHint: "Bitte den Stick nicht abziehen, solange die Sicherung läuft.",
+
+      lastNever: "Es wurde noch nie gesichert.",
+      lastOn: (date: string, days: number) =>
+        days === 0
+          ? `Zuletzt gesichert: heute (${date})`
+          : `Letzte Sicherung vor ${days} ${days === 1 ? "Tag" : "Tagen"} (${date})`,
+
+      restoreTitle: "Eine Sicherung zurückspielen",
+      restoreIntro:
+        "Nur nötig, wenn das Gerät neu aufgesetzt wurde oder etwas verloren gegangen ist. " +
+        "Der jetzige Bestand wird dabei ersetzt.",
+      restoreNone: "Auf diesem Stick ist keine Sicherung, die sich zurückspielen ließe.",
+      restore: "Zurückspielen",
+      restoreConfirmTitle: "Wirklich zurückspielen?",
+      restoreConfirm: (date: string, photos: string) =>
+        `Der jetzige Bestand wird durch die Sicherung vom ${date} mit ${photos} Fotos ersetzt. ` +
+        "Der bisherige Stand wird nicht gelöscht, sondern auf dem Gerät beiseitegelegt.",
+      restoreYes: "Ja, zurückspielen",
+      restoreNo: "Abbrechen",
     },
 
     loading: "Wird geladen …",

@@ -75,19 +75,23 @@ TEST_PIN = "4711"
 
 
 @pytest.fixture(autouse=True)
-def reset_admin_auth() -> Iterator[None]:
-    """Sessions and the failure counter live in the process, not in the database.
+def reset_process_state() -> Iterator[None]:
+    """Everything the service keeps in memory rather than in the database.
 
-    Without this the lockout from one test would still be running in the next -- and a test that
-    logs in five times wrongly would take the whole suite down with it.
+    Admin sessions, the failure counter and the one backup job all outlive a test otherwise --
+    a test that mistypes the PIN five times would take the whole suite down with it, and a
+    finished backup job would still be reported to the next test.
     """
-    from app.services import auth
+    from app.services import auth, backup
 
-    auth.sessions.clear()
-    auth.attempts.reset()
+    def clear() -> None:
+        auth.sessions.clear()
+        auth.attempts.reset()
+        backup.job.reset()
+
+    clear()
     yield
-    auth.sessions.clear()
-    auth.attempts.reset()
+    clear()
 
 
 @pytest.fixture

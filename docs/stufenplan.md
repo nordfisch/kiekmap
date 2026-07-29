@@ -49,8 +49,8 @@ Wappen führt die linke Spalte an und ist zugleich der Weg in den Admin-Bereich.
 | 7.5 | Sprachregelung, Textmodul, Entwicklerdoku | ✅ |
 | 7.6 | Deutsche Texte im Backend nach Konvention ordnen | ✅ |
 | 8 | Admin-Bereich mit Stapel-Upload | ✅ |
-| **9** | **Sicherung und Wiederherstellung auf USB** | **als Nächstes** |
-| 10 | Kiosk-Deployment auf dem Pi | offen |
+| 9 | Sicherung und Wiederherstellung auf USB | ✅ (Einhängen auf dem Pi offen, siehe unten) |
+| **10** | **Kiosk-Deployment auf dem Pi** | **als Nächstes** |
 | — | [Vorgemerkt](#vorgemerkt): Hausnummern, Fragewechsel, Import vom Stick | gewollt, nicht eingeplant |
 | 11 | Ausbau nach Bedarf | offen |
 
@@ -178,9 +178,22 @@ der Stick im Container unsichtbar.
 **Fertig, wenn:** jemand aus der Zielgruppe die Sicherung ohne Hilfe und ohne Anleitung schafft —
 und die Wiederherstellung auf einem zweiten, leeren Gerät nachweislich funktioniert.
 
-> Beim Bauen dieser Stufe den Abschnitt [Vorgemerkt](#vorgemerkt) lesen: Der Import vom USB-Stick
-> braucht dasselbe Erkennen und Einhängen. Es lohnt, das gleich mitzudenken, statt es zweimal zu
-> lösen.
+**Stand.** Die Funktion ist fertig und gegen einen echten eingehängten Datenträger erprobt:
+sichern, inkrementell erneuern, zurückspielen, Beiseitelegen des bisherigen Stands. Zwei Punkte
+der Abnahme brauchen das Gerät und wandern damit in Stufe 10:
+
+- **Das Einhängen auf dem Pi.** udev-Regel und Skript liegen unter `deploy/pi/`, sind aber
+  mangels Pi noch nicht gelaufen. Beschreibung in [betrieb.md](betrieb.md).
+- **Der Bedienbarkeitstest mit der Zielgruppe** und die Wiederherstellung auf ein zweites,
+  leeres Gerät.
+
+Dazugekommen beim Bauen, weil es sonst still gebrochen wäre: Ein Laufwerk muss ein echter
+Einhängepunkt **und** beschreibbar sein. Ohne das Erste liefe die Sicherung auf dieselbe SD-Karte,
+gegen deren Ausfall sie schützt; ohne das Zweite fiele ein schreibgeschützter Stick erst auf,
+nachdem jemand den Knopf gedrückt hat.
+
+> Beim Bauen von Stufe 10 den Abschnitt [Vorgemerkt](#vorgemerkt) lesen: Der Import vom USB-Stick
+> braucht dasselbe Erkennen und Einhängen, das hier vorbereitet ist.
 
 ---
 

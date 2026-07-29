@@ -32,6 +32,7 @@ from app.models import (
     Tag,
 )
 from app.schemas import (
+    BackupReminder,
     ChangeItem,
     ImportLogItem,
     LoginRequest,
@@ -45,6 +46,7 @@ from app.schemas import (
     UploadResult,
 )
 from app.services import auth
+from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
 from app.services.importer import import_upload, upload_name
 
@@ -115,13 +117,14 @@ def session_state(admin: Admin) -> LoginResponse:
 
 
 @router.get("/overview", response_model=Overview, summary="Counts for the admin start page")
-def overview(admin: Admin, session: Db) -> Overview:
+def overview(admin: Admin, session: Db, settings: Config) -> Overview:
     def count(*filters) -> int:
         return session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
 
     last_import: datetime | None = session.scalar(
         select(func.max(ImportLog.created_at)).where(ImportLog.result == ImportResult.IMPORTED)
     )
+    backup_state = read_backup_state(settings)
 
     return Overview(
         total=count(),
@@ -141,6 +144,12 @@ def overview(admin: Admin, session: Db) -> Overview:
         )
         or 0,
         last_import_at=last_import,
+        backup=BackupReminder(
+            last_backup_at=backup_state.last_backup_at,
+            last_drive=backup_state.last_drive,
+            days_since=backup_state.days_since,
+            overdue=backup_state.overdue,
+        ),
     )
 
 

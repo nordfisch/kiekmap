@@ -135,8 +135,8 @@ def import_file(
     if info.format not in ALLOWED_FORMATS:
         outcome = ImportOutcome(
             ImportResult.REJECTED,
-            f"Format {info.format or 'unbekannt'} wird nicht unterstuetzt "
-            f"(erlaubt: {', '.join(sorted(ALLOWED_FORMATS))})",
+            f"Format {info.format or 'unbekannt'} passt nicht "
+            f"(erlaubt sind: {', '.join(sorted(ALLOWED_FORMATS))})",
         )
         _log_outcome(session, path, outcome, sha256)
         if move_aside:

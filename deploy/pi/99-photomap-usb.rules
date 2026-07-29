@@ -1,0 +1,16 @@
+# USB-Datentraeger unter /media einhaengen.
+#
+# Nach /etc/udev/rules.d/ kopieren, dann:  sudo udevadm control --reload
+#
+# Ohne diese Regel passiert auf Raspberry Pi OS Lite beim Einstecken eines Sticks gar nichts --
+# es gibt dort keinen Desktop und damit keinen Automounter. Der Admin-Bereich saehe nie einen
+# Stick und meldete ewig "Bitte USB-Stick einstecken".
+#
+# ID_FS_USAGE=="filesystem" laesst nur Partitionen durch, auf denen wirklich ein Dateisystem
+# liegt: die Platte selbst (/dev/sda) und leere Partitionstabellen bleiben aussen vor.
+
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{ID_FS_USAGE}=="filesystem", \
+    RUN+="/usr/local/sbin/photomap-usb-mount einhaengen %E{DEVNAME} %E{ID_FS_LABEL} %E{ID_FS_TYPE}"
+
+ACTION=="remove", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", \
+    RUN+="/usr/local/sbin/photomap-usb-mount aushaengen %E{DEVNAME}"

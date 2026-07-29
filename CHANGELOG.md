@@ -59,6 +59,19 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   keine Uploads kosten. Dubletten werden benannt („3 waren schon da")
 - Das Ortswappen liegt als austauschbare Datei unter `frontend/public/logo.png`; im Code steht
   nirgends, was darauf zu sehen ist
+- Sicherung auf USB-Stick: Stick einstecken, ein Knopf, Fortschrittsbalken, am Ende „Der Stick
+  kann jetzt abgezogen werden". Ein Ordner statt eines Archivs — eine abgebrochene Sicherung ist
+  so teilweise brauchbar statt komplett wertlos
+- Die zweite Sicherung schreibt nur, was dazugekommen ist: der Dateiname ist der Hash des Inhalts,
+  ein gleicher Name ist dasselbe Bild
+- `VACUUM INTO` schreibt die Datenbank konsistent heraus, ohne den Kiosk anzuhalten
+- Als Sicherungsziel gelten nur echte Einhängepunkte, die auch beschreibbar sind — sonst liefe die
+  Sicherung auf dieselbe SD-Karte, gegen deren Ausfall sie schützt
+- Wiederherstellen kopiert erst daneben und schaltet zuletzt um; der bisherige Stand wird nach
+  `data/vorher-<Datum>/` beiseitegelegt, mitsamt Write-Ahead-Log, und nie gelöscht
+- Erinnerung „Letzte Sicherung vor 34 Tagen" auf der Startseite der Verwaltung, ab 30 Tagen rot
+- `deploy/pi/99-photomap-usb.rules` und `photomap-usb-mount` hängen Sticks auf Pi OS Lite ein —
+  dort gibt es keinen Automounter
 
 ### Geändert
 

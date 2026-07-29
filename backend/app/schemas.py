@@ -288,6 +288,58 @@ class ImportLogItem(BaseModel):
         )
 
 
+class BackupReminder(BaseModel):
+    """Nudge for the start page: "Letzte Sicherung vor 34 Tagen". Never an automatism."""
+
+    last_backup_at: datetime | None
+    last_drive: str
+    days_since: int | None
+    #: True when it is time, and also when there has never been a backup at all.
+    overdue: bool
+
+
+class BackupOnDrive(BaseModel):
+    created_at: datetime
+    photos: int
+    bytes: int
+    place: str
+
+
+class DriveItem(BaseModel):
+    path: str
+    name: str
+    total_bytes: int
+    free_bytes: int
+    #: Enough room for the whole collection, not just for what is still missing.
+    enough_space: bool
+    #: What is already on this stick, if anything.
+    backup: BackupOnDrive | None
+
+
+class DriveList(BaseModel):
+    drives: list[DriveItem]
+    #: How many photos would be written, and how much room that takes.
+    photos: int
+    needed_bytes: int
+    reminder: BackupReminder
+
+
+class DriveChoice(BaseModel):
+    path: str
+
+
+class JobState(BaseModel):
+    """How far along backup or restore is."""
+
+    kind: str
+    phase: str
+    done: int
+    total: int
+    #: German -- goes straight onto the screen.
+    message: str
+    error: str | None
+
+
 class Overview(BaseModel):
     """The numbers on the admin start page."""
 
@@ -300,6 +352,8 @@ class Overview(BaseModel):
     #: Visitor contributions not yet reverted. Something to look through, not a problem.
     visitor_changes: int
     last_import_at: datetime | None
+    #: "Letzte Sicherung vor 34 Tagen" belongs on the start page, not only in its own section.
+    backup: BackupReminder
 
 
 class UploadItem(BaseModel):

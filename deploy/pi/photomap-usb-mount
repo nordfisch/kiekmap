@@ -1,0 +1,72 @@
+#!/bin/sh
+# Haengt einen eingesteckten USB-Datentraeger unter /media/<Bezeichnung> ein.
+#
+# Raspberry Pi OS Lite hat keinen Desktop und damit auch keinen Automounter -- ein eingesteckter
+# Stick taucht dort schlicht nicht auf. Dieses Skript wird von der udev-Regel
+# 99-photomap-usb.rules gerufen und schliesst genau diese Luecke.
+#
+# Zwei Dinge sind hier leicht falsch zu machen:
+#
+#   1. Aus einer udev-RUN-Anweisung heraus direkt zu mounten geht schief: udev raeumt die
+#      Kindprozesse eines Ereignisses wieder ab. Deshalb "systemd-mount" -- es reicht den
+#      Einhaengevorgang an systemd weiter und kehrt sofort zurueck.
+#   2. Ein FAT- oder exFAT-Stick kennt keine Besitzer. Ohne "uid=" gehoert er root, und der
+#      Dienst im Container (UID 1000) darf nicht darauf schreiben. Die Sicherung wuerde dann
+#      erst scheitern, nachdem jemand den Knopf gedrueckt hat.
+#
+# Aufruf:  photomap-usb-mount einhaengen  /dev/sda1 [Bezeichnung] [Dateisystem]
+#          photomap-usb-mount aushaengen  /dev/sda1
+
+set -eu
+
+# Muss zur UID im Container passen, siehe backend/Dockerfile.
+DIENST_UID=1000
+DIENST_GID=1000
+
+AKTION="${1:-}"
+GERAET="${2:-}"
+BEZEICHNUNG="${3:-}"
+DATEISYSTEM="${4:-}"
+
+[ -n "$AKTION" ] && [ -n "$GERAET" ] || {
+    echo "Aufruf: $0 einhaengen|aushaengen /dev/sdX1 [Bezeichnung] [Dateisystem]" >&2
+    exit 2
+}
+
+# Nur Buchstaben, Ziffern, Strich und Unterstrich: eine Bezeichnung wie "Kalles Stick / 2024"
+# wuerde sonst einen Pfad aufmachen, den so niemand gemeint hat.
+saeubern() {
+    printf '%s' "$1" | tr -c 'A-Za-z0-9._-' '_' | cut -c1-40
+}
+
+case "$AKTION" in
+einhaengen)
+    NAME=$(saeubern "${BEZEICHNUNG:-$(basename "$GERAET")}")
+    [ -n "$NAME" ] || NAME=$(basename "$GERAET")
+    ZIEL="/media/$NAME"
+
+    case "$DATEISYSTEM" in
+    vfat | exfat | ntfs | ntfs3)
+        # Dateisysteme ohne Besitzrechte: die Rechte entstehen erst beim Einhaengen.
+        OPTIONEN="uid=$DIENST_UID,gid=$DIENST_GID,umask=0022,noatime"
+        ;;
+    *)
+        # ext4 und Verwandte bringen ihre eigenen Besitzer mit.
+        OPTIONEN="noatime"
+        ;;
+    esac
+
+    mkdir -p "$ZIEL"
+    exec systemd-mount --no-block --collect --options "$OPTIONEN" "$GERAET" "$ZIEL"
+    ;;
+
+aushaengen)
+    # Nach dem Abziehen ist die Bezeichnung nicht mehr zu erfahren -- ueber das Geraet abmelden.
+    exec systemd-umount "$GERAET"
+    ;;
+
+*)
+    echo "Unbekannte Aktion: $AKTION" >&2
+    exit 2
+    ;;
+esac

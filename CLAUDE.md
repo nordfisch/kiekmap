@@ -60,6 +60,14 @@ Deutsche Beispiele in englischen Kommentaren sind erwünscht, wo sie den Fall er
 **Umlaute:** In deutschen Texten für Menschen normal schreiben (Mühlenweg). In Python-Quelltext,
 Shell-Skripten und Commit-Nachrichten werden sie umschrieben (`ue`, `oe`, `ae`, `ss`).
 
+Daraus folgt eine Regel für deutsche Meldungen **im Python-Code, die auf dem Bildschirm landen
+können**: so formulieren, dass sie ohne Umlaut auskommen. Nicht „Sie koennen den Stick jetzt
+abziehen", sondern „Der Stick kann jetzt abgezogen werden". Das ist bisher jedes Mal gelungen und
+liest sich meist sogar besser, weil es zum Umformulieren zwingt.
+
+Das `ss` ist die Ausnahme in der Ausnahme: „ausserhalb" ist gültiges Deutsch, „koennen" ist es
+nicht. `ß` darf also ersetzt werden, die drei Umlaute nicht.
+
 ## Aufbau
 
 ```
@@ -132,9 +140,13 @@ Sprache kosten würde und ab wann sich Modularisierung lohnt.
 
 ## Stand
 
-Fertig: Stufen 0–8 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
-Zeitschieber, „Hilf mit", Sprachregelung, Admin-Bereich mit Stapel-Upload). Als Nächstes
-USB-Sicherung (9), dann Kiosk-Deployment (10).
+Fertig: Stufen 0–9 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
+Zeitschieber, „Hilf mit", Sprachregelung, Admin-Bereich mit Stapel-Upload, USB-Sicherung). Als
+Nächstes Kiosk-Deployment (10).
+
+Aus Stufe 9 offen, weil es das Gerät braucht: das Einhängen von USB-Sticks auf dem Pi
+(`deploy/pi/99-photomap-usb.rules`, ungeprüft). Zum Entwickeln auf dem Mac `PHOTOMAP_MEDIA_DIR=
+/Volumes` setzen und ein Prüfvolumen mit `hdiutil` anlegen — siehe [docs/betrieb.md](docs/betrieb.md).
 
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.

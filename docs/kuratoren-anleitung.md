@@ -78,7 +78,41 @@ steht hier, warum.
 
 ## Sicherung auf einen USB-Stick
 
-> Kommt mit Stufe 9.
+Einmal im Jahr, und immer nach einem größeren Stapel neuer Bilder. Auf der Startseite der
+Verwaltung steht, wann zuletzt gesichert wurde; ist es länger als einen Monat her, steht es rot da.
+
+1. **USB-Stick einstecken.** Ein gewöhnlicher Stick genügt. Er sollte so viel Platz haben wie die
+   Sammlung groß ist — das Gerät rechnet es Ihnen vor.
+2. Verwaltung → **Sicherung**. Der Stick erscheint von allein, sobald er steckt.
+3. Steht dort sein Name und „genug für … Fotos", auf **„Sicherung starten"** tippen.
+4. Warten. Das Gerät zeigt, bei welchem Bild es gerade ist. **Den Stick nicht abziehen, solange
+   der Balken läuft.**
+5. Am Ende steht „… Fotos und alle Angaben gesichert. Der Stick kann jetzt abgezogen werden."
+   Erst dann abziehen.
+
+**Beim zweiten Mal geht es schnell.** Das Gerät schreibt nur, was seit dem letzten Mal
+dazugekommen ist. Steht am Ende „Neue Bilder gab es nicht", ist das kein Fehler, sondern heißt:
+Es war schon alles auf dem Stick.
+
+Denselben Stick können Sie immer wieder verwenden. Auf ihm liegt ein Ordner
+`photomap-sicherung` — den können Sie an jedem Rechner öffnen, die Bilder liegen dort als ganz
+normale Dateien.
+
+> **Wenn kein Stick erscheint:** Steckt er richtig? Manche sehr alten Sticks werden nicht erkannt.
+> Ein anderer Stick ist der schnellste Versuch.
+
+## Eine Sicherung zurückspielen
+
+Das brauchen Sie nur, wenn das Gerät neu aufgesetzt wurde oder wirklich etwas verloren gegangen
+ist. **Der jetzige Bestand wird dabei ersetzt.**
+
+1. Stick einstecken, Verwaltung → **Sicherung**.
+2. Ganz unten **„Zurückspielen"**.
+3. Das Gerät fragt nach und nennt Datum und Anzahl der Sicherung. Erst dann geht es los.
+
+Was vorher auf dem Gerät war, wird **nicht gelöscht**, sondern in einen Ordner mit dem heutigen
+Datum beiseitegelegt. Wer also versehentlich die falsche Sicherung einspielt, hat nichts verloren
+— sagen Sie in dem Fall jemandem Bescheid, der an das Gerät kann.
 
 ## Was tun, wenn der Bildschirm schwarz bleibt
 

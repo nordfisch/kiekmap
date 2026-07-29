@@ -12,13 +12,14 @@ import { useEffect, useState } from "react";
 
 import { useAdmin } from "../store/admin";
 import { t } from "../texte/de";
+import { Backup } from "./Backup";
 import { BatchUpload } from "./BatchUpload";
 import { Changes } from "./Changes";
 import { ImportLog } from "./ImportLog";
 import { Overview } from "./Overview";
 import { PhotoCare } from "./PhotoCare";
 
-type Section = "overview" | "photos" | "upload" | "changes" | "imports";
+type Section = "overview" | "photos" | "upload" | "changes" | "imports" | "backup";
 
 const SECTIONS: { value: Section; label: string }[] = [
   { value: "overview", label: t.admin.shell.sections.overview },
@@ -26,6 +27,7 @@ const SECTIONS: { value: Section; label: string }[] = [
   { value: "upload", label: t.admin.shell.sections.upload },
   { value: "changes", label: t.admin.shell.sections.changes },
   { value: "imports", label: t.admin.shell.sections.imports },
+  { value: "backup", label: t.admin.shell.sections.backup },
 ];
 
 const TICK_MS = 10_000;
@@ -85,6 +87,7 @@ export function AdminApp() {
               setPhotoFilter("incomplete");
               setSection("photos");
             }}
+            onShowBackup={() => setSection("backup")}
           />
         )}
         {/* Remounted when the filter changes, so the list starts on the right one. */}
@@ -92,6 +95,7 @@ export function AdminApp() {
         {section === "upload" && <BatchUpload />}
         {section === "changes" && <Changes />}
         {section === "imports" && <ImportLog />}
+        {section === "backup" && <Backup />}
       </main>
     </div>
   );
