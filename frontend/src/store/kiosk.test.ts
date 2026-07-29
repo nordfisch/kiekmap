@@ -1,6 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { queryTimeFilter, sameViewport } from "./kiosk";
+vi.mock("../api/client", () => ({
+  fetchPhotos: vi.fn(),
+  fetchHistogram: vi.fn(),
+}));
+
+import { fetchHistogram, fetchPhotos } from "../api/client";
+import { queryTimeFilter, sameViewport, useKiosk } from "./kiosk";
 
 describe("queryTimeFilter", () => {
   const fullRange = { from: 1900, to: 1980 };
@@ -39,5 +45,45 @@ describe("sameViewport", () => {
   it("kommt mit fehlendem Ausschnitt zurecht", () => {
     expect(sameViewport(null, [...bbox])).toBe(false);
     expect(sameViewport(null, null)).toBe(true);
+  });
+});
+
+describe("Leerlauf-Reset", () => {
+  beforeEach(() => {
+    vi.mocked(fetchPhotos).mockResolvedValue({ photos: [], total: 0, truncated: false });
+    vi.mocked(fetchHistogram).mockResolvedValue({
+      decades: [],
+      undated: 0,
+      earliest: null,
+      latest: null,
+    });
+    useKiosk.setState({
+      bbox: [9.6, 53.57, 9.75, 53.67],
+      fullRange: { from: 1860, to: 1990 },
+      timeRange: { from: 1930, to: 1939 },
+      openPhotoId: 42,
+    });
+  });
+
+  it("schliesst das offene Foto", () => {
+    // Sonst steht morgens das Bild des letzten Besuchers vom Vorabend ueber der Karte.
+    useKiosk.getState().reset();
+
+    expect(useKiosk.getState().openPhotoId).toBeNull();
+  });
+
+  it("gibt den ganzen Zeitraum wieder frei", () => {
+    useKiosk.getState().reset();
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 1860, to: 1990 });
+  });
+
+  it("kommt ohne bekannte Spanne zurecht", () => {
+    // Vor der ersten Histogramm-Antwort gibt es keine. Ein Absturz waere hier besonders bitter:
+    // niemand sieht ihn, das Geraet bleibt einfach stehen.
+    useKiosk.setState({ fullRange: null });
+
+    expect(() => useKiosk.getState().reset()).not.toThrow();
+    expect(useKiosk.getState().timeRange).toBeNull();
   });
 });

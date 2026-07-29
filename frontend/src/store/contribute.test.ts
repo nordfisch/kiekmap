@@ -132,6 +132,32 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
   });
 });
 
+describe("Leerlauf-Reset", () => {
+  it("vergisst, was der letzte Besucher weggetippt hat", async () => {
+    // Sonst faengt der naechste Besucher dort an, wo der vorige aufgehoert hat -- mit einer
+    // Merkliste, die ihm Fotos vorenthaelt, die er nie gesehen hat.
+    bestand(aufgabe("location", 1), aufgabe("date", 2));
+    useContribute.setState({
+      need: "date",
+      skipped: [7, 8, 9],
+      pin: { lat: 53.62, lon: 9.676 },
+      pinLabel: "Lehmweg 4b",
+      thanks: "Danke!",
+    });
+
+    useContribute.getState().reset();
+    await vi.waitFor(() => expect(useContribute.getState().task).not.toBeNull());
+
+    const zustand = useContribute.getState();
+    expect(zustand.skipped).toEqual([]);
+    expect(zustand.pin).toBeNull();
+    expect(zustand.pinLabel).toBeNull();
+    expect(zustand.thanks).toBeNull();
+    // Und wieder mit der Ortsfrage anfangen, wie beim ersten Aufruf.
+    expect(zustand.need).toBe("location");
+  });
+});
+
 describe("Karte und Zeitleiste nach einem Beitrag", () => {
   beforeEach(() => {
     bestand(aufgabe("location", 2), aufgabe("date", 3));

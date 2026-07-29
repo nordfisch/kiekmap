@@ -140,13 +140,16 @@ Sprache kosten würde und ab wann sich Modularisierung lohnt.
 
 ## Stand
 
-Fertig: Stufen 0–9 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
-Zeitschieber, „Hilf mit", Sprachregelung, Admin-Bereich mit Stapel-Upload, USB-Sicherung). Als
-Nächstes Kiosk-Deployment (10).
+Fertig: Stufen 0–10 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
+Zeitschieber, „Hilf mit" mit Hausnummern, Sprachregelung, Admin-Bereich mit Stapel-Upload,
+USB-Sicherung, Kiosk-Betrieb). Als Nächstes Stufe 11 und die Vormerkungen im Stufenplan.
 
-Aus Stufe 9 offen, weil es das Gerät braucht: das Einhängen von USB-Sticks auf dem Pi
-(`deploy/pi/99-photomap-usb.rules`, ungeprüft). Zum Entwickeln auf dem Mac `PHOTOMAP_MEDIA_DIR=
-/Volumes` setzen und ein Prüfvolumen mit `hdiutil` anlegen — siehe [docs/betrieb.md](docs/betrieb.md).
+**Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
+ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,
+gehört nach [docs/betrieb.md](docs/betrieb.md).
+
+Zum Entwickeln auf dem Mac `PHOTOMAP_MEDIA_DIR=/Volumes` setzen und ein Prüfvolumen mit `hdiutil`
+anlegen — siehe ebenfalls [docs/betrieb.md](docs/betrieb.md).
 
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.

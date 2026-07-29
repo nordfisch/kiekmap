@@ -50,7 +50,7 @@ Wappen führt die linke Spalte an und ist zugleich der Weg in den Admin-Bereich.
 | 7.6 | Deutsche Texte im Backend nach Konvention ordnen | ✅ |
 | 8 | Admin-Bereich mit Stapel-Upload | ✅ |
 | 9 | Sicherung und Wiederherstellung auf USB | ✅ (Einhängen auf dem Pi offen, siehe unten) |
-| **10** | **Kiosk-Deployment auf dem Pi** | **als Nächstes** |
+| 10 | Kiosk-Deployment auf dem Pi | ✅ gebaut, Abnahme braucht das Gerät |
 | — | [Vorgemerkt](#vorgemerkt): historische Karte, Import vom Stick | gewollt, nicht eingeplant |
 | 11 | Ausbau nach Bedarf | offen |
 
@@ -222,6 +222,26 @@ Offline-Update vom Stick.
 
 **Fertig, wenn:** der Pi nach einem Kaltstart ohne Tastatur von selbst in der Karte landet — und
 nach einem gezogenen Netzstecker genauso wieder hochkommt.
+
+**Stand.** Gebaut und dokumentiert, aber **auf keinem Pi gelaufen** — es gab beim Bauen kein Gerät.
+Was hier steht, ist ehrlich getrennt:
+
+| | |
+|---|---|
+| **Geprüft** | Leerlauf-Reset (Zeitgeber und beide `reset()`, erstmals überhaupt aufgerufen), Shell-Syntax aller Skripte |
+| **Ungeprüft** | `setup-pi.sh`, `photomap-kiosk`, die systemd-Unit, `update.sh`, das Einhängen der USB-Sticks aus Stufe 9 |
+| **Nicht möglich** | Kaltstart, gezogener Netzstecker, Dauerlauf, Touch am Zielgerät |
+
+Der Leerlauf-Reset brachte zwei Dinge ans Licht: `useKiosk.reset()` und `useContribute.reset()`
+gab es seit den Stufen 6 und 7, **aufgerufen hat sie nie jemand**. Sie sind jetzt getestet. Und
+was als Anwesenheit zählt, ist eng gefasst: Tippen, Tasten, Scrollen — *keine* Mausbewegung. Ein
+vom Ärmel angestoßener Zeiger hielte den Kiosk sonst die ganze Nacht wach.
+
+Beim Schreiben der Chromium-Aufrufzeile fielen zwei Flaggen an, die man erst nach dem ersten
+Museumstag vermisst: `--disable-session-crashed-bubble` (nach einem gezogenen Netzstecker fragt
+Chromium sonst „Seiten wiederherstellen?" — mitten in der Ausstellung) und
+`--overscroll-history-navigation=0` (ein Wisch nach rechts löste sonst „Zurück" aus, auf einer
+Karte, die man wischt).
 
 ---
 

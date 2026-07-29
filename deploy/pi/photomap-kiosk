@@ -1,0 +1,56 @@
+#!/bin/sh
+# Startet die Besucheransicht im Vollbild -- das, was das Museum morgens sieht.
+#
+# Zwei Dinge passieren hier, und beide haben einen Grund:
+#
+#   1. Warten, bis die API antwortet. Ohne das begruesst das Geraet seine Besucher nach dem
+#      Einschalten ein paar Sekunden lang mit einer Fehlerseite -- und genau die bleibt stehen,
+#      weil Chromium nicht von allein neu laedt.
+#   2. cage statt eines Desktops. cage ist ein winziger Wayland-Compositor, der genau ein
+#      Programm im Vollbild zeigt. Nichts kann sich davorschieben, kein Hintergrundbild blitzt
+#      auf, keine Update-Hinweise, kein Bildschirmschoner.
+#
+# Wird von photomap-kiosk.service gerufen, nicht von Hand.
+
+set -eu
+
+ADRESSE="${PHOTOMAP_URL:-http://localhost/}"
+GESUNDHEIT="${ADRESSE%/}/api/health"
+
+# Frisches Browserprofil bei jedem Start. Damit ist nach einem Absturz oder Stromausfall nichts
+# von gestern uebrig -- kein halb geladener Zustand, kein Cache, der das Update verschluckt.
+PROFIL="$(mktemp -d /tmp/photomap-chromium.XXXXXX)"
+trap 'rm -rf "$PROFIL"' EXIT
+
+echo "Warte auf $GESUNDHEIT ..."
+VERSUCH=0
+while ! curl -sf --max-time 3 "$GESUNDHEIT" >/dev/null 2>&1; do
+    VERSUCH=$((VERSUCH + 1))
+    # Nach fuenf Minuten trotzdem starten. Lieber eine Fehlerseite, die jemand sieht und meldet,
+    # als ein schwarzer Bildschirm, bei dem niemand weiss, ob das Geraet ueberhaupt laeuft.
+    if [ "$VERSUCH" -gt 150 ]; then
+        echo "API antwortet nicht -- starte trotzdem." >&2
+        break
+    fi
+    sleep 2
+done
+
+exec cage -- chromium-browser \
+    --kiosk "$ADRESSE" \
+    --ozone-platform=wayland \
+    --user-data-dir="$PROFIL" \
+    --no-first-run \
+    --noerrdialogs \
+    --disable-infobars \
+    --disable-translate \
+    --disable-features=TranslateUI \
+    `# Nach einem gezogenen Netzstecker fragt Chromium sonst "Seiten wiederherstellen?" --` \
+    `# ein Dialog mitten in der Ausstellung, den niemand wegklickt.` \
+    --disable-session-crashed-bubble \
+    --hide-crash-restore-bubble \
+    `# Ein Wisch nach rechts loest sonst "Zurueck" aus. Auf einer Karte, die man wischt,` \
+    `# ist das ein taeglicher Aerger.` \
+    --overscroll-history-navigation=0 \
+    `# Pinch-Zoom bleibt an -- die Karte lebt davon.` \
+    --disable-pinch=false \
+    --autoplay-policy=no-user-gesture-required

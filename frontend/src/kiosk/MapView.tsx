@@ -5,9 +5,11 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Bbox } from "../api/client";
 import type { Region } from "../region";
+import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { PhotoLayer } from "./PhotoLayer";
 import { PinLayer } from "./PinLayer";
+import { IDLE_MS, watchForIdle } from "./idle";
 import { buildStyle } from "./mapStyle";
 
 // Once per page load: teaches MapLibre to read `pmtiles://` sources via HTTP range requests.
@@ -77,6 +79,18 @@ export function MapView({ region }: { region: Region }) {
       setMap(null);
     };
   }, [region, setViewport]);
+
+  // Back to the state the device should be in each morning. The map is part of it, and only this
+  // component can move it -- so the idle watch lives here rather than in a store.
+  useEffect(() => {
+    if (!map) return;
+
+    return watchForIdle(window, IDLE_MS, () => {
+      useKiosk.getState().reset();
+      useContribute.getState().reset();
+      map.easeTo({ center: region.center, zoom: region.defaultZoom, duration: 1500 });
+    });
+  }, [map, region]);
 
   return (
     <div className="map">

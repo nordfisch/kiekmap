@@ -91,6 +91,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Faustregel für Meldungen eingeführt: erscheint sie im Kiosk oder Admin-Bereich, ist sie deutsch,
   sonst englisch. OpenAPI-Beschreibungen sind damit englisch, CLI-Ausgaben bleiben deutsch
 - Jahrzehnte der Datumsfrage kommen aus `region.json` statt aus dem Code
+- Kiosk-Betrieb auf dem Pi: `deploy/pi/setup-pi.sh` richtet einen frischen Raspberry Pi ein,
+  `photomap-kiosk.service` startet cage mit Chromium im Vollbild, sobald `/api/health` antwortet.
+  Frisches Browserprofil bei jedem Start; systemd startet nach einem Absturz neu
+- `deploy/pi/update.sh` spielt ein Update vom USB-Stick ein, ohne den Bestand anzufassen —
+  Kartendaten werden erst danebengelegt und dann umbenannt, der Ortsindex ausdrücklich neu geladen
+- Leerlauf-Reset: Nach fünf Minuten ohne Berührung schließt sich ein offenes Foto, Zeitraum und
+  Kartenausschnitt kehren zur Standardansicht zurück. Sonst stünde das Gerät morgens im Zustand
+  des letzten Besuchers vom Vorabend. Als Anwesenheit zählen Tippen, Tasten und Scrollen — keine
+  Mausbewegung
 - Hausnummern im Ortsindex: Wer eine Straße antippt, wählt danach die Hausnummer aus einem
   Knopfraster — oder tippt „Reicht so", denn nicht jedes Haus steht in OpenStreetMap. Ohne sie
   bekam jedes Foto einer 800 m langen Straße denselben Punkt

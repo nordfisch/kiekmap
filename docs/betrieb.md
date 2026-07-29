@@ -1,20 +1,149 @@
 # Betriebshandbuch
 
-> Wird in **Stufe 10 (Kiosk-Deployment)** gefüllt. Diese Datei ist der Ort für alles, was jemand
-> wissen muss, der das Gerät im Museum am Laufen hält.
+Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung für das
+Museumsteam steht in der [Kuratoren-Anleitung](kuratoren-anleitung.md); hier steht die Technik.
 
-Geplanter Inhalt:
+> **Auf einem echten Pi noch nicht erprobt.** Die Dateien unter `deploy/pi/` sind sorgfältig
+> geschrieben und syntaktisch geprüft, aber nie gelaufen — es gab beim Bauen kein Gerät. Was
+> davon zuerst hakt, gehört in diese Datei, sobald der Pi dasteht.
 
-- Einrichtung eines neuen Pi von Grund auf (`deploy/pi/setup-pi.sh`)
-- Was beim Einschalten passiert und woran man erkennt, dass etwas hakt
-- Wartungsausgang: SSH, und die Tastenkombination, die vor Ort den Kiosk beendet
-- Update ohne Internet: Stick anstecken, `update.sh`
-- Sicherung auf USB und Wiederherstellung (die Bedienung steht in der
-  [Kuratoren-Anleitung](kuratoren-anleitung.md), hier die Technik dahinter)
-- SD-Karte klonen als Komplettsicherung des Geräts
-- Fehlersuche: Container-Logs, Kiosk-Dienst, Display, Touch, USB-Automount
+---
 
-Schon jetzt gültig — **die PIN für den Admin-Bereich einrichten**:
+## Einen neuen Pi einrichten
+
+Raspberry Pi OS **Lite** (64 Bit), kein Desktop. Dann:
+
+```bash
+sudo git clone <repo> /opt/photomap
+sudo sh /opt/photomap/deploy/pi/setup-pi.sh
+```
+
+Das Skript installiert cage, Chromium und Docker, legt den Benutzer `photomap` an, richtet den
+Kiosk-Dienst und die USB-Regel ein und schaltet die Bildschirmabschaltung ab. Danach nennt es die
+vier Schritte, die es nicht selbst tun kann: `.env` anlegen, PIN setzen, Kartendaten kopieren,
+Container starten.
+
+**Kartendaten kommen vom Entwicklungsrechner**, nicht vom Pi. `make tiles` und `make places`
+brauchen Internet und Rechenzeit; auf den Pi gehören nur die Ergebnisse:
+
+```bash
+rsync -a frontend/public/tiles/ pi:/opt/photomap/frontend/public/tiles/
+rsync -a data/places.json       pi:/opt/photomap/data/places.json
+```
+
+---
+
+## Was beim Einschalten passiert
+
+Etwa 20 Sekunden, in dieser Reihenfolge:
+
+1. **Docker startet.** Die Container laufen mit `restart: unless-stopped` von selbst hoch. Beim
+   ersten Start nach einem Update laufen die Alembic-Migrationen — deshalb kann er länger dauern.
+2. **`photomap-kiosk.service` wartet auf `/api/health`.** Ohne das Warten sähen die ersten
+   Besucher ein paar Sekunden lang eine Fehlerseite — und die bliebe stehen, weil Chromium nicht
+   von allein neu lädt. Nach fünf Minuten startet der Dienst trotzdem: eine Fehlerseite, die
+   jemand sieht und meldet, ist besser als ein schwarzer Bildschirm.
+3. **`cage -- chromium --kiosk`** übernimmt den Bildschirm. Frisches Browserprofil bei jedem
+   Start, damit nach einem Stromausfall nichts von gestern übrig ist.
+4. **Stürzt Chromium ab, startet systemd ihn neu** (`Restart=always`, 5 s Pause).
+
+Woran man erkennt, dass etwas hakt:
+
+```bash
+systemctl status photomap-kiosk       # läuft der Kiosk?
+journalctl -u photomap-kiosk -n 50    # warum nicht?
+cd /opt/photomap/deploy && docker compose ps
+curl -sf http://localhost/api/health && echo " API antwortet"
+```
+
+---
+
+## Wartungsausgang
+
+Der Kiosk kennt keine Tastenkombination zum Beenden — das ist Absicht, ein Besucher soll nicht
+versehentlich herausfallen. Der Weg hinaus geht über SSH:
+
+```bash
+sudo systemctl stop photomap-kiosk     # Bildschirm wird schwarz, Dienste laufen weiter
+sudo systemctl start photomap-kiosk    # zurück in die Karte
+```
+
+Für Arbeiten am Gerät selbst genügt meist der Admin-Bereich über das Wappen — Fotos pflegen,
+hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
+
+---
+
+## Update ohne Internet
+
+Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
+
+```bash
+docker save photomap-backend:v1.2 photomap-frontend:v1.2 -o /Volumes/STICK/photomap-update/abbilder.tar
+echo v1.2 > /Volumes/STICK/photomap-update/version
+# nur falls sich die Region geändert hat:
+cp -r frontend/public/tiles data/places.json /Volumes/STICK/photomap-update/
+```
+
+Am Pi:
+
+```bash
+sudo sh /opt/photomap/deploy/pi/update.sh /media/STICK/photomap-update
+```
+
+Das Skript liest die Abbilder ein, trägt die Version in die `.env`, tauscht Kartendaten und
+Ortsindex, startet die Container neu und wartet, bis die API antwortet. **Der Bestand wird nicht
+angefasst** — Fotos und Angaben bleiben, wo sie sind.
+
+Zwei Feinheiten stecken darin: Die Kartendaten werden erst danebengelegt und dann umbenannt, damit
+ein abgebrochenes Kopieren keine halbe Kartendatei hinterlässt. Und der Ortsindex wird ausdrücklich
+neu eingelesen — beim Start lädt das Backend ihn nur, wenn die Tabelle leer ist.
+
+---
+
+## SD-Karte klonen
+
+Die vollständige Sicherung des Geräts, inklusive Betriebssystem. Einmal nach der Einrichtung und
+nach jedem größeren Update:
+
+```bash
+# Pi herunterfahren, Karte in den Entwicklungsrechner:
+sudo dd if=/dev/rdiskN bs=4m | gzip > holm-pi-2026-07-29.img.gz
+```
+
+Das ersetzt die Sicherung im Admin-Bereich **nicht** — die läuft im laufenden Betrieb und sichert
+den Bestand. Der Klon sichert das eingerichtete Gerät.
+
+---
+
+## Bildschirm bleibt schwarz
+
+In dieser Reihenfolge:
+
+1. `systemctl status photomap-kiosk` — läuft der Dienst?
+2. `journalctl -u photomap-kiosk -n 50` — meldet cage etwas? *„unable to open primary DRM device"*
+   heißt: Die Sitzung hat kein Ausgabegerät. Dann fehlt eine der vier Zeilen `PAMName`,
+   `TTYPath`, `StandardInput`, `UtmpIdentifier` in der Unit, oder der Benutzer ist nicht in den
+   Gruppen `video` und `render`.
+3. `docker compose ps` — laufen die Container? Wenn nicht: `docker compose logs backend`.
+4. Nach zehn Minuten schwarz, obwohl vorher alles lief: `consoleblank=0` fehlt in der
+   `cmdline.txt` (setzt `setup-pi.sh`, wirkt erst nach einem Neustart).
+
+---
+
+## Fehlersuche kurz
+
+| Beobachtung | Erster Verdacht |
+|---|---|
+| Karte ohne Beschriftung | `frontend/public/basemaps/` fehlt — `make tiles` lief nicht |
+| Karte grau, keine Kacheln | `frontend/public/tiles/map.pmtiles` fehlt oder ist halb kopiert |
+| Ortssuche findet nichts | `data/places.json` fehlt, oder `python -m app.cli places` lief nicht |
+| „Hilf mit" meldet stumm Fehler | Regionsprüfung ohne `data/region.json` — `make tiles` legt sie mit ab |
+| USB-Stick erscheint nicht | udev-Regel oder `:rshared` — siehe unten |
+| Anmeldung lehnt jede PIN ab | `PHOTOMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
+
+---
+
+## Die PIN für den Admin-Bereich einrichten
 
 ```bash
 cd backend && .venv/bin/python -m app.cli pin
@@ -30,10 +159,6 @@ Bedienung; jede Aktion schiebt sie hinaus, und ein Neustart des Dienstes beendet
 ---
 
 ## USB-Sticks sichtbar machen
-
-> **Noch nicht auf einem Pi erprobt.** Die Sicherung selbst ist es (gegen ein eingehängtes
-> Laufwerk auf dem Entwicklungsrechner) — das Einhängen auf dem Pi wartet auf das Gerät und
-> gehört zur Abnahme von Stufe 10.
 
 Raspberry Pi OS **Lite** hat keinen Desktop und damit keinen Automounter: Ein eingesteckter Stick
 taucht von allein nirgends auf. Der Admin-Bereich sähe nie einen und meldete ewig „Bitte USB-Stick
