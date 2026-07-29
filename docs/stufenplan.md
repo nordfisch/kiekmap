@@ -233,23 +233,140 @@ erledigt sind, weil die Notiz dann erzählt, was daran wirklich dran war.
 
 ### Hausnummern im Ortsindex
 
-**Warum.** Die Verortung über die Ortssuche trifft heute die Straße, nicht das Haus. Ein
-Mühlenweg von 800 m Länge bekommt für jedes Foto denselben Punkt — auf der Karte liegen sie dann
-übereinander, und die Aussage „hier war das" ist um bis zu 400 m falsch. Für ein Dorf, in dem man
-Häuser auseinanderhält, ist das zu grob.
+**Warum.** Die Verortung über die Ortssuche trifft heute die Straße, nicht das Haus. Ein Mühlenweg
+von 800 m Länge bekommt für jedes Foto denselben Punkt — auf der Karte liegen sie übereinander, und
+„hier war das" ist um bis zu 400 m falsch. Für ein Dorf, in dem man Häuser auseinanderhält, ist das
+zu grob.
 
-**Wo.** [`tiles/build-places.py`](../tiles/build-places.py) fragt Overpass ab und schreibt
-`data/places.json`; die Tabelle `places` nimmt es auf. Hausnummern stehen in OSM als
-`addr:housenumber` an Gebäuden und an `addr:*`-Knoten — eine zweite Overpass-Abfrage, kein neuer
-Datenweg.
+#### Die Gestaltungsentscheidung: Straße zuerst, dann die Nummer
 
-**Womit zu rechnen ist.** Der Index wächst deutlich: statt rund tausend Straßen und Orten kommen
-für eine Gemeinde einige tausend Adressen dazu. Das betrifft die Suche (`name_normalized` sucht
-heute über einen Namen, „Mühlenweg 12" ist zwei Angaben) und die Trefferliste am Kiosk — dort
-dürfen nicht plötzlich vierzig Hausnummern die Straße verdrängen. Naheliegend: Straße zuerst, die
-Nummern darunter oder erst nach Eingabe einer Ziffer.
+Nicht eine flache Trefferliste aus Straßen *und* Hausnummern, sondern **zwei Schritte** — genau wie
+bei der Datierung, wo erst das Jahrzehnt und dann optional das Jahr kommt:
 
-Nicht jedes Haus hat in OSM eine Nummer. Die Straße muss deshalb weiterhin als Antwort taugen.
+```
+"Mühlenweg" tippen  →  [Mühlenweg   Straße]
+                       ↓ antippen
+                       Welche Hausnummer?   (Pin liegt schon auf der Straße)
+                       [1] [1a] [2] [3] [10] [12] …
+                       [ Reicht so — Straße genügt ]
+```
+
+Drei Gründe, und der dritte wiegt am schwersten:
+
+1. Eine flache Liste mit `MAX_RESULTS = 12` wäre nach vierzig Hausnummern des Mühlenwegs voll —
+   die anderen Straßen fielen heraus.
+2. Große Knöpfe statt einer langen Liste sind am Touchscreen für ältere Finger das Richtige.
+3. **„Reicht so" muss eine vollwertige Antwort bleiben.** Nicht jedes Haus hat in OSM eine Nummer,
+   und niemand weiß bei jedem Foto die Hausnummer. Ein Schritt, der sich überspringen lässt, ist
+   ehrlicher als ein Zwang — dieselbe Überlegung wie bei „Ganze 1920er Jahre".
+
+Zusätzlich, weil es fast nichts kostet: Enthält die Eingabe eine **Ziffer** („mühlenweg 12"), darf
+die freie Suche Adressen direkt liefern. Wer die Nummer weiß, tippt sie.
+
+#### Datenmodell
+
+Adressen sind gewöhnliche `places`-Zeilen mit `kind = "adresse"` — derselbe Ladeweg, dieselbe
+Suche, dieselbe API-Form. Dazu zwei neue, leere Spalten auf `Place`:
+
+| Spalte | Inhalt | Warum |
+|---|---|---|
+| `street` | `"Mühlenweg"` | Verknüpfung zur Straße, ohne Präfixraterei am Namen |
+| `housenumber` | `"12"`, `"1a"` | zum natürlichen Sortieren, siehe unten |
+
+`name` bleibt der zusammengesetzte `"Mühlenweg 12"` — davon lebt die bestehende Suche.
+
+**Eine Alembic-Migration**, kein Zusammenfassen mit der initialen: In `data/` liegen inzwischen
+Fotos. Die `places`-Tabelle selbst wird aus `places.json` ohnehin neu gefüllt (`load_from_file`
+löscht und lädt), aber die Migration muss trotzdem sauber laufen.
+
+#### Bauskript
+
+[`tiles/build-places.py`](../tiles/build-places.py), zwei Zeilen mehr in `ABFRAGEN`:
+
+```python
+('node["addr:housenumber"]["addr:street"]', "adresse"),
+('way["addr:housenumber"]["addr:street"]', "adresse"),
+```
+
+**Der Fallstrick sitzt in der Sammelschleife.** Sie überspringt heute jedes Element ohne `name`:
+
+```python
+ort_name = (tags.get("name") or "").strip()
+if not ort_name:
+    continue          # ← hier fielen alle Adressen still heraus
+```
+
+Adressknoten haben keinen `name`. Es braucht einen eigenen Zweig, der ihn aus
+`addr:street` + `addr:housenumber` baut, bevor diese Zeile greift. Wer das übersieht, bekommt eine
+grün durchlaufende Abfrage und null Adressen.
+
+Zweiter Punkt: `art_fuer(tags)` prüft `"highway" in tags` zuerst; ein Gebäude mit Adresse *und*
+`highway` gibt es praktisch nicht, aber die Adressprüfung gehört trotzdem vor die anderen.
+
+Die Mittelwertbildung über gleiche `(name, art)` darf bleiben: Adressknoten und Gebäudeumriss
+desselben Hauses liegen Meter auseinander, ihr Mittel ist richtiger als beides einzeln.
+
+#### Suche
+
+[`app/services/places.py`](../backend/app/services/places.py):
+
+- `KIND_ORDER` und `kind_rank` um `"adresse"` **ganz hinten** ergänzen.
+- `search()` bekommt eine Bedingung: `kind = "adresse"` nur, wenn `any(c.isdigit() for c in term)`.
+- Neu: `housenumbers(session, street: str) -> list[Place]`, sortiert **natürlich**.
+
+**Natürliche Sortierung ist der klassische stille Fehler:** Alphabetisch kommt „10" vor „9" und
+„1a" vor „2". Der Schlüssel ist `(führende Zahl, Rest)` — eine reine Funktion, die einen eigenen
+Test verdient (`test_hausnummern_werden_natuerlich_sortiert`).
+
+Neuer Endpunkt in [`app/api/places.py`](../backend/app/api/places.py):
+
+```
+GET /api/places/{id}/housenumbers   →  list[PlaceOut]
+```
+
+Über die Id der Straße, nicht über ihren Namen — der Name käme aus dem Browser zurück und wäre
+Eingabe, keine Tatsache (dieselbe Regel wie beim Sicherungspfad).
+
+#### Oberfläche
+
+[`frontend/src/kiosk/LocationTask.tsx`](../frontend/src/kiosk/LocationTask.tsx): Nach dem Antippen
+einer Straße die Hausnummern als Knopfraster, darunter „Reicht so". Der Pin sitzt sofort auf der
+Straßenmitte — der zweite Schritt verschiebt ihn nur.
+
+`t.location` in [`de.ts`](../frontend/src/texte/de.ts) bekommt `askHouseNumber`, `noHouseNumber`,
+und `kinds` den Eintrag `adresse: "Adresse"`.
+
+Der Admin-Metadateneditor profitiert ohne Zutun: `PlaceField` nutzt dieselbe freie Suche, und dort
+tippt jemand mit Tastatur ohnehin gern „Mühlenweg 12".
+
+#### Genauigkeit mitschreiben
+
+`Photo.location_accuracy_m` und `LocationContribution.accuracy_m` gibt es seit Stufe 3, benutzt
+werden sie nicht. Hier lohnt es: Straßenmitte ≈ 150 m, Hausnummer ≈ 15 m. Der Kurator sieht damit,
+welche Angabe belastbar ist, ohne dass jemand es dazuschreiben muss.
+
+#### Womit zu rechnen ist
+
+- **Umfang.** Für eine Gemeinde dieser Größe einige hundert bis zweitausend Adressen — der Index
+  verdoppelt bis verdreifacht sich. `places.json` bleibt unter einem Megabyte, die Suche über ein
+  paar tausend Zeilen ist auf dem Pi weiterhin unmerklich.
+- **Lücken.** Nicht jedes Haus ist in OSM erfasst. Eine Straße ohne Hausnummern muss den zweiten
+  Schritt einfach überspringen, nicht leer dastehen.
+- **`addr:place` statt `addr:street`.** Kommt bei Streusiedlungen vor. Beim ersten Bau prüfen, ob
+  in Holm Adressen fehlen, die es geben müsste.
+
+#### Tests, die den Fehlerfall beschreiben
+
+```
+test_adressen_verdraengen_die_strassen_nicht     # der Grund für die zwei Schritte
+test_hausnummer_mit_ziffer_wird_direkt_gefunden
+test_hausnummern_werden_natuerlich_sortiert      # 10 nach 9, 1a nach 1
+test_strasse_ohne_hausnummern_bleibt_beantwortbar
+test_hausnummer_setzt_die_genauigkeit
+```
+
+**Aufwand.** Vergleichbar mit der Ortssuche aus Stufe 7 — eine konzentrierte Sitzung, wenn
+`make places` einmal mit Internet laufen kann.
 
 ### ~~„Weiß ich nicht" wechselt die Frage~~ ✅ erledigt
 
