@@ -1,4 +1,3 @@
-import { layers, namedFlavor } from "@protomaps/basemaps";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Protocol } from "pmtiles";
@@ -9,41 +8,12 @@ import type { Region } from "../region";
 import { useKiosk } from "../store/kiosk";
 import { PhotoLayer } from "./PhotoLayer";
 import { PinLayer } from "./PinLayer";
+import { buildStyle } from "./mapStyle";
 
 // Once per page load: teaches MapLibre to read `pmtiles://` sources via HTTP range requests.
 // That is exactly what makes a tile server unnecessary -- nginx just serves a static file.
 const protocol = new Protocol();
 maplibregl.addProtocol("pmtiles", protocol.tile);
-
-/**
- * Fonts and icons live locally under /basemaps/.
- *
- * This is where an offline map otherwise breaks silently: tiles and style would come from the
- * PMTiles file, but labels and icons would still be fetched from protomaps.github.io. Without a
- * network what remains is a map without a single word on it.
- */
-const GLYPHS = "/basemaps/fonts/{fontstack}/{range}.pbf";
-// MapLibre demands an absolute sprite URL -- it rejects relative paths. The origin comes from the
-// browser rather than from configuration, so the same build works on localhost, in the museum's
-// wifi and behind the Pi's nginx.
-const SPRITE = `${window.location.origin}/basemaps/sprites/v4/light`;
-
-function buildStyle(region: Region): maplibregl.StyleSpecification {
-  return {
-    version: 8,
-    glyphs: GLYPHS,
-    sprite: SPRITE,
-    sources: {
-      protomaps: {
-        type: "vector",
-        url: "pmtiles:///tiles/map.pmtiles",
-        attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>-Mitwirkende',
-      },
-    },
-    layers: layers("protomaps", namedFlavor("light"), { lang: "de" }),
-    ...{ maxzoom: region.maxZoom },
-  } as maplibregl.StyleSpecification;
-}
 
 export function MapView({ region }: { region: Region }) {
   const container = useRef<HTMLDivElement>(null);

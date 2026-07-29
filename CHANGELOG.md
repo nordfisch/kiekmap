@@ -91,6 +91,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Faustregel für Meldungen eingeführt: erscheint sie im Kiosk oder Admin-Bereich, ist sie deutsch,
   sonst englisch. OpenAPI-Beschreibungen sind damit englisch, CLI-Ausgaben bleiben deutsch
 - Jahrzehnte der Datumsfrage kommen aus `region.json` statt aus dem Code
+- Eigener Kartenstil „Papier" in den Farben der Oberfläche: Erde in Papierton, Grün zu Salbei
+  entsättigt, Wasser in mattem Graublau statt Türkis. Regel beim Aussuchen: nichts auf der Karte
+  darf so gesättigt sein wie ein Foto. Dazu ohne Geschäfte, Hausnummern und Autobahnschilder, und
+  mit Straßen auf 80 % ihrer Breite — die kleinen Straßennamen bleiben, an ihnen hängt die
+  Verortung
 - Kiosk-Aufteilung auf ein Raster aus zwei Spalten und zwei Zeilen: links Titelbereich über
   „Hilf mit", rechts Zeitschieber über der Karte. Der Schieber steht damit weiterhin genau über
   der Karte, die er filtert, und das Wappen führt den Bereich an, statt die Karte zu verdecken.

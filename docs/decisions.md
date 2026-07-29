@@ -259,3 +259,28 @@ Details:
 *Bekannter Fallstrick:* Auf Pi OS Lite mountet nichts von selbst (udev-Regel nötig), und ein
 Docker-Bind-Mount zeigt neu eingehängte Datenträger nur mit `rshared`-Propagation. Ohne das bleibt
 der Stick im Container unsichtbar.
+
+---
+
+## 12. Die Karte ist Hintergrund, nicht Hauptsache
+
+**Entscheidung.** Ein eigener Farb-Flavor („Papier") in den Tönen der Oberfläche, statt eines der
+fünf mitgelieferten. Dazu drei Ebenen weniger und Straßen auf 80 % ihrer Breite. Alles in
+[`frontend/src/kiosk/mapStyle.ts`](../frontend/src/kiosk/mapStyle.ts).
+
+**Warum.** Die fertigen Flavors sind für Navigation gebaut: türkises Wasser, kräftiges Grün, kühles
+Grau. Neben einem Bereich in Papierweiß und Sepiabraun sahen sie aus wie ein zweites Programm. Die
+Regel beim Aussuchen der Farben war: **nichts auf der Karte darf so gesättigt sein wie ein Foto.**
+Was auf dem Schirm Farbe hat, soll ein Foto sein.
+
+**Was weggelassen wird**, und was ausdrücklich nicht: `pois` (Geschäfte samt Symbolen),
+`address_label` (Hausnummern im Kartenbild) und `roads_shields` (Autobahnschilder). Die
+Straßennamen bleiben — **auch die kleinen**: Der „Hilf mit"-Bereich sagt „Tippen Sie auf der Karte
+auf die Stelle — oder suchen Sie den Straßennamen", und in einem Dorf sind die meisten Straßen
+kleine. Sie zu entfernen hätte die Karte beruhigt und die Verortung erschwert.
+
+*Fallstrick bei der Strichstärke:* Die Breiten sind Zoom-Interpolationen. Sie in `["*", breite,
+0.8]` einzupacken wirkt naheliegend und wird von MapLibre abgelehnt — *„zoom expression may only be
+used as input to a top-level step or interpolate expression"*. Skaliert werden deshalb die
+**Stützstellen**, die Kurve bleibt, wie sie ist. Damit wandern spätere Änderungen des Flavors
+weiterhin mit, statt in einer handgepflegten Kopie fremder Kartografie zu enden.
