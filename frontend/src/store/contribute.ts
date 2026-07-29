@@ -33,7 +33,12 @@ const THANKS_MS = 2200;
  */
 const SESSION_ID = Math.random().toString(36).slice(2, 12);
 
-/** Remember only the last few skipped photos, otherwise nothing would be left to show. */
+/**
+ * Remember only the last few skipped photos, otherwise nothing would be left to show.
+ *
+ * One list for both questions, not one each: a photo somebody has just waved away should not come
+ * straight back with the other question on it. That would read as "you were not listening".
+ */
 const SKIP_MEMORY = 20;
 
 type ContributeState = {
@@ -63,12 +68,19 @@ type ContributeState = {
 let abort: AbortController | null = null;
 let thanksTimer: ReturnType<typeof setTimeout> | null = null;
 
-/** After a contribution, the other question is the welcome change of pace. */
-function otherNeed(current: Need): Need {
+/** The two questions take turns -- after a contribution and after "Weiß ich nicht" alike. */
+export function otherNeed(current: Need): Need {
   return current === "location" ? "date" : "location";
 }
 
 export const useContribute = create<ContributeState>((set, get) => {
+  /**
+   * Fetch the next task, and fall back to the other question when this one has run dry.
+   *
+   * The fallback is what makes taking turns safe. Both kinds empty out at different rates -- in a
+   * collection where every photo is placed but half of them are undated, always asking "where is
+   * this?" would report "everything is complete" while hundreds of photos still wait for a year.
+   */
   async function load(need: Need) {
     abort?.abort();
     abort = new AbortController();
@@ -77,6 +89,15 @@ export const useContribute = create<ContributeState>((set, get) => {
     set({ loading: true, error: null, pin: null, pinLabel: null });
     try {
       const task = await fetchTask(need, get().skipped, signal);
+
+      if (!task.photo) {
+        const fallback = await fetchTask(otherNeed(need), get().skipped, signal);
+        if (fallback.photo) {
+          set({ task: fallback, need: otherNeed(need), loading: false });
+          return;
+        }
+      }
+
       set({ task, need, loading: false });
     } catch (e) {
       if (signal.aborted) return;
@@ -125,6 +146,12 @@ export const useContribute = create<ContributeState>((set, get) => {
 
     load: (need) => load(need ?? get().need),
 
+    /**
+     * "Weiß ich nicht -- nächstes Foto" changes the question, not just the picture.
+     *
+     * Whoever cannot place a photo may well know the decade, and the other way round. Asking the
+     * same kind of question again is what makes a visitor give up after three pictures.
+     */
     skip() {
       const { task, need, skipped } = get();
       const id = task?.photo?.id;
@@ -133,7 +160,7 @@ export const useContribute = create<ContributeState>((set, get) => {
         pin: null,
         pinLabel: null,
       });
-      void load(need);
+      void load(otherNeed(need));
     },
 
     setPin(pin, label = null) {

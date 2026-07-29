@@ -72,6 +72,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Erinnerung „Letzte Sicherung vor 34 Tagen" auf der Startseite der Verwaltung, ab 30 Tagen rot
 - `deploy/pi/99-photomap-usb.rules` und `photomap-usb-mount` hängen Sticks auf Pi OS Lite ein —
   dort gibt es keinen Automounter
+- „Weiß ich nicht — nächstes Foto" wechselt jetzt die Frage zwischen Ort und Jahr. Wer einen Ort
+  nicht erkennt, weiß vielleicht trotzdem das Jahrzehnt; dieselbe Frage noch einmal ist der Grund,
+  warum jemand nach drei Bildern aufhört
+- Läuft eine der beiden Fragen leer, fällt der „Hilf mit"-Bereich auf die andere zurück, statt
+  „alles vollständig" zu melden, während Hunderte Fotos auf eine Jahreszahl warten
 
 ### Geändert
 

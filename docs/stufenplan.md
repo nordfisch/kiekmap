@@ -51,7 +51,7 @@ Wappen führt die linke Spalte an und ist zugleich der Weg in den Admin-Bereich.
 | 8 | Admin-Bereich mit Stapel-Upload | ✅ |
 | 9 | Sicherung und Wiederherstellung auf USB | ✅ (Einhängen auf dem Pi offen, siehe unten) |
 | **10** | **Kiosk-Deployment auf dem Pi** | **als Nächstes** |
-| — | [Vorgemerkt](#vorgemerkt): Hausnummern, Fragewechsel, Import vom Stick | gewollt, nicht eingeplant |
+| — | [Vorgemerkt](#vorgemerkt): Hausnummern, Import vom Stick | gewollt, nicht eingeplant |
 | 11 | Ausbau nach Bedarf | offen |
 
 Was in den fertigen Stufen entstanden ist, steht im [CHANGELOG](../CHANGELOG.md).
@@ -227,8 +227,9 @@ nach einem gezogenen Netzstecker genauso wieder hochkommt.
 
 ## Vorgemerkt
 
-Anders als Stufe 11: Diese drei sind gewollt, nur noch nicht eingeplant. Sie stehen hier mit dem,
-was beim Aufgreifen sonst erst wieder herausgefunden werden müsste.
+Anders als Stufe 11: Diese sind gewollt, nur noch nicht eingeplant. Sie stehen hier mit dem, was
+beim Aufgreifen sonst erst wieder herausgefunden werden müsste — und bleiben stehen, wenn sie
+erledigt sind, weil die Notiz dann erzählt, was daran wirklich dran war.
 
 ### Hausnummern im Ortsindex
 
@@ -250,22 +251,13 @@ Nummern darunter oder erst nach Eingabe einer Ziffer.
 
 Nicht jedes Haus hat in OSM eine Nummer. Die Straße muss deshalb weiterhin als Antwort taugen.
 
-### „Weiß ich nicht" wechselt die Frage
+### ~~„Weiß ich nicht" wechselt die Frage~~ ✅ erledigt
 
-**Was.** Tippt jemand im „Hilf mit"-Bereich auf *„Weiß ich nicht — nächstes Foto"*, kommt heute
-wieder dieselbe Art Frage. Es soll zwischen Verortung und Datierung wechseln: Wer einen Ort nicht
-erkennt, weiß vielleicht trotzdem ein Jahrzehnt — und umgekehrt.
-
-**Wo.** [`frontend/src/store/contribute.ts`](../frontend/src/store/contribute.ts). Die Funktion
-`otherNeed()` gibt es schon und sie wird nach einem *erfolgreichen* Beitrag bereits benutzt
-(`showThanks(text, otherNeed(need))`). In `skip()` steht dagegen `void load(need)` — dort gehört
-`otherNeed(need)` hin. Das ist im Kern eine Zeile.
-
-**Was dabei zu bedenken ist.** `skipped` merkt sich die weggetippten Fotos gemeinsam für beide
-Fragearten; das bleibt richtig. Zu prüfen ist der Fall, dass eine der beiden Sorten leer ist — sind
-alle Fotos verortet, aber viele undatiert, darf das Wechseln nicht bei „Zurzeit ist alles
-vollständig" hängen bleiben. `open_count` aus der Antwort sagt, ob die andere Seite überhaupt etwas
-zu bieten hat.
+Umgesetzt in [`frontend/src/store/contribute.ts`](../frontend/src/store/contribute.ts). Der
+Fallstrick war der vermutete: Läuft eine der beiden Fragen leer, muss das Laden auf die andere
+zurückfallen — sonst stünde „Zurzeit ist alles vollständig" auf dem Schirm, während Hunderte Fotos
+auf eine Jahreszahl warten. Der Rückfall greift jetzt bei jedem Laden, nicht nur beim Wechseln, und
+behebt denselben Fehler auch nach einem abgegebenen Beitrag.
 
 ### Import vom USB-Stick im Admin-Bereich
 
