@@ -284,3 +284,35 @@ kleine. Sie zu entfernen hätte die Karte beruhigt und die Verortung erschwert.
 used as input to a top-level step or interpolate expression"*. Skaliert werden deshalb die
 **Stützstellen**, die Kurve bleibt, wie sie ist. Damit wandern spätere Änderungen des Flavors
 weiterhin mit, statt in einer handgepflegten Kopie fremder Kartografie zu enden.
+
+---
+
+## 13. Verortung in zwei Schritten: Straße, dann Hausnummer
+
+**Entscheidung.** Die Ortssuche liefert Straßen. Wer eine antippt, bekommt deren Hausnummern als
+Knopfraster und darunter „Reicht so — die Straße genügt". Adressen tauchen in der freien Suche
+nur auf, wenn die Eingabe eine **Ziffer** enthält.
+
+**Warum nicht eine flache Liste?** Weil zwölf Plätze nach den Hausnummern einer Straße voll wären.
+Der Lehmweg in Holm hat 139. Eine Trefferliste aus „Lehmweg 1" bis „Lehmweg 12" hätte jede andere
+Straße verdrängt — und der Mühlenteich, den jemand vielleicht meinte, wäre nicht mehr darin
+gewesen.
+
+**Warum zwei Schritte gut sind, nicht nur erträglich.** Es ist dieselbe Form wie bei der
+Datierung (Jahrzehnt, dann Jahr), und aus demselben Grund: Der zweite Schritt ist **überspringbar**.
+Nicht jedes Haus steht in OpenStreetMap, und niemand weiß bei jedem Foto die Hausnummer. Der Pin
+sitzt schon nach dem ersten Schritt auf der Straße; wer dort aufhört, hat geantwortet.
+
+**Nebenprodukt: die Genauigkeit wird endlich benutzt.** `location_accuracy_m` gibt es seit Stufe 3
+ungenutzt. Eine Straße bekommt 150 m, eine Hausnummer 15 m. Der Kurator sieht damit, worauf Verlass
+ist, ohne dass jemand es dazuschreiben musste. Ein von Hand auf die Karte getippter Punkt bekommt
+**keine** Angabe — wie gut jemand gezielt hat, ist nicht unsere Behauptung. Wer den Pin verschiebt,
+verliert Name und Genauigkeit wieder, aus demselben Grund.
+
+*Zwei stille Fallstricke, beide mit Test:*
+
+- **Die Sammelschleife im Bauskript** übersprang jedes Element ohne `name`-Tag — und genau das
+  haben Adressknoten. Der Adresszweig muss davor stehen, sonst läuft die Overpass-Abfrage grün
+  durch und liefert null Adressen.
+- **Hausnummern alphabetisch sortiert** ergibt 1, 10, 12, 1a, 2, 9. Sortiert wird nach
+  (führender Zahl, Rest) — beim Lehmweg kommt „10-18" so hinter der 9 heraus, wo sie hingehört.

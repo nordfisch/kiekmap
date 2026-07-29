@@ -46,6 +46,10 @@ ABFRAGEN = [
     ('way["waterway"]["name"]', "natur"),
     ('way["leisure"]["name"]', "natur"),
     ('way["landuse"]["name"]', "flur"),
+    # Adressen. Ohne sie bekommt eine 800 m lange Strasse fuer jedes Foto denselben Punkt.
+    # Beide Formen kommen vor: ein eigener Adressknoten und ein Gebaeudeumriss mit Adresstags.
+    ('node["addr:housenumber"]["addr:street"]', "adresse"),
+    ('way["addr:housenumber"]["addr:street"]', "adresse"),
 ]
 
 
@@ -102,7 +106,18 @@ def frage_overpass(abfrage: str, versuche: int = 3) -> dict:
     raise RuntimeError("nicht erreichbar")
 
 
+def adresse_von(tags: dict) -> tuple[str, str] | None:
+    """(Strasse, Hausnummer) -- oder None, wenn das kein Adresselement ist."""
+    strasse = (tags.get("addr:street") or "").strip()
+    nummer = (tags.get("addr:housenumber") or "").strip()
+    return (strasse, nummer) if strasse and nummer else None
+
+
 def art_fuer(tags: dict) -> str:
+    # Vor allem anderen: ein Wohnhaus traegt oft "building" und waere sonst ein "gebaeude"
+    # ohne Namen -- also gar nichts.
+    if adresse_von(tags):
+        return "adresse"
     if "highway" in tags:
         return "strasse"
     if "place" in tags:
@@ -124,23 +139,39 @@ def main() -> int:
 
     # Eine Strasse besteht aus vielen Wegstuecken mit demselben Namen. Zusammenfassen und den
     # Mittelpunkt aller Stuecke nehmen -- sonst landet der Pin am Ende eines Teilstuecks.
+    # Bei Adressen tut derselbe Mittelwert etwas anderes Gutes: Adressknoten und Gebaeudeumriss
+    # desselben Hauses liegen Meter auseinander, ihre Mitte ist richtiger als beides einzeln.
     gesammelt: dict[tuple[str, str], list[tuple[float, float]]] = {}
+    adressteile: dict[tuple[str, str], tuple[str, str]] = {}
 
     for element in elemente:
         tags = element.get("tags", {})
-        ort_name = (tags.get("name") or "").strip()
-        if not ort_name:
-            continue
+
+        # Adressen zuerst, und zwar VOR der Pruefung auf "name": ein Adressknoten hat keinen
+        # Namen. Ohne diesen Zweig faellt jede Adresse hier still heraus -- die Abfrage liefe
+        # gruen durch und der Index bliebe leer.
+        adresse = adresse_von(tags)
+        if adresse:
+            strasse, nummer = adresse
+            ort_name = f"{strasse} {nummer}"
+            art = "adresse"
+            adressteile[(ort_name, art)] = adresse
+        else:
+            ort_name = (tags.get("name") or "").strip()
+            if not ort_name:
+                continue
+            art = art_fuer(tags)
 
         mitte = element.get("center") or element
         lat, lon = mitte.get("lat"), mitte.get("lon")
         if lat is None or lon is None:
             continue
 
-        gesammelt.setdefault((ort_name, art_fuer(tags)), []).append((lat, lon))
+        gesammelt.setdefault((ort_name, art), []).append((lat, lon))
 
     orte = []
     for (ort_name, art), punkte in sorted(gesammelt.items()):
+        strasse, nummer = adressteile.get((ort_name, art), ("", ""))
         orte.append(
             {
                 "name": ort_name,
@@ -148,6 +179,7 @@ def main() -> int:
                 "lat": round(sum(p[0] for p in punkte) / len(punkte), 7),
                 "lon": round(sum(p[1] for p in punkte) / len(punkte), 7),
                 "kind": art,
+                **({"street": strasse, "housenumber": nummer} if strasse else {}),
             }
         )
 

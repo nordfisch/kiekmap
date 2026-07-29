@@ -57,10 +57,20 @@ type ContributeState = {
   pin: { lat: number; lon: number } | null;
   /** Name from the place search, when set that way. */
   pinLabel: string | null;
+  /**
+   * How precise the pin is, in metres -- a house number is worth more than a street.
+   *
+   * Null for a pin someone tapped onto the map: how well they aimed is not for us to claim.
+   * Dragging the pin clears it again, for the same reason.
+   */
+  pinAccuracy: number | null;
 
   load: (need?: Need) => Promise<void>;
   skip: () => void;
-  setPin: (pin: { lat: number; lon: number } | null, label?: string | null) => void;
+  setPin: (
+    pin: { lat: number; lon: number } | null,
+    details?: { label?: string | null; accuracyM?: number | null },
+  ) => void;
   submitLocation: () => Promise<void>;
   submitDate: (year: number, precision: Precision) => Promise<void>;
   reset: () => void;
@@ -87,7 +97,7 @@ export const useContribute = create<ContributeState>((set, get) => {
     abort = new AbortController();
     const signal = abort.signal;
 
-    set({ loading: true, error: null, pin: null, pinLabel: null });
+    set({ loading: true, error: null, pin: null, pinLabel: null, pinAccuracy: null });
     try {
       const task = await fetchTask(need, get().skipped, signal);
 
@@ -126,7 +136,7 @@ export const useContribute = create<ContributeState>((set, get) => {
     set({ loading: true, error: null });
     try {
       await action(task.photo);
-      set({ loading: false, pin: null, pinLabel: null });
+      set({ loading: false, pin: null, pinLabel: null, pinAccuracy: null });
 
       // Map and timeline have to show it now. The thank-you note promises exactly that -- and
       // before this line it only came true once somebody happened to pan the map.
@@ -149,6 +159,7 @@ export const useContribute = create<ContributeState>((set, get) => {
     skipped: [],
     pin: null,
     pinLabel: null,
+    pinAccuracy: null,
 
     load: (need) => load(need ?? get().need),
 
@@ -165,16 +176,21 @@ export const useContribute = create<ContributeState>((set, get) => {
         skipped: id ? [...skipped, id].slice(-SKIP_MEMORY) : skipped,
         pin: null,
         pinLabel: null,
+        pinAccuracy: null,
       });
       void load(otherNeed(need));
     },
 
-    setPin(pin, label = null) {
-      set({ pin, pinLabel: label });
+    setPin(pin, details) {
+      set({
+        pin,
+        pinLabel: details?.label ?? null,
+        pinAccuracy: details?.accuracyM ?? null,
+      });
     },
 
     async submitLocation() {
-      const { pin, pinLabel } = get();
+      const { pin, pinLabel, pinAccuracy } = get();
       if (!pin) return;
       await contribute(
         (photo) =>
@@ -182,6 +198,7 @@ export const useContribute = create<ContributeState>((set, get) => {
             lat: pin.lat,
             lon: pin.lon,
             ...(pinLabel ? { place_name: pinLabel } : {}),
+            ...(pinAccuracy !== null ? { accuracy_m: pinAccuracy } : {}),
             session_id: SESSION_ID,
           }),
         t.help.thanksLocation,
@@ -199,7 +216,7 @@ export const useContribute = create<ContributeState>((set, get) => {
     reset() {
       if (thanksTimer) clearTimeout(thanksTimer);
       thanksTimer = null;
-      set({ skipped: [], pin: null, pinLabel: null, thanks: null, error: null });
+      set({ skipped: [], pin: null, pinLabel: null, pinAccuracy: null, thanks: null, error: null });
       void load("location");
     },
   };

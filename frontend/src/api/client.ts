@@ -79,6 +79,10 @@ export type Place = {
   lat: number;
   lon: number;
   kind: string;
+  /** Only for kind="adresse": the number on its own, for a button that reads "12". */
+  housenumber: string | null;
+  /** How precise this point is, in metres. Travels along with the contribution. */
+  accuracy_m: number | null;
 };
 
 export type Precision = "day" | "month" | "year" | "decade";
@@ -147,7 +151,13 @@ export function fetchTask(need: Need, skipped: number[], signal?: AbortSignal): 
 
 export function postLocation(
   id: number,
-  body: { lat: number; lon: number; place_name?: string; session_id?: string },
+  body: {
+    lat: number;
+    lon: number;
+    place_name?: string;
+    accuracy_m?: number;
+    session_id?: string;
+  },
 ): Promise<PhotoDetail> {
   return postJson<PhotoDetail>(`/api/contribute/${id}/location`, body);
 }
@@ -161,4 +171,14 @@ export function postDate(
 
 export function searchPlaces(query: string, signal?: AbortSignal): Promise<Place[]> {
   return getJson<Place[]>(`/api/places?q=${encodeURIComponent(query)}`, signal);
+}
+
+/**
+ * The house numbers of one street -- the second step of locating.
+ *
+ * By the street's id, not its name: the name would be going back out of the browser and is input,
+ * not a fact.
+ */
+export function fetchHouseNumbers(placeId: number, signal?: AbortSignal): Promise<Place[]> {
+  return getJson<Place[]>(`/api/places/${placeId}/housenumbers`, signal);
 }

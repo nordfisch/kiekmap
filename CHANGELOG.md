@@ -91,6 +91,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Faustregel für Meldungen eingeführt: erscheint sie im Kiosk oder Admin-Bereich, ist sie deutsch,
   sonst englisch. OpenAPI-Beschreibungen sind damit englisch, CLI-Ausgaben bleiben deutsch
 - Jahrzehnte der Datumsfrage kommen aus `region.json` statt aus dem Code
+- Hausnummern im Ortsindex: Wer eine Straße antippt, wählt danach die Hausnummer aus einem
+  Knopfraster — oder tippt „Reicht so", denn nicht jedes Haus steht in OpenStreetMap. Ohne sie
+  bekam jedes Foto einer 800 m langen Straße denselben Punkt
+- In der freien Suche erscheinen Adressen erst ab einer Ziffer in der Eingabe. Sonst wären die
+  zwölf Plätze der Trefferliste nach den Hausnummern einer Straße voll — der Lehmweg hat 139
+- Hausnummern werden natürlich sortiert: 1, 1a, 2, 9, 10 — nicht 1, 10, 1a, 2, 9
+- `location_accuracy_m` wird endlich benutzt: 150 m für eine Straße, 15 m für eine Hausnummer,
+  nichts für einen von Hand getippten Punkt
 - Eigener Kartenstil „Papier" in den Farben der Oberfläche: Erde in Papierton, Grün zu Salbei
   entsättigt, Wasser in mattem Graublau statt Türkis. Regel beim Aussuchen: nichts auf der Karte
   darf so gesättigt sein wie ein Foto. Dazu ohne Geschäfte, Hausnummern und Autobahnschilder, und

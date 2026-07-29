@@ -200,12 +200,24 @@ class Place(Base):
     name_normalized: Mapped[str] = mapped_column(String(200), nullable=False)
     lat: Mapped[float] = mapped_column(Float, nullable=False)
     lon: Mapped[float] = mapped_column(Float, nullable=False)
-    #: strasse, ortsteil, gebaeude, natur, flur -- German, matching tiles/build-places.py
+    #: strasse, ortsteil, gebaeude, natur, flur, adresse -- German, matching tiles/build-places.py
     kind: Mapped[str] = mapped_column(String(40), nullable=False)
+
+    # --- only for kind="adresse" ----------------------------------------------
+    #
+    # A street of 800 m gets one point, so every photo on it lands in the same spot. The house
+    # number is what makes "here it was" mean a house rather than a street.
+    #
+    # Kept as its own column rather than parsed back out of ``name``: the link to the street has
+    # to be exact, and "Am Markt 3" would have to be told apart from "Am Markt" by guesswork.
+    street: Mapped[str | None] = mapped_column(String(200))
+    #: The number itself, with any letter: "12", "1a". Sorted naturally, not alphabetically.
+    housenumber: Mapped[str | None] = mapped_column(String(20))
 
     __table_args__ = (
         UniqueConstraint("name", "kind", "lat", "lon", name="uq_place"),
         Index("ix_places_search", "name_normalized"),
+        Index("ix_places_street", "street"),
     )
 
 

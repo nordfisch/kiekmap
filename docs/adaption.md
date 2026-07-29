@@ -76,7 +76,13 @@ make places    # Ortsindex aus OpenStreetMap
 ```
 
 Beides braucht Internet und läuft auf dem Entwicklungsrechner, nicht auf dem Pi. Größenordnung für
-eine Gemeinde mit 5 km Umkreis: 4–5 MB Kacheln, 14 MB Schriften und Symbole, rund tausend Orte.
+eine Gemeinde mit 5 km Umkreis: 4–5 MB Kacheln, 14 MB Schriften und Symbole, rund achttausend Orte
+(`places.json` ~1,5 MB).
+
+Der Löwenanteil sind **Adressen** — für Holm 7686 von 8513 Einträgen. Sie machen die Verortung
+haus- statt straßengenau; ohne sie bekäme jedes Foto einer 800 m langen Straße denselben Punkt. Wer
+den Ortsindex klein halten will, kann die beiden `addr:`-Zeilen in `tiles/build-places.py`
+auskommentieren; die Oberfläche überspringt den Hausnummernschritt dann von allein.
 
 `make tiles` legt `region.json` zusätzlich unter `data/` ab — dort liest das Backend sie und prüft
 damit, ob eine Verortung aus dem „Hilf mit"-Bereich überhaupt in der Region liegt. **Ohne diese

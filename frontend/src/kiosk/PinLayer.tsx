@@ -58,9 +58,9 @@ export function PinLayer({ map }: { map: maplibregl.Map }) {
 
       marker.current.on("dragend", () => {
         const position = marker.current?.getLngLat();
-        // Dragging drops a previously chosen place name: the name belongs to the spot the search
-        // returned, not to wherever the pin was dragged.
-        if (position) setPin({ lat: position.lat, lon: position.lng }, null);
+        // Dragging drops the chosen place name -- and with it the claimed accuracy. Both belong
+        // to the spot the search returned, not to wherever the pin was dragged.
+        if (position) setPin({ lat: position.lat, lon: position.lng });
       });
     } else {
       marker.current.setLngLat([pin.lon, pin.lat]);

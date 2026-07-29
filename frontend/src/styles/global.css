@@ -289,6 +289,17 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+/* House numbers behave like the year buttons: a grid of thumb-sized targets. Narrower columns --
+ * "12" needs less room than "1932", and a long street should not become a page of scrolling. */
+.housenumbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.75rem, 1fr));
+  gap: 0.5rem;
+  max-height: 40vh;
+  overflow-y: auto;
+  margin-bottom: 0.75rem;
+}
+
 .decades,
 .years {
   display: grid;

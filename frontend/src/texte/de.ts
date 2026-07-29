@@ -67,12 +67,22 @@ export const t = {
     searchPlaceholder: "z. B. Mühlenweg",
     confirm: "Hier war das",
     clear: "Punkt entfernen",
+    /**
+     * Zweiter Schritt: Straße gewählt, jetzt die Hausnummer — wie Jahrzehnt, dann Jahr.
+     *
+     * „Reicht so" ist eine vollwertige Antwort, kein Ausweichen: Nicht jedes Haus steht in
+     * OpenStreetMap, und niemand weiß bei jedem Foto die Hausnummer.
+     */
+    askHouseNumber: (street: string) => `Welche Hausnummer im ${street}?`,
+    noHouseNumber: "Reicht so — die Straße genügt",
+    otherStreet: "Andere Straße",
     kinds: {
       strasse: "Straße",
       ortsteil: "Ortsteil",
       gebaeude: "Gebäude",
       natur: "Natur",
       flur: "Flur",
+      adresse: "Adresse",
     } as Record<string, string>,
   },
 
