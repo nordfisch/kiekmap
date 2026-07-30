@@ -818,14 +818,17 @@
  * und wechselt nur den Inhalt -- sonst springt die Maske beim Umschalten. Gestrichelt, solange
  * gewartet wird; mit Rand, sobald etwas da ist. Dieselbe Dramaturgie wie im Sicherungsbereich. */
 .dropzone {
-  padding: 2rem 1.25rem;
+  /* Dieselben Innenabstaende wie die Quellenkacheln darueber, und derselbe Abstand nach unten wie
+   * der, den `.sources` nach oben laesst -- die Flaeche soll wie ein dritter Kasten derselben
+   * Familie sitzen, nicht wie ein Anhaengsel. */
+  margin-bottom: 1rem;
+  padding: 1rem;
   border: 2px dashed var(--line);
   border-radius: 12px;
   text-align: center;
 }
 
 .dropzone--filled {
-  padding: 1rem 1.25rem;
   border-style: solid;
   border-color: var(--accent-light);
   background: #fff;
@@ -902,8 +905,19 @@
   }
 }
 
+/* Der Rahmen laeuft durch die Mitte der Beschriftung auf der Linie, und deren untere Haelfte zaehlt
+ * fuer den Browser schon als Inhalt. Ein Innenabstand von 1 rem stuende oben deshalb sichtbar
+ * hoeher als unten -- der Kasten saehe aus, als haenge sein Inhalt. */
 .batch-fields .field__group {
   margin: 0;
+  padding-top: 0.25rem;
+}
+
+/* Die erste Beschriftung im Kasten bringt ihren eigenen Abstand mit (`.field__label`). Ohne diese
+ * Zeile stuende oben 1,9 rem und unten 1 rem -- der Kasten saehe aus, als haenge sein Inhalt. */
+.batch-fields .year-field .field__label,
+.batch-fields .place-field > .field__label:first-child {
+  margin-top: 0;
 }
 
 /* --- import log ---------------------------------------------------------- */
