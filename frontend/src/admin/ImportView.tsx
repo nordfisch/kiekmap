@@ -29,8 +29,9 @@ import {
 import type { PhotoDetail } from "../api/client";
 import { t } from "../texte/de";
 import { titleFromFilename } from "./filename";
-import { type YearInput, decadeAllowed, toBatchDate, withYear } from "./jahr";
+import { type YearInput, toDate } from "./jahr";
 import { PlaceField, type PickedPlace } from "./PlaceField";
+import { YearField } from "./YearField";
 import { StickFolders } from "./StickImport";
 
 /** Muss zu REVIEW_LIMIT in backend/app/api/backup.py passen. */
@@ -79,7 +80,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
   const [files, setFiles] = useState<File[]>([]);
   const [folder, setFolder] = useState<ImportFolder | null>(null);
 
-  const [year, setYear] = useState<YearInput>({ year: "", decade: false });
+  const [year, setYear] = useState<YearInput>({ year: "", precision: "year" });
   const [place, setPlace] = useState<PickedPlace | null>(null);
 
   const [phase, setPhase] = useState<Phase>("choose");
@@ -92,7 +93,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
   const ready = source === "computer" ? files.length > 0 : folder !== null;
 
   function batchDefaults(): BatchDefaults {
-    const date = toBatchDate(year);
+    const date = toDate(year);
     return {
       ...(date ? { year: date.year, precision: date.precision } : {}),
       ...(place ? { lat: place.lat, lon: place.lon, placeName: place.name } : {}),
@@ -329,25 +330,8 @@ export function ImportView({ onReview }: { onReview: () => void }) {
 
       <div className="batch-fields">
         <fieldset className="field__group">
-          <legend className="field__label">{t.admin.editor.year}</legend>
-          <input
-            className="field__input field__input--year"
-            type="number"
-            min={1800}
-            max={2100}
-            value={year.year}
-            onChange={(event) => setYear(withYear(year, event.target.value))}
-          />
-          <label className="field__check">
-            <input
-              type="checkbox"
-              checked={year.decade}
-              disabled={!decadeAllowed(year.year)}
-              onChange={(event) => setYear({ ...year, decade: event.target.checked })}
-            />
-            {t.admin.upload.wholeDecade}
-          </label>
-          <p className="admin__note">{t.admin.upload.wholeDecadeHint}</p>
+          <legend className="field__label">{t.admin.editor.time}</legend>
+          <YearField value={year} onChange={setYear} />
         </fieldset>
 
         <fieldset className="field__group">

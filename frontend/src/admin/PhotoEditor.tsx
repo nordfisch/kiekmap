@@ -14,13 +14,14 @@ import { useEffect, useState } from "react";
 import { type PhotoPatch, patchPhoto } from "../api/admin";
 import type { PhotoDetail } from "../api/client";
 import { t } from "../texte/de";
+import { type YearInput, toDate } from "./jahr";
 import { PlaceField, type PickedPlace } from "./PlaceField";
+import { YearField } from "./YearField";
 
 type Draft = {
   title: string;
   description: string;
-  year: string;
-  precision: "year" | "decade";
+  date: YearInput;
   place: PickedPlace | null;
   tags: string;
   hidden: boolean;
@@ -30,8 +31,10 @@ function toDraft(photo: PhotoDetail): Draft {
   return {
     title: photo.title ?? "",
     description: photo.description ?? "",
-    year: photo.date_from ? photo.date_from.slice(0, 4) : "",
-    precision: photo.date_precision === "decade" ? "decade" : "year",
+    date: {
+      year: photo.date_from ? photo.date_from.slice(0, 4) : "",
+      precision: photo.date_precision === "decade" ? "decade" : "year",
+    },
     place:
       photo.lat !== null && photo.lon !== null
         ? { lat: photo.lat, lon: photo.lon, name: photo.place_name ?? "" }
@@ -42,12 +45,11 @@ function toDraft(photo: PhotoDetail): Draft {
 }
 
 function toPatch(draft: Draft): PhotoPatch {
-  const year = Number.parseInt(draft.year, 10);
-
   return {
     title: draft.title.trim() || null,
     description: draft.description.trim() || null,
-    date: Number.isFinite(year) ? { year, precision: draft.precision } : null,
+    // null heisst "Datierung loeschen" -- ein leeres Jahresfeld ist genau das, siehe unten.
+    date: toDate(draft.date),
     location: draft.place
       ? { lat: draft.place.lat, lon: draft.place.lon, place_name: draft.place.name || null }
       : null,
@@ -123,29 +125,7 @@ export function PhotoEditor({
         onChange={(event) => change("description", event.target.value)}
       />
 
-      <label className="field__label" htmlFor="editor-year">
-        {t.admin.editor.year}
-      </label>
-      <div className="field__row">
-        <input
-          id="editor-year"
-          className="field__input field__input--year"
-          type="number"
-          min={1800}
-          max={2100}
-          value={draft.year}
-          onChange={(event) => change("year", event.target.value)}
-        />
-        <select
-          className="field__input"
-          aria-label={t.admin.editor.year}
-          value={draft.precision}
-          onChange={(event) => change("precision", event.target.value as "year" | "decade")}
-        >
-          <option value="year">{t.admin.editor.precisionYear}</option>
-          <option value="decade">{t.admin.editor.precisionDecade}</option>
-        </select>
-      </div>
+      <YearField value={draft.date} onChange={(date) => change("date", date)} />
       <p className="admin__note">{t.admin.editor.yearHint}</p>
 
       <fieldset className="field__group">

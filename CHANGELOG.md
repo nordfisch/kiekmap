@@ -149,6 +149,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   einer Zahl — „Heute gesichert", „Noch nie importiert"
 - Auch „Auf der Karte zu sehen" ist jetzt ein Weg: die Kachel führt zurück zur Karte, denselben
   Weg wie „Verwaltung beenden". Damit führt jede Zahl der Übersicht irgendwohin
+- Jahreszahl und Genauigkeit sind ein **gemeinsames Bauteil** für beide Stellen, an denen datiert
+  wird — den Stapel beim Importieren und das einzelne Foto im Editor. Vorher war es dort ein
+  Ankreuzfeld unter der Zahl, hier ein breites Auswahlfeld daneben, und die Regel für „Jahrzehnt"
+  galt nur an einer der beiden Stellen. Jetzt überall: „Jahr" und „Jahrzehnt" zur Auswahl, beide
+  Felder gleich breit, die Genauigkeit gesperrt, solange kein Jahr dasteht, und „Jahrzehnt" nur
+  bei runden Jahreszahlen
+- Klarere Überschriften: „Liste aller Fotos", „Protokoll der Foto-Importe", „Auswahl der zu
+  importierenden Bilder", „Angaben für alle neu hinzugefügten Bilder (optional)". Der Fotobereich
+  hatte als einziger gar keine
 - Fotoliste, Moderation und Protokoll lassen sich **seitenweise** durchblättern, dreißig Zeilen je
   Seite. Vorher hörten alle drei still auf — die Fotoliste schrieb „60 von 214 Fotos", an die
   übrigen 154 kam niemand heran. Der Filterwechsel fängt wieder auf Seite eins an, und wer den

@@ -73,6 +73,8 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
 
   return (
     <div className="photo-care">
+      <h3 className="admin__heading">{t.admin.photos.title}</h3>
+
       <label className="field__label" htmlFor="photo-search">
         {t.admin.photos.searchLabel}
       </label>

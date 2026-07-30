@@ -161,6 +161,7 @@ export const t = {
     },
 
     photos: {
+      title: "Liste aller Fotos",
       searchLabel: "Suchen in Titel, Ort und Dateiname",
       searchPlaceholder: "z. B. Kirchweih",
       filterAll: "Alle",
@@ -182,8 +183,11 @@ export const t = {
       description: "Beschreibung",
       year: "Jahr",
       yearHint: "Leer lassen, wenn das Jahr unbekannt ist.",
-      precisionYear: "genaues Jahr",
-      precisionDecade: "ganzes Jahrzehnt",
+      /** Die Beschriftung des Rahmens beim Importieren -- dort steht mehr als nur die Jahreszahl. */
+      time: "Zeit",
+      precision: "Genauigkeit",
+      precisionYear: "Jahr",
+      precisionDecade: "Jahrzehnt",
       place: "Ort",
       placeSearch: "Straße oder Ort suchen",
       coordinates: "Koordinaten",
@@ -203,20 +207,16 @@ export const t = {
 
     upload: {
       title: "Fotos hinzufügen",
-      whereFrom: "1. Woher kommen die Bilder?",
+      whereFrom: "Auswahl der zu importierenden Bilder",
       fromComputer: "Vom Rechner",
       fromStick: "Vom USB-Stick",
       chooseHint: "Bilder auf diesem Rechner auswählen",
-      wholeDecade: "Ganzes Jahrzehnt",
-      wholeDecadeHint: "Nur bei vollen Jahrzehnten wie 1920 oder 1930 wählbar.",
       toReview: "Fotos ohne Ort nacharbeiten",
       tooManyForTable:
         "Das sind zu viele für eine Tabelle. Was noch fehlt, findet sich in der Fotoliste — " +
         "und taucht im „Hilf mit“-Bereich auf.",
-      step1: "2. Gilt für alle Bilder (freiwillig)",
-      step1Hint:
-        "Beides ist freiwillig und lässt sich hinterher je Bild ändern. Bei vierzig Bildern " +
-        "derselben Kirchweih spart es vierzig Eingaben.",
+      step1: "Angaben für alle neu hinzugefügten Bilder (optional)",
+      step1Hint: "Beides ist freiwillig und lässt sich hinterher je Bild ändern.",
       choose: "Bilder auswählen",
       chosen: (count: number) => `${count} ${count === 1 ? "Bild" : "Bilder"} ausgewählt`,
       start: "Importieren",
@@ -275,7 +275,7 @@ export const t = {
     },
 
     imports: {
-      title: "Protokoll",
+      title: "Protokoll der Foto-Importe",
       none: "Noch nichts aufgenommen.",
       all: "Alle",
       imported: "Aufgenommen",

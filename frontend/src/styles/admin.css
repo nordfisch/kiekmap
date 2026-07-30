@@ -287,6 +287,21 @@
   border-radius: 10px;
 }
 
+/* Jahreszahl und Genauigkeit gleich breit nebeneinander. Feste Spalten statt `1fr`, damit das
+ * Auswahlfeld nicht auf halbe Formularbreite auflaeuft -- neben einer vierstelligen Zahl sieht
+ * das aus wie ein anderes Feld. */
+.year-field {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 9rem));
+  gap: 0.6rem;
+}
+
+@media (max-width: 26rem) {
+  .year-field {
+    grid-template-columns: 1fr;
+  }
+}
+
 .field__check {
   display: flex;
   align-items: center;
@@ -801,11 +816,13 @@
 
 /* Jahr und Ort nebeneinander, beide im Rahmen mit Beschriftung auf der Linie. Das Jahr bekommt
  * damit dieselbe Wertigkeit wie der Ort statt eines nackten Eingabefelds. */
+/* Ohne die Dehnung stünde der kürzere Kasten hoch und die beiden sähen aus wie zwei Ränge. Sobald
+ * ein Ort gewählt ist, wächst der rechte um eine Zeile -- der linke geht mit. */
 .batch-fields {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (max-width: 44rem) {
