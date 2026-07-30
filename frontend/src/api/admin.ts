@@ -6,6 +6,7 @@
  * back on screen -- which is what `onAdminSignedOut` is for.
  */
 
+import { PAGE_SIZE } from "../admin/paging";
 import { t } from "../texte/de";
 import { type PhotoDetail, readError } from "./client";
 
@@ -97,6 +98,12 @@ export type ChangeItem = {
   revertable: boolean;
 };
 
+/** Die Gesamtzahl gilt für den Filter, nicht für die Seite -- daraus entsteht die Seitenzahl. */
+export type ChangeList = {
+  changes: ChangeItem[];
+  total: number;
+};
+
 export type ImportLogItem = {
   id: number;
   filename: string;
@@ -104,6 +111,11 @@ export type ImportLogItem = {
   message: string | null;
   photo_id: number | null;
   created_at: string;
+};
+
+export type ImportLogList = {
+  entries: ImportLogItem[];
+  total: number;
 };
 
 export type UploadItem = {
@@ -207,9 +219,14 @@ export function fetchOverview(): Promise<Overview> {
 export function fetchAdminPhotos(
   show: Selection,
   query: string,
-  limit = 60,
+  offset = 0,
+  limit = PAGE_SIZE,
 ): Promise<PhotoAdminList> {
-  const params = new URLSearchParams({ show, limit: String(limit) });
+  const params = new URLSearchParams({
+    show,
+    limit: String(limit),
+    offset: String(offset),
+  });
   if (query.trim()) params.set("q", query.trim());
   return adminFetch<PhotoAdminList>(`/photos?${params}`);
 }
@@ -226,18 +243,23 @@ export function patchPhoto(id: number, patch: PhotoPatch): Promise<PhotoDetail> 
   });
 }
 
-export function fetchChanges(includeReverted = false): Promise<ChangeItem[]> {
-  return adminFetch<ChangeItem[]>(`/changes?include_reverted=${includeReverted}`);
+export function fetchChanges(includeReverted = false, offset = 0): Promise<ChangeList> {
+  const params = new URLSearchParams({
+    include_reverted: String(includeReverted),
+    limit: String(PAGE_SIZE),
+    offset: String(offset),
+  });
+  return adminFetch<ChangeList>(`/changes?${params}`);
 }
 
 export function revertChange(id: number): Promise<PhotoDetail> {
   return adminFetch<PhotoDetail>(`/changes/${id}/revert`, { method: "POST" });
 }
 
-export function fetchImportLog(result?: string): Promise<ImportLogItem[]> {
-  const params = new URLSearchParams({ limit: "100" });
+export function fetchImportLog(result?: string, offset = 0): Promise<ImportLogList> {
+  const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(offset) });
   if (result) params.set("result", result);
-  return adminFetch<ImportLogItem[]>(`/imports?${params}`);
+  return adminFetch<ImportLogList>(`/imports?${params}`);
 }
 
 // --- backup onto a USB stick ------------------------------------------------

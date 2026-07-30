@@ -34,7 +34,9 @@ from app.models import (
 from app.schemas import (
     BackupReminder,
     ChangeItem,
+    ChangeList,
     ImportLogItem,
+    ImportLogList,
     LoginRequest,
     LoginResponse,
     Overview,
@@ -349,26 +351,32 @@ def _still_from_visitor(photo: Photo, field: str) -> bool:
             return False
 
 
-@router.get("/changes", response_model=list[ChangeItem], summary="Visitor contributions")
+@router.get("/changes", response_model=ChangeList, summary="Visitor contributions")
 def list_changes(
     admin: Admin,
     session: Db,
     limit: Annotated[int, Query(ge=1, le=MAX_PAGE)] = DEFAULT_PAGE,
+    offset: Annotated[int, Query(ge=0)] = 0,
     include_reverted: Annotated[
         bool, Query(description="Also list what was already taken back")
     ] = False,
-) -> list[ChangeItem]:
+) -> ChangeList:
+    filters = [Change.source == Source.VISITOR]
+    if not include_reverted:
+        filters.append(Change.reverted_at.is_(None))
+
+    # Counted unpaged: this is the number the page count is built from.
+    total = session.scalar(select(func.count()).select_from(Change).where(*filters)) or 0
     query = (
         select(Change, Photo)
         .join(Photo, Photo.id == Change.photo_id)
-        .where(Change.source == Source.VISITOR)
+        .where(*filters)
         .order_by(Change.created_at.desc(), Change.id.desc())
         .limit(limit)
+        .offset(offset)
     )
-    if not include_reverted:
-        query = query.where(Change.reverted_at.is_(None))
 
-    return [
+    items = [
         ChangeItem(
             id=change.id,
             photo_id=photo.id,
@@ -384,6 +392,7 @@ def list_changes(
         )
         for change, photo in session.execute(query).all()
     ]
+    return ChangeList(changes=items, total=total)
 
 
 @router.post(
@@ -433,17 +442,26 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoDetail:
 # --- import log -------------------------------------------------------------
 
 
-@router.get("/imports", response_model=list[ImportLogItem], summary="Import log")
+@router.get("/imports", response_model=ImportLogList, summary="Import log")
 def import_log(
     admin: Admin,
     session: Db,
     limit: Annotated[int, Query(ge=1, le=MAX_PAGE)] = DEFAULT_PAGE,
+    offset: Annotated[int, Query(ge=0)] = 0,
     result: Annotated[ImportResult | None, Query(description="Only this outcome")] = None,
-) -> list[ImportLogItem]:
-    query = select(ImportLog).order_by(ImportLog.created_at.desc(), ImportLog.id.desc())
-    if result is not None:
-        query = query.where(ImportLog.result == result)
-    return [ImportLogItem.from_entry(entry) for entry in session.scalars(query.limit(limit)).all()]
+) -> ImportLogList:
+    filters = [ImportLog.result == result] if result is not None else []
+
+    total = session.scalar(select(func.count()).select_from(ImportLog).where(*filters)) or 0
+    query = (
+        select(ImportLog)
+        .where(*filters)
+        .order_by(ImportLog.created_at.desc(), ImportLog.id.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    entries = [ImportLogItem.from_entry(entry) for entry in session.scalars(query).all()]
+    return ImportLogList(entries=entries, total=total)
 
 
 # --- batch upload -----------------------------------------------------------

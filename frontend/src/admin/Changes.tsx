@@ -10,10 +10,12 @@
  * again, which is usually the point.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { fetchChanges, revertChange } from "../api/admin";
 import { t } from "../texte/de";
+import { Pager } from "./Pager";
+import { clampOffset } from "./paging";
 import { useLoaded } from "./useLoaded";
 
 const FIELD_NAMES: Record<string, string> = {
@@ -32,12 +34,20 @@ function when(iso: string): string {
 
 export function Changes() {
   const [includeReverted, setIncludeReverted] = useState(false);
+  const [offset, setOffset] = useState(0);
   const [busy, setBusy] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Das Häkchen ändert die Menge -- also von vorn, sonst stünde man hinter deren Ende.
+  useEffect(() => setOffset(0), [includeReverted]);
+
   const { data, error: loadError, loading, reload } = useLoaded(
-    useCallback(() => fetchChanges(includeReverted), [includeReverted]),
+    useCallback(() => fetchChanges(includeReverted, offset), [includeReverted, offset]),
   );
+
+  useEffect(() => {
+    if (data) setOffset((current) => clampOffset(current, data.total));
+  }, [data]);
 
   async function revert(id: number) {
     setBusy(id);
@@ -68,11 +78,11 @@ export function Changes() {
       {(error || loadError) && <p className="admin__error">{error ?? loadError}</p>}
       {loading && !data && <p className="admin__note">{t.admin.loading}</p>}
 
-      {data && data.length === 0 && <p className="admin__note">{t.admin.changes.none}</p>}
+      {data && data.changes.length === 0 && <p className="admin__note">{t.admin.changes.none}</p>}
 
-      {data && data.length > 0 && (
+      {data && data.changes.length > 0 && (
         <ul className="photo-rows">
-          {data.map((change) => (
+          {data.changes.map((change) => (
             <li key={change.id} className="photo-row">
               <img className="photo-row__thumb" src={change.thumb_url} alt="" />
               <div className="photo-row__text">
@@ -104,6 +114,8 @@ export function Changes() {
           ))}
         </ul>
       )}
+
+      {data && <Pager total={data.total} offset={offset} onOffset={setOffset} />}
     </div>
   );
 }

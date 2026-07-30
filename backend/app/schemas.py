@@ -267,6 +267,12 @@ class ChangeItem(BaseModel):
     revertable: bool
 
 
+class ChangeList(BaseModel):
+    changes: list[ChangeItem]
+    #: Total matching the filter, not just the page returned -- the page count is built from it.
+    total: int
+
+
 class ImportLogItem(BaseModel):
     id: int
     #: Just the file name: the full path leads into a container or a temp folder and helps nobody.
@@ -286,6 +292,12 @@ class ImportLogItem(BaseModel):
             photo_id=entry.photo_id,
             created_at=entry.created_at,
         )
+
+
+class ImportLogList(BaseModel):
+    entries: list[ImportLogItem]
+    #: Total matching the filter, not just the page returned.
+    total: int
 
 
 class BackupReminder(BaseModel):

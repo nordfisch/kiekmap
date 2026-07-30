@@ -5,10 +5,12 @@
  * one that was never copied in. "Nichts passiert" is the one answer a volunteer cannot act on.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { fetchImportLog } from "../api/admin";
 import { t } from "../texte/de";
+import { Pager } from "./Pager";
+import { clampOffset } from "./paging";
 import { useLoaded } from "./useLoaded";
 
 const RESULTS: { value: string; label: string }[] = [
@@ -26,9 +28,18 @@ const LABELS: Record<string, string> = {
 
 export function ImportLog() {
   const [result, setResult] = useState("");
+  const [offset, setOffset] = useState(0);
+
+  // Ein anderer Reiter ist eine andere Liste -- also wieder von vorn.
+  useEffect(() => setOffset(0), [result]);
+
   const { data, error, loading } = useLoaded(
-    useCallback(() => fetchImportLog(result || undefined), [result]),
+    useCallback(() => fetchImportLog(result || undefined, offset), [result, offset]),
   );
+
+  useEffect(() => {
+    if (data) setOffset((current) => clampOffset(current, data.total));
+  }, [data]);
 
   return (
     <div className="imports">
@@ -49,11 +60,11 @@ export function ImportLog() {
 
       {error && <p className="admin__error">{error}</p>}
       {loading && !data && <p className="admin__note">{t.admin.loading}</p>}
-      {data && data.length === 0 && <p className="admin__note">{t.admin.imports.none}</p>}
+      {data && data.entries.length === 0 && <p className="admin__note">{t.admin.imports.none}</p>}
 
-      {data && data.length > 0 && (
+      {data && data.entries.length > 0 && (
         <ul className="log-rows">
-          {data.map((entry) => (
+          {data.entries.map((entry) => (
             <li key={entry.id} className="log-row">
               <span className={`flag flag--${entry.result}`}>
                 {LABELS[entry.result] ?? entry.result}
@@ -73,6 +84,8 @@ export function ImportLog() {
           ))}
         </ul>
       )}
+
+      {data && <Pager total={data.total} offset={offset} onOffset={setOffset} />}
     </div>
   );
 }

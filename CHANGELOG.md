@@ -149,6 +149,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   einer Zahl — „Heute gesichert", „Noch nie importiert"
 - Auch „Auf der Karte zu sehen" ist jetzt ein Weg: die Kachel führt zurück zur Karte, denselben
   Weg wie „Verwaltung beenden". Damit führt jede Zahl der Übersicht irgendwohin
+- Fotoliste, Moderation und Protokoll lassen sich **seitenweise** durchblättern, dreißig Zeilen je
+  Seite. Vorher hörten alle drei still auf — die Fotoliste schrieb „60 von 214 Fotos", an die
+  übrigen 154 kam niemand heran. Der Filterwechsel fängt wieder auf Seite eins an, und wer den
+  letzten Eintrag der letzten Seite abarbeitet, rutscht auf die letzte noch vorhandene
 - Gespeicherte Zeitstempel sind durchgängig UTC — auch die der Sicherungsdatei und der Kopfdaten
   auf dem Stick, die bisher Ortszeit schrieben. „Wie lange her" zählt **Kalendertage** entlang der
   deutschen Tagesgrenze: eine Sicherung von gestern Abend ist „1 Tag", nicht „Heute"

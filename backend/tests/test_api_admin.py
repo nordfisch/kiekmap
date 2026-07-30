@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from app.models import Change, DatePrecision, Photo, PhotoStatus, Source
+from app.models import Change, DatePrecision, ImportLog, ImportResult, Photo, PhotoStatus, Source
 
 HOLM = {"lat": 53.6205, "lon": 9.676}
 
@@ -185,6 +185,65 @@ class TestFotoliste:
         assert client.get("/api/admin/photos").status_code == 401
 
 
+class TestBlaettern:
+    """Die Gesamtzahl traegt die Seitenzahl.
+
+    Wird sie aus der geblaetterten Abfrage genommen, steht ueberall "Seite 1 von 1" und niemand
+    kommt je auf Seite 2.
+    """
+
+    def test_gesamtzahl_zaehlt_ungeblaettert(self, admin_client: TestClient, session, make_photo):
+        for nummer in range(5):
+            make_photo(title=f"Foto {nummer}", sha=str(nummer) * 64)
+        session.commit()
+
+        daten = admin_client.get("/api/admin/photos", params={"limit": 2}).json()
+
+        assert len(daten["photos"]) == 2
+        assert daten["total"] == 5
+
+    def test_zweite_seite_zeigt_andere_fotos(self, admin_client: TestClient, session, make_photo):
+        for nummer in range(5):
+            make_photo(title=f"Foto {nummer}", sha=str(nummer) * 64)
+        session.commit()
+
+        erste = admin_client.get("/api/admin/photos", params={"limit": 2}).json()["photos"]
+        zweite = admin_client.get("/api/admin/photos", params={"limit": 2, "offset": 2}).json()[
+            "photos"
+        ]
+
+        assert {foto["id"] for foto in erste}.isdisjoint({foto["id"] for foto in zweite})
+
+    def test_zweite_seite_zeigt_andere_beitraege(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        for nummer in range(3):
+            foto = make_photo(lat=None, lon=None, sha=str(nummer) * 64)
+            session.commit()
+            admin_client.post(f"/api/contribute/{foto.id}/location", json=HOLM)
+
+        daten = admin_client.get("/api/admin/changes", params={"limit": 2, "offset": 2}).json()
+
+        assert daten["total"] == 3
+        assert len(daten["changes"]) == 1
+
+    def test_protokoll_blaettert_ebenfalls(self, admin_client: TestClient, session):
+        for nummer in range(4):
+            session.add(
+                ImportLog(
+                    path=f"/tmp/{nummer}.jpg",
+                    result=ImportResult.IMPORTED,
+                    created_at=datetime(2026, 3, nummer + 1, 12, 0),
+                )
+            )
+        session.commit()
+
+        daten = admin_client.get("/api/admin/imports", params={"limit": 3, "offset": 3}).json()
+
+        assert daten["total"] == 4
+        assert [eintrag["filename"] for eintrag in daten["entries"]] == ["0.jpg"]
+
+
 class TestFotoBearbeiten:
     def test_fehlendes_feld_bleibt_unangetastet(
         self, admin_client: TestClient, session, make_photo
@@ -321,7 +380,7 @@ class TestFotoBearbeiten:
 class TestBesucherbeitraege:
     def _beitrag(self, client: TestClient, foto_id: int) -> int:
         client.post(f"/api/contribute/{foto_id}/location", json=HOLM)
-        return client.get("/api/admin/changes").json()[0]["id"]
+        return client.get("/api/admin/changes").json()["changes"][0]["id"]
 
     def test_liste_zeigt_was_am_kiosk_passiert_ist(
         self, admin_client: TestClient, session, make_photo
@@ -332,10 +391,10 @@ class TestBesucherbeitraege:
 
         daten = admin_client.get("/api/admin/changes").json()
 
-        assert len(daten) == 1
-        assert daten[0]["photo_title"] == "Ohne Ort"
-        assert daten[0]["field"] == "location"
-        assert daten[0]["revertable"] is True
+        assert daten["total"] == 1
+        assert daten["changes"][0]["photo_title"] == "Ohne Ort"
+        assert daten["changes"][0]["field"] == "location"
+        assert daten["changes"][0]["revertable"] is True
 
     def test_zuruecknehmen_legt_das_foto_wieder_vor(
         self, admin_client: TestClient, session, make_photo
@@ -376,7 +435,7 @@ class TestBesucherbeitraege:
         antwort = admin_client.post(f"/api/admin/changes/{beitrag}/revert")
 
         assert antwort.status_code == 409
-        assert admin_client.get("/api/admin/changes").json()[0]["revertable"] is False
+        assert admin_client.get("/api/admin/changes").json()["changes"][0]["revertable"] is False
 
     def test_kuratorenaenderung_steht_nicht_in_der_beitragsliste(
         self, admin_client: TestClient, session, make_photo
@@ -386,7 +445,7 @@ class TestBesucherbeitraege:
         session.commit()
         admin_client.patch(f"/api/admin/photos/{foto.id}", json={"title": "Neu"})
 
-        assert admin_client.get("/api/admin/changes").json() == []
+        assert admin_client.get("/api/admin/changes").json()["changes"] == []
 
     def test_zurueckgenommenes_bleibt_auf_wunsch_sichtbar(
         self, admin_client: TestClient, session, make_photo
@@ -396,10 +455,10 @@ class TestBesucherbeitraege:
         beitrag = self._beitrag(admin_client, foto.id)
         admin_client.post(f"/api/admin/changes/{beitrag}/revert")
 
-        assert admin_client.get("/api/admin/changes").json() == []
+        assert admin_client.get("/api/admin/changes").json()["changes"] == []
         mit_allem = admin_client.get("/api/admin/changes", params={"include_reverted": True}).json()
-        assert len(mit_allem) == 1
-        assert mit_allem[0]["reverted_at"] is not None
+        assert mit_allem["total"] == 1
+        assert mit_allem["changes"][0]["reverted_at"] is not None
 
 
 class TestStapelUpload:
@@ -516,10 +575,10 @@ class TestStapelUpload:
 
         protokoll = admin_client.get("/api/admin/imports").json()
 
-        assert len(protokoll) == 1
+        assert protokoll["total"] == 1
         # Nicht der Pfad im temporaeren Ordner, sondern der Name, den der Admin kennt.
-        assert protokoll[0]["filename"] == "scan.jpg"
-        assert protokoll[0]["result"] == "imported"
+        assert protokoll["entries"][0]["filename"] == "scan.jpg"
+        assert protokoll["entries"][0]["result"] == "imported"
 
 
 class TestImportprotokoll:
@@ -534,7 +593,7 @@ class TestImportprotokoll:
 
         daten = admin_client.get("/api/admin/imports", params={"result": "rejected"}).json()
 
-        assert [eintrag["filename"] for eintrag in daten] == ["schlecht.txt"]
+        assert [eintrag["filename"] for eintrag in daten["entries"]] == ["schlecht.txt"]
 
     def test_neueste_zuerst(self, admin_client: TestClient, session):
         from app.models import ImportLog, ImportResult
@@ -551,7 +610,7 @@ class TestImportprotokoll:
 
         daten = admin_client.get("/api/admin/imports").json()
 
-        assert [eintrag["filename"] for eintrag in daten] == ["3.jpg", "2.jpg", "1.jpg"]
+        assert [eintrag["filename"] for eintrag in daten["entries"]] == ["3.jpg", "2.jpg", "1.jpg"]
 
 
 class TestUnberuehrteFelder:

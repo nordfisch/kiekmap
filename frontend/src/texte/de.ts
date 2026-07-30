@@ -331,6 +331,12 @@ export const t = {
       restoreNo: "Abbrechen",
     },
 
+    pager: {
+      prev: "Zurück",
+      next: "Weiter",
+      page: (current: number, count: number) => `Seite ${current} von ${count}`,
+    },
+
     loading: "Wird geladen …",
     expired: "Die Anmeldung ist abgelaufen.",
   },

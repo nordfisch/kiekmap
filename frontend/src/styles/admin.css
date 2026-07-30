@@ -437,6 +437,31 @@
   color: var(--muted);
 }
 
+/* Blaettern. Erscheint nur, wenn es mehr als eine Seite gibt -- bei siebenundzwanzig Fotos soll
+ * die Verwaltung nicht nach Aktenverwaltung aussehen. */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+/* Ohne `flex: 0 0 auto` zieht die Grundbreite der Knöpfe (100 %) die Zeile auseinander und
+ * quetscht "Seite 1 von 2" auf drei Zeilen. */
+.pager .button {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 9rem;
+  margin: 0;
+}
+
+.pager__label {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
 /* --- photo rows ---------------------------------------------------------- */
 
 .photo-rows,

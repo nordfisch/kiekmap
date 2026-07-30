@@ -14,7 +14,9 @@ import { useCallback, useEffect, useState } from "react";
 import { type Selection, fetchAdminPhoto, fetchAdminPhotos } from "../api/admin";
 import type { PhotoDetail } from "../api/client";
 import { t } from "../texte/de";
+import { Pager } from "./Pager";
 import { PhotoEditor } from "./PhotoEditor";
+import { clampOffset } from "./paging";
 import { useLoaded } from "./useLoaded";
 
 // Ort und Jahr getrennt: Verorten und Datieren sind zwei Arbeiten, und wer die eine macht, will
@@ -30,6 +32,7 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
   const [show, setShow] = useState<Selection>(initialFilter);
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
+  const [offset, setOffset] = useState(0);
   const [editing, setEditing] = useState<PhotoDetail | null>(null);
 
   useEffect(() => {
@@ -37,9 +40,19 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
     return () => clearTimeout(timer);
   }, [query]);
 
+  // Filter- oder Suchwechsel fängt wieder auf Seite eins an. Wer auf Seite 5 von „Alle" steht und
+  // auf „Ohne Ort" umschaltet, sähe sonst eine leere Liste und hielte den Filter für kaputt.
+  useEffect(() => setOffset(0), [show, debounced]);
+
   const { data, error, loading, reload } = useLoaded(
-    useCallback(() => fetchAdminPhotos(show, debounced), [show, debounced]),
+    useCallback(() => fetchAdminPhotos(show, debounced, offset), [show, debounced, offset]),
   );
+
+  // Beim Abarbeiten wird die Liste kürzer -- wer den letzten Eintrag der letzten Seite verortet,
+  // stünde sonst hinter dem Ende.
+  useEffect(() => {
+    if (data) setOffset((current) => clampOffset(current, data.total));
+  }, [data]);
 
   async function open(id: number) {
     setEditing(await fetchAdminPhoto(id));
@@ -125,6 +138,7 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
               ))}
             </ul>
           )}
+          <Pager total={data.total} offset={offset} onOffset={setOffset} />
         </>
       )}
     </div>
