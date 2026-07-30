@@ -213,6 +213,28 @@ export const t = {
       allApplied: "Alle Bilder sind bearbeitet.",
     },
 
+    /**
+     * Import vom USB-Stick.
+     *
+     * Anders als beim Upload über den Rechner steht hier nach dem Lesen keine Tabelle: Bei zwei-
+     * hundert Bildern aus einem Ordner ist die „Unvollständig"-Liste der bessere Ort zum
+     * Nacharbeiten — dafür ist sie gebaut. Deshalb endet dieser Weg mit einem Sprung dorthin.
+     */
+    stick: {
+      title: "Oder von einem USB-Stick",
+      intro:
+        "Stick einstecken — die Ordner mit Bildern erscheinen dann von allein. " +
+        "Auf dem Stick wird nichts verändert, nur gelesen.",
+      searching: "Es wird nach einem Stick gesucht …",
+      none: "Zurzeit steckt kein Stick mit Bildern.",
+      folder: (name: string, drive: string) => `${name} (auf ${drive})`,
+      images: (count: number) => `${count} ${count === 1 ? "Bild" : "Bilder"}`,
+      start: "Diesen Ordner aufnehmen",
+      running: "Bitte den Stick nicht abziehen, solange gelesen wird.",
+      toIncomplete: "Unvollständige nacharbeiten",
+      done: "Fertig",
+    },
+
     changes: {
       title: "Was Besucher beigetragen haben",
       none: "Zurzeit gibt es nichts zu sichten.",

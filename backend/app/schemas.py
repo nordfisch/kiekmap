@@ -328,6 +328,26 @@ class DriveChoice(BaseModel):
     path: str
 
 
+class ImportFolderItem(BaseModel):
+    """A folder on a plugged-in drive that holds images."""
+
+    path: str
+    #: Relative to the drive, so it is recognisable: "Scans2024/Kirchweih".
+    name: str
+    drive: str
+    images: int
+
+
+class ImportRequest(DriveChoice):
+    """Which folder to take in, and what applies to all of it."""
+
+    year: int | None = Field(default=None, ge=1800, le=2100)
+    precision: DatePrecision = DatePrecision.YEAR
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lon: float | None = Field(default=None, ge=-180, le=180)
+    place_name: str | None = Field(default=None, max_length=300)
+
+
 class JobState(BaseModel):
     """How far along backup or restore is."""
 

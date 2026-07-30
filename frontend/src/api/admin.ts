@@ -262,6 +262,36 @@ export function startRestore(path: string): Promise<JobState> {
   });
 }
 
+export type ImportFolder = {
+  path: string;
+  /** Relative to the drive: "Scans2024/Kirchweih". */
+  name: string;
+  drive: string;
+  images: number;
+};
+
+export function fetchImportFolders(): Promise<ImportFolder[]> {
+  return adminFetch<ImportFolder[]>("/import/folders");
+}
+
+/** Same batch statements as the upload -- they apply to the whole folder. */
+export function startStickImport(path: string, defaults: BatchDefaults): Promise<JobState> {
+  return adminFetch<JobState>("/import/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      path,
+      ...(defaults.year !== undefined
+        ? { year: defaults.year, precision: defaults.precision ?? "year" }
+        : {}),
+      ...(defaults.lat !== undefined && defaults.lon !== undefined
+        ? { lat: defaults.lat, lon: defaults.lon }
+        : {}),
+      ...(defaults.placeName ? { place_name: defaults.placeName } : {}),
+    }),
+  });
+}
+
 export function fetchJob(): Promise<JobState> {
   return adminFetch<JobState>("/backup/status");
 }

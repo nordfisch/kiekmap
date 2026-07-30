@@ -48,7 +48,7 @@ from app.schemas import (
 from app.services import auth
 from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
-from app.services.importer import import_upload, upload_name
+from app.services.importer import apply_batch_defaults, import_upload, upload_name
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -468,7 +468,7 @@ def upload(
         outcome = import_upload(session, name, upload_file.file, settings)
 
         if outcome.succeeded and outcome.photo is not None:
-            _apply_batch_defaults(outcome.photo, year, precision, lat, lon, place_name)
+            apply_batch_defaults(outcome.photo, year, precision, lat, lon, place_name)
 
         session.commit()
         if outcome.photo is not None:
@@ -494,25 +494,3 @@ def upload(
         duplicates=counts[ImportResult.DUPLICATE],
         rejected=counts[ImportResult.REJECTED],
     )
-
-
-def _apply_batch_defaults(
-    photo: Photo,
-    year: int | None,
-    precision: DatePrecision,
-    lat: float | None,
-    lon: float | None,
-    place_name: str | None,
-) -> None:
-    if year is not None and photo.needs_date:
-        photo.date_from, photo.date_to, photo.date_precision = date_range(
-            year, precision=DatePrecision(precision)
-        )
-        photo.date_source = Source.CURATOR
-
-    if lat is not None and lon is not None and photo.needs_location:
-        photo.lat, photo.lon = lat, lon
-        photo.location_source = Source.CURATOR
-
-    if place_name and not photo.place_name:
-        photo.place_name = place_name

@@ -9,6 +9,7 @@ front of the device with a stick in their hand.
 """
 
 import logging
+from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 
@@ -21,12 +22,20 @@ from app.schemas import (
     DriveChoice,
     DriveItem,
     DriveList,
+    ImportFolderItem,
+    ImportRequest,
     JobState,
 )
 from app.services import backup as service
+from app.services import importer
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin/backup", tags=["sicherung"])
+
+# Der Stick-Import wohnt hier, obwohl er kein Backup ist: Er teilt sich das Erkennen der
+# Datentraeger und den einen Auftrag mit der Sicherung. Beides zweimal zu haben waere schlimmer
+# als ein Modul, das zwei Dinge kann.
+import_router = APIRouter(prefix="/admin/import", tags=["import"])
 
 
 def _reminder(settings: Settings) -> BackupReminder:
@@ -128,6 +137,78 @@ def _reopen_database() -> None:
     app.db.engine = app.db.create_db_engine()
     app.db.SessionLocal.configure(bind=app.db.engine)
     log.info("Database reopened after restore")
+
+
+@import_router.get(
+    "/folders", response_model=list[ImportFolderItem], summary="Image folders on a stick"
+)
+def import_folders(admin: Admin, settings: Config) -> list[ImportFolderItem]:
+    """What could be taken in from the drives currently plugged in.
+
+    Polled like the drive list, so plugging a stick in is enough.
+    """
+    folders = []
+    for drive in service.find_drives(settings.media_dir):
+        for folder in importer.find_image_folders(drive.path):
+            folders.append(
+                ImportFolderItem(
+                    path=str(folder.path),
+                    name=folder.name,
+                    drive=drive.name,
+                    images=folder.images,
+                )
+            )
+    return folders
+
+
+@import_router.post("/start", response_model=JobState, summary="Take in a folder from a stick")
+def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) -> JobState:
+    """Read a folder off a stick, with place and year optionally applying to all of it.
+
+    **Nothing on the stick is touched.** Unlike the watched inbox, where imported files are moved
+    aside, a stranger's drive is only ever read from -- see app/services/importer.py.
+    """
+    folder = _pick_folder(settings, request.path)
+
+    def work(report: service.Report) -> str:
+        with SessionLocal() as session:
+            return importer.import_from_folder(
+                session,
+                folder,
+                settings,
+                defaults=lambda photo: importer.apply_batch_defaults(
+                    photo,
+                    request.year,
+                    request.precision,
+                    request.lat,
+                    request.lon,
+                    request.place_name,
+                ),
+                report=report,
+            )
+
+    if not service.job.start("import", work):
+        raise HTTPException(409, "Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.")
+
+    log.info("Stick import from %s started", folder)
+    return status(admin)
+
+
+def _pick_folder(settings: Settings, path: str) -> Path:
+    """Only a folder that really sits on a plugged-in drive.
+
+    The path comes back from the browser, so it is input, not a fact. Without this check the
+    admin area would be a way to read any folder on the device into the collection -- and a
+    resolved path is compared, so ``..`` gets nobody out of the drive either.
+    """
+    wanted = Path(path).resolve()
+    for drive in service.find_drives(settings.media_dir):
+        root = drive.path.resolve()
+        if wanted == root or root in wanted.parents:
+            if wanted.is_dir():
+                return wanted
+            break
+    raise HTTPException(404, "Diesen Ordner gibt es auf dem Stick nicht mehr.")
 
 
 @router.get("/status", response_model=JobState, summary="How far along backup or restore is")

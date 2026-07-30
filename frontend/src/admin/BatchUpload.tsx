@@ -18,6 +18,7 @@ import type { PhotoDetail } from "../api/client";
 import { t } from "../texte/de";
 import { titleFromFilename } from "./filename";
 import { PlaceField, type PickedPlace } from "./PlaceField";
+import { StickImport } from "./StickImport";
 
 type Phase = "choose" | "uploading" | "review";
 
@@ -60,7 +61,7 @@ function toRow(
   };
 }
 
-export function BatchUpload() {
+export function BatchUpload({ onShowIncomplete }: { onShowIncomplete: () => void }) {
   const [phase, setPhase] = useState<Phase>("choose");
   const [files, setFiles] = useState<File[]>([]);
   const [year, setYear] = useState("");
@@ -203,6 +204,10 @@ export function BatchUpload() {
         >
           {t.admin.upload.start}
         </button>
+
+        {/* Derselbe Stapel, anderer Weg herein. Ort und Jahr von oben gelten für beide -- wer sie
+            eingetragen hat, muss das für den Stick nicht wiederholen. */}
+        <StickImport defaults={batchDefaults()} onFinished={onShowIncomplete} />
       </div>
     );
   }

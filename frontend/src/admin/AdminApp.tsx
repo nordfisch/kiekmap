@@ -92,7 +92,14 @@ export function AdminApp() {
         )}
         {/* Remounted when the filter changes, so the list starts on the right one. */}
         {section === "photos" && <PhotoCare key={photoFilter} initialFilter={photoFilter} />}
-        {section === "upload" && <BatchUpload />}
+        {section === "upload" && (
+          <BatchUpload
+            onShowIncomplete={() => {
+              setPhotoFilter("incomplete");
+              setSection("photos");
+            }}
+          />
+        )}
         {section === "changes" && <Changes />}
         {section === "imports" && <ImportLog />}
         {section === "backup" && <Backup />}

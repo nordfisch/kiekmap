@@ -77,20 +77,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   warum jemand nach drei Bildern aufhört
 - Läuft eine der beiden Fragen leer, fällt der „Hilf mit"-Bereich auf die andere zurück, statt
   „alles vollständig" zu melden, während Hunderte Fotos auf eine Jahreszahl warten
-
-### Geändert
-
-- Bezeichner und Code-Kommentare durchgängig auf Englisch; Deutsch bleibt für Oberfläche,
-  Fehlermeldungen, Dokumentation und Commit-Nachrichten
-- Die beiden Migrationen zu einer initialen zusammengefasst, mit englischen Index- und
-  Constraint-Namen — möglich, solange nichts ausgeliefert ist
-- `CLAUDE.md` (für Coding-Agents) und `docs/entwicklung.md` (für Entwickler) ergänzt
-- `docs/adaption.md` und `docs/stufenplan.md` ergänzt
-- Query-Parameter `von`/`bis` heißen jetzt `from_year`/`to_year` — die Konvention verlangt
-  Englisch für die API
-- Faustregel für Meldungen eingeführt: erscheint sie im Kiosk oder Admin-Bereich, ist sie deutsch,
-  sonst englisch. OpenAPI-Beschreibungen sind damit englisch, CLI-Ausgaben bleiben deutsch
-- Jahrzehnte der Datumsfrage kommen aus `region.json` statt aus dem Code
+- Import vom USB-Stick im Admin-Bereich, unter dem Upload über den Rechner: Ordner mit Bildern
+  erscheinen von allein, sobald ein Stick steckt; Ort und Jahr aus demselben Formular gelten für
+  beide Wege. **Auf dem Stick wird nichts verschoben und nichts gelöscht** — anders als im
+  überwachten Eingangsordner, der Aufgenommenes nach `_erledigt/` räumt
+- Nach dem Lesen führt ein Knopf in die „Unvollständig"-Liste statt in eine Tabelle: bei
+  zweihundert Bildern aus einem Ordner ist sie der bessere Ort zum Nacharbeiten
 - Kiosk-Betrieb auf dem Pi: `deploy/pi/setup-pi.sh` richtet einen frischen Raspberry Pi ein,
   `photomap-kiosk.service` startet cage mit Chromium im Vollbild, sobald `/api/health` antwortet.
   Frisches Browserprofil bei jedem Start; systemd startet nach einem Absturz neu
@@ -113,6 +105,20 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   darf so gesättigt sein wie ein Foto. Dazu ohne Geschäfte, Hausnummern und Autobahnschilder, und
   mit Straßen auf 80 % ihrer Breite — die kleinen Straßennamen bleiben, an ihnen hängt die
   Verortung
+
+### Geändert
+
+- Bezeichner und Code-Kommentare durchgängig auf Englisch; Deutsch bleibt für Oberfläche,
+  Fehlermeldungen, Dokumentation und Commit-Nachrichten
+- Die beiden Migrationen zu einer initialen zusammengefasst, mit englischen Index- und
+  Constraint-Namen — möglich, solange nichts ausgeliefert ist
+- `CLAUDE.md` (für Coding-Agents) und `docs/entwicklung.md` (für Entwickler) ergänzt
+- `docs/adaption.md` und `docs/stufenplan.md` ergänzt
+- Query-Parameter `von`/`bis` heißen jetzt `from_year`/`to_year` — die Konvention verlangt
+  Englisch für die API
+- Faustregel für Meldungen eingeführt: erscheint sie im Kiosk oder Admin-Bereich, ist sie deutsch,
+  sonst englisch. OpenAPI-Beschreibungen sind damit englisch, CLI-Ausgaben bleiben deutsch
+- Jahrzehnte der Datumsfrage kommen aus `region.json` statt aus dem Code
 - Kiosk-Aufteilung auf ein Raster aus zwei Spalten und zwei Zeilen: links Titelbereich über
   „Hilf mit", rechts Zeitschieber über der Karte. Der Schieber steht damit weiterhin genau über
   der Karte, die er filtert, und das Wappen führt den Bereich an, statt die Karte zu verdecken.

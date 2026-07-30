@@ -688,6 +688,18 @@
   margin-top: 1rem;
 }
 
+/* Der Stick-Import sitzt unter dem Upload -- derselbe Auftrag, anderer Weg herein. Die Linie
+ * trennt die beiden Wege, ohne den zweiten zu verstecken. */
+.stick {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.stick .photo-row {
+  align-items: center;
+}
+
 /* --- import log ---------------------------------------------------------- */
 
 .log-row {

@@ -15,6 +15,7 @@ Files from the watched folder are moved aside afterwards, never deleted:
 import logging
 import shutil
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO
@@ -213,6 +214,151 @@ def import_file(
         _move_aside(path, inbox, DONE_DIR)
 
     return outcome
+
+
+# --- taking in a folder from a USB stick -------------------------------------
+#
+# The stick belongs to somebody else. Nothing here moves or deletes a single file on it, unlike
+# the watched inbox where moving aside is the whole point. Read and copy, that is all.
+
+#: File endings that count as an image when looking around a stick.
+IMAGE_SUFFIXES = {suffix for _, suffix in ALLOWED_FORMATS.values()} | {".jpeg", ".tiff"}
+
+#: Folders never worth offering: our own backup, and what the operating systems leave behind.
+SKIPPED_FOLDERS = {
+    "photomap-sicherung",
+    "System Volume Information",
+    ".Spotlight-V100",
+    ".Trashes",
+    ".fseventsd",
+    "$RECYCLE.BIN",
+    DONE_DIR,
+    PROBLEM_DIR,
+}
+
+
+@dataclass
+class ImportFolder:
+    path: Path
+    #: Relative to the drive, so the admin recognises it: "Scans2024/Kirchweih".
+    name: str
+    images: int
+
+
+def count_images(folder: Path) -> int:
+    try:
+        return sum(
+            1
+            for entry in folder.iterdir()
+            if entry.is_file() and entry.suffix.lower() in IMAGE_SUFFIXES
+        )
+    except OSError:
+        return 0
+
+
+def find_image_folders(root: Path, max_depth: int = 4) -> list[ImportFolder]:
+    """Folders on a drive that hold images, the drive itself included.
+
+    Only where the images actually are: a folder whose pictures all sit in subfolders is not
+    offered, because importing it would take in nothing. Depth is capped -- a stick with a whole
+    backup of somebody's home directory should not cost a minute of walking.
+    """
+    found: list[ImportFolder] = []
+
+    def look(folder: Path, depth: int) -> None:
+        if depth > max_depth:
+            return
+        if (images := count_images(folder)) > 0:
+            relative = folder.relative_to(root)
+            found.append(
+                ImportFolder(
+                    path=folder,
+                    name=str(relative) if str(relative) != "." else folder.name,
+                    images=images,
+                )
+            )
+        try:
+            children = sorted(entry for entry in folder.iterdir() if entry.is_dir())
+        except OSError:
+            return
+        for child in children:
+            if child.name in SKIPPED_FOLDERS or child.name.startswith("."):
+                continue
+            look(child, depth + 1)
+
+    if root.is_dir():
+        look(root, 0)
+    return found
+
+
+def apply_batch_defaults(
+    photo: Photo,
+    year: int | None,
+    precision: DatePrecision,
+    lat: float | None,
+    lon: float | None,
+    place_name: str | None,
+) -> None:
+    """Statements that apply to a whole batch -- from the upload form or the stick.
+
+    They only fill what the import left empty. A scan almost never brings a usable date or GPS
+    with it, so in practice they apply to everything -- but where the file does know better, the
+    file wins.
+    """
+    if year is not None and photo.needs_date:
+        photo.date_from, photo.date_to, photo.date_precision = date_range(
+            year, precision=DatePrecision(precision)
+        )
+        photo.date_source = Source.CURATOR
+
+    if lat is not None and lon is not None and photo.needs_location:
+        photo.lat, photo.lon = lat, lon
+        photo.location_source = Source.CURATOR
+
+    if place_name and not photo.place_name:
+        photo.place_name = place_name
+
+
+def import_from_folder(
+    session: Session,
+    folder: Path,
+    settings: Settings,
+    defaults: Callable[[Photo], None] | None = None,
+    report: Callable[[int, int, str], None] | None = None,
+) -> str:
+    """Take in every image of one folder. Returns the German closing message.
+
+    Committed photo by photo, not at the end: a stick pulled out halfway then leaves behind what
+    was already read, instead of nothing.
+    """
+    images = sorted(
+        path
+        for path in folder.iterdir()
+        if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES
+    )
+    counts = {result: 0 for result in ImportResult}
+
+    for index, path in enumerate(images, start=1):
+        # move_aside stays False -- see the note at the top of this section.
+        outcome = import_file(session, path, settings)
+        if outcome.succeeded and outcome.photo is not None and defaults:
+            defaults(outcome.photo)
+        session.commit()
+
+        counts[outcome.result] += 1
+        if report:
+            report(index, len(images), f"Lese Foto {index} von {len(images)}")
+
+    log.info("Stick import from %s: %s", folder, dict(counts))
+
+    teile = [f"{counts[ImportResult.IMPORTED]} Fotos aufgenommen"]
+    if counts[ImportResult.DUPLICATE]:
+        waren = "war" if counts[ImportResult.DUPLICATE] == 1 else "waren"
+        teile.append(f"{counts[ImportResult.DUPLICATE]} {waren} schon da")
+    if counts[ImportResult.REJECTED]:
+        teile.append(f"{counts[ImportResult.REJECTED]} abgewiesen")
+
+    return ", ".join(teile) + ". Der Stick kann jetzt abgezogen werden."
 
 
 def upload_name(filename: str) -> str:

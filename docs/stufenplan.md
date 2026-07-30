@@ -51,7 +51,7 @@ Wappen führt die linke Spalte an und ist zugleich der Weg in den Admin-Bereich.
 | 8 | Admin-Bereich mit Stapel-Upload | ✅ |
 | 9 | Sicherung und Wiederherstellung auf USB | ✅ (Einhängen auf dem Pi offen, siehe unten) |
 | 10 | Kiosk-Deployment auf dem Pi | ✅ gebaut, Abnahme braucht das Gerät |
-| — | [Vorgemerkt](#vorgemerkt): historische Karte, Import vom Stick | gewollt, nicht eingeplant |
+| — | [Vorgemerkt](#vorgemerkt): historische Karte | gewollt, nicht eingeplant |
 | 11 | Ausbau nach Bedarf | offen |
 
 Was in den fertigen Stufen entstanden ist, steht im [CHANGELOG](../CHANGELOG.md).
@@ -302,25 +302,26 @@ kein Ersatz.
 *Bis dahin steht der billige Teil zur Verfügung: ein eigener Farb-Flavor für die heutige Karte,
 siehe die Farbvorschläge in der Sitzung vom 29. Juli 2026 (Papier / Sepia / Zurückgenommen).*
 
-### Import vom USB-Stick im Admin-Bereich
+### ~~Import vom USB-Stick im Admin-Bereich~~ ✅ erledigt
 
-**Was.** Im Admin-Bereich Bilder von einem eingesteckten Stick aufnehmen, im Ablauf so wie der
-Stapel-Upload: Ort und Jahr optional für alles, danach dieselbe Nacharbeitstabelle.
+Umgesetzt im Abschnitt „Hochladen", direkt unter dem Weg über den Rechner — Ort und Jahr aus
+demselben Formular gelten für beide. Die Ordner mit Bildern erscheinen von allein, sobald ein
+Stick steckt.
 
-**Warum.** Der Weg über den Browser setzt einen Rechner voraus. Wer mit einem Stick voller Scans vor
-dem Kiosk steht, soll ihn einstecken können.
+**Bewusst anders als geplant:** Nach dem Lesen kommt *keine* Nacharbeitstabelle. Wer einen Ordner
+mit zweihundert Bildern einliest, will keine Tabelle mit zweihundert Zeilen; die
+„Unvollständig"-Liste aus Stufe 8 ist genau dafür gebaut. Der Weg endet deshalb mit einem Knopf
+dorthin. Beim Upload über den Rechner bleibt die Tabelle — dort hat jemand vierzig Dateien
+ausgesucht und will sie beschriften.
 
-**Wo.** Das Fachliche ist fertig: `import_file()` nimmt einen Pfad,
-[`import_directory()`](../backend/app/services/importer.py) ein ganzes Verzeichnis — genau das, was
-hier gebraucht wird. Neu sind nur der Endpunkt, der ein Verzeichnis auf dem Stick statt
-hochgeladener Dateien annimmt, und die Auswahl des Ordners in der Oberfläche.
+Die Warnung aus der Vormerkung hat sich als die wichtigste Zusage erwiesen und einen eigenen Test
+bekommen: **Auf dem Stick wird nichts verschoben und nichts gelöscht.** Der überwachte
+Eingangsordner räumt Aufgenommenes nach `_erledigt/` — dort ist das richtig, es ist unser Ordner.
+Auf einem fremden Datenträger wäre es ein Übergriff.
 
-**Reihenfolge.** Gehört hinter Stufe 9, nicht davor: Das Erkennen und Einhängen des Sticks
-(udev-Regel, `rshared`-Propagation) wird dort ohnehin gebaut, und beides zweimal zu lösen wäre
-verschenkt. Der Fortschrittsbalken der Sicherung passt ebenfalls.
-
-**Achtung.** Der Stick ist fremdes Dateisystem: keine Datei darf verschoben oder gelöscht werden,
-anders als im überwachten Eingangsordner. Nur lesen und kopieren.
+Dazu zwei Dinge, die der Plan nicht nannte: Der Pfad wird gegen die erkannten Laufwerke geprüft
+(`..` bringt niemanden heraus), und der Import teilt sich den einen Auftrag mit der Sicherung —
+zwei gleichzeitige Schreibläufe auf dieselbe SQLite-Datei wären eine Fehlerquelle ohne Not.
 
 ---
 
