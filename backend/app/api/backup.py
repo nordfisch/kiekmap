@@ -23,6 +23,7 @@ from app.schemas import (
     DriveItem,
     DriveList,
     ImportFolderItem,
+    ImportFolders,
     ImportRequest,
     JobState,
     PhotoDetail,
@@ -141,16 +142,16 @@ def _reopen_database() -> None:
     log.info("Database reopened after restore")
 
 
-@import_router.get(
-    "/folders", response_model=list[ImportFolderItem], summary="Image folders on a stick"
-)
-def import_folders(admin: Admin, settings: Config) -> list[ImportFolderItem]:
+@import_router.get("/folders", response_model=ImportFolders, summary="Image folders on a stick")
+def import_folders(admin: Admin, settings: Config) -> ImportFolders:
     """What could be taken in from the drives currently plugged in.
 
-    Polled like the drive list, so plugging a stick in is enough.
+    Polled like the drive list, so plugging a stick in is enough. The drive names travel along:
+    "no stick" and "a stick without images" need different words on screen.
     """
+    drives = service.find_drives(settings.media_dir)
     folders = []
-    for drive in service.find_drives(settings.media_dir):
+    for drive in drives:
         for folder in importer.find_image_folders(drive.path):
             folders.append(
                 ImportFolderItem(
@@ -160,7 +161,7 @@ def import_folders(admin: Admin, settings: Config) -> list[ImportFolderItem]:
                     images=folder.images,
                 )
             )
-    return folders
+    return ImportFolders(drives=[drive.name for drive in drives], folders=folders)
 
 
 @import_router.post("/start", response_model=JobState, summary="Take in a folder from a stick")

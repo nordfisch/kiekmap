@@ -350,6 +350,18 @@ class ImportFolderItem(BaseModel):
     images: int
 
 
+class ImportFolders(BaseModel):
+    """What could be taken in -- and, separately, whether anything is plugged in at all.
+
+    Without the drive names an empty folder list would mean two different things: no stick, or a
+    stick without images. The screen would then tell someone who has just plugged one in to plug
+    one in -- the kind of dead end where a volunteer gives up.
+    """
+
+    drives: list[str]
+    folders: list[ImportFolderItem]
+
+
 class ImportRequest(DriveChoice):
     """Which folder to take in, and what applies to all of it."""
 

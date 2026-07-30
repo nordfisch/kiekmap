@@ -30,6 +30,7 @@ import type { PhotoDetail } from "../api/client";
 import { t } from "../texte/de";
 import { titleFromFilename } from "./filename";
 import { type YearInput, toDate } from "./jahr";
+import { FileDropZone } from "./DropZone";
 import { PlaceField, type PickedPlace } from "./PlaceField";
 import { YearField } from "./YearField";
 import { StickFolders } from "./StickImport";
@@ -302,25 +303,13 @@ export function ImportView({ onReview }: { onReview: () => void }) {
         >
           <span className="source__title">{t.admin.upload.fromStick}</span>
           <span className="source__hint">
-            {folder ? t.admin.stick.folder(folder.name, folder.drive) : t.admin.stick.intro}
+            {folder ? t.admin.stick.folder(folder.name, folder.drive) : t.admin.upload.fromStickHint}
           </span>
         </button>
       </div>
 
       {source === "computer" ? (
-        <>
-          <label className="field__label" htmlFor="batch-files">
-            {t.admin.upload.choose}
-          </label>
-          <input
-            id="batch-files"
-            className="field__input"
-            type="file"
-            multiple
-            accept="image/jpeg,image/png,image/tiff,image/webp"
-            onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
-          />
-        </>
+        <FileDropZone files={files} onFiles={setFiles} />
       ) : (
         <StickFolders selected={folder} onSelect={setFolder} onJob={stickFinished} />
       )}
@@ -344,7 +333,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
 
       <button
         type="button"
-        className="button button--primary"
+        className="button button--primary upload__start"
         disabled={!ready}
         onClick={() => void (source === "computer" ? startFromComputer() : startFromStick())}
       >

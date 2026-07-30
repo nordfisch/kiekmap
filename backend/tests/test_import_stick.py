@@ -170,9 +170,20 @@ class TestUeberDieApi:
 
         daten = admin_client.get("/api/admin/import/folders").json()
 
-        assert daten[0]["drive"] == "SCANSTICK"
-        assert daten[0]["name"] == "Scans2024"
-        assert daten[0]["images"] == 2
+        assert daten["folders"][0]["drive"] == "SCANSTICK"
+        assert daten["folders"][0]["name"] == "Scans2024"
+        assert daten["folders"][0]["images"] == 2
+
+    def test_stick_ohne_bilder_nennt_trotzdem_das_laufwerk(self, admin_client: TestClient, stick):
+        """Sonst hiesse eine leere Liste zweierlei: kein Stick, oder ein Stick ohne Bilder.
+
+        Der Bildschirm haelt dem, der gerade eingesteckt hat, sonst "Bitte USB-Stick einstecken"
+        entgegen -- die Art Sackgasse, an der jemand aufgibt.
+        """
+        daten = admin_client.get("/api/admin/import/folders").json()
+
+        assert daten["drives"] == ["SCANSTICK"]
+        assert daten["folders"] == []
 
     def test_pfad_ausserhalb_des_sticks_wird_abgewiesen(
         self, admin_client: TestClient, stick, tmp_path: Path

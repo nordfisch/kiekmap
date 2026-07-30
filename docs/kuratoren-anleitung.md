@@ -20,19 +20,25 @@ Zwei Wege führen zum selben Ergebnis:
 
 Verwaltung → **Importieren**. Die Seite fragt zwei Dinge, in dieser Reihenfolge:
 
-**1. Woher kommen die Bilder?**
+**Auswahl der zu importierenden Bilder**
 
-- **Vom Rechner** — „Bilder auswählen", dann die Dateien anklicken.
-- **Vom USB-Stick** — Stick einstecken. Die Ordner mit Bildern erscheinen von allein; einen davon
-  auswählen. *Auf dem Stick wird nichts verändert, nur gelesen.*
+Oben stehen zwei Kacheln; die gewählte ist umrandet. Darunter ist immer dieselbe Fläche, sie
+ändert nur ihren Inhalt:
 
-**2. Gilt für alle Bilder (freiwillig)**
+- **Vom Rechner** — auf **„Auswählen"** tippen und die Dateien anklicken. Wer mit der Maus
+  arbeitet, kann sie stattdessen auf die Fläche ziehen.
+- **Vom USB-Stick** — Stick einstecken. In der Fläche erscheinen von allein die Ordner mit
+  Bildern; einen davon auswählen. *Auf dem Stick wird nichts verändert, nur gelesen.*
+
+**Angaben für alle neu hinzugefügten Bilder (optional)**
 
 *Jahr* und *Ort* für den ganzen Stapel — bei vierzig Bildern derselben Kirchweih spart das
 neununddreißig Eingaben. Beides lässt sich hinterher für jedes Bild einzeln ändern.
 
-Beim Jahr können Sie **„Ganzes Jahrzehnt"** ankreuzen, wenn Sie es nicht genauer wissen. Das geht
-nur bei runden Zahlen wie 1920 oder 1930 — bei 1923 wäre nicht klar, was gemeint ist.
+Neben dem Jahr steht **„Genauigkeit"**: *Jahr* oder *Jahrzehnt*. Solange kein Jahr eingetragen
+ist, lässt sich dort nichts wählen. *Jahrzehnt* gibt es nur bei runden Zahlen wie 1920 oder 1930 —
+bei 1923 wäre nicht klar, was gemeint ist. Wer erst 1920 und Jahrzehnt wählt und die Zahl danach
+auf 1923 ändert, bekommt automatisch wieder *Jahr*.
 
 Dann **„Importieren"**. Das Gerät zeigt, bei welchem Bild es gerade ist.
 
@@ -68,6 +74,10 @@ finden Sie ein bestimmtes Bild nach Titel, Ort oder Dateiname.
 **Der kürzeste Weg dorthin ist die Startseite:** Jede Zahl der Übersicht führt direkt in die
 passende Liste. „4 ohne Jahr" antippen, und Sie sind dort.
 
+Sind es mehr als dreißig Bilder, steht unter der Liste **„Zurück · Seite 1 von 3 · Weiter"**. Wenn
+Sie ein Bild bearbeitet haben, sind Sie danach wieder auf derselben Seite. Wechseln Sie den Filter
+oder suchen Sie etwas, fängt es wieder bei Seite 1 an.
+
 „Bearbeiten" öffnet das Formular. Zum **Ort** gibt es eine Suche nach Straßennamen; sie funktioniert
 ohne Internet.
 
@@ -98,7 +108,8 @@ steht hier, warum.
 ## Sicherung auf einen USB-Stick
 
 Einmal im Jahr, und immer nach einem größeren Stapel neuer Bilder. Auf der Startseite der
-Verwaltung steht, wann zuletzt gesichert wurde; ist es länger als einen Monat her, steht es rot da.
+Verwaltung steht unten links, wie viele Tage seit der letzten Sicherung vergangen sind; ist es
+länger als einen Monat her, wird die Kachel rot. Antippen führt direkt hierher.
 
 1. **USB-Stick einstecken.** Ein gewöhnlicher Stick genügt. Er sollte so viel Platz haben wie die
    Sammlung groß ist — das Gerät rechnet es Ihnen vor.

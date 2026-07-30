@@ -211,6 +211,14 @@ export const t = {
       fromComputer: "Vom Rechner",
       fromStick: "Vom USB-Stick",
       chooseHint: "Bilder auf diesem Rechner auswählen",
+      /** Die Zusicherung bleibt in der Kachel stehen, auch wenn der Rest des Hinweises weg ist. */
+      fromStickHint: "Auf dem Stick wird nichts verändert, nur gelesen.",
+
+      dropTitle: "Bitte Bilder auswählen.",
+      /** „Ablegen", nicht „droppen": die Zielgruppe steht oft mit sechzig davor. */
+      dropHint: "Bilder hier ablegen oder",
+      dropButton: "Auswählen",
+      dropAgain: "Andere auswählen",
       toReview: "Fotos ohne Ort nacharbeiten",
       tooManyForTable:
         "Das sind zu viele für eine Tabelle. Was noch fehlt, findet sich in der Fotoliste — " +
@@ -248,11 +256,13 @@ export const t = {
      */
     stick: {
       title: "Oder von einem USB-Stick",
-      intro:
-        "Stick einstecken — die Ordner mit Bildern erscheinen dann von allein. " +
-        "Auf dem Stick wird nichts verändert, nur gelesen.",
       searching: "Es wird nach einem Stick gesucht …",
-      none: "Zurzeit steckt kein Stick mit Bildern.",
+
+      waitTitle: "Bitte USB-Stick einstecken.",
+      waitHint: "Die Ordner mit Bildern erscheinen dann von allein.",
+      /** Der Stick steckt, nur ist nichts darauf -- eine andere Auskunft als „bitte einstecken". */
+      noImages: (drive: string) => `Auf „${drive}" sind keine Bilder.`,
+      noImagesHint: "Gesucht wird in allen Ordnern des Sticks.",
       folder: (name: string, drive: string) => `${name} (auf ${drive})`,
       images: (count: number) => `${count} ${count === 1 ? "Bild" : "Bilder"}`,
       choose: "Auswählen",

@@ -296,8 +296,19 @@ export type ImportFolder = {
   images: number;
 };
 
-export function fetchImportFolders(): Promise<ImportFolder[]> {
-  return adminFetch<ImportFolder[]>("/import/folders");
+/**
+ * Die Laufwerksnamen kommen mit.
+ *
+ * Eine leere Ordnerliste hiesse sonst zweierlei: kein Stick, oder ein Stick ohne Bilder. Der
+ * Bildschirm haelt dem, der gerade eingesteckt hat, sonst "Bitte USB-Stick einstecken" entgegen.
+ */
+export type ImportFolders = {
+  drives: string[];
+  folders: ImportFolder[];
+};
+
+export function fetchImportFolders(): Promise<ImportFolders> {
+  return adminFetch<ImportFolders>("/import/folders");
 }
 
 /** Same batch statements as the upload -- they apply to the whole folder. */

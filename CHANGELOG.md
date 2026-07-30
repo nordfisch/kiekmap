@@ -149,6 +149,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   einer Zahl — „Heute gesichert", „Noch nie importiert"
 - Auch „Auf der Karte zu sehen" ist jetzt ein Weg: die Kachel führt zurück zur Karte, denselben
   Weg wie „Verwaltung beenden". Damit führt jede Zahl der Übersicht irgendwohin
+- Unter den beiden Quellenkacheln liegt jetzt **eine Fläche an fester Stelle**, die nur ihren
+  Inhalt wechselt — gestrichelt, solange gewartet wird, mit vollem Rand, sobald etwas da ist, wie
+  im Sicherungsbereich. Bei „Vom Rechner" ist sie zugleich Ablagefläche für Dateien; der Knopf
+  „Auswählen" bleibt der verlässliche Weg, weil es auf dem Kiosk kein Ziehen und Ablegen gibt.
+  Beim Stick unterscheidet sie jetzt drei Lagen: kein Stick, Stick ohne Bilder, Ordner gefunden —
+  vorher hätte sie jemandem, der gerade eingesteckt hat, „Bitte USB-Stick einstecken" entgegen-
+  gehalten
 - Jahreszahl und Genauigkeit sind ein **gemeinsames Bauteil** für beide Stellen, an denen datiert
   wird — den Stapel beim Importieren und das einzelne Foto im Editor. Vorher war es dort ein
   Ankreuzfeld unter der Zahl, hier ein breites Auswahlfeld daneben, und die Regel für „Jahrzehnt"

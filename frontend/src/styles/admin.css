@@ -814,6 +814,77 @@
   color: var(--muted);
 }
 
+/* Die Flaeche unter den Quellenkacheln. Sie behaelt ihren Platz, egal welche Quelle gewaehlt ist,
+ * und wechselt nur den Inhalt -- sonst springt die Maske beim Umschalten. Gestrichelt, solange
+ * gewartet wird; mit Rand, sobald etwas da ist. Dieselbe Dramaturgie wie im Sicherungsbereich. */
+.dropzone {
+  padding: 2rem 1.25rem;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.dropzone--filled {
+  padding: 1rem 1.25rem;
+  border-style: solid;
+  border-color: var(--accent-light);
+  background: #fff;
+  text-align: left;
+}
+
+/* Ohne sichtbare Antwort weiss niemand, ob das Fenster ueberhaupt annimmt. */
+.dropzone--over {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.dropzone__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.dropzone__hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0;
+  color: var(--muted);
+}
+
+.dropzone__hint .button {
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+}
+
+.dropzone .photo-rows {
+  margin: 0;
+}
+
+/* Die Trennlinie der letzten Zeile liefe sonst gegen den Rand des Kastens. */
+.dropzone .photo-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Aus dem Bild, aber nicht aus dem Baum: Das Dateifeld wird vom Knopf daneben ausgeloest. Mit
+ * `display: none` liesse es sich nicht mehr anklicken. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Der Knopf klebte an den Kaesten darueber. */
+.upload__start {
+  margin-top: 1.5rem;
+}
+
 /* Jahr und Ort nebeneinander, beide im Rahmen mit Beschriftung auf der Linie. Das Jahr bekommt
  * damit dieselbe Wertigkeit wie der Ort statt eines nackten Eingabefelds. */
 /* Ohne die Dehnung stünde der kürzere Kasten hoch und die beiden sähen aus wie zwei Ränge. Sobald
