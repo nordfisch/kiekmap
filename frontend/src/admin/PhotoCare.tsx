@@ -2,8 +2,11 @@
  * The photo list with its editor.
  *
  * Newest import at the top, because that is what someone is looking for right after an upload.
- * The "Unvollständig" filter is the actual working view: it is the list a volunteer works
- * through on a winter afternoon.
+ *
+ * „Ohne Ort" und „Ohne Jahr" sind die eigentlichen Arbeitsansichten -- die Listen, die ein
+ * Ehrenamtlicher an einem Winternachmittag durchgeht. Getrennt, weil Verorten und Datieren zwei
+ * verschiedene Arbeiten sind: Wer Straßennamen zuordnet, ist in einem anderen Kopf als jemand,
+ * der Jahrzehnte schätzt.
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -14,9 +17,12 @@ import { t } from "../texte/de";
 import { PhotoEditor } from "./PhotoEditor";
 import { useLoaded } from "./useLoaded";
 
+// Ort und Jahr getrennt: Verorten und Datieren sind zwei Arbeiten, und wer die eine macht, will
+// die andere nicht dazwischen haben.
 const FILTERS: { value: Selection; label: string }[] = [
   { value: "all", label: t.admin.photos.filterAll },
-  { value: "incomplete", label: t.admin.photos.filterIncomplete },
+  { value: "without_location", label: t.admin.photos.filterWithoutLocation },
+  { value: "without_date", label: t.admin.photos.filterWithoutDate },
   { value: "hidden", label: t.admin.photos.filterHidden },
 ];
 

@@ -95,7 +95,24 @@ class TestUebersicht:
 
 
 class TestFotoliste:
-    def test_filter_unvollstaendig_zeigt_nur_luecken(
+    def test_filter_ohne_ort_zeigt_nicht_die_ohne_jahr(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        """Der Grund fuer die Aufteilung.
+
+        Verorten und Datieren sind zwei Arbeiten. Wer die Fotos ohne Ort abarbeitet, will die
+        ohne Jahr nicht dazwischen -- unter einem gemeinsamen "unvollstaendig" bekam er sie.
+        """
+        make_photo(title="Vollstaendig", sha="a" * 64)
+        make_photo(title="Ohne Ort", lat=None, lon=None, sha="b" * 64)
+        make_photo(title="Ohne Jahr", year=None, sha="c" * 64)
+        session.commit()
+
+        daten = admin_client.get("/api/admin/photos", params={"show": "without_location"}).json()
+
+        assert [foto["title"] for foto in daten["photos"]] == ["Ohne Ort"]
+
+    def test_filter_ohne_jahr_zeigt_nicht_die_ohne_ort(
         self, admin_client: TestClient, session, make_photo
     ):
         make_photo(title="Vollstaendig", sha="a" * 64)
@@ -103,10 +120,9 @@ class TestFotoliste:
         make_photo(title="Ohne Jahr", year=None, sha="c" * 64)
         session.commit()
 
-        daten = admin_client.get("/api/admin/photos", params={"show": "incomplete"}).json()
+        daten = admin_client.get("/api/admin/photos", params={"show": "without_date"}).json()
 
-        assert daten["total"] == 2
-        assert {foto["title"] for foto in daten["photos"]} == {"Ohne Ort", "Ohne Jahr"}
+        assert [foto["title"] for foto in daten["photos"]] == ["Ohne Jahr"]
 
     def test_suche_findet_ueber_den_dateinamen(self, admin_client: TestClient, session, make_photo):
         """Nach einem Stapel-Upload sucht man nach dem, was auf dem Scanner stand."""

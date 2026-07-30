@@ -93,9 +93,10 @@ class TestAufnehmen:
     def test_fotos_landen_in_der_sammlung(self, session, settings, stick, bilder_auf_dem_stick):
         ordner = bilder_auf_dem_stick()
 
-        meldung = importer.import_from_folder(session, ordner, settings)
+        meldung, zeilen = importer.import_from_folder(session, ordner, settings)
 
         assert len(session.scalars(select(Photo)).all()) == 2
+        assert [zeile.source.name for zeile in zeilen] == sorted(p.name for p in ordner.iterdir())
         assert "2 Fotos aufgenommen" in meldung
         assert "abgezogen werden" in meldung
 
@@ -105,7 +106,7 @@ class TestAufnehmen:
         ordner = bilder_auf_dem_stick()
         importer.import_from_folder(session, ordner, settings)
 
-        meldung = importer.import_from_folder(session, ordner, settings)
+        meldung, _ = importer.import_from_folder(session, ordner, settings)
 
         assert "0 Fotos aufgenommen" in meldung
         assert "2 waren schon da" in meldung
@@ -224,3 +225,57 @@ class TestUeberDieApi:
             assert antwort.status_code == 409
         finally:
             laeuft.set()
+
+
+class TestZeilenFuerDieNacharbeit:
+    """Bis 30 Bilder liefert der Auftrag die Zeilen mit, darueber nicht.
+
+    Sie reisen im Status mit, der im Sekundentakt abgefragt wird -- zweihundert Fotos darin
+    gingen bei jeder Abfrage neu ueber die Leitung.
+    """
+
+    def _bis_fertig(self, client) -> dict:
+        import time
+
+        ende = time.monotonic() + 10
+        while time.monotonic() < ende:
+            zustand = client.get("/api/admin/backup/status").json()
+            if zustand["phase"] != "running":
+                return zustand
+            time.sleep(0.02)
+        raise AssertionError("Der Auftrag wurde nicht fertig")
+
+    def test_kleiner_stapel_liefert_die_zeilen_mit(
+        self, admin_client: TestClient, stick, bilder_auf_dem_stick
+    ):
+        ordner = bilder_auf_dem_stick()
+
+        admin_client.post("/api/admin/import/start", json={"path": str(ordner)})
+        zustand = self._bis_fertig(admin_client)
+
+        assert zustand["phase"] == "done"
+        assert [zeile["filename"] for zeile in zustand["items"]] == [
+            "hochkant.jpg",
+            "scan_ohne_exif.jpg",
+        ]
+
+    def test_grosser_stapel_liefert_keine_zeilen(
+        self, admin_client: TestClient, stick, fixtures_dir, monkeypatch
+    ):
+        import shutil
+
+        from app.api import backup as api
+
+        monkeypatch.setattr(api, "REVIEW_LIMIT", 1)
+        ordner = stick / "Viele"
+        ordner.mkdir()
+        for name in ("scan_ohne_exif.jpg", "hochkant.jpg"):
+            shutil.copy2(fixtures_dir / name, ordner / name)
+
+        admin_client.post("/api/admin/import/start", json={"path": str(ordner)})
+        zustand = self._bis_fertig(admin_client)
+
+        assert zustand["phase"] == "done"
+        assert zustand["items"] is None
+        # Die Meldung bleibt -- nur die Tabelle entfaellt.
+        assert "2 Fotos aufgenommen" in zustand["message"]

@@ -356,18 +356,49 @@
 
 /* --- overview ------------------------------------------------------------ */
 
+/* Feste drei Spalten statt auto-fill: Die Aufteilung in zwei Zeilen -- oben der Bestand, unten
+ * die Arbeit -- ist eine Aussage. Mit auto-fill ordnet der Browser sie je nach Breite um und die
+ * Aussage geht verloren. Auf schmalem Schirm bricht es auf eine Spalte. */
 .overview__figures {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
+@media (max-width: 44rem) {
+  .overview__figures {
+    grid-template-columns: 1fr;
+  }
+}
+
 .figure {
+  display: block;
+  width: 100%;
+  min-height: 5rem;
   padding: 1rem;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: #fff;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+/* Jede Zahl, die irgendwohin fuehrt, sieht auch danach aus. "Auf der Karte zu sehen" bleibt eine
+ * Anzeige -- ein Knopf, der nichts tut, ist schlimmer als kein Knopf. */
+.figure--link {
+  border-color: var(--accent-light);
+  cursor: pointer;
+}
+
+.figure--link:hover,
+.figure--link:focus-visible {
+  border-color: var(--accent);
+}
+
+.figure--link:active {
+  transform: translateY(1px);
 }
 
 .figure--muted {
@@ -688,16 +719,73 @@
   margin-top: 1rem;
 }
 
-/* Der Stick-Import sitzt unter dem Upload -- derselbe Auftrag, anderer Weg herein. Die Linie
- * trennt die beiden Wege, ohne den zweiten zu verstecken. */
-.stick {
-  margin-top: 2rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
-}
-
 .stick .photo-row {
   align-items: center;
+}
+
+/* --- Quelle des Imports -------------------------------------------------- */
+
+/* Zwei gleichrangige Kacheln. Der Stick war vorher ein Nachtrag unter einer Trennlinie -- wer mit
+ * einem Stick vor dem Geraet steht, soll ihn sofort sehen. */
+.sources {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 0.75rem 0 1rem;
+}
+
+@media (max-width: 44rem) {
+  .sources {
+    grid-template-columns: 1fr;
+  }
+}
+
+.source {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-height: 5rem;
+  padding: 1rem;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+}
+
+.source--active {
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.source__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.source__hint {
+  font-size: 0.9rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+/* Jahr und Ort nebeneinander, beide im Rahmen mit Beschriftung auf der Linie. Das Jahr bekommt
+ * damit dieselbe Wertigkeit wie der Ort statt eines nackten Eingabefelds. */
+.batch-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+}
+
+@media (max-width: 44rem) {
+  .batch-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+.batch-fields .field__group {
+  margin: 0;
 }
 
 /* --- import log ---------------------------------------------------------- */

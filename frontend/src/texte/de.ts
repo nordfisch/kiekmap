@@ -126,9 +126,9 @@ export const t = {
       sections: {
         overview: "Übersicht",
         photos: "Fotos",
-        upload: "Hochladen",
-        changes: "Beiträge",
-        imports: "Import",
+        moderation: "Moderation",
+        import: "Importieren",
+        log: "Protokoll",
         backup: "Sicherung",
       },
     },
@@ -142,14 +142,14 @@ export const t = {
       visitorChanges: "Beiträge von Besuchern",
       lastImport: "Zuletzt aufgenommen",
       never: "noch nichts",
-      toIncomplete: "Unvollständige ansehen",
     },
 
     photos: {
       searchLabel: "Suchen in Titel, Ort und Dateiname",
       searchPlaceholder: "z. B. Kirchweih",
       filterAll: "Alle",
-      filterIncomplete: "Unvollständig",
+      filterWithoutLocation: "Ohne Ort",
+      filterWithoutDate: "Ohne Jahr",
       filterHidden: "Versteckt",
       found: (shown: number, total: number) =>
         shown === total ? `${total} Fotos` : `${shown} von ${total} Fotos`,
@@ -186,14 +186,24 @@ export const t = {
     },
 
     upload: {
-      title: "Fotos hochladen",
-      step1: "Gilt für alle Bilder dieses Stapels",
+      title: "Fotos hinzufügen",
+      whereFrom: "1. Woher kommen die Bilder?",
+      fromComputer: "Vom Rechner",
+      fromStick: "Vom USB-Stick",
+      chooseHint: "Bilder auf diesem Rechner auswählen",
+      wholeDecade: "Ganzes Jahrzehnt",
+      wholeDecadeHint: "Nur bei vollen Jahrzehnten wie 1920 oder 1930 wählbar.",
+      toReview: "Fotos ohne Ort nacharbeiten",
+      tooManyForTable:
+        "Das sind zu viele für eine Tabelle. Was noch fehlt, findet sich in der Fotoliste — " +
+        "und taucht im „Hilf mit“-Bereich auf.",
+      step1: "2. Gilt für alle Bilder (freiwillig)",
       step1Hint:
         "Beides ist freiwillig und lässt sich hinterher je Bild ändern. Bei vierzig Bildern " +
         "derselben Kirchweih spart es vierzig Eingaben.",
       choose: "Bilder auswählen",
       chosen: (count: number) => `${count} ${count === 1 ? "Bild" : "Bilder"} ausgewählt`,
-      start: "Hochladen",
+      start: "Importieren",
       progress: (done: number, total: number) => `Bild ${done} von ${total}`,
       summary: (imported: number, duplicates: number, rejected: number) =>
         [
@@ -229,7 +239,8 @@ export const t = {
       none: "Zurzeit steckt kein Stick mit Bildern.",
       folder: (name: string, drive: string) => `${name} (auf ${drive})`,
       images: (count: number) => `${count} ${count === 1 ? "Bild" : "Bilder"}`,
-      start: "Diesen Ordner aufnehmen",
+      choose: "Auswählen",
+      chosen: "Ausgewählt",
       running: "Bitte den Stick nicht abziehen, solange gelesen wird.",
       toIncomplete: "Unvollständige nacharbeiten",
       done: "Fertig",
@@ -248,7 +259,7 @@ export const t = {
     },
 
     imports: {
-      title: "Import-Protokoll",
+      title: "Protokoll",
       none: "Noch nichts aufgenommen.",
       all: "Alle",
       imported: "Aufgenommen",

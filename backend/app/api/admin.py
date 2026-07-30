@@ -155,7 +155,9 @@ def overview(admin: Admin, session: Db, settings: Config) -> Overview:
 
 # --- photo care -------------------------------------------------------------
 
-Selection = Literal["all", "incomplete", "hidden"]
+# Ort und Jahr getrennt, nicht als ein "unvollstaendig": Verorten und Datieren sind zwei
+# verschiedene Arbeiten. Wer die Fotos ohne Ort abarbeitet, will die ohne Jahr nicht dazwischen.
+Selection = Literal["all", "without_location", "without_date", "hidden"]
 
 
 @router.get("/photos", response_model=PhotoAdminList, summary="Photo list for the admin area")
@@ -169,8 +171,10 @@ def list_photos(
 ) -> PhotoAdminList:
     """Newest import first -- that is what someone is looking for right after an upload."""
     filters = []
-    if show == "incomplete":
-        filters.append(or_(Photo.lat.is_(None), Photo.date_from.is_(None)))
+    if show == "without_location":
+        filters.append(Photo.lat.is_(None))
+    elif show == "without_date":
+        filters.append(Photo.date_from.is_(None))
     elif show == "hidden":
         filters.append(Photo.status == PhotoStatus.HIDDEN)
 

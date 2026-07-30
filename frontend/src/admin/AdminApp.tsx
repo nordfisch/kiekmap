@@ -10,23 +10,28 @@
 
 import { useEffect, useState } from "react";
 
+import { type Selection } from "../api/admin";
 import { useAdmin } from "../store/admin";
 import { t } from "../texte/de";
 import { Backup } from "./Backup";
-import { BatchUpload } from "./BatchUpload";
 import { Changes } from "./Changes";
 import { ImportLog } from "./ImportLog";
-import { Overview } from "./Overview";
+import { ImportView } from "./ImportView";
+import { Overview, type Target } from "./Overview";
 import { PhotoCare } from "./PhotoCare";
 
-type Section = "overview" | "photos" | "upload" | "changes" | "imports" | "backup";
+/**
+ * Reihenfolge mit Absicht: erst die Pflege des Bestands, dann das Hinzufügen, dann das
+ * Technische. „Moderation" steht neben „Fotos", weil beides Inhaltsarbeit ist.
+ */
+type Section = "overview" | "photos" | "moderation" | "import" | "log" | "backup";
 
 const SECTIONS: { value: Section; label: string }[] = [
   { value: "overview", label: t.admin.shell.sections.overview },
   { value: "photos", label: t.admin.shell.sections.photos },
-  { value: "upload", label: t.admin.shell.sections.upload },
-  { value: "changes", label: t.admin.shell.sections.changes },
-  { value: "imports", label: t.admin.shell.sections.imports },
+  { value: "moderation", label: t.admin.shell.sections.moderation },
+  { value: "import", label: t.admin.shell.sections.import },
+  { value: "log", label: t.admin.shell.sections.log },
   { value: "backup", label: t.admin.shell.sections.backup },
 ];
 
@@ -36,8 +41,14 @@ export function AdminApp() {
   const leave = useAdmin((s) => s.leave);
   const dropSession = useAdmin((s) => s.dropSession);
   const [section, setSection] = useState<Section>("overview");
-  const [photoFilter, setPhotoFilter] = useState<"all" | "incomplete">("all");
+  const [photoFilter, setPhotoFilter] = useState<Selection>("all");
   const [minutes, setMinutes] = useState<number | null>(null);
+
+  /** Ein Weg für alle Kacheln der Übersicht: Abschnitt und Filter zusammen setzen. */
+  function navigate(target: Target) {
+    if (target.filter) setPhotoFilter(target.filter);
+    setSection(target.section);
+  }
 
   useEffect(() => {
     function tick() {
@@ -81,27 +92,14 @@ export function AdminApp() {
       </nav>
 
       <main className="admin__body">
-        {section === "overview" && (
-          <Overview
-            onShowIncomplete={() => {
-              setPhotoFilter("incomplete");
-              setSection("photos");
-            }}
-            onShowBackup={() => setSection("backup")}
-          />
-        )}
+        {section === "overview" && <Overview onNavigate={navigate} />}
         {/* Remounted when the filter changes, so the list starts on the right one. */}
         {section === "photos" && <PhotoCare key={photoFilter} initialFilter={photoFilter} />}
-        {section === "upload" && (
-          <BatchUpload
-            onShowIncomplete={() => {
-              setPhotoFilter("incomplete");
-              setSection("photos");
-            }}
-          />
+        {section === "import" && (
+          <ImportView onReview={() => navigate({ section: "photos", filter: "without_location" })} />
         )}
-        {section === "changes" && <Changes />}
-        {section === "imports" && <ImportLog />}
+        {section === "moderation" && <Changes />}
+        {section === "log" && <ImportLog />}
         {section === "backup" && <Backup />}
       </main>
     </div>

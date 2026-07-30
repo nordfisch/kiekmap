@@ -54,6 +54,10 @@ LOOSE_FILES = ("region.json", "places.json")
 #: Report progress: done, total, message.
 Report = Callable[[int, int, str], None]
 
+#: What a job hands back: the closing message, or that plus rows for the screen. The backup and
+#: the restore have nothing to show afterwards, so they return the message alone.
+JobResult = str | tuple[str, list[dict] | None]
+
 
 # --- what is on the stick ---------------------------------------------------
 
@@ -502,6 +506,10 @@ class JobStatus:
     total: int = 0
     message: str = ""
     error: str | None = None
+    #: What the finished job produced, when that is worth passing on -- the stick import puts its
+    #: rows here so the screen can offer the same review table as the upload does. Plain data, so
+    #: the job stays free of the API's shapes; the caller decides how much is worth sending.
+    items: list[dict] | None = None
 
 
 class Job:
@@ -528,8 +536,11 @@ class Job:
         with self._lock:
             return self._status.phase == "running"
 
-    def start(self, kind: str, work: Callable[[Report], str]) -> bool:
-        """False when something is already running."""
+    def start(self, kind: str, work: Callable[[Report], "JobResult"]) -> bool:
+        """False when something is already running.
+
+        ``work`` returns the closing message, and optionally rows for the screen to show.
+        """
         with self._lock:
             if self._status.phase == "running":
                 return False
@@ -537,10 +548,12 @@ class Job:
 
         def run() -> None:
             try:
-                message = work(self._report)
+                outcome = work(self._report)
+                message, items = outcome if isinstance(outcome, tuple) else (outcome, None)
                 with self._lock:
                     self._status.phase = "done"
                     self._status.message = message
+                    self._status.items = items
                     self._status.done = self._status.total
             except BackupError as error:
                 self._fail(str(error))

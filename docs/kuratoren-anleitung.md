@@ -1,7 +1,7 @@
 # Anleitung für das Museumsteam
 
-> Der Teil zur Sicherung wird in **Stufe 9** ergänzt, sobald es sie gibt. Diese Seite ist zum
-> Ausdrucken und Neben-das-Gerät-Legen gedacht — Bildschirmfotos folgen, wenn das Gerät steht.
+> Zum Ausdrucken und Neben-das-Gerät-Legen gedacht — Bildschirmfotos folgen, wenn das Gerät im
+> Museum steht.
 
 ## In den Verwaltungsbereich kommen
 
@@ -18,20 +18,36 @@ vergessen, meldet sich das Gerät nach einer halben Stunde von selbst ab.
 
 Zwei Wege führen zum selben Ergebnis:
 
-**Am Gerät.** Verwaltung → **Hochladen**. Ganz oben lassen sich *Jahr* und *Ort* für alle Bilder
-auf einmal eintragen — bei vierzig Bildern derselben Kirchweih spart das neununddreißig Eingaben.
-Beides ist freiwillig und lässt sich hinterher für jedes Bild einzeln ändern.
+Verwaltung → **Importieren**. Die Seite fragt zwei Dinge, in dieser Reihenfolge:
 
-Dann „Bilder auswählen", die Dateien anklicken, „Hochladen". Das Gerät zeigt, bei welchem Bild es
-gerade ist.
+**1. Woher kommen die Bilder?**
 
-**Am Rechner.** Die Bilder in den Ordner `incoming` kopieren. Das Gerät nimmt sie von allein auf
-und legt die Dateien danach in den Unterordner `_erledigt`. Gelöscht wird nichts.
+- **Vom Rechner** — „Bilder auswählen", dann die Dateien anklicken.
+- **Vom USB-Stick** — Stick einstecken. Die Ordner mit Bildern erscheinen von allein; einen davon
+  auswählen. *Auf dem Stick wird nichts verändert, nur gelesen.*
 
-### Nach dem Hochladen
+**2. Gilt für alle Bilder (freiwillig)**
 
-Es erscheint eine Liste: links das Bild, daneben Titel, Jahr und Ort. Der **Titel ist aus dem
-Dateinamen vorgeschlagen** — aus `Kirchweih_1932_Muehle.jpg` wird „Kirchweih 1932 Muehle".
+*Jahr* und *Ort* für den ganzen Stapel — bei vierzig Bildern derselben Kirchweih spart das
+neununddreißig Eingaben. Beides lässt sich hinterher für jedes Bild einzeln ändern.
+
+Beim Jahr können Sie **„Ganzes Jahrzehnt"** ankreuzen, wenn Sie es nicht genauer wissen. Das geht
+nur bei runden Zahlen wie 1920 oder 1930 — bei 1923 wäre nicht klar, was gemeint ist.
+
+Dann **„Importieren"**. Das Gerät zeigt, bei welchem Bild es gerade ist.
+
+> **Es gibt noch einen dritten Weg, ganz ohne Verwaltung:** die Bilder am Rechner in den Ordner
+> `incoming` kopieren. Das Gerät nimmt sie von allein auf und legt die Dateien danach in den
+> Unterordner `_erledigt`. Gelöscht wird auch dort nichts.
+
+### Nach dem Importieren
+
+Bei überschaubar vielen Bildern erscheint eine Liste: links das Bild, daneben Titel, Jahr und Ort.
+Der **Titel ist aus dem Dateinamen vorgeschlagen** — aus `Kirchweih_1932_Muehle.jpg` wird
+„Kirchweih 1932 Muehle".
+
+Bei sehr vielen Bildern auf einmal steht dort nur, wie viele es geworden sind, und ein Knopf in die
+Liste **„Ohne Ort"**. Eine Tabelle mit zweihundert Zeilen wäre keine Arbeitsfläche.
 
 Ändern Sie, was Sie wissen, und tippen Sie auf **„Übernehmen"**. Die Zeile verschwindet dann.
 **„Alle übernehmen"** erledigt den Rest in einem Zug.
@@ -45,9 +61,12 @@ Kopie.
 
 ## Angaben ergänzen und korrigieren
 
-Verwaltung → **Fotos**. Mit dem Knopf **„Unvollständig"** sehen Sie nur die Bilder, bei denen etwas
-fehlt — das ist die Liste zum Durcharbeiten. Über das Suchfeld finden Sie ein bestimmtes Bild nach
-Titel, Ort oder Dateiname.
+Verwaltung → **Fotos**. Mit **„Ohne Ort"** und **„Ohne Jahr"** sehen Sie genau die Bilder, bei
+denen das eine oder das andere fehlt — das sind die Listen zum Durcharbeiten. Über das Suchfeld
+finden Sie ein bestimmtes Bild nach Titel, Ort oder Dateiname.
+
+**Der kürzeste Weg dorthin ist die Startseite:** Jede Zahl der Übersicht führt direkt in die
+passende Liste. „4 ohne Jahr" antippen, und Sie sind dort.
 
 „Bearbeiten" öffnet das Formular. Zum **Ort** gibt es eine Suche nach Straßennamen; sie funktioniert
 ohne Internet.
@@ -62,7 +81,7 @@ Zwei Dinge sind wichtig zu wissen:
 
 ## Was Besucher beigetragen haben
 
-Verwaltung → **Beiträge**. Hier steht, was Besucher am Bildschirm eingetragen haben.
+Verwaltung → **Moderation**. Hier steht, was Besucher am Bildschirm eingetragen haben.
 
 Ist etwas offensichtlich falsch, tippen Sie auf **„Zurücknehmen"**. Die Angabe wird gelöscht und
 das Bild wandert zurück in den „Hilf mit"-Bereich — vielleicht weiß es der nächste Besucher besser.
@@ -72,7 +91,7 @@ Angabe überarbeitet. Zurücknehmen würde diese Arbeit mit wegwerfen, deshalb g
 
 ## Wenn etwas nicht ankommt
 
-Verwaltung → **Import**. Dort steht jede Datei, die das Gerät angesehen hat, mit dem Grund:
+Verwaltung → **Protokoll**. Dort steht jede Datei, die das Gerät angesehen hat, mit dem Grund:
 aufgenommen, Dublette oder abgewiesen. „Nichts passiert" gibt es hier nicht — wenn ein Bild fehlt,
 steht hier, warum.
 
@@ -116,4 +135,9 @@ Datum beiseitegelegt. Wer also versehentlich die falsche Sicherung einspielt, ha
 
 ## Was tun, wenn der Bildschirm schwarz bleibt
 
-> Kommt mit Stufe 10.
+Zuerst: Steckt der Stecker, ist der Bildschirm an? Wenn ja, hilft meist ein Neustart — Gerät
+ausschalten, zehn Sekunden warten, wieder einschalten. Nach etwa zwanzig Sekunden sollte die Karte
+von allein erscheinen.
+
+Bleibt es dabei, hilft nur jemand mit Zugang zum Gerät weiter. Was er wissen muss, steht in
+[betrieb.md](betrieb.md).

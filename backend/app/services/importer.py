@@ -46,7 +46,11 @@ class ImportOutcome:
     #: German -- this text reaches the curator through the import log.
     message: str
     photo: Photo | None = None
+    #: Where the image was stored. Only set when it was actually taken in.
     path: Path | None = None
+    #: The file it came from. ``import_file`` is handed a path but does not keep it -- the caller
+    #: fills this in where the original name still matters, as the review table does.
+    source: Path | None = None
 
     @property
     def succeeded(self) -> bool:
@@ -325,8 +329,11 @@ def import_from_folder(
     settings: Settings,
     defaults: Callable[[Photo], None] | None = None,
     report: Callable[[int, int, str], None] | None = None,
-) -> str:
-    """Take in every image of one folder. Returns the German closing message.
+) -> tuple[str, list[ImportOutcome]]:
+    """Take in every image of one folder.
+
+    Returns the German closing message and what became of each file -- the caller decides whether
+    a list that long is still worth showing (see REVIEW_LIMIT in app/api/backup.py).
 
     Committed photo by photo, not at the end: a stick pulled out halfway then leaves behind what
     was already read, instead of nothing.
@@ -337,6 +344,7 @@ def import_from_folder(
         if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES
     )
     counts = {result: 0 for result in ImportResult}
+    outcomes: list[ImportOutcome] = []
 
     for index, path in enumerate(images, start=1):
         # move_aside stays False -- see the note at the top of this section.
@@ -345,6 +353,8 @@ def import_from_folder(
             defaults(outcome.photo)
         session.commit()
 
+        outcome.source = path
+        outcomes.append(outcome)
         counts[outcome.result] += 1
         if report:
             report(index, len(images), f"Lese Foto {index} von {len(images)}")
@@ -358,7 +368,7 @@ def import_from_folder(
     if counts[ImportResult.REJECTED]:
         teile.append(f"{counts[ImportResult.REJECTED]} abgewiesen")
 
-    return ", ".join(teile) + ". Der Stick kann jetzt abgezogen werden."
+    return ", ".join(teile) + ". Der Stick kann jetzt abgezogen werden.", outcomes
 
 
 def upload_name(filename: str) -> str:

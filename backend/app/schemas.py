@@ -358,6 +358,9 @@ class JobState(BaseModel):
     #: German -- goes straight onto the screen.
     message: str
     error: str | None
+    #: Rows for the review table, when the finished job produced few enough to be worth showing.
+    #: See REVIEW_LIMIT in app/api/backup.py.
+    items: list["UploadItem"] | None = None
 
 
 class Overview(BaseModel):

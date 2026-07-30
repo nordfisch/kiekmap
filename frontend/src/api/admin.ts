@@ -62,6 +62,8 @@ export type JobState = {
   total: number;
   message: string;
   error: string | null;
+  /** Zeilen für die Nacharbeit, wenn es wenige genug waren. Siehe REVIEW_LIMIT im Backend. */
+  items: UploadItem[] | null;
 };
 
 export type PhotoAdminItem = {
@@ -135,7 +137,7 @@ export type PhotoPatch = {
   status?: "published" | "hidden";
 };
 
-export type Selection = "all" | "incomplete" | "hidden";
+export type Selection = "all" | "without_location" | "without_date" | "hidden";
 
 let token: string | null = null;
 let signedOutHandler: (() => void) | null = null;

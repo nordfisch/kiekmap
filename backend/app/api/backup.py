@@ -25,6 +25,8 @@ from app.schemas import (
     ImportFolderItem,
     ImportRequest,
     JobState,
+    PhotoDetail,
+    UploadItem,
 )
 from app.services import backup as service
 from app.services import importer
@@ -170,9 +172,9 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
     """
     folder = _pick_folder(settings, request.path)
 
-    def work(report: service.Report) -> str:
+    def work(report: service.Report) -> service.JobResult:
         with SessionLocal() as session:
-            return importer.import_from_folder(
+            message, outcomes = importer.import_from_folder(
                 session,
                 folder,
                 settings,
@@ -186,12 +188,42 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
                 ),
                 report=report,
             )
+            return message, _review_rows(outcomes)
 
     if not service.job.start("import", work):
         raise HTTPException(409, "Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.")
 
     log.info("Stick import from %s started", folder)
     return status(admin)
+
+
+#: Bis hierher lohnt sich die Nacharbeits-Tabelle, darueber nicht mehr.
+#:
+#: Wer vierzig ausgesuchte Bilder hochlaedt, will sie gleich beschriften. Wer einen Ordner mit
+#: zweihundert einliest, will keine Tabelle mit zweihundert Zeilen -- fuer den ist die
+#: "Ohne Ort"-Liste die Arbeitsflaeche. Die Zahl steht auch im Frontend; beide Seiten nennen die
+#: jeweils andere im Kommentar.
+REVIEW_LIMIT = 30
+
+
+def _review_rows(outcomes: list[importer.ImportOutcome]) -> list[dict] | None:
+    """Die Zeilen fuer die Nacharbeit -- oder None, wenn es zu viele waeren.
+
+    Sie reisen im Auftragsstatus mit, der im Sekundentakt abgefragt wird. Zweihundert Fotos darin
+    waeren eine Nutzlast, die bei jeder Abfrage neu ueber die Leitung ginge.
+    """
+    if len(outcomes) > REVIEW_LIMIT:
+        return None
+
+    return [
+        UploadItem(
+            filename=outcome.source.name if outcome.source else "",
+            result=outcome.result,
+            message=outcome.message,
+            photo=PhotoDetail.from_photo(outcome.photo) if outcome.photo else None,
+        ).model_dump(mode="json")
+        for outcome in outcomes
+    ]
 
 
 def _pick_folder(settings: Settings, path: str) -> Path:
@@ -221,6 +253,7 @@ def status(admin: Admin) -> JobState:
         total=current.total,
         message=current.message,
         error=current.error,
+        items=current.items,
     )
 
 

@@ -1,5 +1,8 @@
 # Umbau des Verwaltungsmenüs
 
+> **Umgesetzt am 29. Juli 2026.** Der Plan steht unverändert; was beim Bauen dazukam, steht am
+> Ende unter „Beim Bauen dazugekommen".
+
 ## Kontext
 
 Der Admin-Bereich ist über die Stufen 8 bis 10 gewachsen, und das sieht man ihm an. Drei Dinge
@@ -215,3 +218,18 @@ Bei der Sicherung ist nichts zu tun.
 **Doku**: CHANGELOG unter „Geändert", und in `docs/kuratoren-anleitung.md` die Abschnittsnamen
 nachziehen — dort stehen „Fotos hinzufügen" und „Was Besucher beigetragen haben" mit den alten
 Menünamen.
+
+
+---
+
+## Beim Bauen dazugekommen
+
+- **Die Sicherungs-Erinnerung** auf der Startseite verlinkte durch den Umbau versehentlich in die
+  Fotoliste. Sie führt jetzt dorthin, wo sie hingehört: in den Abschnitt „Sicherung".
+- **Die Dateiauswahl brauchte eine sichtbare Beschriftung.** Ohne sie stand in der Maske nur ein
+  fast leerer Kasten — ein `input type="file"` zeigt von sich aus kaum etwas an.
+- **Die Kuratoren-Anleitung war weiter als gedacht veraltet:** Sie beschrieb noch den alten Ablauf
+  („Jahr und Ort ganz oben, dann Bilder auswählen") und trug zwei Platzhalter aus den Stufen 9 und
+  10, die längst gebaut sind. Beides ist nachgezogen.
+- **`ImportOutcome` bekam ein Feld `source`.** Für die Nacharbeits-Tabelle wird der Name der
+  Quelldatei gebraucht; `path` war schon mit dem Ablageort belegt.

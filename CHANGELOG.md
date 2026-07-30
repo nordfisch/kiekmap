@@ -124,6 +124,25 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   der Karte, die er filtert, und das Wappen führt den Bereich an, statt die Karte zu verdecken.
   Der Ortsname im Titel kommt aus `region.json`
 
+- Verwaltungsmenü aufgeräumt: **Übersicht · Fotos · Moderation · Importieren · Protokoll ·
+  Sicherung**. Erst die Pflege des Bestands, dann das Hinzufügen, dann das Technische. „Beiträge"
+  heißt jetzt Moderation, „Import" heißt Protokoll — es stand als Protokoll in Konkurrenz zum
+  Hochladen
+- Der Fotofilter trennt **„Ohne Ort"** und **„Ohne Jahr"** statt eines gemeinsamen
+  „Unvollständig". Verorten und Datieren sind zwei Arbeiten; wer die eine macht, will die andere
+  nicht dazwischen
+- Jede Zahl der Übersicht ist ein Weg: Fotos insgesamt, Versteckt, Ohne Ort und Ohne Jahr führen
+  in die passend gefilterte Liste, die Besucherbeiträge in die Moderation. Nur „auf der Karte zu
+  sehen" bleibt eine Anzeige — es ist das Ergebnis, keine Aufgabe
+- „Importieren" fragt jetzt **erst die Quelle**, dann was für alle gilt: zwei gleichrangige
+  Kacheln für Rechner und Stick statt eines Nachtrags unter einer Trennlinie. Jahr und Ort werden
+  einmal gefragt und gelten für beide Wege
+- Jahr und Ort stehen nebeneinander, beide im Rahmen. „Ganzes Jahrzehnt" lässt sich nur bei vollen
+  Jahrzehnten wählen — sonst rundete das Backend eine 1934 stillschweigend zu den 1930ern ab. Wird
+  die Zahl nachträglich geändert, nimmt sich das Häkchen selbst zurück
+- Nach dem Import gilt für beide Wege dieselbe Regel: bis 30 Bilder die Nacharbeits-Tabelle,
+  darüber die Zusammenfassung mit einem Sprung in die Liste „Ohne Ort"
+
 ### Behoben
 
 - Marker verschwanden gelegentlich von der Karte: der `load`-Rückruf konnte eine bereits entfernte

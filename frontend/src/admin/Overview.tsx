@@ -1,33 +1,54 @@
 /**
- * The start page of the admin area: what is there, and what is missing.
+ * Die Startseite der Verwaltung: was da ist, und was fehlt.
  *
- * The gaps come first, not the total. After a scanning session the question is never "how many
- * photos are there" but "how much still has no year".
+ * Jede Zahl ist ein Weg. Vorher nannte diese Seite sechs Zahlen, von denen genau eine
+ * irgendwohin führte — wer „4 ohne Ort" las, musste sich selbst zum Filter durchklicken. Für
+ * jemanden, der zweimal im Jahr hier ist, ist das die halbe Bedienung.
+ *
+ * Zwei Zeilen zu drei Kacheln: oben der Bestand, unten die Arbeit. Nur „auf der Karte zu sehen"
+ * führt nirgendwohin — es ist das Ergebnis, keine Aufgabe.
  */
 
 import { useCallback } from "react";
 
-import { fetchOverview } from "../api/admin";
+import { type Selection, fetchOverview } from "../api/admin";
 import { t } from "../texte/de";
 import { formatDate } from "./format";
 import { useLoaded } from "./useLoaded";
 
-function Figure({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
-  return (
-    <div className={muted ? "figure figure--muted" : "figure"}>
+/** Wohin eine Kachel führt. `filter` gilt nur für den Fotobereich. */
+export type Target = { section: "photos" | "moderation" | "backup"; filter?: Selection };
+
+function Figure({
+  label,
+  value,
+  muted,
+  onClick,
+}: {
+  label: string;
+  value: string;
+  muted?: boolean;
+  onClick?: () => void;
+}) {
+  const className = muted ? "figure figure--muted" : "figure";
+  const content = (
+    <>
       <span className="figure__value">{value}</span>
       <span className="figure__label">{label}</span>
-    </div>
+    </>
+  );
+
+  // Ohne Ziel bleibt es eine Anzeige. Ein Knopf, der nichts tut, ist schlimmer als kein Knopf.
+  if (!onClick) return <div className={className}>{content}</div>;
+
+  return (
+    <button type="button" className={`${className} figure--link`} onClick={onClick}>
+      {content}
+    </button>
   );
 }
 
-export function Overview({
-  onShowIncomplete,
-  onShowBackup,
-}: {
-  onShowIncomplete: () => void;
-  onShowBackup: () => void;
-}) {
+export function Overview({ onNavigate }: { onNavigate: (target: Target) => void }) {
   const { data, error, loading } = useLoaded(useCallback(() => fetchOverview(), []));
 
   if (loading && !data) return <p className="admin__note">{t.admin.loading}</p>;
@@ -39,15 +60,34 @@ export function Overview({
   return (
     <div className="overview">
       <div className="overview__figures">
-        <Figure label={t.admin.overview.total} value={String(data.total)} />
+        <Figure
+          label={t.admin.overview.total}
+          value={String(data.total)}
+          onClick={() => onNavigate({ section: "photos", filter: "all" })}
+        />
         <Figure label={t.admin.overview.onMap} value={String(data.on_map)} />
-        <Figure label={t.admin.overview.withoutLocation} value={String(data.without_location)} />
-        <Figure label={t.admin.overview.withoutDate} value={String(data.without_date)} />
-        <Figure label={t.admin.overview.hidden} value={String(data.hidden)} muted />
+        <Figure
+          label={t.admin.overview.hidden}
+          value={String(data.hidden)}
+          muted
+          onClick={() => onNavigate({ section: "photos", filter: "hidden" })}
+        />
+
+        <Figure
+          label={t.admin.overview.withoutLocation}
+          value={String(data.without_location)}
+          onClick={() => onNavigate({ section: "photos", filter: "without_location" })}
+        />
+        <Figure
+          label={t.admin.overview.withoutDate}
+          value={String(data.without_date)}
+          onClick={() => onNavigate({ section: "photos", filter: "without_date" })}
+        />
         <Figure
           label={t.admin.overview.visitorChanges}
           value={String(data.visitor_changes)}
           muted
+          onClick={() => onNavigate({ section: "moderation" })}
         />
       </div>
 
@@ -55,8 +95,8 @@ export function Overview({
         {t.admin.overview.lastImport}: {lastImport}
       </p>
 
-      {/* The backup reminder belongs on the start page, not only in its own section -- that is the
-          whole point of a reminder. Red once it is due. */}
+      {/* Die Erinnerung an die Sicherung bleibt, wo sie war -- sie ist keine Zahl über den
+          Bestand, sondern eine Aufforderung. Rot, sobald sie fällig ist. */}
       <button
         type="button"
         className={
@@ -64,7 +104,7 @@ export function Overview({
             ? "button backup__reminder-button backup__reminder-button--overdue"
             : "button backup__reminder-button"
         }
-        onClick={onShowBackup}
+        onClick={() => onNavigate({ section: "backup" })}
       >
         {data.backup.last_backup_at
           ? t.admin.backup.lastOn(
@@ -73,12 +113,6 @@ export function Overview({
             )
           : t.admin.backup.lastNever}
       </button>
-
-      {data.without_location + data.without_date > 0 && (
-        <button type="button" className="button" onClick={onShowIncomplete}>
-          {t.admin.overview.toIncomplete}
-        </button>
-      )}
     </div>
   );
 }
