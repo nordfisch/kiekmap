@@ -9,6 +9,19 @@
  * server. Making the kiosk bilingual would mean moving that formatting to the client.
  */
 
+/**
+ * Die Beschriftung unter einer Statuskachel der Übersicht.
+ *
+ * Der Wert steht darüber (`formatDaysSince()`), Wert und Beschriftung ergeben zusammen einen Satz:
+ * „34 Tage seit der letzten Sicherung", „Heute gesichert", „Noch nie gesichert". Deshalb wechselt
+ * die Beschriftung mit, sobald aus der Zahl ein Wort wird — und deshalb steht hier die Einzahl:
+ * „1 Tage" fällt auf einem Museumsgerät auf.
+ */
+function since(days: number | null, what: string, done: string): string {
+  if (days === null || days <= 0) return done;
+  return `${days === 1 ? "Tag" : "Tage"} seit ${what}`;
+}
+
 export const t = {
   app: {
     /**
@@ -140,8 +153,11 @@ export const t = {
       withoutDate: "Ohne Jahr",
       hidden: "Versteckt",
       visitorChanges: "Beiträge von Besuchern",
-      lastImport: "Zuletzt aufgenommen",
-      never: "noch nichts",
+
+      sinceBackup: (days: number | null) => since(days, "der letzten Sicherung", "gesichert"),
+      sinceImport: (days: number | null) => since(days, "dem neuesten Import", "importiert"),
+      sinceChange: (days: number | null) =>
+        since(days, "dem jüngsten Besucherbeitrag", "gab es einen Besucherbeitrag"),
     },
 
     photos: {

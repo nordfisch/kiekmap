@@ -374,7 +374,12 @@ class Overview(BaseModel):
     hidden: int
     #: Visitor contributions not yet reverted. Something to look through, not a problem.
     visitor_changes: int
-    last_import_at: datetime | None
+    #: Days, not timestamps: the start page asks "wie lange ist das her?", and the answer depends
+    #: on where the day boundary lies -- a question the browser cannot answer, because a stored
+    #: stamp carries no time zone and JavaScript would read it as local time. See
+    #: services/dates.days_since.
+    days_since_import: int | None
+    days_since_change: int | None
     #: "Letzte Sicherung vor 34 Tagen" belongs on the start page, not only in its own section.
     backup: BackupReminder
 

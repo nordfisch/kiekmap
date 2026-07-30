@@ -24,13 +24,14 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.config import Settings
+from app.services import dates
 
 log = logging.getLogger(__name__)
 
@@ -57,6 +58,16 @@ Report = Callable[[int, int, str], None]
 #: What a job hands back: the closing message, or that plus rows for the screen. The backup and
 #: the restore have nothing to show afterwards, so they return the message alone.
 JobResult = str | tuple[str, list[dict] | None]
+
+
+def _stamp() -> str:
+    """Now, as it goes into the JSON files: UTC, and without the marker saying so.
+
+    One clock for the whole device. The database writes UTC anyway (``func.now()``), and a state
+    file in local time next to it would make every difference computed across the two wrong by the
+    offset -- enough to turn last night's backup into "vorgestern".
+    """
+    return datetime.now(UTC).replace(tzinfo=None).isoformat(timespec="seconds")
 
 
 # --- what is on the stick ---------------------------------------------------
@@ -339,7 +350,8 @@ def _write_manifest(target: Path, photos: int, size: int, settings: Settings) ->
     (target / MANIFEST_NAME).write_text(
         json.dumps(
             {
-                "created_at": datetime.now().isoformat(timespec="seconds"),
+                # UTC, like every other stored timestamp -- see services/dates.days_since.
+                "created_at": _stamp(),
                 "photos": photos,
                 "bytes": size,
                 "place": place,
@@ -458,7 +470,7 @@ class BackupState:
     def days_since(self) -> int | None:
         if self.last_backup_at is None:
             return None
-        return (datetime.now() - self.last_backup_at).days
+        return dates.days_since(self.last_backup_at)
 
     @property
     def overdue(self) -> bool:
@@ -485,7 +497,7 @@ def record_backup(settings: Settings, drive_name: str) -> None:
     (settings.data_dir / STATE_FILE).write_text(
         json.dumps(
             {
-                "last_backup_at": datetime.now().isoformat(timespec="seconds"),
+                "last_backup_at": _stamp(),
                 "last_drive": drive_name,
             },
             indent=2,

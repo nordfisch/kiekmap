@@ -10,7 +10,7 @@ are dedicated tests for it.
 """
 
 import calendar
-from datetime import date
+from datetime import UTC, date, datetime
 
 from app.models import DatePrecision
 
@@ -113,3 +113,19 @@ def overlaps(
     if start is None or end is None:
         return False
     return start <= selected_end and end >= selected_start
+
+
+def days_since(when: datetime, now: datetime | None = None) -> int:
+    """How many days ago, counted in calendar days rather than in 24-hour blocks.
+
+    The distinction matters because the answer is read out as a sentence: a backup made yesterday
+    at 09:00 must be "1 Tag" this morning, not "Heute". Subtracting the timestamps would give a
+    zero for another hour.
+
+    Stored timestamps are UTC throughout (``func.now()`` in SQLite, ``datetime.now(UTC)`` in the
+    JSON state files). The day boundary that counts, however, is the local one -- so both sides are
+    converted before their dates are compared.
+    """
+    then = when.replace(tzinfo=UTC).astimezone()
+    today = (now or datetime.now(UTC)).astimezone()
+    return (today.date() - then.date()).days

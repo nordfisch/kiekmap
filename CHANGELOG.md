@@ -142,6 +142,16 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   die Zahl nachträglich geändert, nimmt sich das Häkchen selbst zurück
 - Nach dem Import gilt für beide Wege dieselbe Regel: bis 30 Bilder die Nacharbeits-Tabelle,
   darüber die Zusammenfassung mit einem Sprung in die Liste „Ohne Ort"
+- Unter den sechs Zahlen der Übersicht steht jetzt eine Trennlinie und darunter, in denselben drei
+  Spalten, der Betrieb: Tage seit der letzten Sicherung, seit dem neuesten Import und seit dem
+  jüngsten Besucherbeitrag. Die Sicherungskachel ersetzt den bisherigen Erinnerungsknopf und wird
+  rot, sobald sie fällig ist; „Zuletzt aufgenommen" entfällt. An den Rändern steht ein Wort statt
+  einer Zahl — „Heute gesichert", „Noch nie importiert"
+- Auch „Auf der Karte zu sehen" ist jetzt ein Weg: die Kachel führt zurück zur Karte, denselben
+  Weg wie „Verwaltung beenden". Damit führt jede Zahl der Übersicht irgendwohin
+- Gespeicherte Zeitstempel sind durchgängig UTC — auch die der Sicherungsdatei und der Kopfdaten
+  auf dem Stick, die bisher Ortszeit schrieben. „Wie lange her" zählt **Kalendertage** entlang der
+  deutschen Tagesgrenze: eine Sicherung von gestern Abend ist „1 Tag", nicht „Heute"
 
 ### Behoben
 

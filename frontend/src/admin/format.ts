@@ -24,6 +24,19 @@ export function formatCount(value: number): string {
   return COUNT.format(value);
 }
 
+/**
+ * Wie lange etwas her ist, als Kopfzeile einer Kachel.
+ *
+ * Die Ränder bekommen ein Wort statt einer Zahl: „0 Tage seit der letzten Sicherung" ist für
+ * jemanden, der zweimal im Jahr an dieses Gerät tritt, eine Denksportaufgabe. Groß geschrieben,
+ * weil der Wert die Zeile anfängt.
+ */
+export function formatDaysSince(days: number | null): string {
+  if (days === null) return "Noch nie";
+  if (days <= 0) return "Heute";
+  return COUNT.format(days);
+}
+
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("de-DE", {
     day: "numeric",

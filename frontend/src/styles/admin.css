@@ -405,6 +405,24 @@
   background: none;
 }
 
+/* Die Sicherung ist die einzige Kachel, die mahnen darf. Dieselbe Farbe wie zuvor der eigene
+ * Erinnerungsknopf, den sie ersetzt. */
+.figure--overdue {
+  border-color: #a33;
+}
+
+.figure--overdue .figure__value {
+  color: #a33;
+}
+
+/* Trennt den Bestand oben vom Betrieb unten. Beide Zeilen benutzen dasselbe Raster, damit die
+ * Spalten bündig stehen und nicht nur ungefähr übereinander. */
+.overview__rule {
+  margin: 1.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
 .figure__value {
   display: block;
   font-size: 2rem;
@@ -597,19 +615,6 @@
 .backup__reminder--overdue {
   font-weight: 600;
   color: #a33;
-}
-
-.backup__reminder-button {
-  width: auto;
-  min-width: 18rem;
-  margin: 0.5rem 0;
-  text-align: left;
-}
-
-.backup__reminder-button--overdue {
-  border-color: #a33;
-  color: #a33;
-  font-weight: 600;
 }
 
 .backup__empty {

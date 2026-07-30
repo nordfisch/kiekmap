@@ -26,7 +26,9 @@ export type Overview = {
   without_date: number;
   hidden: number;
   visitor_changes: number;
-  last_import_at: string | null;
+  /** Fertig gerechnete Tage: siehe services/dates.days_since im Backend. */
+  days_since_import: number | null;
+  days_since_change: number | null;
   backup: BackupReminder;
 };
 

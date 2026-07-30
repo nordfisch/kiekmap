@@ -46,6 +46,12 @@ export function AdminApp() {
 
   /** Ein Weg für alle Kacheln der Übersicht: Abschnitt und Filter zusammen setzen. */
   function navigate(target: Target) {
+    // „Auf der Karte zu sehen" führt aus der Verwaltung heraus, denselben Weg wie der Knopf oben
+    // rechts -- also mit Abmelden. Wer zurück will, gibt die PIN erneut ein.
+    if (target.section === "kiosk") {
+      void leave();
+      return;
+    }
     if (target.filter) setPhotoFilter(target.filter);
     setSection(target.section);
   }

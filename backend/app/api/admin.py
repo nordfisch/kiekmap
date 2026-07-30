@@ -45,7 +45,7 @@ from app.schemas import (
     UploadItem,
     UploadResult,
 )
-from app.services import auth
+from app.services import auth, dates
 from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
 from app.services.importer import apply_batch_defaults, import_upload, upload_name
@@ -124,6 +124,13 @@ def overview(admin: Admin, session: Db, settings: Config) -> Overview:
     last_import: datetime | None = session.scalar(
         select(func.max(ImportLog.created_at)).where(ImportLog.result == ImportResult.IMPORTED)
     )
+    # Only what still stands: the tile leads into the moderation list, and it would be a poor
+    # signpost if it announced a contribution that has since been taken back.
+    last_change: datetime | None = session.scalar(
+        select(func.max(Change.created_at)).where(
+            Change.source == Source.VISITOR, Change.reverted_at.is_(None)
+        )
+    )
     backup_state = read_backup_state(settings)
 
     return Overview(
@@ -143,7 +150,8 @@ def overview(admin: Admin, session: Db, settings: Config) -> Overview:
             .where(Change.source == Source.VISITOR, Change.reverted_at.is_(None))
         )
         or 0,
-        last_import_at=last_import,
+        days_since_import=dates.days_since(last_import) if last_import else None,
+        days_since_change=dates.days_since(last_change) if last_change else None,
         backup=BackupReminder(
             last_backup_at=backup_state.last_backup_at,
             last_drive=backup_state.last_drive,

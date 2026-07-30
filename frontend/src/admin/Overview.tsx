@@ -1,36 +1,51 @@
 /**
- * Die Startseite der Verwaltung: was da ist, und was fehlt.
+ * Die Startseite der Verwaltung: was da ist, was fehlt, und wann zuletzt etwas geschah.
  *
  * Jede Zahl ist ein Weg. Vorher nannte diese Seite sechs Zahlen, von denen genau eine
  * irgendwohin führte — wer „4 ohne Ort" las, musste sich selbst zum Filter durchklicken. Für
  * jemanden, der zweimal im Jahr hier ist, ist das die halbe Bedienung.
  *
- * Zwei Zeilen zu drei Kacheln: oben der Bestand, unten die Arbeit. Nur „auf der Karte zu sehen"
- * führt nirgendwohin — es ist das Ergebnis, keine Aufgabe.
+ * Oben der Bestand, unter der Trennlinie der Betrieb: seit wann nicht gesichert, seit wann nichts
+ * aufgenommen, seit wann kein Besucher etwas beigetragen. Dieselben drei Spalten, damit die untere
+ * Zeile nicht „ungefähr", sondern durch dasselbe Raster bündig steht.
  */
 
 import { useCallback } from "react";
 
 import { type Selection, fetchOverview } from "../api/admin";
 import { t } from "../texte/de";
-import { formatDate } from "./format";
+import { formatDaysSince } from "./format";
 import { useLoaded } from "./useLoaded";
 
-/** Wohin eine Kachel führt. `filter` gilt nur für den Fotobereich. */
-export type Target = { section: "photos" | "moderation" | "backup"; filter?: Selection };
+/** Wohin eine Kachel führt. `filter` gilt nur für den Fotobereich, `kiosk` verlässt die Verwaltung. */
+export type Target = {
+  section: "photos" | "moderation" | "log" | "backup" | "kiosk";
+  filter?: Selection;
+};
 
 function Figure({
   label,
   value,
   muted,
+  overdue,
   onClick,
 }: {
   label: string;
   value: string;
   muted?: boolean;
+  /** Nur die Sicherungskachel: rot, sobald sie fällig ist. */
+  overdue?: boolean;
   onClick?: () => void;
 }) {
-  const className = muted ? "figure figure--muted" : "figure";
+  const className = [
+    "figure",
+    muted ? "figure--muted" : "",
+    overdue ? "figure--overdue" : "",
+    onClick ? "figure--link" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   const content = (
     <>
       <span className="figure__value">{value}</span>
@@ -42,7 +57,7 @@ function Figure({
   if (!onClick) return <div className={className}>{content}</div>;
 
   return (
-    <button type="button" className={`${className} figure--link`} onClick={onClick}>
+    <button type="button" className={className} onClick={onClick}>
       {content}
     </button>
   );
@@ -55,8 +70,6 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
   if (error) return <p className="admin__error">{error}</p>;
   if (!data) return null;
 
-  const lastImport = data.last_import_at ? formatDate(data.last_import_at) : t.admin.overview.never;
-
   return (
     <div className="overview">
       <div className="overview__figures">
@@ -65,7 +78,12 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
           value={String(data.total)}
           onClick={() => onNavigate({ section: "photos", filter: "all" })}
         />
-        <Figure label={t.admin.overview.onMap} value={String(data.on_map)} />
+        {/* Der einzige Weg hier heraus statt tiefer hinein -- derselbe wie „Verwaltung beenden". */}
+        <Figure
+          label={t.admin.overview.onMap}
+          value={String(data.on_map)}
+          onClick={() => onNavigate({ section: "kiosk" })}
+        />
         <Figure
           label={t.admin.overview.hidden}
           value={String(data.hidden)}
@@ -91,28 +109,26 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
         />
       </div>
 
-      <p className="admin__note">
-        {t.admin.overview.lastImport}: {lastImport}
-      </p>
+      <hr className="overview__rule" />
 
-      {/* Die Erinnerung an die Sicherung bleibt, wo sie war -- sie ist keine Zahl über den
-          Bestand, sondern eine Aufforderung. Rot, sobald sie fällig ist. */}
-      <button
-        type="button"
-        className={
-          data.backup.overdue
-            ? "button backup__reminder-button backup__reminder-button--overdue"
-            : "button backup__reminder-button"
-        }
-        onClick={() => onNavigate({ section: "backup" })}
-      >
-        {data.backup.last_backup_at
-          ? t.admin.backup.lastOn(
-              formatDate(data.backup.last_backup_at),
-              data.backup.days_since ?? 0,
-            )
-          : t.admin.backup.lastNever}
-      </button>
+      <div className="overview__figures">
+        <Figure
+          label={t.admin.overview.sinceBackup(data.backup.days_since)}
+          value={formatDaysSince(data.backup.days_since)}
+          overdue={data.backup.overdue}
+          onClick={() => onNavigate({ section: "backup" })}
+        />
+        <Figure
+          label={t.admin.overview.sinceImport(data.days_since_import)}
+          value={formatDaysSince(data.days_since_import)}
+          onClick={() => onNavigate({ section: "log" })}
+        />
+        <Figure
+          label={t.admin.overview.sinceChange(data.days_since_change)}
+          value={formatDaysSince(data.days_since_change)}
+          onClick={() => onNavigate({ section: "moderation" })}
+        />
+      </div>
     </div>
   );
 }

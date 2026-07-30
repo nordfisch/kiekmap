@@ -1,9 +1,9 @@
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
 from app.models import DatePrecision
-from app.services.dates import date_range, format_label, overlaps
+from app.services.dates import date_range, days_since, format_label, overlaps
 
 
 class TestZeitraum:
@@ -72,3 +72,40 @@ class TestUeberlappung:
     def test_undatiertes_foto_erscheint_in_keiner_auswahl(self):
         # Solche Fotos gehoeren in den "Hilf mit"-Bereich, nicht auf die Karte.
         assert not overlaps(None, None, date(1900, 1, 1), date(2000, 1, 1))
+
+
+class TestTageSeitdem:
+    """Kalendertage, nicht 24-Stunden-Bloecke -- die Uebersicht liest das Ergebnis als Satz vor."""
+
+    @staticmethod
+    def _gespeichert(zeitpunkt: datetime) -> datetime:
+        """Wie das Geraet einen Zeitpunkt ablegt: UTC, ohne Zeitzonenkennung."""
+        return zeitpunkt.astimezone(UTC).replace(tzinfo=None)
+
+    def test_gestern_mittag_ist_ein_tag_her(self):
+        """Der Fall, der in 24-Stunden-Bloecken still zur Null wird.
+
+        Zwanzig Stunden sind weniger als ein Tag -- gemeint ist trotzdem "gestern", und genau das
+        steht dann auf der Kachel.
+        """
+        heute_frueh = datetime.now().astimezone().replace(hour=8, minute=0, second=0, microsecond=0)
+        gestern_mittag = heute_frueh - timedelta(hours=20)
+
+        assert days_since(self._gespeichert(gestern_mittag), heute_frueh.astimezone(UTC)) == 1
+
+    def test_heute_ist_null(self):
+        jetzt = datetime.now().astimezone().replace(hour=14, minute=0, second=0, microsecond=0)
+        vorhin = jetzt - timedelta(hours=3)
+
+        assert days_since(self._gespeichert(vorhin), jetzt.astimezone(UTC)) == 0
+
+    def test_abends_gespeichertes_gehoert_noch_zum_selben_tag(self):
+        """Die Tagesgrenze ist die deutsche, nicht die von Greenwich.
+
+        Um 23:30 Uhr Ortszeit ist es in UTC schon der naechste Tag. Wer stur in UTC rechnet,
+        macht daraus einen Tag Unterschied.
+        """
+        spaet = datetime.now().astimezone().replace(hour=23, minute=30, second=0, microsecond=0)
+        kurz_danach = spaet + timedelta(minutes=15)
+
+        assert days_since(self._gespeichert(spaet), kurz_danach.astimezone(UTC)) == 0

@@ -8,7 +8,7 @@ Zwei Zusagen tragen diesen Bereich, und beide brechen still, wenn sie brechen:
      geschlossener Browser darf keine Uploads kosten.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
 from sqlalchemy import select
@@ -92,6 +92,52 @@ class TestUebersicht:
         # Auf der Karte: mit Ort, mit Jahr und nicht versteckt.
         assert daten["on_map"] == 1
         assert daten["hidden"] == 1
+
+    def test_zurueckgenommener_beitrag_zaehlt_nicht_mehr(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        """Die Kachel fuehrt in die Moderation -- sie darf nichts melden, was dort nicht steht.
+
+        Sonst stuende "Heute gab es einen Besucherbeitrag" ueber einer leeren Liste.
+        """
+        foto = make_photo(sha="a" * 64)
+        session.add(
+            Change(
+                photo_id=foto.id,
+                field="date",
+                old_value=None,
+                new_value="1932",
+                source=Source.VISITOR,
+                created_at=datetime.now(),
+                reverted_at=datetime.now(),
+            )
+        )
+        session.commit()
+
+        daten = admin_client.get("/api/admin/overview").json()
+
+        assert daten["visitor_changes"] == 0
+        assert daten["days_since_change"] is None
+
+    def test_offener_beitrag_datiert_die_kachel(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        foto = make_photo(sha="a" * 64)
+        session.add(
+            Change(
+                photo_id=foto.id,
+                field="date",
+                old_value=None,
+                new_value="1932",
+                source=Source.VISITOR,
+                created_at=datetime.now(UTC).replace(tzinfo=None),
+            )
+        )
+        session.commit()
+
+        daten = admin_client.get("/api/admin/overview").json()
+
+        assert daten["days_since_change"] == 0
 
 
 class TestFotoliste:
