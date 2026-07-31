@@ -75,6 +75,8 @@ button {
 
 /* --- title bar ----------------------------------------------------------- */
 
+/* Ohne Rahmenlinien zu den Nachbarfeldern. Die einzige Kante, die eine Aufgabe hat, ist der
+ * Papierton gegen die Karte -- alles andere machte aus einer Ausstellung ein Formular. */
 .app__title {
   grid-area: title;
   display: flex;
@@ -82,8 +84,6 @@ button {
   gap: 0.8rem;
   min-width: 0;
   padding: 0.75rem 1.25rem;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
 }
 
 .app__heading {
@@ -93,20 +93,29 @@ button {
 }
 
 /* Two lines: a small lead-in over the name of the village. The name is the thing people look for,
- * so it gets the size -- and it comes from region.json, not from here. */
-.app__heading-lead {
+ * so it gets the size -- and it comes from region.json, not from here.
+ *
+ * Die Groessen sind auf das Wappen abgestimmt: beide Zeilen zusammen ergeben mit dieser
+ * Zeilenhoehe rund 3,5 rem und stehen damit genau so hoch wie es. */
+.app__heading-place {
   display: block;
-  font-size: 0.95rem;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+
+/* Eine Gruppe, damit die beiden nicht wieder auseinanderlaufen: Die Einleitung ueber dem Ortsnamen
+ * und die Ueberschrift des Beitragsbereichs sollen gleich aussehen. */
+.app__heading-lead,
+.help-panel__title {
+  font-size: 1.15rem;
   font-weight: 400;
   color: var(--muted);
 }
 
-.app__heading-place {
+.app__heading-lead {
   display: block;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--accent);
-  overflow-wrap: anywhere;
 }
 
 /* Still a flex column, although it now holds only the map: `.map` needs a parent that hands it a
@@ -139,15 +148,13 @@ button {
   min-width: 0;
   padding: 1.25rem;
   overflow-y: auto;
-  border-right: 1px solid var(--line);
   background: var(--paper);
 }
 
+/* Groesse, Gewicht und Farbe kommen aus der Gruppe bei `.app__heading-lead` -- die beiden
+ * Ueberschriften der linken Spalte sollen gleich aussehen. */
 .help-panel__title {
   margin: 0 0 0.75rem;
-  font-size: 1.4rem;
-  letter-spacing: 0.02em;
-  color: var(--accent);
 }
 
 .help-panel__question {
@@ -476,7 +483,6 @@ button {
   gap: 0.35rem;
   min-width: 0;
   padding: 0.75rem 2.5rem 0.5rem;
-  border-bottom: 1px solid var(--line);
   background: var(--paper);
 }
 

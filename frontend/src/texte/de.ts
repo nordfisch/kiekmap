@@ -31,7 +31,7 @@ export const t = {
      * einzige Ort im Projekt, an dem „Holm" im Code stünde, ausgerechnet die größte Schrift
      * auf dem Bildschirm.
      */
-    titleLead: "Bilder aus unserem",
+    titleLead: "Bilder aus",
     loadingMap: "Karte wird geladen …",
   },
 
