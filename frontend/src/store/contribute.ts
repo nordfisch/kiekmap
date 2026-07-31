@@ -122,6 +122,9 @@ export const useContribute = create<ContributeState>((set, get) => {
     thanksTimer = setTimeout(() => {
       thanksTimer = null;
       set({ thanks: null });
+      // Karte und Zeitraum kehren zurueck, sobald der Dank verschwindet -- beide leben damit
+      // genau so lange wie er, ohne einen zweiten Zeitgeber.
+      useKiosk.getState().releaseFocus();
       void load(next);
     }, THANKS_MS);
   }
@@ -135,12 +138,16 @@ export const useContribute = create<ContributeState>((set, get) => {
 
     set({ loading: true, error: null });
     try {
-      await action(task.photo);
+      // Das Backend gibt das aktualisierte Foto zurueck -- Ort und Datierung kommen damit aus
+      // erster Hand, statt dass hier irgendetwas nachgeraten wird.
+      const updated = await action(task.photo);
       set({ loading: false, pin: null, pinLabel: null, pinAccuracy: null });
 
       // Map and timeline have to show it now. The thank-you note promises exactly that -- and
       // before this line it only came true once somebody happened to pan the map.
       useKiosk.getState().refresh();
+      // Und die Ansicht stellt sich auf dieses eine Foto ein, solange der Dank steht.
+      useKiosk.getState().showPhoto(updated);
 
       showThanks(thanksText, otherNeed(need));
     } catch (e) {

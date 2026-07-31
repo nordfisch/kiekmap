@@ -6,7 +6,7 @@
  * acquires data.
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { useContribute } from "../store/contribute";
 import { t } from "../texte/de";
@@ -28,8 +28,17 @@ export function HelpPanel() {
 
   const photo = task?.photo ?? null;
 
+  // Bei jedem Wechsel nach oben: neues Foto, andere Frage, Dank. Sonst bliebe der Bereich dort
+  // stehen, wo ihn der letzte Finger hingeschoben hat -- und die neue Frage staende ausserhalb
+  // des Bildes. Die Zwischenschritte einer Aufgabe ("Andere Strasse") lassen ihn stehen: dort
+  // bleibt der Blick ohnehin an derselben Stelle.
+  const panel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    panel.current?.scrollTo({ top: 0 });
+  }, [photo?.id, need, thanks]);
+
   return (
-    <aside className="help-panel">
+    <aside className="help-panel" ref={panel}>
       <h2 className="help-panel__title">{t.help.title}</h2>
 
       {thanks ? (

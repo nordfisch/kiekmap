@@ -15,11 +15,13 @@ import { create } from "zustand";
 import {
   type Bbox,
   type Histogram,
+  type PhotoDetail,
   type PhotoMarker,
   type TimeRange,
   fetchHistogram,
   fetchPhotos,
 } from "../api/client";
+import { boundsAround, rangeForPhoto } from "../kiosk/fokus";
 import { axisBounds, clampRange } from "../kiosk/zeitachse";
 
 /** How long the map has to stand still before loading. */
@@ -50,9 +52,24 @@ type KioskState = {
   /** Id of the photo shown full screen, or null. */
   openPhotoId: number | null;
 
+  /**
+   * Wohin die Karte für die Dauer des Dankes fährt, oder null.
+   *
+   * Die Karte gehört `MapView`, der Zustand diesem Store -- dies ist die Brücke dazwischen, wie
+   * beim Rücksprung nach Leerlauf. `seq` sorgt dafür, dass zweimal derselbe Ort auch zweimal
+   * auslöst.
+   */
+  focus: { lat: number; lon: number; bounds: [[number, number], [number, number]]; seq: number } | null;
+  /** Der Zeitraum, den der Besucher eingestellt hatte, bevor der Fokus ihn verstellt hat. */
+  rangeBefore: TimeRange | null;
+
   setViewport: (bbox: Bbox) => void;
   setTimeRange: (timeRange: TimeRange) => void;
   openPhoto: (id: number | null) => void;
+  /** Nach einem Beitrag: Karte und Zeitraum so stellen, dass dieses Foto zu sehen ist. */
+  showPhoto: (photo: PhotoDetail) => void;
+  /** Beides zusammen zurücknehmen -- am Ende des Dankes. */
+  releaseFocus: () => void;
   refresh: () => void;
   reset: () => void;
 };
@@ -161,6 +178,8 @@ export const useKiosk = create<KioskState>((set, get) => {
     loading: false,
     error: null,
     openPhotoId: null,
+    focus: null,
+    rangeBefore: null,
 
     setViewport(bbox) {
       if (sameViewport(get().bbox, bbox)) return;
@@ -183,6 +202,39 @@ export const useKiosk = create<KioskState>((set, get) => {
 
     openPhoto(id) {
       set({ openPhotoId: id });
+    },
+
+    /**
+     * Die Ansicht auf ein eben ergänztes Foto einstellen -- für die Dauer des Dankes.
+     *
+     * Karte und Zeitraum werden zusammen verstellt und von ``releaseFocus`` zusammen
+     * zurückgenommen. Ein Foto ohne Ort lässt beides in Ruhe: Es ist auf keiner Karte zu finden,
+     * und den Schieber zu verstellen würde nur andere Fotos ausblenden.
+     */
+    showPhoto(photo) {
+      const range = rangeForPhoto(photo, get().fullRange);
+      if (photo.lat === null || photo.lon === null) return;
+
+      set((state) => ({
+        focus: {
+          lat: photo.lat as number,
+          lon: photo.lon as number,
+          bounds: boundsAround(photo.lat as number, photo.lon as number),
+          seq: (state.focus?.seq ?? 0) + 1,
+        },
+        // Nur beim ersten Mal merken. Trägt jemand zweimal schnell hintereinander bei, würde der
+        // zweite Aufruf sonst den Zeitraum des ersten Fokus für "vorher" halten -- und der
+        // Besucher bekäme am Ende ein Jahrzehnt zurück, das er nie eingestellt hat.
+        rangeBefore: state.rangeBefore ?? state.timeRange,
+        timeRange: range ?? state.timeRange,
+      }));
+      void loadPhotos();
+    },
+
+    releaseFocus() {
+      const { rangeBefore } = get();
+      set({ focus: null, rangeBefore: null, ...(rangeBefore ? { timeRange: rangeBefore } : {}) });
+      if (rangeBefore) void loadPhotos();
     },
 
     /**
@@ -209,7 +261,9 @@ export const useKiosk = create<KioskState>((set, get) => {
     /** For the idle reset: back to the state the device should be in each morning. */
     reset() {
       const { fullRange } = get();
-      set({ openPhotoId: null, timeRange: fullRange });
+      // Fokus und gemerkter Zeitraum gehen mit: Sonst spielte ein Rücksprung mitten im Dank später
+      // einen Zeitraum zurück, den es längst nicht mehr gibt.
+      set({ openPhotoId: null, timeRange: fullRange, focus: null, rangeBefore: null });
       scheduleLoad();
     },
   };

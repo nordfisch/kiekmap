@@ -21,6 +21,7 @@ export function MapView({ region }: { region: Region }) {
   const container = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const setViewport = useKiosk((s) => s.setViewport);
+  const focus = useKiosk((s) => s.focus);
 
   useEffect(() => {
     if (!container.current) return;
@@ -91,6 +92,28 @@ export function MapView({ region }: { region: Region }) {
       map.easeTo({ center: region.center, zoom: region.defaultZoom, duration: 1500 });
     });
   }, [map, region]);
+
+  /**
+   * Nach einem Beitrag kurz zum Foto -- und danach wieder zurück.
+   *
+   * Die Rückfahrt steht in der Aufräumfunktion: React sagt hier ohnehin Bescheid, wenn der Fokus
+   * endet, und so kann die gemerkte Kamera gar nicht erst verlorengehen.
+   */
+  useEffect(() => {
+    if (!map || !focus) return;
+
+    const before = { center: map.getCenter(), zoom: map.getZoom() };
+    map.fitBounds(focus.bounds, { padding: 40, duration: 800 });
+
+    let disposed = false;
+    return () => {
+      // Derselbe Riegel wie beim "load"-Rückruf: eine bereits entfernte Karte darf nicht mehr
+      // bewegt werden.
+      if (disposed) return;
+      disposed = true;
+      map.easeTo({ ...before, duration: 800 });
+    };
+  }, [map, focus]);
 
   return (
     <div className="map">

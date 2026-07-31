@@ -87,3 +87,60 @@ describe("Leerlauf-Reset", () => {
     expect(useKiosk.getState().timeRange).toBeNull();
   });
 });
+
+describe("Fokus nach einem Beitrag", () => {
+  function machFoto(felder: Record<string, unknown>) {
+    return {
+      id: 1,
+      lat: 53.62,
+      lon: 9.676,
+      date_from: null,
+      // Der Rest interessiert showPhoto nicht.
+      ...felder,
+    } as never;
+  }
+
+  beforeEach(() => {
+    vi.mocked(fetchPhotos).mockResolvedValue({ photos: [], total: 0, truncated: false });
+    useKiosk.setState({
+      bbox: [9.6, 53.57, 9.75, 53.67],
+      fullRange: { from: 1920, to: 2019 },
+      timeRange: { from: 1950, to: 1959 },
+      focus: null,
+      rangeBefore: null,
+    });
+  });
+
+  it("stellt den Zeitraum auf das Jahrzehnt des Fotos", () => {
+    useKiosk.getState().showPhoto(machFoto({ date_from: "1932-01-01" }));
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 1930, to: 1939 });
+    expect(useKiosk.getState().focus).not.toBeNull();
+  });
+
+  it("gibt Karte und Zeitraum zusammen zurueck", () => {
+    useKiosk.getState().showPhoto(machFoto({ date_from: "1932-01-01" }));
+    useKiosk.getState().releaseFocus();
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 1950, to: 1959 });
+    expect(useKiosk.getState().focus).toBeNull();
+  });
+
+  it("gibt nach zwei Beitraegen den urspruenglichen Zeitraum zurueck", () => {
+    // Der Dank-Zeitgeber wird beim zweiten Beitrag neu gesetzt. Merkte sich der zweite Aufruf den
+    // Zeitraum des ersten Fokus, bekaeme der Besucher am Ende ein Jahrzehnt zurueck, das er nie
+    // eingestellt hat.
+    useKiosk.getState().showPhoto(machFoto({ date_from: "1932-01-01" }));
+    useKiosk.getState().showPhoto(machFoto({ id: 2, date_from: "1975-01-01" }));
+    useKiosk.getState().releaseFocus();
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 1950, to: 1959 });
+  });
+
+  it("laesst ein Foto ohne Ort die Ansicht nicht verstellen", () => {
+    useKiosk.getState().showPhoto(machFoto({ lat: null, lon: null, date_from: "1932-01-01" }));
+
+    expect(useKiosk.getState().focus).toBeNull();
+    expect(useKiosk.getState().timeRange).toEqual({ from: 1950, to: 1959 });
+  });
+});
