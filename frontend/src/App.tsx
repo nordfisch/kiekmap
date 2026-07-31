@@ -75,7 +75,7 @@ export function App() {
 
         <TimeSlider />
 
-        <HelpPanel region={region} />
+        <HelpPanel />
 
         <div className="app__map">
           <MapView region={region} />

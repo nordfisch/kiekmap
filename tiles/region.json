@@ -12,10 +12,6 @@
     "Ortskern. Beim Aufbau am echten Display nachjustieren; Nachkommastellen sind erlaubt.",
     "minZoom 13 zeigt den gesamten Ausschnitt auf einmal.",
     "",
-    "firstDecade/lastDecade bestimmen, welche Jahrzehnte im 'Hilf mit'-Bereich zur Auswahl stehen.",
-    "Das gehoert zur Sammlung, nicht zur Software: ein Museum, dessen aeltester Abzug von 1890 ist,",
-    "gewinnt nichts durch einen 1860er-Knopf. Weglassen heisst 1860 bis 1990.",
-    "",
     "Diese Datei ist alles, was ein anderer Ort anpassen muss. Siehe docs/adaption.md."
   ],
   "name": "Holm",
@@ -23,7 +19,5 @@
   "center": [9.67601, 53.62053],
   "defaultZoom": 14.8,
   "minZoom": 13,
-  "maxZoom": 15,
-  "firstDecade": 1860,
-  "lastDecade": 1990
+  "maxZoom": 15
 }

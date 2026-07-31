@@ -63,7 +63,7 @@ export const t = {
   help: {
     title: "Hilf mit",
     askLocation: "Wo ist das?",
-    askDate: "Von wann ist dieses Bild?",
+    askDate: "Wann war das?",
     photoAlt: "Foto, dem eine Angabe fehlt",
     allComplete: "Zurzeit ist alles vollständig. Vielen Dank an alle, die geholfen haben!",
     next: "Weiß ich nicht — nächstes Foto",

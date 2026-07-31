@@ -27,11 +27,14 @@ Nur eine Datei: [`tiles/region.json`](../tiles/region.json).
   "center": [lon, lat],
   "defaultZoom": 14.8,
   "minZoom": 13,
-  "maxZoom": 15,
-  "firstDecade": 1880,
-  "lastDecade": 1990
+  "maxZoom": 15
 }
 ```
+
+Die Datei beschreibt einen **Ort** und sonst nichts. Welche Jahrzehnte der „Hilf mit"-Bereich zur
+Auswahl stellt, stand hier einmal mit — das gehört aber zur Sammlung und ergibt sich inzwischen aus
+ihr: angeboten wird, was der Bestand umspannt, mindestens jedoch 1920er bis 2010er. Ein Museum, das
+später ein Foto von 1890 datiert, bekommt den 1890er-Knopf von selbst dazu.
 
 **Bounding Box ausrechnen.** Aus Mittelpunkt und gewünschtem Umkreis:
 

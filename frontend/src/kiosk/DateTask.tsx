@@ -11,21 +11,19 @@
 
 import { useMemo, useState } from "react";
 
-import { DEFAULT_DECADES, type Region } from "../region";
 import { useContribute } from "../store/contribute";
+import { useKiosk } from "../store/kiosk";
 import { t } from "../texte/de";
+import { offeredDecades } from "./jahrzehnte";
 
-export function DateTask({ region }: { region: Region }) {
+export function DateTask() {
   const submitDate = useContribute((s) => s.submitDate);
   const loading = useContribute((s) => s.loading);
+  const collection = useKiosk((s) => s.fullRange);
   const [decade, setDecade] = useState<number | null>(null);
 
-  // Which decades to offer belongs to the collection, not to the software -- see region.json.
-  const decades = useMemo(() => {
-    const first = region.firstDecade ?? DEFAULT_DECADES.first;
-    const last = region.lastDecade ?? DEFAULT_DECADES.last;
-    return Array.from({ length: (last - first) / 10 + 1 }, (_, i) => first + i * 10);
-  }, [region.firstDecade, region.lastDecade]);
+  // Was zur Wahl steht, ergibt sich aus dem Bestand -- siehe kiosk/jahrzehnte.ts.
+  const decades = useMemo(() => offeredDecades(collection), [collection]);
 
   if (decade === null) {
     return (
