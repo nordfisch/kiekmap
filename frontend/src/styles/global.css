@@ -20,7 +20,11 @@
    * collapses to zero below roughly 600 px -- the panel refuses to give way and squeezes it out
    * entirely. */
   --sidebar-width: clamp(16rem, 22%, 28rem);
-  --timeline-height: 9rem;
+
+  /* Der Abstand, der die Ansicht zusammenhaelt: seitlich zwischen Beitragsbereich und Karte,
+   * senkrecht zwischen der oberen Zeile und der Karte darunter. Eine Zahl, damit beide gleich
+   * sind. */
+  --gap: 1.25rem;
 
   /* Hoehe des Wappens -- und zugleich die des Titels daneben, der sich daraus ableitet. Sie ist so
    * bemessen, dass beide zusammen genau so hoch stehen wie der Zeitschieber von seiner ersten
@@ -78,7 +82,10 @@ button {
 .app {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
-  grid-template-rows: var(--timeline-height) 1fr;
+  /* Die obere Zeile misst sich an ihrem Inhalt statt an einer geratenen Hoehe. Damit ist der
+   * Abstand zur Karte das, was die beiden Zellen unten an Polster mitbringen -- und nicht der
+   * Rest, der von einer festen Zeilenhoehe uebrigbleibt. */
+  grid-template-rows: auto 1fr;
   grid-template-areas:
     "title timeline"
     "help  map";
@@ -103,7 +110,7 @@ button {
   align-items: flex-start;
   gap: 0.8rem;
   min-width: 0;
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1.25rem var(--gap);
 }
 
 .app__heading {
@@ -177,7 +184,7 @@ button {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 0 1.25rem 1.25rem;
+  padding: 0 var(--gap) var(--gap);
   overflow-y: auto;
   background: var(--paper);
 }
@@ -559,7 +566,7 @@ button {
   justify-content: flex-start;
   gap: 0.35rem;
   min-width: 0;
-  padding: 0.75rem 2.5rem 0.5rem;
+  padding: 0.75rem 2.5rem var(--gap);
   background: var(--paper);
 }
 
