@@ -146,6 +146,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Karte aus; neben dem Wappen steht „Bilder aus" über dem Ortsnamen. Wappen und Titel stehen
   zusammen so hoch wie der Zeitschieber daneben — von seiner ersten Zeile bis zur Jahresskala —,
   und ihre Oberkanten fluchten. „Hilf mit:" beginnt auf derselben Höhe wie die Karte
+- „Weiß ich nicht — nächstes Foto" verschwindet, wenn es die letzte offene Aufgabe ist: Es gäbe
+  kein nächstes, dasselbe Foto käme zurück. Der Task-Endpunkt zählt dafür auch die andere Frage mit
+- Ist gar nichts mehr zu ergänzen, fällt der „Hilf mit"-Bereich ganz weg und die **Karte nimmt die
+  volle Breite**. Eine Erfolgsmeldung, die monatelang dasteht, ist kein Inhalt — die Fotos sind es
 - Der Leerlauf nach fünf Minuten **lädt die Seite neu**, statt nur den Zustand zurückzusetzen. Im
   Kiosk gibt es keine Browser-Bedienung: kein Reload-Knopf, keine Adressleiste, keine Tastatur —
   ein verhakter Zustand bliebe sonst bis zum Netzstecker stehen. Dazu ein Knopf „Anzeige neu

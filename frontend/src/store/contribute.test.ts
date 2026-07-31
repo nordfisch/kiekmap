@@ -26,10 +26,11 @@ const fotosGeholt = vi.mocked(fetchPhotos);
 const histogrammGeholt = vi.mocked(fetchHistogram);
 const ortGesendet = vi.mocked(postLocation);
 
-function aufgabe(need: Need, fotoId: number | null, offen = 3): Task {
+function aufgabe(need: Need, fotoId: number | null, offen = 3, andere = 3): Task {
   return {
     need,
     open_count: fotoId === null ? 0 : offen,
+    open_other: andere,
     photo: fotoId === null ? null : ({ id: fotoId, title: `Foto ${fotoId}` } as PhotoDetail),
   };
 }

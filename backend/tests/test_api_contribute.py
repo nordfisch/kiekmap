@@ -342,3 +342,30 @@ class TestOrtsverzeichnisLaden:
         from app.services.places import load_from_file
 
         assert load_from_file(session, settings.data_dir / "gibtsnicht.json") == 0
+
+
+class TestLetzteAufgabe:
+    def test_zaehlt_auch_die_andere_frage(self, client: TestClient, session, make_photo):
+        """Davon haengt ab, ob "Weiss ich nicht" ueberhaupt noch irgendwohin fuehrt.
+
+        Ist sonst nichts offen, kaeme dasselbe Foto zurueck -- dann steht der Knopf besser gar
+        nicht da.
+        """
+        make_photo(lat=None, lon=None, sha="a" * 64)
+        make_photo(year=None, sha="b" * 64)
+        make_photo(year=None, sha="c" * 64)
+        session.commit()
+
+        daten = client.get("/api/contribute/next", params={"need": "location"}).json()
+
+        assert daten["open_count"] == 1, "ein Foto ohne Ort"
+        assert daten["open_other"] == 2, "zwei ohne Jahr"
+
+    def test_letzte_aufgabe_hat_nichts_daneben(self, client: TestClient, session, make_photo):
+        make_photo(lat=None, lon=None, sha="a" * 64)
+        session.commit()
+
+        daten = client.get("/api/contribute/next", params={"need": "location"}).json()
+
+        assert daten["open_count"] == 1
+        assert daten["open_other"] == 0

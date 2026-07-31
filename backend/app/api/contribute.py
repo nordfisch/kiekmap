@@ -51,6 +51,18 @@ def next_task(
     filters = [Photo.status == PhotoStatus.PUBLISHED, _missing_filter(need)]
     open_count = session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
 
+    # Auch die andere Frage zaehlen: Danach entscheidet der Bildschirm, ob "Weiss ich nicht"
+    # ueberhaupt noch irgendwohin fuehrt. Ist sonst nichts mehr offen, kaeme dasselbe Foto zurueck.
+    other: Need = "date" if need == "location" else "location"
+    open_other = (
+        session.scalar(
+            select(func.count())
+            .select_from(Photo)
+            .where(Photo.status == PhotoStatus.PUBLISHED, _missing_filter(other))
+        )
+        or 0
+    )
+
     query = select(Photo).where(*filters)
     if skipped:
         query = query.where(Photo.id.notin_(skipped))
@@ -65,6 +77,7 @@ def next_task(
     return TaskResponse(
         need=need,
         open_count=open_count,
+        open_other=open_other,
         photo=PhotoDetail.from_photo(photo) if photo else None,
     )
 

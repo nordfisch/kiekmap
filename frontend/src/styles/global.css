@@ -85,6 +85,14 @@ button {
   height: 100%;
 }
 
+/* Ist nichts mehr zu ergaenzen, verschwindet die linke Spalte und die Karte nimmt die volle
+ * Breite. Eine Erfolgsmeldung, die monatelang dasteht, ist kein Inhalt -- die Fotos sind es. */
+.app--complete {
+  grid-template-areas:
+    "title timeline"
+    "map   map";
+}
+
 /* --- title bar ----------------------------------------------------------- */
 
 /* Ohne Rahmenlinien zu den Nachbarfeldern. Die einzige Kante, die eine Aufgabe hat, ist der

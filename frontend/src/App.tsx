@@ -9,6 +9,7 @@ import { PhotoOverlay } from "./kiosk/PhotoOverlay";
 import { TimeSlider } from "./kiosk/TimeSlider";
 import { type Region, loadRegion } from "./region";
 import { useAdmin } from "./store/admin";
+import { useContribute } from "./store/contribute";
 import { useKiosk } from "./store/kiosk";
 import { t } from "./texte/de";
 
@@ -26,6 +27,9 @@ function MapNotice() {
 
 export function App() {
   const [region, setRegion] = useState<Region | null>(null);
+  // Alles vollständig heisst: eine Aufgabe wurde geholt und es gab keine. Der Dank zaehlt noch
+  // nicht dazu -- er soll zu Ende stehen duerfen, bevor die Spalte verschwindet.
+  const complete = useContribute((s) => s.task !== null && s.task.photo === null && !s.thanks);
   const [error, setError] = useState<string | null>(null);
   const view = useAdmin((s) => s.view);
   const restore = useAdmin((s) => s.restore);
@@ -64,7 +68,7 @@ export function App() {
        *
        * The slider still sits directly above the map it filters, and the arms head the panel
        * rather than covering the map. The grid itself is in styles/global.css. */}
-      <div className="app">
+      <div className={complete ? "app app--complete" : "app"}>
         <header className="app__title">
           <AdminGate regionName={region.name} />
           <h1 className="app__heading">
@@ -75,7 +79,9 @@ export function App() {
 
         <TimeSlider />
 
-        <HelpPanel />
+        {/* Ist alles vollständig, fällt die Spalte ganz weg statt eine Erfolgsmeldung
+            stehenzulassen -- und die Karte bekommt die Breite. */}
+        {!complete && <HelpPanel />}
 
         <div className="app__map">
           <MapView region={region} />

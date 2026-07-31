@@ -75,6 +75,8 @@ export type Task = {
   need: Need;
   /** How many photos of this kind are still open. It motivates. */
   open_count: number;
+  /** Offene Aufgaben der anderen Frage -- sagt, ob „Weiß ich nicht" noch irgendwohin führt. */
+  open_other: number;
   /** null means nothing is missing any more. A pleasant state. */
   photo: PhotoDetail | null;
 };

@@ -88,9 +88,13 @@ export function HelpPanel() {
 
           {need === "location" ? <LocationTask /> : <DateTask />}
 
-          <button type="button" className="button button--quiet help-panel__next" onClick={skip}>
-            {t.help.next}
-          </button>
+          {/* Ist dies die letzte offene Aufgabe, fuehrt "Weiss ich nicht" nirgendwohin -- dasselbe
+              Foto kaeme zurueck. Dann steht der Knopf besser gar nicht da. */}
+          {task && (task.open_count > 1 || task.open_other > 0) && (
+            <button type="button" className="button button--quiet help-panel__next" onClick={skip}>
+              {t.help.next}
+            </button>
+          )}
 
           {task && task.open_count > 1 && (
             <p className="help-panel__open">{t.help.stillOpen(task.open_count, need)}</p>

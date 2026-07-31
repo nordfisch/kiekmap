@@ -178,6 +178,9 @@ class TaskResponse(BaseModel):
     need: str
     #: Shown in the panel: "noch 214 Fotos ohne Ort". It motivates.
     open_count: int
+    #: Open tasks of the *other* kind. Tells the panel whether "Weiß ich nicht" still leads
+    #: anywhere -- with nothing else left, the same photo would simply come back.
+    open_other: int
     #: None means nothing is missing any more. A pleasant state.
     photo: PhotoDetail | None
 
