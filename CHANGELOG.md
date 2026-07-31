@@ -165,6 +165,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   in voller Größe
 - Fotos an derselben Stelle stehen als **ein** Marker mit Anzahl auf der Karte und lassen sich im
   Vollbild durchblättern. Die Kartenabfrage sortiert dafür nach dem zuletzt bearbeiteten Foto
+- Ein Kreis auf der Karte nennt die Zahl der **Fotos**, nicht die der Stellen: Über einem
+  Achterstapel und zwei Einzelbildern steht jetzt 10 statt 3
 - Unter den sechs Zahlen der Übersicht steht jetzt eine Trennlinie und darunter, in denselben drei
   Spalten, der Betrieb: Tage seit der letzten Sicherung, seit dem neuesten Import und seit dem
   jüngsten Besucherbeitrag. Die Sicherungskachel ersetzt den bisherigen Erinnerungsknopf und wird

@@ -25,19 +25,31 @@ const CLUSTER_MAXZOOM = 17;
 
 type PhotoProps = { stack: Stack };
 
-/** getClusters returns merged groups and single photos mixed together. */
-type Group = Supercluster.PointFeature<PhotoProps | Supercluster.ClusterProperties>;
+/**
+ * Was ein Kreis zusammenfasst.
+ *
+ * Nicht die Anzahl der Punkte, sondern die der **Fotos**: Ein Stapel ist für supercluster ein
+ * einziger Punkt (siehe stapel.ts), und ein Kreis über einem Achterstapel und zwei Einzelbildern
+ * hätte sonst eine 3 getragen statt einer 10.
+ */
+type ClusterProps = Supercluster.ClusterProperties & { photos: number };
 
-function isCluster(
-  group: Group,
-): group is Supercluster.PointFeature<Supercluster.ClusterProperties> {
+/** getClusters returns merged groups and single photos mixed together. */
+type Group = Supercluster.PointFeature<PhotoProps | ClusterProps>;
+
+function isCluster(group: Group): group is Supercluster.PointFeature<ClusterProps> {
   return "cluster" in group.properties && group.properties.cluster;
 }
 
-function buildIndex(photos: PhotoMarker[]): Supercluster<PhotoProps> {
-  const index = new Supercluster<PhotoProps>({
+export function buildIndex(photos: PhotoMarker[]): Supercluster<PhotoProps, ClusterProps> {
+  const index = new Supercluster<PhotoProps, ClusterProps>({
     radius: CLUSTER_RADIUS,
     maxZoom: CLUSTER_MAXZOOM,
+    // Beim Zusammenfassen die Fotos zaehlen, nicht die Punkte.
+    map: (props) => ({ photos: props.stack.photos.length }) as ClusterProps,
+    reduce: (summe, props) => {
+      summe.photos += props.photos;
+    },
   });
   // Vor dem Clustern gruppiert: supercluster bekommt keine Dubletten zu sehen, und ein Stapel
   // bleibt auf jeder Zoomstufe ein Marker. Siehe stapel.ts.
@@ -137,7 +149,7 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
         const [lon, lat] = group.geometry.coordinates as [number, number];
 
         if (isCluster(group)) {
-          const { cluster_id: clusterId, point_count: count } = group.properties;
+          const { cluster_id: clusterId, photos: count } = group.properties;
           const element = clusterElement(count, () => {
             // Zoom in far enough for this group to dissolve.
             map.easeTo({
