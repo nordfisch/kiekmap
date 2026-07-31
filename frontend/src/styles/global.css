@@ -80,7 +80,7 @@ button {
 .app__title {
   grid-area: title;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.8rem;
   min-width: 0;
   padding: 0.75rem 1.25rem;
@@ -141,12 +141,13 @@ button {
 
 /* --- "Hilf mit" panel ---------------------------------------------------- */
 
+/* Ohne Abstand nach oben: "Hilf mit:" beginnt damit auf derselben Hoehe wie die Karte daneben. */
 .help-panel {
   grid-area: help;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 1.25rem;
+  padding: 0 1.25rem 1.25rem;
   overflow-y: auto;
   background: var(--paper);
 }
@@ -517,11 +518,15 @@ button {
 
 /* --- time slider --------------------------------------------------------- */
 
+/* Oben ausgerichtet, nicht mittig: So liegt die erste Zeile des Schiebers auf derselben Hoehe wie
+ * das Wappen nebenan -- beide beginnen bei `padding-top`. Zentriert waere ihre Lage ein
+ * Rechenergebnis aus der Inhaltshoehe und veraenderte sich, sobald der Kopf des Schiebers anders
+ * aussieht. */
 .timeline {
   grid-area: timeline;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.35rem;
   min-width: 0;
   padding: 0.75rem 2.5rem 0.5rem;
