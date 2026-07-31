@@ -9,6 +9,7 @@
 import { useEffect, useRef } from "react";
 
 import { useContribute } from "../store/contribute";
+import { useKiosk } from "../store/kiosk";
 import { t } from "../texte/de";
 import { DateTask } from "./DateTask";
 import { LocationTask } from "./LocationTask";
@@ -58,12 +59,22 @@ export function HelpPanel() {
             {need === "location" ? t.help.askLocation : t.help.askDate}
           </p>
 
-          <img
-            className="help-panel__image"
-            src={photo.thumb_url}
-            alt={photo.title ?? t.help.photoAlt}
-            style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
-          />
+          {/* Genauer hinsehen ist das, was jemand tut, bevor er sagt, wo das war -- auf einem
+              160 px breiten Bild ist ein Hof kaum zu erkennen. Derselbe Weg wie beim Tippen auf
+              einen Marker, samt Schliessen per Tipp daneben, Knopf oder Escape. */}
+          <button
+            type="button"
+            className="help-panel__zoom"
+            aria-label={t.help.enlarge}
+            onClick={() => useKiosk.getState().openPhoto(photo.id)}
+          >
+            <img
+              className="help-panel__image"
+              src={photo.thumb_url}
+              alt={photo.title ?? t.help.photoAlt}
+              style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
+            />
+          </button>
 
           <div className="help-panel__known">
             {photo.title && <span className="help-panel__photo-title">{photo.title}</span>}

@@ -164,7 +164,22 @@ button {
   line-height: 1.25;
 }
 
+/* Der Knopf um das Bild bleibt unsichtbar: Es soll ein Bild bleiben, kein Knopf werden. Nur beim
+ * Antippen gibt es eine Rückmeldung, wie beim Wappen. */
+.help-panel__zoom {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.help-panel__zoom:active {
+  transform: translateY(1px);
+}
+
 .help-panel__image {
+  display: block;
   width: 100%;
   max-height: 30vh;
   object-fit: contain;

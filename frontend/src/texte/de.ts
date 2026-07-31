@@ -70,6 +70,7 @@ export const t = {
     askLocation: "Wo ist das?",
     askDate: "Wann war das?",
     photoAlt: "Foto, dem eine Angabe fehlt",
+    enlarge: "Foto groß anzeigen",
     allComplete: "Zurzeit ist alles vollständig. Vielen Dank an alle, die geholfen haben!",
     next: "Weiß ich nicht — nächstes Foto",
     stillOpen: (count: number, need: "location" | "date") =>
