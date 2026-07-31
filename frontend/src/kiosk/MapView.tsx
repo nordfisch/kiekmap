@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Bbox } from "../api/client";
 import type { Region } from "../region";
-import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { PhotoLayer } from "./PhotoLayer";
 import { PinLayer } from "./PinLayer";
@@ -81,17 +80,20 @@ export function MapView({ region }: { region: Region }) {
     };
   }, [region, setViewport]);
 
-  // Back to the state the device should be in each morning. The map is part of it, and only this
-  // component can move it -- so the idle watch lives here rather than in a store.
+  /**
+   * Back to the state the device should be in each morning.
+   *
+   * Nach fünf Minuten ohne Berührung wird die Seite **neu geladen**, nicht nur zurückgesetzt. Im
+   * Kiosk gibt es keine Browser-Bedienung — kein Reload-Knopf, keine Adressleiste, keine Tastatur
+   * (`--kiosk` unter cage, siehe deploy/pi/photomap-kiosk). Ein verhakter Zustand bliebe sonst bis
+   * zum nächsten Netzstecker stehen. So heilt sich das Gerät selbst, und niemand muss davon wissen.
+   *
+   * Es kostet nichts: Die Kacheln liegen im Cache, und ohne Besucher stört das Nachladen keinen.
+   */
   useEffect(() => {
     if (!map) return;
-
-    return watchForIdle(window, IDLE_MS, () => {
-      useKiosk.getState().reset();
-      useContribute.getState().reset();
-      map.easeTo({ center: region.center, zoom: region.defaultZoom, duration: 1500 });
-    });
-  }, [map, region]);
+    return watchForIdle(window, IDLE_MS, () => window.location.reload());
+  }, [map]);
 
   /**
    * Die Kamera merken, solange ein Fokus läuft — und am Ende dorthin zurückfahren.

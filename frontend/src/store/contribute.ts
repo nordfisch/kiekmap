@@ -73,7 +73,6 @@ type ContributeState = {
   ) => void;
   submitLocation: () => Promise<void>;
   submitDate: (year: number, precision: Precision) => Promise<void>;
-  reset: () => void;
 };
 
 let abort: AbortController | null = null;
@@ -230,14 +229,6 @@ export const useContribute = create<ContributeState>((set, get) => {
         (photo) => postDate(photo.id, { year, precision, session_id: SESSION_ID }),
         t.help.thanksDate,
       );
-    },
-
-    /** For the idle reset: forget everything and start over. */
-    reset() {
-      if (thanksTimer) clearTimeout(thanksTimer);
-      thanksTimer = null;
-      set({ skipped: [], pin: null, pinLabel: null, pinAccuracy: null, thanks: null, error: null });
-      void load("location");
     },
   };
 });

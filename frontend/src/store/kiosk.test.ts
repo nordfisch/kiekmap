@@ -5,7 +5,7 @@ vi.mock("../api/client", () => ({
   fetchHistogram: vi.fn(),
 }));
 
-import { fetchHistogram, fetchPhotos } from "../api/client";
+import { fetchPhotos } from "../api/client";
 import { queryTimeFilter, sameViewport, useKiosk } from "./kiosk";
 
 describe("queryTimeFilter", () => {
@@ -45,47 +45,6 @@ describe("sameViewport", () => {
   it("kommt mit fehlendem Ausschnitt zurecht", () => {
     expect(sameViewport(null, [...bbox])).toBe(false);
     expect(sameViewport(null, null)).toBe(true);
-  });
-});
-
-describe("Leerlauf-Reset", () => {
-  beforeEach(() => {
-    vi.mocked(fetchPhotos).mockResolvedValue({ photos: [], total: 0, truncated: false });
-    vi.mocked(fetchHistogram).mockResolvedValue({
-      decades: [],
-      undated: 0,
-      collection_from: null,
-      collection_to: null,
-    });
-    useKiosk.setState({
-      bbox: [9.6, 53.57, 9.75, 53.67],
-      fullRange: { from: 1860, to: 1990 },
-      timeRange: { from: 1930, to: 1939 },
-      openStack: [42],
-      openIndex: 0,
-    });
-  });
-
-  it("schliesst das offene Foto", () => {
-    // Sonst steht morgens das Bild des letzten Besuchers vom Vorabend ueber der Karte.
-    useKiosk.getState().reset();
-
-    expect(useKiosk.getState().openStack).toEqual([]);
-  });
-
-  it("gibt den ganzen Zeitraum wieder frei", () => {
-    useKiosk.getState().reset();
-
-    expect(useKiosk.getState().timeRange).toEqual({ from: 1860, to: 1990 });
-  });
-
-  it("kommt ohne bekannte Spanne zurecht", () => {
-    // Vor der ersten Histogramm-Antwort gibt es keine. Ein Absturz waere hier besonders bitter:
-    // niemand sieht ihn, das Geraet bleibt einfach stehen.
-    useKiosk.setState({ fullRange: null });
-
-    expect(() => useKiosk.getState().reset()).not.toThrow();
-    expect(useKiosk.getState().timeRange).toBeNull();
   });
 });
 

@@ -88,7 +88,6 @@ type KioskState = {
   /** Beides zusammen zurücknehmen -- am Ende des Dankes. */
   releaseFocus: () => void;
   refresh: () => void;
-  reset: () => void;
 };
 
 let photoAbort: AbortController | null = null;
@@ -291,15 +290,6 @@ export const useKiosk = create<KioskState>((set, get) => {
       if (!bbox) return;
       void loadPhotos();
       void loadHistogram(bbox);
-    },
-
-    /** For the idle reset: back to the state the device should be in each morning. */
-    reset() {
-      const { fullRange } = get();
-      // Fokus und gemerkter Zeitraum gehen mit: Sonst spielte ein Rücksprung mitten im Dank später
-      // einen Zeitraum zurück, den es längst nicht mehr gibt.
-      set({ openStack: [], openIndex: 0, timeRange: fullRange, focus: null, rangeBefore: null });
-      scheduleLoad();
     },
   };
 });

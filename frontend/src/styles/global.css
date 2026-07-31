@@ -22,6 +22,12 @@
   --sidebar-width: clamp(16rem, 22%, 28rem);
   --timeline-height: 9rem;
 
+  /* Hoehe des Wappens -- und zugleich die des Titels daneben, der sich daraus ableitet. Sie ist so
+   * bemessen, dass beide zusammen genau so hoch stehen wie der Zeitschieber von seiner ersten
+   * Zeile bis zur Jahresskala. Auf schmalen Schirmen eine Stufe kleiner: Sonst braeche der
+   * Ortsname um, und der Titelbereich liefe aus seiner Zeile. */
+  --crest: 6.2rem;
+
   --paper: #faf8f4;
   --ink: #2b2723;
   --muted: #6f6862;
@@ -31,6 +37,12 @@
 
   /* At a large display the visitor stands rather than sits -- everything a notch larger. */
   font-size: 18px;
+}
+
+@media (max-width: 85rem) {
+  :root {
+    --crest: 4rem;
+  }
 }
 
 * {
@@ -95,27 +107,37 @@ button {
 /* Two lines: a small lead-in over the name of the village. The name is the thing people look for,
  * so it gets the size -- and it comes from region.json, not from here.
  *
- * Die Groessen sind auf das Wappen abgestimmt: beide Zeilen zusammen ergeben mit dieser
- * Zeilenhoehe rund 3,5 rem und stehen damit genau so hoch wie es. */
+ * Die Groessen sind auf den Zeitschieber abgestimmt: Beide Zeilen zusammen ergeben mit dieser
+ * Zeilenhoehe rund 6,2 rem und stehen damit genau so hoch wie der Schieber nebenan, von seiner
+ * ersten Zeile bis zur Jahresskala. Das Wappen misst dasselbe. */
+.app__heading-lead,
 .app__heading-place {
   display: block;
-  font-size: 1.9rem;
-  font-weight: 700;
-  color: var(--accent);
-  overflow-wrap: anywhere;
 }
 
-/* Eine Gruppe, damit die beiden nicht wieder auseinanderlaufen: Die Einleitung ueber dem Ortsnamen
- * und die Ueberschrift des Beitragsbereichs sollen gleich aussehen. */
-.app__heading-lead,
-.help-panel__title {
-  font-size: 1.15rem;
+/* Die beiden Faktoren ergeben mit der Zeilenhoehe 1,15 zusammen genau `--crest` -- die
+ * Hoehengleichheit mit Wappen und Zeitschieber gilt damit in jeder Stufe, nicht nur in einer. */
+.app__heading-lead {
+  font-size: calc(var(--crest) * 0.323);
   font-weight: 400;
   color: var(--muted);
 }
 
-.app__heading-lead {
-  display: block;
+.app__heading-place {
+  font-size: calc(var(--crest) * 0.54);
+  font-weight: 700;
+  color: var(--accent);
+  /* Notnagel fuer sehr lange Ortsnamen: lieber im Wort umbrechen als aus der Spalte laufen. */
+  overflow-wrap: anywhere;
+}
+
+/* Sieht aus wie "Bilder aus", ist aber nicht mehr an dessen Groesse gebunden: Das eine ist der Kopf
+ * des Geraets, das andere die Ueberschrift einer Spalte. Waere es gekoppelt, stuende hier eine
+ * 2-rem-Zeile ueber einer Frage von 1,25 rem. */
+.help-panel__title {
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--muted);
 }
 
 /* Still a flex column, although it now holds only the map: `.map` needs a parent that hands it a

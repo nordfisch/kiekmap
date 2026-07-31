@@ -17,8 +17,9 @@
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
+  /* So hoch wie der Zeitschieber nebenan und wie der Titel daneben -- siehe global.css. */
+  width: var(--crest, 6.2rem);
+  height: var(--crest, 6.2rem);
   padding: 0;
   border: none;
   border-radius: 8px;
@@ -443,6 +444,20 @@ select.field__input {
 
 .figure--overdue .figure__value {
   color: #a33;
+}
+
+/* Der Notausgang, wenn die Besucheransicht klemmt. Unten und still: Er wird selten gebraucht, und
+ * wer ihn sucht, sucht ihn hier. */
+.overview__repair {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.overview__repair .button {
+  width: auto;
+  min-width: 14rem;
+  margin: 0;
 }
 
 /* Trennt den Bestand oben vom Betrieb unten. Beide Zeilen benutzen dasselbe Raster, damit die

@@ -13,6 +13,7 @@
 import { useCallback } from "react";
 
 import { type Selection, fetchOverview } from "../api/admin";
+import { useAdmin } from "../store/admin";
 import { t } from "../texte/de";
 import { formatDaysSince } from "./format";
 import { useLoaded } from "./useLoaded";
@@ -65,6 +66,13 @@ function Figure({
 
 export function Overview({ onNavigate }: { onNavigate: (target: Target) => void }) {
   const { data, error, loading } = useLoaded(useCallback(() => fetchOverview(), []));
+  const leave = useAdmin((s) => s.leave);
+
+  /** Abmelden und neu laden: Danach steht die Besucheransicht frisch da. */
+  async function reload() {
+    await leave();
+    window.location.reload();
+  }
 
   if (loading && !data) return <p className="admin__note">{t.admin.loading}</p>;
   if (error) return <p className="admin__error">{error}</p>;
@@ -128,6 +136,17 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
           value={formatDaysSince(data.days_since_change)}
           onClick={() => onNavigate({ section: "moderation" })}
         />
+      </div>
+
+      {/* Im Kiosk gibt es keine Browser-Bedienung -- kein Reload-Knopf, keine Adressleiste, keine
+          Tastatur. Ohne diesen Knopf bliebe bei einer verhakten Anzeige nur der Netzstecker (oder
+          fünf Minuten warten, bis der Leerlauf neu lädt). Er meldet zugleich ab, damit danach die
+          Besucheransicht dasteht und nicht die Verwaltung. */}
+      <div className="overview__repair">
+        <button type="button" className="button" onClick={() => void reload()}>
+          {t.admin.overview.reload}
+        </button>
+        <p className="admin__note">{t.admin.overview.reloadHint}</p>
       </div>
     </div>
   );

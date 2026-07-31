@@ -155,5 +155,10 @@ Zuerst: Steckt der Stecker, ist der Bildschirm an? Wenn ja, hilft meist ein Neus
 ausschalten, zehn Sekunden warten, wieder einschalten. Nach etwa zwanzig Sekunden sollte die Karte
 von allein erscheinen.
 
+**Hakt die Anzeige nur, ohne dass der Bildschirm schwarz ist**, geht es sanfter: Verwaltung →
+**„Anzeige neu laden"** ganz unten auf der Startseite. Das dauert einen Augenblick und ändert am
+Bestand nichts. Von allein passiert dasselbe, sobald das Gerät fünf Minuten unberührt bleibt —
+über Nacht steht es also morgens ohnehin frisch da.
+
 Bleibt es dabei, hilft nur jemand mit Zugang zum Gerät weiter. Was er wissen muss, steht in
 [betrieb.md](betrieb.md).

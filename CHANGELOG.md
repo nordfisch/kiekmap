@@ -143,8 +143,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Nach dem Import gilt für beide Wege dieselbe Regel: bis 30 Bilder die Nacharbeits-Tabelle,
   darüber die Zusammenfassung mit einem Sprung in die Liste „Ohne Ort"
 - Die Besucheransicht kommt ohne Trennlinien zwischen Titel, Zeitschieber, Beitragsbereich und
-  Karte aus; neben dem Wappen steht „Bilder aus" über dem Ortsnamen, beide Zeilen zusammen so hoch
-  wie das Wappen. „Hilf mit" ist genauso gesetzt wie „Bilder aus"
+  Karte aus; neben dem Wappen steht „Bilder aus" über dem Ortsnamen. Wappen und Titel stehen
+  zusammen so hoch wie der Zeitschieber daneben — von seiner ersten Zeile bis zur Jahresskala —,
+  und ihre Oberkanten fluchten. „Hilf mit:" beginnt auf derselben Höhe wie die Karte
+- Der Leerlauf nach fünf Minuten **lädt die Seite neu**, statt nur den Zustand zurückzusetzen. Im
+  Kiosk gibt es keine Browser-Bedienung: kein Reload-Knopf, keine Adressleiste, keine Tastatur —
+  ein verhakter Zustand bliebe sonst bis zum Netzstecker stehen. Dazu ein Knopf „Anzeige neu
+  laden" in der Verwaltung, für den Fall, dass jemand danebensteht
 - Die Zeitachse zeigt immer den ganzen Bestand, die Balken darunter den sichtbaren Ausschnitt.
   Damit bedeutet dieselbe Stelle des Schiebers immer dasselbe Jahr — und eine leere Achse mit einem
   einzelnen Balken sagt, dass es hier nur Fotos aus diesem Jahrzehnt gibt

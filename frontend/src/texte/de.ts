@@ -168,6 +168,11 @@ export const t = {
       sinceImport: (days: number | null) => since(days, "dem neuesten Import", "importiert"),
       sinceChange: (days: number | null) =>
         since(days, "dem jüngsten Besucherbeitrag", "gab es einen Besucherbeitrag"),
+
+      reload: "Anzeige neu laden",
+      reloadHint:
+        "Hilft, wenn die Besucheransicht sich verhakt hat. Am Bestand ändert sich dabei nichts. " +
+        "Von allein passiert dasselbe, sobald das Gerät fünf Minuten unberührt bleibt.",
     },
 
     photos: {
