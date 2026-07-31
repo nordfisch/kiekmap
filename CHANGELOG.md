@@ -152,6 +152,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Auswahl stehen, ergibt sich aus dem **Bestand** (mindestens 1920er bis 2010er) statt aus
   `firstDecade`/`lastDecade` in `region.json` — das beschreibt die Sammlung und nicht den Ort, und
   eine Änderung daran zog bisher einen Kartenbau samt Netzzugang hinter sich her
+- Bei langen Straßen kommt vor die Hausnummer ein **Abschnitt** — „1–13", „15–24" —, genau wie das
+  Jahrzehnt vor dem Jahr. Dazu vertritt die Grundzahl ihre Buchstabenzusätze: Aus 78 Knöpfen im
+  Mühlenweg werden vier plus zehn. Kurze Straßen behalten den einen Schritt
 - Beim Verorten fährt die Karte schon heran, sobald über die Ortssuche eine Straße oder Hausnummer
   gewählt ist — der Besucher sieht, wo sein Punkt gelandet ist, bevor er bestätigt. Ein selbst auf
   die Karte getippter oder verschobener Pin lässt sie stehen: Dort hat er gerade gezielt

@@ -93,6 +93,9 @@ export const t = {
      * OpenStreetMap, und niemand weiß bei jedem Foto die Hausnummer.
      */
     askHouseNumber: (street: string) => `Welche Hausnummer im ${street}?`,
+    /** Bei langen Straßen ein Schritt davor — wie das Jahrzehnt vor dem Jahr. */
+    askArea: (street: string) => `In welchem Abschnitt vom ${street}?`,
+    otherArea: "Anderer Abschnitt",
     noHouseNumber: "Reicht so — die Straße genügt",
     otherStreet: "Andere Straße",
     kinds: {

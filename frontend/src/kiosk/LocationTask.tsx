@@ -12,11 +12,12 @@
  * every photograph.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { type Place, fetchHouseNumbers, searchPlaces } from "../api/client";
 import { useContribute } from "../store/contribute";
 import { t } from "../texte/de";
+import { type NumberBlock, blocksOf, groupByBase } from "./hausnummern";
 
 /** How long the input has to rest before searching. */
 const DEBOUNCE_MS = 200;
@@ -33,6 +34,11 @@ export function LocationTask() {
   /** The street whose house numbers are on offer, or null while none is. */
   const [street, setStreet] = useState<Place | null>(null);
   const [numbers, setNumbers] = useState<Place[]>([]);
+  /** Der gewählte Bereich einer langen Straße, oder null, solange die Bereiche dastehen. */
+  const [block, setBlock] = useState<NumberBlock | null>(null);
+
+  // Zusammenfassen und Aufteilen in einem Zug -- beides haengt nur an der geholten Liste.
+  const blocks = useMemo(() => blocksOf(groupByBase(numbers)), [numbers]);
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -62,6 +68,7 @@ export function LocationTask() {
     setResults([]);
     setStreet(null);
     setNumbers([]);
+    setBlock(null);
 
     if (place.kind !== "strasse") return;
 
@@ -72,6 +79,7 @@ export function LocationTask() {
         if (found.length === 0) return;
         setStreet(place);
         setNumbers(found);
+        setBlock(null);
       })
       .catch(() => {
         /* Without the numbers the street stands as the answer -- that was always allowed. */
@@ -82,32 +90,58 @@ export function LocationTask() {
     setPin({ lat: place.lat, lon: place.lon }, { label: place.name, accuracyM: place.accuracy_m });
     setStreet(null);
     setNumbers([]);
+    setBlock(null);
   }
 
   function keepStreet() {
     setStreet(null);
     setNumbers([]);
+    setBlock(null);
   }
 
   // Second step: the street is set, now the number. The search steps aside meanwhile, so that
   // nothing but the numbers is on offer.
   if (street) {
+    // Bei einer langen Straße kommt ein Bereich davor -- wie das Jahrzehnt vor dem Jahr. Passt
+    // alles auf eine Seite, gibt `blocksOf` einen einzigen zurück und der Schritt entfällt.
+    const shown = block ? [block] : blocks;
+    const asking = !block && blocks.length > 1;
+
     return (
       <div className="task">
-        <p className="task__hint">{t.location.askHouseNumber(street.name)}</p>
+        <p className="task__hint">
+          {asking ? t.location.askArea(street.name) : t.location.askHouseNumber(street.name)}
+        </p>
 
         <div className="housenumbers">
-          {numbers.map((place) => (
-            <button
-              key={place.id}
-              type="button"
-              className="button button--year"
-              onClick={() => chooseNumber(place)}
-            >
-              {place.housenumber}
-            </button>
-          ))}
+          {asking
+            ? blocks.map((entry) => (
+                <button
+                  key={entry.label}
+                  type="button"
+                  className="button button--year"
+                  onClick={() => setBlock(entry)}
+                >
+                  {entry.label}
+                </button>
+              ))
+            : shown[0]?.numbers.map((place) => (
+                <button
+                  key={place.id}
+                  type="button"
+                  className="button button--year"
+                  onClick={() => chooseNumber(place)}
+                >
+                  {place.housenumber}
+                </button>
+              ))}
         </div>
+
+        {block && (
+          <button type="button" className="button button--quiet" onClick={() => setBlock(null)}>
+            {t.location.otherArea}
+          </button>
+        )}
 
         <button type="button" className="button" onClick={keepStreet}>
           {t.location.noHouseNumber}
