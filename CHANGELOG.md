@@ -152,6 +152,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Auswahl stehen, ergibt sich aus dem **Bestand** (mindestens 1920er bis 2010er) statt aus
   `firstDecade`/`lastDecade` in `region.json` — das beschreibt die Sammlung und nicht den Ort, und
   eine Änderung daran zog bisher einen Kartenbau samt Netzzugang hinter sich her
+- Beim Verorten fährt die Karte schon heran, sobald über die Ortssuche eine Straße oder Hausnummer
+  gewählt ist — der Besucher sieht, wo sein Punkt gelandet ist, bevor er bestätigt. Ein selbst auf
+  die Karte getippter oder verschobener Pin lässt sie stehen: Dort hat er gerade gezielt
 - Nach einem Besucherbeitrag stellt sich die Ansicht für die Dauer des Dankes auf dieses Foto ein:
   Die Karte fährt auf hundert Meter heran, der Zeitraum auf das Jahrzehnt der Angabe — oder ganz
   auf, wenn das Foto undatiert ist. Danach kehren beide zusammen zurück

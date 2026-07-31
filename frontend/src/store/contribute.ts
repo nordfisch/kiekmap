@@ -97,6 +97,11 @@ export const useContribute = create<ContributeState>((set, get) => {
     abort = new AbortController();
     const signal = abort.signal;
 
+    // Beim Wechsel des Fotos oder der Frage steht die Karte wieder da, wo der Besucher war.
+    // Deckt "Weiss ich nicht" mit ab; nach einer Bestaetigung hat der Dank-Zeitgeber es schon
+    // getan, und ein zweites Mal schadet nicht.
+    useKiosk.getState().releaseFocus();
+
     set({ loading: true, error: null, pin: null, pinLabel: null, pinAccuracy: null });
     try {
       const task = await fetchTask(need, get().skipped, signal);
@@ -194,6 +199,14 @@ export const useContribute = create<ContributeState>((set, get) => {
         pinLabel: details?.label ?? null,
         pinAccuracy: details?.accuracyM ?? null,
       });
+
+      // Aus der Ortssuche (nur die setzt ein Label) nimmt die Karte den Besucher mit -- er hat den
+      // Punkt ja nicht selbst gesetzt und will sehen, wo er gelandet ist. Ein auf die Karte
+      // getippter oder verschobener Pin laesst sie stehen: Dort hat er gerade gezielt, und eine
+      // Karte, die unter dem Finger wegspringt, fuehlt sich an wie ein Verrutschen.
+      if (pin && details?.label) useKiosk.getState().showLocation(pin.lat, pin.lon);
+      // "Punkt entfernen" nimmt auch den Zoom zurueck.
+      if (!pin) useKiosk.getState().releaseFocus();
     },
 
     async submitLocation() {

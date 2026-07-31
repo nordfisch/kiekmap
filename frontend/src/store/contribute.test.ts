@@ -200,3 +200,41 @@ describe("Karte und Zeitleiste nach einem Beitrag", () => {
     expect(fotosGeholt).not.toHaveBeenCalled();
   });
 });
+
+describe("Die Karte beim Verorten", () => {
+  beforeEach(() => {
+    useKiosk.setState({ focus: null, rangeBefore: null, bbox: [9.6, 53.57, 9.75, 53.67] });
+  });
+
+  it("holt bei einem Treffer der Ortssuche heran", () => {
+    // Der Besucher hat den Punkt nicht selbst gesetzt -- er will sehen, wo er gelandet ist.
+    useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
+
+    expect(useKiosk.getState().focus).not.toBeNull();
+    expect(useKiosk.getState().focus?.lat).toBe(53.62);
+  });
+
+  it("laesst sie bei einem auf die Karte getippten Punkt stehen", () => {
+    // Dort hat er gerade gezielt. Eine Karte, die unter dem Finger wegspringt, fuehlt sich an wie
+    // ein Verrutschen.
+    useContribute.getState().setPin({ lat: 53.62, lon: 9.676 });
+
+    expect(useKiosk.getState().focus).toBeNull();
+  });
+
+  it("faehrt zurueck, wenn der Punkt entfernt wird", () => {
+    useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
+    useContribute.getState().setPin(null);
+
+    expect(useKiosk.getState().focus).toBeNull();
+  });
+
+  it("laesst den Zeitraum in Ruhe, solange nichts beigetragen ist", () => {
+    useKiosk.setState({ timeRange: { from: 1950, to: 1959 }, fullRange: { from: 1920, to: 2019 } });
+
+    useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 1950, to: 1959 });
+    expect(useKiosk.getState().rangeBefore).toBeNull();
+  });
+});

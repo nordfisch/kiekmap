@@ -94,25 +94,34 @@ export function MapView({ region }: { region: Region }) {
   }, [map, region]);
 
   /**
-   * Nach einem Beitrag kurz zum Foto -- und danach wieder zurück.
+   * Die Kamera merken, solange ein Fokus läuft — und am Ende dorthin zurückfahren.
    *
-   * Die Rückfahrt steht in der Aufräumfunktion: React sagt hier ohnehin Bescheid, wenn der Fokus
-   * endet, und so kann die gemerkte Kamera gar nicht erst verlorengehen.
+   * Bewusst an `focused` gebunden und nicht an den Fokus selbst: Während einer Verortung wechselt
+   * er zweimal (erst der gesetzte Punkt, dann das bestätigte Foto). Hinge die Rückfahrt am Objekt,
+   * würde die Karte beim Bestätigen kurz heraus- und sofort wieder hineinfahren.
    */
+  const focused = focus !== null;
+  const cameraBefore = useRef<{ center: maplibregl.LngLat; zoom: number } | null>(null);
+
+  useEffect(() => {
+    if (!map || !focused) return;
+
+    cameraBefore.current = { center: map.getCenter(), zoom: map.getZoom() };
+    return () => {
+      const before = cameraBefore.current;
+      cameraBefore.current = null;
+      // Eine bereits entfernte Karte darf nicht mehr bewegt werden -- beim Wechsel in den
+      // Verwaltungsbereich verschwindet sie mitsamt ihrem Container aus dem Dokument.
+      if (before && map.getContainer().isConnected) {
+        map.easeTo({ ...before, duration: 800 });
+      }
+    };
+  }, [map, focused]);
+
+  // Hinfahren, wann immer der Fokus auf eine neue Stelle zeigt.
   useEffect(() => {
     if (!map || !focus) return;
-
-    const before = { center: map.getCenter(), zoom: map.getZoom() };
     map.fitBounds(focus.bounds, { padding: 40, duration: 800 });
-
-    let disposed = false;
-    return () => {
-      // Derselbe Riegel wie beim "load"-Rückruf: eine bereits entfernte Karte darf nicht mehr
-      // bewegt werden.
-      if (disposed) return;
-      disposed = true;
-      map.easeTo({ ...before, duration: 800 });
-    };
   }, [map, focus]);
 
   return (

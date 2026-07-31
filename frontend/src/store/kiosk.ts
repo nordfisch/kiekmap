@@ -76,6 +76,13 @@ type KioskState = {
   openStackAt: (ids: number[], index?: number) => void;
   /** Im geöffneten Stapel blättern; bleibt an den Enden stehen. */
   stepInStack: (delta: number) => void;
+  /**
+   * Nur die Karte an eine Stelle holen — für den gesetzten Pin, bevor etwas beigetragen ist.
+   *
+   * Rührt den Zeitraum nicht an: Es ist noch kein Beitrag, es geht allein darum, dem Besucher zu
+   * zeigen, wo sein Punkt gelandet ist.
+   */
+  showLocation: (lat: number, lon: number) => void;
   /** Nach einem Beitrag: Karte und Zeitraum so stellen, dass dieses Foto zu sehen ist. */
   showPhoto: (photo: PhotoDetail) => void;
   /** Beides zusammen zurücknehmen -- am Ende des Dankes. */
@@ -224,6 +231,12 @@ export const useKiosk = create<KioskState>((set, get) => {
       const next = openIndex + delta;
       if (next < 0 || next >= openStack.length) return;
       set({ openIndex: next });
+    },
+
+    showLocation(lat, lon) {
+      set((state) => ({
+        focus: { lat, lon, bounds: boundsAround(lat, lon), seq: (state.focus?.seq ?? 0) + 1 },
+      }));
     },
 
     /**
