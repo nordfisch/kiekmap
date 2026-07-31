@@ -397,11 +397,33 @@ button {
 
 /* A photo at its place, like a pinned print. The lower edge sits on the coordinate. */
 .marker {
+  position: relative;
   display: block;
   padding: 0;
   border: none;
   background: none;
   transition: transform 120ms ease;
+}
+
+/* Mehrere Fotos an derselben Stelle: die Anzahl in der Ecke sagt es, bevor jemand tippt.
+ * Hineinzoomen hilft hier nicht -- identische Punkte trennen sich bei keiner Zoomstufe. */
+.marker__count {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  display: grid;
+  place-items: center;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  padding: 0 0.3rem;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 35%);
 }
 
 .marker:hover,
@@ -665,6 +687,45 @@ button {
   border-radius: 999px;
   font-size: 0.8rem;
   color: #d8d0c6;
+}
+
+/* Sind es mehrere Fotos, macht das Overlay unten Platz für die Blätterknöpfe -- sonst lägen sie
+ * über dem unteren Bildrand, und ausgerechnet dort steht bei alten Abzügen oft die Beschriftung. */
+.overlay--stack {
+  padding-bottom: 6.5rem;
+}
+
+/* Blättern durch die Fotos einer Stelle. Unten mittig, in Daumennähe -- dort landet die Hand von
+ * selbst, wenn das Bild den Rest des Schirms füllt. */
+.overlay__pager {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1;
+}
+
+.overlay__pager .button {
+  width: auto;
+  min-width: 10rem;
+  min-height: 3.5rem;
+  margin: 0;
+  border: 2px solid rgb(255 255 255 / 40%);
+  background: rgb(0 0 0 / 45%);
+  color: #fff;
+}
+
+.overlay__pager .button:disabled {
+  opacity: 0.35;
+}
+
+.overlay__position {
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
 }
 
 .overlay__close {

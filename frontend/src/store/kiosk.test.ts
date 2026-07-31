@@ -61,7 +61,8 @@ describe("Leerlauf-Reset", () => {
       bbox: [9.6, 53.57, 9.75, 53.67],
       fullRange: { from: 1860, to: 1990 },
       timeRange: { from: 1930, to: 1939 },
-      openPhotoId: 42,
+      openStack: [42],
+      openIndex: 0,
     });
   });
 
@@ -69,7 +70,7 @@ describe("Leerlauf-Reset", () => {
     // Sonst steht morgens das Bild des letzten Besuchers vom Vorabend ueber der Karte.
     useKiosk.getState().reset();
 
-    expect(useKiosk.getState().openPhotoId).toBeNull();
+    expect(useKiosk.getState().openStack).toEqual([]);
   });
 
   it("gibt den ganzen Zeitraum wieder frei", () => {

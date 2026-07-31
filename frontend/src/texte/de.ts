@@ -41,6 +41,8 @@ export const t = {
       `${count} Fotos in diesem Ausschnitt — für mehr Übersicht näher heranzoomen`,
     markerLabel: (title: string, date: string) => `${title}, ${date} — groß anzeigen`,
     clusterLabel: (count: number) => `${count} Fotos — hineinzoomen`,
+    /** Mehrere Fotos an derselben Stelle: Hineinzoomen hilft hier nicht, Blättern schon. */
+    stackLabel: (count: number) => `${count} Fotos von dieser Stelle — ansehen`,
     pinLabel: "Gesetzter Ort, verschiebbar",
     untitled: "Ohne Titel",
     photoAlt: "Historisches Foto",
@@ -49,6 +51,9 @@ export const t = {
   overlay: {
     dialogLabel: "Foto in voller Größe",
     close: "Schließen",
+    prev: "Vorheriges",
+    next: "Nächstes",
+    position: (current: number, count: number) => `${current} von ${count}`,
   },
 
   timeline: {

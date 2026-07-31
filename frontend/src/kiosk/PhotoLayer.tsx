@@ -15,6 +15,7 @@ import Supercluster from "supercluster";
 import type { PhotoMarker } from "../api/client";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../texte/de";
+import { type Stack, groupByLocation } from "./stapel";
 
 /** Radius in pixels within which photos are merged. About a thumb's width. */
 const CLUSTER_RADIUS = 70;
@@ -22,7 +23,7 @@ const CLUSTER_RADIUS = 70;
 /** Beyond this zoom nothing is merged -- closer together than that is rarely meaningful. */
 const CLUSTER_MAXZOOM = 17;
 
-type PhotoProps = { photo: PhotoMarker };
+type PhotoProps = { stack: Stack };
 
 /** getClusters returns merged groups and single photos mixed together. */
 type Group = Supercluster.PointFeature<PhotoProps | Supercluster.ClusterProperties>;
@@ -38,21 +39,31 @@ function buildIndex(photos: PhotoMarker[]): Supercluster<PhotoProps> {
     radius: CLUSTER_RADIUS,
     maxZoom: CLUSTER_MAXZOOM,
   });
+  // Vor dem Clustern gruppiert: supercluster bekommt keine Dubletten zu sehen, und ein Stapel
+  // bleibt auf jeder Zoomstufe ein Marker. Siehe stapel.ts.
   index.load(
-    photos.map((photo) => ({
+    groupByLocation(photos).map((stack) => ({
       type: "Feature" as const,
-      properties: { photo },
-      geometry: { type: "Point" as const, coordinates: [photo.lon, photo.lat] },
+      properties: { stack },
+      geometry: { type: "Point" as const, coordinates: [stack.lon, stack.lat] },
     })),
   );
   return index;
 }
 
-function photoElement(photo: PhotoMarker, onSelect: () => void): HTMLElement {
+function photoElement(stack: Stack, onSelect: () => void): HTMLElement {
+  const photo = stack.photos[0]!;
+  const count = stack.photos.length;
+
   const root = document.createElement("button");
   root.type = "button";
   root.className = "marker";
-  root.setAttribute("aria-label", t.map.markerLabel(photo.title ?? "Foto", photo.date_label));
+  root.setAttribute(
+    "aria-label",
+    count > 1
+      ? t.map.stackLabel(count)
+      : t.map.markerLabel(photo.title ?? "Foto", photo.date_label),
+  );
 
   const image = document.createElement("img");
   image.className = "marker__image";
@@ -68,6 +79,14 @@ function photoElement(photo: PhotoMarker, onSelect: () => void): HTMLElement {
   year.className = "marker__year";
   year.textContent = photo.date_label;
   root.appendChild(year);
+
+  // Die Anzahl in der Ecke: Der Besucher soll vor dem Tippen wissen, dass mehr dahintersteckt.
+  if (count > 1) {
+    const badge = document.createElement("span");
+    badge.className = "marker__count";
+    badge.textContent = String(count);
+    root.appendChild(badge);
+  }
 
   root.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -95,7 +114,7 @@ function clusterElement(count: number, onSelect: () => void): HTMLElement {
 
 export function PhotoLayer({ map }: { map: maplibregl.Map }) {
   const photos = useKiosk((s) => s.photos);
-  const openPhoto = useKiosk((s) => s.openPhoto);
+  const openStackAt = useKiosk((s) => s.openStackAt);
   const markers = useRef<Marker[]>([]);
 
   const index = useMemo(() => buildIndex(photos), [photos]);
@@ -129,8 +148,10 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
           });
           markers.current.push(new Marker({ element }).setLngLat([lon, lat]).addTo(map));
         } else {
-          const photo = group.properties.photo;
-          const element = photoElement(photo, () => openPhoto(photo.id));
+          const stack = group.properties.stack;
+          const element = photoElement(stack, () =>
+            openStackAt(stack.photos.map((photo) => photo.id)),
+          );
           markers.current.push(
             // The marker sits with its lower edge on the location, like a pin.
             new Marker({ element, anchor: "bottom" }).setLngLat([lon, lat]).addTo(map),
@@ -148,7 +169,7 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
       for (const old of markers.current) old.remove();
       markers.current = [];
     };
-  }, [map, index, openPhoto]);
+  }, [map, index, openStackAt]);
 
   return null;
 }

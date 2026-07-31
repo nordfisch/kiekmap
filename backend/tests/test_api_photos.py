@@ -126,6 +126,26 @@ class TestBegrenzung:
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["truncated"] is False
 
 
+class TestReihenfolge:
+    def test_zuletzt_bearbeitetes_foto_kommt_zuerst(self, client: TestClient, session, make_photo):
+        """Fotos am selben Ort liegen als Stapel uebereinander -- oben das eben Ergaenzte.
+
+        Genau dorthin faehrt die Karte nach einem Besucherbeitrag.
+        """
+        from datetime import datetime
+
+        alt = make_photo(title="Lange her", sha="a" * 64)
+        neu = make_photo(title="Eben bearbeitet", sha="b" * 64)
+        session.commit()
+        alt.updated_at = datetime(2026, 1, 1, 12, 0)
+        neu.updated_at = datetime(2026, 7, 31, 12, 0)
+        session.commit()
+
+        daten = client.get("/api/photos", params={"bbox": BBOX}).json()
+
+        assert [foto["title"] for foto in daten["photos"]] == ["Eben bearbeitet", "Lange her"]
+
+
 class TestHistogramm:
     def test_zaehlt_je_jahrzehnt(self, client: TestClient, session, make_photo):
         for jahr, titel in ((1923, "a"), (1927, "b"), (1955, "c")):

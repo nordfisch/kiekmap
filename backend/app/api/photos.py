@@ -105,9 +105,16 @@ def list_photos(
 ) -> PhotoList:
     filters = _viewport_filters(viewport)
 
+    # Zuletzt Bearbeitetes zuerst. Fotos am selben Ort liegen auf der Karte als ein Stapel
+    # uebereinander -- oben liegt dann das, was gerade ergaenzt wurde, und genau dorthin faehrt
+    # die Karte nach einem Beitrag. ``updated_at`` fuehrt jeden Besucherbeitrag und jede
+    # Bearbeitung im Verwaltungsbereich nach (``onupdate`` in app/models.py).
     total = session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
     photos = session.scalars(
-        select(Photo).where(*filters).order_by(Photo.date_from, Photo.id).limit(limit)
+        select(Photo)
+        .where(*filters)
+        .order_by(Photo.updated_at.desc(), Photo.imported_at.desc(), Photo.id.desc())
+        .limit(limit)
     ).all()
 
     return PhotoList(

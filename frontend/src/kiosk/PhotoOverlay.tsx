@@ -16,10 +16,14 @@ import { useKiosk } from "../store/kiosk";
 import { t } from "../texte/de";
 
 export function PhotoOverlay() {
-  const openPhotoId = useKiosk((s) => s.openPhotoId);
+  const openStack = useKiosk((s) => s.openStack);
+  const openIndex = useKiosk((s) => s.openIndex);
   const openPhoto = useKiosk((s) => s.openPhoto);
+  const stepInStack = useKiosk((s) => s.stepInStack);
   const [detail, setDetail] = useState<PhotoDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const openPhotoId = openStack[openIndex] ?? null;
 
   useEffect(() => {
     if (openPhotoId === null) {
@@ -42,10 +46,12 @@ export function PhotoOverlay() {
     if (openPhotoId === null) return;
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") openPhoto(null);
+      if (event.key === "ArrowLeft") stepInStack(-1);
+      if (event.key === "ArrowRight") stepInStack(1);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [openPhotoId, openPhoto]);
+  }, [openPhotoId, openPhoto, stepInStack]);
 
   if (openPhotoId === null) return null;
 
@@ -53,7 +59,7 @@ export function PhotoOverlay() {
 
   return (
     <div
-      className="overlay"
+      className={openStack.length > 1 ? "overlay overlay--stack" : "overlay"}
       role="dialog"
       aria-modal="true"
       aria-label={t.overlay.dialogLabel}
@@ -65,6 +71,32 @@ export function PhotoOverlay() {
       </button>
 
       {error && <p className="overlay__notice">{error}</p>}
+
+      {/* Blättern durch die Fotos, die an derselben Stelle liegen. Zwei große Knöpfe am unteren
+          Rand, in Daumennähe -- das Fingerfreundlichste, was das Gerät hergibt. */}
+      {openStack.length > 1 && (
+        <div className="overlay__pager" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            className="button"
+            disabled={openIndex === 0}
+            onClick={() => stepInStack(-1)}
+          >
+            {t.overlay.prev}
+          </button>
+          <span className="overlay__position">
+            {t.overlay.position(openIndex + 1, openStack.length)}
+          </span>
+          <button
+            type="button"
+            className="button"
+            disabled={openIndex === openStack.length - 1}
+            onClick={() => stepInStack(1)}
+          >
+            {t.overlay.next}
+          </button>
+        </div>
+      )}
 
       {detail && (
         // Clicks on the image itself must not close -- otherwise you cannot look at it without

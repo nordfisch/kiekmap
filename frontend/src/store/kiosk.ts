@@ -49,8 +49,14 @@ type KioskState = {
   loading: boolean;
   error: string | null;
 
-  /** Id of the photo shown full screen, or null. */
-  openPhotoId: number | null;
+  /**
+   * Die Fotos, die gerade im Vollbild stehen, und welches davon.
+   *
+   * Eine Liste statt einer Id, weil Fotos am selben Ort als ein Stapel geöffnet werden und sich
+   * durchblättern lassen. Ein einzelnes Foto ist der Stapel der Länge eins.
+   */
+  openStack: number[];
+  openIndex: number;
 
   /**
    * Wohin die Karte für die Dauer des Dankes fährt, oder null.
@@ -65,7 +71,11 @@ type KioskState = {
 
   setViewport: (bbox: Bbox) => void;
   setTimeRange: (timeRange: TimeRange) => void;
+  /** Ein einzelnes Foto — die Kurzform für einen Stapel der Länge eins. */
   openPhoto: (id: number | null) => void;
+  openStackAt: (ids: number[], index?: number) => void;
+  /** Im geöffneten Stapel blättern; bleibt an den Enden stehen. */
+  stepInStack: (delta: number) => void;
   /** Nach einem Beitrag: Karte und Zeitraum so stellen, dass dieses Foto zu sehen ist. */
   showPhoto: (photo: PhotoDetail) => void;
   /** Beides zusammen zurücknehmen -- am Ende des Dankes. */
@@ -177,7 +187,8 @@ export const useKiosk = create<KioskState>((set, get) => {
     histogram: null,
     loading: false,
     error: null,
-    openPhotoId: null,
+    openStack: [],
+    openIndex: 0,
     focus: null,
     rangeBefore: null,
 
@@ -201,7 +212,18 @@ export const useKiosk = create<KioskState>((set, get) => {
     },
 
     openPhoto(id) {
-      set({ openPhotoId: id });
+      set({ openStack: id === null ? [] : [id], openIndex: 0 });
+    },
+
+    openStackAt(ids, index = 0) {
+      set({ openStack: ids, openIndex: index });
+    },
+
+    stepInStack(delta) {
+      const { openStack, openIndex } = get();
+      const next = openIndex + delta;
+      if (next < 0 || next >= openStack.length) return;
+      set({ openIndex: next });
     },
 
     /**
@@ -263,7 +285,7 @@ export const useKiosk = create<KioskState>((set, get) => {
       const { fullRange } = get();
       // Fokus und gemerkter Zeitraum gehen mit: Sonst spielte ein Rücksprung mitten im Dank später
       // einen Zeitraum zurück, den es längst nicht mehr gibt.
-      set({ openPhotoId: null, timeRange: fullRange, focus: null, rangeBefore: null });
+      set({ openStack: [], openIndex: 0, timeRange: fullRange, focus: null, rangeBefore: null });
       scheduleLoad();
     },
   };
