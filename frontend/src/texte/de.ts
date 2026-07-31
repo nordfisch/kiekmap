@@ -66,7 +66,8 @@ export const t = {
   },
 
   help: {
-    title: "Hilf mit",
+    /** Mit Doppelpunkt: Der Titel fuehrt in die Frage darunter, statt fuer sich zu stehen. */
+    title: "Hilf mit:",
     askLocation: "Wo ist das?",
     askDate: "Wann war das?",
     photoAlt: "Foto, dem eine Angabe fehlt",

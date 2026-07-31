@@ -152,16 +152,21 @@ button {
 }
 
 /* Groesse, Gewicht und Farbe kommen aus der Gruppe bei `.app__heading-lead` -- die beiden
- * Ueberschriften der linken Spalte sollen gleich aussehen. */
+ * Ueberschriften der linken Spalte sollen gleich aussehen.
+ *
+ * Und genauso eng beieinander: "Hilf mit:" steht ueber der Frage wie "Bilder aus" ueber dem
+ * Ortsnamen, also ohne Abstand dazwischen. Deshalb dieselbe Zeilenhoehe wie beim Titelpaar oben --
+ * dort entsteht der Abstand allein aus ihr. */
 .help-panel__title {
-  margin: 0 0 0.75rem;
+  margin: 0;
+  line-height: 1.15;
 }
 
 .help-panel__question {
   margin: 0 0 0.75rem;
   font-size: 1.25rem;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.15;
 }
 
 /* Der Knopf um das Bild bleibt unsichtbar: Es soll ein Bild bleiben, kein Knopf werden. Nur beim
