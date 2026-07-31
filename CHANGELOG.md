@@ -142,6 +142,23 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   die Zahl nachträglich geändert, nimmt sich das Häkchen selbst zurück
 - Nach dem Import gilt für beide Wege dieselbe Regel: bis 30 Bilder die Nacharbeits-Tabelle,
   darüber die Zusammenfassung mit einem Sprung in die Liste „Ohne Ort"
+- Die Besucheransicht kommt ohne Trennlinien zwischen Titel, Zeitschieber, Beitragsbereich und
+  Karte aus; neben dem Wappen steht „Bilder aus" über dem Ortsnamen, beide Zeilen zusammen so hoch
+  wie das Wappen. „Hilf mit" ist genauso gesetzt wie „Bilder aus"
+- Die Zeitachse zeigt immer den ganzen Bestand, die Balken darunter den sichtbaren Ausschnitt.
+  Damit bedeutet dieselbe Stelle des Schiebers immer dasselbe Jahr — und eine leere Achse mit einem
+  einzelnen Balken sagt, dass es hier nur Fotos aus diesem Jahrzehnt gibt
+- Die Datierungsfrage heißt „Wann war das?", passend zu „Wo ist das?". Welche Jahrzehnte zur
+  Auswahl stehen, ergibt sich aus dem **Bestand** (mindestens 1920er bis 2010er) statt aus
+  `firstDecade`/`lastDecade` in `region.json` — das beschreibt die Sammlung und nicht den Ort, und
+  eine Änderung daran zog bisher einen Kartenbau samt Netzzugang hinter sich her
+- Nach einem Besucherbeitrag stellt sich die Ansicht für die Dauer des Dankes auf dieses Foto ein:
+  Die Karte fährt auf hundert Meter heran, der Zeitraum auf das Jahrzehnt der Angabe — oder ganz
+  auf, wenn das Foto undatiert ist. Danach kehren beide zusammen zurück
+- Der „Hilf mit"-Bereich springt bei jedem Wechsel nach oben, und sein Vorschaubild öffnet das Foto
+  in voller Größe
+- Fotos an derselben Stelle stehen als **ein** Marker mit Anzahl auf der Karte und lassen sich im
+  Vollbild durchblättern. Die Kartenabfrage sortiert dafür nach dem zuletzt bearbeiteten Foto
 - Unter den sechs Zahlen der Übersicht steht jetzt eine Trennlinie und darunter, in denselben drei
   Spalten, der Betrieb: Tage seit der letzten Sicherung, seit dem neuesten Import und seit dem
   jüngsten Besucherbeitrag. Die Sicherungskachel ersetzt den bisherigen Erinnerungsknopf und wird
@@ -182,3 +199,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   jetzt auf der Karte", zu sehen war es aber erst, wenn jemand die Karte verschob — also gerade bei
   den älteren Besuchern, für die der Bereich gebaut ist, gar nicht. Ein Beitrag stößt jetzt ein
   Nachladen von Markern und Histogramm an
+- **Der Zeitschieber lief aus seinem Feld.** Nach dem Hineinzoomen in einen Bereich mit weniger
+  Jahrzehnten als der Gesamtbestand stand die Achse auf dem neuen Ausschnitt, die Auswahl aber
+  noch auf dem alten — der Auswahlbalken zeichnete sich dann mit `left: -300%` quer über Wappen
+  und Titel, beide Griffe lagen außerhalb des Bildschirms. Die Achse spannt jetzt über den ganzen
+  Bestand und steht still; dazu ist die Positionsrechnung auf 0…1 geklammert
+- **Fotos am selben Ort waren nicht einzeln erreichbar.** Acht Bilder auf identischen Koordinaten
+  wurden ab Zoom 18 zu acht Markern exakt übereinander, von denen nur der oberste antippbar war —
+  und der Weg dorthin führte ins Leere, denn identische Punkte trennen sich bei keiner Zoomstufe

@@ -99,6 +99,11 @@ das Bild wandert zurück in den „Hilf mit"-Bereich — vielleicht weiß es der
 Steht dort statt eines Knopfes **„Von Hand bearbeitet"**, hat inzwischen jemand aus dem Team die
 Angabe überarbeitet. Zurücknehmen würde diese Arbeit mit wegwerfen, deshalb geht es dann nicht mehr.
 
+> **Welche Jahrzehnte Besucher anbieten bekommen**, ergibt sich aus der Sammlung selbst: alles, was
+> im Bestand vorkommt, mindestens aber die 1920er bis 2010er. Fehlt ein Knopf für ein sehr altes
+> Foto, datieren Sie ein einziges Bild aus dieser Zeit über **Fotos → Bearbeiten** — danach steht
+> das Jahrzehnt auch den Besuchern zur Verfügung.
+
 ## Wenn etwas nicht ankommt
 
 Verwaltung → **Protokoll**. Dort steht jede Datei, die das Gerät angesehen hat, mit dem Grund:

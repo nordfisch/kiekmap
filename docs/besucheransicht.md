@@ -36,14 +36,14 @@ zweimal gemacht werden müssen):
 
 | # | Schritt | hängt ab von | Commit | erledigt |
 |---|---|---|---|---|
-| 0 | Plan ins Repo | — | `docs: Plan fuer die Besucheransicht` | ☐ |
-| 1 | **Punkt 2** — Trennlinien weg, Titel größer, „Hilf mit" angeglichen | — | `style(kiosk): Ruhigeres Bild in der Besucheransicht` | ☐ |
-| 2 | **Punkt 1** — feste Zeitachse, Schieber bleibt in seinem Feld | — | `fix(kiosk): Zeitachse spannt ueber den ganzen Bestand` | ☐ |
-| 3 | **Punkt 3** — „Wann war das?", Jahrzehnte aus dem Bestand | 2 | `refactor(kiosk): Jahrzehnte kommen aus dem Bestand` | ☐ |
-| 4 | **Punkt 4** — Bereich springt nach oben, Beitrag wird sichtbar | 2 | `feat(kiosk): Der eigene Beitrag wird sofort sichtbar` | ☐ |
-| 5 | **Punkt 5** — Fotos am selben Ort als ein Stapel | — | `feat(kiosk): Fotos am selben Ort blaetterbar` | ☐ |
-| 6 | **Punkt 6** — Vorschaubild im Beitragsbereich öffnet das Vollbild | 5 | `feat(kiosk): Foto im Beitragsbereich gross ansehen` | ☐ |
-| 7 | Abschluss: CHANGELOG, `docs/kuratoren-anleitung.md`, Durchgang über alles | 1–6 | `docs: Aenderungen an der Besucheransicht` | ☐ |
+| 0 | Plan ins Repo | — | `docs: Plan fuer die Besucheransicht` | ☑ |
+| 1 | **Punkt 2** — Trennlinien weg, Titel größer, „Hilf mit" angeglichen | — | `style(kiosk): Ruhigeres Bild in der Besucheransicht` | ☑ |
+| 2 | **Punkt 1** — feste Zeitachse, Schieber bleibt in seinem Feld | — | `fix(kiosk): Zeitachse spannt ueber den ganzen Bestand` | ☑ |
+| 3 | **Punkt 3** — „Wann war das?", Jahrzehnte aus dem Bestand | 2 | `refactor(kiosk): Jahrzehnte kommen aus dem Bestand` | ☑ |
+| 4 | **Punkt 4** — Bereich springt nach oben, Beitrag wird sichtbar | 2 | `feat(kiosk): Der eigene Beitrag wird sofort sichtbar` | ☑ |
+| 5 | **Punkt 5** — Fotos am selben Ort als ein Stapel | — | `feat(kiosk): Fotos am selben Ort blaetterbar` | ☑ |
+| 6 | **Punkt 6** — Vorschaubild im Beitragsbereich öffnet das Vollbild | 5 | `feat(kiosk): Foto im Beitragsbereich gross ansehen` | ☑ |
+| 7 | Abschluss: CHANGELOG, `docs/kuratoren-anleitung.md`, Durchgang über alles | 1–6 | `docs: Aenderungen an der Besucheransicht` | ☑ |
 
 **Warum diese Reihenfolge:**
 

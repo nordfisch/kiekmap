@@ -316,3 +316,62 @@ verliert Name und Genauigkeit wieder, aus demselben Grund.
   durch und liefert null Adressen.
 - **Hausnummern alphabetisch sortiert** ergibt 1, 10, 12, 1a, 2, 9. Sortiert wird nach
   (führender Zahl, Rest) — beim Lehmweg kommt „10-18" so hinter der 9 heraus, wo sie hingehört.
+
+---
+
+## 14. Die Zeitachse gehört dem Bestand, nicht dem Kartenausschnitt
+
+**Entscheidung.** Der Zeitschieber spannt immer über die Spanne der **ganzen Sammlung** und steht
+still. Die Balken darunter zeigen weiterhin, was im sichtbaren Ausschnitt liegt.
+
+**Warum nicht mitskalieren?** Es war so gebaut, und es hatte eine Logik: Der Schieber zeigte den
+Bereich, den man gerade sieht. Zwei Dinge sprechen dagegen, und das zweite ist ein Fehler.
+
+*Erstens die Bedeutung.* Eine Achse, die sich beim Zoomen neu skaliert, ändert unter der Hand, was
+dieselbe Stelle des Schiebers bedeutet. Für jemanden, der einmal im Leben davorsteht, ist ein
+Bedienelement, das seine Bedeutung wechselt, nicht zu durchschauen.
+
+*Zweitens.* Die Achse kam aus dem Ausschnitt, die Auswahl blieb bewusst stehen — nach dem
+Hineinzoomen auf zwei Fotos aus den 1950ern stand die Achse auf 1950–1960 und die Auswahl auf
+1920–2019. Der Auswahlbalken zeichnete sich mit `left: -300%` quer über Wappen und Titel, beide
+Griffe lagen außerhalb des Bildschirms. Das passierte bei **jedem** Hineinzoomen in einen Bereich
+mit weniger Jahrzehnten als der Gesamtbestand, im Museum also ständig.
+
+**Was die feste Achse zusätzlich kann.** Eine leere Achse mit einem einzelnen Balken bei 1950 sagt
+etwas, das die mitskalierende Achse verschwieg: *hier gibt es nur Fotos aus den 1950ern.*
+
+**Der Riegel darunter.** `fraction()` in `kiosk/zeitachse.ts` klammert auf 0…1, `setTimeRange()`
+zieht die Auswahl in die Achse. Selbst wenn beide je wieder auseinanderlaufen, kann kein Element
+mehr aus seiner Zelle laufen. Die Regel steht als reine Funktion mit Test da, weil sie sich nicht
+am Code ablesen ließ, sondern erst auf dem Bildschirm.
+
+---
+
+## 15. Fotos am selben Ort: ein Stapel zum Blättern, kein Fächer
+
+**Entscheidung.** Fotos auf demselben Punkt (auf rund einen Meter genau) werden **vor** dem
+Clustern zu einem Eintrag zusammengefasst. Auf der Karte stehen sie als ein Vorschaubild mit der
+Anzahl in der Ecke; ein Tipp öffnet die Vollbildansicht, dort wird geblättert.
+
+**Warum das nötig wurde.** Am Gasthof Petersen liegen acht Fotos auf identischen Koordinaten. Ab
+Zoom 18 fasst supercluster nichts mehr zusammen — es wurden acht Marker exakt übereinander, von
+denen nur der oberste erreichbar war. Der Weg dorthin war eine Sackgasse: Ein Tipp auf den Kreis
+zoomte genau in diesen Stapel hinein. **Identische Punkte trennen sich bei keiner Zoomstufe.**
+
+**Warum nicht auffächern?** Ein Fächer zeigte die Fotos dort, wo sie nicht sind, und bei acht
+Bildern ist er dauerhaft viel Unruhe — am Kartenrand hat er zudem keinen Platz. Ein Fächer *auf
+Tipp* führt außerdem einen Zustand ein, den man auch wieder verlassen muss, ohne dass etwas den
+Ausweg zeigt. Zwei-Schritt-Gesten sind das, woran ältere Besucher hängenbleiben.
+
+**Warum vor dem Clustern.** Danach zu gruppieren hätte nur unterhalb von `CLUSTER_MAXZOOM`
+geholfen. So sieht supercluster gar keine Dubletten, und ein Stapel ist auf **jeder** Zoomstufe
+ein Marker.
+
+**Die Schwelle ist fünf Nachkommastellen**, also rund ein Meter. Sie trifft den tatsächlichen
+Fall: Fotos aus der Ortssuche tragen exakt dieselbe Koordinate der Straße. Wer den Punkt von Hand
+gesetzt hat, liegt daneben und bleibt ein eigener Marker — richtig so, denn dann *ist* es eine
+andere Stelle.
+
+**Oben liegt das zuletzt bearbeitete Foto.** Die Kartenabfrage sortiert nach `updated_at`; damit
+liegt das eben verortete oder datierte Foto genau dort obenauf, wohin die Karte nach einem Beitrag
+fährt.
