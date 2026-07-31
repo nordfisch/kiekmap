@@ -127,11 +127,19 @@ class DecadeCount(BaseModel):
 
 
 class Histogram(BaseModel):
+    """The bars behind the time slider -- and the axis they hang on.
+
+    The two are scoped differently on purpose, which is why they are not called ``earliest`` and
+    ``latest`` any more: the bars belong to the viewport, the axis to the whole collection.
+    """
+
     decades: list[DecadeCount]
     #: Photos without a date. In no time selection, but in the "Hilf mit" panel.
     undated: int
-    earliest: int | None
-    latest: int | None
+    #: Span of the whole collection, deliberately **not** of the viewport: the slider axis must not
+    #: move under the visitor's hand while they pan the map. See frontend kiosk/zeitachse.ts.
+    collection_from: int | None
+    collection_to: int | None
 
 
 class DateInput(BaseModel):

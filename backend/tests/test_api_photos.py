@@ -138,8 +138,26 @@ class TestHistogramm:
             {"decade": 1920, "count": 2},
             {"decade": 1950, "count": 1},
         ]
-        assert daten["earliest"] == 1920
-        assert daten["latest"] == 1959
+        # Die Spanne der Sammlung, nicht die der Balken: auf Jahrzehnte gerundet wird erst in der
+        # Anzeige (kiosk/zeitachse.ts).
+        assert daten["collection_from"] == 1923
+        assert daten["collection_to"] == 1955
+
+    def test_spanne_ignoriert_den_kartenausschnitt(self, client: TestClient, session, make_photo):
+        """Die Achse des Zeitschiebers gehoert der Sammlung, nicht dem Ausschnitt.
+
+        Sonst bedeutete dieselbe Stelle des Schiebers nach jedem Zoom ein anderes Jahr -- und eine
+        vorher getroffene Auswahl laege ausserhalb ihrer eigenen Bahn.
+        """
+        make_photo(year=1930, sha="a" * 64)
+        # Weit weg, ausserhalb der abgefragten bbox.
+        make_photo(year=1890, lat=48.0, lon=11.0, sha="b" * 64)
+        session.commit()
+
+        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+
+        assert daten["decades"] == [{"decade": 1930, "count": 1}], "Balken zeigen den Ausschnitt"
+        assert daten["collection_from"] == 1890, "die Achse zeigt den ganzen Bestand"
 
     def test_zeigt_auch_ausserhalb_der_auswahl(self, client: TestClient, session, make_photo):
         """Der Schieber soll zeigen, wo ueberhaupt etwas liegt -- auch jenseits der Auswahl."""
@@ -166,7 +184,12 @@ class TestHistogramm:
     def test_leerer_ausschnitt(self, client: TestClient, session):
         daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten == {"decades": [], "undated": 0, "earliest": None, "latest": None}
+        assert daten == {
+            "decades": [],
+            "undated": 0,
+            "collection_from": None,
+            "collection_to": None,
+        }
 
 
 class TestEinzelnesFoto:

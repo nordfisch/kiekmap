@@ -54,8 +54,8 @@ describe("Leerlauf-Reset", () => {
     vi.mocked(fetchHistogram).mockResolvedValue({
       decades: [],
       undated: 0,
-      earliest: null,
-      latest: null,
+      collection_from: null,
+      collection_to: null,
     });
     useKiosk.setState({
       bbox: [9.6, 53.57, 9.75, 53.67],

@@ -11,6 +11,7 @@
 
 import { create } from "zustand";
 
+
 import {
   type Bbox,
   type Histogram,
@@ -19,6 +20,7 @@ import {
   fetchHistogram,
   fetchPhotos,
 } from "../api/client";
+import { axisBounds, clampRange } from "../kiosk/zeitachse";
 
 /** How long the map has to stand still before loading. */
 export const DEBOUNCE_MS = 250;
@@ -29,7 +31,12 @@ export const MAX_PHOTOS = 500;
 type KioskState = {
   bbox: Bbox | null;
   timeRange: TimeRange | null;
-  /** The full span from the histogram. The slider cannot go beyond it. */
+  /**
+   * Span of the whole collection -- the axis of the slider.
+   *
+   * Deliberately not the span of the current viewport: the axis must not move under the visitor's
+   * hand while they pan the map. See kiosk/zeitachse.ts.
+   */
   fullRange: TimeRange | null;
 
   photos: PhotoMarker[];
@@ -117,8 +124,8 @@ export const useKiosk = create<KioskState>((set, get) => {
 
       const { timeRange } = get();
       const span =
-        histogram.earliest !== null && histogram.latest !== null
-          ? { from: histogram.earliest, to: histogram.latest }
+        histogram.collection_from !== null && histogram.collection_to !== null
+          ? { from: histogram.collection_from, to: histogram.collection_to }
           : null;
 
       set({
@@ -126,7 +133,8 @@ export const useKiosk = create<KioskState>((set, get) => {
         fullRange: span,
         // First time round, select the whole span: the visitor should see everything first and
         // narrow down afterwards, not the other way round. A selection already made stays
-        // untouched, even when the span changes while panning the map.
+        // untouched -- and since the span belongs to the collection rather than to the viewport,
+        // panning the map no longer moves it underneath.
         timeRange: timeRange ?? span,
       });
     } catch {
@@ -162,9 +170,14 @@ export const useKiosk = create<KioskState>((set, get) => {
     },
 
     setTimeRange(timeRange) {
+      // In die Achse geklammert, damit der Zustand gar nicht erst ungueltig werden kann. Der
+      // Schieber selbst klammert seine Anzeige noch einmal -- siehe kiosk/zeitachse.ts.
+      const bounds = axisBounds(get().fullRange);
+      const next = bounds ? clampRange(timeRange, bounds) : timeRange;
+
       const current = get().timeRange;
-      if (current && current.from === timeRange.from && current.to === timeRange.to) return;
-      set({ timeRange });
+      if (current && current.from === next.from && current.to === next.to) return;
+      set({ timeRange: next });
       scheduleLoad();
     },
 

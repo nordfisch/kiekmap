@@ -46,7 +46,7 @@ beforeEach(() => {
   fotosGeholt.mockReset().mockResolvedValue({ photos: [], total: 0, truncated: false });
   histogrammGeholt
     .mockReset()
-    .mockResolvedValue({ decades: [], undated: 0, earliest: null, latest: null });
+    .mockResolvedValue({ decades: [], undated: 0, collection_from: null, collection_to: null });
   ortGesendet.mockReset().mockResolvedValue({ id: 1 } as PhotoDetail);
 
   useContribute.setState({

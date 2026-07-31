@@ -21,13 +21,9 @@ import {
 
 import { useKiosk } from "../store/kiosk";
 import { t } from "../texte/de";
+import { axisBounds, fraction } from "./zeitachse";
 
 type Handle = "start" | "end";
-
-/** Round to whole years, but widen the span to decades -- that simply reads better. */
-function roundToDecade(year: number, direction: "down" | "up"): number {
-  return direction === "down" ? Math.floor(year / 10) * 10 : Math.ceil(year / 10) * 10;
-}
 
 export function TimeSlider() {
   const histogram = useKiosk((s) => s.histogram);
@@ -46,16 +42,10 @@ export function TimeSlider() {
   const draggingRef = useRef<Handle | null>(null);
   const [dragging, setDragging] = useState<Handle | null>(null);
 
-  const bounds = useMemo(() => {
-    if (!fullRange) return null;
-    return { min: roundToDecade(fullRange.from, "down"), max: roundToDecade(fullRange.to, "up") };
-  }, [fullRange]);
+  const bounds = useMemo(() => axisBounds(fullRange), [fullRange]);
 
   const yearToFraction = useCallback(
-    (year: number) => {
-      if (!bounds || bounds.max === bounds.min) return 0;
-      return (year - bounds.min) / (bounds.max - bounds.min);
-    },
+    (year: number) => (bounds ? fraction(year, bounds) : 0),
     [bounds],
   );
 
@@ -113,6 +103,9 @@ export function TimeSlider() {
     moveHandle(handle, event.clientX);
   }
 
+  // Nur wenn der ganze Bestand kein datiertes Foto hat, gibt es nichts zu schieben. Ein Ausschnitt
+  // ohne datierte Fotos lässt die Achse dagegen stehen und zeigt einfach keine Balken -- die
+  // Ansicht springt dann nicht zwischen zwei Bauformen hin und her.
   if (!bounds || !timeRange || !histogram) {
     return (
       <div className="timeline timeline--empty">
@@ -131,8 +124,14 @@ export function TimeSlider() {
         <span className="timeline__selection">
           {timeRange.from} <span className="timeline__to">{t.timeline.to}</span> {timeRange.to}
         </span>
-        {histogram.undated > 0 && (
+        {histogram.undated > 0 ? (
           <span className="timeline__undated">{t.timeline.undated(histogram.undated)}</span>
+        ) : (
+          // Keine Balken und auch nichts Undatiertes: hier ist schlicht nichts. Das gehört gesagt,
+          // sonst wirkt die leere Achse wie ein Fehler.
+          histogram.decades.length === 0 && (
+            <span className="timeline__undated">{t.timeline.empty}</span>
+          )
         )}
       </div>
 

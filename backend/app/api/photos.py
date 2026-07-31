@@ -164,12 +164,24 @@ def histogram(
         or 0
     )
 
+    # The axis of the slider, and deliberately without the viewport: it spans the whole collection
+    # and stays put while the visitor pans the map. Otherwise the same spot on the slider would
+    # mean a different year after every zoom -- and a selection made earlier would end up outside
+    # its own track. See frontend kiosk/zeitachse.ts.
+    dated = [Photo.status == PhotoStatus.PUBLISHED, Photo.date_from.is_not(None)]
+    collection_from = session.scalar(
+        select(func.min(cast(func.substr(Photo.date_from, 1, 4), Integer))).where(*dated)
+    )
+    collection_to = session.scalar(
+        select(func.max(cast(func.substr(Photo.date_to, 1, 4), Integer))).where(*dated)
+    )
+
     decades = [DecadeCount(decade=int(row.decade), count=row.count) for row in rows]
     return Histogram(
         decades=decades,
         undated=undated,
-        earliest=decades[0].decade if decades else None,
-        latest=decades[-1].decade + 9 if decades else None,
+        collection_from=collection_from,
+        collection_to=collection_to,
     )
 
 

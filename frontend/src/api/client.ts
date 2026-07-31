@@ -54,8 +54,14 @@ export type Histogram = {
   decades: DecadeCount[];
   /** Photos without a date: not on the timeline, but in the "Hilf mit" panel. */
   undated: number;
-  earliest: number | null;
-  latest: number | null;
+  /**
+   * Spanne des ganzen Bestands — die Achse des Zeitschiebers.
+   *
+   * Die Balken zeigen den Kartenausschnitt, die Achse nicht: Sie darf sich nicht unter der Hand
+   * des Besuchers verschieben. Siehe kiosk/zeitachse.ts.
+   */
+  collection_from: number | null;
+  collection_to: number | null;
 };
 
 /** [minLon, minLat, maxLon, maxLat] */
