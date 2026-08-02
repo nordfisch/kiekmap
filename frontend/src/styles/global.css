@@ -349,6 +349,14 @@ button {
   font-size: 0.9rem;
 }
 
+/* Löschen ist die einzige Handlung im Verwaltungsbereich, die etwas aus dem Bestand nimmt. Sie
+ * traegt deshalb Farbe -- aber nur am Rand und in der Schrift, nicht als Flaeche: Ein rot
+ * gefuellter Knopf neben „Speichern" zoege den Blick genau dorthin, wo er nicht hingehoert. */
+.button--danger {
+  border-color: #b4443a;
+  color: #b4443a;
+}
+
 .button--year {
   margin: 0;
   font-variant-numeric: tabular-nums;

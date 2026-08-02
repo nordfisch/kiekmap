@@ -10,7 +10,7 @@ Drei Zusagen tragen diese Stufe, und alle drei brechen still:
      falsche Sicherung einspielt, soll nicht alles verloren haben.
 """
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -293,7 +293,10 @@ class TestErinnerung:
         assert zustand.last_drive == "SANDISK"
 
     def test_alte_sicherung_ist_ueberfaellig(self, settings):
-        alt = datetime.now() - timedelta(days=backup.OVERDUE_DAYS + 4)
+        # UTC, weil `_stamp()` das schreibt und `read_state` es so liest. Mit Ortszeit war dieser
+        # Test zwei Stunden am Tag rot: Ab 22 Uhr MESZ rutscht der umgerechnete Stempel auf den
+        # naechsten Kalendertag, und die Differenz fiel um einen Tag kleiner aus.
+        alt = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=backup.OVERDUE_DAYS + 4)
         (settings.data_dir / backup.STATE_FILE).write_text(
             f'{{"last_backup_at": "{alt.isoformat()}", "last_drive": "X"}}', encoding="utf-8"
         )

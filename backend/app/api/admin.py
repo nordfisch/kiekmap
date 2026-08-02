@@ -7,8 +7,8 @@ three decisions:
     a short secret defensible.
   * Every message in here is German. By the rule in CLAUDE.md this is admin-facing text, so it is
     written for the person at the screen, not for whoever calls the API.
-  * Nothing is deleted. A photo can be hidden, a visitor contribution taken back -- both are
-    reversible, and neither loses the file.
+  * Nothing is really deleted. "Loeschen" sets a status, a visitor contribution can be taken
+    back -- both are reversible, and neither loses the file. See models.PhotoStatus.
 """
 
 import logging
@@ -135,17 +135,22 @@ def overview(admin: Admin, session: Db, settings: Config) -> Overview:
     )
     backup_state = read_backup_state(settings)
 
+    # Deleted photos count in none of these but their own: "28 Fotos insgesamt, davon 7 gelöscht"
+    # reads as if they were still part of the collection, and they are not. Each figure matches
+    # the list its tile leads into -- see list_photos.
+    alive = Photo.status != PhotoStatus.DELETED
+
     return Overview(
-        total=count(),
+        total=count(alive),
         # Both are needed for the map: the view filters on place and time at once.
         on_map=count(
             Photo.lat.is_not(None),
             Photo.date_from.is_not(None),
             Photo.status == PhotoStatus.PUBLISHED,
         ),
-        without_location=count(Photo.lat.is_(None)),
-        without_date=count(Photo.date_from.is_(None)),
-        hidden=count(Photo.status == PhotoStatus.HIDDEN),
+        without_location=count(alive, Photo.lat.is_(None)),
+        without_date=count(alive, Photo.date_from.is_(None)),
+        deleted=count(Photo.status == PhotoStatus.DELETED),
         visitor_changes=session.scalar(
             select(func.count())
             .select_from(Change)
@@ -167,7 +172,7 @@ def overview(admin: Admin, session: Db, settings: Config) -> Overview:
 
 # Ort und Jahr getrennt, nicht als ein "unvollstaendig": Verorten und Datieren sind zwei
 # verschiedene Arbeiten. Wer die Fotos ohne Ort abarbeitet, will die ohne Jahr nicht dazwischen.
-Selection = Literal["all", "without_location", "without_date", "hidden"]
+Selection = Literal["all", "without_location", "without_date", "deleted"]
 
 
 @router.get("/photos", response_model=PhotoAdminList, summary="Photo list for the admin area")
@@ -179,14 +184,21 @@ def list_photos(
     limit: Annotated[int, Query(ge=1, le=MAX_PAGE)] = DEFAULT_PAGE,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> PhotoAdminList:
-    """Newest import first -- that is what someone is looking for right after an upload."""
+    """Newest import first -- that is what someone is looking for right after an upload.
+
+    **Every view except "deleted" leaves deleted photos out**, including "all". Otherwise deleting
+    would change nothing where anyone looks, and the two working lists would keep handing back
+    photos that somebody has just thrown out. "Gelöscht" is the one place they show up.
+    """
     filters = []
-    if show == "without_location":
-        filters.append(Photo.lat.is_(None))
-    elif show == "without_date":
-        filters.append(Photo.date_from.is_(None))
-    elif show == "hidden":
-        filters.append(Photo.status == PhotoStatus.HIDDEN)
+    if show == "deleted":
+        filters.append(Photo.status == PhotoStatus.DELETED)
+    else:
+        filters.append(Photo.status != PhotoStatus.DELETED)
+        if show == "without_location":
+            filters.append(Photo.lat.is_(None))
+        elif show == "without_date":
+            filters.append(Photo.date_from.is_(None))
 
     if term := q.strip():
         pattern = f"%{term}%"

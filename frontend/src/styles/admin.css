@@ -544,6 +544,18 @@ select.field__input {
   min-width: 0;
 }
 
+.photo-row__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+}
+
+.photo-row__actions .button {
+  width: auto;
+  min-width: 7rem;
+  margin: 0;
+}
+
 .photo-row__title {
   font-weight: 600;
 }
@@ -658,6 +670,12 @@ select.field__input {
   width: auto;
   margin: 0;
   min-width: 12rem;
+}
+
+/* Abstand zu „Speichern" und „Abbrechen": Der Knopf soll nicht in Reihe mit ihnen stehen, sonst
+ * trifft ihn irgendwann jemand im Vorbeigehen. */
+.editor__delete {
+  margin-left: auto;
 }
 
 /* --- editor -------------------------------------------------------------- */

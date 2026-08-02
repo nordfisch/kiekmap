@@ -87,10 +87,10 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
           onClick={() => onNavigate({ section: "kiosk" })}
         />
         <Figure
-          label={t.admin.overview.hidden}
-          value={String(data.hidden)}
+          label={t.admin.overview.deleted}
+          value={String(data.deleted)}
           muted
-          onClick={() => onNavigate({ section: "photos", filter: "hidden" })}
+          onClick={() => onNavigate({ section: "photos", filter: "deleted" })}
         />
 
         <Figure

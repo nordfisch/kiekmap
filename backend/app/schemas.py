@@ -406,7 +406,8 @@ class Overview(BaseModel):
     on_map: int
     without_location: int
     without_date: int
-    hidden: int
+    #: Geloescht heisst hier: aus der Ausstellung genommen. Datei und Zeile bleiben.
+    deleted: int
     #: Visitor contributions not yet reverted. Something to look through, not a problem.
     visitor_changes: int
     #: Days, not timestamps: the start page asks "wie lange ist das her?", and the answer depends

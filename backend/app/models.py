@@ -48,8 +48,16 @@ class DatePrecision(StrEnum):
 
 
 class PhotoStatus(StrEnum):
+    """Ob ein Foto zum Bestand gehoert.
+
+    ``DELETED`` heisst *aus der Ausstellung genommen*, nicht *von der Platte entfernt*: Die Zeile
+    bleibt stehen, die Bilddatei liegen, und "Wiederherstellen" holt beides zurueck. Der Status
+    hiess frueher ``hidden`` -- aber niemand im Museumsteam sucht unter "verstecken" nach dem
+    Loeschen, und ein Fehlscan will geloescht werden, nicht versteckt.
+    """
+
     PUBLISHED = "published"
-    HIDDEN = "hidden"
+    DELETED = "deleted"
 
 
 class ImportResult(StrEnum):

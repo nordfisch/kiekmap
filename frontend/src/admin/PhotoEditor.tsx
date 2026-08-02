@@ -24,7 +24,7 @@ type Draft = {
   date: YearInput;
   place: PickedPlace | null;
   tags: string;
-  hidden: boolean;
+  deleted: boolean;
 };
 
 function toDraft(photo: PhotoDetail): Draft {
@@ -40,11 +40,11 @@ function toDraft(photo: PhotoDetail): Draft {
         ? { lat: photo.lat, lon: photo.lon, name: photo.place_name ?? "" }
         : null,
     tags: photo.tags.join(", "),
-    hidden: photo.status === "hidden",
+    deleted: photo.status === "deleted",
   };
 }
 
-function toPatch(draft: Draft): PhotoPatch {
+function toPatch(draft: Draft, deleted = draft.deleted): PhotoPatch {
   return {
     title: draft.title.trim() || null,
     description: draft.description.trim() || null,
@@ -57,7 +57,7 @@ function toPatch(draft: Draft): PhotoPatch {
       .split(",")
       .map((tag) => tag.trim())
       .filter(Boolean),
-    status: draft.hidden ? "hidden" : "published",
+    status: deleted ? "deleted" : "published",
   };
 }
 
@@ -80,15 +80,24 @@ export function PhotoEditor({
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
-  async function save() {
+  async function save(deleted = draft.deleted) {
     setBusy(true);
     setError(null);
     try {
-      onSaved(await patchPhoto(photo.id, toPatch(draft)));
+      onSaved(await patchPhoto(photo.id, toPatch(draft, deleted)));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
+    }
+  }
+
+  /* Löschen speichert und kehrt zurück wie „Speichern" -- nur mit dem anderen Status. Die übrigen
+     Änderungen im Formular gehen dabei mit; sie wegzuwerfen wäre die größere Überraschung.
+     Wiederherstellen fragt nicht zurück: Es macht nichts kaputt. */
+  function remove() {
+    if (window.confirm(t.admin.editor.deleteConfirm(photo.title || t.admin.photos.untitled))) {
+      void save(true);
     }
   }
 
@@ -182,25 +191,34 @@ export function PhotoEditor({
       />
       <p className="admin__note">{t.admin.editor.tagsHint}</p>
 
-      <label className="field__check">
-        <input
-          type="checkbox"
-          checked={draft.hidden}
-          onChange={(event) => change("hidden", event.target.checked)}
-        />
-        {t.admin.editor.hidden}
-      </label>
-      <p className="admin__note">{t.admin.editor.hiddenHint}</p>
-
       {error && <p className="admin__error">{error}</p>}
 
       <div className="editor__actions">
-        <button type="button" className="button button--primary" onClick={save} disabled={busy}>
+        <button
+          type="button"
+          className="button button--primary"
+          onClick={() => void save()}
+          disabled={busy}
+        >
           {t.admin.editor.save}
         </button>
         <button type="button" className="button" onClick={onClose} disabled={busy}>
           {t.admin.editor.cancel}
         </button>
+        {draft.deleted ? (
+          <button type="button" className="button" onClick={() => void save(false)} disabled={busy}>
+            {t.admin.editor.restore}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="button button--danger editor__delete"
+            onClick={remove}
+            disabled={busy}
+          >
+            {t.admin.editor.delete}
+          </button>
+        )}
       </div>
     </div>
   );

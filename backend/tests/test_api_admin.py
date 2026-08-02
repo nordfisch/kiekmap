@@ -81,17 +81,37 @@ class TestUebersicht:
         make_photo(sha="a" * 64)
         make_photo(lat=None, lon=None, sha="b" * 64)
         make_photo(year=None, sha="c" * 64)
-        make_photo(status=PhotoStatus.HIDDEN, sha="d" * 64)
+        make_photo(status=PhotoStatus.DELETED, sha="d" * 64)
         session.commit()
 
         daten = admin_client.get("/api/admin/overview").json()
 
-        assert daten["total"] == 4
+        # Geloeschtes gehoert nicht mehr zum Bestand: drei von vier Fotos, nicht vier.
+        assert daten["total"] == 3
         assert daten["without_location"] == 1
         assert daten["without_date"] == 1
-        # Auf der Karte: mit Ort, mit Jahr und nicht versteckt.
+        # Auf der Karte: mit Ort, mit Jahr und nicht geloescht.
         assert daten["on_map"] == 1
-        assert daten["hidden"] == 1
+        assert daten["deleted"] == 1
+
+    def test_geloeschtes_foto_zaehlt_in_keiner_arbeitskachel(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        """Sonst schickte die Kachel jemanden in eine Liste, in der das Foto gar nicht steht.
+
+        Ein geloeschtes Foto ohne Ort erfuellt beide Bedingungen -- ohne den Statusfilter zaehlte
+        es unter „Ohne Ort" mit, waehrend die Liste dahinter es weglaesst. Die Zahl und die Liste
+        muessen dasselbe sagen.
+        """
+        make_photo(lat=None, lon=None, year=None, status=PhotoStatus.DELETED, sha="e" * 64)
+        session.commit()
+
+        daten = admin_client.get("/api/admin/overview").json()
+
+        assert daten["total"] == 0
+        assert daten["without_location"] == 0
+        assert daten["without_date"] == 0
+        assert daten["deleted"] == 1
 
     def test_zurueckgenommener_beitrag_zaehlt_nicht_mehr(
         self, admin_client: TestClient, session, make_photo
@@ -169,6 +189,50 @@ class TestFotoliste:
         daten = admin_client.get("/api/admin/photos", params={"show": "without_date"}).json()
 
         assert [foto["title"] for foto in daten["photos"]] == ["Ohne Jahr"]
+
+    def test_geloeschtes_foto_steht_in_keiner_anderen_liste(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        """Sonst waere das Loeschen dort wirkungslos, wo ueberhaupt jemand hinsieht.
+
+        Ein geloeschtes Foto ohne Ort und ohne Jahr erfuellt alle drei uebrigen Filter. Ohne den
+        Statusfilter legten die beiden Arbeitslisten es immer wieder zur Bearbeitung vor -- gerade
+        das Foto, das jemand eben aussortiert hat.
+        """
+        make_photo(title="Bleibt", sha="a" * 64)
+        make_photo(
+            title="Geloescht",
+            lat=None,
+            lon=None,
+            year=None,
+            status=PhotoStatus.DELETED,
+            sha="b" * 64,
+        )
+        session.commit()
+
+        def titel(show: str) -> list[str]:
+            daten = admin_client.get("/api/admin/photos", params={"show": show}).json()
+            return [foto["title"] for foto in daten["photos"]]
+
+        assert titel("all") == ["Bleibt"]
+        assert titel("without_location") == []
+        assert titel("without_date") == []
+        assert titel("deleted") == ["Geloescht"]
+
+    def test_wiederhergestelltes_foto_taucht_wieder_auf(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        """Loeschen muss umkehrbar sein -- ein Fehlgriff darf nicht endgueltig sein."""
+        foto = make_photo(title="Zurueck", status=PhotoStatus.DELETED, sha="a" * 64)
+        session.commit()
+
+        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"status": "published"})
+
+        daten = admin_client.get("/api/admin/photos", params={"show": "all"}).json()
+        assert [f["title"] for f in daten["photos"]] == ["Zurueck"]
+        assert (
+            admin_client.get("/api/admin/photos", params={"show": "deleted"}).json()["total"] == 0
+        )
 
     def test_suche_findet_ueber_den_dateinamen(self, admin_client: TestClient, session, make_photo):
         """Nach einem Stapel-Upload sucht man nach dem, was auf dem Scanner stand."""
@@ -352,7 +416,7 @@ class TestFotoBearbeiten:
         foto = make_photo()
         session.commit()
 
-        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"status": "hidden"})
+        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"status": "deleted"})
 
         karte = admin_client.get("/api/photos", params={"bbox": "9.5,53.5,9.8,53.7"}).json()
         assert karte["total"] == 0

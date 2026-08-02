@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { type Selection, fetchAdminPhoto, fetchAdminPhotos } from "../api/admin";
+import { type Selection, fetchAdminPhoto, fetchAdminPhotos, patchPhoto } from "../api/admin";
 import type { PhotoDetail } from "../api/client";
 import { t } from "../texte/de";
 import { Pager } from "./Pager";
@@ -26,7 +26,7 @@ const FILTERS: { value: Selection; label: string }[] = [
   { value: "all", label: t.admin.photos.filterAll },
   { value: "without_location", label: t.admin.photos.filterWithoutLocation },
   { value: "without_date", label: t.admin.photos.filterWithoutDate },
-  { value: "hidden", label: t.admin.photos.filterHidden },
+  { value: "deleted", label: t.admin.photos.filterDeleted },
 ];
 
 export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection }) {
@@ -61,14 +61,35 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
   const scrollArea = useScrollArea();
   const listScroll = useRef(0);
 
+  // Zählt hoch, sobald eine Zeile gelöscht wurde: Der Effekt darunter muss dann noch einmal
+  // laufen, obwohl sich `editing` nicht geändert hat.
+  const [restoreScroll, setRestoreScroll] = useState(0);
+
   useLayoutEffect(() => {
     const area = scrollArea?.current;
     if (area) area.scrollTop = editing ? 0 : listScroll.current;
-  }, [editing, scrollArea]);
+  }, [editing, scrollArea, restoreScroll, data]);
 
   async function open(id: number) {
     listScroll.current = scrollArea?.current?.scrollTop ?? 0;
     setEditing(await fetchAdminPhoto(id));
+  }
+
+  /* Löschen und Wiederherstellen direkt aus der Liste, ohne den Umweg über den Editor -- beim
+     Aussortieren nach einem Import geht es reihenweise. Die Zeile verschwindet danach aus der
+     Ansicht (jeder Filter zeigt entweder Gelöschte oder die anderen), die Liste bleibt aber
+     stehen, wo sie stand: Der nächste Griff soll dieselbe Stelle treffen.
+
+     Nur das Löschen fragt zurück. Wiederherstellen macht nichts kaputt. */
+  async function setDeleted(id: number, title: string | null, deleted: boolean) {
+    if (deleted && !window.confirm(t.admin.editor.deleteConfirm(title || t.admin.photos.untitled))) {
+      return;
+    }
+    const stand = scrollArea?.current?.scrollTop ?? 0;
+    await patchPhoto(id, { status: deleted ? "deleted" : "published" });
+    reload();
+    listScroll.current = stand;
+    setRestoreScroll((n) => n + 1);
   }
 
   if (editing) {
@@ -141,14 +162,33 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
                       {photo.needs_date && (
                         <span className="flag">{t.admin.photos.missingDate}</span>
                       )}
-                      {photo.status === "hidden" && (
-                        <span className="flag flag--muted">{t.admin.photos.hidden}</span>
+                      {photo.status === "deleted" && (
+                        <span className="flag flag--muted">{t.admin.photos.deleted}</span>
                       )}
                     </span>
                   </div>
-                  <button type="button" className="button" onClick={() => void open(photo.id)}>
-                    {t.admin.photos.edit}
-                  </button>
+                  <div className="photo-row__actions">
+                    <button type="button" className="button" onClick={() => void open(photo.id)}>
+                      {t.admin.photos.edit}
+                    </button>
+                    {photo.status === "deleted" ? (
+                      <button
+                        type="button"
+                        className="button"
+                        onClick={() => void setDeleted(photo.id, photo.title, false)}
+                      >
+                        {t.admin.photos.restore}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="button button--danger"
+                        onClick={() => void setDeleted(photo.id, photo.title, true)}
+                      >
+                        {t.admin.photos.delete}
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>

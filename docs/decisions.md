@@ -394,3 +394,30 @@ andere Stelle.
 **Oben liegt das zuletzt bearbeitete Foto.** Die Kartenabfrage sortiert nach `updated_at`; damit
 liegt das eben verortete oder datierte Foto genau dort obenauf, wohin die Karte nach einem Beitrag
 fährt.
+
+## 16. Löschen heißt: aus der Ausstellung genommen, nicht von der Platte entfernt
+
+Es fehlte ein Weg, einen Fehlscan oder ein versehentlich doppelt eingelesenes Bild loszuwerden.
+Es gab nur ein Ankreuzfeld „Verstecken" im Editor — und niemand im Museumsteam sucht unter diesem
+Wort nach dem Löschen.
+
+**Gelöscht wird trotzdem nichts.** Der vorhandene Status heißt jetzt `deleted` statt `hidden`, die
+Bilddatei bleibt liegen, die Datenbankzeile steht, und „Wiederherstellen" holt beides zurück. Das
+ist keine Halbherzigkeit, sondern spart drei Probleme, die echtes Löschen mitbrächte:
+
+- Der SHA-256 bleibt bekannt, ein erneuter Import erkennt die Dublette und bringt das Foto nicht
+  ungefragt zurück.
+- Änderungsprotokoll und Import-Protokoll zeigen weiter auf ein Foto, das es gibt.
+- Die Sicherung braucht keine Sonderregel für einen Papierkorb.
+
+Für eine ehrenamtliche Person, die zweimal im Jahr hier ist, ist der Fehlgriff damit folgenlos.
+
+**Was daraus folgt, und das ist der eigentliche Teil der Entscheidung:** Gelöschte Fotos zählen in
+keiner Kachel der Übersicht mit und stehen in keiner Liste ausser „Gelöscht" — auch nicht in
+„Alle". Sonst wäre das Löschen genau dort wirkungslos, wo überhaupt jemand hinsieht, und die
+beiden Arbeitslisten legten immer wieder das Foto vor, das eben jemand aussortiert hat. Jede Zahl
+sagt dasselbe wie die Liste, in die sie führt.
+
+Der Preis: Es gibt keinen Weg mehr, ein Foto nur *vorübergehend* auszublenden, ohne es „gelöscht"
+zu nennen — etwa, solange die Rechtelage geklärt wird. Wer das braucht, braucht einen dritten
+Status, keine zweite Bedeutung für diesen.

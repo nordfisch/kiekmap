@@ -161,7 +161,7 @@ export const t = {
       onMap: "Auf der Karte zu sehen",
       withoutLocation: "Ohne Ort",
       withoutDate: "Ohne Jahr",
-      hidden: "Versteckt",
+      deleted: "Gelöscht",
       visitorChanges: "Beiträge von Besuchern",
 
       sinceBackup: (days: number | null) => since(days, "der letzten Sicherung", "gesichert"),
@@ -182,15 +182,17 @@ export const t = {
       filterAll: "Alle",
       filterWithoutLocation: "Ohne Ort",
       filterWithoutDate: "Ohne Jahr",
-      filterHidden: "Versteckt",
+      filterDeleted: "Gelöscht",
       found: (shown: number, total: number) =>
         shown === total ? `${total} Fotos` : `${shown} von ${total} Fotos`,
       none: "Keine Fotos gefunden.",
       untitled: "Ohne Titel",
       missingLocation: "Ort fehlt",
       missingDate: "Jahr fehlt",
-      hidden: "Versteckt",
+      deleted: "Gelöscht",
       edit: "Bearbeiten",
+      delete: "Löschen",
+      restore: "Wiederherstellen",
     },
 
     editor: {
@@ -210,14 +212,20 @@ export const t = {
       tags: "Schlagwörter",
       tagsHint: "Mit Komma getrennt.",
       visible: "Auf der Karte zeigen",
-      hidden: "Verstecken",
-      hiddenHint: "Versteckte Fotos bleiben erhalten, sind aber für Besucher nicht zu sehen.",
       fileInfo: (filename: string, width: number, height: number) =>
         `${filename} · ${width} × ${height} Pixel`,
       scanDate: (date: string) => `Aufnahmedatum der Datei: ${date} (datiert das Foto nicht)`,
       save: "Speichern",
       cancel: "Abbrechen",
       saved: "Gespeichert.",
+
+      /* Löschen nimmt das Foto aus der Ausstellung, wirft es aber nicht weg — das sagt die
+         Rückfrage, damit niemand zögert, und der Weg zurück steht daneben. */
+      delete: "Löschen",
+      deleteConfirm: (title: string) =>
+        `„${title}“ löschen? Das Foto verschwindet aus der Karte und aus allen Listen — ` +
+        `die Datei bleibt erhalten und lässt sich unter „Gelöscht“ wiederherstellen.`,
+      restore: "Wiederherstellen",
     },
 
     upload: {

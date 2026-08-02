@@ -25,7 +25,7 @@ export type Overview = {
   on_map: number;
   without_location: number;
   without_date: number;
-  hidden: number;
+  deleted: number;
   visitor_changes: number;
   /** Fertig gerechnete Tage: siehe services/dates.days_since im Backend. */
   days_since_import: number | null;
@@ -148,10 +148,10 @@ export type PhotoPatch = {
   date?: { year: number; month?: number; day?: number; precision: string } | null;
   location?: { lat: number; lon: number; place_name?: string | null } | null;
   tags?: string[];
-  status?: "published" | "hidden";
+  status?: "published" | "deleted";
 };
 
-export type Selection = "all" | "without_location" | "without_date" | "hidden";
+export type Selection = "all" | "without_location" | "without_date" | "deleted";
 
 let token: string | null = null;
 let signedOutHandler: (() => void) | null = null;

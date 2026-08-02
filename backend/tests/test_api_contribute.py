@@ -74,7 +74,7 @@ class TestNaechsteAufgabe:
         assert daten["open_count"] == 0
 
     def test_verstecktes_foto_wird_nicht_vorgelegt(self, client: TestClient, session, make_photo):
-        make_photo(lat=None, lon=None, status=PhotoStatus.HIDDEN, sha="a" * 64)
+        make_photo(lat=None, lon=None, status=PhotoStatus.DELETED, sha="a" * 64)
         session.commit()
 
         assert (

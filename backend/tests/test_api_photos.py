@@ -41,7 +41,7 @@ class TestKartenausschnitt:
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 0
 
     def test_verstecktes_foto_erscheint_nicht(self, client: TestClient, session, make_photo):
-        make_photo(status=PhotoStatus.HIDDEN)
+        make_photo(status=PhotoStatus.DELETED)
         session.commit()
 
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 0

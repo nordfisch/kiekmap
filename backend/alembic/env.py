@@ -7,7 +7,7 @@ Datei wie die Anwendung.
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, event, pool
 
 from alembic import context
 from app.config import get_settings
@@ -44,6 +44,26 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+
+    @event.listens_for(connectable, "connect")
+    def _migrations_without_cascades(dbapi_connection, connection_record) -> None:
+        """Fremdschluessel aus, solange migriert wird -- und das ist kein Detail.
+
+        SQLite kann Spalten und Constraints nicht aendern; Alembic baut die Tabelle deshalb neu:
+        Kopie anlegen, **Original loeschen**, umbenennen. Mit eingeschalteten Fremdschluesseln
+        raeumt genau dieses DROP alles ab, was daran haengt -- ``changes`` mit ON DELETE CASCADE,
+        ``photo_tags`` ebenso, und ``import_log`` verliert seine Verknuepfung durch
+        ON DELETE SET NULL. Der Schaden faellt nicht auf: Die Migration laeuft gruen durch, und
+        erst Wochen spaeter fehlen im Museum alle Besucherbeitraege.
+
+        ``app/db.py`` schaltet die Pruefung fuer *jede* Engine des Prozesses ein, auch fuer diese
+        hier -- deshalb muss sie an dieser Stelle ausdruecklich wieder aus. Im Betrieb bleibt sie
+        selbstverstaendlich an.
+        """
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=OFF")
+        cursor.close()
+
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
