@@ -68,12 +68,6 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
   const { data, error, loading } = useLoaded(useCallback(() => fetchOverview(), []));
   const leave = useAdmin((s) => s.leave);
 
-  /** Abmelden und neu laden: Danach steht die Besucheransicht frisch da. */
-  async function reload() {
-    await leave();
-    window.location.reload();
-  }
-
   if (loading && !data) return <p className="admin__note">{t.admin.loading}</p>;
   if (error) return <p className="admin__error">{error}</p>;
   if (!data) return null;
@@ -140,10 +134,13 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
 
       {/* Im Kiosk gibt es keine Browser-Bedienung -- kein Reload-Knopf, keine Adressleiste, keine
           Tastatur. Ohne diesen Knopf bliebe bei einer verhakten Anzeige nur der Netzstecker (oder
-          fünf Minuten warten, bis der Leerlauf neu lädt). Er meldet zugleich ab, damit danach die
-          Besucheransicht dasteht und nicht die Verwaltung. */}
+          fünf Minuten warten, bis der Leerlauf neu lädt).
+
+          Seit „Verwaltung beenden" selbst neu lädt, tut er technisch dasselbe. Er bleibt trotzdem
+          stehen: Wer eine verhakte Anzeige reparieren will, sucht nach „neu laden" und nicht nach
+          „beenden". Der Knopf ist der Name für den Weg, nicht ein zweiter Weg. */}
       <div className="overview__repair">
-        <button type="button" className="button" onClick={() => void reload()}>
+        <button type="button" className="button" onClick={() => void leave()}>
           {t.admin.overview.reload}
         </button>
         <p className="admin__note">{t.admin.overview.reloadHint}</p>

@@ -39,6 +39,7 @@ type AdminState = {
   askPin: () => void;
   cancelPin: () => void;
   signIn: (pin: string) => Promise<void>;
+  /** Deliberately leaving the admin area. Signs out **and reloads** -- see the action. */
   leave: () => Promise<void>;
   /** Session ended by the backend or by the countdown -- no request left to make. */
   dropSession: () => void;
@@ -102,8 +103,22 @@ export const useAdmin = create<AdminState>((set, get) => ({
       /* Whatever the answer: from here on this browser is out. */
     }
     get().dropSession();
+
+    // Wer die Verwaltung verlässt, hat meist etwas geändert: importiert, datiert, verortet,
+    // etwas versteckt. Die Besucheransicht hat davon nichts mitbekommen -- sie hielt ihre Marker
+    // und ihr Histogramm die ganze Zeit über fest. Ohne das Neuladen stünde also der Bestand von
+    // vorher da, und die naheliegende Erklärung ("es hat nicht geklappt") wäre die falsche.
+    window.location.reload();
   },
 
+  /**
+   * Session ist zu Ende, ohne dass jemand sie beendet hat -- Ablauf der Zeit oder ein vom Backend
+   * abgelehntes Token.
+   *
+   * **Hier darf nicht neu geladen werden**, anders als in ``leave``. Ein abgelaufenes Token aus
+   * der sessionStorage lässt ``restore`` beim Start über ``onAdminSignedOut`` genau hier landen --
+   * ein Neuladen an dieser Stelle lüde die Seite endlos neu.
+   */
   dropSession() {
     setAdminToken(null);
     remember(null);
