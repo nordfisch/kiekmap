@@ -9,9 +9,74 @@ Zusammenhang kostet beim zweiten Anlauf dieselbe Arbeit wie beim ersten.
 
 Nichts hiervon ist terminiert. Die Reihenfolge innerhalb der Abschnitte ist grob nach Gewicht.
 
+Es ist alles Ausbau — mit **einer Ausnahme**: [Gleichnamige Straßen werden zu einer
+verschmolzen](#fehler-gleichnamige-straßen-werden-zu-einer-verschmolzen) ist ein Fehler, der
+Besuchern heute im Museum begegnet.
+
 ---
 
 ## Verwaltung
+
+### Fotos löschen
+
+Bisher gibt es nur „Verstecken". Das ist richtig für ein Foto, das man nicht zeigen will — aber
+nicht für einen Fehlscan, eine doppelt eingelesene Datei oder ein Bild, das gar nicht ins Museum
+gehört. Die bleiben auf ewig im Bestand und werden bei jeder Sicherung mitgeschleppt.
+
+**Wo.** Auf jeden Fall in der Einzelbearbeitungsmaske. Für die Fotoliste wäre ein Mehrfachlöschen
+naheliegend — das braucht dort aber erst eine Mehrfachauswahl, die es heute nicht gibt, und ist
+deshalb der zweite Schritt, nicht der erste.
+
+**Wie: Papierkorb, nicht endgültig.** Die Datenbankzeile verschwindet aus allen Listen, die
+Bilddatei wandert nach `data/geloescht/<Datum>/`. Dasselbe Muster, mit dem das Zurückspielen einer
+Sicherung den bisherigen Stand nach `data/vorher-<Datum>/` legt: Der Fehlgriff einer ehrenamtlichen
+Person, die zweimal im Jahr hier ist, darf nicht unwiderruflich sein.
+
+> **Das widerspricht einer festgehaltenen Zusage.** `backend/app/api/admin.py` beginnt heute mit
+> *„Nothing is deleted. A photo can be hidden, a visitor contribution taken back — both are
+> reversible, and neither loses the file."* Der Papierkorb hält den zweiten Halbsatz ein, den
+> ersten nicht mehr. Der Docstring und der entsprechende Absatz in [decisions.md](decisions.md)
+> sind beim Umsetzen mitzuziehen — nicht stillschweigend zu übergehen.
+
+**Vorher zu klären:**
+
+- **Kommt ein gelöschtes Foto beim nächsten Import zurück?** Der überwachte Eingangsordner und der
+  Stick-Import erkennen Dubletten am SHA-256 des Inhalts. Ist die Zeile weg, ist es keine Dublette
+  mehr — dieselbe Datei würde wieder aufgenommen. Es braucht also entweder eine Sperrliste
+  gelöschter Hashes oder die bewusste Entscheidung, dass ein erneut angebotenes Bild erneut
+  hereinkommt.
+- **Was wird aus Änderungsprotokoll und Import-Protokoll?** Beide verweisen auf `photo_id`.
+  Mitlöschen verliert die Spur, Stehenlassen erzeugt Einträge, die ins Leere zeigen.
+- **Zählt der Papierkorb in die Sicherung?** Eher nicht — sonst wächst der Stick mit dem, was
+  jemand gerade loswerden wollte.
+
+### Sicherung und Wiederherstellung auch als ZIP
+
+Heute geht beides nur über einen USB-Stick. Ein zweiter Weg über den Browser hilft dort, wo kein
+Stick zur Hand ist — und beim Entwickeln ohnehin. Der Pi veröffentlicht Port 80, ein Notebook am
+Netzwerkkabel kommt also an die Verwaltung heran.
+
+**Die Maske übernimmt die Form, die das Importieren schon hat:** zwei gleichrangige Kacheln für
+das Ziel beziehungsweise die Quelle — links Browser/ZIP-Datei, rechts USB-Stick —, darunter **eine
+Fläche an fester Stelle**, die den Fortschritt und das Ergebnis des gewählten Weges zeigt. Damit
+sieht der Sicherungsbereich aus wie der Importbereich, und wer den einen bedient hat, erkennt den
+anderen wieder.
+
+**Umfang: alles, wie auf den Stick** — Fotos, Vorschaubilder und Datenbank in einem Archiv. Eine
+halbe Sicherung wäre gefährlicher als keine, weil sie sich wie eine ganze anfühlt.
+
+**Was dabei verlorengeht, und das ist zu benennen:** Das Archiv ist **nicht inkrementell**. Der
+Stick schreibt beim zweiten Mal nur, was dazugekommen ist, und ist in Sekunden fertig; das ZIP
+packt jedes Mal den ganzen Bestand — bei zweitausend Fotos mehrere Gigabyte. Und ein Abbruch macht
+das Archiv wertlos, während eine abgebrochene Ordner-Sicherung teilweise brauchbar bleibt. Genau
+diese beiden Eigenschaften waren die Begründung für „Ordner statt ZIP" auf dem Stick
+([decisions.md](decisions.md), Punkt 11). Der Browser-Weg ist deshalb die **Ergänzung**, nicht der
+Ersatz, und die Oberfläche sollte das sagen.
+
+**Vorher zu klären:** Wird das Archiv im Speicher gebaut (auf einem Pi mit 2 GB keine gute Idee),
+auf die SD-Karte geschrieben (die dafür Platz braucht) oder im Strom erzeugt? Letzteres geht mit
+ZIP ohne Kompression und ist für JPEGs ohnehin das Richtige — komprimieren bringt bei ihnen
+nichts.
 
 ### Rechte- und Herkunftsangaben pro Foto
 
@@ -30,6 +95,16 @@ als **Vorschlag** markiert werden, nie als Tatsache — sonst entsteht genau der
 EXIF-Regel aus Stufe 3 vermeidet: ein falsch datiertes Foto, das nie zur Korrektur vorgelegt wird,
 weil es als datiert gilt.
 
+### Beim Verlassen der Verwaltung die Besucheransicht neu laden
+
+„Verwaltung beenden" führt heute zurück zur Karte, ohne dass die Ansicht ihre Daten neu holt. Wer
+gerade dreißig Fotos importiert oder eine Datierung korrigiert hat, steht dann vor dem Bestand von
+vorher — und die naheliegende Erklärung, es habe nicht geklappt, ist die falsche.
+
+Der Weg ist da: Der Leerlauf lädt seit `c32748d` die Seite neu, und in der Verwaltung gibt es
+schon einen Knopf „Anzeige neu laden". Es geht also darum, denselben Neuladen beim Verlassen
+auszulösen statt nur den Abschnitt zu wechseln.
+
 ### Perceptual Hash gegen zugeschnittene Dubletten
 
 Der SHA-256 erkennt nur bitgleiche Dateien. Zwei Scans desselben Fotos mit unterschiedlichem
@@ -44,6 +119,89 @@ den Titel.
 ---
 
 ## Besucher-Interface
+
+### Fehler: gleichnamige Straßen werden zu einer verschmolzen
+
+**Der einzige bekannte Fehler auf dieser Seite.** Wer bei der Verortung „Hauptstraße" eingibt und
+den Vorschlag übernimmt, bekommt einen Punkt weit ausserhalb des erwarteten Bereichs.
+
+**An den Daten nachgemessen** (`data/places.json`, Stand 29. Juli 2026):
+
+| | |
+|---|---|
+| Adressen namens „Hauptstraße" im Index | **153** |
+| davon räumlich getrennte Straßen | **17**, in verschiedenen Dörfern |
+| Einträge der Art `strasse` dafür | **1** |
+| dessen Punkt | 53,64050 / 9,66954 |
+| Entfernung zur **nächstgelegenen** echten Hauptstraße | **490 m** — er liegt auf keiner |
+| Entfernung zu Holms Ortsmitte | **2,26 km** |
+| Holms eigene Hauptstraße läge bei | 53,6205 / 9,6727 — 200 m von der Mitte |
+
+**Zwei Ursachen, beide in `tiles/build-places.py`:**
+
+1. **Gleiche Namen werden zu einem Punkt verrechnet.** Die Segmente werden nach `(name, kind)`
+   gruppiert, und aus ihren Mittelpunkten wird der **Durchschnitt** gebildet. Die Bounding Box der
+   Region reicht über Holm hinaus — das war schon der Grund für die 7686 Adressen —, es liegen also
+   siebzehn Hauptstraßen darin. Der Durchschnitt landet zwischen ihnen, auf keiner einzigen.
+2. **`out center` liefert die Mitte des Rechtecks, nicht einen Punkt auf der Straße.** Overpass
+   gibt zu jedem Weg den Mittelpunkt seiner Bounding Box zurück. Bei einer kurzen, geraden Straße
+   fällt das kaum auf; bei einer gebogenen oder L-förmigen liegt der Punkt neben der Fahrbahn.
+
+**Der zweite Schritt rettet es nicht — er erbt denselben Fehler.** `places.housenumbers()` sucht
+die Nummern über `Place.street == street.name`, also über den **Namen**. Wer „Hauptstraße" antippt,
+bekommt deshalb alle **153** Hausnummern aus siebzehn Dörfern angeboten, jede Nummer mehrfach. Die
+Auswahl ist dann ein Münzwurf, und das neue Abschnittsraster („1–13", „15–24") sortiert Nummern
+nebeneinander, die kilometerweit auseinanderliegen.
+
+**Derselbe Mechanismus trifft ausgedehnte Naturobjekte.** Die „Elbe" liegt im Index bei
+53,68963 / 9,50909 — ausserhalb der Bounding Box. Ein Beitrag dorthin würde vom Backend mit
+„Dieser Ort liegt ausserhalb der Karte." abgewiesen (`app/api/contribute.py:142`).
+
+**Gewünschtes Verhalten:** Bei mehreren gleichnamigen Straßen wird die des Museumsortes genommen.
+Der vorgeschlagene Punkt liegt auf dem **Straßenverlauf selbst**, in der Mitte der Strecke — nicht
+in der Mitte des umschließenden Vierecks. Und die Hausnummern gehören zu *dieser* Straße, nicht zu
+allen gleichnamigen.
+
+**Vorher zu klären:**
+
+- **Woran wird „die aus Holm" erkannt?** Der Ortsname steht in `region.json`, es darf also nichts
+  Ortsspezifisches in den Code. Drei Wege, in absteigender Verlässlichkeit: über die Grenzrelation
+  des Ortes (`admin_level`), über `addr:city`/`is_in` an den Segmenten (nicht überall gepflegt),
+  oder rein geometrisch über die Nähe zu `region.center`. Wahrscheinlich braucht es eine Kette aus
+  zweien davon.
+- **Oder werden gleichnamige Straßen gar nicht zusammengeworfen?** Die Alternative wäre, jede der
+  siebzehn als eigenen Eintrag zu führen und in der Trefferliste zu unterscheiden. Für ein Museum,
+  dessen Fotos aus einem Dorf stammen, ist das vermutlich zu viel Auswahl — aber es ist die
+  ehrlichere Datenhaltung, und die Entscheidung gehört vor den Code.
+- **Die Hausnummern brauchen eine Zuordnung zur Straße, die nicht der Name ist.** Heute gibt es
+  keine, deshalb der Namensvergleich. Naheliegend: beim Bauen des Index jede Adresse dem
+  nächstgelegenen gleichnamigen Segment zuordnen und die Beziehung mitschreiben.
+
+**Was der Umbau kostet:** Für einen Punkt auf der Strecke reicht `out center` nicht, es braucht
+`out geom` — die vollständige Geometrie aller Wege. Das vergrößert die Overpass-Antwort deutlich.
+`places.json` muss dadurch nicht wachsen: Gespeichert wird weiterhin nur der ausgerechnete Punkt.
+
+**Nach dem Umbau:** `make places` neu laufen lassen und den Index mit `python -m app.cli places`
+einlesen — auf dem Pi über `update.sh`. **Fotos, die vorher auf einen falschen Punkt verortet
+wurden, bleiben dort.** Sie sind an ihrem `place_name` erkennbar und über die Fotoliste zu
+korrigieren; wie viele es sind, ist vor dem Umbau zu zählen.
+
+### Abbruch in der Hausnummern-Auswahl
+
+Sobald eine Straße gewählt ist, zeigt der Beitragsbereich nur noch das Knopfraster der
+Hausnummern. Zurück führt von dort einzig „Reicht so" — und das ist **keine** Abbruchtaste,
+sondern eine Antwort: Es behält den Pin auf der Straße.
+
+Wer die Straße versehentlich getroffen hat oder es sich anders überlegt, braucht einen Weg zurück
+zur **Startansicht von „Hilf mit"** — Suchfeld und Karte, ohne gesetzten Pin. Der Knopf gehört
+neben „Reicht so" und muss sich davon deutlich unterscheiden; die beiden bedeuten das Gegenteil
+voneinander.
+
+**Dazu, und das ist der subtilere Teil:** Setzt der Besucher währenddessen einen Pin auf der Karte,
+soll dieser die begonnene Hausnummern-Auswahl **übersteuern**. Heute läuft beides nebeneinander
+her — der Pin wandert, das Knopfraster bleibt stehen, und der nächste Tipp auf eine Hausnummer
+wirft den eben gesetzten Punkt wieder weg. Ein Tipp auf die Karte ist die bestimmtere Aussage: Dort
+hat jemand gerade gezielt.
 
 ### Historische Karte als umschaltbare Grundkarte
 
@@ -95,6 +253,39 @@ als auch „x Fotos ohne Jahr".
 Dazu ein Erbe aus dem Umbau der Zeitachse: Der Satz „Für diesen Ausschnitt gibt es keine datierten
 Fotos." steht in dieser Kopfzeile. Fällt sie, muss er woanders hin — oder ganz weg, denn die Karte
 sagt mit „Hier gibt es noch keine Fotos im gewählten Zeitraum." ohnehin dasselbe.
+
+### Detailansicht: der Schließen-Knopf soll doch nach oben rechts
+
+Der Umbau vom 2. August (`b20ff5c`) hat den Schließen-Knopf aus der Ecke in die Kopfzeile der
+Textspalte geholt. Das steht in der Flucht, aber es liest sich nicht wie ein Schließen-Knopf — die
+gewohnte Stelle ist oben rechts, und dort soll er wieder hin.
+
+**Die Ansicht bekommt dafür drei gedachte Zeilen:**
+
+```
+┌───────────────────────────────────────────────────────────┐
+│                                          [× Schließen]    │  ← Kopfzeile
+├───────────────────────────────┬───────────────────────────┤
+│                               │  Titel                    │
+│         Bild, so groß         │  1943                     │
+│         wie es geht           │  Friedhofsweg 30          │  ← Mittelzeile
+│                               │  Beschreibung … (scrollt) │
+│                               │                           │
+├───────────────────────────────┴───────────────────────────┤
+│           [Vorheriges]  3 von 8  [Nächstes]               │  ← Fußzeile
+└───────────────────────────────────────────────────────────┘
+```
+
+- **Kopfzeile:** rechtsbündig der Schließen-Knopf, sonst nichts.
+- **Mittelzeile:** links etwa zwei Drittel das Bild, so groß, dass es **oben/unten oder
+  rechts/links anstößt** — je nachdem, was zuerst greift. Rechts daneben der Textbereich, oben
+  bündig mit der Oberkante des Bildes, weiterhin scrollend.
+- **Fußzeile:** die Blätterknöpfe mittig **unter dem Bild** — das bleibt, wie es seit `b20ff5c`
+  ist, und gilt weiterhin: nicht mittig im Schirm.
+
+**Vorher zu klären:** Kopf- und Fußzeile brauchen ihre Höhe auch dann, wenn nichts darin steht —
+sonst springt das Bild in der Größe, je nachdem ob ein Stapel offen ist oder ein einzelnes Foto.
+Feste Höhen sind der einfache Weg; sie kosten das Bild oben und unten je gut drei Zentimeter.
 
 ### „Hilf mit:" hat seine Akzentfarbe verloren
 
