@@ -174,7 +174,7 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
                     {photo.status === "deleted" ? (
                       <button
                         type="button"
-                        className="button"
+                        className="button button--restore"
                         onClick={() => void setDeleted(photo.id, photo.title, false)}
                       >
                         {t.admin.photos.restore}

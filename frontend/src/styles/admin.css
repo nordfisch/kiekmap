@@ -672,9 +672,10 @@ select.field__input {
   min-width: 12rem;
 }
 
-/* Abstand zu „Speichern" und „Abbrechen": Der Knopf soll nicht in Reihe mit ihnen stehen, sonst
- * trifft ihn irgendwann jemand im Vorbeigehen. */
-.editor__delete {
+/* „Löschen" beziehungsweise „Wiederherstellen" -- an derselben Stelle, weil sie einander
+ * abloesen. Abgesetzt von „Speichern" und „Abbrechen": In einer Reihe mit ihnen traefe den
+ * Loeschen-Knopf irgendwann jemand im Vorbeigehen. */
+.editor__status {
   margin-left: auto;
 }
 

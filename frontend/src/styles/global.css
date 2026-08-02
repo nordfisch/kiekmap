@@ -357,6 +357,14 @@ button {
   color: #b4443a;
 }
 
+/* Das Gegenstueck: Wiederherstellen holt zurueck, was Loeschen genommen hat. Dieselbe Bauform --
+ * Farbe nur am Rand und in der Schrift --, damit die beiden als Paar zu erkennen sind, und im
+ * Kontrast zu ihm abgestimmt: Beide liegen bei rund 5:1 gegen Weiss. */
+.button--restore {
+  border-color: #3f7a4e;
+  color: #3f7a4e;
+}
+
 .button--year {
   margin: 0;
   font-variant-numeric: tabular-nums;

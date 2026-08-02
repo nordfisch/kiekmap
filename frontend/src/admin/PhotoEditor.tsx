@@ -206,13 +206,18 @@ export function PhotoEditor({
           {t.admin.editor.cancel}
         </button>
         {draft.deleted ? (
-          <button type="button" className="button" onClick={() => void save(false)} disabled={busy}>
+          <button
+            type="button"
+            className="button button--restore editor__status"
+            onClick={() => void save(false)}
+            disabled={busy}
+          >
             {t.admin.editor.restore}
           </button>
         ) : (
           <button
             type="button"
-            className="button button--danger editor__delete"
+            className="button button--danger editor__status"
             onClick={remove}
             disabled={busy}
           >
