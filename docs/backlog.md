@@ -1,7 +1,8 @@
 # Offene Punkte
 
-Was noch aussteht, nach **Verwaltung · Besucher-Interface · Infrastruktur**. Was schon gebaut ist,
-steht in [history.md](history.md).
+Was noch aussteht, nach **Verwaltung · Besucher-Interface · Infrastruktur · Entwicklung**. Die
+ersten drei betreffen das Programm, der letzte die Arbeit daran. Was schon gebaut ist, steht in
+[history.md](history.md).
 
 Jeder Eintrag trägt mit, was beim Aufgreifen sonst erst wieder herausgefunden werden müsste. Das
 ist der Grund, warum er hier steht und nicht in einer Stichwortliste: Ein Punkt ohne seinen
@@ -498,6 +499,187 @@ nachgemessen; die Variable `--crest` hat für schmale Schirme bereits eine Media
 Gegen SD-Karten-Korruption bei Stromausfall. Der Pi wird im Museum nicht heruntergefahren, sondern
 ausgeschaltet — das ist auf Dauer der wahrscheinlichste Ausfallgrund.
 
-### Lizenz des Projekts
+---
 
-Noch festzulegen. Alle verwendeten Komponenten sind Open Source.
+## Entwicklung
+
+Nicht das Programm, sondern die Arbeit daran: wie das Projekt geordnet, veröffentlicht und
+weitergegeben wird.
+
+### Gute Beispieldaten für Entwicklung und Test
+
+Heute gibt es sechs Testbilder in `backend/tests/fixtures/`, und die decken genau die schwierigen
+Fälle der Import-Pipeline ab: Scan ohne EXIF, Scan mit Scandatum von 2019, hochkant über
+EXIF-Orientierung, CMYK-TIFF, Graustufen, Datei ohne Bild. Sie sind mit
+`tests/fixtures/erzeuge_testbilder.py` **synthetisch erzeugt** — für die Pipeline richtig, für
+alles andere nutzlos: Man sieht auf ihnen nichts, was auf einer Karte an einer Stelle Sinn ergäbe.
+
+Was fehlt, ist ein **Bestand zum Ansehen**: genug Fotos, an verschiedenen Orten, mit und ohne
+Datierung, mit und ohne Ort, damit Karte, Zeitschieber, Cluster, Stapel und der „Hilf mit"-Bereich
+in einem realistischen Zustand geprüft werden können. Bisher stammt jeder solche Test aus einer von
+Hand befüllten `data/`, die niemand sonst hat.
+
+> **Das README verspricht das schon.** In seiner Kommandotabelle steht `make seed` —
+> „Beispielfotos importieren". **Dieses Ziel gibt es im Makefile nicht.** Entweder es entsteht mit
+> diesem Punkt, oder die Zeile muss weg.
+
+**Vorher zu klären — und das ist der Knoten:** Welche Fotos? Echte historische Aufnahmen aus Holm
+gehören dem Museum und sind nicht ohne Weiteres in einem Repo zu veröffentlichen. Drei Wege:
+
+1. **Weiter synthetisch**, aber ansehnlich: erzeugte Bilder mit erkennbarem Motiv und Beschriftung
+   („Beispiel 3 — Mühlenweg, 1930er"). Rechtlich unbedenklich, im Repo tragbar, sieht aber nie aus
+   wie ein Museum.
+2. **Gemeinfreie historische Fotos** aus Wikimedia Commons oder einem Landesarchiv, auf Holmer
+   Koordinaten gelegt. Realistisch, braucht aber je Bild eine Lizenzprüfung und die Namensnennung
+   im Repo.
+3. **Ein kleiner echter Satz mit Erlaubnis des Museums**, klar als solcher gekennzeichnet und mit
+   schriftlicher Freigabe.
+
+Dazu gehört: die vorhandenen Tests auf den neuen Satz ziehen und ihn **committen** — ein
+Beispielbestand, den man erst herstellen muss, wird nicht benutzt.
+
+### Versionierung, Releaseprozess und Veröffentlichung des Codes
+
+**Stand:** `development.md` kündigt SemVer-Tags und Conventional Commits an, beides zusammen
+versioniert. Tatsächlich gibt es nach 62 Commits **keinen einzigen Tag**; `package.json` und
+`pyproject.toml` stehen beide auf `0.1.0`, und `deploy/docker-compose.yml` baut Images mit
+`${PHOTOMAP_VERSION:-dev}`. Es fehlt also nicht die Entscheidung, sondern ihre Umsetzung: Was löst
+eine Version aus, wer setzt den Tag, und wie kommt die Nummer in die beiden Dateien und in das
+Image?
+
+Daran hängt der Updateweg auf den Pi, der schon gebaut ist (`deploy/pi/update.sh` spielt ein
+Update vom Stick ein) — er braucht etwas, das er einspielen kann.
+
+**Die zweite, größere Frage: Wie öffentlich wird das Repo?** Zu recherchieren sind die üblichen
+Vorgehensweisen und ihre Vor- und Nachteile. Die Bandbreite reicht von „alles öffentlich, von der
+ersten Zeile an" bis „privates Arbeitsrepo, öffentlich nur die Release-Stände". Kurz gefasst:
+Vollständige Offenheit ist die übliche und die ehrlichste Form, sie macht aber jede Zwischenstufe
+und jeden Fehlversuch dauerhaft sichtbar; ein reines Release-Repo schützt davor, verliert aber die
+Historie, die dieses Projekt gerade auszeichnet — die Commit-Nachrichten hier tragen die
+Begründungen.
+
+**Zwei Dinge sind vor jeder Veröffentlichung zu klären, und eines davon ist ein echter Blocker:**
+
+- **`frontend/public/logo.png` ist das Wappen der Gemeinde Holm.** Ein Gemeindewappen ist kein
+  freies Werk, sondern ein hoheitliches Zeichen; seine Verwendung braucht die Erlaubnis der
+  Gemeinde, und in einem öffentlichen Repo liegt es für jeden zum Mitnehmen. Der Code ist darauf
+  vorbereitet — im Code steht nirgends, was auf dem Bild zu sehen ist —, die Datei müsste also nur
+  durch einen Platzhalter ersetzt werden. **Vor der Veröffentlichung zu entscheiden, nicht danach:
+  aus der Git-Historie bekommt man sie nur mit einem Rewrite wieder heraus.**
+- **Die Historie ist sonst sauber.** Keine `.env`, keine Laufzeitdaten, keine Kartendateien, keine
+  echten Fotos — nur `deploy/.env.example` und die sechs synthetischen Testbilder. Das ist vor dem
+  Veröffentlichen noch einmal zu prüfen, aber der Ausgangspunkt ist gut.
+
+### Lizenz des Projekts und der verwendeten Komponenten
+
+Noch festzulegen. Zwei getrennte Fragen, die oft verwechselt werden:
+
+- **Unter welcher Lizenz steht Photomap selbst?** Für ein Projekt, das ausdrücklich für ein zweites
+  Museum nachnutzbar sein soll, ist das keine Formalie — ohne Lizenz ist Nachnutzung rechtlich
+  nicht erlaubt, auch wenn der Code offen daliegt.
+- **Was verlangen die verwendeten Komponenten?** Bisher steht im README nur der Satz „Alle
+  verwendeten Komponenten sind Open Source" — das ist geglaubt, nicht geprüft. Nachzusehen sind
+  mindestens MapLibre GL (BSD-3), PMTiles, `@protomaps/basemaps` samt der mitgelieferten
+  **Schriften und Symbole** unter `frontend/public/basemaps/`, die OpenStreetMap-Daten in Kacheln
+  und Ortsindex (ODbL — verlangt Namensnennung, die auf der Karte steht) und die
+  Python-Abhängigkeiten. Die Kombination entscheidet, welche Lizenz für Photomap überhaupt möglich
+  ist.
+
+Gehört anschließend in eine `LICENSE`-Datei und in den Lizenzabschnitt des README.
+
+### Deployment auf einem Webserver evaluieren
+
+Das System dem Museumsteam **zunächst online** anbieten — zur Erprobung und vor allem zum Aufbau
+der Fotodatenbank, bevor ein Pi im Ausstellungsraum steht. Die Bilder könnten so über Monate von
+zu Hause aus eingepflegt werden.
+
+Technisch ist der Weg kurz: Es läuft schon in Containern (`make prod`), das Frontend ist statisch,
+nginx steht davor, und die Datenbank ist eine Datei. Die Fragen liegen woanders:
+
+- **Zugriffsschutz.** Die PIN ist für einen Touchscreen in einem Museumsraum gebaut — vier Ziffern,
+  gesichert durch eine Sperre nach fünf Fehlversuchen. Im offenen Netz ist das zu wenig, und vor
+  allem schützt sie nur die Verwaltung: Der „Hilf mit"-Bereich nimmt **Beiträge ohne jede
+  Anmeldung** an. Online wäre das eine offene Tür. Naheliegend ist ein Schutz **vor** der ganzen
+  Anwendung (HTTP-Basisauthentifizierung im nginx oder ein Zugang über VPN), nicht ein zweiter
+  Schutz in der Anwendung.
+- **Was aus dem Offline-Versprechen wird.** Die Regel „null Anfragen an eine fremde Herkunft" bleibt
+  erfüllt, sie kostet online nur nichts mehr. Umgekehrt gilt: Kartendatei und Ortsindex sind auf
+  einen Rechner im Ausstellungsraum zugeschnitten — 4,6 MB Kacheln und 1,5 MB Ortsindex über eine
+  langsame Leitung sind spürbar, aber tragbar.
+- **Wie die Daten zurück auf den Pi kommen.** Das ist der eigentliche Zweck, und dafür gibt es das
+  Werkzeug bereits: Sicherung und Wiederherstellung. Zu prüfen ist, ob der Weg auch als
+  Übertragungsweg taugt — dann wäre der Umzug vom Webserver ins Museum ein bekannter Vorgang und
+  kein Sonderfall.
+
+### `architecture.md` anlegen
+
+Es gibt keine Stelle, an der jemand nachlesen kann, **aus welchen Teilen das System besteht und wie
+sie zusammenspielen**. Wer heute einsteigt, muss sich das aus vier Dateien zusammensuchen.
+
+Beschreiben: die Bausteine (Backend, Frontend, Kacheln und Ortsindex, Container, Kiosk-Schicht auf
+dem Pi), ihre jeweilige Aufgabe, und die Wege dazwischen — welche Daten wann wohin fließen, was
+zur Bauzeit entsteht und was zur Laufzeit, was auf dem Entwicklungsrechner läuft und was auf dem
+Gerät.
+
+**Die Abgrenzung ist der eigentliche Teil der Arbeit**, sonst entsteht eine vierte Datei, die
+dasselbe noch einmal sagt:
+
+| Datei | beantwortet |
+|---|---|
+| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? |
+| [development.md](development.md) | *Wie* arbeitet man daran? (Einrichtung, Tests, Konventionen) |
+| **architecture.md** | *Was* gibt es, und wie greift es ineinander? |
+| [history.md](history.md) | *Wie* ist es dazu gekommen? |
+
+Konkret heißt das: Der Abschnitt „Aufbau" in `development.md` ist eine Ordnerliste und bleibt eine;
+`architecture.md` erklärt stattdessen die Zusammenhänge und verweist für Begründungen nach
+`decisions.md`, statt sie zu wiederholen.
+
+### Backlog ordnen und klassifizieren
+
+Diese Datei wächst. Sie mischt inzwischen Fehler, konkrete Aufgaben, Entscheidungsfragen und Ideen
+in einer Gliederung, die nur nach Bereich sortiert. Was fehlt:
+
+- **Trennung nach Art:** Fehler, Aufgabe, offene Frage, Idee. Fehler stehen heute nur durch eine
+  Namenskonvention („Fehler: …") vorn.
+- **Einordnung nach Dringlichkeit und Wichtigkeit** — die beiden sind nicht dasselbe, und gerade
+  hier fällt es auf: Der Straßenfehler ist wichtig *und* dringend (er trifft Besucher heute), die
+  historische Karte ist wichtig und gar nicht dringend, die Akzentfarbe von „Hilf mit:" ist beides
+  nicht.
+- **Stabile Kennungen**, damit ein Punkt referenzierbar wird — in einem Commit, in einer
+  Besprechung, in einem Auftrag an einen Coding-Agent. Heute geht das nur über die Überschrift, und
+  die ändert sich.
+
+**Das ist ausdrücklich die Vorstufe zu einem Ticketsystem**, nicht sein Ersatz. Solange alles in
+einer Datei steht, liest es sich am Stück und überlebt einen Kontextverlust — genau der Grund,
+warum die Pläne früher so geführt wurden. Der Umzug lohnt, sobald mehr als eine Person daran
+arbeitet oder die Reihenfolge häufiger wechselt als die Inhalte.
+
+### Sprach- und Namenskonsistenz prüfen
+
+Die Sprachregelung in [CLAUDE.md](../CLAUDE.md) ist klar, die Umsetzung ist es nicht. **Der
+deutlichste Fall sind die Dateinamen**, für die Englisch vorgeschrieben ist — tatsächlich stehen
+sie fast genau halbe-halbe:
+
+| | |
+|---|---|
+| deutsch | `fokus.ts`, `hausnummern.ts`, `jahrzehnte.ts`, `stapel.ts`, `zeitachse.ts`, `jahr.ts` (samt Tests), `tests/fixtures/erzeuge_testbilder.py` |
+| englisch | `idle.ts`, `mapStyle.ts`, `filename.ts`, `format.ts`, `paging.ts`, `scrollArea.tsx`, `useLoaded.ts` |
+
+Beide Gruppen sind Module derselben Art — kleine reine Fachlogik neben den Komponenten. Es gibt
+also keine Regel dahinter, nur die Reihenfolge ihrer Entstehung. Zu entscheiden ist, ob die Regel
+gilt (dann sechs Umbenennungen) oder ob Fachlogik-Module die Ausnahme sind wie die Testnamen (dann
+gehört das in die Regel geschrieben).
+
+**Dasselbe für Kommentare.** Sie sollen englisch sein; in den jüngeren Dateien sind viele deutsch,
+und teils stehen beide Sprachen in einer Datei nebeneinander. Auch hier: entweder nachziehen oder
+die Regel ändern — aber nicht offenlassen, denn genau daran orientiert sich, wer als Nächstes etwas
+hinzufügt.
+
+**Dazu die Sinnfrage.** Nicht nur die Sprache eines Dateinamens ist zu prüfen, sondern ob er sagt,
+was drinsteht: `jahr.ts` enthält die Jahrzehnt-Regel des Verwaltungsbereichs, `format.ts` formatiert
+Tagesangaben, `paging.ts` heißt so, weil `pager.ts` auf macOS mit `Pager.tsx` kollidierte. Solche
+Namen kosten jedes Mal einen Blick in die Datei.
+
+**Commit-Nachrichten** sind deutsch und ohne Umlaute — das ist bisher durchgehalten; ein Durchgang
+über `git log` sollte es bestätigen statt es anzunehmen.
