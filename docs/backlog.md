@@ -17,38 +17,92 @@ heute im Museum.
 
 ## Verwaltung
 
-### Fotos löschen
+### Fotos löschen — über den bisherigen „Versteckt"-Status
 
-Bisher gibt es nur „Verstecken". Das ist richtig für ein Foto, das man nicht zeigen will — aber
-nicht für einen Fehlscan, eine doppelt eingelesene Datei oder ein Bild, das gar nicht ins Museum
-gehört. Die bleiben auf ewig im Bestand und werden bei jeder Sicherung mitgeschleppt.
+Es fehlt ein Weg, einen Fehlscan, eine doppelt eingelesene Datei oder ein Bild loszuwerden, das
+gar nicht ins Museum gehört. Es gibt nur die Ankreuzbox „Verstecken" im Editor, und niemand aus
+dem Museumsteam sucht unter diesem Wort nach dem Löschen.
 
-**Wo.** Auf jeden Fall in der Einzelbearbeitungsmaske. Für die Fotoliste wäre ein Mehrfachlöschen
-naheliegend — das braucht dort aber erst eine Mehrfachauswahl, die es heute nicht gibt, und ist
-deshalb der zweite Schritt, nicht der erste.
+**Gelöscht wird deshalb nichts — der vorhandene Status wird umbenannt und anders bedient.** Die
+Bilddatei bleibt liegen, die Datenbankzeile bleibt stehen, und beides ist über „Wiederherstellen"
+zurückzuholen.
 
-**Wie: Papierkorb, nicht endgültig.** Die Datenbankzeile verschwindet aus allen Listen, die
-Bilddatei wandert nach `data/geloescht/<Datum>/`. Dasselbe Muster, mit dem das Zurückspielen einer
-Sicherung den bisherigen Stand nach `data/vorher-<Datum>/` legt: Der Fehlgriff einer ehrenamtlichen
-Person, die zweimal im Jahr hier ist, darf nicht unwiderruflich sein.
+**Was sich ändert**
 
-> **Das widerspricht einer festgehaltenen Zusage.** `backend/app/api/admin.py` beginnt heute mit
-> *„Nothing is deleted. A photo can be hidden, a visitor contribution taken back — both are
-> reversible, and neither loses the file."* Der Papierkorb hält den zweiten Halbsatz ein, den
-> ersten nicht mehr. Der Docstring und der entsprechende Absatz in [decisions.md](decisions.md)
-> sind beim Umsetzen mitzuziehen — nicht stillschweigend zu übergehen.
+- Im Editor **entfällt die Ankreuzbox** „Verstecken" samt ihrem Hinweis. An ihre Stelle tritt eine
+  Schaltfläche neben „Speichern" und „Abbrechen": **„Löschen"** — bei einem bereits gelöschten Foto
+  heißt sie **„Wiederherstellen"**.
+- **„Löschen" fragt zurück.** „Wiederherstellen" nicht: Es macht nichts kaputt.
+- Ein Druck darauf ändert den Status, **speichert und kehrt zur Liste zurück** — genau so, wie es
+  „Speichern" tut.
+- In der Fotoliste heißt der Filter **„Gelöscht"** statt „Versteckt", ebenso die Marke an der Zeile
+  und die Kachel in der Übersicht.
+- **Kein Mehrfachlöschen.** Dafür bräuchte die Liste erst eine Mehrfachauswahl; das ist ein eigener
+  Schritt und ausdrücklich nicht Teil dieses Punktes.
 
-**Vorher zu klären:**
+**Warum diese Variante die bessere ist**
 
-- **Kommt ein gelöschtes Foto beim nächsten Import zurück?** Der überwachte Eingangsordner und der
-  Stick-Import erkennen Dubletten am SHA-256 des Inhalts. Ist die Zeile weg, ist es keine Dublette
-  mehr — dieselbe Datei würde wieder aufgenommen. Es braucht also entweder eine Sperrliste
-  gelöschter Hashes oder die bewusste Entscheidung, dass ein erneut angebotenes Bild erneut
-  hereinkommt.
-- **Was wird aus Änderungsprotokoll und Import-Protokoll?** Beide verweisen auf `photo_id`.
-  Mitlöschen verliert die Spur, Stehenlassen erzeugt Einträge, die ins Leere zeigen.
-- **Zählt der Papierkorb in die Sicherung?** Eher nicht — sonst wächst der Stick mit dem, was
-  jemand gerade loswerden wollte.
+Die zuvor hier eingeplante Fassung — Zeile weg, Datei in einen Papierkorb — hatte drei offene
+Fragen. **Alle drei entfallen**, weil nichts verschwindet:
+
+| bisher offen | jetzt |
+|---|---|
+| Kommt ein gelöschtes Foto beim nächsten Import zurück? | Nein. Die Zeile bleibt, der SHA-256 ist bekannt, der Import erkennt die Dublette. |
+| Was wird aus Änderungs- und Import-Protokoll? | Nichts. Beide zeigen weiter auf ein Foto, das es gibt. |
+| Zählt der Papierkorb in die Sicherung? | Keine Sonderregel — die Datei wird gesichert wie jede andere. |
+
+Und die Zusage in `backend/app/api/admin.py` — *„Nothing is deleted"* — **bleibt wahr**. Sie muss
+beim Umsetzen nur präziser werden: Gelöscht heißt hier *aus der Ausstellung genommen*, nicht *von
+der Platte entfernt*. Das gehört so auch nach [decisions.md](decisions.md), denn es ist die
+eigentliche Entscheidung.
+
+**Umzubenennen**
+
+| | heute | neu |
+|---|---|---|
+| `app/models.py:52` | `PhotoStatus.HIDDEN = "hidden"` | `DELETED = "deleted"` |
+| `app/api/admin.py:170` | `Selection = Literal[…, "hidden"]` | `…, "deleted"` |
+| `app/api/admin.py:148,188` | Zählung und Filter | mitziehen |
+| `app/schemas.py:409` | `Overview.hidden` | `deleted` |
+| `api/admin.ts:28,151,154` | Typen im Frontend | mitziehen |
+| `texte/de.ts` | fünf Stellen „Versteckt" / „Verstecken" | „Gelöscht" / „Löschen" |
+| `admin/PhotoEditor.tsx`, `Overview.tsx`, `PhotoCare.tsx` | Ankreuzbox, Kachel, Filter, Marke | siehe oben |
+
+**Der teuerste Teil ist die Migration.** Die initiale Migration schreibt den Wert in einem
+Check-Constraint fest (`status IN ('published', 'hidden')`,
+`alembic/versions/85f5993e7f4f_initial_schema.py:60`). SQLite kann Constraints nicht ändern —
+Alembic baut die Tabelle dazu neu (`render_as_batch`), und dabei gehen Details verloren, wenn man
+nicht hinsieht (siehe [development.md](development.md), Abschnitt „Datenbank"). Dazu ein `UPDATE`
+auf die vorhandenen Zeilen.
+
+*Die billigere Alternative wäre, nur die Oberfläche umzubenennen und den Datenbankwert `hidden` zu
+lassen.* Das spart die Migration, hinterlässt aber genau die Sorte Diskrepanz, über die später
+jemand stolpert: In der API steht `hidden`, auf dem Schirm „Gelöscht". Empfehlung ist deshalb die
+durchgängige Umbenennung — sie ist einmal Arbeit und danach nie wieder ein Thema.
+
+**Was beim Umsetzen auffallen wird**
+
+- **Die Arbeitslisten zeigen gelöschte Fotos mit.** `list_photos()` filtert nur „Ohne Ort" und
+  „Ohne Jahr" auf ihr jeweiliges Feld, nicht auf den Status (`app/api/admin.py:183–189`). Heute ist
+  das bei „Versteckt" halbwegs vertretbar; sobald es „Gelöscht" heißt, bekommt jemand, der die
+  Liste „Ohne Ort" abarbeitet, **gelöschte Fotos zur Bearbeitung vorgelegt**. Zu entscheiden:
+  Schließen die Arbeitslisten Gelöschte künftig aus? Und was heißt dann „Alle" — mit oder ohne?
+- **„Fotos insgesamt" zählt Gelöschte mit** (`app/api/admin.py:148`). „28 Fotos insgesamt, davon 7
+  gelöscht" liest sich anders als „28 Fotos, davon 7 versteckt": Gelöschtes gehört im Kopf nicht
+  mehr zum Bestand. Die Zahl gehört vermutlich um die Gelöschten bereinigt — dann muss aber die
+  Summe der Kacheln weiterhin aufgehen.
+- **„Speichern und zurück" heißt: die übrigen Änderungen im Formular auch.** Wer den Titel ändert
+  und dann „Löschen" drückt, speichert beides. Das ist vermutlich richtig, sollte aber eine
+  Entscheidung sein und keine Nebenwirkung.
+- **Wird eine gelöschte Datei erneut eingelesen, meldet der Import „war schon da"** und ändert
+  nichts — das Foto bleibt gelöscht. Für jemanden, der es bewusst noch einmal einliest, um es
+  zurückzuholen, ist diese Meldung irreführend. Sie sollte den Fall benennen.
+
+> **Was dabei verlorengeht, und das ist zu wollen:** Es gibt danach keinen Weg mehr, ein Foto nur
+> *vorübergehend* auszublenden, ohne es „gelöscht" zu nennen — etwa, solange die Rechtelage geklärt
+> wird. Ein Status trägt dann zwei Bedeutungen. Das ist vertretbar, weil „Verstecken" bisher
+> praktisch nur zum Aussortieren benutzt wurde; wer es anders sieht, braucht einen dritten Status
+> statt einer Umbenennung.
 
 ### Sicherung und Wiederherstellung auch als ZIP
 
