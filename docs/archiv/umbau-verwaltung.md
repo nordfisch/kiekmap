@@ -1,5 +1,9 @@
 # Umbau des Verwaltungsmenüs
 
+> **Archiviert am 2. August 2026.** Was daraus gebaut wurde, steht in
+> [history.md](../history.md), Teil II; was offen blieb, in [backlog.md](../backlog.md). Diese
+> Datei bleibt als Originalplan lesbar und wird nicht mehr gepflegt.
+
 > **Umgesetzt am 29. Juli 2026.** Der Plan steht unverändert; was beim Bauen dazukam, steht am
 > Ende unter „Beim Bauen dazugekommen".
 

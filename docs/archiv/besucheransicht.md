@@ -1,5 +1,9 @@
 # Besucheransicht: Fehler und Verbesserungen
 
+> **Archiviert am 2. August 2026.** Was daraus gebaut wurde, steht in
+> [history.md](../history.md), Teil IV; was offen blieb, in [backlog.md](../backlog.md). Diese
+> Datei bleibt als Originalplan lesbar und wird nicht mehr gepflegt.
+
 Sechs Punkte, die beim Durchsehen der Kioskansicht aufgefallen sind — ein handfester Fehler, zwei
 Sackgassen in der Bedienung und drei Verbesserungen. Die Liste ist vollständig.
 

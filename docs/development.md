@@ -1,8 +1,8 @@
 # Entwicklung
 
 Für Menschen, die an Photomap arbeiten. Warum die Dinge so sind, steht in
-[decisions.md](decisions.md); was noch kommt, im [Stufenplan](stufenplan.md); wie man hier
-arbeitet, hier.
+[decisions.md](decisions.md); wie es dazu gekommen ist, in [history.md](history.md); was noch
+kommt, im [backlog.md](backlog.md); wie man hier arbeitet, hier.
 
 ## Einrichtung
 
@@ -102,6 +102,15 @@ make lint          # ruff
 
 Alle drei beschreiben Fehler, die im Museum aufgefallen wären, nicht in der Entwicklung.
 
+**Der Offline-Test ist die wichtigste Prüfung des Projekts** und lässt sich nicht automatisieren:
+Netz trennen, Karte bewegen, Fotos öffnen, einen Beitrag abgeben — und danach in den DevTools
+nachsehen, dass keine Anfrage an eine fremde Herkunft gegangen ist.
+
+```js
+performance.getEntriesByType('resource')
+  .filter(e => !e.name.startsWith(location.origin) && !e.name.startsWith('data:')).length  // 0
+```
+
 **Fixtures.** `make_photo` erzeugt Datenbankzeilen ohne Dateien (schnell, für Abfragetests),
 `sample_image` kopiert ein echtes Testbild (für die Import-Pipeline). Die Testbilder in
 `backend/tests/fixtures/` decken bewusst die schwierigen Fälle ab: Scan ohne EXIF, Scan mit
@@ -143,6 +152,30 @@ frontend/src/
 ```
 
 **Faustregel:** Wenn sich etwas ohne HTTP testen lässt, gehört es nach `services/`.
+
+## Am laufenden System prüfen
+
+Erfahrungen aus den letzten Umbauten, damit sie nicht zweimal gemacht werden müssen:
+
+- **Die Admin-PIN ist lokal 4711**, und in die Verwaltung führt ein Klick auf das Wappen
+  (`.admin-gate`). Eine eigene PIN erzeugt `python -m app.cli pin`.
+- **Ein Klick auf die Karte setzt bei laufender Ortsfrage einen Pin.** Zum Zoomen deshalb die
+  Bedienelemente oder das Mausrad nehmen — sonst legt man beim Prüfen versehentlich einen
+  Besucherbeitrag an, den nachher jemand in der Moderation zurücknehmen muss.
+- Für den Import einen Prüfstick anlegen statt einen echten zu suchen:
+  ```bash
+  hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil attach teststick.dmg
+  ```
+  Dazu `PHOTOMAP_MEDIA_DIR=/Volumes` in `backend/.env` — steht dort schon.
+
+Wer die Ansicht über einen Browser fernsteuert (Coding-Agents tun das):
+
+- Dienste über die Vorschau-Werkzeuge starten (`backend`, `frontend` aus `.claude/launch.json`),
+  nicht über die Shell.
+- Der Screenshot-Kompositor zeichnet nach einer Navigation oft verkleinert. Ein Setzen der
+  Fenstergröße erzwingt einen sauberen Neuaufbau.
+- Zustand geht zwischen zwei Aufrufen der JavaScript-Konsole verloren. Einen Ablauf deshalb **in
+  einem** Aufruf durchspielen — anmelden, klicken, messen.
 
 ## Was leicht schiefgeht
 

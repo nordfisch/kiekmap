@@ -9,21 +9,28 @@ man einen USB-Stick einsteckt und einen Knopf drückt.
 ## Was der Besucher sieht
 
 ```
-┌────────────────────────────────────────┬──────────────┐
-│                                        │  HILF MIT    │
-│         Karte des Ortes                │              │
-│         Fotos an ihrem Aufnahmeort     │  [Foto]      │
-│         Tippen öffnet sie groß         │  "Wo ist     │
-│                                        │   das?"      │
-├────────────────────────────────────────┤              │
-│  1880 ├──●━━━━━━━━━━━━━━━●──┤ 1990     │  [Karte][×]  │
-└────────────────────────────────────────┴──────────────┘
+┌──────────────┬────────────────────────────────────────┐
+│ [Wappen]     │  1920 ├──●━━━━━━━━━━━━━━━●──┤ 2019     │
+│ Bilder aus   │                                        │
+│ HOLM         │                                        │
+├──────────────┼────────────────────────────────────────┤
+│  HILF MIT:   │                                        │
+│              │         Karte des Ortes                │
+│  [Foto]      │         Fotos an ihrem Aufnahmeort     │
+│  "Wo ist     │         Tippen öffnet sie groß         │
+│   das?"      │                                        │
+│              │                                        │
+│  [Karte][×]  │                                        │
+└──────────────┴────────────────────────────────────────┘
 ```
 
-Karte zoomen und den Zeitraum-Schieber bewegen filtert die Fotos. Rechts fragt der
-„Hilf mit"-Bereich nach fehlenden Angaben — *„Wo ist das?"*, *„Von wann ist dieses Bild?"* —, denn
-bei historischen Scans steht das nirgends in der Datei. Wer den Ort kennt, ergänzt die Datenbank im
-Vorbeigehen.
+Karte zoomen und den Zeitraum-Schieber bewegen filtert die Fotos. Der Schieber steht über der
+Karte, die er filtert — nicht über dem Beitragsbereich. Links fragt der „Hilf mit"-Bereich nach
+fehlenden Angaben — *„Wo ist das?"*, *„Wann war das?"* —, denn bei historischen Scans steht das
+nirgends in der Datei. Wer den Ort kennt, ergänzt die Datenbank im Vorbeigehen. Ist nichts mehr
+offen, fällt der Bereich weg und die Karte nimmt die volle Breite.
+
+Das Wappen führt die linke Spalte an und ist zugleich der Weg in die Verwaltung.
 
 ## Aufbau
 
@@ -71,8 +78,9 @@ Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in
 [docs/operations.md](docs/operations.md). Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen
 ist [docs/usermanual.md](docs/usermanual.md).
 
-Warum die Technik so gewählt ist, steht in [docs/decisions.md](docs/decisions.md).
-Was noch kommt, im [Stufenplan](docs/stufenplan.md).
+Warum die Technik so gewählt ist, steht in [docs/decisions.md](docs/decisions.md); wie es dazu
+gekommen ist, in [docs/history.md](docs/history.md). Was noch offen ist, im
+[docs/backlog.md](docs/backlog.md).
 
 ## Lizenz
 

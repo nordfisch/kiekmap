@@ -1,8 +1,12 @@
 # Stufenplan
 
+> **Archiviert am 2. August 2026.** Was daraus gebaut wurde, steht in
+> [history.md](../history.md); was offen blieb, in [backlog.md](../backlog.md). Diese Datei bleibt
+> als Originalplan lesbar und wird nicht mehr gepflegt.
+
 Der Bauplan des Projekts: was fertig ist, was noch kommt, und woran man erkennt, dass eine Stufe
-fertig ist. Das *Warum* der technischen Entscheidungen steht in [decisions.md](decisions.md), das
-*Wie* der Arbeit in [development.md](development.md).
+fertig ist. Das *Warum* der technischen Entscheidungen steht in [decisions.md](../decisions.md), das
+*Wie* der Arbeit in [development.md](../development.md).
 
 Jede Stufe endet in einem lauffähigen, committeten Zustand.
 
@@ -54,7 +58,7 @@ Wappen führt die linke Spalte an und ist zugleich der Weg in den Admin-Bereich.
 | — | [Vorgemerkt](#vorgemerkt): historische Karte | gewollt, nicht eingeplant |
 | 11 | Ausbau nach Bedarf | offen |
 
-Was in den fertigen Stufen entstanden ist, steht im [CHANGELOG](../CHANGELOG.md).
+Was in den fertigen Stufen entstanden ist, steht im [CHANGELOG](../../CHANGELOG.md).
 
 ---
 
@@ -72,14 +76,14 @@ Bestandsaufnahme nach der Sprachumstellung. Umgesetzt:
   `open_count` gelesen.
 - **CLI-Ausgaben bleiben deutsch.** Den Erstimport führt auch das Museumsteam aus.
 
-Die Konventionstabellen in [CLAUDE.md](../CLAUDE.md) und [development.md](development.md) nennen die
+Die Konventionstabellen in [CLAUDE.md](../../CLAUDE.md) und [development.md](../development.md) nennen die
 Regel; ein Kommentar in `app/api/photos.py` erklärt sie an der Stelle, wo beide Sorten Meldungen
 nebeneinander stehen.
 
 Nicht angefasst und weiterhin richtig so: Fehlermeldungen an Besucher und Kuratoren, das
 Import-Protokoll, die Ordnernamen `_erledigt`/`_problem` und die Datumsbeschriftungen. Letztere
 sitzen architektonisch auf der falschen Seite für Mehrsprachigkeit — siehe
-[adaption.md](adaption.md).
+[adaption.md](../adaption.md).
 
 ---
 
@@ -183,7 +187,7 @@ sichern, inkrementell erneuern, zurückspielen, Beiseitelegen des bisherigen Sta
 der Abnahme brauchen das Gerät und wandern damit in Stufe 10:
 
 - **Das Einhängen auf dem Pi.** udev-Regel und Skript liegen unter `deploy/pi/`, sind aber
-  mangels Pi noch nicht gelaufen. Beschreibung in [operations.md](operations.md).
+  mangels Pi noch nicht gelaufen. Beschreibung in [operations.md](../operations.md).
 - **Der Bedienbarkeitstest mit der Zielgruppe** und die Wiederherstellung auf ein zweites,
   leeres Gerät.
 
@@ -255,7 +259,7 @@ erledigt sind, weil die Notiz dann erzählt, was daran wirklich dran war.
 
 Umgesetzt wie geplant: zwei Schritte, „Reicht so" als vollwertige Antwort, Adressen in der freien
 Suche erst ab einer Ziffer. Begründung und Fallstricke stehen jetzt in
-[decisions.md](decisions.md), Punkt 13.
+[decisions.md](../decisions.md), Punkt 13.
 
 Was der Plan nicht wusste: Es sind **7686 Adressen**, nicht „einige hundert bis zweitausend" — die
 Bounding Box reicht über Holm hinaus. Der Ortsindex wuchs von 827 auf 8513 Einträge, `places.json`
@@ -264,7 +268,7 @@ Hausnummern.
 
 ### ~~„Weiß ich nicht" wechselt die Frage~~ ✅ erledigt
 
-Umgesetzt in [`frontend/src/store/contribute.ts`](../frontend/src/store/contribute.ts). Der
+Umgesetzt in [`frontend/src/store/contribute.ts`](../../frontend/src/store/contribute.ts). Der
 Fallstrick war der vermutete: Läuft eine der beiden Fragen leer, muss das Laden auf die andere
 zurückfallen — sonst stünde „Zurzeit ist alles vollständig" auf dem Schirm, während Hunderte Fotos
 auf eine Jahreszahl warten. Der Rückfall greift jetzt bei jedem Laden, nicht nur beim Wechseln, und

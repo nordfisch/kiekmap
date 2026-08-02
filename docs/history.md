@@ -127,6 +127,11 @@ Ein 404 auf ein gelöschtes Foto landet im Overlay des Besuchers — deutsch. Ei
 sieht nur, wer die API selbst aufruft — englisch. Die CLI ist die Ausnahme in der Ausnahme: Den
 Erstimport führt auch das Museumsteam aus, ihre Ausgaben bleiben deutsch.
 
+**Nebenbei ein Fehler, der schwer zu fassen war:** Marker verschwanden gelegentlich von der Karte.
+Der `load`-Rückruf konnte eine bereits entfernte Karteninstanz an die Ebenen weiterreichen — die
+Vorschaubilder wurden dann sogar geladen, waren aber nie zu sehen. Seither hat der Rückruf einen
+`disposed`-Riegel, der später beim Fokus-Effekt (Teil IV, Punkt 4) noch einmal gebraucht wurde.
+
 ## Stufe 8 — Admin-Bereich mit Stapel-Upload
 
 `2d237ff` · Klick auf das Ortswappen, PIN auf einem Zahlenfeld mit großen Tasten, Sitzung mit
@@ -208,16 +213,19 @@ stünde „Zurzeit ist alles vollständig" auf dem Schirm, während Hunderte Fot
 warten. Der Rückfall greift jetzt bei **jedem** Laden, nicht nur beim Wechseln — und behebt
 denselben Fehler damit auch nach einem abgegebenen Beitrag.
 
-## Zwei Fehler aus dem laufenden Betrieb
+## Der Dank lief ins Leere
 
-`c9271f8` und der `load`-Rückruf:
+`c9271f8` · **Karte und Zeitleiste blieben nach einem Besucherbeitrag stehen.** Der Dank versprach
+„Das Foto ist jetzt auf der Karte", zu sehen war es aber erst, wenn jemand die Karte verschob und
+damit eine neue Abfrage auslöste — also gerade bei den älteren Besuchern, für die der Bereich
+gebaut ist, gar nicht. Der unmittelbare Effekt, der überhaupt der Grund für den „Hilf mit"-Bereich
+ist, lief damit ins Leere.
 
-- **Marker verschwanden gelegentlich von der Karte.** Der `load`-Rückruf konnte eine bereits
-  entfernte Karteninstanz an die Ebenen weiterreichen. Die Vorschaubilder wurden dann sogar
-  geladen, waren aber nie zu sehen.
-- **Karte und Zeitleiste blieben nach einem Besucherbeitrag stehen.** Der Dank versprach „Das Foto
-  ist jetzt auf der Karte", zu sehen war es aber erst, wenn jemand die Karte verschob — also
-  gerade bei den älteren Besuchern, für die der Bereich gebaut ist, gar nicht.
+`refresh()` lädt seither Marker **und** Histogramm nach: Ein verortetes Foto wandert aus „ohne
+Ort" heraus, ein datiertes aus „ohne Jahr" in einen Jahrzehnt-Balken. Nicht entprellt, anders als
+beim Kartenverschieben — ein Beitrag ist eine einzelne bewusste Handlung, und genau die soll sofort
+sichtbar werden. Bei einem abgelehnten Beitrag (HTTP 409, jemand war schneller) wird nicht
+nachgeladen; es hat sich nichts geändert.
 
 ## Kartenstil „Papier"
 

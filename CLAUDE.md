@@ -142,7 +142,8 @@ Sprache kosten würde und ab wann sich Modularisierung lohnt.
 
 Fertig: Stufen 0–10 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
 Zeitschieber, „Hilf mit" mit Hausnummern, Sprachregelung, Admin-Bereich mit Stapel-Upload,
-USB-Sicherung, Kiosk-Betrieb). Als Nächstes Stufe 11 und die Vormerkungen im Stufenplan.
+USB-Sicherung, Kiosk-Betrieb), dazu der Umbau des Verwaltungsmenüs und zwei Runden Nachbesserungen
+an Verwaltung und Besucheransicht. Was als Nächstes ansteht, steht im Backlog.
 
 **Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
 ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,
@@ -154,5 +155,8 @@ anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md).
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.
 
-**Der vollständige Bauplan mit Abnahmekriterien steht in [docs/stufenplan.md](docs/stufenplan.md).**
-Was schon entstanden ist, im Änderungsprotokoll [CHANGELOG.md](CHANGELOG.md).
+**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — nach Verwaltung,
+Besucher-Interface und Infrastruktur geordnet, jeder Punkt mit dem, was beim Aufgreifen sonst erst
+wieder herausgefunden werden müsste. Wie das Vorhandene entstanden ist und was dabei anders kam
+als geplant, steht in [docs/history.md](docs/history.md); was das Programm kann, im
+Änderungsprotokoll [CHANGELOG.md](CHANGELOG.md).

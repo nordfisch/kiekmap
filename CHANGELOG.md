@@ -208,6 +208,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Seite. Vorher hörten alle drei still auf — die Fotoliste schrieb „60 von 214 Fotos", an die
   übrigen 154 kam niemand heran. Der Filterwechsel fängt wieder auf Seite eins an, und wer den
   letzten Eintrag der letzten Seite abarbeitet, rutscht auf die letzte noch vorhandene
+- Die Dokumentation ist neu geordnet. Die Dateinamen folgen jetzt der Konvention und sind englisch
+  (`operations.md`, `development.md`, `usermanual.md`); der Inhalt bleibt deutsch, denn er richtet
+  sich an Menschen. Aus den drei Plandokumenten, die alle Erledigtes mit Offenem mischten, sind
+  **`docs/history.md`** (was gebaut wurde, in der Reihenfolge der Arbeit, und was dabei anders kam
+  als geplant) und **`docs/backlog.md`** (was offen ist, nach Verwaltung, Besucher-Interface und
+  Infrastruktur) geworden. Die Originalpläne liegen unter `docs/archiv/`
 - Gespeicherte Zeitstempel sind durchgängig UTC — auch die der Sicherungsdatei und der Kopfdaten
   auf dem Stick, die bisher Ortszeit schrieben. „Wie lange her" zählt **Kalendertage** entlang der
   deutschen Tagesgrenze: eine Sicherung von gestern Abend ist „1 Tag", nicht „Heute"
