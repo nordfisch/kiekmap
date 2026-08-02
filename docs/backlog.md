@@ -176,6 +176,58 @@ einlesen — auf dem Pi über `update.sh`. **Fotos, die vorher auf einen falsche
 wurden, bleiben dort.** Sie sind an ihrem `place_name` erkennbar und über die Fotoliste zu
 korrigieren; wie viele es sind, ist vor dem Umbau zu zählen.
 
+### Tastatur: was ist ohne sie erreichbar, und wollen wir eine?
+
+**Die ganze Besucheransicht hat genau ein Eingabefeld** — die Ortssuche in
+`kiosk/LocationTask.tsx:159`. Alles andere ist Knopf: Zeitschieber, Jahrzehnte, Jahre,
+Hausnummern, Marker, Blättern, Schließen. Diese eine Stelle entscheidet also die ganze Frage.
+
+**Ohne Tastatur bleibt der Beitragsbereich vollständig bedienbar** — aber auf dem zweiten Weg:
+Pin auf die Karte tippen statt Straßennamen suchen. Datieren geht ohnehin nur über Knöpfe. Es
+fehlt also keine *Funktion*, es fehlt der bequemere von zwei Wegen zum selben Ziel. Zu prüfen ist,
+ob das in der Praxis stimmt: Wer den Hof auf dem Foto kennt, aber nicht weiß, wo er auf einer
+Karte liegt, kommt über den Pin **nicht** ans Ziel. Für den ist die Suche der einzige Weg.
+
+**Zu klären, in dieser Reihenfolge:**
+
+1. **Ist der Zustand konsistent?** Ein Suchfeld, das ohne Tastatur nichts annimmt, sieht aus wie
+   ein defektes Bedienelement — schlimmer als gar keins. Wenn keine Tastatur kommt, gehört es
+   entweder weg oder muss sagen, dass hier getippt werden kann.
+2. **Echte Tastatur oder Bildschirmtastatur?** Eine echte Tastatur im Ausstellungsraum ist ein
+   Gegenstand, der wegkommt, verschmutzt und nach Büro aussieht; sie öffnet ausserdem Tastenwege
+   in Chromium, die der Kiosk gerade zumacht (F11, Strg-W, Alt-Tab). Eine Bildschirmtastatur
+   kostet Fläche, muss aber nur dort erscheinen, wo sie gebraucht wird — und ist bei
+   Touchbedienung das Erwartete.
+3. **Chromium unter `cage` blendet keine Bildschirmtastatur ein.** Es gibt keine vom System; sie
+   müsste im Frontend gebaut werden — ein Tastenraster wie das PIN-Feld, aber mit Buchstaben und
+   Umlauten. Der Aufwand ist überschaubar, die Fläche ist das Problem.
+
+> **Der Zusammenhang, der die Entscheidung mitbestimmt:** Der Verwaltungsbereich hat **13**
+> Eingabefelder in sieben Dateien — Titel, Beschreibung, Schlagwörter, Suche, Jahr, Ortssuche. Die
+> sind ohne Tastatur nicht zu bedienen. Wer Fotos am Gerät pflegen will, braucht also ohnehin
+> eine; die PIN auf dem Zahlenfeld ändert daran nichts. Denkbar ist deshalb: **keine Tastatur für
+> Besucher, eine ausleihbare für die Pflege** — dann muss die Besucheransicht ohne auskommen, und
+> Punkt 1 ist zu beantworten.
+
+### Braucht der Kiosk einen eigenen Reload-Knopf?
+
+Auf dem Besucherschirm gibt es heute keinen Weg, die Anzeige zurückzusetzen. Es gibt drei
+Umwege: fünf Minuten warten (der Leerlauf lädt neu), die PIN eingeben und die Verwaltung wieder
+verlassen (lädt seit `a3a5be7` ebenfalls neu), oder den Netzstecker.
+
+Für einen Besucher, der sich verhakt hat, sind alle drei keine Antwort. Für eine ehrenamtliche
+Person, die danebensteht, reicht der Weg über die Verwaltung — aber nur, wenn sie die PIN weiß.
+
+**Was dagegen spricht**, und deshalb ist es eine Frage und keine Aufgabe: Ein Knopf im
+Besucherbild, den fast niemand braucht, wird trotzdem gedrückt — von Kindern zuerst. Er nimmt
+Fläche, und er wirft die Arbeit weg, die gerade jemand angefangen hat. Die Ansicht kann sich
+ausserdem kaum noch verhaken: Der Leerlauf lädt neu statt zurückzusetzen, seit `c32748d`.
+
+**Der naheliegende Mittelweg wäre eine unauffällige Geste** — ein langer Druck auf das Wappen etwa.
+Genau diese Bauform wurde in Stufe 8 für den Verwaltungszugang **verworfen**, weil eine unsichtbare
+Geste etwas ist, das Ehrenamtliche sich merken müssten (siehe [history.md](history.md), Stufe 8).
+Wer sie hier wieder aufgreift, sollte das wissen und begründen.
+
 ### Abbruch in der Hausnummern-Auswahl
 
 Sobald eine Straße gewählt ist, zeigt der Beitragsbereich nur noch das Knopfraster der
@@ -192,6 +244,41 @@ soll dieser die begonnene Hausnummern-Auswahl **übersteuern**. Heute läuft bei
 her — der Pin wandert, das Knopfraster bleibt stehen, und der nächste Tipp auf eine Hausnummer
 wirft den eben gesetzten Punkt wieder weg. Ein Tipp auf die Karte ist die bestimmtere Aussage: Dort
 hat jemand gerade gezielt.
+
+### Die Dankmeldung: brauchen wir sie, und stimmt sie immer?
+
+**Zuerst die Tatsache, weil die Vermutung eine andere war:** Den Dank gibt es bei **beiden**
+Beiträgen. `submitLocation()` und `submitDate()` gehen durch dieselbe Funktion `contribute()`
+(`store/contribute.ts:136`), die ihn mit dem jeweiligen Text auslöst — „Danke! Das Foto ist jetzt
+auf der Karte." beziehungsweise „… auf der Zeitleiste.". Es ist also **nichts zu vereinheitlichen**;
+die Wege sind schon einer.
+
+Warum der Eindruck entstanden ist, ist trotzdem die interessante Spur — und dahinter steckt ein
+handfester Fall:
+
+**Beim Datieren eines Fotos ohne Ort ist der Dank eine falsche Zusage.** `rangeForPhoto()` in
+`kiosk/fokus.ts:36` gibt für ein Foto ohne Koordinaten `null` zurück, die Ansicht stellt sich also
+bewusst *nicht* ein — richtig so, denn ein Foto ohne Ort steht auf keiner Karte. Auf dem Schirm
+steht dann aber „Das Foto ist jetzt auf der Zeitleiste", und sichtbar wird nichts. Beim Verorten
+fährt die Karte sichtbar heran; beim Datieren springt bestenfalls der Schieber, und in diesem Fall
+passiert gar nichts. Das ist dieselbe Sorte Fehler, die beim Verorten schon einmal behoben wurde
+(siehe [history.md](history.md), Teil IV, Punkt 4) — nur an der anderen Frage.
+
+Im Museumsbestand ist das **nicht** der Randfall: Ein frisch importierter Scan hat typischerweise
+weder Ort noch Jahr, und welche der beiden Fragen zuerst kommt, entscheidet der Zufall.
+
+**Zu klären:**
+
+- **Braucht es die Meldung überhaupt?** Sie steht 2,2 Sekunden und blendet den Beitragsbereich so
+  lange aus. Die eigentliche Rückmeldung ist die Ansicht selbst — die Karte fährt hin, das Foto
+  taucht auf. Wo das eintritt, ist der Satz vielleicht überflüssig; wo es *nicht* eintritt, ist er
+  irreführend. Beides spricht gegen ihn, aus entgegengesetzten Richtungen.
+- **Falls sie bleibt: was sagt sie im Fall ohne Ort?** Ehrlich wäre etwa „Danke! Sobald jemand
+  weiß, wo das war, erscheint es auf der Karte." — das benennt zugleich, was noch fehlt, und
+  könnte den nächsten Beitrag anstoßen.
+- **Die 2,2 Sekunden sind zugleich die Fokusdauer.** Zoom und Schieberstellung leben genau so
+  lange wie der Dank, ohne zweiten Zeitgeber (`showThanks` in `store/contribute.ts:123`). Wer die
+  Meldung streicht, muss diesen Zeitgeber ersetzen, sonst kehrt die Karte nie zurück.
 
 ### Historische Karte als umschaltbare Grundkarte
 
