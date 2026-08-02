@@ -93,11 +93,31 @@ export function LocationTask() {
     setBlock(null);
   }
 
-  function keepStreet() {
+  /** Den zweiten Schritt schliessen. Was mit dem Pin geschieht, entscheidet der Aufrufer. */
+  function closeNumbers() {
     setStreet(null);
     setNumbers([]);
     setBlock(null);
   }
+
+  /** „Doch nicht": zurueck auf Anfang, ohne gesetzten Punkt. Das Gegenteil von „Reicht so". */
+  function cancelStreet() {
+    closeNumbers();
+    setPin(null);
+  }
+
+  /**
+   * Ein Tipp auf die Karte beendet die Hausnummern-Auswahl.
+   *
+   * Sonst liefe beides nebeneinander her: Der Pin waere versetzt, das Knopfraster stuende noch da,
+   * und der naechste Tipp auf eine Hausnummer wuerfe den eben gesetzten Punkt wieder weg. Ein Tipp
+   * auf die Karte ist die bestimmtere Aussage -- dort hat jemand gerade gezielt.
+   *
+   * Erkennbar am fehlenden Etikett: Nur die Ortssuche setzt eines (siehe store/contribute.ts).
+   */
+  useEffect(() => {
+    if (street && pinLabel === null) closeNumbers();
+  }, [street, pinLabel]);
 
   // Second step: the street is set, now the number. The search steps aside meanwhile, so that
   // nothing but the numbers is on offer.
@@ -143,8 +163,14 @@ export function LocationTask() {
           </button>
         )}
 
-        <button type="button" className="button" onClick={keepStreet}>
+        <button type="button" className="button" onClick={closeNumbers}>
           {t.location.noHouseNumber}
+        </button>
+
+        {/* Leiser als „Reicht so", weil es keine Antwort ist, sondern ein Rueckweg -- dieselbe
+            Form wie „Anderer Abschnitt" darueber. */}
+        <button type="button" className="button button--quiet" onClick={cancelStreet}>
+          {t.location.cancelStreet}
         </button>
       </div>
     );

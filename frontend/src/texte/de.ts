@@ -98,6 +98,8 @@ export const t = {
     askArea: (street: string) => `In welchem Abschnitt vom ${street}?`,
     otherArea: "Anderer Abschnitt",
     noHouseNumber: "Reicht so — die Straße genügt",
+    /** Das Gegenteil von „Reicht so": nichts behalten, zurück auf Anfang. */
+    cancelStreet: "Doch nicht — von vorn",
     otherStreet: "Andere Straße",
     kinds: {
       strasse: "Straße",

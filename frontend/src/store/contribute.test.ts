@@ -204,6 +204,17 @@ describe("Die Karte beim Verorten", () => {
     expect(useKiosk.getState().focus).toBeNull();
   });
 
+  it("gibt nur der Ortssuche ein Etikett mit", () => {
+    // Daran unterscheidet die Hausnummern-Auswahl einen Tipp auf die Karte von ihrem eigenen
+    // Treffer: Nur beim eigenen steht ein Etikett. Faellt diese Zusage, bliebe das Knopfraster
+    // nach einem Kartentipp stehen und wuerfe den eben gesetzten Punkt beim naechsten Tipp weg.
+    useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
+    expect(useContribute.getState().pinLabel).toBe("Mühlenweg");
+
+    useContribute.getState().setPin({ lat: 53.63, lon: 9.677 });
+    expect(useContribute.getState().pinLabel).toBeNull();
+  });
+
   it("laesst den Zeitraum in Ruhe, solange nichts beigetragen ist", () => {
     useKiosk.setState({ timeRange: { from: 1950, to: 1959 }, fullRange: { from: 1920, to: 2019 } });
 
