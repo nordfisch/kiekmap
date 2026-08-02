@@ -208,6 +208,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Seite. Vorher hörten alle drei still auf — die Fotoliste schrieb „60 von 214 Fotos", an die
   übrigen 154 kam niemand heran. Der Filterwechsel fängt wieder auf Seite eins an, und wer den
   letzten Eintrag der letzten Seite abarbeitet, rutscht auf die letzte noch vorhandene
+- **„Verwaltung beenden" lädt die Besucheransicht neu.** Wer die Verwaltung verlässt, hat meist
+  etwas geändert — importiert, datiert, verortet, versteckt —, und die Karte bekam davon nichts
+  mit: Sie hielt ihre Marker und ihr Histogramm die ganze Zeit über fest. Wer nachsah, ob sein
+  Import angekommen ist, sah den Bestand von vorher. Gilt für alle drei Auswege: den Knopf oben
+  rechts, die Kachel „Auf der Karte zu sehen" und „Anzeige neu laden"
 - Die Dokumentation ist neu geordnet. Die Dateinamen folgen jetzt der Konvention und sind englisch
   (`operations.md`, `development.md`, `usermanual.md`); der Inhalt bleibt deutsch, denn er richtet
   sich an Menschen. Aus den drei Plandokumenten, die alle Erledigtes mit Offenem mischten, sind

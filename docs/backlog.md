@@ -95,16 +95,6 @@ als **Vorschlag** markiert werden, nie als Tatsache — sonst entsteht genau der
 EXIF-Regel aus Stufe 3 vermeidet: ein falsch datiertes Foto, das nie zur Korrektur vorgelegt wird,
 weil es als datiert gilt.
 
-### Beim Verlassen der Verwaltung die Besucheransicht neu laden
-
-„Verwaltung beenden" führt heute zurück zur Karte, ohne dass die Ansicht ihre Daten neu holt. Wer
-gerade dreißig Fotos importiert oder eine Datierung korrigiert hat, steht dann vor dem Bestand von
-vorher — und die naheliegende Erklärung, es habe nicht geklappt, ist die falsche.
-
-Der Weg ist da: Der Leerlauf lädt seit `c32748d` die Seite neu, und in der Verwaltung gibt es
-schon einen Knopf „Anzeige neu laden". Es geht also darum, denselben Neuladen beim Verlassen
-auszulösen statt nur den Abschnitt zu wechseln.
-
 ### Perceptual Hash gegen zugeschnittene Dubletten
 
 Der SHA-256 erkennt nur bitgleiche Dateien. Zwei Scans desselben Fotos mit unterschiedlichem

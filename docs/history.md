@@ -16,7 +16,7 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 *„Was der Plan nicht wusste"* und sind der eigentliche Grund für diese Datei.
 
-## Die fünf Arbeitsblöcke
+## Die Arbeitsblöcke
 
 | | Block | Zeitraum | Commits |
 |---|---|---|---|
@@ -25,6 +25,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 | III | Nachbesserungen an der Verwaltung | 30.–31. Juli 2026 | `850db95` … `b4a9f6f` |
 | IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `cc5a437` … `006f9ee` |
 | V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `2f773f1` … `b20ff5c` |
+| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … |
 
 ---
 
@@ -554,3 +555,27 @@ Pin bleibt dabei erhalten: Er liegt im Store, nicht in der Ansicht.
   eine Knopfform kennt. *Dabei gefunden:* Die Bildbreite war auf `62vw` gedeckelt, was die
   Textspalte nicht einrechnete; bei einem querformatigen Foto lief der Inhalt über seine eigenen
   Ränder hinaus.
+
+---
+
+# Teil VI — Einzelne Punkte aus dem Backlog
+
+Ab hier keine Blöcke mehr, sondern einzeln aufgegriffene Einträge aus [backlog.md](backlog.md).
+
+## Verwaltung verlassen lädt die Besucheransicht neu
+
+`a3a5be7` · 2. August 2026.
+
+„Verwaltung beenden" führte zurück zur Karte, ohne dass die Ansicht ihre Daten neu holte. Wer
+gerade dreißig Fotos importiert oder eine Datierung korrigiert hatte, stand vor dem Bestand von
+vorher — und die naheliegende Erklärung, es habe nicht geklappt, war die falsche.
+
+**Das Neuladen sitzt in `leave()`, nicht in `dropSession()`, und das ist keine Feinheit.** Ein
+abgelaufenes Token aus der `sessionStorage` lässt `restore()` beim Start über `onAdminSignedOut`
+genau in `dropSession()` landen — ein Neuladen dort lüde die Seite endlos neu. Der Docstring hält
+das jetzt fest, damit es niemand „aufräumt".
+
+Damit gehen alle drei Auswege denselben Weg: der Knopf oben rechts, die Kachel „Auf der Karte zu
+sehen" und „Anzeige neu laden". Der letzte tut technisch dasselbe wie der erste und bleibt
+trotzdem stehen — wer eine verhakte Anzeige reparieren will, sucht nach „neu laden" und nicht nach
+„beenden". Er ist der Name für den Weg, nicht ein zweiter Weg.
