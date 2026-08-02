@@ -213,6 +213,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   mit: Sie hielt ihre Marker und ihr Histogramm die ganze Zeit über fest. Wer nachsah, ob sein
   Import angekommen ist, sah den Bestand von vorher. Gilt für alle drei Auswege: den Knopf oben
   rechts, die Kachel „Auf der Karte zu sehen" und „Anzeige neu laden"
+- Die Hausnummern-Auswahl lässt sich **abbrechen**: „Doch nicht — von vorn" führt zurück zum
+  Suchfeld, ohne gesetzten Punkt. Bisher gab es dort nur „Reicht so", und das ist eine Antwort und
+  kein Rückweg — es behält den Pin auf der Straße. Ausserdem beendet ein Tipp auf die Karte die
+  Auswahl jetzt: Vorher blieb das Knopfraster stehen und der nächste Tipp auf eine Hausnummer warf
+  den eben gesetzten Punkt wieder weg
 - **Fotos lassen sich löschen** — im Editor und in jeder Zeile der Fotoliste, beides mit
   Rückfrage. „Gelöscht" heißt dabei *aus der Ausstellung genommen*, nicht *von der Platte
   entfernt*: Datei und Datenbankzeile bleiben, „Wiederherstellen" holt beides zurück. Der

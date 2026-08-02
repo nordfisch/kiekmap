@@ -25,7 +25,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 | III | Nachbesserungen an der Verwaltung | 30.–31. Juli 2026 | `850db95` … `b4a9f6f` |
 | IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `cc5a437` … `006f9ee` |
 | V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `2f773f1` … `b20ff5c` |
-| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `f9b6506` |
+| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `853d6b8` |
 
 ---
 
@@ -718,3 +718,31 @@ Schlagwort und Protokolleintrag anlegen, migrieren, nachzählen. Ohne die Repara
 Ortszeit, gelesen wird er als UTC. Zwischen 22 und 24 Uhr MESZ rutschte der umgerechnete Stempel
 auf den nächsten Kalendertag und der Test war rot — zwei Stunden am Tag, seit die Kalendertage
 eingeführt wurden.
+
+## Abbruch in der Hausnummern-Auswahl
+
+`853d6b8` · 2. August 2026.
+
+Sobald eine Straße gewählt war, zeigte der Beitragsbereich nur noch das Knopfraster der
+Hausnummern. Zurück führte einzig „Reicht so" — und das ist **keine Abbruchtaste, sondern eine
+Antwort**: Es behält den Pin auf der Straße. Wer die Straße versehentlich getroffen hatte, kam
+nicht mehr heraus, ohne etwas zu behaupten.
+
+Daneben steht jetzt **„Doch nicht — von vorn"**: zurück zur Startansicht, ohne gesetzten Punkt.
+Leiser gestaltet als „Reicht so", weil es keine Antwort ist, sondern ein Rückweg — dieselbe Form
+wie „Anderer Abschnitt" darüber.
+
+**Der subtilere Teil war der zweite:** Ein Tipp auf die Karte beendet die Auswahl jetzt. Vorher
+lief beides nebeneinander her — der Pin wanderte, das Knopfraster blieb stehen, und der nächste
+Tipp auf eine Hausnummer warf den eben gesetzten Punkt wieder weg. Ein Tipp auf die Karte ist die
+bestimmtere Aussage: Dort hat jemand gerade gezielt.
+
+**Woran das erkannt wird, war der eigentliche Fund:** Der Store setzt ein Etikett am Pin **nur**,
+wenn er aus der Ortssuche kommt — eine Eigenschaft, die seit dem Heranfahren der Karte
+(Teil V) besteht und dort aus einem anderen Grund gebraucht wird. Ein Pin ohne Etikett ist also
+per Definition einer von der Karte. Damit ist die ganze Regel eine Zeile, ohne zusätzlichen
+Zustand und ohne Vergleich von Koordinaten.
+
+Diese Zusage trägt jetzt die Bedienung an zwei Stellen und hat deshalb einen eigenen Test bekommen.
+Bräche sie, bliebe das Knopfraster nach einem Kartentipp still stehen — der Fehler, der eben
+behoben wurde, wäre wieder da, ohne dass irgendetwas rot würde.

@@ -127,23 +127,6 @@ Genau diese Bauform wurde in Stufe 8 für den Verwaltungszugang **verworfen**, w
 Geste etwas ist, das Ehrenamtliche sich merken müssten (siehe [history.md](history.md), Stufe 8).
 Wer sie hier wieder aufgreift, sollte das wissen und begründen.
 
-### Abbruch in der Hausnummern-Auswahl
-
-Sobald eine Straße gewählt ist, zeigt der Beitragsbereich nur noch das Knopfraster der
-Hausnummern. Zurück führt von dort einzig „Reicht so" — und das ist **keine** Abbruchtaste,
-sondern eine Antwort: Es behält den Pin auf der Straße.
-
-Wer die Straße versehentlich getroffen hat oder es sich anders überlegt, braucht einen Weg zurück
-zur **Startansicht von „Hilf mit"** — Suchfeld und Karte, ohne gesetzten Pin. Der Knopf gehört
-neben „Reicht so" und muss sich davon deutlich unterscheiden; die beiden bedeuten das Gegenteil
-voneinander.
-
-**Dazu, und das ist der subtilere Teil:** Setzt der Besucher währenddessen einen Pin auf der Karte,
-soll dieser die begonnene Hausnummern-Auswahl **übersteuern**. Heute läuft beides nebeneinander
-her — der Pin wandert, das Knopfraster bleibt stehen, und der nächste Tipp auf eine Hausnummer
-wirft den eben gesetzten Punkt wieder weg. Ein Tipp auf die Karte ist die bestimmtere Aussage: Dort
-hat jemand gerade gezielt.
-
 ### Die Dankmeldung: brauchen wir sie, und stimmt sie immer?
 
 **Zuerst die Tatsache, weil die Vermutung eine andere war:** Den Dank gibt es bei **beiden**
