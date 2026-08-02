@@ -1,0 +1,9 @@
+# Gilt fuer Python ausserhalb von backend/ -- vor allem tiles/.
+#
+# Ruff nimmt immer die naechstgelegene Konfiguration: fuer backend/ ist das backend/pyproject.toml,
+# fuer tiles/ diese Datei. Die Werte muessen deshalb uebereinstimmen, sonst formatiert `make lint`
+# denselben Code je nach Ordner verschieden.
+line-length = 100
+
+[lint]
+select = ["E", "F", "I", "UP", "B"]

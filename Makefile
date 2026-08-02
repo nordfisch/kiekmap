@@ -73,17 +73,22 @@ revision: $(VENV)  ## Neue Migration erzeugen: make revision m="Beschreibung"
 
 # --- Pruefen ----------------------------------------------------------------
 
-test: test-backend test-frontend  ## Alle Tests
+test: test-backend test-tiles test-frontend  ## Alle Tests
 
 test-backend: $(VENV)
 	cd backend && .venv/bin/pytest -q
+
+# Der Kartenbau laeuft nie auf dem Pi, seine Rechnung geht aber genauso still schief wie die des
+# Backends -- ein Ortsindex mit falschen Punkten faellt erst im Museum auf.
+test-tiles: $(VENV)
+	$(VENV)/bin/pytest -q tiles
 
 test-frontend: frontend/node_modules
 	cd frontend && npm run typecheck && npm test
 
 lint: $(VENV)  ## Code-Stil pruefen
-	$(VENV)/bin/ruff check backend
-	$(VENV)/bin/ruff format --check backend
+	$(VENV)/bin/ruff check backend tiles
+	$(VENV)/bin/ruff format --check backend tiles
 
 build: frontend/node_modules  ## Frontend-Bundle bauen (Ergebnis in frontend/dist)
 	cd frontend && npm run build
