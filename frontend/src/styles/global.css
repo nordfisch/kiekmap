@@ -684,34 +684,71 @@ button {
 /* --- photo at full size -------------------------------------------------- */
 
 .overlay {
+  /* Wie viel Höhe unter dem Bild für die Blätterknöpfe abgeht -- ohne Stapel nichts. Aus der Zahl
+   * rechnen Bild und Textspalte ihre Grenze aus, damit beide oben in einer Flucht anfangen und
+   * unten im sichtbaren Bereich enden. */
+  --pager-room: 0rem;
+  --overlay-pad: 2.5rem;
+  --overlay-gap: 2rem;
+  --overlay-aside: 24rem;
+
   position: fixed;
   inset: 0;
   z-index: 10;
   display: grid;
   place-items: center;
-  padding: 2.5rem;
+  padding: var(--overlay-pad);
   background: rgb(20 17 14 / 92%);
 }
 
+.overlay--stack {
+  --pager-room: 4.5rem;
+}
+
 .overlay__content {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-  margin: 0;
+  display: grid;
+  /* Die linke Spalte ist so breit wie das Bild, nicht breiter -- nur so stehen die Blätterknöpfe
+   * darunter mittig unter dem Bild und nicht mittig in einer leeren Spalte. */
+  grid-template-columns: auto minmax(16rem, var(--overlay-aside));
+  gap: var(--overlay-gap);
+  /* Oben ausgerichtet: Oberkante des Bildes, des Schließen-Knopfes und des Textes fluchten. */
+  align-items: start;
   max-width: 100%;
   max-height: 100%;
 }
 
+.overlay__figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
 .overlay__image {
-  max-width: 68vw;
-  max-height: 85vh;
+  /* Was nach Textspalte, Abstand und Rand übrig bleibt. Ein Anteil der Breite (etwa 62vw) traf
+   * dieselbe Zahl nur zufällig: bei einem querformatigen Foto schob sich der Inhalt dann über
+   * seine eigenen Ränder hinaus. */
+  max-width: calc(100vw - var(--overlay-aside) - var(--overlay-gap) - 2 * var(--overlay-pad));
+  max-height: calc(100vh - 2 * var(--overlay-pad) - var(--pager-room));
   object-fit: contain;
   background: #000;
   box-shadow: 0 6px 30px rgb(0 0 0 / 60%);
 }
 
+.overlay__aside {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+  max-height: calc(100vh - 2 * var(--overlay-pad));
+  min-height: 0;
+}
+
 .overlay__text {
-  flex: 0 1 20rem;
+  /* Viel Text scrollt in seiner Spalte, statt unter den Bildschirmrand zu laufen. */
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 0.5rem;
   color: #f4efe8;
 }
 
@@ -751,23 +788,12 @@ button {
   color: #d8d0c6;
 }
 
-/* Sind es mehrere Fotos, macht das Overlay unten Platz für die Blätterknöpfe -- sonst lägen sie
- * über dem unteren Bildrand, und ausgerechnet dort steht bei alten Abzügen oft die Beschriftung. */
-.overlay--stack {
-  padding-bottom: 6.5rem;
-}
-
-/* Blättern durch die Fotos einer Stelle. Unten mittig, in Daumennähe -- dort landet die Hand von
- * selbst, wenn das Bild den Rest des Schirms füllt. */
+/* Blättern durch die Fotos einer Stelle: mittig unter dem Bild, nicht mittig im Schirm. Über dem
+ * Bildrand dürfen sie nicht liegen -- ausgerechnet dort steht bei alten Abzügen die Beschriftung. */
 .overlay__pager {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 1rem;
-  z-index: 1;
 }
 
 .overlay__pager .button {
@@ -790,18 +816,18 @@ button {
   text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
 }
 
+/* Gleiche Form, gleicher Rahmen, gleiche Höhe wie die Blätterknöpfe -- die Ansicht kennt damit
+ * genau eine Knopfform. Rechtsbündig am Ende der Textspalte, also am äußeren Rand der Ansicht. */
 .overlay__close {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   min-height: 3.5rem;
   padding: 0 1.5rem;
   border: 2px solid rgb(255 255 255 / 40%);
-  border-radius: 999px;
-  background: rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 45%);
   color: #fff;
   font-size: 1.05rem;
 }

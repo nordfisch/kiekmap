@@ -65,64 +65,75 @@ export function PhotoOverlay() {
       aria-label={t.overlay.dialogLabel}
       onClick={close}
     >
-      <button type="button" className="overlay__close" onClick={close}>
-        <span aria-hidden="true">×</span>
-        <span className="overlay__close-text">{t.overlay.close}</span>
-      </button>
+      {/* Clicks inside must not close -- otherwise you cannot look at the photo without losing it.
+          Beside it they do: whoever is stuck taps somewhere, and that has to lead back. */}
+      <div className="overlay__content" onClick={(e) => e.stopPropagation()}>
+        <div className="overlay__figure">
+          {detail && (
+            <img
+              className="overlay__image"
+              src={detail.thumb_url}
+              alt={detail.title ?? t.map.photoAlt}
+              style={{ aspectRatio: `${detail.width} / ${detail.height}` }}
+            />
+          )}
 
-      {error && <p className="overlay__notice">{error}</p>}
-
-      {/* Blättern durch die Fotos, die an derselben Stelle liegen. Zwei große Knöpfe am unteren
-          Rand, in Daumennähe -- das Fingerfreundlichste, was das Gerät hergibt. */}
-      {openStack.length > 1 && (
-        <div className="overlay__pager" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            className="button"
-            disabled={openIndex === 0}
-            onClick={() => stepInStack(-1)}
-          >
-            {t.overlay.prev}
-          </button>
-          <span className="overlay__position">
-            {t.overlay.position(openIndex + 1, openStack.length)}
-          </span>
-          <button
-            type="button"
-            className="button"
-            disabled={openIndex === openStack.length - 1}
-            onClick={() => stepInStack(1)}
-          >
-            {t.overlay.next}
-          </button>
+          {/* Blättern durch die Fotos, die an derselben Stelle liegen -- mittig unter dem Bild,
+              damit die Knöpfe zu dem gehören, was sie wechseln. */}
+          {openStack.length > 1 && (
+            <div className="overlay__pager">
+              <button
+                type="button"
+                className="button"
+                disabled={openIndex === 0}
+                onClick={() => stepInStack(-1)}
+              >
+                {t.overlay.prev}
+              </button>
+              <span className="overlay__position">
+                {t.overlay.position(openIndex + 1, openStack.length)}
+              </span>
+              <button
+                type="button"
+                className="button"
+                disabled={openIndex === openStack.length - 1}
+                onClick={() => stepInStack(1)}
+              >
+                {t.overlay.next}
+              </button>
+            </div>
+          )}
         </div>
-      )}
 
-      {detail && (
-        // Clicks on the image itself must not close -- otherwise you cannot look at it without
-        // losing it.
-        <figure className="overlay__content" onClick={(e) => e.stopPropagation()}>
-          <img
-            className="overlay__image"
-            src={detail.thumb_url}
-            alt={detail.title ?? t.map.photoAlt}
-            style={{ aspectRatio: `${detail.width} / ${detail.height}` }}
-          />
-          <figcaption className="overlay__text">
-            <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
-            <p className="overlay__year">{detail.date_label}</p>
-            {detail.place_name && <p className="overlay__place">{detail.place_name}</p>}
-            {detail.description && <p className="overlay__description">{detail.description}</p>}
-            {detail.tags.length > 0 && (
-              <ul className="overlay__tags">
-                {detail.tags.map((tag) => (
-                  <li key={tag}>{tag}</li>
-                ))}
-              </ul>
+        {/* Der Schließen-Knopf steht in der Kopfzeile der Textspalte, nicht über dem Bild: so
+            liegt er in einer Flucht mit der Oberkante des Fotos, nimmt ihm keine Fläche weg und
+            bleibt stehen, während der Text darunter scrollt. */}
+        <div className="overlay__aside">
+          <button type="button" className="overlay__close" onClick={close}>
+            <span aria-hidden="true">×</span>
+            <span className="overlay__close-text">{t.overlay.close}</span>
+          </button>
+
+          <div className="overlay__text">
+            {error && <p className="overlay__notice">{error}</p>}
+            {detail && (
+              <>
+                <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
+                <p className="overlay__year">{detail.date_label}</p>
+                {detail.place_name && <p className="overlay__place">{detail.place_name}</p>}
+                {detail.description && <p className="overlay__description">{detail.description}</p>}
+                {detail.tags.length > 0 && (
+                  <ul className="overlay__tags">
+                    {detail.tags.map((tag) => (
+                      <li key={tag}>{tag}</li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
-          </figcaption>
-        </figure>
-      )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

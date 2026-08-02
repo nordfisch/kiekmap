@@ -174,6 +174,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   in voller Größe
 - Fotos an derselben Stelle stehen als **ein** Marker mit Anzahl auf der Karte und lassen sich im
   Vollbild durchblättern. Die Kartenabfrage sortiert dafür nach dem zuletzt bearbeiteten Foto
+- Die Detailansicht ist auf Fluchtlinien gebaut: Bild, Textspalte und Schließen-Knopf beginnen auf
+  derselben Höhe, die Blätterknöpfe stehen mittig **unter dem Bild** statt mittig im Schirm. Viel
+  Text scrollt jetzt in seiner Spalte, statt oben den Schließen-Knopf zu überlagern und unten aus
+  dem Bild zu laufen. Der Schließen-Knopf sitzt dafür nicht mehr über dem Foto, sondern führt die
+  Textspalte an — in der Form der Blätterknöpfe, damit die Ansicht genau eine Knopfform kennt
 - Ein Kreis auf der Karte nennt die Zahl der **Fotos**, nicht die der Stellen: Über einem
   Achterstapel und zwei Einzelbildern steht jetzt 10 statt 3
 - Unter den sechs Zahlen der Übersicht steht jetzt eine Trennlinie und darunter, in denselben drei
