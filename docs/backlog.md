@@ -8,62 +8,14 @@ ist der Grund, warum er hier steht und nicht in einer Stichwortliste: Ein Punkt 
 Zusammenhang kostet beim zweiten Anlauf dieselbe Arbeit wie beim ersten.
 
 Nichts hiervon ist terminiert. Innerhalb der Abschnitte stehen **Fehler zuerst**, danach der
-Ausbau grob nach Gewicht. Zwei Einträge sind Fehler und keine Wünsche:
-
-- [Gleichnamige Straßen werden zu einer verschmolzen](#fehler-gleichnamige-straßen-werden-zu-einer-verschmolzen)
-  — begegnet Besuchern heute im Museum.
-- [Der Bearbeitungsdialog öffnet sich mitten im Formular](#fehler-der-bearbeitungsdialog-öffnet-sich-mitten-im-formular)
-  — trifft die Ehrenamtlichen bei der Fotopflege.
+Ausbau grob nach Gewicht. Ein Eintrag ist ein Fehler und kein Wunsch:
+[Gleichnamige Straßen werden zu einer
+verschmolzen](#fehler-gleichnamige-straßen-werden-zu-einer-verschmolzen) — er begegnet Besuchern
+heute im Museum.
 
 ---
 
 ## Verwaltung
-
-### Fehler: der Bearbeitungsdialog öffnet sich mitten im Formular
-
-Wer in der Fotoliste nach unten scrollt und dann ein Foto zur Bearbeitung öffnet, bekommt das
-Formular **an derselben Scrollposition** — also mittendrin, oft unterhalb der ersten Felder. Der
-Titel des Fotos, die Überschrift und die ersten Eingaben stehen oberhalb des Bildes.
-
-**Die Ursache ist ein gemeinsamer Scroll-Container.** `PhotoCare` ersetzt seinen eigenen Inhalt
-durch den Editor (`if (editing) return <PhotoEditor …>`, `admin/PhotoCare.tsx:61`), gescrollt wird
-aber eine Ebene höher: `.admin__body` in `AdminApp.tsx:100` trägt das `overflow-y: auto`
-(`styles/admin.css:175`). Dieser Container wird nicht ausgetauscht, also behält der Browser seinen
-`scrollTop` — der Inhalt darunter ist ein völlig anderer.
-
-**Die Rückkehr ist besser dran, als es aussieht.** `PhotoCare` bleibt beim Öffnen des Editors
-gemountet — nur `editing` wechselt. Filter (`show`), Suchbegriff und Seite (`offset`) leben in
-seinem State und sind nach „Speichern" oder „Abbrechen" **unverändert da**. Die vom Bericht als
-wichtigste genannte Zusage ist damit schon erfüllt; offen ist allein die Scrollposition, und die
-ist nach der Rückkehr die zufällige des Editors.
-
-**Zu tun:**
-
-1. **Beim Öffnen nach oben scrollen.** Das Muster gibt es im Repo schon: `HelpPanel` setzt bei
-   jedem Wechsel `scrollTo({ top: 0 })` über ein Ref (`kiosk/HelpPanel.tsx:36`). Hier gehört das
-   Ref auf `.admin__body`, das `AdminApp` besitzt — der Editor kommt also nicht ohne Weiteres
-   selbst daran. Naheliegend: ein Ref in `AdminApp` und ein kleiner gemeinsamer Weg dorthin, oder
-   der Editor sucht sich den nächsten scrollbaren Vorfahren.
-2. **Beim Schließen die Position der Liste wiederherstellen.** `scrollTop` beim Öffnen merken und
-   nach dem Rendern der Liste zurücksetzen — im `useLayoutEffect`, sonst ist die Liste noch nicht
-   hoch genug und der Wert wird gekappt.
-
-**Falls Schritt 2 zu aufwändig wird, darf die Liste oben anfangen** — Filter und Seite müssen
-bleiben, die Scrollposition ist die Kür. Da Filter und Seite schon heute erhalten bleiben, ist der
-Rückfall billig zu haben.
-
-**Bei der Paginierung eigens zu prüfen**, denn hier gibt es einen Fall, der die Seite trotzdem
-verschiebt: Nach `onSaved` läuft `reload()`, und der Effekt in `PhotoCare.tsx:53` klemmt den
-Offset über `clampOffset(current, data.total)` fest. Erfüllt das bearbeitete Foto den aktiven
-Filter nicht mehr — Ort ergänzt in der Liste „Ohne Ort" —, wird die Liste kürzer und die letzte
-Seite kann wegfallen. Das ist **gewollt** (sonst stünde man hinter dem Ende), aber es heißt: Die
-Zusage „gleiche Seite" gilt nur, solange die Trefferzahl das hergibt. Genau dieser Fall macht auch
-eine wiederhergestellte Scrollposition fragwürdig — sie zeigt dann auf eine andere Zeile.
-
-> **Dieselbe Ursache trifft auch andere Stellen.** Jeder Ansichtswechsel innerhalb von
-> `.admin__body` erbt die alte Scrollposition — etwa der Sprung von der Importmaske zur
-> Ergebnistabelle. Wer das Ref einbaut, sollte gleich prüfen, ob es dort ebenso hingehört, statt
-> es nur an dieser einen Stelle zu flicken.
 
 ### Fotos löschen
 

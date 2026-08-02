@@ -25,7 +25,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 | III | Nachbesserungen an der Verwaltung | 30.–31. Juli 2026 | `850db95` … `b4a9f6f` |
 | IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `cc5a437` … `006f9ee` |
 | V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `2f773f1` … `b20ff5c` |
-| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … |
+| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `b064e62` |
 
 ---
 
@@ -579,3 +579,43 @@ Damit gehen alle drei Auswege denselben Weg: der Knopf oben rechts, die Kachel �
 sehen" und „Anzeige neu laden". Der letzte tut technisch dasselbe wie der erste und bleibt
 trotzdem stehen — wer eine verhakte Anzeige reparieren will, sucht nach „neu laden" und nicht nach
 „beenden". Er ist der Name für den Weg, nicht ein zweiter Weg.
+
+## Der Bearbeitungsdialog fängt oben an
+
+`b064e62` · 2. August 2026.
+
+Wer in der Fotoliste nach unten gescrollt hatte und dann ein Foto öffnete, bekam das Formular an
+derselben Stelle — mittendrin, mit Vorschaubild und Titel oberhalb des Bildschirmrands.
+
+**Gescrollt wird nicht die Ansicht, sondern `.admin__body` um sie herum.** `PhotoCare` tauscht nur
+seinen eigenen Inhalt gegen den Editor; der Container bleibt und behält seinen `scrollTop`. Der
+Inhalt darunter ist dann ein völlig anderer.
+
+**Was der Bericht nicht wusste:** Filter, Suche und Seite waren nie das Problem. `PhotoCare` bleibt
+beim Öffnen des Editors gemountet — nur `editing` wechselt —, also lebt sein State weiter. Die als
+wichtigste genannte Zusage war schon erfüllt; offen war allein die Scrollposition, und die ist
+billig zu haben, wenn man sie beim Öffnen merkt.
+
+Weil der Container `AdminApp` gehört, der Wechsel aber in der Ansicht passiert, reicht ihn ein
+Context durch (`admin/scrollArea.tsx`). Die Alternative wäre ein weiteres Prop an jeder Ansicht
+gewesen, das mit ihrer Aufgabe nichts zu tun hat.
+
+**Damit waren es drei Stellen, nicht eine** — die Ursache ist allgemein, und wer nur die gemeldete
+Stelle geflickt hätte, hätte die anderen beiden stehen lassen:
+
+| | vorher |
+|---|---|
+| Fotoliste → Editor | Formular öffnet mittendrin; Rückkehr an zufälliger Stelle |
+| Abschnittswechsel | nach langer Fotoliste steht man im „Protokoll" mitten im Nichts |
+| Importieren, Phasenwechsel | wer unten auf „Importieren" tippt, steht mitten in der Ergebnistabelle |
+
+*Nachgemessen, auch mit Paginierung (`PAGE_SIZE` zum Prüfen vorübergehend auf 5): Seite 4 von 6,
+auf 196,5 gescrollt, Foto geöffnet → 0. Nach „Speichern" wie nach „Abbrechen" wieder 196,5,
+Seite 4 von 6, Filter „Alle". Der Phasenwechsel beim Importieren ist ungeprüft — dazu bräuchte es
+einen echten Import.*
+
+> **Eine Grenze, die bleibt und die keine ist:** Fällt das bearbeitete Foto durch die Änderung aus
+> dem aktiven Filter — Ort ergänzt in der Liste „Ohne Ort" —, wird die Liste kürzer, und
+> `clampOffset` zieht den Versatz auf eine Seite, die es noch gibt. „Gleiche Seite" gilt also nur,
+> solange die Trefferzahl das hergibt. Das ist gewollt: Die Alternative wäre eine leere Seite
+> hinter dem Ende.

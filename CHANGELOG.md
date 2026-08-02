@@ -237,6 +237,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   noch auf dem alten — der Auswahlbalken zeichnete sich dann mit `left: -300%` quer über Wappen
   und Titel, beide Griffe lagen außerhalb des Bildschirms. Die Achse spannt jetzt über den ganzen
   Bestand und steht still; dazu ist die Positionsrechnung auf 0…1 geklammert
+- **Der Bearbeitungsdialog öffnete sich mitten im Formular.** Wer in der Fotoliste nach unten
+  gescrollt hatte und dann ein Foto öffnete, bekam das Formular an derselben Stelle — Vorschaubild
+  und Titel standen oberhalb des Bildschirmrands. Gescrollt wird nämlich nicht die Ansicht, sondern
+  der Bereich um sie herum, und der behielt beim Wechsel seine Position. Der Editor fängt jetzt
+  oben an, und beim Schließen kehrt die Liste an ihre Stelle zurück — mit Filter, Suche und Seite,
+  auch über mehrere Seiten hinweg. Dieselbe Ursache betraf den Abschnittswechsel und den Sprung
+  von der Importmaske zur Ergebnistabelle; beide fangen jetzt ebenfalls oben an
 - **Fotos am selben Ort waren nicht einzeln erreichbar.** Acht Bilder auf identischen Koordinaten
   wurden ab Zoom 18 zu acht Markern exakt übereinander, von denen nur der oberste antippbar war —
   und der Weg dorthin führte ins Leere, denn identische Punkte trennen sich bei keiner Zoomstufe
