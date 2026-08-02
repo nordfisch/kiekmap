@@ -178,4 +178,4 @@ Backend werden zusammen versioniert — bei einem Ein-Geräte-System ist getrenn
 Ballast, und die API-Kompatibilität ist dadurch garantiert.
 
 Das Museumsgerät ist offline. Der Updateweg dorthin (Image-Tarball auf einen USB-Stick) steht in
-[betrieb.md](betrieb.md).
+[operations.md](operations.md).

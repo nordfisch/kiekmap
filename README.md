@@ -58,7 +58,7 @@ Vite leitet `/api` an das Backend weiter, sodass in Entwicklung und Betrieb dies
 | `make prod` | Alles in Containern, so wie es auf dem Pi läuft |
 
 Einrichtung im Detail, Sprachregelung, Teststrategie und die Fallstricke, die Zeit gekostet haben:
-[docs/entwicklung.md](docs/entwicklung.md). Für Coding-Agents: [CLAUDE.md](CLAUDE.md).
+[docs/development.md](docs/development.md). Für Coding-Agents: [CLAUDE.md](CLAUDE.md).
 
 **Für einen anderen Ort:** Es genügt, `tiles/region.json` anzupassen und `make tiles && make places`
 auszuführen — kein Fork, kein Codeeingriff. Schritt für Schritt in
@@ -67,9 +67,9 @@ auszuführen — kein Fork, kein Codeeingriff. Schritt für Schritt in
 ## Betrieb
 
 Der Pi bootet direkt in die Karte — kein Login, kein Desktop, keine Bedienung nötig.
-Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in [docs/betrieb.md](docs/betrieb.md).
-Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen ist
-[docs/kuratoren-anleitung.md](docs/kuratoren-anleitung.md).
+Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in
+[docs/operations.md](docs/operations.md). Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen
+ist [docs/usermanual.md](docs/usermanual.md).
 
 Warum die Technik so gewählt ist, steht in [docs/decisions.md](docs/decisions.md).
 Was noch kommt, im [Stufenplan](docs/stufenplan.md).

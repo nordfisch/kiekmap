@@ -200,7 +200,7 @@ zuerst tun.
 | Import-Protokoll | `ImportOutcome.message` | „Aufgenommen, es fehlt noch: Ort und Jahr" |
 | Ordnernamen im Eingang | `_erledigt`, `_problem` | sieht das Museumsteam im Dateimanager |
 | Ortsarten | `strasse`, `gebaeude`, `flur` … | kommen so aus `tiles/build-places.py`; die Anzeige übersetzt sie in `t.location.kinds` |
-| Doku und Commit-Nachrichten | alles unter `docs/` | bewusst so, siehe [entwicklung.md](entwicklung.md) |
+| Doku und Commit-Nachrichten | alles unter `docs/` | bewusst so, siehe [development.md](development.md) |
 
 Die Ortsarten sind der einzige Fall, der nach einer Falle aussieht und keine ist: In der Datenbank
 stehen deutsche Schlüsselwörter, aber angezeigt wird, was das Textmodul daraus macht. Eine

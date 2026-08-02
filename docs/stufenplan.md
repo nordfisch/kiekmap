@@ -2,7 +2,7 @@
 
 Der Bauplan des Projekts: was fertig ist, was noch kommt, und woran man erkennt, dass eine Stufe
 fertig ist. Das *Warum* der technischen Entscheidungen steht in [decisions.md](decisions.md), das
-*Wie* der Arbeit in [entwicklung.md](entwicklung.md).
+*Wie* der Arbeit in [development.md](development.md).
 
 Jede Stufe endet in einem lauffähigen, committeten Zustand.
 
@@ -72,7 +72,7 @@ Bestandsaufnahme nach der Sprachumstellung. Umgesetzt:
   `open_count` gelesen.
 - **CLI-Ausgaben bleiben deutsch.** Den Erstimport führt auch das Museumsteam aus.
 
-Die Konventionstabellen in [CLAUDE.md](../CLAUDE.md) und [entwicklung.md](entwicklung.md) nennen die
+Die Konventionstabellen in [CLAUDE.md](../CLAUDE.md) und [development.md](development.md) nennen die
 Regel; ein Kommentar in `app/api/photos.py` erklärt sie an der Stelle, wo beide Sorten Meldungen
 nebeneinander stehen.
 
@@ -183,7 +183,7 @@ sichern, inkrementell erneuern, zurückspielen, Beiseitelegen des bisherigen Sta
 der Abnahme brauchen das Gerät und wandern damit in Stufe 10:
 
 - **Das Einhängen auf dem Pi.** udev-Regel und Skript liegen unter `deploy/pi/`, sind aber
-  mangels Pi noch nicht gelaufen. Beschreibung in [betrieb.md](betrieb.md).
+  mangels Pi noch nicht gelaufen. Beschreibung in [operations.md](operations.md).
 - **Der Bedienbarkeitstest mit der Zielgruppe** und die Wiederherstellung auf ein zweites,
   leeres Gerät.
 

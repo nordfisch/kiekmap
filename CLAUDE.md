@@ -146,10 +146,10 @@ USB-Sicherung, Kiosk-Betrieb). Als Nächstes Stufe 11 und die Vormerkungen im St
 
 **Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
 ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,
-gehört nach [docs/betrieb.md](docs/betrieb.md).
+gehört nach [docs/operations.md](docs/operations.md).
 
 Zum Entwickeln auf dem Mac `PHOTOMAP_MEDIA_DIR=/Volumes` setzen und ein Prüfvolumen mit `hdiutil`
-anlegen — siehe ebenfalls [docs/betrieb.md](docs/betrieb.md).
+anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md).
 
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.

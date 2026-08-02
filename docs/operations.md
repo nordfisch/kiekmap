@@ -1,7 +1,7 @@
 # Betriebshandbuch
 
 Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung für das
-Museumsteam steht in der [Kuratoren-Anleitung](kuratoren-anleitung.md); hier steht die Technik.
+Museumsteam steht in der [Kuratoren-Anleitung](usermanual.md); hier steht die Technik.
 
 > **Auf einem echten Pi noch nicht erprobt.** Die Dateien unter `deploy/pi/` sind sorgfältig
 > geschrieben und syntaktisch geprüft, aber nie gelaufen — es gab beim Bauen kein Gerät. Was
