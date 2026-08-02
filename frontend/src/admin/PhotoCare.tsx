@@ -9,7 +9,7 @@
  * der Jahrzehnte schätzt.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { type Selection, fetchAdminPhoto, fetchAdminPhotos } from "../api/admin";
 import type { PhotoDetail } from "../api/client";
@@ -17,6 +17,7 @@ import { t } from "../texte/de";
 import { Pager } from "./Pager";
 import { PhotoEditor } from "./PhotoEditor";
 import { clampOffset } from "./paging";
+import { useScrollArea } from "./scrollArea";
 import { useLoaded } from "./useLoaded";
 
 // Ort und Jahr getrennt: Verorten und Datieren sind zwei Arbeiten, und wer die eine macht, will
@@ -54,7 +55,19 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
     if (data) setOffset((current) => clampOffset(current, data.total));
   }, [data]);
 
+  // Der Editor fängt oben an, die Liste kommt an ihre Stelle zurück. Gescrollt wird der Bereich um
+  // beide herum (siehe scrollArea.tsx); ohne das erbte das Formular die Position der Liste und
+  // öffnete sich mittendrin.
+  const scrollArea = useScrollArea();
+  const listScroll = useRef(0);
+
+  useLayoutEffect(() => {
+    const area = scrollArea?.current;
+    if (area) area.scrollTop = editing ? 0 : listScroll.current;
+  }, [editing, scrollArea]);
+
   async function open(id: number) {
+    listScroll.current = scrollArea?.current?.scrollTop ?? 0;
     setEditing(await fetchAdminPhoto(id));
   }
 

@@ -14,7 +14,7 @@
  * Zeilen — für den ist die „Ohne Ort"-Liste die Arbeitsfläche.
  */
 
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 import {
   type BatchDefaults,
@@ -34,6 +34,7 @@ import { FileDropZone } from "./DropZone";
 import { PlaceField, type PickedPlace } from "./PlaceField";
 import { YearField } from "./YearField";
 import { StickFolders } from "./StickImport";
+import { useScrollArea } from "./scrollArea";
 
 /** Muss zu REVIEW_LIMIT in backend/app/api/backup.py passen. */
 const REVIEW_LIMIT = 30;
@@ -90,6 +91,14 @@ export function ImportView({ onReview }: { onReview: () => void }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [summary, setSummary] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Dieselbe Ursache wie beim Fotoeditor: Der Phasenwechsel tauscht den Inhalt, nicht den
+  // scrollenden Bereich darum. Wer unten auf „Importieren" tippt, stünde sonst mitten in der
+  // Ergebnistabelle, statt bei ihrer Überschrift.
+  const scrollArea = useScrollArea();
+  useLayoutEffect(() => {
+    scrollArea?.current?.scrollTo({ top: 0 });
+  }, [phase, scrollArea]);
 
   const ready = source === "computer" ? files.length > 0 : folder !== null;
 

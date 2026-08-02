@@ -8,7 +8,7 @@
  * so nobody is thrown out while working -- but a login forgotten in the evening does close.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { type Selection } from "../api/admin";
 import { useAdmin } from "../store/admin";
@@ -19,6 +19,7 @@ import { ImportLog } from "./ImportLog";
 import { ImportView } from "./ImportView";
 import { Overview, type Target } from "./Overview";
 import { PhotoCare } from "./PhotoCare";
+import { ScrollAreaProvider } from "./scrollArea";
 
 /**
  * Reihenfolge mit Absicht: erst die Pflege des Bestands, dann das Hinzufügen, dann das
@@ -43,6 +44,13 @@ export function AdminApp() {
   const [section, setSection] = useState<Section>("overview");
   const [photoFilter, setPhotoFilter] = useState<Selection>("all");
   const [minutes, setMinutes] = useState<number | null>(null);
+  const body = useRef<HTMLElement>(null);
+
+  // Ein Abschnittswechsel fängt oben an. Sonst stünde man im neuen Abschnitt an der Stelle, bis zu
+  // der man im alten gescrollt hatte -- bei „Protokoll" nach langer Fotoliste mitten im Nichts.
+  useLayoutEffect(() => {
+    body.current?.scrollTo({ top: 0 });
+  }, [section]);
 
   /** Ein Weg für alle Kacheln der Übersicht: Abschnitt und Filter zusammen setzen. */
   function navigate(target: Target) {
@@ -97,16 +105,21 @@ export function AdminApp() {
         ))}
       </nav>
 
-      <main className="admin__body">
-        {section === "overview" && <Overview onNavigate={navigate} />}
-        {/* Remounted when the filter changes, so the list starts on the right one. */}
-        {section === "photos" && <PhotoCare key={photoFilter} initialFilter={photoFilter} />}
-        {section === "import" && (
-          <ImportView onReview={() => navigate({ section: "photos", filter: "without_location" })} />
-        )}
-        {section === "moderation" && <Changes />}
-        {section === "log" && <ImportLog />}
-        {section === "backup" && <Backup />}
+      {/* Der scrollende Bereich, nicht die Ansicht darin -- siehe scrollArea.tsx. */}
+      <main className="admin__body" ref={body}>
+        <ScrollAreaProvider value={body}>
+          {section === "overview" && <Overview onNavigate={navigate} />}
+          {/* Remounted when the filter changes, so the list starts on the right one. */}
+          {section === "photos" && <PhotoCare key={photoFilter} initialFilter={photoFilter} />}
+          {section === "import" && (
+            <ImportView
+              onReview={() => navigate({ section: "photos", filter: "without_location" })}
+            />
+          )}
+          {section === "moderation" && <Changes />}
+          {section === "log" && <ImportLog />}
+          {section === "backup" && <Backup />}
+        </ScrollAreaProvider>
       </main>
     </div>
   );
