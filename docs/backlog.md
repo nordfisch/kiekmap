@@ -9,10 +9,7 @@ ist der Grund, warum er hier steht und nicht in einer Stichwortliste: Ein Punkt 
 Zusammenhang kostet beim zweiten Anlauf dieselbe Arbeit wie beim ersten.
 
 Nichts hiervon ist terminiert. Innerhalb der Abschnitte stehen **Fehler zuerst**, danach der
-Ausbau grob nach Gewicht. Ein Eintrag ist ein Fehler und kein Wunsch:
-[Gleichnamige Straßen werden zu einer
-verschmolzen](#fehler-gleichnamige-straßen-werden-zu-einer-verschmolzen) — er begegnet Besuchern
-heute im Museum.
+Ausbau grob nach Gewicht. Zurzeit ist kein Fehler offen — alles hier ist Ausbau.
 
 ---
 
@@ -164,72 +161,6 @@ den Titel.
 ---
 
 ## Besucher-Interface
-
-### Fehler: gleichnamige Straßen werden zu einer verschmolzen
-
-**Der einzige bekannte Fehler auf dieser Seite.** Wer bei der Verortung „Hauptstraße" eingibt und
-den Vorschlag übernimmt, bekommt einen Punkt weit ausserhalb des erwarteten Bereichs.
-
-**An den Daten nachgemessen** (`data/places.json`, Stand 29. Juli 2026):
-
-| | |
-|---|---|
-| Adressen namens „Hauptstraße" im Index | **153** |
-| davon räumlich getrennte Straßen | **17**, in verschiedenen Dörfern |
-| Einträge der Art `strasse` dafür | **1** |
-| dessen Punkt | 53,64050 / 9,66954 |
-| Entfernung zur **nächstgelegenen** echten Hauptstraße | **490 m** — er liegt auf keiner |
-| Entfernung zu Holms Ortsmitte | **2,26 km** |
-| Holms eigene Hauptstraße läge bei | 53,6205 / 9,6727 — 200 m von der Mitte |
-
-**Zwei Ursachen, beide in `tiles/build-places.py`:**
-
-1. **Gleiche Namen werden zu einem Punkt verrechnet.** Die Segmente werden nach `(name, kind)`
-   gruppiert, und aus ihren Mittelpunkten wird der **Durchschnitt** gebildet. Die Bounding Box der
-   Region reicht über Holm hinaus — das war schon der Grund für die 7686 Adressen —, es liegen also
-   siebzehn Hauptstraßen darin. Der Durchschnitt landet zwischen ihnen, auf keiner einzigen.
-2. **`out center` liefert die Mitte des Rechtecks, nicht einen Punkt auf der Straße.** Overpass
-   gibt zu jedem Weg den Mittelpunkt seiner Bounding Box zurück. Bei einer kurzen, geraden Straße
-   fällt das kaum auf; bei einer gebogenen oder L-förmigen liegt der Punkt neben der Fahrbahn.
-
-**Der zweite Schritt rettet es nicht — er erbt denselben Fehler.** `places.housenumbers()` sucht
-die Nummern über `Place.street == street.name`, also über den **Namen**. Wer „Hauptstraße" antippt,
-bekommt deshalb alle **153** Hausnummern aus siebzehn Dörfern angeboten, jede Nummer mehrfach. Die
-Auswahl ist dann ein Münzwurf, und das neue Abschnittsraster („1–13", „15–24") sortiert Nummern
-nebeneinander, die kilometerweit auseinanderliegen.
-
-**Derselbe Mechanismus trifft ausgedehnte Naturobjekte.** Die „Elbe" liegt im Index bei
-53,68963 / 9,50909 — ausserhalb der Bounding Box. Ein Beitrag dorthin würde vom Backend mit
-„Dieser Ort liegt ausserhalb der Karte." abgewiesen (`app/api/contribute.py:142`).
-
-**Gewünschtes Verhalten:** Bei mehreren gleichnamigen Straßen wird die des Museumsortes genommen.
-Der vorgeschlagene Punkt liegt auf dem **Straßenverlauf selbst**, in der Mitte der Strecke — nicht
-in der Mitte des umschließenden Vierecks. Und die Hausnummern gehören zu *dieser* Straße, nicht zu
-allen gleichnamigen.
-
-**Vorher zu klären:**
-
-- **Woran wird „die aus Holm" erkannt?** Der Ortsname steht in `region.json`, es darf also nichts
-  Ortsspezifisches in den Code. Drei Wege, in absteigender Verlässlichkeit: über die Grenzrelation
-  des Ortes (`admin_level`), über `addr:city`/`is_in` an den Segmenten (nicht überall gepflegt),
-  oder rein geometrisch über die Nähe zu `region.center`. Wahrscheinlich braucht es eine Kette aus
-  zweien davon.
-- **Oder werden gleichnamige Straßen gar nicht zusammengeworfen?** Die Alternative wäre, jede der
-  siebzehn als eigenen Eintrag zu führen und in der Trefferliste zu unterscheiden. Für ein Museum,
-  dessen Fotos aus einem Dorf stammen, ist das vermutlich zu viel Auswahl — aber es ist die
-  ehrlichere Datenhaltung, und die Entscheidung gehört vor den Code.
-- **Die Hausnummern brauchen eine Zuordnung zur Straße, die nicht der Name ist.** Heute gibt es
-  keine, deshalb der Namensvergleich. Naheliegend: beim Bauen des Index jede Adresse dem
-  nächstgelegenen gleichnamigen Segment zuordnen und die Beziehung mitschreiben.
-
-**Was der Umbau kostet:** Für einen Punkt auf der Strecke reicht `out center` nicht, es braucht
-`out geom` — die vollständige Geometrie aller Wege. Das vergrößert die Overpass-Antwort deutlich.
-`places.json` muss dadurch nicht wachsen: Gespeichert wird weiterhin nur der ausgerechnete Punkt.
-
-**Nach dem Umbau:** `make places` neu laufen lassen und den Index mit `python -m app.cli places`
-einlesen — auf dem Pi über `update.sh`. **Fotos, die vorher auf einen falschen Punkt verortet
-wurden, bleiben dort.** Sie sind an ihrem `place_name` erkennbar und über die Fotoliste zu
-korrigieren; wie viele es sind, ist vor dem Umbau zu zählen.
 
 ### Tastatur: was ist ohne sie erreichbar, und wollen wir eine?
 

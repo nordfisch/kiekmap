@@ -25,7 +25,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 | III | Nachbesserungen an der Verwaltung | 30.–31. Juli 2026 | `850db95` … `b4a9f6f` |
 | IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `cc5a437` … `006f9ee` |
 | V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `2f773f1` … `b20ff5c` |
-| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `b064e62` |
+| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `42fe5d8` |
 
 ---
 
@@ -619,3 +619,57 @@ einen echten Import.*
 > `clampOffset` zieht den Versatz auf eine Seite, die es noch gibt. „Gleiche Seite" gilt also nur,
 > solange die Trefferzahl das hergibt. Das ist gewollt: Die Alternative wäre eine leere Seite
 > hinter dem Ende.
+
+## Gleichnamige Straßen werden nicht mehr verschmolzen
+
+`42fe5d8` · 2. August 2026.
+
+Wer bei der Verortung „Hauptstraße" eingab, bekam einen Punkt **2,26 km von Holms Ortsmitte** — auf
+keiner Straße, mitten im Feld. Und der zweite Schritt bot **153 Hausnummern aus siebzehn Dörfern**
+an, jede mehrfach.
+
+**Zwei Ursachen, beide im Bauskript.** Gleichnamige Wegstücke wurden nach `(Name, Art)` gruppiert
+und ihre Mittelpunkte gemittelt; der Ausschnitt reicht über Holm hinaus, also lagen darin siebzehn
+Hauptstraßen, und der Durchschnitt landete zwischen ihnen. Dazu liefert Overpass mit `out center`
+die Mitte des umschließenden Rechtecks — bei einer gebogenen Straße also einen Punkt neben der
+Fahrbahn.
+
+**Die Lösung kam aus einem Vorschlag im Gespräch und ist besser als die geplante.** Der Plan sah
+vor, die ortsnächste Straßengruppe geometrisch zu bestimmen. Stattdessen entscheidet jetzt die
+**niedrigste Hausnummer**: Sie liegt in einem gewachsenen Dorf am Ortskern und bleibt dort, auch
+wenn die Straße weit hinausführt — die Mitte einer langen Straße wandert dagegen mit ihr aus dem
+Ort heraus. Und der Vertreterpunkt ist die **mittlere Hausnummer**, liegt also an einem Haus statt
+auf der Fahrbahn; für „Wo war das?" ist das die brauchbarere Antwort.
+
+**Was der Vorschlag nicht wusste:** Ein erster Einfall war, die Postleitzahl in die Konfiguration
+aufzunehmen — dann gäbe es je Name nur noch eine Straße. Die Messung sprach dagegen: **29 % der
+Straßen (141 von 486) haben gar keine Hausnummer** und damit auch keine PLZ, und an den
+Straßen-Wegen selbst steht sie ohnehin nie. Ein Stichprobenlauf gegen Overpass zeigte zudem, dass
+sie an 17 % der Adressknoten fehlt. Ein geometrischer Rückfall war also in jedem Fall nötig — er
+ist geblieben und deckt genau diese 141 Straßen ab, mit einem Punkt auf ihrem Verlauf
+(`out geom` statt `out center`).
+
+**Der Index führt seither nur noch Straßen und Adressen.** Gebäude, Gewässer, Fluren und Ortsteile
+sind entfallen — für sie gibt es den Pin auf der Karte. Damit erledigte sich der zweite Fall
+desselben Fehlers: Die „Elbe" hatte sich aus ihren Teilstücken zu einem Punkt **ausserhalb der
+Region** gemittelt, den das Backend bei einem Beitrag abgewiesen hätte. Dazu werden Wege jetzt auf
+den Ausschnitt zugeschnitten, denn Overpass liefert jeden Weg vollständig, sobald er die Bounding
+Box nur berührt.
+
+**Die Rechnung steht als `tiles/geometry.py` mit 19 Tests daneben**, und `make test` hat dafür ein
+drittes Ziel bekommen. Der Grund ist derselbe wie überall in diesem Projekt: Beide Fehler passieren
+**still**. Das Skript lief grün durch, der Index wurde gebaut, und erst im Museum hätte jemand auf
+„Hauptstraße" getippt.
+
+*Nachgemessen:*
+
+| | vorher | nachher |
+|---|---|---|
+| Punkt der Hauptstraße, Abstand zur Ortsmitte | 2,26 km | **0,18 km** |
+| Hausnummern der Hauptstraße | 153, alphabetisch sortiert | **76**, in Gehreihenfolge |
+| Straßen, deren Punkt auf einer eigenen Hausnummer liegt | — | **345 von 345** |
+| Einträge ausserhalb der Region | 54 | **0** |
+
+> **Was bleibt:** Fotos, die vorher auf einen falschen Punkt verortet wurden, stehen weiter dort.
+> Der Ortsindex wird ersetzt, die Fotos werden nicht neu verortet — sie sind an ihrem `place_name`
+> erkennbar und über die Fotoliste zu korrigieren.

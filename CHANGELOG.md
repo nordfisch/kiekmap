@@ -237,6 +237,18 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   noch auf dem alten — der Auswahlbalken zeichnete sich dann mit `left: -300%` quer über Wappen
   und Titel, beide Griffe lagen außerhalb des Bildschirms. Die Achse spannt jetzt über den ganzen
   Bestand und steht still; dazu ist die Positionsrechnung auf 0…1 geklammert
+- **Gleichnamige Straßen wurden zu einer verschmolzen.** Wer „Hauptstraße" eingab, bekam einen
+  Punkt 2,26 km von der Ortsmitte — auf keiner Straße —, und der zweite Schritt bot 153
+  Hausnummern aus siebzehn Dörfern an. Der Ausschnitt reicht über den Museumsort hinaus; die
+  gleichnamigen Straßen darin wurden gemittelt, und `out center` liefert ohnehin die Mitte des
+  umschließenden Rechtecks statt eines Punktes auf der Fahrbahn. Der Ortsindex trennt sie jetzt
+  räumlich und nimmt die, deren **niedrigste Hausnummer** der Ortsmitte am nächsten liegt; als
+  Punkt dient die **mittlere Hausnummer**, liegt also an einem Haus. Straßen ohne Hausnummern
+  bekommen einen Punkt auf ihrem Verlauf. Nachgemessen: 0,18 km statt 2,26 km, 76 statt 153
+  Hausnummern, keine Einträge mehr ausserhalb der Region
+- Der Ortsindex führt nur noch **Straßen und Hausnummern**. Gebäude, Gewässer, Fluren und Ortsteile
+  sind entfallen — für sie gibt es den Pin auf der Karte, und die „Elbe" war der zweite Fall
+  desselben Fehlers: Sie mittelte sich aus ihren Teilstücken zu einem Punkt ausserhalb der Region
 - **Der Bearbeitungsdialog öffnete sich mitten im Formular.** Wer in der Fotoliste nach unten
   gescrollt hatte und dann ein Foto öffnete, bekam das Formular an derselben Stelle — Vorschaubild
   und Titel standen oberhalb des Bildschirmrands. Gescrollt wird nämlich nicht die Ansicht, sondern
