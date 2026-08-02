@@ -25,7 +25,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 | III | Nachbesserungen an der Verwaltung | 30.–31. Juli 2026 | `850db95` … `b4a9f6f` |
 | IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `cc5a437` … `006f9ee` |
 | V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `2f773f1` … `b20ff5c` |
-| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `42fe5d8` |
+| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `f9b6506` |
 
 ---
 
@@ -673,3 +673,48 @@ drittes Ziel bekommen. Der Grund ist derselbe wie überall in diesem Projekt: Be
 > **Was bleibt:** Fotos, die vorher auf einen falschen Punkt verortet wurden, stehen weiter dort.
 > Der Ortsindex wird ersetzt, die Fotos werden nicht neu verortet — sie sind an ihrem `place_name`
 > erkennbar und über die Fotoliste zu korrigieren.
+
+## Fotos löschen — und ein Datenverlust, der beinahe unbemerkt geblieben wäre
+
+`f9b6506` · 2. August 2026.
+
+Aus „Verstecken" wurde „Löschen": derselbe Status unter dem Wort, unter dem das Museumsteam ihn
+sucht. Bedient wird es im Editor und in jeder Zeile der Fotoliste, beide mit Rückfrage; gelöschte
+Fotos zählen in keiner Kachel mehr mit und stehen in keiner Liste ausser „Gelöscht". Die
+Begründung steht als Punkt 16 in [decisions.md](decisions.md).
+
+**Der eigentliche Fund war die Migration.** Sie benennt den Wert `hidden` in `deleted` um, und
+weil SQLite einen Check-Constraint nicht ändern kann, baut Alembic die Tabelle `photos` dazu neu:
+Kopie anlegen, **Original löschen**, umbenennen. Beim ersten Lauf gegen die Entwicklungsdatenbank
+nahm dieses `DROP` mit, was daran hing:
+
+| | vorher | nachher |
+|---|---|---|
+| Besucherbeiträge (`changes`, ON DELETE CASCADE) | 21 | **0** |
+| Schlagwort-Zuordnungen (`photo_tags`) | vorhanden | **0** |
+| Verknüpfte Einträge im Import-Protokoll (ON DELETE SET NULL) | 38 | **0** |
+
+**Nichts davon warf einen Fehler.** Die Migration lief grün durch, die Fotos waren alle noch da,
+und aufgefallen ist es nur, weil die Übersicht danach „0 Beiträge von Besuchern" zeigte, wo vorher
+21 standen. Auf dem Museums-Pi wäre der Verlust Wochen später aufgefallen — und dann unwiederbringlich.
+
+Die Ursache ist eine Kette, die einzeln überall richtig aussieht: `app/db.py` schaltet
+`PRAGMA foreign_keys=ON` über einen Listener auf der **Engine-Klasse** ein, gilt also für jede
+Engine des Prozesses. `alembic/env.py` importiert die Modelle und damit `app.db` — die
+Migrationsverbindung erbt die Einstellung. Und mit eingeschalteten Fremdschlüsseln räumt der
+Tabellenneubau ab, was auf die Tabelle zeigt.
+
+`env.py` schaltet die Prüfung jetzt für die Dauer der Migration ausdrücklich ab. Das gilt für
+**jede künftige Batch-Migration**, nicht nur für diese eine — dieselbe Falle stünde sonst beim
+nächsten Constraint wieder auf.
+
+Dazu ein Test, der die Migration wirklich fährt (`tests/test_migrationen.py`): Foto, Beitrag,
+Schlagwort und Protokolleintrag anlegen, migrieren, nachzählen. Ohne die Reparatur ist er rot.
+
+> **Verloren sind die Testdaten dieser Entwicklungsdatenbank** — 21 Besucherbeiträge, die
+> Schlagwörter und die Verknüpfungen des Import-Protokolls. Die Fotos selbst sind vollständig.
+
+*Nebenbei repariert:* `test_alte_sicherung_ist_ueberfaellig` schrieb seinen Zeitstempel in
+Ortszeit, gelesen wird er als UTC. Zwischen 22 und 24 Uhr MESZ rutschte der umgerechnete Stempel
+auf den nächsten Kalendertag und der Test war rot — zwei Stunden am Tag, seit die Kalendertage
+eingeführt wurden.

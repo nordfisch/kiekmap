@@ -213,6 +213,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   mit: Sie hielt ihre Marker und ihr Histogramm die ganze Zeit über fest. Wer nachsah, ob sein
   Import angekommen ist, sah den Bestand von vorher. Gilt für alle drei Auswege: den Knopf oben
   rechts, die Kachel „Auf der Karte zu sehen" und „Anzeige neu laden"
+- **Fotos lassen sich löschen** — im Editor und in jeder Zeile der Fotoliste, beides mit
+  Rückfrage. „Gelöscht" heißt dabei *aus der Ausstellung genommen*, nicht *von der Platte
+  entfernt*: Datei und Datenbankzeile bleiben, „Wiederherstellen" holt beides zurück. Der
+  bisherige Status „Versteckt" ist darin aufgegangen. Gelöschte Fotos zählen in keiner Kachel der
+  Übersicht mehr mit und stehen in keiner Liste ausser „Gelöscht" — sonst wäre das Löschen dort
+  wirkungslos, wo jemand hinsieht
 - Die Dokumentation ist neu geordnet. Die Dateinamen folgen jetzt der Konvention und sind englisch
   (`operations.md`, `development.md`, `usermanual.md`); der Inhalt bleibt deutsch, denn er richtet
   sich an Menschen. Aus den drei Plandokumenten, die alle Erledigtes mit Offenem mischten, sind
@@ -237,6 +243,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   noch auf dem alten — der Auswahlbalken zeichnete sich dann mit `left: -300%` quer über Wappen
   und Titel, beide Griffe lagen außerhalb des Bildschirms. Die Achse spannt jetzt über den ganzen
   Bestand und steht still; dazu ist die Positionsrechnung auf 0…1 geklammert
+- **Eine Migration hätte alle Besucherbeiträge gelöscht.** SQLite kann Constraints nicht ändern,
+  also baut Alembic die Tabelle neu — und mit eingeschalteten Fremdschlüsseln räumt dieses Löschen
+  der alten Tabelle ab, was daran hängt: Besucherbeiträge (`ON DELETE CASCADE`), die
+  Schlagwort-Zuordnungen, die Verknüpfungen des Import-Protokolls. Ohne jede Fehlermeldung.
+  `alembic/env.py` schaltet die Prüfung für die Dauer einer Migration jetzt ab; ein Test fährt die
+  Migration und zählt nach
 - **Gleichnamige Straßen wurden zu einer verschmolzen.** Wer „Hauptstraße" eingab, bekam einen
   Punkt 2,26 km von der Ortsmitte — auf keiner Straße —, und der zweite Schritt bot 153
   Hausnummern aus siebzehn Dörfern an. Der Ausschnitt reicht über den Museumsort hinaus; die
