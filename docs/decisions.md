@@ -421,3 +421,66 @@ sagt dasselbe wie die Liste, in die sie führt.
 Der Preis: Es gibt keinen Weg mehr, ein Foto nur *vorübergehend* auszublenden, ohne es „gelöscht"
 zu nennen — etwa, solange die Rechtelage geklärt wird. Wer das braucht, braucht einen dritten
 Status, keine zweite Bedeutung für diesen.
+
+## 17. Der Migrationsverlauf wurde einmal zusammengefasst — und das war die letzte Gelegenheit
+
+Am 3. August 2026 wurden die drei vorhandenen Alembic-Revisionen zu einem Anfangsschema
+zusammengelegt. Der Grund ist schlicht: Es hatte nie ein Gerät Photomap ausgeführt. Es gab also
+keine Datenbank, von der ein Migrationsweg irgendwohin hätte führen können — ein Verlauf, den
+nichts nachspielen kann, ist kein Verlauf, sondern Ballast. Mit ihm verschwand nebenbei die
+Migration, die einen Datenverlust verursacht hatte.
+
+**Ab dem ersten Pi ist das nicht mehr erlaubt.** Sobald ein Museum eine gefüllte Datenbank hat,
+ist die Kette der Migrationen der einzige Weg, auf dem seine Daten eine Schemaänderung überleben.
+Das Zusammenfassen wäre dann kein Aufräumen mehr, sondern ein Datenverlust mit Ansage.
+
+**Was bleiben musste, blieb:** Das `PRAGMA foreign_keys=OFF` in `alembic/env.py` ist die Lehre aus
+dem Verlust und steht unverändert. Der Test, der es bewacht, hing allerdings namentlich an einer
+der gelöschten Revisionen — ein Test, der mit dem Fehler stirbt, den er bewacht, ist keiner. Er
+läuft jetzt gegen eine Probe-Migration unter `tests/fixtures/migrationsprobe/`, die an keiner
+Revisionsnummer hängt und deren `env.py` die echte ausführt.
+
+## 18. Der Beispielbestand liegt als Bilder plus JSON, nicht als Datenbankabzug
+
+`make seed` stellt einen kleinen Fotobestand zum Entwickeln her, `make seed-save` sichert ihn.
+Dazwischen liegt `seed/` — die Bilddateien unter ihren ursprünglichen Namen und eine `seed.json`
+mit allem Übrigen.
+
+Ein Datenbankabzug wäre der kürzere Weg gewesen und ist trotzdem der falsche: **Er ist wertlos,
+sobald eine Spalte dazukommt**, und genau das passiert in diesem Projekt regelmäßig. Hier kostet
+eine neue Spalte eine Zeile je Foto, und der Bestand muss nicht neu kuratiert werden.
+
+Zwei Eigenschaften fallen dabei ab, die den Aufwand rechtfertigen:
+
+- **Das Einlesen geht durch die echte Import-Pipeline.** Es erzeugt damit die Vorschaubilder,
+  füllt das Import-Protokoll und prüft den Import bei jedem Lauf gleich mit.
+- **Die Datei ist im Diff lesbar.** Wer eine Datierung ändert, sieht das als eine Zeile.
+
+Was *nicht* in der JSON steht, steht mit Absicht nicht darin: SHA-256, Dateigröße, Abmessungen und
+MIME-Typ werden beim Einlesen aus dem Bild gelesen. Eine Kopie davon könnte nur veralten. Der
+SHA-256 ist die einzige Ausnahme und dient allein der Warnung, falls sich eine Datei seit dem
+Sichern geändert hat.
+
+**Die Lücken im Bestand sind Teil des Bestands.** Fotos ohne Jahr, Fotos ohne Ort, eines ohne
+beides, ein zurückgenommener Besucherbeitrag: Ohne sie prüft der Bestand die Hälfte des Programms
+nicht — der „Hilf mit"-Bereich hätte nichts vorzulegen. Wer den Bestand pflegt, muss sie erhalten;
+`test_luecken_bleiben_luecken` hält fest, dass auch das Einlesen sie nicht zuschüttet.
+
+## 19. Bildnachweis und Herkunft sind zwei Felder, weil sie zwei Leser haben
+
+Museumsfotos brauchen eine Rechte- und Herkunftsangabe. Naheliegend wäre ein Freitextfeld gewesen;
+es sind zwei geworden, und die Trennung ist der eigentliche Inhalt der Entscheidung:
+
+- **`credit`** — der Bildnachweis, eine Zeile, steht im Besucher-Overlay unter der Beschreibung.
+  „Sammlung Heimatmuseum Holm", „Foto: H. Meyer".
+- **`provenance`** — von wem das Bild kam, ob es eine Leihgabe ist, ob eine Freigabe vorliegt.
+  Eine interne Notiz, die den Verwaltungsbereich nie verlässt.
+
+**Durchgesetzt wird das durch den Typ, nicht durch eine Verabredung.** Der Kiosk-Endpunkt liefert
+`PhotoDetail`, und diese Klasse hat kein Feld für die Herkunft — sie kann sie also auch
+versehentlich nicht mitschicken. Die Verwaltung bekommt `PhotoAdminDetail`, das davon erbt und
+eines hinzufügt. Eine Regel, die nur im Kopf steht, hält der nächste Endpunkt nicht ein.
+
+Beide sind auch gemeinsame Angabe des Stapel-Imports, neben Jahr und Ort: Eine Kiste Scans kommt
+fast immer von einer Person, und keines der beiden Felder kann aus der Datei stammen — ein Scanner
+weiß nicht, wer das Bild verliehen hat.

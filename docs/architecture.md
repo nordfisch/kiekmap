@@ -147,6 +147,11 @@ dasselbe Bild, überall.
 also spätestens beim morgendlichen Neustart. Alles andere im Frontend ist flüchtiger Zustand in
 Zustand-Stores (`src/store/`), einer je Bereich.
 
+Daneben steht **`seed/`**, und es gehört ausdrücklich *nicht* zum Zustand des Geräts: ein
+Beispielbestand für die Entwicklung, den `make seed` in `data/` verwandelt und `make seed-save`
+zurückschreibt. Bilddateien plus eine `seed.json`, damit eine neue Spalte ihn nicht wertlos macht;
+auf dem Pi kommt er nie vor. Siehe [decisions.md](decisions.md), Punkt 18.
+
 ---
 
 ## Die Wege durch das System

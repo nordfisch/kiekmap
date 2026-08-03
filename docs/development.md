@@ -135,6 +135,32 @@ soll niemand daran denken müssen. Die erzeugte Migration immer durchlesen: SQLi
 nicht ändern, Alembic baut die Tabelle dann neu (`render_as_batch`), und dabei gehen Details
 verloren, wenn man nicht hinsieht.
 
+> **Der Verlauf fängt bei einem Anfangsschema an, und das bleibt so.** Am 3. August 2026 wurden
+> die drei vorhandenen Revisionen zusammengelegt, weil noch kein Gerät im Feld war. **Ab dem
+> ersten Pi ist das nicht mehr erlaubt** — dann ist die Kette der Migrationen der einzige Weg, auf
+> dem die Daten eines Museums eine Schemaänderung überleben. Siehe [decisions.md](decisions.md),
+> Punkt 17.
+
+Was beim Neubau einer Tabelle schiefgehen kann, ist einmal schiefgegangen und kostete alle
+Besucherbeiträge: `app/db.py` schaltet `PRAGMA foreign_keys=ON` für *jede* Engine des Prozesses
+ein, auch für die von Alembic, und der Neubau löscht das Original. `alembic/env.py` schaltet die
+Prüfung deshalb für die Dauer einer Migration ab. `tests/test_migrationen.py` bewacht das — wer
+dort etwas ändert, sollte die Gegenprobe machen: mit `foreign_keys=ON` muss der Test rot sein.
+
+## Beispielbestand
+
+```bash
+make seed        # Bestand aus seed/ herstellen — loescht den vorhandenen!
+make seed-save   # den laufenden Bestand nach seed/ sichern
+```
+
+Sechzehn echte Aufnahmen aus Holm, bewusst lückenhaft: Fotos ohne Jahr, ohne Ort, gestaffelte
+Textlängen, gelöschte Fotos, Besucherbeiträge samt einem zurückgenommenen. Ohne diese Lücken prüft
+der Bestand die Hälfte des Programms nicht — der „Hilf mit"-Bereich hätte nichts vorzulegen.
+
+**Die Bilder sind noch nicht im Repo**, weil sie dem Museum gehören; `make seed` sagt das im
+Klartext, wenn `seed/` leer ist. Alles Weitere in [../seed/README.md](../seed/README.md).
+
 ## Aufbau
 
 ```
@@ -150,6 +176,7 @@ frontend/src/
   store/      Zustand-Stores, einer je Bereich
   api/        Backend-Zugriff; die Typen spiegeln backend/app/schemas.py
   texte/      Oberflächentexte
+seed/         Beispielbestand: Bilddateien und seed.json
 ```
 
 **Faustregel:** Wenn sich etwas ohne HTTP testen lässt, gehört es nach `services/`.

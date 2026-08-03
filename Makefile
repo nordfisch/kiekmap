@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
-        migrate revision lint tiles places build prod prod-down clean
+        migrate revision seed seed-save lint tiles places build prod prod-down clean
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
@@ -70,6 +70,17 @@ migrate: $(VENV)  ## Schemastand auf den neuesten Stand bringen
 revision: $(VENV)  ## Neue Migration erzeugen: make revision m="Beschreibung"
 	@test -n "$(m)" || { echo 'Bitte m="Beschreibung" angeben'; exit 1; }
 	cd backend && .venv/bin/alembic revision --autogenerate -m "$(m)"
+
+# --- Beispielbestand --------------------------------------------------------
+#
+# Ein Entwicklungsstand, den man nicht zurueckholen kann, ist keiner. `make seed` wirft den
+# Bestand weg und baut ihn aus seed/ neu auf -- das ist der Punkt, nicht ein Versehen.
+
+seed: migrate  ## Beispielbestand aus seed/ herstellen (loescht den vorhandenen!)
+	cd backend && .venv/bin/python -m app.cli seed-load
+
+seed-save: $(VENV)  ## Den laufenden Bestand nach seed/ sichern
+	cd backend && .venv/bin/python -m app.cli seed-export
 
 # --- Pruefen ----------------------------------------------------------------
 

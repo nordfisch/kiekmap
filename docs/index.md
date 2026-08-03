@@ -45,6 +45,7 @@ Bedienung, `operations.md` die Technik dahinter.
 | [../README.md](../README.md) | Der Einstieg: was das Ganze ist, wie man es startet |
 | [../CHANGELOG.md](../CHANGELOG.md) | Was das Programm kann, nach Keep a Changelog sortiert |
 | [../CLAUDE.md](../CLAUDE.md) | Die Regeln dieses Repos, für Coding-Agents |
+| [../seed/README.md](../seed/README.md) | Der Beispielbestand: was `make seed` herstellt und warum seine Lücken Absicht sind |
 
 `CHANGELOG.md` und `history.md` beschreiben beide Gebautes und sind trotzdem beide da: Der eine
 listet **was**, die andere erzählt **wie und warum**. Wer sucht, ob eine Funktion existiert, nimmt

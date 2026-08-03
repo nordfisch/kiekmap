@@ -5,6 +5,8 @@
     python -m app.cli stats                      what is in there, what is still missing
     python -m app.cli places                     reload the gazetteer
     python -m app.cli pin                        set the PIN for the admin area
+    python -m app.cli seed-export                write the collection out to seed/
+    python -m app.cli seed-load                  empty it and rebuild it from seed/
 
 The usual route for the museum team is the watched folder; these commands are for the initial fill
 with a few thousand scans and for troubleshooting.
@@ -100,6 +102,42 @@ def _cmd_places(_: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_seed_export(_: argparse.Namespace) -> int:
+    from app.services import seed
+
+    settings = get_settings()
+    target = seed.seed_dir(settings)
+
+    with SessionLocal() as session:
+        photos, contributions = seed.export(session, settings, target)
+
+    print(f"{photos} Fotos und {contributions} Besucherbeitraege nach {target} geschrieben.")
+    print("Zurueckspielen mit: make seed")
+    return 0
+
+
+def _cmd_seed_load(_: argparse.Namespace) -> int:
+    """Throws the collection away and rebuilds it. That is the point, so it says so first."""
+    from app.services import seed
+
+    settings = get_settings()
+    settings.ensure_dirs()
+    source = seed.seed_dir(settings)
+
+    with SessionLocal() as session:
+        try:
+            photos, contributions = seed.load(session, settings, source)
+        except FileNotFoundError:
+            print(f"Kein Beispielbestand unter {source}.", file=sys.stderr)
+            print("Was dort hingehoert, steht in seed/README.md.", file=sys.stderr)
+            print("Einen eigenen anlegen: python -m app.cli seed-export", file=sys.stderr)
+            return 1
+        session.commit()
+
+    print(f"{photos} Fotos und {contributions} Besucherbeitraege eingelesen.")
+    return 0
+
+
 def _cmd_pin(_: argparse.Namespace) -> int:
     """Ask for a PIN twice and print the line that belongs in the .env file.
 
@@ -152,6 +190,12 @@ def main(argv: list[str] | None = None) -> int:
 
     p_pin = commands.add_parser("pin", help="PIN fuer den Admin-Bereich setzen")
     p_pin.set_defaults(handler=_cmd_pin)
+
+    p_seed_export = commands.add_parser("seed-export", help="Bestand nach seed/ sichern")
+    p_seed_export.set_defaults(handler=_cmd_seed_export)
+
+    p_seed_load = commands.add_parser("seed-load", help="Bestand aus seed/ wiederherstellen")
+    p_seed_load.set_defaults(handler=_cmd_seed_load)
 
     args = parser.parse_args(argv)
     return args.handler(args)

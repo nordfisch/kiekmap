@@ -3,6 +3,13 @@
 /data/*
 !/data/.gitkeep
 
+# Beispielbestand fuer Entwicklung und Test. Noch nicht im Repo: es sind echte Aufnahmen aus
+# Holm, und ob wir sie mitliefern duerfen und wollen, ist offen -- siehe docs/backlog.md unter
+# "Versionierung, Releaseprozess und Veroeffentlichung". Bis dahin holt sich jeder seinen eigenen
+# ueber `make seed-save`; seed/README.md sagt, was dort hingehoert.
+/seed/*
+!/seed/README.md
+
 # Kartendaten: zu gross fuers Repo, werden per `make tiles` gebaut.
 # Versioniert wird nur das Bauskript und tiles/region.json.
 *.pmtiles

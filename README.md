@@ -59,7 +59,7 @@ Vite leitet `/api` an das Backend weiter, sodass in Entwicklung und Betrieb dies
 | Kommando | Zweck |
 |---|---|
 | `make dev` | Backend und Frontend mit Hot Reload |
-| `make seed` | Beispielfotos importieren |
+| `make seed` | Beispielbestand aus `seed/` herstellen — [noch nicht mitgeliefert](seed/README.md) |
 | `make test` | pytest und vitest |
 | `make tiles` | Offline-Karte und Ortsindex für die konfigurierte Region bauen |
 | `make prod` | Alles in Containern, so wie es auf dem Pi läuft |

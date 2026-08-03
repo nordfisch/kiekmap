@@ -43,13 +43,6 @@ auf die SD-Karte geschrieben (die dafür Platz braucht) oder im Strom erzeugt? L
 ZIP ohne Kompression und ist für JPEGs ohnehin das Richtige — komprimieren bringt bei ihnen
 nichts.
 
-### Rechte- und Herkunftsangaben pro Foto
-
-Im Museumskontext oft relevant, bisher **nicht spezifiziert** — weder das Datenfeld noch, wer es
-sieht. Vor dem Code zu klären: Gehört die Angabe zum Foto oder zur Sammlung? Steht sie im
-Foto-Overlay für Besucher oder nur im Verwaltungsbereich? Und braucht der Stapel-Import ein
-gemeinsames Feld dafür, wie er es für Jahr und Ort hat?
-
 ### Jahreszahl aus dem Dateinamen raten
 
 `Kirchweih_1932_Muehle.jpg` trägt seine Datierung im Namen, und beim Erstimport von einigen
@@ -333,38 +326,6 @@ ausgeschaltet — das ist auf Dauer der wahrscheinlichste Ausfallgrund.
 Nicht das Programm, sondern die Arbeit daran: wie das Projekt geordnet, veröffentlicht und
 weitergegeben wird.
 
-### Gute Beispieldaten für Entwicklung und Test
-
-Heute gibt es sechs Testbilder in `backend/tests/fixtures/`, und die decken genau die schwierigen
-Fälle der Import-Pipeline ab: Scan ohne EXIF, Scan mit Scandatum von 2019, hochkant über
-EXIF-Orientierung, CMYK-TIFF, Graustufen, Datei ohne Bild. Sie sind mit
-`tests/fixtures/erzeuge_testbilder.py` **synthetisch erzeugt** — für die Pipeline richtig, für
-alles andere nutzlos: Man sieht auf ihnen nichts, was auf einer Karte an einer Stelle Sinn ergäbe.
-
-Was fehlt, ist ein **Bestand zum Ansehen**: genug Fotos, an verschiedenen Orten, mit und ohne
-Datierung, mit und ohne Ort, damit Karte, Zeitschieber, Cluster, Stapel und der „Hilf mit"-Bereich
-in einem realistischen Zustand geprüft werden können. Bisher stammt jeder solche Test aus einer von
-Hand befüllten `data/`, die niemand sonst hat.
-
-> **Das README verspricht das schon.** In seiner Kommandotabelle steht `make seed` —
-> „Beispielfotos importieren". **Dieses Ziel gibt es im Makefile nicht.** Entweder es entsteht mit
-> diesem Punkt, oder die Zeile muss weg.
-
-**Vorher zu klären — und das ist der Knoten:** Welche Fotos? Echte historische Aufnahmen aus Holm
-gehören dem Museum und sind nicht ohne Weiteres in einem Repo zu veröffentlichen. Drei Wege:
-
-1. **Weiter synthetisch**, aber ansehnlich: erzeugte Bilder mit erkennbarem Motiv und Beschriftung
-   („Beispiel 3 — Mühlenweg, 1930er"). Rechtlich unbedenklich, im Repo tragbar, sieht aber nie aus
-   wie ein Museum.
-2. **Gemeinfreie historische Fotos** aus Wikimedia Commons oder einem Landesarchiv, auf Holmer
-   Koordinaten gelegt. Realistisch, braucht aber je Bild eine Lizenzprüfung und die Namensnennung
-   im Repo.
-3. **Ein kleiner echter Satz mit Erlaubnis des Museums**, klar als solcher gekennzeichnet und mit
-   schriftlicher Freigabe.
-
-Dazu gehört: die vorhandenen Tests auf den neuen Satz ziehen und ihn **committen** — ein
-Beispielbestand, den man erst herstellen muss, wird nicht benutzt.
-
 ### Versionierung, Releaseprozess und Veröffentlichung des Codes
 
 **Stand:** `development.md` kündigt SemVer-Tags und Conventional Commits an, beides zusammen
@@ -393,6 +354,20 @@ Begründungen.
   vorbereitet — im Code steht nirgends, was auf dem Bild zu sehen ist —, die Datei müsste also nur
   durch einen Platzhalter ersetzt werden. **Vor der Veröffentlichung zu entscheiden, nicht danach:
   aus der Git-Historie bekommt man sie nur mit einem Rewrite wieder heraus.**
+- **Dürfen und wollen wir Beispielfotos ausliefern?** Seit dem 3. August gibt es einen
+  Beispielbestand unter `seed/` — sechzehn echte historische Aufnahmen aus Holm, mit denen `make
+  seed` in einer Minute einen brauchbaren Entwicklungsstand herstellt. **Er ist bewusst nicht
+  committet**, denn die Bilder gehören dem Museum. Damit steht `make seed` im README als
+  Kommando, das für einen frischen Clone nichts tut — der Zustand ist ehrlich dokumentiert
+  (`seed/README.md` und eine Klartextmeldung), aber er ist kein Endzustand.
+
+  Die Frage hat drei Antworten, und sie ist mit der Wappen-Frage verwandt: **mitliefern** (braucht
+  die schriftliche Freigabe des Museums und einen Bildnachweis je Foto — das Feld dafür gibt es
+  seit demselben Tag), **durch gemeinfreie Bilder ersetzen** (Wikimedia Commons oder ein
+  Landesarchiv, je Bild eine Lizenzprüfung), oder **durch erzeugte Bilder mit erkennbarem Motiv
+  ersetzen** (rechtlich unbedenklich, sieht aber nie aus wie ein Museum). Der Weg entscheidet
+  zugleich, ob ein zweites Museum das Projekt mit einem gefüllten Bildschirm ausprobieren kann
+  oder mit einem leeren.
 - **Die Historie ist sonst sauber.** Keine `.env`, keine Laufzeitdaten, keine Kartendateien, keine
   echten Fotos — nur `deploy/.env.example` und die sechs synthetischen Testbilder. Das ist vor dem
   Veröffentlichen noch einmal zu prüfen, aber der Ausgangspunkt ist gut.

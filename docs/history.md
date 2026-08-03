@@ -780,3 +780,113 @@ Was nur hier steht, weil es zwischen den Teilen liegt und deshalb bisher nirgend
 
 Dazu ein Diagramm, das die drei Prozesse, die zwei gebauten Artefakte und ihre Wege in einem Bild
 zeigt — die Frage „was läuft wo?" beantwortet es schneller als jeder Absatz.
+
+## Ein Beispielbestand — und drei Funde auf dem Weg dahin
+
+3. August 2026.
+
+Jeder Test der Karte, des Zeitschiebers und des „Hilf mit"-Bereichs lief bis hierhin gegen eine von
+Hand befüllte `data/`, die niemand sonst hatte und die zwischen zwei Versuchen nicht
+zurückzusetzen war. Das README versprach in seiner Kommandotabelle längst ein `make seed` — das
+Ziel gab es nicht.
+
+Die Reihenfolge stand fest, sobald der erste Blick in die Daten fiel: **Die zwanzig echten Holmer
+Fotos existierten nur als SHA-benannte Dateien**, ihre Originalnamen und alle Metadaten
+ausschließlich in der Datenbank, die geleert werden sollte. Der Export musste also vor allem
+anderen kommen — und wurde vor dem Löschen Datei für Datei per SHA-256 gegen seinen Eintrag
+nachgerechnet.
+
+### Die Form: Bilder und JSON, kein Datenbankabzug
+
+Ein Abzug ist wertlos, sobald eine Spalte dazukommt — und genau das war zwei Tage vorher passiert.
+Hier kostet eine neue Spalte eine Zeile je Foto. Dazu kommt, dass `make seed` durch die **echte**
+Import-Pipeline geht statt Zeilen zu schreiben: Es erzeugt die Vorschaubilder, füllt das
+Import-Protokoll und prüft den Import gleich mit.
+
+Der Rundlauf ist als Test festgehalten (`test_ausgangszustand_uebersteht_das_hin_und_zurueck`),
+und einer seiner Geschwister beschreibt den Fall, der sonst still kaputtginge:
+`test_luecken_bleiben_luecken` — beim Zurückholen läuft jedes Foto durch den Import, und wenn der
+dabei ein Datum oder einen Ort einträgt, verschwindet das Foto aus dem Beitragsbereich. **Die
+Lücke muss die stärkere Angabe sein.**
+
+### Was der Plan nicht wusste, erstens: die Schlagwörter waren Zeichensalat
+
+Im Bestand standen die Schlagwörter `牁档癩潈浬`, `楗瑮牥` und `浉匠湡敤`. Das sind „ArchivHolm",
+„Winter" und „Im Sande", als UTF-16 gelesen.
+
+`_text()` in `services/exif.py` probierte `utf-16-le` **zuerst** — richtig für die
+Windows-Felder `XPTitle` und `XPKeywords`, die wirklich UCS2-LE sind, falsch für IPTC. Die Tücke:
+**Jede** Bytefolge gerader Länge ist gültiges UTF-16, es fliegt also nie ein `UnicodeDecodeError`
+und der Rückfall auf UTF-8 kommt nie zum Zug. Der Beweis stand in den Daten selbst — kaputt waren
+genau die Wörter mit gerader Byte-Länge, heil die mit ungerader („Gebäude", „Hauptstraße"). Das
+sah nach Zufall aus und war eine Regel.
+
+Die Funktion ist jetzt zweigeteilt: `_xp_text()` für die XP-Felder, `_text()` für alles übrige.
+
+### Was der Plan nicht wusste, zweitens: der Import hielt „OLYMPUS DIGITAL CAMERA" für einen Titel
+
+Zwei Fotos trugen genau diesen Satz als Titel *und* als Beschreibung. Er steht wirklich in den
+Dateien — Olympus-Kameras schreiben ihren eigenen Namen in beide Felder.
+
+**Das ist dieselbe Falle wie das Scandatum, ein Feld weiter.** Der Wert ist da, das Foto gilt
+damit als betitelt und wird nie wieder jemandem vorgelegt, der einen echten Titel wüsste. Also
+dieselbe Behandlung: `_statement()` verwirft eine kleine Liste bekannter Kamera-Textbausteine, und
+kein Titel ist ehrlicher als dieser.
+
+### Was der Plan nicht wusste, drittens: der Testschutz hing an den Revisionsnummern
+
+Die drei Migrationen wurden zu einem Anfangsschema zusammengefasst — es gibt kein Gerät im Feld,
+also gab es keine Datenbank, von der ein Migrationsweg irgendwohin geführt hätte. Mit den Dateien
+verschwand auch die Migration, die den Datenverlust angerichtet hatte.
+
+Beinahe verschwunden wäre damit aber der Test, der ihn seither verhindert: Er zog namentlich auf
+die Revision `b7c41d0a92e3` hoch. Ein Test, der mit dem Fehler stirbt, den er bewacht, ist keiner.
+
+Er läuft jetzt gegen eine **Probe-Migration** unter `tests/fixtures/migrationsprobe/` — eine
+einzige Revision, die `photos` mit `recreate="always"` neu baut und sonst nichts. Ihre `env.py`
+tut nur eines: sie führt die **echte** aus. Eine eigene Kopie der Fremdschlüssel-Regel würde nur
+sich selbst bestätigen. Die Gegenprobe steht: Wird das `PRAGMA foreign_keys=OFF` in
+`alembic/env.py` auf `ON` gedreht, ist der Test rot.
+
+### Bildnachweis und Herkunft
+
+Als einziger schema-wirksamer Backlog-Punkt vorgezogen, weil die Angaben beim Kuratieren ohnehin
+mit eingegeben werden. Der Backlog ließ offen, ob es ein Feld oder zwei sind und wer sie sieht —
+es sind zwei, und **die Trennung ist der Punkt**:
+
+- `credit` — Bildnachweis, eine Zeile, im Besucher-Overlay unter der Beschreibung
+- `provenance` — Herkunft, Leihgeber, Freigabe, nur in der Verwaltung
+
+Durchgesetzt wird das nicht durch eine Verabredung, sondern durch den Typ: Der Kiosk-Endpunkt
+liefert `PhotoDetail`, und diese Klasse hat kein Feld für die Herkunft. Die Verwaltung bekommt
+`PhotoAdminDetail`, das davon erbt und eines hinzufügt. Der Test dazu heißt
+`test_herkunft_erscheint_nicht_in_der_besucheransicht` und prüft den Fehlerfall, nicht den
+Erfolgsfall.
+
+Beide sind auch **gemeinsame Angabe** beim Stapel-Import, neben Jahr und Ort — eine Kiste Scans
+kommt fast immer von einer Person.
+
+### Der Bestand selbst
+
+Aus 28 Zeilen wurden 16: neun synthetische Testbilder heraus (die gehören nach
+`backend/tests/fixtures/`, auf ihnen ist nichts zu sehen, was auf einer Karte Sinn ergäbe), drei
+von vier 4K-Videostandbildern desselben Motivs heraus — sie belegten 40 der 51 MB —, und ein Foto
+auf Wunsch.
+
+Was beim Durchsehen sonst noch auffiel und korrigiert wurde:
+
+- **Drei Fotos lagen 1,6 km neben ihrer eigenen Adresse.** Sie trugen „Hauptstraße 14" als Namen
+  und Koordinaten im freien Feld bei „An den Wischen". Der Ortsindex sagte eindeutig, welche der
+  beiden Angaben stimmt.
+- **Zwei Titel waren Dateinamen** („pic 158-1"). Geleert — aus demselben Grund, aus dem der
+  Kamera-Filter entstand.
+- **Die Beitragsliste enthielt nur Statuswechsel aus dem Ausprobieren**, während mehrere Fotos
+  `*_source = visitor` trugen, **ohne** dass es dazu einen Protokolleintrag gab. Das Zurücknehmen
+  in der Verwaltung hängt aber genau daran. Jetzt gibt es zu jeder Besucherangabe einen Eintrag,
+  und einer davon ist zurückgenommen — sonst ließe sich der Fall nie ansehen.
+
+**Die Lücken im Bestand sind Absicht.** Ein Bestand, in dem alles vollständig ist, prüft die
+Hälfte des Programms nicht: Ohne undatierte und unverortete Fotos hat der „Hilf mit"-Bereich
+nichts vorzulegen. Sie entstehen aus nachgelieferten Scans, nicht aus dem Löschen echter Angaben —
+ein frisch importierter Scan hat von sich aus weder Ort noch Jahr, und das ist zugleich der
+realistische Fall.

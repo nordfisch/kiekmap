@@ -86,6 +86,7 @@ frontend/    React + Vite + MapLibre
 tiles/       Skripte, die Offline-Karte und Ortsindex bauen (laufen auf dem Mac, nicht dem Pi)
 deploy/      Docker Compose und die Einrichtung des Pi
 data/        Laufzeitdaten, nicht im Repo
+seed/        Beispielbestand für Entwicklung und Test, Bilder noch nicht im Repo
 ```
 
 ## Kommandos
@@ -96,6 +97,8 @@ make test         # pytest und vitest
 make lint         # ruff check und format --check
 make tiles        # Offline-Karte, Schriften, Symbole für die Region
 make places       # Ortsindex bauen und einlesen
+make seed         # Beispielbestand aus seed/ herstellen (löscht den vorhandenen!)
+make seed-save    # den laufenden Bestand nach seed/ sichern
 make prod         # alles in Containern, wie auf dem Pi
 ```
 
@@ -139,6 +142,9 @@ Sprache kosten würde und ab wann sich Modularisierung lohnt.
 - **Dateinamen der Fotos** sind der SHA-256 ihres Inhalts. Daran hängen Dublettenerkennung,
   Cache-Header und die inkrementelle Sicherung.
 - **`frontend/public/tiles/`** und **`frontend/public/basemaps/`** — erzeugt von `make tiles`.
+- **Die Lücken im Beispielbestand** (`seed/`) — Fotos ohne Jahr, ohne Ort, ein zurückgenommener
+  Besucherbeitrag. Sie sind Absicht: Ohne sie hat der „Hilf mit"-Bereich nichts vorzulegen und
+  ein Drittel des Programms wird nie geprüft.
 
 ## Stand
 

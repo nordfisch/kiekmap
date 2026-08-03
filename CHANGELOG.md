@@ -106,6 +106,19 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   mit Straßen auf 80 % ihrer Breite — die kleinen Straßennamen bleiben, an ihnen hängt die
   Verortung
 
+- **Bildnachweis und Herkunft je Foto.** Der Nachweis („Sammlung Heimatmuseum Holm") steht in der
+  Detailansicht unter der Beschreibung; die Herkunft — von wem das Bild kam, ob eine Freigabe
+  vorliegt — ist eine interne Notiz und **verlässt den Verwaltungsbereich nie**. Durchgesetzt wird
+  das über getrennte Typen, nicht über eine Verabredung: Der Kiosk-Endpunkt hat für die Herkunft
+  gar kein Feld. Beide sind auch gemeinsame Angabe des Stapel-Imports, neben Jahr und Ort
+- **`make seed` und `make seed-save`.** Ein Beispielbestand zum Entwickeln und Testen: `seed/`
+  enthält die Bilddateien und eine `seed.json` mit allem Übrigen, `make seed` stellt daraus in
+  einer Minute einen Ausgangszustand her. Bilder plus JSON statt eines Datenbankabzugs, damit eine
+  neue Spalte den Bestand nicht wertlos macht; das Einlesen geht durch die echte Import-Pipeline
+  und prüft sie damit gleich mit. Die Lücken im Bestand — Fotos ohne Jahr, ohne Ort, ein
+  zurückgenommener Besucherbeitrag — sind Absicht, sonst hätte der „Hilf mit"-Bereich nichts
+  vorzulegen. **Die Bilder selbst sind noch nicht im Repo**, siehe `seed/README.md`
+
 ### Geändert
 
 - Bezeichner und Code-Kommentare durchgängig auf Englisch; Deutsch bleibt für Oberfläche,
@@ -283,3 +296,19 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Fotos am selben Ort waren nicht einzeln erreichbar.** Acht Bilder auf identischen Koordinaten
   wurden ab Zoom 18 zu acht Markern exakt übereinander, von denen nur der oberste antippbar war —
   und der Weg dorthin führte ins Leere, denn identische Punkte trennen sich bei keiner Zoomstufe
+
+- **Schlagwörter aus IPTC wurden zu Zeichensalat.** Im Bestand standen „牁档癩潈浬", „楗瑮牥" und
+  „浉匠湡敤" — das sind „ArchivHolm", „Winter" und „Im Sande", als UTF-16 gelesen. Die Textfunktion
+  probierte `utf-16-le` zuerst, was für die Windows-Felder `XPTitle`/`XPKeywords` richtig ist und
+  für IPTC falsch: **Jede** Bytefolge gerader Länge ist gültiges UTF-16, es fliegt also nie ein
+  Fehler und der Rückfall auf UTF-8 kommt nie zum Zug. Kaputt waren deshalb genau die Wörter mit
+  gerader Byte-Länge. Die beiden Fälle sind jetzt getrennt
+- **Der Import hielt „OLYMPUS DIGITAL CAMERA" für einen Titel.** Kameras schreiben ihren eigenen
+  Namen in das Titel- und das Beschreibungsfeld; das Foto galt damit als betitelt und wurde nie
+  wieder jemandem vorgelegt, der einen echten Titel wüsste — dieselbe Falle wie das Scandatum, ein
+  Feld weiter. Bekannte Kamera-Textbausteine werden jetzt verworfen
+- **Der Schutz vor dem Migrations-Datenverlust hing an einer Revisionsnummer.** Beim
+  Zusammenfassen der drei Migrationen zu einem Anfangsschema wäre der Test mit ihr verschwunden.
+  Er läuft jetzt gegen eine Probe-Migration ohne feste Revision, deren Umgebung die echte
+  `alembic/env.py` ausführt
+
