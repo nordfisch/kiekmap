@@ -353,21 +353,16 @@ export const t = {
       toZipHint: "Ein Download für den Rechner, an dem Sie gerade sitzen. Ohne Stick.",
 
       zipTitle: "Sicherung herunterladen",
+      /* „Achtung, das dauert!" steht für den ganzen Absatz, der hier einmal stand: dass jedes Mal
+         alles neu gepackt wird und ein Abbruch die Datei unbrauchbar macht. Die Begründung dazu
+         steht im Handbuch und in decisions.md — auf dem Bildschirm reicht die Warnung. */
       zipIntro:
         "Sie bekommen den ganzen Bestand als eine ZIP-Datei: alle Fotos, alle Vorschaubilder " +
-        "und alle Angaben.",
-      /* Der Satz, der den Weg einordnet. Er gehört auf den Bildschirm und nicht nur in die
-         Dokumentation: Wer nur diesen Weg benutzt, hat eine schlechtere Sicherung, ohne es zu
-         merken. */
-      zipWarning:
-        "Anders als beim Stick wird jedes Mal alles neu gepackt — das dauert bei vielen Fotos " +
-        "und ergibt eine große Datei. Und ein abgebrochener Download ist unbrauchbar, während " +
-        "eine abgebrochene Sicherung auf dem Stick es nicht ist. Für das Museum bleibt der Stick " +
-        "der richtige Weg; die Datei ist die Ergänzung.",
+        "und alle Angaben. Achtung, das dauert!",
       /* Ohne diesen Satz sähe die fehlende Rückrichtung wie ein Fehler aus. */
       zipRestoreHint:
-        "Zurückspielen lässt sich eine solche Datei ebenfalls: auf einen USB-Stick entpacken, " +
-        "den Stick einstecken und links „Zurückspielen“ wählen.",
+        "Zum Zurückspielen die Datei auf einen USB-Stick entpacken, den Stick einstecken und " +
+        "links „Zurückspielen“ wählen.",
       zipStart: "Sicherung herunterladen",
       zipRunning:
         "Der Download läuft. Bei vielen Fotos dauert er einige Minuten — das Fenster " +

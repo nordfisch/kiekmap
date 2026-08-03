@@ -198,7 +198,6 @@ function ZipCard({ downloading, onStart }: { downloading: boolean; onStart: () =
     <div className="backup__drive">
       <p className="backup__drive-name">{t.admin.backup.zipTitle}</p>
       <p className="admin__note">{t.admin.backup.zipIntro}</p>
-      <p className="admin__note">{t.admin.backup.zipWarning}</p>
 
       <button type="button" className="button button--primary backup__start" onClick={onStart}>
         {t.admin.backup.zipStart}
