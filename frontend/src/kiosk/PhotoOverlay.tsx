@@ -68,6 +68,16 @@ export function PhotoOverlay() {
       {/* Clicks inside must not close -- otherwise you cannot look at the photo without losing it.
           Beside it they do: whoever is stuck taps somewhere, and that has to lead back. */}
       <div className="overlay__content" onClick={(e) => e.stopPropagation()}>
+        {/* Eigene Kopfzeile über beiden Spalten, damit der Knopf dort sitzt, wo ihn jeder sucht:
+            oben rechts. Er stand eine Zeit lang in der Kopfzeile der Textspalte — das fluchtete
+            zwar, las sich aber nicht wie ein Schließen-Knopf. */}
+        <div className="overlay__head">
+          <button type="button" className="overlay__close" onClick={close}>
+            <span aria-hidden="true">×</span>
+            <span className="overlay__close-text">{t.overlay.close}</span>
+          </button>
+        </div>
+
         <div className="overlay__figure">
           {detail && (
             <img
@@ -105,36 +115,36 @@ export function PhotoOverlay() {
           )}
         </div>
 
-        {/* Der Schließen-Knopf steht in der Kopfzeile der Textspalte, nicht über dem Bild: so
-            liegt er in einer Flucht mit der Oberkante des Fotos, nimmt ihm keine Fläche weg und
-            bleibt stehen, während der Text darunter scrollt. */}
-        <div className="overlay__aside">
-          <button type="button" className="overlay__close" onClick={close}>
-            <span aria-hidden="true">×</span>
-            <span className="overlay__close-text">{t.overlay.close}</span>
-          </button>
-
-          <div className="overlay__text">
-            {error && <p className="overlay__notice">{error}</p>}
-            {detail && (
-              <>
-                <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
-                <p className="overlay__year">{detail.date_label}</p>
-                {detail.place_name && <p className="overlay__place">{detail.place_name}</p>}
-                {detail.description && <p className="overlay__description">{detail.description}</p>}
-                {detail.tags.length > 0 && (
-                  <ul className="overlay__tags">
-                    {detail.tags.map((tag) => (
-                      <li key={tag}>{tag}</li>
-                    ))}
-                  </ul>
-                )}
-                {/* Zuletzt und leise: Der Nachweis gehört zum Bild, aber niemand kommt an den
-                    Touchscreen, um ihn zu lesen. */}
-                {detail.credit && <p className="overlay__credit">{detail.credit}</p>}
-              </>
-            )}
-          </div>
+        {/* Oben bündig mit der Oberkante des Bildes, und scrollt für sich, wenn der Text lang
+            wird — statt unter den Bildschirmrand zu laufen. */}
+        <div className="overlay__text">
+          {error && <p className="overlay__notice">{error}</p>}
+          {detail && (
+            <>
+              <h2 className="overlay__title">
+                {detail.title ?? t.map.untitled}
+              </h2>
+              <p className="overlay__year">{detail.date_label}</p>
+              {detail.place_name && (
+                <p className="overlay__place">{detail.place_name}</p>
+              )}
+              {detail.description && (
+                <p className="overlay__description">{detail.description}</p>
+              )}
+              {detail.tags.length > 0 && (
+                <ul className="overlay__tags">
+                  {detail.tags.map((tag) => (
+                    <li key={tag}>{tag}</li>
+                  ))}
+                </ul>
+              )}
+              {/* Zuletzt und leise: Der Nachweis gehört zum Bild, aber niemand kommt an den
+                  Touchscreen, um ihn zu lesen. */}
+              {detail.credit && (
+                <p className="overlay__credit">{detail.credit}</p>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -890,3 +890,30 @@ Hälfte des Programms nicht: Ohne undatierte und unverortete Fotos hat der „Hi
 nichts vorzulegen. Sie entstehen aus nachgelieferten Scans, nicht aus dem Löschen echter Angaben —
 ein frisch importierter Scan hat von sich aus weder Ort noch Jahr, und das ist zugleich der
 realistische Fall.
+
+## Der Schließen-Knopf steht wieder oben rechts
+
+3. August 2026.
+
+Der Umbau vom 2. August (`b20ff5c`) hatte ihn aus der Ecke in die Kopfzeile der Textspalte geholt.
+Das fluchtete mit der Oberkante des Bildes — aber es las sich nicht wie ein Schließen-Knopf. Die
+gewohnte Stelle ist oben rechts.
+
+Die Ansicht hat dafür eine eigene Kopfzeile bekommen, die **über beide Spalten geht**. Das ist der
+ganze Trick: Stünde der Knopf weiter in der Textspalte, säße er am rechten Rand *dieser Spalte*;
+über beide Spalten gespannt sitzt er am rechten Rand der ganzen Ansicht. Drei Zeilen also — Kopf,
+darunter Bild und Text nebeneinander, darunter die Blätterknöpfe.
+
+**Die Frage, die der Backlog offengelassen hatte:** Sollen Kopf- und Fußzeile ihre Höhe auch dann
+reservieren, wenn nichts darin steht? Die Kopfzeile ist nie leer. Die Fußzeile gibt es nur bei
+einem Stapel — und sie reserviert **nicht**. Ein einzelnes Foto ist der häufigere Fall und bekommt
+die 4,5 rem als Bildhöhe, auf 1280 × 800 rund 8 % mehr Bild. Der Preis ist, dass die Unterkante
+des Bildes bei Stapel und Einzelfoto verschieden hoch sitzt; zwei Öffnungen sieht aber niemand
+nebeneinander, und der Schließen-Knopf steht in beiden Fällen an derselben Stelle. Das ist der
+Punkt, an dem die Ansicht ruhig wirkt.
+
+Nachgemessen auf 1280 × 800, in beiden Zuständen und für Hoch- wie Querformat: Der Knopf schließt
+auf **0 px** mit dem rechten Rand des Inhalts ab, Bild und Text fangen auf **0 px** genau in
+derselben Zeile an, und die Blätterknöpfe stehen auf **0 px** mittig unter dem Bild — nicht mittig
+im Schirm, was der eigentliche Grund dafür ist, dass die linke Spalte `auto` breit ist und nicht
+`1fr`. Auf 1024 × 768 passt der Inhalt ebenfalls vollständig in den Schirm.

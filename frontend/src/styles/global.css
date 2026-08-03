@@ -61,7 +61,11 @@ body,
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   color: var(--ink);
   background: var(--paper);
 
@@ -700,9 +704,15 @@ button {
 /* --- photo at full size -------------------------------------------------- */
 
 .overlay {
-  /* Wie viel Höhe unter dem Bild für die Blätterknöpfe abgeht -- ohne Stapel nichts. Aus der Zahl
-   * rechnen Bild und Textspalte ihre Grenze aus, damit beide oben in einer Flucht anfangen und
-   * unten im sichtbaren Bereich enden. */
+  /* Drei gedachte Zeilen: Kopfzeile mit dem Schließen-Knopf, darunter Bild und Text nebeneinander,
+   * darunter die Blätterknöpfe. Die beiden Zahlen sagen, wie viel Höhe Kopf- und Fußzeile dem Bild
+   * wegnehmen -- jeweils Knopfhöhe plus den Abstand darunter.
+   *
+   * Die Fußzeile gibt es **nur bei einem Stapel**, und dann kostet sie auch nur dort Platz. Sie
+   * immer zu reservieren hielte den Rahmen in beiden Fällen gleich, nähme aber jedem einzelnen
+   * Foto -- dem häufigeren Fall -- rund 8 % Bildhöhe. Zwei Öffnungen sieht ohnehin niemand
+   * nebeneinander, und der Schließen-Knopf steht so oder so an derselben Stelle. */
+  --overlay-head: 4.5rem;
   --pager-room: 0rem;
   --overlay-pad: 2.5rem;
   --overlay-gap: 2rem;
@@ -726,11 +736,20 @@ button {
   /* Die linke Spalte ist so breit wie das Bild, nicht breiter -- nur so stehen die Blätterknöpfe
    * darunter mittig unter dem Bild und nicht mittig in einer leeren Spalte. */
   grid-template-columns: auto minmax(16rem, var(--overlay-aside));
-  gap: var(--overlay-gap);
-  /* Oben ausgerichtet: Oberkante des Bildes, des Schließen-Knopfes und des Textes fluchten. */
+  column-gap: var(--overlay-gap);
+  row-gap: 1rem;
+  /* Oben ausgerichtet: Bild und Text fangen in derselben Flucht an. */
   align-items: start;
   max-width: 100%;
   max-height: 100%;
+}
+
+/* Die Kopfzeile geht über beide Spalten, damit der Schließen-Knopf am rechten Rand der ganzen
+ * Ansicht sitzt und nicht am rechten Rand der Textspalte. */
+.overlay__head {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .overlay__figure {
@@ -745,23 +764,21 @@ button {
   /* Was nach Textspalte, Abstand und Rand übrig bleibt. Ein Anteil der Breite (etwa 62vw) traf
    * dieselbe Zahl nur zufällig: bei einem querformatigen Foto schob sich der Inhalt dann über
    * seine eigenen Ränder hinaus. */
-  max-width: calc(100vw - var(--overlay-aside) - var(--overlay-gap) - 2 * var(--overlay-pad));
-  max-height: calc(100vh - 2 * var(--overlay-pad) - var(--pager-room));
+  max-width: calc(
+    100vw - var(--overlay-aside) - var(--overlay-gap) - 2 * var(--overlay-pad)
+  );
+  max-height: calc(
+    100vh - 2 * var(--overlay-pad) - var(--overlay-head) - var(--pager-room)
+  );
   object-fit: contain;
   background: #000;
   box-shadow: 0 6px 30px rgb(0 0 0 / 60%);
 }
 
-.overlay__aside {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 1rem;
-  max-height: calc(100vh - 2 * var(--overlay-pad));
-  min-height: 0;
-}
-
 .overlay__text {
-  /* Viel Text scrollt in seiner Spalte, statt unter den Bildschirmrand zu laufen. */
+  /* Viel Text scrollt in seiner Spalte, statt unter den Bildschirmrand zu laufen. Die Grenze ist
+   * dieselbe wie beim Bild, nur ohne die Fußzeile -- der Text reicht bis unter die Blätterknöpfe. */
+  max-height: calc(100vh - 2 * var(--overlay-pad) - var(--overlay-head));
   overflow-y: auto;
   min-height: 0;
   padding-right: 0.5rem;
@@ -842,9 +859,8 @@ button {
 }
 
 /* Gleiche Form, gleicher Rahmen, gleiche Höhe wie die Blätterknöpfe -- die Ansicht kennt damit
- * genau eine Knopfform. Rechtsbündig am Ende der Textspalte, also am äußeren Rand der Ansicht. */
+ * genau eine Knopfform. Die Stelle macht die Kopfzeile: oben rechts, wo man ihn sucht. */
 .overlay__close {
-  justify-self: end;
   display: flex;
   align-items: center;
   gap: 0.5rem;

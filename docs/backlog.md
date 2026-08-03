@@ -206,39 +206,6 @@ Dazu ein Erbe aus dem Umbau der Zeitachse: Der Satz „Für diesen Ausschnitt gi
 Fotos." steht in dieser Kopfzeile. Fällt sie, muss er woanders hin — oder ganz weg, denn die Karte
 sagt mit „Hier gibt es noch keine Fotos im gewählten Zeitraum." ohnehin dasselbe.
 
-### Detailansicht: der Schließen-Knopf soll doch nach oben rechts
-
-Der Umbau vom 2. August (`b20ff5c`) hat den Schließen-Knopf aus der Ecke in die Kopfzeile der
-Textspalte geholt. Das steht in der Flucht, aber es liest sich nicht wie ein Schließen-Knopf — die
-gewohnte Stelle ist oben rechts, und dort soll er wieder hin.
-
-**Die Ansicht bekommt dafür drei gedachte Zeilen:**
-
-```
-┌───────────────────────────────────────────────────────────┐
-│                                          [× Schließen]    │  ← Kopfzeile
-├───────────────────────────────┬───────────────────────────┤
-│                               │  Titel                    │
-│         Bild, so groß         │  1943                     │
-│         wie es geht           │  Friedhofsweg 30          │  ← Mittelzeile
-│                               │  Beschreibung … (scrollt) │
-│                               │                           │
-├───────────────────────────────┴───────────────────────────┤
-│           [Vorheriges]  3 von 8  [Nächstes]               │  ← Fußzeile
-└───────────────────────────────────────────────────────────┘
-```
-
-- **Kopfzeile:** rechtsbündig der Schließen-Knopf, sonst nichts.
-- **Mittelzeile:** links etwa zwei Drittel das Bild, so groß, dass es **oben/unten oder
-  rechts/links anstößt** — je nachdem, was zuerst greift. Rechts daneben der Textbereich, oben
-  bündig mit der Oberkante des Bildes, weiterhin scrollend.
-- **Fußzeile:** die Blätterknöpfe mittig **unter dem Bild** — das bleibt, wie es seit `b20ff5c`
-  ist, und gilt weiterhin: nicht mittig im Schirm.
-
-**Vorher zu klären:** Kopf- und Fußzeile brauchen ihre Höhe auch dann, wenn nichts darin steht —
-sonst springt das Bild in der Größe, je nachdem ob ein Stapel offen ist oder ein einzelnes Foto.
-Feste Höhen sind der einfache Weg; sie kosten das Bild oben und unten je gut drei Zentimeter.
-
 ### „Hilf mit:" hat seine Akzentfarbe verloren
 
 Beim Angleichen an „Bilder aus" (`cc5a437`) wurde aus dem Akzentbraun eine stille graue Zeile. Das
