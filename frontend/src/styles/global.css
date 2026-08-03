@@ -771,7 +771,11 @@ button {
     100vh - 2 * var(--overlay-pad) - var(--overlay-head) - var(--pager-room)
   );
   object-fit: contain;
-  background: #000;
+  /* Ohne Hintergrund, und das ist kein Versehen: Das Element traegt sein Seitenverhaeltnis als
+   * `aspect-ratio` (siehe PhotoOverlay.tsx), die Box entspricht dem Bild also genau und
+   * `object-fit: contain` laesst nirgends einen Rand frei. Ein Hintergrund waere damit nur in
+   * einem einzigen Moment zu sehen -- bevor das Bild gezeichnet ist. Genau das war er: ein
+   * schwarzer Blitz beim Oeffnen und bei jedem Schritt durch einen Stapel. */
   box-shadow: 0 6px 30px rgb(0 0 0 / 60%);
 }
 

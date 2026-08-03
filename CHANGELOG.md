@@ -318,3 +318,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Ansicht statt am rechten Rand einer Spalte. Die Fußzeile mit den Blätterknöpfen kostet weiterhin
   nur dann Platz, wenn es einen Stapel gibt: Ein einzelnes Foto bekommt die 4,5 rem als Bildhöhe
 
+- **Hinter dem Foto in der Detailansicht blitzte manchmal eine schwarze Fläche auf.** Sie kam von
+  `background: #000` am Bild — einer Zeile aus der Zeit, bevor das Element sein Seitenverhältnis
+  als `aspect-ratio` mitbekam. Seitdem entspricht die Box dem Bild genau, der Hintergrund war also
+  nur noch **vor** dem Zeichnen zu sehen: beim Öffnen und bei jedem Schritt durch einen Stapel.
+  Jetzt scheint dort der Hintergrund der Ansicht durch, derselbe warme Ton wie ringsum
+

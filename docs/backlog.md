@@ -208,8 +208,8 @@ sagt mit „Hier gibt es noch keine Fotos im gewählten Zeitraum." ohnehin dasse
 
 ### Detailansicht: Maße aufräumen
 
-Drei Kleinigkeiten an derselben Ansicht. Sie sind hier zusammengefasst, weil sie in einem Durchgang
-zu erledigen sind — die dritte zieht allerdings mehr nach sich als die beiden anderen.
+Zwei Kleinigkeiten an derselben Ansicht — die zweite zieht allerdings deutlich mehr nach sich als
+die erste.
 
 **1. Die Textspalte drängt das Bild auf schmalen Schirmen zu klein.** `--overlay-aside` ist fest
 auf 24 rem gesetzt, bei 18 px Wurzelschrift also 432 px. Zusammen mit Rand und Abstand
@@ -223,22 +223,7 @@ Das hängt an der offenen Frage nach **Displayauflösung und -orientierung** (si
 mitwachsen zu lassen (`clamp(16rem, 28vw, 24rem)`) statt sie zu setzen. Zu klären ist vorher, ob
 der Text dann noch ohne unruhige Umbrüche steht.
 
-**2. Hinter dem Bild ist manchmal eine schwarze Fläche zu sehen.** Sie soll weg.
-
-Die Ursache ist eingegrenzt: `.overlay__image` trägt `background: #000`. Das stammt aus der Zeit,
-als `object-fit: contain` das Bild in eine Box legte, die nicht seinem Seitenverhältnis entsprach —
-dann brauchte es einen Rand. Seit die Ansicht das Verhältnis als `aspect-ratio` **am Element
-selbst** setzt, gibt es diesen Rand nicht mehr: Über alle achtzehn Fotos des Beispielbestands
-nachgemessen stimmt das Verhältnis der Box mit dem des Vorschaubilds auf 0 % überein, die Box ist
-also immer vollständig gefüllt.
-
-**Damit bleibt nur ein Fall, in dem das Schwarz sichtbar wird: bevor das Bild gezeichnet ist.** Die
-Box steht wegen `aspect-ratio` schon in voller Größe, das Bild ist noch unterwegs — auf dem Pi mit
-einem großen Scan lange genug, um als Blitz aufzufallen. Beim Blättern durch einen Stapel trifft es
-jedes Mal. Die Zeile kann deshalb ersatzlos weg; wer es weicher mag, nimmt einen Ton aus der
-Umgebung statt Schwarz.
-
-**3. Der Schließen-Knopf soll ganz oben rechts stehen, nicht am rechten Rand des Inhalts.** Heute
+**2. Der Schließen-Knopf soll ganz oben rechts stehen, nicht am rechten Rand des Inhalts.** Heute
 sitzt er bündig mit der rechten Kante der Textspalte. Bei einem breiten Foto ist das dasselbe wie
 „oben rechts im Schirm"; bei einem schmalen rückt der ganze Inhalt zusammen und der Knopf mit ihm
 nach innen. Er soll stattdessen **immer** in der Ecke stehen, mit einem vernünftigen Abstand zum

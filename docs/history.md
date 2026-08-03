@@ -917,3 +917,35 @@ auf **0 px** mit dem rechten Rand des Inhalts ab, Bild und Text fangen auf **0 p
 derselben Zeile an, und die Blätterknöpfe stehen auf **0 px** mittig unter dem Bild — nicht mittig
 im Schirm, was der eigentliche Grund dafür ist, dass die linke Spalte `auto` breit ist und nicht
 `1fr`. Auf 1024 × 768 passt der Inhalt ebenfalls vollständig in den Schirm.
+
+## Der schwarze Blitz hinter dem Bild
+
+3. August 2026.
+
+In der Detailansicht war gelegentlich eine schwarze Fläche hinter dem Foto zu sehen. Die Suche nach
+der Ursache ging über drei Verdachtsmomente, und die ersten zwei waren falsch:
+
+- **Kein Alphakanal.** Kein einziges Vorschaubild trägt Transparenz — die WebP-Erzeugung wandelt
+  vorher um.
+- **Kein Seitenverhältnis-Fehler.** Über alle achtzehn Fotos des Beispielbestands nachgemessen
+  stimmt das Verhältnis der Bildbox mit dem des Vorschaubilds auf **0 %** überein. `object-fit:
+  contain` lässt also nirgends einen Rand frei.
+
+Damit blieb nur eine Erklärung übrig, und sie war die richtige: **`background: #000` auf
+`.overlay__image`.** Die Zeile stammte aus der Zeit, bevor das Element sein Seitenverhältnis als
+`aspect-ratio` mitbekam — damals konnte die Box breiter oder höher sein als das Bild darin, und der
+Rand brauchte eine Farbe. Seitdem entspricht die Box dem Bild genau, und der Hintergrund ist nur
+noch in einem einzigen Moment zu sehen: **bevor das Bild gezeichnet ist.** Die Box steht wegen
+`aspect-ratio` schon in voller Größe da, das Bild ist noch unterwegs.
+
+Deshalb „gelegentlich": Es traf beim Öffnen und bei jedem Schritt durch einen Stapel, und wie lange,
+hing an der Dateigröße. Auf dem Entwicklungsrechner über localhost kaum zu sehen, auf dem Pi mit
+einem großen Scan lang genug.
+
+Die Zeile ist ersatzlos entfallen. Was jetzt in diesem Moment durchscheint, ist der Hintergrund der
+Ansicht selbst — `rgb(20 17 14 / 92%)`, derselbe warme Ton wie ringsum statt eines schwarzen
+Rechtecks. Nachgemessen im Ladezustand: Die Box meldet `rgba(0, 0, 0, 0)`, dahinter steht die
+Ansicht.
+
+**Was bleibt, ist der Schlagschatten.** Er zeichnet die Kante des Fotos und hat mit dem Hintergrund
+nichts zu tun.
