@@ -277,6 +277,8 @@ export const t = {
       tableHint:
         "Die Bilder sind bereits gespeichert. Was hier liegen bleibt, taucht später im " +
         "„Hilf mit“-Bereich auf.",
+      enlarge: (filename: string) => `${filename} groß anzeigen`,
+      enlarged: "Foto in voller Größe",
       apply: "Übernehmen",
       applyAll: "Alle übernehmen",
       done: "Fertig",

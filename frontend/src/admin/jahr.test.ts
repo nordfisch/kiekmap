@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { decadeAllowed, toDate, withYear } from "./jahr";
+import { decadeAllowed, fromPhoto, toDate, withYear } from "./jahr";
 
 describe("Jahrzehnt nur bei vollen Jahrzehnten", () => {
   it("laesst 1920 und 1930 zu", () => {
@@ -73,5 +73,24 @@ describe("Was an die API geht", () => {
       year: 1923,
       precision: "year",
     });
+  });
+});
+
+describe("Genauigkeit eines gespeicherten Fotos", () => {
+  it("behält das Jahrzehnt, statt daraus ein Jahr zu machen", () => {
+    expect(fromPhoto("1920-01-01", "decade")).toEqual({ year: "1920", precision: "decade" });
+  });
+
+  it("macht aus einem Jahr kein Jahrzehnt", () => {
+    expect(fromPhoto("1932-01-01", "year")).toEqual({ year: "1932", precision: "year" });
+  });
+
+  it("lässt ein volles Jahrzehnt, das als Jahr gespeichert ist, ein Jahr", () => {
+    // 1920 ist ein zulässiges Jahrzehnt -- trotzdem darf die Angabe nicht wechseln.
+    expect(fromPhoto("1920-01-01", "year")).toEqual({ year: "1920", precision: "year" });
+  });
+
+  it("gibt bei fehlender Datierung ein leeres Feld", () => {
+    expect(fromPhoto(null, "unknown")).toEqual({ year: "", precision: "year" });
   });
 });

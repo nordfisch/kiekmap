@@ -639,6 +639,61 @@ select.field__input {
   display: block;
 }
 
+/* Der Knopf um das Vorschaubild bleibt unsichtbar -- es soll ein Bild bleiben, kein Knopf werden.
+ * Dieselbe Bauform wie `help-panel__zoom` in der Besucheransicht. */
+.upload-row__zoom {
+  display: block;
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.upload-row__zoom:active {
+  transform: translateY(1px);
+}
+
+/* --- Ein Foto gross ansehen ---------------------------------------------- */
+
+/* Bewusst im Fenster statt in einem neuen Tab: Der Verwaltungsbereich laeuft auf demselben
+ * Chromium wie der Kiosk, und der hat keine Tableiste -- wer dort einen zweiten Tab oeffnet, kommt
+ * nicht mehr zurueck. */
+.zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: rgb(20 17 14 / 88%);
+}
+
+.zoom__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.zoom__close {
+  align-self: flex-end;
+  min-height: 3rem;
+  margin: 0;
+  border: 2px solid rgb(255 255 255 / 40%);
+  background: rgb(0 0 0 / 45%);
+  color: #fff;
+}
+
+.zoom__image {
+  max-width: 100%;
+  /* Was nach Rand und Schliessen-Knopf uebrig bleibt. */
+  max-height: calc(100vh - 4rem - 4rem);
+  object-fit: contain;
+  box-shadow: 0 6px 30px rgb(0 0 0 / 60%);
+}
+
 .upload-row__fields {
   display: flex;
   flex: 1;

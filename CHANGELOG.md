@@ -134,6 +134,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   ersetzt. Der bisherige Stand wird wie immer beiseitegelegt, nicht gelöscht, und das eingespielte
   Archiv wandert nach `_erledigt/`
 
+- **Die Nacharbeits-Liste nach einem Stapel-Import zeigt jetzt Jahrzehnte und große Bilder.** Ein
+  Klick auf das Vorschaubild zeigt das Foto groß — auf dem kleinen Bild sind Kirchweih und
+  Feuerwehrfest nicht zu unterscheiden, und genau das braucht man zum Prüfen. Neben der Jahreszahl
+  steht dasselbe Genauigkeitsfeld wie im Fotoeditor, „1920er" ist damit auch hier eintragbar. Eine
+  bereits als Jahrzehnt gespeicherte Datierung bleibt eines, statt still zum Jahr zu werden
+
 ### Geändert
 
 - Bezeichner und Code-Kommentare durchgängig auf Englisch; Deutsch bleibt für Oberfläche,

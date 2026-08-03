@@ -14,7 +14,7 @@
  * Zeilen — für den ist die „Ohne Ort"-Liste die Arbeitsfläche.
  */
 
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 import {
   type BatchDefaults,
@@ -29,7 +29,7 @@ import {
 import type { PhotoDetail } from "../api/client";
 import { t } from "../texte/de";
 import { titleFromFilename } from "./filename";
-import { type YearInput, toDate } from "./jahr";
+import { type YearInput, fromPhoto, toDate } from "./jahr";
 import { FileDropZone } from "./DropZone";
 import { PlaceField, type PickedPlace } from "./PlaceField";
 import { YearField } from "./YearField";
@@ -50,13 +50,14 @@ type Row = {
   message: string;
   photo: PhotoDetail | null;
   title: string;
-  year: string;
+  /** Jahr und Genauigkeit zusammen -- dieselbe Form wie im Fotoeditor. */
+  date: YearInput;
   place: PickedPlace | null;
   busy: boolean;
   error: string | null;
 };
 
-function toRow(item: UploadItem, defaults: { year: string; place: PickedPlace | null }): Row {
+function toRow(item: UploadItem, defaults: { year: YearInput; place: PickedPlace | null }): Row {
   const photo = item.photo;
   return {
     key: `${item.filename}-${photo?.id ?? Math.random()}`,
@@ -67,7 +68,9 @@ function toRow(item: UploadItem, defaults: { year: string; place: PickedPlace | 
     // Was die Datei selbst mitbrachte, schlaegt den Dateinamen -- ein Scan bringt aber selten
     // etwas mit.
     title: photo?.title ?? titleFromFilename(item.filename),
-    year: photo?.date_from ? photo.date_from.slice(0, 4) : defaults.year,
+    // Die Genauigkeit kommt aus dem Foto, nicht aus der Jahreszahl: Ein bereits als Jahrzehnt
+    // gespeichertes 1920 darf beim Nachbearbeiten nicht stillschweigend zum Jahr 1920 werden.
+    date: photo?.date_from ? fromPhoto(photo.date_from, photo.date_precision) : defaults.year,
     place:
       photo?.lat != null && photo.lon != null
         ? { lat: photo.lat, lon: photo.lon, name: photo.place_name ?? "" }
@@ -122,7 +125,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
       items && items.length <= REVIEW_LIMIT
         ? items
             .filter((item) => item.result === "imported")
-            .map((item) => toRow(item, { year: year.year, place }))
+            .map((item) => toRow(item, { year, place }))
         : [],
     );
     setPhase("review");
@@ -192,11 +195,11 @@ export function ImportView({ onReview }: { onReview: () => void }) {
     if (!row.photo) return;
     update(row.key, { busy: true, error: null });
 
-    const parsed = Number.parseInt(row.year, 10);
     try {
       await patchPhoto(row.photo.id, {
         title: row.title.trim() || null,
-        date: Number.isFinite(parsed) ? { year: parsed, precision: "year" } : null,
+        // null heisst "Datierung loeschen" -- ein leeres Jahresfeld ist genau das, wie im Editor.
+        date: toDate(row.date),
         location: row.place
           ? { lat: row.place.lat, lon: row.place.lon, place_name: row.place.name || null }
           : null,
@@ -273,7 +276,9 @@ export function ImportView({ onReview }: { onReview: () => void }) {
       ? (job?.message ?? t.admin.loading)
       : t.admin.upload.progress(done, files.length);
     const share = isStick
-      ? (job && job.total > 0 ? job.done / job.total : 0)
+      ? job && job.total > 0
+        ? job.done / job.total
+        : 0
       : done / Math.max(1, files.length);
 
     return (
@@ -317,7 +322,9 @@ export function ImportView({ onReview }: { onReview: () => void }) {
         >
           <span className="source__title">{t.admin.upload.fromStick}</span>
           <span className="source__hint">
-            {folder ? t.admin.stick.folder(folder.name, folder.drive) : t.admin.upload.fromStickHint}
+            {folder
+              ? t.admin.stick.folder(folder.name, folder.drive)
+              : t.admin.upload.fromStickHint}
           </span>
         </button>
       </div>
@@ -385,55 +392,101 @@ function ReviewTable({
   onChange: (key: string, patch: Partial<Row>) => void;
   onApply: (row: Row) => Promise<void>;
 }) {
+  /** Welches Foto gerade groß zu sehen ist. */
+  const [zoomed, setZoomed] = useState<PhotoDetail | null>(null);
+
   return (
-    <ul className="upload-rows">
-      {rows.map((row) => (
-        <li key={row.key} className="upload-row">
-          {row.photo && (
-            <img
-              className="upload-row__thumb"
-              src={`/api/photos/${row.photo.id}/thumb?size=240`}
-              alt=""
-            />
-          )}
+    <>
+      <ul className="upload-rows">
+        {rows.map((row) => (
+          <li key={row.key} className="upload-row">
+            {/* Das Vorschaubild ist so klein, dass sich Kirchweih und Feuerwehrfest darauf nicht
+                unterscheiden lassen -- gerade das braucht man aber, um Titel und Jahr zu prüfen.
+                Ein Klick zeigt es groß. */}
+            {row.photo && (
+              <button
+                type="button"
+                className="upload-row__zoom"
+                onClick={() => setZoomed(row.photo)}
+                aria-label={t.admin.upload.enlarge(row.filename)}
+              >
+                <img
+                  className="upload-row__thumb"
+                  src={`/api/photos/${row.photo.id}/thumb?size=240`}
+                  alt=""
+                />
+              </button>
+            )}
 
-          <div className="upload-row__fields">
-            <span className="upload-row__filename">{row.filename}</span>
-            <input
-              className="field__input"
-              aria-label={t.admin.editor.title}
-              value={row.title}
-              onChange={(event) => onChange(row.key, { title: event.target.value })}
-            />
-            <div className="field__row">
+            <div className="upload-row__fields">
+              <span className="upload-row__filename">{row.filename}</span>
               <input
-                className="field__input field__input--year"
-                type="number"
-                min={1800}
-                max={2100}
-                aria-label={t.admin.editor.year}
-                value={row.year}
-                onChange={(event) => onChange(row.key, { year: event.target.value })}
+                className="field__input"
+                aria-label={t.admin.editor.title}
+                value={row.title}
+                onChange={(event) => onChange(row.key, { title: event.target.value })}
               />
-              <PlaceField
-                value={row.place}
-                onPick={(picked) => onChange(row.key, { place: picked })}
-                onClear={() => onChange(row.key, { place: null })}
-              />
+              <div className="field__row">
+                {/* Dasselbe Bauteil wie im Fotoeditor: Ohne die Genauigkeit daneben ließe sich
+                    hier kein Jahrzehnt eintragen, und „1920er" ist im Bestand der Normalfall. */}
+                <YearField value={row.date} onChange={(date) => onChange(row.key, { date })} />
+                <PlaceField
+                  value={row.place}
+                  onPick={(picked) => onChange(row.key, { place: picked })}
+                  onClear={() => onChange(row.key, { place: null })}
+                />
+              </div>
+              {row.error && <span className="admin__error">{row.error}</span>}
             </div>
-            {row.error && <span className="admin__error">{row.error}</span>}
-          </div>
 
-          <button
-            type="button"
-            className="button"
-            onClick={() => void onApply(row)}
-            disabled={row.busy}
-          >
-            {t.admin.upload.apply}
-          </button>
-        </li>
-      ))}
-    </ul>
+            <button
+              type="button"
+              className="button"
+              onClick={() => void onApply(row)}
+              disabled={row.busy}
+            >
+              {t.admin.upload.apply}
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      {zoomed && <ZoomView photo={zoomed} onClose={() => setZoomed(null)} />}
+    </>
+  );
+}
+
+/**
+ * Ein Foto groß, über der Liste.
+ *
+ * Bewusst kein Link in einen neuen Tab: Der Verwaltungsbereich läuft auf demselben Chromium wie
+ * der Kiosk, und der hat keine Tableiste — wer dort einen zweiten Tab öffnet, kommt nicht mehr
+ * zurück. Gezeigt wird das 1200er Vorschaubild, dasselbe wie im Fotoeditor; das Original kann ein
+ * 80-MB-Scan sein.
+ */
+function ZoomView({ photo, onClose }: { photo: PhotoDetail; onClose: () => void }) {
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="zoom"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t.admin.upload.enlarged}
+      onClick={onClose}
+    >
+      <div className="zoom__box" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="button zoom__close" onClick={onClose}>
+          {t.overlay.close}
+        </button>
+        <img className="zoom__image" src={photo.thumb_url} alt={photo.title ?? ""} />
+      </div>
+    </div>
   );
 }

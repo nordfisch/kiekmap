@@ -39,3 +39,16 @@ export function toDate(input: YearInput): { year: number; precision: Precision }
     precision: input.precision === "decade" && decadeAllowed(input.year) ? "decade" : "year",
   };
 }
+
+/**
+ * Was ein gespeichertes Foto für die Eingabefelder bedeutet.
+ *
+ * Die Genauigkeit kommt aus dem Foto, **nicht** aus der Jahreszahl. Sonst würde aus einem als
+ * Jahrzehnt gespeicherten 1920 beim Nachbearbeiten stillschweigend das Jahr 1920 — und die
+ * Zeitleiste zeigte danach einen Punkt statt einer Spanne, ohne dass jemand etwas eingegeben
+ * hätte.
+ */
+export function fromPhoto(dateFrom: string | null, precision: string): YearInput {
+  if (!dateFrom) return { year: "", precision: "year" };
+  return { year: dateFrom.slice(0, 4), precision: precision === "decade" ? "decade" : "year" };
+}
