@@ -91,9 +91,7 @@ export function PhotoOverlay() {
           {detail && (
             <img
               className={
-                loadedId === detail.id
-                  ? "overlay__image"
-                  : "overlay__image overlay__image--loading"
+                loadedId === detail.id ? "overlay__image" : "overlay__image overlay__image--loading"
               }
               src={detail.thumb_url}
               alt={detail.title ?? t.map.photoAlt}
@@ -103,8 +101,7 @@ export function PhotoOverlay() {
               // hängen kann -- dann bliebe es unsichtbar. Derselbe Wert noch einmal gesetzt ist
               // für React ein Nichtstun, das schleift also nicht.
               ref={(node) => {
-                if (node?.complete && node.naturalWidth > 0)
-                  setLoadedId(detail.id);
+                if (node?.complete && node.naturalWidth > 0) setLoadedId(detail.id);
               }}
             />
           )}
@@ -142,16 +139,10 @@ export function PhotoOverlay() {
           {error && <p className="overlay__notice">{error}</p>}
           {detail && (
             <>
-              <h2 className="overlay__title">
-                {detail.title ?? t.map.untitled}
-              </h2>
+              <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
               <p className="overlay__year">{detail.date_label}</p>
-              {detail.place_name && (
-                <p className="overlay__place">{detail.place_name}</p>
-              )}
-              {detail.description && (
-                <p className="overlay__description">{detail.description}</p>
-              )}
+              {detail.place_name && <p className="overlay__place">{detail.place_name}</p>}
+              {detail.description && <p className="overlay__description">{detail.description}</p>}
               {detail.tags.length > 0 && (
                 <ul className="overlay__tags">
                   {detail.tags.map((tag) => (
@@ -161,9 +152,7 @@ export function PhotoOverlay() {
               )}
               {/* Zuletzt und leise: Der Nachweis gehört zum Bild, aber niemand kommt an den
                   Touchscreen, um ihn zu lesen. */}
-              {detail.credit && (
-                <p className="overlay__credit">{detail.credit}</p>
-              )}
+              {detail.credit && <p className="overlay__credit">{detail.credit}</p>}
             </>
           )}
         </div>

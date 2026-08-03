@@ -764,12 +764,8 @@ button {
   /* Was nach Textspalte, Abstand und Rand übrig bleibt. Ein Anteil der Breite (etwa 62vw) traf
    * dieselbe Zahl nur zufällig: bei einem querformatigen Foto schob sich der Inhalt dann über
    * seine eigenen Ränder hinaus. */
-  max-width: calc(
-    100vw - var(--overlay-aside) - var(--overlay-gap) - 2 * var(--overlay-pad)
-  );
-  max-height: calc(
-    100vh - 2 * var(--overlay-pad) - var(--overlay-head) - var(--pager-room)
-  );
+  max-width: calc(100vw - var(--overlay-aside) - var(--overlay-gap) - 2 * var(--overlay-pad));
+  max-height: calc(100vh - 2 * var(--overlay-pad) - var(--overlay-head) - var(--pager-room));
   object-fit: contain;
   /* Ohne Hintergrund, und das ist kein Versehen: Das Element traegt sein Seitenverhaeltnis als
    * `aspect-ratio` (siehe PhotoOverlay.tsx), die Box entspricht dem Bild also genau und
