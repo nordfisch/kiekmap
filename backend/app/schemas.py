@@ -1,6 +1,7 @@
 """API payload shapes."""
 
 from datetime import date, datetime
+from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -40,13 +41,19 @@ class PhotoMarker(BaseModel):
 
 
 class PhotoDetail(BaseModel):
-    """Everything about one photo, for the overlay and the admin area."""
+    """Everything about one photo that a visitor may see.
+
+    The admin area gets ``PhotoAdminDetail`` on top of this. What is *not* here is the point:
+    ``provenance`` is missing, so the public endpoint cannot leak it even by accident.
+    """
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     title: str | None
     description: str | None
+    #: Credit line, shown under the description in the overlay.
+    credit: str | None
 
     date_from: date | None
     date_to: date | None
@@ -80,11 +87,17 @@ class PhotoDetail(BaseModel):
     thumb_url: str
 
     @classmethod
-    def from_photo(cls, photo: Photo) -> "PhotoDetail":
-        return cls(
+    def from_photo(cls, photo: Photo) -> Self:
+        return cls(**cls._values(photo))
+
+    @classmethod
+    def _values(cls, photo: Photo) -> dict:
+        """Split out from ``from_photo`` so a subclass can add to it instead of repeating it."""
+        return dict(
             id=photo.id,
             title=photo.title,
             description=photo.description,
+            credit=photo.credit,
             date_from=photo.date_from,
             date_to=photo.date_to,
             date_precision=photo.date_precision,
@@ -109,6 +122,21 @@ class PhotoDetail(BaseModel):
             image_url=f"/api/photos/{photo.id}/image",
             thumb_url=f"/api/photos/{photo.id}/thumb?size=1200",
         )
+
+
+class PhotoAdminDetail(PhotoDetail):
+    """The same photo, as the curator sees it.
+
+    ``provenance`` is the reason this class exists. Who lent the picture and whether a release
+    was given is a note for the museum, not for the screen in the exhibition room -- and the
+    surest way to keep it off that screen is a public schema that has no field for it.
+    """
+
+    provenance: str | None
+
+    @classmethod
+    def _values(cls, photo: Photo) -> dict:
+        return {**super()._values(photo), "provenance": photo.provenance}
 
 
 class PhotoList(BaseModel):
@@ -218,6 +246,8 @@ class PhotoUpdate(BaseModel):
 
     title: str | None = Field(default=None, max_length=300)
     description: str | None = None
+    credit: str | None = Field(default=None, max_length=200)
+    provenance: str | None = None
     date: DateInput | None = None
     location: LocationUpdate | None = None
     tags: list[str] | None = None
@@ -381,6 +411,9 @@ class ImportRequest(DriveChoice):
     lat: float | None = Field(default=None, ge=-90, le=90)
     lon: float | None = Field(default=None, ge=-180, le=180)
     place_name: str | None = Field(default=None, max_length=300)
+    #: A box of scans usually comes from one person -- so both of these belong to the whole batch.
+    credit: str | None = Field(default=None, max_length=200)
+    provenance: str | None = None
 
 
 class JobState(BaseModel):

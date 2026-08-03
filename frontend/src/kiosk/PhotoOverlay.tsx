@@ -129,6 +129,9 @@ export function PhotoOverlay() {
                     ))}
                   </ul>
                 )}
+                {/* Zuletzt und leise: Der Nachweis gehört zum Bild, aber niemand kommt an den
+                    Touchscreen, um ihn zu lesen. */}
+                {detail.credit && <p className="overlay__credit">{detail.credit}</p>}
               </>
             )}
           </div>

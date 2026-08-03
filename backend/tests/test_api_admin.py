@@ -690,3 +690,62 @@ class TestUnberuehrteFelder:
 
         assert daten["date_precision"] == DatePrecision.YEAR
         assert daten["date_label"] == "1955"
+
+
+class TestNachweisUndHerkunft:
+    """Zwei Felder mit zwei verschiedenen Lesern -- und die Trennung ist die eigentliche Zusage.
+
+    Der Bildnachweis steht im Museum neben dem Bild. Die Herkunft -- wer es abgegeben hat, ob eine
+    Freigabe vorliegt -- ist eine interne Notiz. Wuerde sie an den Besucherschirm durchgereicht,
+    stuende dort der Name eines Leihgebers, den nie jemand dafuer gefragt hat.
+    """
+
+    def test_beides_laesst_sich_setzen(self, admin_client: TestClient, session, make_photo):
+        foto = make_photo()
+        session.commit()
+
+        daten = admin_client.patch(
+            f"/api/admin/photos/{foto.id}",
+            json={"credit": "Sammlung Heimatmuseum Holm", "provenance": "Leihgabe H. Meyer"},
+        ).json()
+
+        assert daten["credit"] == "Sammlung Heimatmuseum Holm"
+        assert daten["provenance"] == "Leihgabe H. Meyer"
+
+    def test_herkunft_erscheint_nicht_in_der_besucheransicht(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        foto = make_photo()
+        foto.credit = "Sammlung Heimatmuseum Holm"
+        foto.provenance = "Leihgabe H. Meyer, Freigabe liegt vor"
+        session.commit()
+
+        daten = admin_client.get(f"/api/photos/{foto.id}").json()
+
+        assert daten["credit"] == "Sammlung Heimatmuseum Holm", "der Nachweis gehoert ans Bild"
+        assert "provenance" not in daten, "die Herkunft darf den Kiosk nie erreichen"
+        assert "Meyer" not in str(daten)
+
+    def test_leeres_feld_loescht_den_nachweis(self, admin_client: TestClient, session, make_photo):
+        """Wie ueberall im Editor: fehlendes Feld heisst unveraendert, leeres heisst loeschen."""
+        foto = make_photo()
+        foto.credit = "Falsche Angabe"
+        session.commit()
+
+        daten = admin_client.patch(f"/api/admin/photos/{foto.id}", json={"credit": None}).json()
+
+        assert daten["credit"] is None
+
+    def test_stapel_upload_setzt_beides_fuer_alle(
+        self, admin_client: TestClient, session, fixtures_dir
+    ):
+        antwort = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _bild(fixtures_dir, "scan_ohne_exif.jpg"), "image/jpeg"))],
+            data={"credit": "Sammlung Heimatmuseum Holm", "provenance": "Kiste Dachboden Petersen"},
+        )
+
+        assert antwort.status_code == 200
+        foto = session.scalars(select(Photo)).one()
+        assert foto.credit == "Sammlung Heimatmuseum Holm"
+        assert foto.provenance == "Kiste Dachboden Petersen"

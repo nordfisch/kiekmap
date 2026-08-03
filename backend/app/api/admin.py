@@ -40,6 +40,7 @@ from app.schemas import (
     LoginRequest,
     LoginResponse,
     Overview,
+    PhotoAdminDetail,
     PhotoAdminItem,
     PhotoAdminList,
     PhotoDetail,
@@ -251,13 +252,13 @@ def _location_label(photo: Photo) -> str | None:
     return f"{photo.lat:.6f},{photo.lon:.6f}{name}"
 
 
-@router.get("/photos/{photo_id}", response_model=PhotoDetail, summary="One photo, everything")
-def photo_detail(photo_id: int, admin: Admin, session: Db) -> PhotoDetail:
-    return PhotoDetail.from_photo(_get_photo(session, photo_id))
+@router.get("/photos/{photo_id}", response_model=PhotoAdminDetail, summary="One photo, everything")
+def photo_detail(photo_id: int, admin: Admin, session: Db) -> PhotoAdminDetail:
+    return PhotoAdminDetail.from_photo(_get_photo(session, photo_id))
 
 
-@router.patch("/photos/{photo_id}", response_model=PhotoDetail, summary="Edit a photo")
-def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) -> PhotoDetail:
+@router.patch("/photos/{photo_id}", response_model=PhotoAdminDetail, summary="Edit a photo")
+def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) -> PhotoAdminDetail:
     """Change what was supplied and leave the rest alone.
 
     A field that is absent from the request stays as it is; a field that is explicitly ``null``
@@ -275,6 +276,14 @@ def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) 
     if "description" in supplied:
         _record(session, photo, "description", photo.description, update.description)
         photo.description = update.description
+
+    if "credit" in supplied:
+        _record(session, photo, "credit", photo.credit, update.credit)
+        photo.credit = update.credit
+
+    if "provenance" in supplied:
+        _record(session, photo, "provenance", photo.provenance, update.provenance)
+        photo.provenance = update.provenance
 
     if "date" in supplied:
         previous = format_label(photo.date_from, photo.date_to, photo.date_precision)
@@ -339,7 +348,7 @@ def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) 
     session.commit()
     session.refresh(photo)
     log.info("Curator edited photo %s", photo.id)
-    return PhotoDetail.from_photo(photo)
+    return PhotoAdminDetail.from_photo(photo)
 
 
 # --- visitor contributions --------------------------------------------------
@@ -409,10 +418,10 @@ def list_changes(
 
 @router.post(
     "/changes/{change_id}/revert",
-    response_model=PhotoDetail,
+    response_model=PhotoAdminDetail,
     summary="Take back a visitor contribution",
 )
-def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoDetail:
+def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail:
     """Clear the field the visitor filled.
 
     Clearing, not restoring: a visitor may only ever fill what was empty (see api/contribute.py),
@@ -448,7 +457,7 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoDetail:
     session.commit()
     session.refresh(photo)
     log.info("Curator reverted visitor contribution %s on photo %s", change.id, photo.id)
-    return PhotoDetail.from_photo(photo)
+    return PhotoAdminDetail.from_photo(photo)
 
 
 # --- import log -------------------------------------------------------------
@@ -490,6 +499,8 @@ def upload(
     lat: Annotated[float | None, Form(ge=-90, le=90)] = None,
     lon: Annotated[float | None, Form(ge=-180, le=180)] = None,
     place_name: Annotated[str | None, Form(max_length=300)] = None,
+    credit: Annotated[str | None, Form(max_length=200)] = None,
+    provenance: Annotated[str | None, Form()] = None,
 ) -> UploadResult:
     """Take in a batch, optionally dating and locating all of it at once.
 
@@ -510,7 +521,16 @@ def upload(
         outcome = import_upload(session, name, upload_file.file, settings)
 
         if outcome.succeeded and outcome.photo is not None:
-            apply_batch_defaults(outcome.photo, year, precision, lat, lon, place_name)
+            apply_batch_defaults(
+                outcome.photo,
+                year,
+                precision,
+                lat,
+                lon,
+                place_name,
+                credit=credit,
+                provenance=provenance,
+            )
 
         session.commit()
         if outcome.photo is not None:

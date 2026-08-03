@@ -108,6 +108,16 @@ class Photo(Base):
     #: Lets a rough visitor statement ("somewhere by the village pond") be marked as such.
     location_accuracy_m: Mapped[int | None] = mapped_column(Integer)
 
+    # --- rights and where it came from -----------------------------------------
+    #
+    # Two fields rather than one, because they have different readers. The credit line belongs
+    # beside the picture; who lent it and whether they released it is an internal note that must
+    # never reach the kiosk -- which is why ``PhotoDetail`` has no such field at all.
+    #: Credit line, one line, shown to visitors: "Sammlung Heimatmuseum Holm", "Foto: H. Meyer".
+    credit: Mapped[str | None] = mapped_column(String(200))
+    #: Where it came from: donor or lender, whether a release exists. Admin area only.
+    provenance: Mapped[str | None] = mapped_column(Text)
+
     # --- origin of each statement ---------------------------------------------
     title_source: Mapped[str | None] = mapped_column(String(10))
     date_source: Mapped[str | None] = mapped_column(String(10))

@@ -139,11 +139,24 @@ export type BatchDefaults = {
   lat?: number;
   lon?: number;
   placeName?: string;
+  credit?: string;
+  provenance?: string;
 };
+
+/**
+ * Ein Foto, wie die Verwaltung es sieht.
+ *
+ * `provenance` ist der Grund für den eigenen Typ: Woher das Bild kam und ob eine Freigabe
+ * vorliegt, geht den Besucherschirm nichts an — die Kiosk-Endpunkte liefern `PhotoDetail`
+ * und haben das Feld deshalb gar nicht erst.
+ */
+export type PhotoAdminDetail = PhotoDetail & { provenance: string | null };
 
 export type PhotoPatch = {
   title?: string | null;
   description?: string | null;
+  credit?: string | null;
+  provenance?: string | null;
   /** null clears the dating; leaving the key out keeps it. See backend PhotoUpdate. */
   date?: { year: number; month?: number; day?: number; precision: string } | null;
   location?: { lat: number; lon: number; place_name?: string | null } | null;
@@ -231,12 +244,12 @@ export function fetchAdminPhotos(
   return adminFetch<PhotoAdminList>(`/photos?${params}`);
 }
 
-export function fetchAdminPhoto(id: number): Promise<PhotoDetail> {
-  return adminFetch<PhotoDetail>(`/photos/${id}`);
+export function fetchAdminPhoto(id: number): Promise<PhotoAdminDetail> {
+  return adminFetch<PhotoAdminDetail>(`/photos/${id}`);
 }
 
-export function patchPhoto(id: number, patch: PhotoPatch): Promise<PhotoDetail> {
-  return adminFetch<PhotoDetail>(`/photos/${id}`, {
+export function patchPhoto(id: number, patch: PhotoPatch): Promise<PhotoAdminDetail> {
+  return adminFetch<PhotoAdminDetail>(`/photos/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
@@ -252,8 +265,8 @@ export function fetchChanges(includeReverted = false, offset = 0): Promise<Chang
   return adminFetch<ChangeList>(`/changes?${params}`);
 }
 
-export function revertChange(id: number): Promise<PhotoDetail> {
-  return adminFetch<PhotoDetail>(`/changes/${id}/revert`, { method: "POST" });
+export function revertChange(id: number): Promise<PhotoAdminDetail> {
+  return adminFetch<PhotoAdminDetail>(`/changes/${id}/revert`, { method: "POST" });
 }
 
 export function fetchImportLog(result?: string, offset = 0): Promise<ImportLogList> {
@@ -325,6 +338,8 @@ export function startStickImport(path: string, defaults: BatchDefaults): Promise
         ? { lat: defaults.lat, lon: defaults.lon }
         : {}),
       ...(defaults.placeName ? { place_name: defaults.placeName } : {}),
+      ...(defaults.credit ? { credit: defaults.credit } : {}),
+      ...(defaults.provenance ? { provenance: defaults.provenance } : {}),
     }),
   });
 }
@@ -357,6 +372,8 @@ export function uploadPhoto(file: File, defaults: BatchDefaults): Promise<Upload
     form.append("lon", String(defaults.lon));
   }
   if (defaults.placeName) form.append("place_name", defaults.placeName);
+  if (defaults.credit) form.append("credit", defaults.credit);
+  if (defaults.provenance) form.append("provenance", defaults.provenance);
 
   return adminFetch<UploadResult>("/upload", { method: "POST", body: form });
 }

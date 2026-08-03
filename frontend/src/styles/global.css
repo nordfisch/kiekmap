@@ -804,6 +804,15 @@ button {
   color: #d8d0c6;
 }
 
+/* Der Bildnachweis steht zuletzt und am leisesten. Er gehört dorthin, weil er zum Bild gehört --
+ * aber er ist nicht das, wofür jemand vor dem Schirm steht. */
+.overlay__credit {
+  margin: 1.25rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: rgb(216 208 198 / 65%);
+}
+
 /* Blättern durch die Fotos einer Stelle: mittig unter dem Bild, nicht mittig im Schirm. Über dem
  * Bildrand dürfen sie nicht liegen -- ausgerechnet dort steht bei alten Abzügen die Beschriftung. */
 .overlay__pager {

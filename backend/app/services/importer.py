@@ -302,6 +302,9 @@ def apply_batch_defaults(
     lat: float | None,
     lon: float | None,
     place_name: str | None,
+    *,
+    credit: str | None = None,
+    provenance: str | None = None,
 ) -> None:
     """Statements that apply to a whole batch -- from the upload form or the stick.
 
@@ -321,6 +324,14 @@ def apply_batch_defaults(
 
     if place_name and not photo.place_name:
         photo.place_name = place_name
+
+    # Neither of these can come out of the file -- a scanner does not know who lent the picture.
+    # They are therefore always the batch statement, and only skipped if something is there.
+    if credit and not photo.credit:
+        photo.credit = credit
+
+    if provenance and not photo.provenance:
+        photo.provenance = provenance
 
 
 def import_from_folder(

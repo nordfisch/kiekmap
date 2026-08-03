@@ -11,8 +11,7 @@
 
 import { useEffect, useState } from "react";
 
-import { type PhotoPatch, patchPhoto } from "../api/admin";
-import type { PhotoDetail } from "../api/client";
+import { type PhotoAdminDetail, type PhotoPatch, patchPhoto } from "../api/admin";
 import { t } from "../texte/de";
 import { type YearInput, toDate } from "./jahr";
 import { PlaceField, type PickedPlace } from "./PlaceField";
@@ -21,16 +20,20 @@ import { YearField } from "./YearField";
 type Draft = {
   title: string;
   description: string;
+  credit: string;
+  provenance: string;
   date: YearInput;
   place: PickedPlace | null;
   tags: string;
   deleted: boolean;
 };
 
-function toDraft(photo: PhotoDetail): Draft {
+function toDraft(photo: PhotoAdminDetail): Draft {
   return {
     title: photo.title ?? "",
     description: photo.description ?? "",
+    credit: photo.credit ?? "",
+    provenance: photo.provenance ?? "",
     date: {
       year: photo.date_from ? photo.date_from.slice(0, 4) : "",
       precision: photo.date_precision === "decade" ? "decade" : "year",
@@ -48,6 +51,8 @@ function toPatch(draft: Draft, deleted = draft.deleted): PhotoPatch {
   return {
     title: draft.title.trim() || null,
     description: draft.description.trim() || null,
+    credit: draft.credit.trim() || null,
+    provenance: draft.provenance.trim() || null,
     // null heisst "Datierung loeschen" -- ein leeres Jahresfeld ist genau das, siehe unten.
     date: toDate(draft.date),
     location: draft.place
@@ -66,8 +71,8 @@ export function PhotoEditor({
   onSaved,
   onClose,
 }: {
-  photo: PhotoDetail;
-  onSaved: (photo: PhotoDetail) => void;
+  photo: PhotoAdminDetail;
+  onSaved: (photo: PhotoAdminDetail) => void;
   onClose: () => void;
 }) {
   const [draft, setDraft] = useState<Draft>(() => toDraft(photo));
@@ -190,6 +195,29 @@ export function PhotoEditor({
         onChange={(event) => change("tags", event.target.value)}
       />
       <p className="admin__note">{t.admin.editor.tagsHint}</p>
+
+      <label className="field__label" htmlFor="editor-credit">
+        {t.admin.editor.credit}
+      </label>
+      <input
+        id="editor-credit"
+        className="field__input"
+        value={draft.credit}
+        onChange={(event) => change("credit", event.target.value)}
+      />
+      <p className="admin__note">{t.admin.editor.creditHint}</p>
+
+      <label className="field__label" htmlFor="editor-provenance">
+        {t.admin.editor.provenance}
+      </label>
+      <textarea
+        id="editor-provenance"
+        className="field__input field__input--area"
+        rows={2}
+        value={draft.provenance}
+        onChange={(event) => change("provenance", event.target.value)}
+      />
+      <p className="admin__note">{t.admin.editor.provenanceHint}</p>
 
       {error && <p className="admin__error">{error}</p>}
 

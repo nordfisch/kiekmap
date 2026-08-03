@@ -213,6 +213,17 @@ export const t = {
       clearLocation: "Ort entfernen",
       tags: "Schlagwörter",
       tagsHint: "Mit Komma getrennt.",
+
+      /* Zwei Felder, weil sie zwei verschiedene Leser haben: Der Nachweis steht neben dem Bild
+         im Museum, die Herkunft ist eine interne Notiz und verlässt den Verwaltungsbereich nie.
+         Die Hinweiszeilen sagen genau das — sonst landet der Name des Leihgebers auf dem
+         Besucherschirm. */
+      credit: "Bildnachweis",
+      creditHint: "Steht in der Detailansicht unter der Beschreibung. Zum Beispiel: Sammlung Heimatmuseum Holm.",
+      provenance: "Herkunft",
+      provenanceHint:
+        "Von wem das Bild kam, ob es eine Leihgabe ist, ob eine Freigabe vorliegt. " +
+        "Nur hier zu sehen, nie auf dem Besucherschirm.",
       visible: "Auf der Karte zeigen",
       fileInfo: (filename: string, width: number, height: number) =>
         `${filename} · ${width} × ${height} Pixel`,

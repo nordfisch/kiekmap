@@ -84,6 +84,8 @@ export function ImportView({ onReview }: { onReview: () => void }) {
 
   const [year, setYear] = useState<YearInput>({ year: "", precision: "year" });
   const [place, setPlace] = useState<PickedPlace | null>(null);
+  const [credit, setCredit] = useState("");
+  const [provenance, setProvenance] = useState("");
 
   const [phase, setPhase] = useState<Phase>("choose");
   const [done, setDone] = useState(0);
@@ -107,6 +109,9 @@ export function ImportView({ onReview }: { onReview: () => void }) {
     return {
       ...(date ? { year: date.year, precision: date.precision } : {}),
       ...(place ? { lat: place.lat, lon: place.lon, placeName: place.name } : {}),
+      // Eine Kiste Scans kommt fast immer von einer Person -- deshalb gilt beides fuer alle.
+      ...(credit.trim() ? { credit: credit.trim() } : {}),
+      ...(provenance.trim() ? { provenance: provenance.trim() } : {}),
     };
   }
 
@@ -335,6 +340,25 @@ export function ImportView({ onReview }: { onReview: () => void }) {
         <fieldset className="field__group">
           <legend className="field__label">{t.admin.editor.place}</legend>
           <PlaceField value={place} onPick={setPlace} onClear={() => setPlace(null)} />
+        </fieldset>
+
+        <fieldset className="field__group">
+          <legend className="field__label">{t.admin.editor.credit}</legend>
+          <input
+            className="field__input"
+            aria-label={t.admin.editor.credit}
+            value={credit}
+            onChange={(event) => setCredit(event.target.value)}
+          />
+          <label className="field__label" htmlFor="upload-provenance">
+            {t.admin.editor.provenance}
+          </label>
+          <input
+            id="upload-provenance"
+            className="field__input"
+            value={provenance}
+            onChange={(event) => setProvenance(event.target.value)}
+          />
         </fieldset>
       </div>
 

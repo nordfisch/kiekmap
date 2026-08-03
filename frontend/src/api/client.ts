@@ -23,6 +23,8 @@ export type PhotoDetail = {
   id: number;
   title: string | null;
   description: string | null;
+  /** Bildnachweis, steht in der Detailansicht unter der Beschreibung. */
+  credit: string | null;
   date_from: string | null;
   date_to: string | null;
   date_label: string;

@@ -11,8 +11,13 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { type Selection, fetchAdminPhoto, fetchAdminPhotos, patchPhoto } from "../api/admin";
-import type { PhotoDetail } from "../api/client";
+import {
+  type PhotoAdminDetail,
+  type Selection,
+  fetchAdminPhoto,
+  fetchAdminPhotos,
+  patchPhoto,
+} from "../api/admin";
 import { t } from "../texte/de";
 import { Pager } from "./Pager";
 import { PhotoEditor } from "./PhotoEditor";
@@ -34,7 +39,7 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [offset, setOffset] = useState(0);
-  const [editing, setEditing] = useState<PhotoDetail | null>(null);
+  const [editing, setEditing] = useState<PhotoAdminDetail | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(query), 250);

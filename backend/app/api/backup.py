@@ -186,6 +186,8 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
                     request.lat,
                     request.lon,
                     request.place_name,
+                    credit=request.credit,
+                    provenance=request.provenance,
                 ),
                 report=report,
             )
