@@ -10,6 +10,7 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 |---|---|
 | [../CHANGELOG.md](../CHANGELOG.md) | *Was kann das Programm?* — sortiert nach Keep a Changelog |
 | [decisions.md](decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
+| [architecture.md](architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
 | **history.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
 | [backlog.md](backlog.md) | *Was fehlt noch?* |
 
@@ -746,3 +747,36 @@ Zustand und ohne Vergleich von Koordinaten.
 Diese Zusage trägt jetzt die Bedienung an zwei Stellen und hat deshalb einen eigenen Test bekommen.
 Bräche sie, bliebe das Knopfraster nach einem Kartentipp still stehen — der Fehler, der eben
 behoben wurde, wäre wieder da, ohne dass irgendetwas rot würde.
+
+## `architecture.md` — was es gibt und wie es ineinandergreift
+
+`(dieser Commit)` · 2. August 2026.
+
+Es gab keine Stelle, an der jemand nachlesen konnte, **aus welchen Teilen das System besteht**. Wer
+einstieg, musste sich das aus vier Dateien und dem Code zusammensuchen: `development.md` listete
+die Ordner, `decisions.md` begründete Einzelentscheidungen, `operations.md` beschrieb den Betrieb
+auf dem Pi — die Verbindung dazwischen stand nirgends.
+
+**Die Abgrenzung war der eigentliche Teil der Arbeit**, sonst wäre eine vierte Datei entstanden,
+die dasselbe noch einmal sagt. Die Regel, nach der geschnitten wurde: `architecture.md` beschreibt
+*Zusammenhänge* und verweist für Begründungen weiter, statt sie zu wiederholen. Der Abschnitt
+„Aufbau" in `development.md` bleibt eine Ordnerliste und verweist jetzt hierher.
+
+Was nur hier steht, weil es zwischen den Teilen liegt und deshalb bisher nirgends hingehörte:
+
+- **Drei Prozesse, zwei davon in Containern.** Chromium ist bewusst keiner.
+- **nginx ist der Grund, warum es keinen Tileserver braucht** — es beantwortet Range-Requests auf
+  die Kartendatei, und deshalb steht in seiner Konfiguration `gzip off` an genau dieser Stelle.
+- **Bauzeit gegen Laufzeit.** Kartendatei und Ortsindex entstehen auf dem Entwicklungsrechner und
+  gehen danach *getrennte Wege* — die eine ins Frontend-Image, der andere in die Datenbank.
+  `region.json` dient dabei zwei Zwecken: Sie steuert den Bau und konfiguriert die laufende
+  Ansicht.
+- **Der Zustand liegt an drei Stellen** — SQLite, Dateisystem, `sessionStorage` — mit je einer
+  eigenen Aufgabe.
+- **Vier Importwege, eine Funktion.** Alle laufen durch `import_file()`, und die schreibt immer
+  einen Protokolleintrag.
+- **Sicherung, Wiederherstellung und Stick-Import teilen sich einen Auftrag**, damit nie zwei
+  Schreibläufe auf dieselbe SQLite-Datei treffen.
+
+Dazu ein Diagramm, das die drei Prozesse, die zwei gebauten Artefakte und ihre Wege in einem Bild
+zeigt — die Frage „was läuft wo?" beantwortet es schneller als jeder Absatz.

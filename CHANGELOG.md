@@ -224,6 +224,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   bisherige Status „Versteckt" ist darin aufgegangen. Gelöschte Fotos zählen in keiner Kachel der
   Übersicht mehr mit und stehen in keiner Liste ausser „Gelöscht" — sonst wäre das Löschen dort
   wirkungslos, wo jemand hinsieht
+- **`docs/architecture.md`** beschreibt, woraus das System besteht und wie die Teile
+  zusammenspielen: die drei Prozesse, die beiden gebauten Artefakte und ihre getrennten Wege, was
+  zur Bauzeit entsteht und was zur Laufzeit, wo der Zustand liegt und wie ein Foto hereinkommt.
+  Bisher stand das nirgends — die Ordnerliste in `development.md` sagt, *was es gibt*, nicht *wie
+  es zusammenhängt*
 - Die Dokumentation ist neu geordnet. Die Dateinamen folgen jetzt der Konvention und sind englisch
   (`operations.md`, `development.md`, `usermanual.md`); der Inhalt bleibt deutsch, denn er richtet
   sich an Menschen. Aus den drei Plandokumenten, die alle Erledigtes mit Offenem mischten, sind

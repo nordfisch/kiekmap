@@ -78,9 +78,10 @@ Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in
 [docs/operations.md](docs/operations.md). Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen
 ist [docs/usermanual.md](docs/usermanual.md).
 
-Warum die Technik so gewählt ist, steht in [docs/decisions.md](docs/decisions.md); wie es dazu
-gekommen ist, in [docs/history.md](docs/history.md). Was noch offen ist, im
-[docs/backlog.md](docs/backlog.md).
+Woraus das System besteht und wie die Teile zusammenspielen, steht in
+[docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in
+[docs/decisions.md](docs/decisions.md); wie es dazu gekommen ist, in
+[docs/history.md](docs/history.md). Was noch offen ist, im [docs/backlog.md](docs/backlog.md).
 
 ## Lizenz
 

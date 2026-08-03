@@ -1,8 +1,9 @@
 # Entwicklung
 
 Für Menschen, die an Photomap arbeiten. Warum die Dinge so sind, steht in
-[decisions.md](decisions.md); wie es dazu gekommen ist, in [history.md](history.md); was noch
-kommt, im [backlog.md](backlog.md); wie man hier arbeitet, hier.
+[decisions.md](decisions.md); woraus es besteht, in [architecture.md](architecture.md); wie es
+dazu gekommen ist, in [history.md](history.md); was noch kommt, im [backlog.md](backlog.md); wie
+man hier arbeitet, hier.
 
 ## Einrichtung
 
@@ -152,6 +153,9 @@ frontend/src/
 ```
 
 **Faustregel:** Wenn sich etwas ohne HTTP testen lässt, gehört es nach `services/`.
+
+Das ist die Ordnerliste. Wie die Teile zusammenspielen — welche Daten wann wohin fließen, was zur
+Bauzeit entsteht und was zur Laufzeit —, steht in [architecture.md](architecture.md).
 
 ## Am laufenden System prüfen
 

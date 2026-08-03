@@ -438,30 +438,6 @@ nginx steht davor, und die Datenbank ist eine Datei. Die Fragen liegen woanders:
   Übertragungsweg taugt — dann wäre der Umzug vom Webserver ins Museum ein bekannter Vorgang und
   kein Sonderfall.
 
-### `architecture.md` anlegen
-
-Es gibt keine Stelle, an der jemand nachlesen kann, **aus welchen Teilen das System besteht und wie
-sie zusammenspielen**. Wer heute einsteigt, muss sich das aus vier Dateien zusammensuchen.
-
-Beschreiben: die Bausteine (Backend, Frontend, Kacheln und Ortsindex, Container, Kiosk-Schicht auf
-dem Pi), ihre jeweilige Aufgabe, und die Wege dazwischen — welche Daten wann wohin fließen, was
-zur Bauzeit entsteht und was zur Laufzeit, was auf dem Entwicklungsrechner läuft und was auf dem
-Gerät.
-
-**Die Abgrenzung ist der eigentliche Teil der Arbeit**, sonst entsteht eine vierte Datei, die
-dasselbe noch einmal sagt:
-
-| Datei | beantwortet |
-|---|---|
-| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? |
-| [development.md](development.md) | *Wie* arbeitet man daran? (Einrichtung, Tests, Konventionen) |
-| **architecture.md** | *Was* gibt es, und wie greift es ineinander? |
-| [history.md](history.md) | *Wie* ist es dazu gekommen? |
-
-Konkret heißt das: Der Abschnitt „Aufbau" in `development.md` ist eine Ordnerliste und bleibt eine;
-`architecture.md` erklärt stattdessen die Zusammenhänge und verweist für Begründungen nach
-`decisions.md`, statt sie zu wiederholen.
-
 ### Backlog ordnen und klassifizieren
 
 Diese Datei wächst. Sie mischt inzwischen Fehler, konkrete Aufgaben, Entscheidungsfragen und Ideen

@@ -4,8 +4,9 @@ Photomap ist ein Touchscreen-Kiosk für ein Heimatmuseum in **Holm** (Kreis Pinn
 Ortsfotos auf einer Karte, filterbar über einen Zeitraum-Schieber, plus ein „Hilf mit"-Bereich, in
 dem Besucher fehlende Angaben ergänzen. Das Gerät läuft **offline** auf einem Raspberry Pi.
 
-Lies zuerst [docs/decisions.md](docs/decisions.md) — dort steht, *warum* die Dinge so sind. Diese
-Datei sagt, *wie* man hier arbeitet.
+Lies zuerst [docs/decisions.md](docs/decisions.md) — dort steht, *warum* die Dinge so sind; und
+[docs/architecture.md](docs/architecture.md) — dort, *woraus* das System besteht und wie die Teile
+zusammenspielen. Diese Datei sagt, *wie* man hier arbeitet.
 
 ## Die drei Dinge, die man hier falsch machen kann
 
