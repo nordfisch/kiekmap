@@ -206,6 +206,52 @@ Dazu ein Erbe aus dem Umbau der Zeitachse: Der Satz „Für diesen Ausschnitt gi
 Fotos." steht in dieser Kopfzeile. Fällt sie, muss er woanders hin — oder ganz weg, denn die Karte
 sagt mit „Hier gibt es noch keine Fotos im gewählten Zeitraum." ohnehin dasselbe.
 
+### Detailansicht: Maße aufräumen
+
+Drei Kleinigkeiten an derselben Ansicht. Sie sind hier zusammengefasst, weil sie in einem Durchgang
+zu erledigen sind — die dritte zieht allerdings mehr nach sich als die beiden anderen.
+
+**1. Die Textspalte drängt das Bild auf schmalen Schirmen zu klein.** `--overlay-aside` ist fest
+auf 24 rem gesetzt, bei 18 px Wurzelschrift also 432 px. Zusammen mit Rand und Abstand
+(90 + 36 px) bleiben dem Bild auf 1280 px Breite 722 px, auf **1024 px nur noch 466 px** — bei
+einem querformatigen Scan gut ein Drittel des Schirms. Der `minmax(16rem, …)` in
+`grid-template-columns` federt das nicht ab: Er gibt nur eine Untergrenze an, die Spalte bleibt bei
+ihrer Wunschbreite, solange sie passt.
+
+Das hängt an der offenen Frage nach **Displayauflösung und -orientierung** (siehe *Infrastruktur*)
+— auf 1920 × 1080 ist nichts zu tun, auf einem 1024er Panel schon. Naheliegend wäre, die Spalte
+mitwachsen zu lassen (`clamp(16rem, 28vw, 24rem)`) statt sie zu setzen. Zu klären ist vorher, ob
+der Text dann noch ohne unruhige Umbrüche steht.
+
+**2. Hinter dem Bild ist manchmal eine schwarze Fläche zu sehen.** Sie soll weg.
+
+Die Ursache ist eingegrenzt: `.overlay__image` trägt `background: #000`. Das stammt aus der Zeit,
+als `object-fit: contain` das Bild in eine Box legte, die nicht seinem Seitenverhältnis entsprach —
+dann brauchte es einen Rand. Seit die Ansicht das Verhältnis als `aspect-ratio` **am Element
+selbst** setzt, gibt es diesen Rand nicht mehr: Über alle achtzehn Fotos des Beispielbestands
+nachgemessen stimmt das Verhältnis der Box mit dem des Vorschaubilds auf 0 % überein, die Box ist
+also immer vollständig gefüllt.
+
+**Damit bleibt nur ein Fall, in dem das Schwarz sichtbar wird: bevor das Bild gezeichnet ist.** Die
+Box steht wegen `aspect-ratio` schon in voller Größe, das Bild ist noch unterwegs — auf dem Pi mit
+einem großen Scan lange genug, um als Blitz aufzufallen. Beim Blättern durch einen Stapel trifft es
+jedes Mal. Die Zeile kann deshalb ersatzlos weg; wer es weicher mag, nimmt einen Ton aus der
+Umgebung statt Schwarz.
+
+**3. Der Schließen-Knopf soll ganz oben rechts stehen, nicht am rechten Rand des Inhalts.** Heute
+sitzt er bündig mit der rechten Kante der Textspalte. Bei einem breiten Foto ist das dasselbe wie
+„oben rechts im Schirm"; bei einem schmalen rückt der ganze Inhalt zusammen und der Knopf mit ihm
+nach innen. Er soll stattdessen **immer** in der Ecke stehen, mit einem vernünftigen Abstand zum
+Rand.
+
+**Das wird zusammen mit einer Vereinheitlichung der Schaltflächen- und Eingabefeldgrößen gemacht**,
+und deshalb steht es hier und ist nicht schon erledigt: Der Knopf ist heute absichtlich so hoch wie
+die Blätterknöpfe (3,5 rem), damit die Ansicht genau eine Knopfform kennt. Löst man ihn aus dem
+Raster, ist diese Bindung weg — dann sollte vorher feststehen, welche Größen es überhaupt geben
+soll. Betroffen sind beide Bereiche: Besucheransicht und Verwaltung haben eigene Maße für Knöpfe,
+Eingabefelder und deren Mindesthöhe, und die 48 px aus der Zielgruppen-Regel sind bisher an jeder
+Stelle einzeln eingehalten statt an einer.
+
 ### „Hilf mit:" hat seine Akzentfarbe verloren
 
 Beim Angleichen an „Bilder aus" (`cc5a437`) wurde aus dem Akzentbraun eine stille graue Zeile. Das
