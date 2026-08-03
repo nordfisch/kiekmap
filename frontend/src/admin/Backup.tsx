@@ -16,16 +16,18 @@
  * browser carries it, and there is nothing for us to watch.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   type DriveItem,
   type DriveList,
   type JobState,
+  type WaitingBackup,
   acknowledgeJob,
   downloadBackupZip,
   fetchDrives,
   fetchJob,
+  restoreFromIncoming,
   startBackup,
   startRestore,
 } from "../api/admin";
@@ -49,6 +51,19 @@ export function Backup() {
   const [downloading, setDownloading] = useState(false);
 
   const running = job?.phase === "running";
+  const waiting = drives?.incoming ?? null;
+
+  /* Liegt eine Sicherung im Eingangsordner, ist sie das Wichtigste auf diesem Bildschirm --
+     also wird die Kachel vorgewählt. Einmalig, nicht bei jedem Abruf: Wer danach bewusst auf
+     „Auf USB-Stick" wechselt, soll nicht vier Sekunden später zurückgeschoben werden. */
+  const announced = useRef<string | null>(null);
+  useEffect(() => {
+    if (waiting && announced.current !== waiting.file) {
+      announced.current = waiting.file;
+      setTarget("zip");
+    }
+    if (!waiting) announced.current = null;
+  }, [waiting]);
 
   const poll = useCallback(async () => {
     try {
@@ -130,7 +145,16 @@ export function Backup() {
       </div>
 
       {target === "zip" ? (
-        <ZipCard downloading={downloading} onStart={() => void download()} />
+        waiting ? (
+          <IncomingCard
+            waiting={waiting}
+            onRestore={() => void begin(() => restoreFromIncoming(waiting.file))}
+            onDownload={() => void download()}
+            downloading={downloading}
+          />
+        ) : (
+          <ZipCard downloading={downloading} onStart={() => void download()} />
+        )
       ) : !drives ? (
         <p className="admin__note">{t.admin.backup.searching}</p>
       ) : !drive ? (
@@ -182,6 +206,48 @@ export function Backup() {
           </section>
         </>
       )}
+    </div>
+  );
+}
+
+/**
+ * Die Fläche, wenn im Eingangsordner eine Sicherung liegt.
+ *
+ * Sie wird **vorgelegt, nicht eingespielt**. Der Eingangsordner nimmt sonst Fotos auf — das ist
+ * hinzufügend und folgenlos —, während dies den ganzen Bestand ersetzt. Deshalb dieselbe
+ * Rückfrage mit Datum und Anzahl, die der Stick-Weg schon stellt.
+ */
+function IncomingCard({
+  waiting,
+  onRestore,
+  onDownload,
+  downloading,
+}: {
+  waiting: WaitingBackup;
+  onRestore: () => void;
+  onDownload: () => void;
+  downloading: boolean;
+}) {
+  return (
+    <div className="backup__drive">
+      <p className="backup__drive-name">{t.admin.backup.incomingTitle}</p>
+      <p className="backup__confirm-title">
+        {t.admin.backup.incomingFound(formatDate(waiting.created_at), formatCount(waiting.photos))}
+      </p>
+
+      <button type="button" className="button button--primary backup__start" onClick={onRestore}>
+        {t.admin.backup.incomingStart}
+      </button>
+
+      <p className="admin__note">{t.admin.backup.incomingWhat}</p>
+
+      {/* Sonst wäre der einzige Moment, in dem man den jetzigen Bestand nicht mehr sichern kann,
+          ausgerechnet der unmittelbar vor dem Überschreiben. */}
+      <p className="admin__note">{t.admin.backup.incomingDownloadFirst}</p>
+      <button type="button" className="button" onClick={onDownload}>
+        {t.admin.backup.zipStart}
+      </button>
+      {downloading && <p className="backup__wait">{t.admin.backup.zipRunning}</p>}
     </div>
   );
 }

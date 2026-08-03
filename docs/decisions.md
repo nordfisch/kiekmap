@@ -282,6 +282,21 @@ Zwei Dinge waren dafür nötig und sind es beim Nachbauen wieder:
   auf der Platte, bevor es das erste Byte ausliefert — bei mehreren Gigabyte auf ebenjener
   SD-Karte. Derselbe Fallstrick wie das `gzip off` bei den Kacheln.
 
+**Der Rückweg läuft über den Eingangsordner — aber er fragt nach.** Eine ZIP-Sicherung, die dort
+abgelegt wird, spielt sich **nicht** von selbst ein. Sie wird erkannt und im Sicherungsbereich
+vorgelegt, mit Datum und Anzahl, wie eine Sicherung auf dem Stick.
+
+Der Grund ist eine Eigenschaft des Ordners, die man leicht übersieht: Er tut bisher etwas
+**Hinzufügendes und Folgenloses** — ein Foto zu viel darin ist ein Foto zu viel. Eine
+Wiederherstellung **ersetzt den ganzen Bestand**. Beides im selben Ordner ohne Rückfrage zu
+mischen, hieße: Eine versehentlich dorthin kopierte Datei tauscht die Sammlung aus, und auf einem
+Kiosk fällt das wochenlang niemandem auf.
+
+Damit fallen zugleich die drei Hindernisse weg, an denen ein Upload durch den Browser gescheitert
+wäre: keine `client_max_body_size`, keine zweite Fortschrittsanzeige (der vorhandene Auftrag
+reicht) und kein vierfacher Platzbedarf — das Archiv wird direkt in den Arbeitsordner entpackt,
+nicht erst daneben.
+
 Der Download authentisiert sich über ein **Einmal-Ticket**, weil ein Browser-Download keinen
 `X-Admin-Token` mitschicken kann. Den Sitzungstoken in die Adresse zu hängen wäre der kurze und
 der falsche Weg: Adressen landen im Verlauf, in Lesezeichen und in Proxy-Protokollen, und dieser

@@ -15,29 +15,6 @@ Ausbau grob nach Gewicht. Zurzeit ist kein Fehler offen — alles hier ist Ausba
 
 ## Verwaltung
 
-### Wiederherstellung aus einer hochgeladenen ZIP-Datei
-
-Die Sicherung als Datei gibt es seit dem 3. August; der Rückweg über den Browser fehlt noch. **Er
-ist nicht offen, nur unbequem:** Das Archiv ist genau der Ordner, den auch der Stick bekommt, also
-entpackt man es auf einen Stick und benutzt die vorhandene Wiederherstellung. Diesen Satz sagt die
-Oberfläche auch.
-
-Wer den bequemen Weg baut, stößt auf drei Dinge — und das dritte ist das eigentliche:
-
-- **`client_max_body_size 128m`** in [../frontend/nginx.conf](../frontend/nginx.conf) weist alles
-  Größere ab. Muss hoch oder auf `0`, zusammen mit `proxy_request_buffering off`.
-- **Zwei Phasen, eine Anzeige.** Der Upload läuft im Browser, das Auspacken und Umschalten danach
-  im Auftrag. Der vorhandene Fortschrittsbalken deckt nur die zweite Hälfte ab.
-- **Der Platz.** Erst speichern, dann entpacken heißt: Archiv plus Ausgepacktes plus laufender
-  Bestand, rund das Dreifache der Sammlung. Der Stick-Weg kopiert direkt vom Stick und kommt mit
-  dem Doppelten aus. Auf einer 32-GB-Karte mit 10 GB Fotos geht die eine Rechnung auf und die
-  andere nicht. Lösbar wäre es mit **strömendem Auspacken** — den Anfragekörper durch `zipfile`
-  lesen, statt ihn erst abzulegen —, was ohne Zentralverzeichnis am Ende nur über die lokalen
-  Einträge geht und deshalb sorgfältig zu schreiben ist.
-
-Vorher zu klären ist deshalb weniger die Oberfläche als die Frage, ob es den Weg überhaupt geben
-soll: Auf dem Museumsgerät ist der Stick zur Hand, und für die Entwicklung reicht das Entpacken.
-
 ### Jahreszahl aus dem Dateinamen raten
 
 `Kirchweih_1932_Muehle.jpg` trägt seine Datierung im Namen, und beim Erstimport von einigen

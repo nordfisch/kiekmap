@@ -27,9 +27,11 @@ from app.schemas import (
     ImportFolderItem,
     ImportFolders,
     ImportRequest,
+    IncomingChoice,
     JobState,
     PhotoDetail,
     UploadItem,
+    WaitingBackup,
 )
 from app.services import auth, importer
 from app.services import backup as service
@@ -82,6 +84,27 @@ def drives(admin: Admin, settings: Config) -> DriveList:
         photos=photos,
         needed_bytes=needed,
         reminder=_reminder(settings),
+        incoming=_waiting(settings),
+    )
+
+
+def _waiting(settings: Settings) -> WaitingBackup | None:
+    """Eine Sicherung, die im Eingangsordner auf ihre Bestaetigung wartet.
+
+    Sie spielt sich nie von selbst ein. Der Ordner nimmt sonst Fotos auf -- hinzufuegend und
+    folgenlos --, waehrend das hier den ganzen Bestand ersetzt; deshalb dieselbe Rueckfrage, die
+    der Stick-Weg schon stellt.
+    """
+    found = service.waiting_archive(settings)
+    if found is None:
+        return None
+    path, info = found
+    return WaitingBackup(
+        file=path.name,
+        created_at=info.created_at,
+        photos=info.photos,
+        bytes=info.bytes,
+        place=info.place,
     )
 
 
@@ -127,6 +150,43 @@ def restore(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
 
     log.info("Restore from %s started", drive.path)
     return status(admin)
+
+
+@router.post("/incoming/restore", response_model=JobState, summary="Restore from the inbox")
+def restore_from_incoming(choice: IncomingChoice, admin: Admin, settings: Config) -> JobState:
+    """Spielt eine Sicherung ein, die als ZIP-Datei im Eingangsordner liegt.
+
+    Derselbe Weg wie beim Stick: derselbe Auftrag, derselbe Fortschrittsbalken, dasselbe
+    Beiseitelegen des bisherigen Bestands. Nur die Quelle ist eine andere.
+    """
+    archive = _pick_archive(settings, choice.file)
+
+    def work(report: service.Report) -> str:
+        message = service.run_restore_from_archive(settings, archive, report)
+        _reopen_database()
+        return message
+
+    if not service.job.start("restore", work):
+        raise HTTPException(409, "Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.")
+
+    log.info("Restore from archive %s started", archive.name)
+    return status(admin)
+
+
+def _pick_archive(settings: Settings, name: str) -> Path:
+    """Nur eine Datei, die wirklich im Eingangsordner liegt und eine Sicherung ist.
+
+    Der Name kommt aus dem Browser, ist also Eingabe und keine Tatsache. Ohne diese Pruefung waere
+    die Verwaltung ein Weg, jede beliebige Datei des Geraets als Sicherung einzuspielen -- und ein
+    aufgeloester Pfad wird verglichen, damit ``..`` niemanden aus dem Ordner herausbringt.
+    """
+    inbox = settings.incoming_dir
+    wanted = (inbox / name).resolve()
+    if wanted.parent != inbox.resolve() or not wanted.is_file():
+        raise HTTPException(404, "Diese Datei liegt nicht mehr im Eingangsordner.")
+    if service.read_archive_manifest(wanted) is None:
+        raise HTTPException(422, "Diese Datei ist keine vollstaendige Sicherung.")
+    return wanted
 
 
 def _reopen_database() -> None:

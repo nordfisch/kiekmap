@@ -50,11 +50,15 @@ export type DriveItem = {
   backup: BackupOnDrive | null;
 };
 
+/** Eine Sicherung, die als ZIP-Datei im Eingangsordner auf ihre Bestätigung wartet. */
+export type WaitingBackup = BackupOnDrive & { file: string };
+
 export type DriveList = {
   drives: DriveItem[];
   photos: number;
   needed_bytes: number;
   reminder: BackupReminder;
+  incoming: WaitingBackup | null;
 };
 
 /** How far along backup or restore is. `phase` is idle | running | done | error. */
@@ -359,6 +363,15 @@ export function fetchJob(): Promise<JobState> {
 }
 
 /** Tell the device the result has been seen, so the screen goes back to the start. */
+/** Spielt eine Sicherung ein, die im Eingangsordner liegt. Ersetzt den ganzen Bestand. */
+export function restoreFromIncoming(file: string): Promise<JobState> {
+  return adminFetch<JobState>("/backup/incoming/restore", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ file }),
+  });
+}
+
 export function acknowledgeJob(): Promise<JobState> {
   return adminFetch<JobState>("/backup/acknowledge", { method: "POST" });
 }

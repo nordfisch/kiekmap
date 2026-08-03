@@ -127,6 +127,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   vorhandene Wiederherstellung benutzen. Der Stick bleibt der bessere Weg, weil er nur Neues
   schreibt und auch halbfertig brauchbar ist; die Oberfläche sagt das
 
+- **Eine Sicherung lässt sich über den Eingangsordner zurückspielen.** Wer die heruntergeladene
+  ZIP-Datei in `data/incoming` legt, bekommt im Sicherungsbereich die Frage „Im Eingangsordner
+  liegt eine Sicherung vom … mit … Fotos — zurückspielen?". **Von selbst passiert nichts:** Der
+  Ordner nimmt sonst Fotos auf, was hinzufügend und folgenlos ist, während dies den ganzen Bestand
+  ersetzt. Der bisherige Stand wird wie immer beiseitegelegt, nicht gelöscht, und das eingespielte
+  Archiv wandert nach `_erledigt/`
+
 ### Geändert
 
 - Bezeichner und Code-Kommentare durchgängig auf Englisch; Deutsch bleibt für Oberfläche,

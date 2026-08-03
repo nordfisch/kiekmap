@@ -363,6 +363,21 @@ export const t = {
       zipRestoreHint:
         "Zum Zurückspielen die Datei auf einen USB-Stick entpacken, den Stick einstecken und " +
         "links „Zurückspielen“ wählen.",
+      /* Der zweite Zustand derselben Kachel: Liegt eine Sicherung im Eingangsordner, wird sie
+         nicht eingespielt, sondern vorgelegt. Der Ordner nimmt sonst Fotos auf — hinzufügend und
+         folgenlos —, während das hier den ganzen Bestand ersetzt. */
+      incomingTitle: "Sicherung einspielen",
+      incomingFound: (date: string, photos: string) =>
+        `Im Eingangsordner liegt eine Sicherung vom ${date} mit ${photos} Fotos — zurückspielen?`,
+      incomingStart: "Sicherung zurückspielen",
+      incomingWhat:
+        "Der jetzige Bestand wird dabei nicht gelöscht, sondern auf dem Gerät beiseitegelegt — " +
+        "in einen Ordner mit dem heutigen Datum. Danach steht die Sicherung an seiner Stelle, " +
+        "mit allen Fotos und allen Angaben.",
+      /* Der einzige Moment, in dem man den jetzigen Bestand nicht mehr sichern könnte, wäre
+         ausgerechnet der unmittelbar vor dem Überschreiben. Deshalb bleibt der Download hier. */
+      incomingDownloadFirst: "Vorher noch den jetzigen Bestand sichern?",
+
       zipStart: "Sicherung herunterladen",
       zipRunning:
         "Der Download läuft. Bei vielen Fotos dauert er einige Minuten — das Fenster " +

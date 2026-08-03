@@ -592,3 +592,202 @@ class TestArchivUeberDieApi:
             haltepunkt.set()
 
         assert antwort.status_code == 409
+
+
+class TestSicherungAusDemEingang:
+    """Der Rueckweg: eine heruntergeladene Datei in den Eingangsordner legen.
+
+    **Sie spielt sich nie von selbst ein.** Der Ordner nimmt sonst Fotos auf -- hinzufuegend und
+    folgenlos --, waehrend dies den ganzen Bestand ersetzt. Erkannt wird sie hier, bestaetigt wird
+    sie im Verwaltungsbereich.
+    """
+
+    def _ablegen(self, session, settings, name: str = "photomap-sicherung-holm-2026-08-03.zip"):
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        ziel = settings.incoming_dir / name
+        with ziel.open("wb") as datei:
+            for teil in backup.stream_archive(session, settings):
+                datei.write(teil)
+        return ziel
+
+    def test_heruntergeladenes_archiv_kommt_ueber_den_eingang_zurueck(
+        self, session, settings, collection
+    ):
+        """Der wichtigste Test: Er schliesst den Kreis, den bisher nur der Umweg ueber den Stick
+        schloss."""
+        shas = collection(3)
+        self._ablegen(session, settings)
+
+        # Inzwischen ist auf dem Geraet etwas anderes passiert.
+        for sha in shas:
+            original_path(settings.photos_dir, sha, ".jpg").unlink()
+
+        gefunden = backup.waiting_archive(settings)
+        assert gefunden is not None, "die abgelegte Sicherung wurde nicht erkannt"
+        backup.run_restore_from_archive(settings, gefunden[0], _nichts_melden)
+
+        for sha in shas:
+            assert original_path(settings.photos_dir, sha, ".jpg").is_file()
+            for size in THUMBNAIL_SIZES:
+                assert thumbnail_path(settings.thumbs_dir, sha, size).is_file()
+
+    def test_wartende_sicherung_wird_mit_datum_und_anzahl_gemeldet(
+        self, session, settings, collection
+    ):
+        """Ohne beides waere die Rueckfrage im Verwaltungsbereich nicht zu beantworten."""
+        collection(2)
+        self._ablegen(session, settings)
+
+        gefunden = backup.waiting_archive(settings)
+
+        assert gefunden is not None
+        _, info = gefunden
+        assert info.photos == 2
+        assert info.created_at is not None
+
+    def test_halb_kopierte_datei_wird_nicht_angeboten(self, session, settings, collection):
+        """Ein abgeschnittenes ZIP hat kein Zentralverzeichnis -- es faellt von selbst durch."""
+        collection(2)
+        pfad = self._ablegen(session, settings)
+        daten = pfad.read_bytes()
+        pfad.write_bytes(daten[: len(daten) // 2])
+
+        assert backup.waiting_archive(settings) is None
+
+    def test_fremde_zip_wird_ignoriert(self, settings):
+        """Passender Name, kein Manifest -- der Name entscheidet nur, ob hineingesehen wird."""
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        fremd = settings.incoming_dir / "photomap-sicherung-fremd.zip"
+        with zipfile.ZipFile(fremd, "w") as archiv:
+            archiv.writestr("irgendwas.txt", "kein Bestand")
+
+        assert backup.waiting_archive(settings) is None
+
+    def test_zip_im_eingang_landet_nicht_im_problemordner(self, session, settings, collection):
+        """Ohne diese Zusage tut nichts von alledem etwas: Der Watcher wuerde sie wegraeumen."""
+        from app.services.watcher import IncomingWatcher
+
+        collection(1)
+        pfad = self._ablegen(session, settings)
+        watcher = IncomingWatcher(settings)
+
+        watcher.scan_once()
+        watcher.scan_once()
+
+        assert pfad.is_file(), "der Watcher hat die Sicherung angefasst"
+        assert not (settings.incoming_dir / "_problem").exists()
+
+    def test_ein_foto_daneben_wird_weiterhin_aufgenommen(
+        self, session, settings, collection, sample_image
+    ):
+        """Die Ausnahme gilt nur fuer Sicherungen, nicht fuer den ganzen Ordner."""
+        import shutil as _shutil
+
+        from app.services.watcher import IncomingWatcher
+
+        collection(1)
+        self._ablegen(session, settings)
+        _shutil.copy2(sample_image("scan_ohne_exif.jpg"), settings.incoming_dir / "neu.jpg")
+
+        watcher = IncomingWatcher(settings)
+        watcher.scan_once()
+        aufgenommen = watcher.scan_once()
+
+        assert aufgenommen == 1
+
+    def test_bisheriger_stand_wird_beiseitegelegt(self, session, settings, collection):
+        collection(2)
+        pfad = self._ablegen(session, settings)
+        vorher = {p.name for p in settings.photos_dir.rglob("*") if p.is_file()}
+
+        backup.run_restore_from_archive(settings, pfad, _nichts_melden)
+
+        beiseite = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
+        assert len(beiseite) == 1, "der bisherige Stand wurde nicht beiseitegelegt"
+        assert vorher <= {p.name for p in beiseite[0].rglob("*") if p.is_file()}
+
+    def test_archiv_wandert_nach_erledigt(self, session, settings, collection):
+        collection(1)
+        pfad = self._ablegen(session, settings)
+
+        backup.run_restore_from_archive(settings, pfad, _nichts_melden)
+
+        assert not pfad.exists(), "die Datei liegt noch im Eingang"
+        assert (settings.incoming_dir / "_erledigt" / pfad.name).is_file()
+        assert backup.waiting_archive(settings) is None
+
+    def test_unvollstaendige_datei_wird_abgelehnt(self, settings):
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        keine = settings.incoming_dir / "photomap-sicherung-kaputt.zip"
+        keine.write_bytes(b"kein zip")
+
+        with pytest.raises(backup.BackupError) as fehler:
+            backup.run_restore_from_archive(settings, keine, _nichts_melden)
+
+        assert "keine vollstaendige Sicherung" in str(fehler.value)
+
+
+class TestEingangUeberDieApi:
+    def _bis_fertig(self, client, sekunden: float = 5.0) -> dict:
+        import time
+
+        ende = time.monotonic() + sekunden
+        while time.monotonic() < ende:
+            zustand = client.get("/api/admin/backup/status").json()
+            if zustand["phase"] != "running":
+                return zustand
+            time.sleep(0.02)
+        raise AssertionError("Der Auftrag wurde nicht fertig")
+
+    def _ablegen(self, session, settings) -> str:
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        name = "photomap-sicherung-holm-2026-08-03.zip"
+        with (settings.incoming_dir / name).open("wb") as datei:
+            for teil in backup.stream_archive(session, settings):
+                datei.write(teil)
+        return name
+
+    def test_laufwerksliste_meldet_die_wartende_sicherung(
+        self, admin_client, session, settings, collection
+    ):
+        collection(2)
+        name = self._ablegen(session, settings)
+
+        daten = admin_client.get("/api/admin/backup/drives").json()
+
+        assert daten["incoming"] is not None
+        assert daten["incoming"]["file"] == name
+        assert daten["incoming"]["photos"] == 2
+
+    def test_ohne_datei_meldet_die_liste_nichts(self, admin_client, settings):
+        assert admin_client.get("/api/admin/backup/drives").json()["incoming"] is None
+
+    def test_einspielen_ueber_die_api(self, admin_client, session, settings, collection):
+        shas = collection(2)
+        name = self._ablegen(session, settings)
+        for sha in shas:
+            original_path(settings.photos_dir, sha, ".jpg").unlink()
+
+        antwort = admin_client.post("/api/admin/backup/incoming/restore", json={"file": name})
+        assert antwort.status_code == 200
+        zustand = self._bis_fertig(admin_client)
+
+        assert zustand["phase"] == "done", zustand
+        assert "_erledigt" in zustand["message"]
+        for sha in shas:
+            assert original_path(settings.photos_dir, sha, ".jpg").is_file()
+
+    def test_erfundener_dateiname_wird_abgewiesen(self, admin_client, settings):
+        antwort = admin_client.post(
+            "/api/admin/backup/incoming/restore", json={"file": "gibt-es-nicht.zip"}
+        )
+
+        assert antwort.status_code == 404
+
+    def test_pfad_aus_dem_ordner_heraus_wird_abgewiesen(self, admin_client, settings):
+        """Der Name kommt aus dem Browser -- ohne die Pruefung waere jede Datei einspielbar."""
+        antwort = admin_client.post(
+            "/api/admin/backup/incoming/restore", json={"file": "../photomap.db"}
+        )
+
+        assert antwort.status_code == 404

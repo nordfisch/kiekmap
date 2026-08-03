@@ -162,7 +162,9 @@ Vier Wege, ein Ziel — sie laufen alle durch `import_file()` in `app/services/i
 schreibt immer einen Eintrag ins Import-Protokoll:
 
 1. **Überwachter Eingangsordner** — der Watcher nimmt auf, sobald eine Datei fertig geschrieben
-   ist, und räumt sie danach nach `_erledigt/` oder `_problem/`. Gelöscht wird nie.
+   ist, und räumt sie danach nach `_erledigt/` oder `_problem/`. Gelöscht wird nie. **Eine
+   Ausnahme: ZIP-Dateien mit dem Namen einer Sicherung lässt er liegen** — sie sind kein Foto,
+   sondern eine ganze Sammlung, und werden erst nach Rückfrage eingespielt.
 2. **Hochladen im Verwaltungsbereich** — der Weg für vierzig ausgesuchte Dateien.
 3. **USB-Stick im Verwaltungsbereich** — der Weg für einen Ordner mit zweihundert Scans. **Auf dem
    Stick wird nichts verschoben und nichts gelöscht**, anders als im eigenen Eingangsordner.

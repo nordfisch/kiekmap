@@ -376,16 +376,36 @@ class DriveItem(BaseModel):
     backup: BackupOnDrive | None
 
 
+class WaitingBackup(BackupOnDrive):
+    """Eine Sicherung, die im Eingangsordner liegt und auf ihre Bestaetigung wartet.
+
+    Sie reist mit der Laufwerksabfrage mit, die der Sicherungsbereich ohnehin alle paar Sekunden
+    stellt -- eine zweite Schleife dafuer waere Aufwand ohne Gewinn.
+    """
+
+    #: Der Dateiname. Er geht beim Einspielen zurueck, damit am Ende genau die Datei genommen
+    #: wird, die auf dem Schirm stand -- und nicht eine, die inzwischen dazugekommen ist.
+    file: str
+
+
 class DriveList(BaseModel):
     drives: list[DriveItem]
     #: How many photos would be written, and how much room that takes.
     photos: int
     needed_bytes: int
     reminder: BackupReminder
+    #: Eine Sicherung, die im Eingangsordner auf Bestaetigung wartet.
+    incoming: WaitingBackup | None = None
 
 
 class DriveChoice(BaseModel):
     path: str
+
+
+class IncomingChoice(BaseModel):
+    """Welche Datei aus dem Eingangsordner eingespielt werden soll."""
+
+    file: str = Field(max_length=255)
 
 
 class ImportFolderItem(BaseModel):

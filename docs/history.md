@@ -1028,3 +1028,51 @@ kommt; ohne ihn sähe die fehlende Rückrichtung wie ein Fehler aus.
 
 Am echten Bestand nachgemessen: 31 MB in 132 Stücken, entpackt 18 Fotos, 36 Vorschaubilder, eine
 lesbare Datenbank ohne WAL daneben — und `is_restorable` sagt ja.
+
+## Der Rückweg führt durch den Eingangsordner
+
+3. August 2026.
+
+Die Sicherung als Datei gab es seit dem Vormittag, der Rückweg nicht — man musste sie auf einen
+Stick entpacken. Der Backlog hatte dafür drei Hindernisse notiert, und alle drei hingen am Upload
+durch den Browser: `client_max_body_size`, eine zweiphasige Fortschrittsanzeige und der dreifache
+Platzbedarf beim Auspacken.
+
+**Der Eingangsordner räumt alle drei ab.** Die Datei liegt schon auf der Platte — kein Upload,
+keine nginx-Grenze, keine zweite Anzeige. Und weil direkt in den Arbeitsordner entpackt wird statt
+erst daneben, bleibt es beim Dreifachen statt beim Vierfachen; mehr geht nicht, solange das Archiv
+seine eigene Quelle ist.
+
+### Die Entscheidung, die den Entwurf prägt
+
+Der Ordner tut bisher etwas **Hinzufügendes und Folgenloses**: Ein Foto zu viel darin ist ein Foto
+zu viel. Eine Wiederherstellung **ersetzt den ganzen Bestand**. Beides ohne Rückfrage in denselben
+Ordner zu legen, hieße: Eine versehentlich dorthin kopierte Datei tauscht die Sammlung aus, und auf
+einem Kiosk fällt das wochenlang niemandem auf.
+
+Deshalb spielt sich nichts von selbst ein. Die Datei wird **erkannt** und im Sicherungsbereich
+vorgelegt — dieselbe Rückfrage mit Datum und Anzahl, die der Stick-Weg schon stellt. Die Kachel
+„Als eine Datei" bekommt dafür einen zweiten Zustand und wird vorgewählt, sobald etwas wartet.
+Darunter steht weiterhin der Download: Sonst wäre der einzige Moment, in dem sich der *jetzige*
+Bestand nicht mehr sichern lässt, ausgerechnet der unmittelbar vor dem Überschreiben.
+
+### Was der Plan nicht wusste
+
+**Ohne eine Zeile im Watcher tut nichts davon etwas.** Das Archiv wäre in `import_file` gelaufen,
+dort als „Kein lesbares Bild" abgewiesen worden und in `_problem/` gelandet — bevor es überhaupt
+jemand hätte bestätigen können. `_candidates()` übergeht es jetzt. Die Gegenprobe steht: Ohne die
+Zeile ist `test_zip_im_eingang_landet_nicht_im_problemordner` rot.
+
+**Ein Name kollidierte.** `importer._move_aside` sollte öffentlich werden, damit die Sicherung das
+eingespielte Archiv nach `_erledigt/` räumen kann. Aber `import_file` hat einen **Parameter**
+namens `move_aside` — die Funktion wäre in seinem Geltungsbereich verdeckt gewesen, und die Aufrufe
+darin hätten den Wahrheitswert aufzurufen versucht. Stattdessen heißt die öffentliche Variante
+`move_to_done` und ist zugleich enger: Sie kennt nur ein Ziel.
+
+**Halb kopierte Dateien brauchen keine Sonderbehandlung.** Der Watcher wartet sonst darauf, dass
+eine Dateigröße sich nicht mehr ändert. Für ein Archiv genügt der Versuch, es zu öffnen: Ohne sein
+Zentralverzeichnis am Ende ist ein ZIP für `zipfile` schlicht kein ZIP.
+
+Am echten Bestand geprüft: 18 Fotos gesichert, fünf Dateien gelöscht, eingespielt — 18 wieder da,
+das Archiv in `_erledigt/`, der alte Stand in `vorher-2026-08-03-2341/`, und die Abschlussmeldung
+nennt beide.

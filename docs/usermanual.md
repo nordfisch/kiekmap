@@ -150,10 +150,11 @@ abgebrochene Sicherung auf dem Stick es nicht ist.
 Die Datei ist also die Ergänzung, nicht der Ersatz. Für die Sicherung, die im Museum bleibt,
 nehmen Sie den Stick.
 
-> **Wie kommt so eine Datei wieder ins Gerät?** Genauso wie eine Sicherung vom Stick — sie ist
-> dieselbe. Entpacken Sie die ZIP-Datei auf einen USB-Stick, sodass dort der Ordner
-> `photomap-sicherung` liegt, stecken Sie den Stick ein und gehen Sie wie im nächsten Abschnitt
-> vor.
+> **Wie kommt so eine Datei wieder ins Gerät?** Auf zwei Wegen. Am Rechner: die ZIP-Datei in den
+> Ordner `incoming` legen. Das Gerät erkennt sie von allein und fragt im Sicherungsbereich nach,
+> ob sie eingespielt werden soll — **von selbst passiert nichts.** Oder über den Stick: die Datei
+> so entpacken, dass dort der Ordner `photomap-sicherung` liegt, Stick einstecken, und dann wie
+> im nächsten Abschnitt vorgehen.
 
 ## Eine Sicherung zurückspielen
 

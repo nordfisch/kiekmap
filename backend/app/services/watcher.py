@@ -16,6 +16,7 @@ from pathlib import Path
 
 from app.config import Settings, get_settings
 from app.db import SessionLocal
+from app.services import backup
 from app.services.importer import SPECIAL_DIRS, import_file
 
 log = logging.getLogger(__name__)
@@ -69,6 +70,11 @@ class IncomingWatcher:
             if path.is_file()
             and not path.name.startswith(".")
             and not SPECIAL_DIRS & set(path.relative_to(inbox).parts)
+            # Eine Sicherung ist kein Foto. Ohne diese Zeile liefe sie in ``import_file``, waere
+            # dort "Kein lesbares Bild" und landete in ``_problem/``. Sie bleibt stattdessen
+            # liegen, bis jemand im Verwaltungsbereich zustimmt -- siehe services/backup.py,
+            # ``waiting_archive``. Der Eingangsordner soll nichts von allein ersetzen.
+            and not backup.looks_like_archive(path.name)
         ]
 
     def scan_once(self) -> int:

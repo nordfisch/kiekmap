@@ -93,6 +93,16 @@ def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
     shutil.move(str(path), _free_name(target_folder, path.name))
 
 
+def move_to_done(path: Path, inbox: Path) -> None:
+    """Raeumt eine erledigte Datei weg -- oeffentlich, weil die Sicherung sie auch braucht.
+
+    Ein eingespieltes Archiv wandert nach ``_erledigt`` wie jedes Foto, das durch diesen Ordner
+    kam. Der eigene Name statt eines oeffentlichen ``move_aside``: In ``import_file`` heisst ein
+    Parameter so, und der wuerde die Funktion in seinem Geltungsbereich verdecken.
+    """
+    _move_aside(path, inbox, DONE_DIR)
+
+
 def import_file(
     session: Session,
     path: Path,
