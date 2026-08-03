@@ -87,6 +87,7 @@ def reset_process_state() -> Iterator[None]:
     def clear() -> None:
         auth.sessions.clear()
         auth.attempts.reset()
+        auth.tickets.clear()
         backup.job.reset()
 
     clear()

@@ -15,33 +15,28 @@ Ausbau grob nach Gewicht. Zurzeit ist kein Fehler offen — alles hier ist Ausba
 
 ## Verwaltung
 
-### Sicherung und Wiederherstellung auch als ZIP
+### Wiederherstellung aus einer hochgeladenen ZIP-Datei
 
-Heute geht beides nur über einen USB-Stick. Ein zweiter Weg über den Browser hilft dort, wo kein
-Stick zur Hand ist — und beim Entwickeln ohnehin. Der Pi veröffentlicht Port 80, ein Notebook am
-Netzwerkkabel kommt also an die Verwaltung heran.
+Die Sicherung als Datei gibt es seit dem 3. August; der Rückweg über den Browser fehlt noch. **Er
+ist nicht offen, nur unbequem:** Das Archiv ist genau der Ordner, den auch der Stick bekommt, also
+entpackt man es auf einen Stick und benutzt die vorhandene Wiederherstellung. Diesen Satz sagt die
+Oberfläche auch.
 
-**Die Maske übernimmt die Form, die das Importieren schon hat:** zwei gleichrangige Kacheln für
-das Ziel beziehungsweise die Quelle — links Browser/ZIP-Datei, rechts USB-Stick —, darunter **eine
-Fläche an fester Stelle**, die den Fortschritt und das Ergebnis des gewählten Weges zeigt. Damit
-sieht der Sicherungsbereich aus wie der Importbereich, und wer den einen bedient hat, erkennt den
-anderen wieder.
+Wer den bequemen Weg baut, stößt auf drei Dinge — und das dritte ist das eigentliche:
 
-**Umfang: alles, wie auf den Stick** — Fotos, Vorschaubilder und Datenbank in einem Archiv. Eine
-halbe Sicherung wäre gefährlicher als keine, weil sie sich wie eine ganze anfühlt.
+- **`client_max_body_size 128m`** in [../frontend/nginx.conf](../frontend/nginx.conf) weist alles
+  Größere ab. Muss hoch oder auf `0`, zusammen mit `proxy_request_buffering off`.
+- **Zwei Phasen, eine Anzeige.** Der Upload läuft im Browser, das Auspacken und Umschalten danach
+  im Auftrag. Der vorhandene Fortschrittsbalken deckt nur die zweite Hälfte ab.
+- **Der Platz.** Erst speichern, dann entpacken heißt: Archiv plus Ausgepacktes plus laufender
+  Bestand, rund das Dreifache der Sammlung. Der Stick-Weg kopiert direkt vom Stick und kommt mit
+  dem Doppelten aus. Auf einer 32-GB-Karte mit 10 GB Fotos geht die eine Rechnung auf und die
+  andere nicht. Lösbar wäre es mit **strömendem Auspacken** — den Anfragekörper durch `zipfile`
+  lesen, statt ihn erst abzulegen —, was ohne Zentralverzeichnis am Ende nur über die lokalen
+  Einträge geht und deshalb sorgfältig zu schreiben ist.
 
-**Was dabei verlorengeht, und das ist zu benennen:** Das Archiv ist **nicht inkrementell**. Der
-Stick schreibt beim zweiten Mal nur, was dazugekommen ist, und ist in Sekunden fertig; das ZIP
-packt jedes Mal den ganzen Bestand — bei zweitausend Fotos mehrere Gigabyte. Und ein Abbruch macht
-das Archiv wertlos, während eine abgebrochene Ordner-Sicherung teilweise brauchbar bleibt. Genau
-diese beiden Eigenschaften waren die Begründung für „Ordner statt ZIP" auf dem Stick
-([decisions.md](decisions.md), Punkt 11). Der Browser-Weg ist deshalb die **Ergänzung**, nicht der
-Ersatz, und die Oberfläche sollte das sagen.
-
-**Vorher zu klären:** Wird das Archiv im Speicher gebaut (auf einem Pi mit 2 GB keine gute Idee),
-auf die SD-Karte geschrieben (die dafür Platz braucht) oder im Strom erzeugt? Letzteres geht mit
-ZIP ohne Kompression und ist für JPEGs ohnehin das Richtige — komprimieren bringt bei ihnen
-nichts.
+Vorher zu klären ist deshalb weniger die Oberfläche als die Frage, ob es den Weg überhaupt geben
+soll: Auf dem Museumsgerät ist der Stick zur Hand, und für die Entwicklung reicht das Entpacken.
 
 ### Jahreszahl aus dem Dateinamen raten
 

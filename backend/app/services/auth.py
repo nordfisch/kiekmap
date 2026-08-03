@@ -34,6 +34,9 @@ SESSION_LIFETIME_S = 30 * 60
 MAX_ATTEMPTS = 5
 LOCKOUT_S = 60
 
+#: How long a download ticket is good for. Only long enough to click the link it was made for.
+TICKET_LIFETIME_S = 60
+
 
 # --- the PIN ----------------------------------------------------------------
 
@@ -129,6 +132,49 @@ class SessionStore:
             del self._expiry[token]
 
 
+class TicketStore:
+    """One-shot permits for the one thing a header cannot reach: a browser download.
+
+    Everything in the admin area authenticates with ``X-Admin-Token``. A download does not go
+    through our code -- the browser fetches it -- and a browser cannot be told to send a header.
+    The short way would be to hang the session token in the URL, and it is the wrong one: URLs end
+    up in history, in bookmarks, in proxy logs, and that token opens the whole admin area for half
+    an hour.
+
+    A ticket is the opposite of that: it buys exactly one download, it is forgotten the moment it
+    is used, and it is worthless a minute later. Like the sessions it lives in memory -- a restart
+    is allowed to invalidate it.
+    """
+
+    def __init__(self, lifetime_s: int = TICKET_LIFETIME_S) -> None:
+        self._lifetime_s = lifetime_s
+        self._expiry: dict[str, float] = {}
+        self._lock = threading.Lock()
+
+    def issue(self) -> tuple[str, int]:
+        """A fresh ticket and how many seconds it is good for."""
+        ticket = secrets.token_urlsafe(32)
+        with self._lock:
+            self._forget_expired()
+            self._expiry[ticket] = time.monotonic() + self._lifetime_s
+        return ticket, self._lifetime_s
+
+    def redeem(self, ticket: str) -> bool:
+        """True exactly once per ticket -- using it is what spends it."""
+        with self._lock:
+            deadline = self._expiry.pop(ticket, None)
+        return deadline is not None and deadline > time.monotonic()
+
+    def clear(self) -> None:
+        with self._lock:
+            self._expiry.clear()
+
+    def _forget_expired(self) -> None:
+        now = time.monotonic()
+        for ticket in [t for t, deadline in self._expiry.items() if deadline <= now]:
+            del self._expiry[ticket]
+
+
 # --- guessing ---------------------------------------------------------------
 
 
@@ -172,3 +218,4 @@ class AttemptGuard:
 #: One store and one guard for the process. Both hold no state worth persisting.
 sessions = SessionStore()
 attempts = AttemptGuard()
+tickets = TicketStore()

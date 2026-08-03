@@ -351,6 +351,13 @@ class BackupReminder(BaseModel):
     overdue: bool
 
 
+class DownloadTicket(BaseModel):
+    """A one-shot permit for the archive download. See app/services/auth.py, TicketStore."""
+
+    ticket: str
+    expires_in_s: int
+
+
 class BackupOnDrive(BaseModel):
     created_at: datetime
     photos: int

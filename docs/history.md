@@ -965,3 +965,66 @@ nachweislich nichts, auch keinen Schatten.
 sehen", mit der Vermutung, die Fläche sei größer als das Bild. Das war sie nicht — nachgemessen
 0,03 px Rand auf 366 px Breite. Die Fläche war nicht zu groß, sie war leer. Der Unterschied klingt
 klein und ist der ganze Unterschied zwischen der falschen und der richtigen Reparatur.
+
+## Die Sicherung gibt es jetzt auch als eine Datei
+
+3. August 2026.
+
+Sichern ging nur über einen USB-Stick. Für das Museum ist das richtig und bleibt der Hauptweg —
+aber es gibt zwei Fälle, in denen es nicht trägt: Es liegt kein Stick bereit, oder man sitzt beim
+Entwickeln vor dem Rechner und will den Bestand einfach herunterladen.
+
+**Der Entwurf steht und fällt mit einer Eigenschaft:** Das Archiv ist genau der Ordner, den auch
+der Stick bekommt, nur gezippt. Daraus folgt alles Weitere — vor allem, dass die fehlende
+Upload-Wiederherstellung keine Lücke ist, sondern eine Unbequemlichkeit: auf einen Stick
+entpacken, vorhandene Wiederherstellung benutzen. Es gibt damit **keinen zweiten
+Wiederherstellungsweg**, der eigene Fehler haben könnte.
+
+Weil diese Eigenschaft leicht zu zerstören und schwer zu bemerken wäre, hält
+`test_entpacktes_archiv_laesst_sich_wiederherstellen` sie fest: Archiv bauen, in ein
+Prüf-Laufwerk entpacken, `run_restore` laufen lassen, nachzählen. Bricht der Test, ist der Rückweg
+weg — und zwar lautlos.
+
+### Im Strom, nicht im Speicher
+
+Die Frage, die der Backlog offengelassen hatte: Wird das Archiv im Speicher gebaut, auf die
+SD-Karte geschrieben oder im Strom erzeugt? Auf einem Pi mit 2 GB RAM scheidet das Erste aus, und
+die SD-Karte ist genau das, wovor die Sicherung schützt. Also im Strom.
+
+Das braucht eine Senke für `zipfile`, die nichts aufhebt — `_ArchiveStream`, drei Methoden. Zwei
+davon sind offensichtlich (`write` sammelt, `tell` zählt mit, weil `zipfile` daraus seine Offsets
+rechnet). Die dritte ist der eigentliche Schalter: **`seekable()` sagt nein**, und daraufhin
+arbeitet `zipfile` mit Data Descriptors, statt später in Kopfdaten zurückzuspringen, die längst
+ausgeliefert sind. Ein `seek` gibt es deshalb bewusst nicht — mit einem würde die Klasse still
+anfangen zu lügen.
+
+`ZIP_STORED` ist dabei keine Sparsamkeit: JPEG und WebP sind komprimiert, ein zweiter Durchgang
+kostet den Pi nur Zeit. ZIP64 ist Pflicht, zweitausend Scans gehen ohne Weiteres über vier
+Gigabyte.
+
+### Zwei Fallstricke, die erst beim ersten großen Bestand aufgefallen wären
+
+**`proxy_buffering`** steht im nginx auf der Voreinstellung — es hätte den ganzen Strom erst auf
+die SD-Karte gesammelt, bevor der Browser ein Byte sieht. Genau der Fallstrick, den bei den Kacheln
+schon das `gzip off` daneben abfängt, und genau der, der auf einem Bestand von achtzehn Fotos
+nichts tut.
+
+**Ein Browser-Download kann keinen `X-Admin-Token` mitschicken.** Der kurze Weg wäre, den
+Sitzungstoken in die Adresse zu hängen; er ist falsch, weil Adressen im Verlauf, in Lesezeichen
+und in Proxy-Protokollen landen und dieser Token den ganzen Verwaltungsbereich öffnet. Stattdessen
+ein `TicketStore` nach dem Vorbild des `SessionStore`: ein Ticket kauft genau einen Download, wird
+beim Einlösen vergessen und ist nach einer Minute wertlos.
+
+### Was die Oberfläche sagen muss
+
+Die Maske hat die Form des Importbereichs übernommen — zwei gleichrangige Kacheln, darunter eine
+Fläche an fester Stelle. Der Stick steht links, weil er die bessere Sicherung ist.
+
+Zwei Sätze stehen dabei bewusst auf dem Bildschirm und nicht nur in der Dokumentation. Der erste
+ordnet den Weg ein: Das Archiv ist nicht inkrementell, und ein abgebrochener Download ist
+wertlos — beides Eigenschaften, die genau die Begründung für „Ordner statt ZIP" waren
+([decisions.md](decisions.md), Punkt 11). Der zweite sagt, wie eine solche Datei wieder ins Gerät
+kommt; ohne ihn sähe die fehlende Rückrichtung wie ein Fehler aus.
+
+Am echten Bestand nachgemessen: 31 MB in 132 Stücken, entpackt 18 Fotos, 36 Vorschaubilder, eine
+lesbare Datenbank ohne WAL daneben — und `is_restorable` sagt ja.

@@ -260,6 +260,33 @@ Details:
 Docker-Bind-Mount zeigt neu eingehängte Datenträger nur mit `rshared`-Propagation. Ohne das bleibt
 der Stick im Container unsichtbar.
 
+**Nachtrag vom 3. August 2026: es gibt jetzt doch ein ZIP — als zweiten Weg, nicht als Ersatz.**
+Ein Download über den Browser hilft dort, wo kein Stick liegt. Die beiden Gründe gegen ZIP gelten
+unverändert, und deshalb sagt die Oberfläche sie: Das Archiv ist nicht inkrementell, und ein
+abgebrochener Download ist wertlos.
+
+Was den zweiten Weg trägt, ist eine Eigenschaft, die ihn an den ersten bindet: **Das Archiv ist
+genau der Ordner, den auch der Stick bekommt, nur gezippt.** Wer eine ZIP-Sicherung zurückspielen
+will, entpackt sie auf einen Stick und benutzt die vorhandene Wiederherstellung. Es gibt also
+keinen zweiten Wiederherstellungsweg, der eigene Fehler haben könnte — und weil die Eigenschaft
+leicht zu zerstören und schwer zu bemerken wäre, hält
+`test_entpacktes_archiv_laesst_sich_wiederherstellen` sie fest.
+
+Zwei Dinge waren dafür nötig und sind es beim Nachbauen wieder:
+
+- **Das Archiv entsteht im Strom, unkomprimiert.** Auf einem Pi mit 2 GB RAM darf es nirgends
+  vollständig liegen, und die SD-Karte ist genau das, wovor die Sicherung schützt. `ZIP_STORED`
+  ist dabei nicht Sparsamkeit: JPEG und WebP sind komprimiert, ein zweiter Durchgang kostet nur
+  Rechenzeit.
+- **`proxy_buffering off` im nginx.** Mit der Voreinstellung sammelt nginx die ganze Antwort erst
+  auf der Platte, bevor es das erste Byte ausliefert — bei mehreren Gigabyte auf ebenjener
+  SD-Karte. Derselbe Fallstrick wie das `gzip off` bei den Kacheln.
+
+Der Download authentisiert sich über ein **Einmal-Ticket**, weil ein Browser-Download keinen
+`X-Admin-Token` mitschicken kann. Den Sitzungstoken in die Adresse zu hängen wäre der kurze und
+der falsche Weg: Adressen landen im Verlauf, in Lesezeichen und in Proxy-Protokollen, und dieser
+Token öffnet den ganzen Verwaltungsbereich.
+
 ---
 
 ## 12. Die Karte ist Hintergrund, nicht Hauptsache

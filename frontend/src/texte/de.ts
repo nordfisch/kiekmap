@@ -219,7 +219,8 @@ export const t = {
          Die Hinweiszeilen sagen genau das — sonst landet der Name des Leihgebers auf dem
          Besucherschirm. */
       credit: "Bildnachweis",
-      creditHint: "Steht in der Detailansicht unter der Beschreibung. Zum Beispiel: Sammlung Heimatmuseum Holm.",
+      creditHint:
+        "Steht in der Detailansicht unter der Beschreibung. Zum Beispiel: Sammlung Heimatmuseum Holm.",
       provenance: "Herkunft",
       provenanceHint:
         "Von wem das Bild kam, ob es eine Leihgabe ist, ob eine Freigabe vorliegt. " +
@@ -337,10 +338,40 @@ export const t = {
      * bis hin zu „Sie können den Stick jetzt abziehen".
      */
     backup: {
-      title: "Sicherung auf USB-Stick",
+      title: "Sicherung",
       intro:
-        "Die Sicherung schreibt alle Fotos und alle Angaben auf einen USB-Stick. " +
-        "Der Stick lässt sich an jedem Rechner öffnen; die Bilder liegen dort als Dateien.",
+        "Die Sicherung schreibt alle Fotos und alle Angaben aus dem Gerät heraus — " +
+        "auf einen USB-Stick oder als eine Datei zum Herunterladen.",
+
+      /* Zwei Kacheln wie beim Importieren. Der Stick steht links, weil er der Weg für das Museum
+         ist: Er schreibt beim zweiten Mal nur das Neue und bleibt auch halbfertig brauchbar. */
+      whereTo: "Wohin gesichert wird",
+      toStick: "Auf USB-Stick",
+      toStickHint:
+        "Der übliche Weg. Schreibt nur, was neu ist, und ist beim zweiten Mal in Sekunden fertig.",
+      toZip: "Als eine Datei",
+      toZipHint: "Ein Download für den Rechner, an dem Sie gerade sitzen. Ohne Stick.",
+
+      zipTitle: "Sicherung herunterladen",
+      zipIntro:
+        "Sie bekommen den ganzen Bestand als eine ZIP-Datei: alle Fotos, alle Vorschaubilder " +
+        "und alle Angaben.",
+      /* Der Satz, der den Weg einordnet. Er gehört auf den Bildschirm und nicht nur in die
+         Dokumentation: Wer nur diesen Weg benutzt, hat eine schlechtere Sicherung, ohne es zu
+         merken. */
+      zipWarning:
+        "Anders als beim Stick wird jedes Mal alles neu gepackt — das dauert bei vielen Fotos " +
+        "und ergibt eine große Datei. Und ein abgebrochener Download ist unbrauchbar, während " +
+        "eine abgebrochene Sicherung auf dem Stick es nicht ist. Für das Museum bleibt der Stick " +
+        "der richtige Weg; die Datei ist die Ergänzung.",
+      /* Ohne diesen Satz sähe die fehlende Rückrichtung wie ein Fehler aus. */
+      zipRestoreHint:
+        "Zurückspielen lässt sich eine solche Datei ebenfalls: auf einen USB-Stick entpacken, " +
+        "den Stick einstecken und links „Zurückspielen“ wählen.",
+      zipStart: "Sicherung herunterladen",
+      zipRunning:
+        "Der Download läuft. Bei vielen Fotos dauert er einige Minuten — das Fenster " +
+        "solange offen lassen.",
 
       noDrive: "Bitte USB-Stick einstecken.",
       noDriveHint: "Sobald der Stick steckt, erscheint er hier von allein.",

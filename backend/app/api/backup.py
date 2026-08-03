@@ -11,7 +11,8 @@ front of the device with a stick in their hand.
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi.responses import StreamingResponse
 
 from app.api.admin import Admin, Config
 from app.config import Settings
@@ -19,6 +20,7 @@ from app.db import SessionLocal
 from app.schemas import (
     BackupOnDrive,
     BackupReminder,
+    DownloadTicket,
     DriveChoice,
     DriveItem,
     DriveList,
@@ -29,8 +31,8 @@ from app.schemas import (
     PhotoDetail,
     UploadItem,
 )
+from app.services import auth, importer
 from app.services import backup as service
-from app.services import importer
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin/backup", tags=["sicherung"])
@@ -244,6 +246,52 @@ def _pick_folder(settings: Settings, path: str) -> Path:
                 return wanted
             break
     raise HTTPException(404, "Diesen Ordner gibt es auf dem Stick nicht mehr.")
+
+
+# --- die Sicherung als eine Datei -------------------------------------------
+#
+# Der zweite Weg aus der Sammlung heraus, fuer den Fall, dass kein Stick zur Hand ist. Er laeuft
+# **nicht** ueber den Auftrag: Es gibt nichts zu ueberwachen, der Browser fuehrt die Uebertragung
+# und zeigt sie selbst an. Das Archiv entsteht dabei im Strom -- siehe services/backup.py.
+
+
+@router.post("/zip/ticket", response_model=DownloadTicket, summary="Permit for one download")
+def zip_ticket(admin: Admin) -> DownloadTicket:
+    """Ein Browser-Download kann keinen ``X-Admin-Token`` mitschicken -- deshalb dieser Umweg.
+
+    Die Sitzung selbst in die URL zu haengen waere kuerzer und falsch: Adressen landen im Verlauf,
+    in Lesezeichen und in Proxy-Protokollen, und dieser Token oeffnet den ganzen
+    Verwaltungsbereich. Das Ticket kauft genau einen Download und ist danach verbraucht.
+    """
+    ticket, expires_in_s = auth.tickets.issue()
+    return DownloadTicket(ticket=ticket, expires_in_s=expires_in_s)
+
+
+@router.get("/zip", summary="The whole collection as one ZIP file")
+def zip_download(settings: Config, ticket: str = Query(description="From /zip/ticket")) -> Response:
+    if not auth.tickets.redeem(ticket):
+        raise HTTPException(401, "Dieser Link ist abgelaufen. Bitte noch einmal herunterladen.")
+
+    # Waehrend einer Wiederherstellung wuerden die Dateien unter dem laufenden Strom ausgetauscht,
+    # und das Archiv enthielte am Ende zwei verschiedene Bestaende.
+    if service.job.running:
+        raise HTTPException(409, "Es ist gerade etwas im Gange. Bitte warten, bis es fertig ist.")
+
+    def strom():
+        # Eigene Sitzung: Der Generator laeuft weiter, nachdem die Anfrage beantwortet ist.
+        with SessionLocal() as session:
+            yield from service.stream_archive(session, settings)
+
+    name = service.archive_name(settings)
+    log.info("Archive download started: %s", name)
+    return StreamingResponse(
+        strom(),
+        media_type="application/zip",
+        # Ohne Laengenangabe: Bei ZIP_STORED waere sie ausrechenbar, aber die Rechnung ueber
+        # Eintragskopf, Zentralverzeichnis und ZIP64-Zusatzfelder ist zerbrechlich -- und eine
+        # falsche Zahl ist schlimmer als keine. Der Browser zeigt dafuer keinen Fortschritt.
+        headers={"Content-Disposition": f'attachment; filename="{name}"'},
+    )
 
 
 @router.get("/status", response_model=JobState, summary="How far along backup or restore is")

@@ -1,13 +1,19 @@
 /**
- * Backup onto a USB stick, and restoring from one.
+ * Backup onto a USB stick or into one file, and restoring from a stick.
  *
  * The screen this stage exists for. A shell script would be less work and would never be run --
  * the people who do this are volunteers, once or twice a year. So: plug the stick in, one button,
  * a progress bar, and at the end a sentence that says the job is done and the stick may come out.
  *
+ * Two tiles, the same shape the import screen uses, and below them one surface that keeps its
+ * place and only changes what is in it. **The stick is on the left because it is the better
+ * backup**: it writes only what is new and stays usable when it breaks off halfway. The file is
+ * the addition -- see docs/decisions.md, point 11.
+ *
  * Two loops run here. While nothing is happening, the drive list is polled -- plugging a stick in
  * is then enough, with no reload and no "search" button. While a job runs, its progress is polled
- * instead, faster, because that is what the bar moves on.
+ * instead, faster, because that is what the bar moves on. The download is in neither loop: the
+ * browser carries it, and there is nothing for us to watch.
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -17,6 +23,7 @@ import {
   type DriveList,
   type JobState,
   acknowledgeJob,
+  downloadBackupZip,
   fetchDrives,
   fetchJob,
   startBackup,
@@ -29,12 +36,17 @@ import { formatBytes, formatCount, formatDate } from "./format";
 const IDLE_POLL_MS = 4000;
 const BUSY_POLL_MS = 800;
 
+type Target = "stick" | "zip";
+
 export function Backup() {
+  const [target, setTarget] = useState<Target>("stick");
   const [drives, setDrives] = useState<DriveList | null>(null);
   const [job, setJob] = useState<JobState | null>(null);
   const [error, setError] = useState<string | null>(null);
   /** Path of the drive whose restore is waiting for a yes. */
   const [confirming, setConfirming] = useState<string | null>(null);
+  /** True once the download has been handed to the browser. */
+  const [downloading, setDownloading] = useState(false);
 
   const running = job?.phase === "running";
 
@@ -76,6 +88,16 @@ export function Backup() {
     return <JobView job={job} onFinish={() => void finish()} />;
   }
 
+  async function download() {
+    setError(null);
+    try {
+      await downloadBackupZip();
+      setDownloading(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   const drive = drives?.drives[0] ?? null;
 
   return (
@@ -86,7 +108,30 @@ export function Backup() {
       {error && <p className="admin__error">{error}</p>}
       <Reminder list={drives} />
 
-      {!drives ? (
+      <h3 className="admin__heading">{t.admin.backup.whereTo}</h3>
+      <div className="sources">
+        <button
+          type="button"
+          className={target === "stick" ? "source source--active" : "source"}
+          onClick={() => setTarget("stick")}
+        >
+          <span className="source__title">{t.admin.backup.toStick}</span>
+          <span className="source__hint">{t.admin.backup.toStickHint}</span>
+        </button>
+
+        <button
+          type="button"
+          className={target === "zip" ? "source source--active" : "source"}
+          onClick={() => setTarget("zip")}
+        >
+          <span className="source__title">{t.admin.backup.toZip}</span>
+          <span className="source__hint">{t.admin.backup.toZipHint}</span>
+        </button>
+      </div>
+
+      {target === "zip" ? (
+        <ZipCard downloading={downloading} onStart={() => void download()} />
+      ) : !drives ? (
         <p className="admin__note">{t.admin.backup.searching}</p>
       ) : !drive ? (
         <div className="backup__empty">
@@ -95,7 +140,11 @@ export function Backup() {
         </div>
       ) : (
         <>
-          <DriveCard drive={drive} list={drives} onStart={() => void begin(() => startBackup(drive.path))} />
+          <DriveCard
+            drive={drive}
+            list={drives}
+            onStart={() => void begin(() => startBackup(drive.path))}
+          />
 
           <section className="backup__restore">
             <h3 className="admin__heading">{t.admin.backup.restoreTitle}</h3>
@@ -137,6 +186,30 @@ export function Backup() {
   );
 }
 
+/**
+ * Die Fläche für den Download — an derselben Stelle wie die Laufwerkskachel daneben.
+ *
+ * Kein Fortschrittsbalken: Der Browser führt die Übertragung und zeigt sie selbst an. Was hier
+ * steht, ist die Einordnung — dass jedes Mal alles neu gepackt wird und wie eine solche Datei
+ * wieder ins Gerät kommt.
+ */
+function ZipCard({ downloading, onStart }: { downloading: boolean; onStart: () => void }) {
+  return (
+    <div className="backup__drive">
+      <p className="backup__drive-name">{t.admin.backup.zipTitle}</p>
+      <p className="admin__note">{t.admin.backup.zipIntro}</p>
+      <p className="admin__note">{t.admin.backup.zipWarning}</p>
+
+      <button type="button" className="button button--primary backup__start" onClick={onStart}>
+        {t.admin.backup.zipStart}
+      </button>
+
+      {downloading && <p className="backup__wait">{t.admin.backup.zipRunning}</p>}
+      <p className="admin__note">{t.admin.backup.zipRestoreHint}</p>
+    </div>
+  );
+}
+
 function Reminder({ list }: { list: DriveList | null }) {
   if (!list) return null;
   const { reminder } = list;
@@ -145,7 +218,11 @@ function Reminder({ list }: { list: DriveList | null }) {
     return <p className="backup__reminder backup__reminder--overdue">{t.admin.backup.lastNever}</p>;
   }
   return (
-    <p className={reminder.overdue ? "backup__reminder backup__reminder--overdue" : "backup__reminder"}>
+    <p
+      className={
+        reminder.overdue ? "backup__reminder backup__reminder--overdue" : "backup__reminder"
+      }
+    >
       {t.admin.backup.lastOn(formatDate(reminder.last_backup_at), reminder.days_since ?? 0)}
     </p>
   );

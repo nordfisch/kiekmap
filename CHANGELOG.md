@@ -119,6 +119,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   zurückgenommener Besucherbeitrag — sind Absicht, sonst hätte der „Hilf mit"-Bereich nichts
   vorzulegen. **Die Bilder selbst sind noch nicht im Repo**, siehe `seed/README.md`
 
+- **Die Sicherung gibt es auch als eine Datei.** Verwaltung → Sicherung → „Als eine Datei" lädt
+  den ganzen Bestand als ZIP herunter — für den Fall, dass kein USB-Stick zur Hand ist. Das Archiv
+  entsteht im Strom und unkomprimiert, liegt also nirgends vollständig; auf einem Pi mit 2 GB RAM
+  ist das der Unterschied zwischen geht und geht nicht. **Es ist genau der Ordner, den auch der
+  Stick bekommt, nur gezippt** — zurückspielen heißt deshalb: auf einen Stick entpacken und die
+  vorhandene Wiederherstellung benutzen. Der Stick bleibt der bessere Weg, weil er nur Neues
+  schreibt und auch halbfertig brauchbar ist; die Oberfläche sagt das
+
 ### Geändert
 
 - Bezeichner und Code-Kommentare durchgängig auf Englisch; Deutsch bleibt für Oberfläche,

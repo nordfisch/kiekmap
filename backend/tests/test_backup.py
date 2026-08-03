@@ -10,6 +10,8 @@ Drei Zusagen tragen diese Stufe, und alle drei brechen still:
      falsche Sicherung einspielt, soll nicht alles verloren haben.
 """
 
+import io
+import zipfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -449,3 +451,144 @@ class TestUeberDieApi:
 
         assert zustand["phase"] == "error"
         assert "nicht komplett" in zustand["error"]
+
+
+class TestArchiv:
+    """Die Sicherung als eine Datei -- der zweite Weg aus der Sammlung heraus.
+
+    Die eine Zusage, die alles andere traegt: **Das Archiv ist der Ordner, den auch der Stick
+    bekommt, nur gezippt.** Daran haengt, dass eine ZIP-Sicherung ohne Upload-Weg trotzdem
+    zurueckspielbar ist -- auf einen Stick entpacken, fertig. Bricht diese Eigenschaft, ist der
+    Rueckweg weg, ohne dass es jemandem auffiele.
+    """
+
+    def _archiv(self, session, settings) -> bytes:
+        return b"".join(backup.stream_archive(session, settings))
+
+    def test_entpacktes_archiv_laesst_sich_wiederherstellen(
+        self, session, settings, stick, collection
+    ):
+        """Der wichtigste Test des Archivs: Er bindet die beiden Wege aneinander."""
+        shas = collection(3)
+        daten = self._archiv(session, settings)
+
+        # Auf den Stick entpacken -- genau das, was jemand von Hand taete.
+        with zipfile.ZipFile(io.BytesIO(daten)) as archiv:
+            archiv.extractall(stick)
+
+        # Und danach der ganz gewoehnliche Weg zurueck.
+        for sha in shas:
+            original_path(settings.photos_dir, sha, ".jpg").unlink()
+        backup.run_restore(settings, _drive(settings), _nichts_melden)
+
+        for sha in shas:
+            assert original_path(settings.photos_dir, sha, ".jpg").is_file(), (
+                "das entpackte Archiv war fuer die Wiederherstellung nicht brauchbar"
+            )
+
+    def test_archiv_enthaelt_denselben_ordner_wie_der_stick(self, session, settings, collection):
+        collection(2)
+
+        with zipfile.ZipFile(io.BytesIO(self._archiv(session, settings))) as archiv:
+            namen = archiv.namelist()
+
+        assert {name.split("/")[0] for name in namen} == {backup.BACKUP_DIR_NAME}
+        assert f"{backup.BACKUP_DIR_NAME}/photomap.db" in namen
+        assert f"{backup.BACKUP_DIR_NAME}/{backup.MANIFEST_NAME}" in namen
+        assert any(name.startswith(f"{backup.BACKUP_DIR_NAME}/photos/") for name in namen)
+        assert any(name.startswith(f"{backup.BACKUP_DIR_NAME}/thumbs/") for name in namen)
+
+    def test_archiv_wird_nicht_komprimiert(self, session, settings, collection):
+        """JPEG und WebP sind schon komprimiert -- ein zweiter Durchgang kostet den Pi nur Zeit."""
+        collection(2)
+
+        with zipfile.ZipFile(io.BytesIO(self._archiv(session, settings))) as archiv:
+            verfahren = {eintrag.compress_type for eintrag in archiv.infolist()}
+
+        assert verfahren == {zipfile.ZIP_STORED}
+
+    def test_archiv_entsteht_im_strom(self, session, settings, collection):
+        """Sonst laege es vollstaendig im Speicher -- auf einem Pi mit 2 GB keine gute Idee."""
+        collection(5)
+
+        stuecke = list(backup.stream_archive(session, settings))
+
+        assert len(stuecke) > 1, "der Erzeuger hat alles auf einmal geliefert"
+
+    def test_abgebrochener_download_zaehlt_nicht_als_sicherung(self, session, settings, collection):
+        """Was der Browser nicht bekommen hat, schuetzt niemanden -- also gilt es auch nicht."""
+        collection(3)
+        strom = backup.stream_archive(session, settings)
+        next(strom)  # angefangen, aber nicht zu Ende gelesen
+        strom.close()
+
+        assert backup.read_state(settings).last_backup_at is None
+
+    def test_vollstaendiger_download_setzt_die_erinnerung_zurueck(
+        self, session, settings, collection
+    ):
+        collection(2)
+
+        self._archiv(session, settings)
+
+        zustand = backup.read_state(settings)
+        assert zustand.last_backup_at is not None
+        assert zustand.last_drive == backup.ZIP_DRIVE_NAME
+
+    def test_dateiname_nennt_ort_und_tag(self, settings):
+        settings.region_file.parent.mkdir(parents=True, exist_ok=True)
+        settings.region_file.write_text('{"name": "Holm"}', encoding="utf-8")
+
+        name = backup.archive_name(settings)
+
+        assert name.startswith("photomap-sicherung-holm-")
+        assert name.endswith(".zip")
+        assert name.isascii(), "der Name steht in einem HTTP-Kopf"
+
+
+class TestArchivUeberDieApi:
+    def test_ohne_ticket_kein_download(self, admin_client):
+        assert admin_client.get("/api/admin/backup/zip").status_code == 422
+
+    def test_erfundenes_ticket_wird_abgewiesen(self, admin_client):
+        antwort = admin_client.get("/api/admin/backup/zip", params={"ticket": "ausgedacht"})
+
+        assert antwort.status_code == 401
+
+    def test_ticket_gilt_nur_einmal(self, admin_client, settings, collection):
+        collection(1)
+        ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
+
+        erste = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+        zweite = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+
+        assert erste.status_code == 200
+        assert zweite.status_code == 401, "ein Ticket darf sich nicht wiederverwenden lassen"
+
+    def test_ticket_nur_fuer_angemeldete(self, client):
+        assert client.post("/api/admin/backup/zip/ticket").status_code == 401
+
+    def test_download_liefert_ein_archiv(self, admin_client, settings, collection):
+        collection(2)
+        ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
+
+        antwort = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+
+        assert antwort.headers["content-type"] == "application/zip"
+        assert "attachment" in antwort.headers["content-disposition"]
+        with zipfile.ZipFile(io.BytesIO(antwort.content)) as archiv:
+            assert archiv.testzip() is None
+
+    def test_laufender_auftrag_blockiert_den_download(self, admin_client, settings):
+        """Eine Wiederherstellung wuerde die Dateien unter dem laufenden Strom austauschen."""
+        import threading
+
+        haltepunkt = threading.Event()
+        backup.job.start("backup", lambda report: (haltepunkt.wait(2), "fertig")[1])
+        ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
+        try:
+            antwort = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+        finally:
+            haltepunkt.set()
+
+        assert antwort.status_code == 409

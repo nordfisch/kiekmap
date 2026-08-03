@@ -136,6 +136,25 @@ normale Dateien.
 > **Wenn kein Stick erscheint:** Steckt er richtig? Manche sehr alten Sticks werden nicht erkannt.
 > Ein anderer Stick ist der schnellste Versuch.
 
+## Sicherung als eine Datei herunterladen
+
+Wenn kein Stick zur Hand ist, geht es auch über den Rechner, an dem Sie gerade sitzen: Verwaltung
+→ **Sicherung** → Kachel **„Als eine Datei"** → **„Sicherung herunterladen"**. Sie bekommen den
+ganzen Bestand als eine ZIP-Datei.
+
+**Der Stick bleibt trotzdem der bessere Weg**, und dafür gibt es zwei handfeste Gründe: Auf den
+Stick schreibt das Gerät beim zweiten Mal nur, was neu ist — die Datei enthält jedes Mal alles und
+dauert entsprechend. Und wenn der Download abbricht, ist die Datei unbrauchbar, während eine
+abgebrochene Sicherung auf dem Stick es nicht ist.
+
+Die Datei ist also die Ergänzung, nicht der Ersatz. Für die Sicherung, die im Museum bleibt,
+nehmen Sie den Stick.
+
+> **Wie kommt so eine Datei wieder ins Gerät?** Genauso wie eine Sicherung vom Stick — sie ist
+> dieselbe. Entpacken Sie die ZIP-Datei auf einen USB-Stick, sodass dort der Ordner
+> `photomap-sicherung` liegt, stecken Sie den Stick ein und gehen Sie wie im nächsten Abschnitt
+> vor.
+
 ## Eine Sicherung zurückspielen
 
 Das brauchen Sie nur, wenn das Gerät neu aufgesetzt wurde oder wirklich etwas verloren gegangen

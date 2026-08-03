@@ -158,7 +158,12 @@ export type PhotoPatch = {
   credit?: string | null;
   provenance?: string | null;
   /** null clears the dating; leaving the key out keeps it. See backend PhotoUpdate. */
-  date?: { year: number; month?: number; day?: number; precision: string } | null;
+  date?: {
+    year: number;
+    month?: number;
+    day?: number;
+    precision: string;
+  } | null;
   location?: { lat: number; lon: number; place_name?: string | null } | null;
   tags?: string[];
   status?: "published" | "deleted";
@@ -266,11 +271,16 @@ export function fetchChanges(includeReverted = false, offset = 0): Promise<Chang
 }
 
 export function revertChange(id: number): Promise<PhotoAdminDetail> {
-  return adminFetch<PhotoAdminDetail>(`/changes/${id}/revert`, { method: "POST" });
+  return adminFetch<PhotoAdminDetail>(`/changes/${id}/revert`, {
+    method: "POST",
+  });
 }
 
 export function fetchImportLog(result?: string, offset = 0): Promise<ImportLogList> {
-  const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(offset) });
+  const params = new URLSearchParams({
+    limit: String(PAGE_SIZE),
+    offset: String(offset),
+  });
   if (result) params.set("result", result);
   return adminFetch<ImportLogList>(`/imports?${params}`);
 }
@@ -351,6 +361,32 @@ export function fetchJob(): Promise<JobState> {
 /** Tell the device the result has been seen, so the screen goes back to the start. */
 export function acknowledgeJob(): Promise<JobState> {
   return adminFetch<JobState>("/backup/acknowledge", { method: "POST" });
+}
+
+/**
+ * Die Sicherung als eine Datei herunterladen.
+ *
+ * Der Umweg über ein Ticket hat einen Grund: Den Download führt der Browser, und dem lässt sich
+ * kein `X-Admin-Token` mitgeben. Den Sitzungstoken in die Adresse zu schreiben wäre kürzer und
+ * falsch — Adressen landen im Verlauf und in Protokollen. Das Ticket gilt eine Minute und genau
+ * einen Download lang.
+ *
+ * Geladen wird über einen unsichtbaren Link, nicht über `fetch`: Sonst läge das ganze Archiv im
+ * Speicher des Browsers, bevor irgendjemand es zu Gesicht bekäme — bei zweitausend Fotos mehrere
+ * Gigabyte.
+ */
+export async function downloadBackupZip(): Promise<void> {
+  const { ticket } = await adminFetch<{ ticket: string; expires_in_s: number }>(
+    "/backup/zip/ticket",
+    { method: "POST" },
+  );
+
+  const link = document.createElement("a");
+  link.href = `/api/admin/backup/zip?ticket=${encodeURIComponent(ticket)}`;
+  link.download = "";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 
 /**
