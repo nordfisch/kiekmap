@@ -32,6 +32,24 @@ _IPTC_TITLE = (2, 5)
 _IPTC_KEYWORDS = (2, 25)
 _IPTC_CAPTION = (2, 120)
 
+#: What cameras write into the title and caption fields when nobody wrote anything.
+#:
+#: This is the same trap as the scan date, one field over: the value is there, so the photo counts
+#: as titled and never comes up for correction -- except that "OLYMPUS DIGITAL CAMERA" says
+#: nothing about the picture. No title is more honest than that one, and it puts the photo back in
+#: front of somebody who can supply a real one.
+_CAMERA_BOILERPLATE = frozenset(
+    {
+        "olympus digital camera",
+        "sony dsc",
+        "konica minolta digital camera",
+        "samsung digital camera",
+        "samsung camera pictures",
+        "casio computer co.,ltd",
+        "picasa",
+    }
+)
+
 
 @dataclass
 class ImageInfo:
@@ -52,12 +70,11 @@ class ImageInfo:
     exif_datetime: datetime | None = None
 
 
-def _text(value: object) -> str | None:
-    """EXIF text arrives as bytes, as UTF-16, or padded with null bytes."""
+def _decode(value: object, encodings: tuple[str, ...]) -> str | None:
     if value is None:
         return None
     if isinstance(value, bytes):
-        for encoding in ("utf-16-le", "utf-8", "latin-1"):
+        for encoding in encodings:
             try:
                 value = value.decode(encoding)
                 break
@@ -67,6 +84,34 @@ def _text(value: object) -> str | None:
             return None
     text = str(value).replace("\x00", "").strip()
     return text or None
+
+
+def _text(value: object) -> str | None:
+    """Text from IPTC and from the ordinary EXIF fields: bytes, mostly UTF-8."""
+    return _decode(value, ("utf-8", "latin-1"))
+
+
+def _statement(value: object, decode=_text) -> str | None:
+    """Text that is meant to say something about the picture -- title or caption.
+
+    Drops what the camera put there by itself; see ``_CAMERA_BOILERPLATE``.
+    """
+    text = decode(value)
+    if text is None or text.strip().lower() in _CAMERA_BOILERPLATE:
+        return None
+    return text
+
+
+def _xp_text(value: object) -> str | None:
+    """Only for the ``XP*`` EXIF fields -- and only for those, which is the whole point.
+
+    Windows stores ``XPTitle`` and ``XPKeywords`` as UCS2 little-endian, so UTF-16 has to be tried
+    first there. Trying it first *everywhere* is what went wrong before: **every** byte string of
+    even length is valid UTF-16, so nothing ever raises and the fallback never happens. IPTC
+    keywords came out as ``b"ArchivHolm"`` -> "牁档癩潈浬" -- and only the ones of even length,
+    which is why it looked like random corruption rather than a rule.
+    """
+    return _decode(value, ("utf-16-le", "utf-8", "latin-1"))
 
 
 def _degrees(value: object, reference: object) -> float | None:
@@ -103,9 +148,9 @@ def _read_iptc(image: Image.Image, info: ImageInfo) -> None:
     if not data:
         return
 
-    if title := _text(data.get(_IPTC_TITLE)):
+    if title := _statement(data.get(_IPTC_TITLE)):
         info.title = info.title or title
-    if caption := _text(data.get(_IPTC_CAPTION)):
+    if caption := _statement(data.get(_IPTC_CAPTION)):
         info.description = info.description or caption
 
     raw = data.get(_IPTC_KEYWORDS)
@@ -131,8 +176,10 @@ def read_image_info(path: Path) -> ImageInfo:
         info = ImageInfo(width=rotated[0], height=rotated[1], format=image.format or "")
 
         exif = image.getexif()
-        info.title = _text(exif.get(_TAG_XP_TITLE)) or _text(exif.get(_TAG_IMAGE_DESCRIPTION))
-        if words := _text(exif.get(_TAG_XP_KEYWORDS)):
+        info.title = _statement(exif.get(_TAG_XP_TITLE), _xp_text) or _statement(
+            exif.get(_TAG_IMAGE_DESCRIPTION)
+        )
+        if words := _xp_text(exif.get(_TAG_XP_KEYWORDS)):
             info.keywords.extend(w.strip() for w in words.split(";") if w.strip())
 
         exif_ifd = exif.get_ifd(_EXIF_IFD)

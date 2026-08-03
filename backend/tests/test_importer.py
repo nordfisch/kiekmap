@@ -118,6 +118,58 @@ class TestOrtUndTitel:
         assert foto.title_source == Source.EXIF
 
 
+class TestKameraTextbausteine:
+    """Was die Kamera von sich aus hineinschreibt, ist kein Titel.
+
+    Dieselbe Falle wie das Scandatum, ein Feld weiter: "OLYMPUS DIGITAL CAMERA" steht wirklich im
+    Titel- und im Beschreibungsfeld -- das Foto gilt damit als betitelt und wird nie wieder
+    jemandem vorgelegt, der einen echten Titel wuesste. Kein Titel ist ehrlicher.
+    """
+
+    def test_kameramodell_wird_nicht_zum_titel(self):
+        from app.services.exif import _statement
+
+        assert _statement(b"OLYMPUS DIGITAL CAMERA") is None
+        assert _statement(b"SONY DSC") is None
+        assert _statement(b"Picasa") is None
+
+    def test_echter_titel_bleibt(self):
+        from app.services.exif import _statement
+
+        assert _statement(b"Kirchweih an der Muehle") == "Kirchweih an der Muehle"
+
+
+class TestTextkodierung:
+    """Warum IPTC und die XP-Felder verschieden gelesen werden muessen.
+
+    Anlass ist ein Bestand, in dem die Schlagwoerter "牁档癩潈浬", "楗瑮牥" und "浉匠湡敤"
+    standen -- das sind "ArchivHolm", "Winter" und "Im Sande", als UTF-16 gelesen.
+    Die Ursache ist tueckisch:
+    **Jede** Bytefolge gerader Laenge ist gueltiges UTF-16, es fliegt also nie ein Fehler und der
+    Rueckfall auf UTF-8 kommt nie zum Zug. Kaputt waren deshalb genau die Woerter mit gerader
+    Byte-Laenge, heil die mit ungerader -- was wie Zufall aussah und keiner war.
+    """
+
+    def test_iptc_schlagwort_mit_gerader_bytelaenge_bleibt_lesbar(self):
+        from app.services.exif import _text
+
+        assert _text(b"ArchivHolm") == "ArchivHolm"
+        assert _text(b"Winter") == "Winter"
+        assert _text(b"Im Sande") == "Im Sande"
+
+    def test_iptc_umlaut_kommt_als_utf8_an(self):
+        from app.services.exif import _text
+
+        assert _text("Mühlenweg".encode()) == "Mühlenweg"
+
+    def test_windows_feld_bleibt_utf16(self):
+        """Die Gegenrichtung: XPTitle und XPKeywords sind wirklich UCS2-LE."""
+        from app.services.exif import _xp_text
+
+        assert _xp_text("Kirchweih".encode("utf-16-le")) == "Kirchweih"
+        assert _xp_text("Mühlenweg".encode("utf-16-le")) == "Mühlenweg"
+
+
 class TestSchwierigeDateien:
     def test_hochkant_wird_richtig_herum_vermessen(self, session, settings, sample_image):
         """Die Pixel sind 900x600, die Ausrichtung steht im EXIF. Gespeichert gehoert 600x900."""
