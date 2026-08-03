@@ -322,5 +322,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   `background: #000` am Bild — einer Zeile aus der Zeit, bevor das Element sein Seitenverhältnis
   als `aspect-ratio` mitbekam. Seitdem entspricht die Box dem Bild genau, der Hintergrund war also
   nur noch **vor** dem Zeichnen zu sehen: beim Öffnen und bei jedem Schritt durch einen Stapel.
-  Jetzt scheint dort der Hintergrund der Ansicht durch, derselbe warme Ton wie ringsum
+  In dieser Zeit wird jetzt gar nichts gezeichnet — auch der Schlagschatten nicht, denn ein
+  Schatten um eine leere Fläche sieht nach fehlendem Bild aus. Der Platz bleibt reserviert, es
+  springt also nichts
 

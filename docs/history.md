@@ -942,10 +942,26 @@ Deshalb „gelegentlich": Es traf beim Öffnen und bei jedem Schritt durch einen
 hing an der Dateigröße. Auf dem Entwicklungsrechner über localhost kaum zu sehen, auf dem Pi mit
 einem großen Scan lang genug.
 
-Die Zeile ist ersatzlos entfallen. Was jetzt in diesem Moment durchscheint, ist der Hintergrund der
-Ansicht selbst — `rgb(20 17 14 / 92%)`, derselbe warme Ton wie ringsum statt eines schwarzen
-Rechtecks. Nachgemessen im Ladezustand: Die Box meldet `rgba(0, 0, 0, 0)`, dahinter steht die
-Ansicht.
+Die Zeile ist ersatzlos entfallen — und damit trat der Fehler ein zweites Mal auf, nur anders
+herum. Ohne Hintergrund blieb im Ladezustand der **Schlagschatten um eine leere Fläche** stehen,
+und das sieht schlechter aus als das Schwarz vorher: Es wirkt wie ein Bild, das fehlt.
 
-**Was bleibt, ist der Schlagschatten.** Er zeichnet die Kante des Fotos und hat mit dem Hintergrund
-nichts zu tun.
+Also die Ursache eine Stufe tiefer angefasst. Das Bild wird jetzt erst gezeichnet, wenn es geladen
+ist — `visibility: hidden`, solange nicht. Das nimmt den Schatten mit, während `display: none` den
+Platz genommen hätte und die Ansicht beim Blättern gesprungen wäre. Die Bedingung hängt an der
+Foto-Kennung, nicht an einem Umschalter: `loadedId === detail.id`. Damit gilt sie beim ersten
+Öffnen und bei jedem Schritt durch einen Stapel gleichermaßen, ohne dass irgendwo etwas
+zurückgesetzt werden muss.
+
+**Der eine Fallstrick dabei** steht als Kommentar daneben: Liegt das Bild schon im Cache, ist es
+unter Umständen fertig, bevor React `onLoad` hängen kann — dann bliebe es für immer unsichtbar.
+Deshalb prüft zusätzlich die `ref`-Funktion `node.complete`. Denselben Wert noch einmal zu setzen
+ist für React ein Nichtstun, es schleift also nicht.
+
+Nachgemessen über sieben Blätterschritte: kein Foto blieb verborgen, und die Ladeklasse zeichnet
+nachweislich nichts, auch keinen Schatten.
+
+*Nachtrag zur Fehlersuche selbst:* Die Meldung lautete „jetzt ist da eine Fläche mit Schatten zu
+sehen", mit der Vermutung, die Fläche sei größer als das Bild. Das war sie nicht — nachgemessen
+0,03 px Rand auf 366 px Breite. Die Fläche war nicht zu groß, sie war leer. Der Unterschied klingt
+klein und ist der ganze Unterschied zwischen der falschen und der richtigen Reparatur.

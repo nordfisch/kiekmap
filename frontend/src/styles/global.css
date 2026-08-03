@@ -779,6 +779,14 @@ button {
   box-shadow: 0 6px 30px rgb(0 0 0 / 60%);
 }
 
+/* Solange die Datei unterwegs ist, wird nichts gezeichnet -- der Schatten am wenigsten. Er saesse
+ * sonst um ein leeres Rechteck, was schlimmer aussieht als das Schwarz vorher, weil es wie ein
+ * fehlendes Bild wirkt. `visibility` statt `display`, damit der Platz stehen bleibt und die
+ * Ansicht beim Blaettern nicht springt. */
+.overlay__image--loading {
+  visibility: hidden;
+}
+
 .overlay__text {
   /* Viel Text scrollt in seiner Spalte, statt unter den Bildschirmrand zu laufen. Die Grenze ist
    * dieselbe wie beim Bild, nur ohne die Fußzeile -- der Text reicht bis unter die Blätterknöpfe. */

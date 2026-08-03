@@ -22,6 +22,15 @@ export function PhotoOverlay() {
   const stepInStack = useKiosk((s) => s.stepInStack);
   const [detail, setDetail] = useState<PhotoDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * Welches Foto fertig geladen ist — und nur das wird gezeichnet.
+   *
+   * Das Seitenverhältnis steht als `aspect-ratio` am Bild, die Box hat ihre volle Größe also
+   * schon, während die Datei noch unterwegs ist. Ohne diese Bremse stünde in dieser Zeit ein
+   * leeres Rechteck mit Schlagschatten im Bild — beim Öffnen und bei jedem Schritt durch einen
+   * Stapel. Der Platz bleibt trotzdem reserviert, sonst springt die Ansicht.
+   */
+  const [loadedId, setLoadedId] = useState<number | null>(null);
 
   const openPhotoId = openStack[openIndex] ?? null;
 
@@ -81,10 +90,22 @@ export function PhotoOverlay() {
         <div className="overlay__figure">
           {detail && (
             <img
-              className="overlay__image"
+              className={
+                loadedId === detail.id
+                  ? "overlay__image"
+                  : "overlay__image overlay__image--loading"
+              }
               src={detail.thumb_url}
               alt={detail.title ?? t.map.photoAlt}
               style={{ aspectRatio: `${detail.width} / ${detail.height}` }}
+              onLoad={() => setLoadedId(detail.id)}
+              // Aus dem Cache ist das Bild unter Umständen schon fertig, bevor React ``onLoad``
+              // hängen kann -- dann bliebe es unsichtbar. Derselbe Wert noch einmal gesetzt ist
+              // für React ein Nichtstun, das schleift also nicht.
+              ref={(node) => {
+                if (node?.complete && node.naturalWidth > 0)
+                  setLoadedId(detail.id);
+              }}
             />
           )}
 
