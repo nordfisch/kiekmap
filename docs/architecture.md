@@ -11,6 +11,8 @@ es** — nicht *warum so* und nicht *wie arbeitet man daran*:
 | [history.md](history.md) | *Wie* ist es dazu gekommen? |
 | [operations.md](operations.md) | Wie läuft das Gerät im Museum? |
 
+Die vollständige Übersicht steht in [index.md](index.md).
+
 Wo hier eine Entscheidung nur benannt wird, steht ihre Begründung in `decisions.md`. Die Ordner
 listet `development.md` auf; hier stehen die Zusammenhänge.
 

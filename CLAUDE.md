@@ -6,7 +6,8 @@ dem Besucher fehlende Angaben ergänzen. Das Gerät läuft **offline** auf einem
 
 Lies zuerst [docs/decisions.md](docs/decisions.md) — dort steht, *warum* die Dinge so sind; und
 [docs/architecture.md](docs/architecture.md) — dort, *woraus* das System besteht und wie die Teile
-zusammenspielen. Diese Datei sagt, *wie* man hier arbeitet.
+zusammenspielen. Diese Datei sagt, *wie* man hier arbeitet. Welche Datei sonst welche Frage
+beantwortet, steht in [docs/index.md](docs/index.md).
 
 ## Die drei Dinge, die man hier falsch machen kann
 

@@ -40,7 +40,7 @@ Das Wappen führt die linke Spalte an und ist zugleich der Weg in die Verwaltung
 | `frontend/` | React + MapLibre: Besucheransicht (`src/kiosk/`) und Admin (`src/admin/`) |
 | `tiles/` | Skripte, die die Offline-Karte und die lokale Ortssuche bauen |
 | `deploy/` | Docker Compose und die Einrichtung des Raspberry Pi |
-| `docs/` | Entscheidungen, Betriebshandbuch, Anleitung für Ehrenamtliche |
+| `docs/` | Die ganze Dokumentation — Wegweiser: [docs/index.md](docs/index.md) |
 | `data/` | Laufzeitdaten (nicht im Repo): Datenbank, Fotos, Thumbnails |
 
 ## Entwicklung
@@ -82,6 +82,7 @@ Woraus das System besteht und wie die Teile zusammenspielen, steht in
 [docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in
 [docs/decisions.md](docs/decisions.md); wie es dazu gekommen ist, in
 [docs/history.md](docs/history.md). Was noch offen ist, im [docs/backlog.md](docs/backlog.md).
+Welche Datei welche Frage beantwortet, sagt [docs/index.md](docs/index.md).
 
 ## Lizenz
 

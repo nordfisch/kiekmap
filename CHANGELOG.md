@@ -224,6 +224,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   bisherige Status „Versteckt" ist darin aufgegangen. Gelöschte Fotos zählen in keiner Kachel der
   Übersicht mehr mit und stehen in keiner Liste ausser „Gelöscht" — sonst wäre das Löschen dort
   wirkungslos, wo jemand hinsieht
+- **`docs/index.md`** ist der Wegweiser durch die Dokumentation: acht Dateien, jede mit genau
+  einer Frage, gruppiert nach *verstehen · daran arbeiten · betreiben*
 - **`docs/architecture.md`** beschreibt, woraus das System besteht und wie die Teile
   zusammenspielen: die drei Prozesse, die beiden gebauten Artefakte und ihre getrennten Wege, was
   zur Bauzeit entsteht und was zur Laufzeit, wo der Zustand liegt und wie ein Foto hereinkommt.
