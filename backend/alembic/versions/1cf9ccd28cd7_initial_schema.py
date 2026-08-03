@@ -1,8 +1,25 @@
 """Initial schema
 
-Revision ID: 85f5993e7f4f
+The whole schema in one step, and deliberately so: the three revisions before it were folded
+into this one on 2026-08-03. At that point no device had ever run Photomap, so no database
+existed that a migration path could have led anywhere from -- a history that nothing can replay
+is not a history, it is ballast.
+
+**From the first Pi onwards this stops being allowed.** Once a museum has a filled database, the
+only way its data can survive a schema change is the chain of migrations. See docs/decisions.md.
+
+Two of the folded revisions are worth remembering rather than the files themselves:
+
+  * house numbers on ``places`` -- ``street`` and ``housenumber``, filled only for
+    ``kind="adresse"``
+  * ``status`` renamed from ``hidden`` to ``deleted``. That one **destroyed data**: rebuilding
+    the table with foreign keys switched on took every visitor contribution with it. What came of
+    that is the ``PRAGMA foreign_keys=OFF`` in ``alembic/env.py`` and the test in
+    ``tests/test_migrationen.py``; both stay, the migration file does not.
+
+Revision ID: 1cf9ccd28cd7
 Revises:
-Create Date: 2026-07-28 11:52:03.795139
+Create Date: 2026-08-03 12:38:18.367624
 """
 
 from collections.abc import Sequence
@@ -11,7 +28,7 @@ import sqlalchemy as sa
 
 from alembic import op
 
-revision: str = "85f5993e7f4f"
+revision: str = "1cf9ccd28cd7"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -49,6 +66,8 @@ def upgrade() -> None:
         sa.Column("lon", sa.Float(), nullable=True),
         sa.Column("place_name", sa.String(length=300), nullable=True),
         sa.Column("location_accuracy_m", sa.Integer(), nullable=True),
+        sa.Column("credit", sa.String(length=200), nullable=True),
+        sa.Column("provenance", sa.Text(), nullable=True),
         sa.Column("title_source", sa.String(length=10), nullable=True),
         sa.Column("date_source", sa.String(length=10), nullable=True),
         sa.Column("location_source", sa.String(length=10), nullable=True),
@@ -57,7 +76,7 @@ def upgrade() -> None:
         sa.CheckConstraint(
             "date_precision IN ('day', 'month', 'year', 'decade', 'unknown')", name="ck_precision"
         ),
-        sa.CheckConstraint("status IN ('published', 'hidden')", name="ck_status"),
+        sa.CheckConstraint("status IN ('published', 'deleted')", name="ck_status"),
         sa.CheckConstraint("(lat IS NULL) = (lon IS NULL)", name="ck_coordinate_pair"),
         sa.CheckConstraint("date_to IS NULL OR date_from <= date_to", name="ck_date_order"),
         sa.PrimaryKeyConstraint("id"),
@@ -76,11 +95,14 @@ def upgrade() -> None:
         sa.Column("lat", sa.Float(), nullable=False),
         sa.Column("lon", sa.Float(), nullable=False),
         sa.Column("kind", sa.String(length=40), nullable=False),
+        sa.Column("street", sa.String(length=200), nullable=True),
+        sa.Column("housenumber", sa.String(length=20), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name", "kind", "lat", "lon", name="uq_place"),
     )
     with op.batch_alter_table("places", schema=None) as batch_op:
         batch_op.create_index("ix_places_search", ["name_normalized"], unique=False)
+        batch_op.create_index("ix_places_street", ["street"], unique=False)
 
     op.create_table(
         "tags",
@@ -161,6 +183,7 @@ def downgrade() -> None:
     op.drop_table("changes")
     op.drop_table("tags")
     with op.batch_alter_table("places", schema=None) as batch_op:
+        batch_op.drop_index("ix_places_street")
         batch_op.drop_index("ix_places_search")
 
     op.drop_table("places")
