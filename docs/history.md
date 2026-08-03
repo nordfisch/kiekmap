@@ -26,7 +26,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 | III | Nachbesserungen an der Verwaltung | 30.–31. Juli 2026 | `850db95` … `b4a9f6f` |
 | IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `cc5a437` … `006f9ee` |
 | V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `2f773f1` … `b20ff5c` |
-| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `853d6b8` |
+| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `a3a5be7` … `0c6bd75` |
 
 ---
 
@@ -750,7 +750,7 @@ behoben wurde, wäre wieder da, ohne dass irgendetwas rot würde.
 
 ## `architecture.md` — was es gibt und wie es ineinandergreift
 
-`(dieser Commit)` · 2. August 2026.
+`0c6bd75` · 2. August 2026.
 
 Es gab keine Stelle, an der jemand nachlesen konnte, **aus welchen Teilen das System besteht**. Wer
 einstieg, musste sich das aus vier Dateien und dem Code zusammensuchen: `development.md` listete
