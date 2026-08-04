@@ -99,9 +99,13 @@ make lint          # ruff
 - `test_dates.py::TestUeberlappung` — ein auf „1920er" datiertes Foto muss bei der Auswahl
   1925–1930 erscheinen. Bei naiver Datumsabfrage fällt es lautlos heraus.
 - `test_importer.py::TestDatumAusExif` — das EXIF-Datum eines Scans darf das Foto nicht datieren.
+- `test_foldermeta.py` — was der Ordnername sagt, und wo er nicht geraten werden darf. Aus
+  „10 H Brahms" darf keine Hausnummer 10h werden, aus dem Ordner „2" keine Straße „Kolonie
+  Autal 2", und eine Straße ohne Hausnummer darf nicht mittig verortet werden.
 - `test_watcher.py` — eine halb kopierte Datei darf nicht importiert werden.
 
-Alle drei beschreiben Fehler, die im Museum aufgefallen wären, nicht in der Entwicklung.
+Alle beschreiben Fehler, die im Museum aufgefallen wären, nicht in der Entwicklung — und drei
+davon sind beim echten Erstimport tatsächlich aufgetreten, bevor sie Test wurden.
 
 **Der Offline-Test ist die wichtigste Prüfung des Projekts** und lässt sich nicht automatisieren:
 Netz trennen, Karte bewegen, Fotos öffnen, einen Beitrag abgeben — und danach in den DevTools

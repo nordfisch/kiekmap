@@ -13,8 +13,14 @@ from pathlib import Path
 THUMBNAIL_SIZES = (240, 1200)
 
 #: What may be imported. Anything else is rejected with a reason rather than silently ignored.
+#:
+#: MPO is a JPEG carrying several frames -- some cameras write it for a burst or a 3D shot, and 28
+#: files of the Holm stock are one. Its first frame is an ordinary JPEG, which is what every
+#: browser shows and what the thumbnail is made from, so it is taken in as one. Rejecting it would
+#: have lost 28 photographs to a container format nobody chose.
 ALLOWED_FORMATS = {
     "JPEG": ("image/jpeg", ".jpg"),
+    "MPO": ("image/jpeg", ".jpg"),
     "PNG": ("image/png", ".png"),
     "TIFF": ("image/tiff", ".tif"),
     "WEBP": ("image/webp", ".webp"),

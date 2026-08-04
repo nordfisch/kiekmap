@@ -42,6 +42,29 @@ class Settings(BaseSettings):
     #: Raise this if the collection also holds genuine digital photographs.
     exif_date_max_year: int = 1990
 
+    #: Keywords every imported photo gets, on top of whatever stands in the file.
+    #:
+    #: A collection usually *is* about something -- in Holm the stock is buildings, and tagging
+    #: them by hand afterwards would be a thousand clicks. It is a setting rather than a constant
+    #: because the next museum collects something else; see docs/adaption.md.
+    #: In the ``.env``: ``PHOTOMAP_IMPORT_TAGS=["Gebäude"]``.
+    import_tags: list[str] = []
+
+    #: Credit line for photos whose file names nobody -- "Sammlung Heimatmuseum Holm".
+    #:
+    #: The last resort, not the rule: whatever the file or the upload form says comes first. Empty
+    #: means the photo simply carries no credit line, which is the honest state for a scan whose
+    #: origin nobody wrote down.
+    import_credit: str = ""
+
+    #: Prefix for the provenance note built from the file's own path in the archive.
+    #:
+    #: The folder tree is where a photo came from, and the museum's own archive is filed the same
+    #: way -- so the path leads straight back to the file somebody would want to look at. Used
+    #: verbatim, so it carries its own separator:
+    #: ``PHOTOMAP_IMPORT_PROVENANCE="Online-Archiv des Museums, Verzeichnis 01 Orte/"``.
+    import_provenance: str = ""
+
     @property
     def db_path(self) -> Path:
         return self.data_dir / "photomap.db"

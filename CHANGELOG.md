@@ -353,3 +353,46 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Schatten um eine leere Fläche sieht nach fehlendem Bild aus. Der Platz bleibt reserviert, es
   springt also nichts
 
+
+### Hinzugefügt
+- **Der Import wertet aus, was in den Dateien und ihren Ordnernamen schon steht.** Bisher kam nur
+  ein Bruchteil davon an; ein Archiv, das nach Straße und Hausnummer abgelegt ist, musste danach
+  Foto für Foto von Hand verortet werden. Die Regeln liegen in zwei Schichten, siehe
+  [docs/decisions.md](docs/decisions.md) Punkt 20:
+  - **Metadaten** — gilt für *alle* Importwege, auch das Hochladen im Browser: Fotograf und Rechte
+    (EXIF `Artist`/`Copyright`, IPTC By-line, Credit, Source, Copyright) werden zu Bildnachweis
+    und Herkunft, eine Beschreibung, die nur den Titel wiederholt, bleibt leer, und ein Titel von
+    mehr als 120 Zeichen wandert in die Beschreibung — im Archiv steht die ganze Bildunterschrift
+    im Titelfeld, bis zu 223 Zeichen
+  - **Pfad** — für Eingangsordner, CLI und USB-Stick: Aus `Hauptstraße/14 Gasthof Petersen/` werden
+    Ort, Titel, Ortsbezeichnung und Schlagwörter. **Die Straße erkennt der Ortsindex**, nicht ein
+    Ordner namens „Straßen" — es steht damit weiterhin nichts Ortsspezifisches im Code
+- **Ob ein EXIF-Datum das Foto datiert, entscheidet jetzt zuerst das Gerät.** Ein Scanner
+  (`HP Scanjet 3670`) datiert nichts, ganz gleich welches Jahr dort steht — 116 Dateien des Holmer
+  Erstbestands, 91 davon aus einem einzigen Scanlauf von 2015. Eine Kamera datiert, **auch nach
+  1990**: Diese Aufnahmen sind wirklich von 2014. `exif_date_max_year` bleibt und entscheidet
+  dort, wo die Datei kein Gerät nennt
+- **„unbekannt" ist kein Bildnachweis.** In 82 Dateien steht das wörtlich als Fotograf; übernommen
+  stünde unter 82 Fotos im Kiosk eine Zeile, die aussieht wie eine Auskunft und keine ist. Ebenso
+  verworfen werden `default`, `single` und `x-default`
+- **Doppelt kodierte Umlaute werden zurückgedreht** — „August MÃ¶ller" ist „August Möller". Das
+  passiert in fremden Programmen, lange bevor die Datei hier ankommt; der Import ist die letzte
+  Stelle, an der es auffallen kann
+- **Der USB-Stick liest jetzt auch Unterordner**, wie der Eingangsordner es immer schon tat. Die
+  Liste der angebotenen Ordner nennt zusätzlich das Laufwerk selbst — ein nach Straßen abgelegter
+  Stick hätte sonst Straße für Straße eingelesen werden müssen —, und die Zahl daneben sagt, was
+  ein Import wirklich aufnähme, statt was zufällig direkt im Ordner liegt
+- **MPO-Dateien werden aufgenommen.** Das ist ein JPEG mit mehreren Bildern, wie es manche Kameras
+  bei einer Serie schreiben; 28 Dateien des Erstbestands sind eines. Sein erstes Bild ist ein
+  gewöhnliches JPEG — abgewiesen wären 28 Aufnahmen an einem Containerformat gescheitert, das
+  niemand ausgesucht hat
+- Drei neue Einstellungen für den Import, alle leer voreingestellt, damit nichts Ortsspezifisches
+  im Code steht: `PHOTOMAP_IMPORT_TAGS` (Schlagwörter für jedes Foto — in Holm „Gebäude"),
+  `PHOTOMAP_IMPORT_CREDIT` (Bildnachweis, wo die Datei niemanden nennt) und
+  `PHOTOMAP_IMPORT_PROVENANCE` (Vorspann der Herkunftsangabe aus dem Dateipfad)
+
+### Behoben
+
+- **Tests lasen die `.env` des Entwicklers mit.** Damit hing das Ergebnis davon ab, was auf
+  *diesem* Rechner eingestellt ist — ein Eintrag wie `PHOTOMAP_IMPORT_CREDIT` ließ Tests
+  fehlschlagen, die mit den Voreinstellungen rechnen. Die Testumgebung liest die Datei nicht mehr

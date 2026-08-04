@@ -1119,3 +1119,84 @@ Größer als erwartet: Undatierte Fotos stehen sehr wohl auf der Karte, weil die
 Zeitfilter weglässt, solange der Schieber den ganzen Bestand umspannt. Erst wer den Zeitraum
 einengt, blendet sie aus — richtig so. Die Auswahl ist damit über den Marker *und* über „Foto groß
 anzeigen" erreichbar.
+
+## Der Erstbestand: 929 Fotos aus einem sortierten Archiv
+
+Der Anlass war ein Ordner mit 929 Bildern, den das Museum vorbereitet hatte — und die Frage, ob
+daraus ein Programm entsteht, das einmal läuft, oder ob der Import selbst es lernt. Es wurde das
+Zweite. Was das kostete und was dabei anders kam als gedacht, steht hier.
+
+### Was der Ordner schon wusste
+
+```
+Straßen/Hauptstraße/14 Gasthof Petersen/P4139276.JPG
+```
+
+Straße, Hausnummer, Hausname — dreimal Auskunft, in einem Pfad. 801 der 929 Fotos lagen so, 124
+nur unter einer Straße, 4 ganz oben. Diese Namen zu verwerfen hätte geheißen: Ehrenamtliche tippen
+929 Adressen ab, die schon da sind, und Besucher werden nach dem Ort von Fotos gefragt, deren
+Adresse danebensteht.
+
+### Zwei Funde vor der ersten Zeile Code
+
+Bevor irgendetwas gebaut wurde, wurde der Ordner vermessen. Zwei Ergebnisse haben den Entwurf
+danach getragen:
+
+**116 Fotos tragen ein Scandatum, 91 davon aus einem einzigen Lauf von 2015.** Sie unbesehen zu
+datieren hätte 91 historische Ortsbilder auf der Zeitleiste bei 2015 abgelegt — und weil sie damit
+als datiert gelten, wären sie nie mehr jemandem vorgelegt worden. Genau der Fehler, gegen den
+`exif_date_max_year` gebaut wurde. Der Fund war aber zugleich die Widerlegung dieser Regel in
+ihrer bisherigen Form: 256 Fotos sind **echte Kameraaufnahmen von 2010 bis 2024**, und die
+Jahresgrenze hätte sie alle mit verworfen. Die Regel musste also nicht schärfer werden, sondern
+zweistufig: erst das Gerät, das die Datei nennt, und die Jahresgrenze nur dort, wo keines
+dasteht. Geprüft wurde das an den Bildern selbst — von 256 Kamerafotos sind 234 farbige Aufnahmen
+der Häuser, wie sie heute stehen, und die 22 fast graustufigen zeigen trübes Wetter, Schnee und
+eine dunkle Scheune. Keine Reprofotos alter Abzüge, also trägt die Umkehrung.
+
+**In 82 Dateien steht als Fotograf wörtlich „unbekannt".** Ein Nichtwert, der ein Feld füllt. Das
+ist dieselbe Falle wie „OLYMPUS DIGITAL CAMERA" ein Feld weiter, und die Antwort dieselbe: Was
+nichts sagt, gilt als leer.
+
+### Drei Fehler, die erst der echte Lauf zeigte
+
+Der Probelauf auf eine Straße und danach der volle Lauf haben drei Dinge zutage gefördert, die
+kein Testentwurf vorweggenommen hätte:
+
+1. **`UNIQUE constraint failed: tags.name`** — mitten im Import. Die Sitzung läuft mit
+   `autoflush=False`; ein Schlagwort, das die Pfad-Schicht für ein Foto anlegte, war für die
+   Abfrage des nächsten noch unsichtbar. Zwei Fotos an derselben Adresse legten es also zweimal
+   an. Seitdem schreibt `add_tags` ein neues Schlagwort sofort heraus — und zwar **nach** dem
+   Flush des Fotos, denn davor ist es noch nicht in der Sitzung und die Verknüpfung ginge
+   verloren.
+2. **Der Ordner „2" wurde zur Straße „Kolonie Autal 2".** Damit das Archiv auch kürzen darf
+   („Wiesengrund" für „Im Wiesengrund"), sucht die Straßenerkennung notfalls wortweise — und die
+   Hausnummer 2 unter „Achter de Möhl" fand eindeutig eine Straße, die den Namen zufällig auf
+   eine Zahl enden lässt. Zwei Fotos lagen danach am anderen Ende des Dorfes. Seitdem gilt: Jedes
+   Wort muss einen Buchstaben enthalten. Aufgefallen ist es nur, weil die Zahlen zweier Läufe
+   verglichen wurden — 381 hausgenaue Fotos beim ersten, 379 beim zweiten.
+3. **Der Titel war manchmal ein ganzer Absatz.** Bis zu 223 Zeichen, mit Zeilenumbrüchen: Wer das
+   Archiv pflegte, schrieb die Bildunterschrift dorthin, wo der Cursor stand. Als Überschrift ist
+   das eine Textwand. Weggeworfen gehört sie trotzdem nicht — sie wandert in die Beschreibung, und
+   den Titel liefert der Ordner.
+
+Dazu kamen zwei Kleinigkeiten mit demselben Muster: `x-default`, ein Sprachmarker aus XMP, stand
+als Titel; und „August MÃ¶ller" ist „August Möller", zweimal durch die falsche Kodierung gedreht.
+Beides passiert in fremden Programmen, lange bevor eine Datei hier ankommt — der Import ist die
+letzte Stelle, an der es noch auffallen kann.
+
+### Was herauskam
+
+929 aufgenommen, keine einzige Dublette, zwei `Thumbs.db` abgewiesen. 852 Fotos verortet, davon
+381 hausgenau; 256 datiert; 922 mit Titel, alle mit Bildnachweis, 926 mit Herkunftsangabe. 77
+Fotos ohne Ort und 673 ohne Jahr — das ist kein Rest, sondern der Vorrat des „Hilf mit"-Bereichs.
+
+Der Bestand liegt als ZIP-Sicherung außerhalb des Repos (1,4 GB, 2791 Einträge, geprüft), und die
+Entwicklung läuft danach wieder auf den 18 Fotos des Beispielbestands weiter.
+
+### Was die Entscheidung eigentlich war
+
+Nicht die Regeln, sondern ihre **Trennung in zwei Schichten**: Metadaten für alle vier
+Importwege, Pfad nur für die drei, die einen haben. Damit bekam das Hochladen im Browser die
+Metadaten-Regeln geschenkt, ohne die Pfad-Regeln zu erben — und der USB-Stick verhält sich seither
+wie der Eingangsordner, weil er dieselbe Schicht durchläuft. Wäre es ein einmaliges Skript
+geworden, hätte das nächste Archiv wieder eines gebraucht.

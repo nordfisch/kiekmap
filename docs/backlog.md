@@ -15,6 +15,26 @@ Ausbau grob nach Gewicht. Zurzeit ist kein Fehler offen — alles hier ist Ausba
 
 ## Verwaltung
 
+### Der Erstbestand braucht eine Durchsicht
+
+929 Fotos sind eingelesen, und der Import hat aus Dateien und Ordnernamen herausgeholt, was
+darin stand. Was er *nicht* konnte, ist jetzt Handarbeit — und weil es Ortskenntnis braucht,
+gehört sie dem Museumsteam, nicht dem Rechner:
+
+- **673 Fotos ohne Jahr.** Das ist gewollt: Es sind die historischen Scans, und ihr EXIF-Datum
+  ist das des Scanlaufs. Sie sind der Vorrat für „Wann war das?" — aber die Zeitleiste zeigt
+  vorerst nur 2010 bis 2024, weil ausschließlich die neuen Kameraaufnahmen datiert sind. Ein
+  paar Dutzend datierte Altaufnahmen würden die Leiste erst brauchbar machen.
+- **77 Fotos ohne Ort**, davon 7 auch ohne Straße — die vier losen Dateien oben im Import-Ordner
+  und die aus `Deelenweg`, wo der Ortsindex zwei Straßen kennt („Deelenweg I" und „II") und
+  deshalb bewusst nicht rät.
+- **58 Fotos nur straßengenau**, weil die Hausnummer nicht in OpenStreetMap steht.
+- **Schlagwörter aus den Dateien**, die keine sind: „Wer hat eine bessere Vorlage?", „Or01-1",
+  „Förderkreis-Cloud". Sie stammen aus der Archivarbeit und stehen jetzt im Kiosk.
+
+Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene Nacharbeits-Liste reicht, ist Teil
+der Frage.
+
 ### Jahreszahl aus dem Dateinamen raten
 
 `Kirchweih_1932_Muehle.jpg` trägt seine Datierung im Namen, und beim Erstimport von einigen

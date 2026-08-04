@@ -25,11 +25,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import Settings
-from app.models import DatePrecision, ImportLog, ImportResult, Photo, Source, Tag
+from app.models import DatePrecision, ImportLog, ImportResult, Photo, Source
 from app.services import exif as exif_service
-from app.services import thumbnails
+from app.services import foldermeta, thumbnails
 from app.services.dates import date_range
 from app.services.storage import ALLOWED_FORMATS, original_path, sha256_of_file
+from app.services.tags import add_tags
 
 log = logging.getLogger(__name__)
 
@@ -101,6 +102,44 @@ def move_to_done(path: Path, inbox: Path) -> None:
     Parameter so, und der wuerde die Funktion in seinem Geltungsbereich verdecken.
     """
     _move_aside(path, inbox, DONE_DIR)
+
+
+#: Beyond this many characters, what stands in the title field is a caption.
+#:
+#: Whoever filled in the archive wrote what they knew, and the title field was where the cursor
+#: was: "Beschriftung: v. li.: Johann Harms, Tina Harms (Mutter v. Grete, verwitw. ...)",
+#: 223 characters, sometimes with line breaks. As a heading in the detail view that is a wall of
+#: text; as a description it is exactly right, and the folder supplies a heading that fits on one
+#: line. 4 files of the Holm stock, and the number only grows as the archive does.
+TITLE_MAX = 120
+
+
+def _own_title(info: exif_service.ImageInfo) -> str | None:
+    if info.title and (len(info.title) > TITLE_MAX or "\n" in info.title):
+        return None
+    return info.title
+
+
+def _own_description(info: exif_service.ImageInfo) -> str | None:
+    """The caption -- unless it only repeats the title.
+
+    Many scanning programs write the same sentence into both fields. Shown one under the other in
+    the detail view that reads like a stutter, and it costs the space where something the picture
+    actually needs could stand. 57 files of the Holm stock do it.
+
+    A title too long to be one lands here instead of being thrown away; see ``TITLE_MAX``.
+    """
+    long_title = info.title if _own_title(info) is None else None
+    description = info.description or long_title
+    if not description:
+        return None
+    if long_title and info.description:
+        description = f"{long_title}\n\n{info.description}"
+
+    title = _own_title(info)
+    if title and description.strip().lower() == title.strip().lower():
+        return None
+    return description
 
 
 def import_file(
@@ -186,17 +225,19 @@ def import_file(
         bytes=path.stat().st_size,
         width=info.width,
         height=info.height,
-        title=info.title,
-        description=info.description,
-        title_source=Source.EXIF if info.title else None,
+        title=_own_title(info),
+        description=_own_description(info),
+        title_source=Source.EXIF if _own_title(info) else None,
+        # Whoever the file names, else the collection as a whole -- see Settings.import_credit.
+        credit=info.credit or settings.import_credit or None,
+        provenance=info.source,
         exif_datetime=info.exif_datetime,
         date_precision=DatePrecision.UNKNOWN,
     )
 
-    # The EXIF date is only adopted when it is plausibly a capture date. For a scan it is the date
-    # of the scanning run -- see app/services/exif.py.
-    moment = info.exif_datetime
-    if moment and not exif_service.is_scan_date(moment, settings.exif_date_max_year):
+    # The EXIF date is only adopted when it plausibly dates the picture rather than the scanning
+    # run -- see exif.capture_year, which is where that decision lives.
+    if moment := exif_service.capture_year(info, settings.exif_date_max_year):
         photo.date_from, photo.date_to, precision = date_range(
             moment.year, moment.month, moment.day
         )
@@ -207,12 +248,12 @@ def import_file(
         photo.lat, photo.lon = info.lat, info.lon
         photo.location_source = Source.EXIF
 
-    for name in dict.fromkeys(info.keywords):
-        tag = session.scalar(select(Tag).where(Tag.name == name)) or Tag(name=name)
-        photo.tags.append(tag)
-
     session.add(photo)
     session.flush()  # assigns the id for the log entry
+
+    # After the flush, not before: add_tags writes a new tag out at once, and doing that while
+    # the photo is still transient would drop the link between the two.
+    add_tags(session, photo, [*info.keywords, *settings.import_tags])
 
     missing = [
         label
@@ -259,13 +300,40 @@ class ImportFolder:
     images: int
 
 
+def _is_image(entry: Path) -> bool:
+    return (
+        entry.is_file()
+        and not entry.name.startswith(".")
+        and entry.suffix.lower() in IMAGE_SUFFIXES
+    )
+
+
+def images_in(folder: Path) -> list[Path]:
+    """Every image below a folder, subfolders included, in stable order.
+
+    Recursive because an archive is filed, not piled -- and the folder names carry statements of
+    their own; see app/services/foldermeta.py. A stick has to behave like the watched folder,
+    which walks recursively too.
+    """
+    found = [entry for entry in folder.rglob("*") if _is_image(entry)]
+    return sorted(
+        entry
+        for entry in found
+        if not (SKIPPED_FOLDERS & set(entry.relative_to(folder).parts[:-1]))
+    )
+
+
 def count_images(folder: Path) -> int:
+    """How many images an import of this folder would take in -- subfolders included."""
     try:
-        return sum(
-            1
-            for entry in folder.iterdir()
-            if entry.is_file() and entry.suffix.lower() in IMAGE_SUFFIXES
-        )
+        return len(images_in(folder))
+    except OSError:
+        return 0
+
+
+def _direct_images(folder: Path) -> int:
+    try:
+        return sum(1 for entry in folder.iterdir() if _is_image(entry))
     except OSError:
         return 0
 
@@ -273,16 +341,21 @@ def count_images(folder: Path) -> int:
 def find_image_folders(root: Path, max_depth: int = 4) -> list[ImportFolder]:
     """Folders on a drive that hold images, the drive itself included.
 
-    Only where the images actually are: a folder whose pictures all sit in subfolders is not
-    offered, because importing it would take in nothing. Depth is capped -- a stick with a whole
-    backup of somebody's home directory should not cost a minute of walking.
+    Offered are the folders whose pictures lie directly in them -- plus the drive itself, which
+    since the import walks subfolders takes in everything at once. Without that entry an archive
+    filed by street would have to be imported street by street, thirty-eight times.
+
+    The count is what the import would take in, subfolders included, not what lies directly in
+    the folder. Depth is capped -- a stick with a whole backup of somebody's home directory
+    should not cost a minute of walking.
     """
     found: list[ImportFolder] = []
 
     def look(folder: Path, depth: int) -> None:
         if depth > max_depth:
             return
-        if (images := count_images(folder)) > 0:
+        images = count_images(folder)
+        if images > 0 and (depth == 0 or _direct_images(folder) > 0):
             relative = folder.relative_to(root)
             found.append(
                 ImportFolder(
@@ -351,7 +424,7 @@ def import_from_folder(
     defaults: Callable[[Photo], None] | None = None,
     report: Callable[[int, int, str], None] | None = None,
 ) -> tuple[str, list[ImportOutcome]]:
-    """Take in every image of one folder.
+    """Take in every image of one folder, subfolders included.
 
     Returns the German closing message and what became of each file -- the caller decides whether
     a list that long is still worth showing (see REVIEW_LIMIT in app/api/backup.py).
@@ -359,19 +432,19 @@ def import_from_folder(
     Committed photo by photo, not at the end: a stick pulled out halfway then leaves behind what
     was already read, instead of nothing.
     """
-    images = sorted(
-        path
-        for path in folder.iterdir()
-        if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES
-    )
+    images = images_in(folder)
     counts = {result: 0 for result in ImportResult}
     outcomes: list[ImportOutcome] = []
 
     for index, path in enumerate(images, start=1):
         # move_aside stays False -- see the note at the top of this section.
         outcome = import_file(session, path, settings)
-        if outcome.succeeded and outcome.photo is not None and defaults:
-            defaults(outcome.photo)
+        if outcome.succeeded and outcome.photo is not None:
+            # The folder first, the batch form after it: both only fill what is empty, and the
+            # form's statement ("all of these are from the Kirchweih") is the coarser of the two.
+            foldermeta.apply_folder_meta(session, outcome.photo, path, folder, settings)
+            if defaults:
+                defaults(outcome.photo)
         session.commit()
 
         outcome.source = path
@@ -439,6 +512,9 @@ def import_directory(
         if SPECIAL_DIRS & set(path.relative_to(directory).parts):
             continue
 
-        outcomes.append(import_file(session, path, settings, move_aside=move_aside))
+        outcome = import_file(session, path, settings, move_aside=move_aside)
+        if outcome.succeeded and outcome.photo is not None:
+            foldermeta.apply_folder_meta(session, outcome.photo, path, directory, settings)
+        outcomes.append(outcome)
 
     return outcomes

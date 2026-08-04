@@ -100,6 +100,43 @@ class TestDatumAusExif:
 
         assert outcome.photo.date_from == date(2019, 3, 14)
 
+    def test_scannerdatum_datiert_das_foto_nicht(self, session, settings, sample_image):
+        """Der teuerste Fehler dieses Imports -- 116 Fotos des Erstbestands, 91 aus einem Lauf.
+
+        Der Scanner nennt sich in der Datei, und danach entscheidet das Geraet, nicht das Jahr.
+        Ohne diese Regel laege ein Ortsbild von 1910 auf der Zeitleiste bei 2015, gaelte als
+        datiert und kaeme deshalb nie zur Korrektur.
+        """
+        outcome = import_file(session, sample_image("scan_vom_scanner.jpg"), settings)
+
+        assert outcome.photo.date_from is None
+        assert outcome.photo.needs_date
+        assert outcome.photo.exif_datetime.year == 2015
+
+    def test_scannerdatum_bleibt_auch_bei_hoher_grenze_draussen(
+        self, session, settings, sample_image, monkeypatch
+    ):
+        """Die Sammlung mit echten Digitalfotos hebt die Grenze -- der Scanner bleibt ein Scanner.
+
+        Genau der Fall, in dem die Jahresgrenze allein nicht mehr traegt: Sie steht hoch, damit
+        die Kamerafotos durchkommen, und wuerde die Scans gleich mit hindurchlassen.
+        """
+        monkeypatch.setattr(settings, "exif_date_max_year", 2030)
+        outcome = import_file(session, sample_image("scan_vom_scanner.jpg"), settings)
+
+        assert outcome.photo.date_from is None
+
+    def test_kameradatum_datiert_das_foto(self, session, settings, sample_image):
+        """Die Gegenrichtung, und ohne sie bliebe der halbe Bestand undatiert.
+
+        Das Foto ist von 2014, also weit hinter ``exif_date_max_year``. Die Jahresgrenze ist aber
+        nur der Ersatz fuer eine fehlende Geraeteangabe -- und hier steht sie in der Datei.
+        """
+        outcome = import_file(session, sample_image("kamerafoto.jpg"), settings)
+
+        assert outcome.photo.date_from == date(2014, 3, 9)
+        assert outcome.photo.date_source == Source.EXIF
+
 
 class TestOrtUndTitel:
     def test_gps_wird_uebernommen(self, session, settings, sample_image):
@@ -138,6 +175,81 @@ class TestKameraTextbausteine:
 
         assert _statement(b"Kirchweih an der Muehle") == "Kirchweih an der Muehle"
 
+    def test_unbekannt_ist_kein_bildnachweis(self, session, settings, sample_image):
+        """In 82 Dateien des Erstbestands steht als Fotograf woertlich "unbekannt".
+
+        Uebernommen stuende unter 82 Fotos im Kiosk die Zeile "unbekannt" -- schlechter als gar
+        keine, denn sie sieht aus wie eine Auskunft und ist keine.
+        """
+        foto = import_file(session, sample_image("scan_vom_scanner.jpg"), settings).photo
+
+        assert foto.credit is None
+
+    def test_ein_genannter_fotograf_bleibt(self, session, settings, sample_image):
+        foto = import_file(session, sample_image("kamerafoto.jpg"), settings).photo
+
+        assert foto.credit == "August Kroeger"
+
+    def test_eingestellter_bildnachweis_springt_nur_ein(
+        self, session, settings, sample_image, monkeypatch
+    ):
+        """Die Sammlung als Rueckfall -- aber nur, wo die Datei niemanden nennt."""
+        monkeypatch.setattr(settings, "import_credit", "Sammlung Heimatmuseum Holm")
+
+        ohne = import_file(session, sample_image("scan_ohne_exif.jpg"), settings).photo
+        mit = import_file(session, sample_image("kamerafoto.jpg"), settings).photo
+
+        assert ohne.credit == "Sammlung Heimatmuseum Holm"
+        assert mit.credit == "August Kroeger"
+
+    def test_eingestellte_schlagwoerter_kommen_an_jedes_foto(
+        self, session, settings, sample_image, monkeypatch
+    ):
+        """Eine Sammlung ist meist ueber etwas -- in Holm ueber Gebaeude.
+
+        Im Code steht das nicht: sonst brauchte das naechste Museum einen Fork. Siehe
+        Settings.import_tags.
+        """
+        monkeypatch.setattr(settings, "import_tags", ["Gebaeude"])
+
+        foto = import_file(session, sample_image("scan_ohne_exif.jpg"), settings).photo
+
+        assert "Gebaeude" in {schlagwort.name for schlagwort in foto.tags}
+
+    def test_beschreibung_wiederholt_den_titel_nicht(self):
+        """57 Dateien des Erstbestands tragen denselben Satz in beiden Feldern.
+
+        Untereinander gestellt liest sich das wie ein Stottern und kostet den Platz, an dem etwas
+        stehen koennte, was das Bild wirklich braucht.
+        """
+        from app.services.exif import ImageInfo
+        from app.services.importer import _own_description
+
+        gleich = ImageInfo(1, 1, "JPEG", title="Hof Hinrich Petersen")
+        gleich.description = "hof hinrich petersen "
+        assert _own_description(gleich) is None
+
+        verschieden = ImageInfo(1, 1, "JPEG", title="Hof Hinrich Petersen")
+        verschieden.description = "Aufnahme von der Strassenseite"
+        assert _own_description(verschieden) == "Aufnahme von der Strassenseite"
+
+    def test_ein_ganzer_absatz_ist_kein_titel_sondern_eine_beschreibung(self):
+        """Im Archiv steht die ganze Bildunterschrift im Titelfeld -- 223 Zeichen, mit Umbruechen.
+
+        Als Ueberschrift in der Detailansicht ist das eine Textwand. Weggeworfen gehoert sie
+        trotzdem nicht: Sie wandert in die Beschreibung, und den Titel liefert der Ordner.
+        """
+        from app.services.exif import ImageInfo
+        from app.services.importer import _own_description, _own_title
+
+        lang = ImageInfo(1, 1, "JPEG", title="Beschriftung: v. li.: " + "Johann Harms, " * 12)
+        assert _own_title(lang) is None
+        assert _own_description(lang).startswith("Beschriftung: v. li.")
+
+        mehrzeilig = ImageInfo(1, 1, "JPEG", title="Bilderbummel S. 12\nClaus Petersen")
+        assert _own_title(mehrzeilig) is None
+        assert _own_description(mehrzeilig) == "Bilderbummel S. 12\nClaus Petersen"
+
 
 class TestTextkodierung:
     """Warum IPTC und die XP-Felder verschieden gelesen werden muessen.
@@ -161,6 +273,20 @@ class TestTextkodierung:
         from app.services.exif import _text
 
         assert _text("Mühlenweg".encode()) == "Mühlenweg"
+
+    def test_doppelt_kodierter_umlaut_wird_zurueckgedreht(self):
+        """ "MÃ¶ller" ist "Möller", zweimal durch die falsche Kodierung gedreht.
+
+        Passiert vor uns: Ein Programm schreibt UTF-8 in ein EXIF-Feld, das ASCII sein soll, das
+        naechste liest es Byte fuer Byte. Unter zwei Fotos des Erstbestands stuende sonst ein
+        falsch geschriebener Name.
+        """
+        from app.services.exif import _text
+
+        assert _text("August MÃ¶ller") == "August Möller"
+        # Was schon richtig ist, bleibt unangetastet.
+        assert _text("August Möller") == "August Möller"
+        assert _text("Hof Hinrich Petersen") == "Hof Hinrich Petersen"
 
     def test_windows_feld_bleibt_utf16(self):
         """Die Gegenrichtung: XPTitle und XPKeywords sind wirklich UCS2-LE."""
@@ -264,7 +390,7 @@ class TestVerzeichnisimport:
         aufgenommen = [e for e in outcomes if e.result == ImportResult.IMPORTED]
         abgewiesen = [e for e in outcomes if e.result == ImportResult.REJECTED]
 
-        assert len(aufgenommen) == 6, "6 Bilder, 1 Textdatei"
+        assert len(aufgenommen) == 8, "8 Bilder, 1 Textdatei"
         assert len(abgewiesen) == 1
         # Originale des Nutzers bleiben unangetastet.
-        assert len(list(quelle.iterdir())) == 7
+        assert len(list(quelle.iterdir())) == 9

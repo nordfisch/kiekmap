@@ -52,8 +52,23 @@ class TestOrdnerFinden:
 
         gefunden = importer.find_image_folders(stick)
 
-        assert [ordner.name for ordner in gefunden] == ["Scans2024"]
-        assert gefunden[0].images == 2
+        # Das Laufwerk selbst steht mit vorn: Es nimmt alles auf einmal auf.
+        assert [ordner.name for ordner in gefunden] == ["SCANSTICK", "Scans2024"]
+        assert [ordner.images for ordner in gefunden] == [2, 2]
+
+    def test_das_laufwerk_zaehlt_die_unterordner_mit(self, settings, stick, bilder_auf_dem_stick):
+        """Sonst stuende am Eintrag fuer den ganzen Stick eine Null, waehrend er 900 Fotos traegt.
+
+        Ein nach Strassen abgelegtes Archiv hat oben keine einzige Datei liegen. Die Zahl muss
+        sagen, was ein Import aufnaehme -- nicht, was zufaellig direkt im Ordner liegt.
+        """
+        bilder_auf_dem_stick("Strassen/Hauptstrasse", ("scan_ohne_exif.jpg",))
+        bilder_auf_dem_stick("Strassen/Niederstrasse", ("hochkant.jpg",))
+
+        gefunden = {ordner.name: ordner.images for ordner in importer.find_image_folders(stick)}
+
+        assert gefunden["SCANSTICK"] == 2
+        assert "Strassen" not in gefunden  # dort liegt nichts unmittelbar
 
     def test_ordner_ohne_bilder_werden_nicht_angeboten(self, settings, stick):
         (stick / "Rechnungen").mkdir()
@@ -99,6 +114,20 @@ class TestAufnehmen:
         assert [zeile.source.name for zeile in zeilen] == sorted(p.name for p in ordner.iterdir())
         assert "2 Fotos aufgenommen" in meldung
         assert "abgezogen werden" in meldung
+
+    def test_stick_liest_auch_unterordner(self, session, settings, stick, bilder_auf_dem_stick):
+        """Ein Stick muss sich verhalten wie der Eingangsordner, der schon rekursiv liest.
+
+        Sonst haengt es vom Weg ins Haus ab, ob die Ordnernamen eines Archivs ausgewertet werden
+        -- und ein nach Strassen abgelegter Stick naehme null Fotos auf.
+        """
+        bilder_auf_dem_stick("Archiv/Hauptstrasse", ("scan_ohne_exif.jpg",))
+        bilder_auf_dem_stick("Archiv/Hauptstrasse/14 Museum", ("hochkant.jpg",))
+
+        meldung, zeilen = importer.import_from_folder(session, stick / "Archiv", settings)
+
+        assert len(session.scalars(select(Photo)).all()) == 2
+        assert "2 Fotos aufgenommen" in meldung
 
     def test_dubletten_werden_gezaehlt_nicht_verschwiegen(
         self, session, settings, stick, bilder_auf_dem_stick
@@ -170,9 +199,9 @@ class TestUeberDieApi:
 
         daten = admin_client.get("/api/admin/import/folders").json()
 
-        assert daten["folders"][0]["drive"] == "SCANSTICK"
-        assert daten["folders"][0]["name"] == "Scans2024"
-        assert daten["folders"][0]["images"] == 2
+        assert daten["folders"][1]["drive"] == "SCANSTICK"
+        assert daten["folders"][1]["name"] == "Scans2024"
+        assert daten["folders"][1]["images"] == 2
 
     def test_stick_ohne_bilder_nennt_trotzdem_das_laufwerk(self, admin_client: TestClient, stick):
         """Sonst hiesse eine leere Liste zweierlei: kein Stick, oder ein Stick ohne Bilder.

@@ -166,13 +166,32 @@ schreibt immer einen Eintrag ins Import-Protokoll:
    Ausnahme: ZIP-Dateien mit dem Namen einer Sicherung lässt er liegen** — sie sind kein Foto,
    sondern eine ganze Sammlung, und werden erst nach Rückfrage eingespielt.
 2. **Hochladen im Verwaltungsbereich** — der Weg für vierzig ausgesuchte Dateien.
-3. **USB-Stick im Verwaltungsbereich** — der Weg für einen Ordner mit zweihundert Scans. **Auf dem
-   Stick wird nichts verschoben und nichts gelöscht**, anders als im eigenen Eingangsordner.
+3. **USB-Stick im Verwaltungsbereich** — der Weg für einen Ordner mit zweihundert Scans, Unter-
+   ordner eingeschlossen. **Auf dem Stick wird nichts verschoben und nichts gelöscht**, anders
+   als im eigenen Eingangsordner.
 4. **`python -m app.cli import`** — für den Erstbestand.
 
-Der Import berechnet den Hash, legt Original und zwei Vorschaugrößen ab, liest EXIF und IPTC — und
-verwirft dabei ein EXIF-Datum ab 1990 als Scandatum. Ohne diese Regel läge ein Foto von 1932 auf
-der Zeitleiste bei 2019 und käme nie zur Korrektur.
+Der Import berechnet den Hash, legt Original und zwei Vorschaugrößen ab und liest dann in **zwei
+Schichten** aus, was schon dasteht (Begründung in [decisions.md](decisions.md) Punkt 20):
+
+| Schicht | Wo | Gilt für | Was sie liest |
+|---|---|---|---|
+| **Metadaten** | `import_file()` | alle vier Wege | Datum, GPS, Titel, Beschreibung, Bildnachweis, Herkunft, Schlagwörter aus EXIF/IPTC |
+| **Pfad** | `foldermeta.py` | 1, 3, 4 | Straße und Hausnummer aus den Ordnernamen |
+
+Beim Hochladen gibt es keinen Pfad — dort greift nur die erste Schicht, und die gemeinsamen
+Angaben kommen wie bisher aus der Maske. Die zweite ist ein reines Modul ohne HTTP-Bezug: Sie
+bekommt die Pfadteile und den Ortsindex und gibt zurück, welche Straße und welche Hausnummer
+darin stehen. **Die Straße erkennt der Ortsindex**, nicht ein Ordner namens „Straßen" — deshalb
+steht trotz dieser Auswertung nichts Ortsspezifisches im Code.
+
+Zwei Vorrangregeln halten das zusammen: Eine Koordinate aus der Datei schlägt den Ordner, und die
+Pfad-Schicht setzt **nur leere Felder**.
+
+Ob ein EXIF-Datum das Foto datiert, entscheidet zuerst das **Gerät**: Ein Scanner datiert nichts,
+eine Kamera datiert auch nach 1990, und wo kein Gerät genannt ist, gilt weiterhin
+`exif_date_max_year`. Ohne diese Regeln läge ein Foto von 1932 auf der Zeitleiste beim Datum des
+Scanlaufs und käme nie zur Korrektur — und die echten Aufnahmen von 2014 kämen undatiert an.
 
 ### Ein Besucher trägt etwas bei
 

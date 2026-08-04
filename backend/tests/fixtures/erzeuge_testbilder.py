@@ -7,6 +7,8 @@ etwas Falsches tut:
 
     scan_ohne_exif.jpg      der Normalfall: ein Scan ohne jede Angabe
     scan_mit_scandatum.jpg  EXIF-Datum von 2019, obwohl das Foto historisch ist
+    scan_vom_scanner.jpg    dasselbe, aber das Geraet nennt sich: "HP Scanjet 3670"
+    kamerafoto.jpg          Kamera und Datum von 2014 -- ein echtes Aufnahmedatum
     foto_mit_gps.jpg        echtes Digitalfoto mit Koordinaten und Aufnahmedatum
     hochkant.jpg            Ausrichtung steht im EXIF, nicht in den Pixeln
     graustufen.tif          TIFF ohne Farbe, wie es Buchscanner liefern
@@ -57,6 +59,36 @@ def main() -> None:
         {
             "0th": {piexif.ImageIFD.ImageDescription: b"Kirchweih an der Muehle"},
             "Exif": {piexif.ExifIFD.DateTimeOriginal: b"2019:03:14 11:22:33"},
+        },
+    )
+
+    # 2b. Derselbe Fall, aber die Datei sagt, womit sie entstanden ist. Der Geraetename entscheidet
+    #     dann statt der Jahresgrenze -- und "unbekannt" als Fotograf ist kein Bildnachweis.
+    _mit_exif(
+        _bild(900, 640, "Scan vom Flachbettscanner, 2015"),
+        HIER / "scan_vom_scanner.jpg",
+        {
+            "0th": {
+                piexif.ImageIFD.Make: b"HP",
+                piexif.ImageIFD.Model: b"HP Scanjet 3670",
+                piexif.ImageIFD.Artist: b"unbekannt",
+            },
+            "Exif": {piexif.ExifIFD.DateTimeOriginal: b"2015:04:02 09:15:00"},
+        },
+    )
+
+    # 2c. Die Gegenrichtung: eine Kamera. Ihr Datum ist ein Aufnahmedatum, auch wenn es weit hinter
+    #     exif_date_max_year liegt -- die Jahresgrenze ist nur der Ersatz fuer eine Geraeteangabe.
+    _mit_exif(
+        _bild(900, 640, "Kamerafoto 2014", farbe="#b6c8b0"),
+        HIER / "kamerafoto.jpg",
+        {
+            "0th": {
+                piexif.ImageIFD.Make: b"OLYMPUS IMAGING CORP.",
+                piexif.ImageIFD.Model: b"E-500",
+                piexif.ImageIFD.Artist: "August Kroeger".encode("latin-1"),
+            },
+            "Exif": {piexif.ExifIFD.DateTimeOriginal: b"2014:03:09 16:41:20"},
         },
     )
 

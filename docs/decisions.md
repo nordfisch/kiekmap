@@ -526,3 +526,98 @@ eines hinzufügt. Eine Regel, die nur im Kopf steht, hält der nächste Endpunkt
 Beide sind auch gemeinsame Angabe des Stapel-Imports, neben Jahr und Ort: Eine Kiste Scans kommt
 fast immer von einer Person, und keines der beiden Felder kann aus der Datei stammen — ein Scanner
 weiß nicht, wer das Bild verliehen hat.
+
+## 20. Der Import wertet aus, was die Dateien und ihre Ordner schon sagen
+
+Bis Stufe 10 war der Import zurückhaltend: EXIF-Datum, GPS, Titel, Schlagwörter — alles andere
+kam später von Hand. Beim Erstbestand für Holm ging das nicht mehr auf. 929 Fotos lagen in einer
+Struktur, die selbst schon Auskunft gibt:
+
+```
+Straßen/Hauptstraße/14 Gasthof Petersen/P4139276.JPG
+Straßen/Hörnstraße/10 H Brahms/023.jpg
+Straßen/Rehnaer Straße/119.jpg
+```
+
+Wer diese Ordnernamen verwirft, fragt Besucher nach dem Ort eines Fotos, dessen Adresse
+danebensteht — und lässt Ehrenamtliche 929 Adressen abtippen, die schon da sind.
+
+**Die Regeln zerfallen in zwei Schichten, und die Trennung ist der eigentliche Entwurf:**
+
+| Schicht | Gilt für | Was sie tut |
+|---|---|---|
+| **Metadaten** (`import_file`) | *alle vier* Importwege | Datum, Ort, Titel, Beschreibung, Nachweis, Herkunft, Schlagwörter aus EXIF/IPTC |
+| **Pfad** (`foldermeta.py`) | Eingangsordner, CLI, USB-Stick | Straße und Hausnummer aus den Ordnernamen |
+
+Beim Hochladen im Browser gibt es keinen Pfad — dort greift nur die erste Schicht, und die
+gemeinsamen Angaben der Maske kommen wie bisher darüber. Damit brauchte kein Aufrufer geändert zu
+werden, um die Metadaten-Regeln zu bekommen, und keiner bekommt die Pfad-Regeln versehentlich.
+
+### Erst das Gerät, dann die Jahresgrenze
+
+`exif_date_max_year` (Punkt 1 und die Kopfzeile von `exif.py`) bleibt — aber es ist ab jetzt der
+**Ersatz für eine fehlende Geräteangabe**, nicht die erste Instanz. Wo eine Datei sagt, womit sie
+entstanden ist, entscheidet das:
+
+- **Scanner** (`HP Scanjet 3670`, `DIGITAL CAMERA Film Scanner`) → **kein Datum**, ganz gleich
+  welches Jahr dort steht. 116 Dateien des Erstbestands, 91 davon aus einem einzigen Scanlauf
+  von 2015. Unbesehen datiert lägen 91 historische Ortsbilder auf der Zeitleiste bei 2015 und
+  kämen, weil sie als datiert gelten, nie zur Korrektur.
+- **Kamera** (`OLYMPUS E-500`, `Panasonic DMC-GX8`) → **Datum zählt, auch nach 1990.** Die
+  Grenze wäre hier eine Fehlannahme: Diese Aufnahmen *sind* von 2014 und 2018. Ohne diese
+  Umkehrung käme der halbe Bestand undatiert an.
+- **Keine Geräteangabe** → die Jahresgrenze entscheidet allein, wie bisher.
+
+Geprüft wurde das, bevor es Regel wurde: Von 256 Kamerafotos sind 234 farbige Aufnahmen der
+Häuser, wie sie heute stehen; die 22 fast graustufigen sind Aufnahmen bei trübem Wetter, im
+Schnee und in einer dunklen Scheune — keine Reprofotos alter Abzüge. Die Umkehrung ist damit
+tragfähig.
+
+### Ein Wert, der nichts sagt, gilt als leer
+
+`_NON_VALUES` in `exif.py` deckt jetzt zwei Quellen ab: was eine Kamera von sich aus schreibt
+(`OLYMPUS DIGITAL CAMERA`), und was jemand tippt, weil ein Formular eine Antwort verlangt.
+**In 82 Dateien steht als Fotograf wörtlich „unbekannt".** Übernommen stünde unter 82 Fotos im
+Kiosk die Zeile „unbekannt" — schlechter als gar keine, weil sie aussieht wie eine Auskunft.
+
+Dazu kam beim echten Lauf: `x-default` (ein Sprachmarker aus XMP), und die Reparatur doppelt
+kodierter Umlaute — „August MÃ¶ller" ist „August Möller", zweimal durch die falsche Kodierung
+gedreht. Beides passiert vor uns, in fremden Programmen; hier ist die letzte Stelle, an der es
+noch auffallen kann.
+
+### Die Straße erkennt der Ortsindex, nicht ein Ordner namens „Straßen"
+
+Ein Pfadteil gilt als Straße, wenn `places` sie kennt. Das ist der Grund, warum trotz dieser
+Erweiterung **nichts Ortsspezifisches im Code steht**: kein „Straßen"-Schalter, keine Liste
+Holmer Straßennamen. Auf einem USB-Stick mit anderer Ablage funktioniert es genauso.
+
+Was das Archiv kürzt, wird trotzdem erkannt — Ordner „Wiesengrund", Straße „Im Wiesengrund" —,
+aber nur unter zwei Bedingungen, und beide haben im echten Lauf einen Fehler abgefangen:
+
+1. **Genau ein Treffer.** „Deelenweg" steckt in „Deelenweg I" *und* „Deelenweg II". Geraten
+   lägen fünf Fotos am anderen Ende des Dorfes, und niemand sähe es je.
+2. **Jedes Wort enthält einen Buchstaben.** Der Hausnummernordner „2" unter „Achter de Möhl"
+   traf die Straße „Kolonie Autal 2" — eindeutig und vollkommen falsch. Eine Zahl ist eine
+   Hausnummer; nur ein Name ist eine Straße.
+
+### Ohne Hausnummer bleibt das Foto unverortet
+
+Die Straße ist bekannt, der Punkt trotzdem nicht gesetzt. Der Straßenpunkt sähe aus wie eine
+Antwort, ist bis zu 400 m daneben — und das Foto gälte danach als verortet, käme also nie mehr
+jemandem vor die Augen, der das Haus kennt. Der Straßenname wird stattdessen **Schlagwort und
+Ortsbezeichnung**: Das ist dieselbe Aussage, ehrlich beschriftet, und im „Hilf mit"-Bereich steht
+sie als Hilfestellung unter der Frage „Wo ist das?".
+
+### Vorrang, wo zwei Quellen sprechen
+
+Eine Koordinate aus den Metadaten schlägt den Ordner: Die Kamera stand dort, der Ordner ist die
+Ablage von jemandem. 413 Fotos des Erstbestands tragen GPS, alle innerhalb der Region — auch
+Scans, die jemand von Hand verortet hat. Umgekehrt setzt die Pfad-Schicht **nur leere Felder**.
+
+### Was sich am Verhalten geändert hat
+
+Der Import ist danach **nicht mehr zurückhaltend**. Das hat eine Kehrseite: Ein Foto, das der
+Import betitelt, gilt als betitelt und wird nicht mehr vorgelegt. Deshalb bleibt die Prüfung auf
+Nichtwerte streng, deshalb setzt die Pfad-Schicht nur leere Felder — und deshalb wandert ein
+Titel von mehr als 120 Zeichen in die Beschreibung, statt als Überschrift eine Textwand zu
+bilden (`TITLE_MAX`; im Archiv steht die ganze Bildunterschrift im Titelfeld, bis zu 223 Zeichen).

@@ -150,8 +150,10 @@ Sprache kosten würde und ab wann sich Modularisierung lohnt.
 
 Fertig: Stufen 0–10 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mit Markern,
 Zeitschieber, „Hilf mit" mit Hausnummern, Sprachregelung, Admin-Bereich mit Stapel-Upload,
-USB-Sicherung, Kiosk-Betrieb), dazu der Umbau des Verwaltungsmenüs und zwei Runden Nachbesserungen
-an Verwaltung und Besucheransicht. Was als Nächstes ansteht, steht im Backlog.
+USB-Sicherung, Kiosk-Betrieb), dazu der Umbau des Verwaltungsmenüs, zwei Runden Nachbesserungen
+an Verwaltung und Besucheransicht sowie die Auswertung von Metadaten und Ordnerstruktur beim
+Import, mit der der Erstbestand von 929 Fotos eingelesen wurde. Was als Nächstes ansteht, steht im
+Backlog.
 
 **Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
 ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,

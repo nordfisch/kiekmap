@@ -113,10 +113,27 @@ In der `.env`:
 ```bash
 PHOTOMAP_EXIF_DATE_MAX_YEAR=1990   # ab wann ein EXIF-Datum als Scandatum gilt
 PHOTOMAP_ADMIN_PIN_HASH=...        # PIN für den Admin-Bereich
+
+# Angaben, die beim Import für jedes Foto gelten. Alle drei sind leer voreingestellt.
+PHOTOMAP_IMPORT_TAGS=["Gebäude"]                 # Schlagwörter für jedes importierte Foto
+PHOTOMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # Bildnachweis, wo die Datei niemanden nennt
+PHOTOMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
 ```
 
 `exif_date_max_year` hochsetzen, falls die Sammlung auch echte Digitalfotos enthält — sonst
-verlieren die ihr Aufnahmedatum. Herunterlassen, wenn ausschließlich Scans erwartet werden.
+verlieren die ihr Aufnahmedatum. Herunterlassen, wenn ausschließlich Scans erwartet werden. Wo
+die Datei ihr Gerät nennt, entscheidet ohnehin das: Ein Scanner datiert nie, eine Kamera immer.
+Der Wert greift nur für Dateien ohne Geräteangabe.
+
+Die drei `IMPORT_`-Werte sind der Ort für das, was eine *Sammlung* ausmacht.
+`PHOTOMAP_IMPORT_TAGS` ist eine JSON-Liste; in Holm besteht der Bestand aus Gebäuden, anderswo
+aus Trachten oder Schiffen. `PHOTOMAP_IMPORT_PROVENANCE` wird wörtlich vor den Dateipfad im
+Import-Ordner gesetzt und trägt darum sein eigenes Trennzeichen am Ende — so führt die
+Herkunftsangabe eines Fotos zurück auf die Datei im eigenen Archiv.
+
+Ob der Import die **Ordnernamen** auswertet, muss nirgends eingestellt werden: Ein Pfadteil gilt
+als Straße, wenn der Ortsindex sie kennt. Ein Archiv, das nach Straße und Hausnummer abgelegt
+ist, wird damit von selbst verortet; eines mit anderer Ablage bleibt einfach unberührt.
 
 Den PIN-Hash erzeugt:
 

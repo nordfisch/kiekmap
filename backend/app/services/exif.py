@@ -8,8 +8,14 @@ For a scanned paper print, EXIF carries the date of the scan. Adopting it would 
 "Hilf mit" panel where someone could have corrected it. A wrong date does more damage here than no
 date at all.
 
-Hence: EXIF dates from ``exif_date_max_year`` onwards count as scan dates. They are kept in
-``Photo.exif_datetime`` so the curator can see them, but they do not date the photo.
+Two things decide it, and the order matters -- see ``is_scan`` and ``is_scan_date``:
+
+1. **The device.** A file that names ``HP Scanjet 3670`` is a scan and gets no date, whatever the
+   year says. A file that names a camera was taken by that camera, and its date counts.
+2. **The year**, for files that name no device at all: from ``exif_date_max_year`` onwards the
+   date is treated as a scan date.
+
+Either way the raw value stays in ``Photo.exif_datetime`` so the curator can see it.
 """
 
 import logging
@@ -28,17 +34,29 @@ _TAG_IMAGE_DESCRIPTION = 0x010E
 _TAG_XP_TITLE = 0x9C9B
 _TAG_XP_KEYWORDS = 0x9C9E
 
+_TAG_MAKE = 0x010F
+_TAG_MODEL = 0x0110
+_TAG_ARTIST = 0x013B
+_TAG_COPYRIGHT = 0x8298
+
 _IPTC_TITLE = (2, 5)
 _IPTC_KEYWORDS = (2, 25)
+_IPTC_BYLINE = (2, 80)
+_IPTC_CREDIT = (2, 110)
+_IPTC_SOURCE = (2, 115)
+_IPTC_COPYRIGHT = (2, 116)
 _IPTC_CAPTION = (2, 120)
 
-#: What cameras write into the title and caption fields when nobody wrote anything.
+#: Values that fill a field without saying anything -- and therefore count as empty.
 #:
 #: This is the same trap as the scan date, one field over: the value is there, so the photo counts
-#: as titled and never comes up for correction -- except that "OLYMPUS DIGITAL CAMERA" says
-#: nothing about the picture. No title is more honest than that one, and it puts the photo back in
-#: front of somebody who can supply a real one.
-_CAMERA_BOILERPLATE = frozenset(
+#: as titled (or credited) and never comes up for correction -- except that "OLYMPUS DIGITAL
+#: CAMERA" says nothing about the picture and "unbekannt" says nothing about who took it. Nothing
+#: is more honest than either, and it puts the photo back in front of somebody who knows.
+#:
+#: Two sources feed this list: what a camera writes by itself, and what a person types when the
+#: form insists on an answer. "unbekannt" stands in 82 files of the Holm stock.
+_NON_VALUES = frozenset(
     {
         "olympus digital camera",
         "sony dsc",
@@ -47,8 +65,21 @@ _CAMERA_BOILERPLATE = frozenset(
         "samsung camera pictures",
         "casio computer co.,ltd",
         "picasa",
+        "unbekannt",
+        "unknown",
+        "default",
+        "single",
+        # A language marker out of XMP that ends up in the title when the text beside it is empty.
+        "x-default",
     }
 )
+
+#: Words in the device name that mark a scanner rather than a camera.
+#:
+#: Deliberately a substring test on a lowercased name, and "scan" alone catches Scanjet, CanoScan
+#: and CoolScan. The other two are makes that do not say it. That the *model* is read as well is
+#: not a nicety: "DIGITAL CAMERA Film Scanner" calls itself a camera in the make field.
+_SCANNER_WORDS = ("scan", "perfection", "mustek")
 
 
 @dataclass
@@ -69,6 +100,15 @@ class ImageInfo:
     #: Raw EXIF date. Whether it is the capture date is decided by the importer.
     exif_datetime: datetime | None = None
 
+    #: Make and model in one line: "HP HP Scanjet 3670", "Panasonic DMC-GX8". Empty for a file
+    #: that names no device -- and *that* is the case where the year limit has to decide alone.
+    device: str | None = None
+
+    #: Who is named beside the picture: photographer first, then whoever provided it.
+    credit: str | None = None
+    #: Where it came from -- IPTC Source, "Sammlung Jan Wendt". Never shown to visitors.
+    source: str | None = None
+
 
 def _decode(value: object, encodings: tuple[str, ...]) -> str | None:
     if value is None:
@@ -82,8 +122,26 @@ def _decode(value: object, encodings: tuple[str, ...]) -> str | None:
                 continue
         else:
             return None
-    text = str(value).replace("\x00", "").strip()
+    text = _repair(str(value).replace("\x00", "").strip())
     return text or None
+
+
+def _repair(text: str) -> str:
+    """Undo a UTF-8 text that was once read as Latin-1: "MÃ¶ller" -> "Möller".
+
+    It happens before the file ever reaches us -- a program writes UTF-8 bytes into an EXIF field
+    that is specified as ASCII, and the next program reads them back byte by byte. Two files of
+    the Holm stock carry it, and the wrong name would then stand under the photograph.
+
+    Safe because German never spells "Ã" or "Â": without one of those nothing is attempted, and
+    the round trip has to succeed or the original stands.
+    """
+    if not any(mark in text for mark in ("Ã", "Â")):
+        return text
+    try:
+        return text.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return text
 
 
 def _text(value: object) -> str | None:
@@ -92,14 +150,22 @@ def _text(value: object) -> str | None:
 
 
 def _statement(value: object, decode=_text) -> str | None:
-    """Text that is meant to say something about the picture -- title or caption.
+    """Text that is meant to say something -- a title, a caption, a name.
 
-    Drops what the camera put there by itself; see ``_CAMERA_BOILERPLATE``.
+    Drops what nobody actually stated; see ``_NON_VALUES``.
     """
     text = decode(value)
-    if text is None or text.strip().lower() in _CAMERA_BOILERPLATE:
+    if text is None or text.strip().lower() in _NON_VALUES:
         return None
     return text
+
+
+def _first(*values: object) -> str | None:
+    """The first of several fields that holds a real statement."""
+    for value in values:
+        if text := _statement(value):
+            return text
+    return None
 
 
 def _xp_text(value: object) -> str | None:
@@ -140,23 +206,12 @@ def _exif_datetime(exif_ifd: dict) -> datetime | None:
     return None
 
 
-def _read_iptc(image: Image.Image, info: ImageInfo) -> None:
+def _read_iptc(image: Image.Image) -> dict:
+    """The IPTC block, or an empty dict. Broken IPTC must not stop the import."""
     try:
-        data = IptcImagePlugin.getiptcinfo(image)
-    except Exception:  # noqa: BLE001 -- broken IPTC must not stop the import
-        return
-    if not data:
-        return
-
-    if title := _statement(data.get(_IPTC_TITLE)):
-        info.title = info.title or title
-    if caption := _statement(data.get(_IPTC_CAPTION)):
-        info.description = info.description or caption
-
-    raw = data.get(_IPTC_KEYWORDS)
-    for entry in raw if isinstance(raw, list) else [raw] if raw else []:
-        if word := _text(entry):
-            info.keywords.append(word)
+        return IptcImagePlugin.getiptcinfo(image) or {}
+    except Exception:  # noqa: BLE001
+        return {}
 
 
 def read_image_info(path: Path) -> ImageInfo:
@@ -176,11 +231,43 @@ def read_image_info(path: Path) -> ImageInfo:
         info = ImageInfo(width=rotated[0], height=rotated[1], format=image.format or "")
 
         exif = image.getexif()
-        info.title = _statement(exif.get(_TAG_XP_TITLE), _xp_text) or _statement(
-            exif.get(_TAG_IMAGE_DESCRIPTION)
+        iptc = _read_iptc(image)
+
+        info.title = _first(
+            _xp_text(exif.get(_TAG_XP_TITLE)),
+            exif.get(_TAG_IMAGE_DESCRIPTION),
+            iptc.get(_IPTC_TITLE),
         )
+        info.description = _statement(iptc.get(_IPTC_CAPTION))
+
         if words := _xp_text(exif.get(_TAG_XP_KEYWORDS)):
             info.keywords.extend(w.strip() for w in words.split(";") if w.strip())
+        raw = iptc.get(_IPTC_KEYWORDS)
+        for entry in raw if isinstance(raw, list) else [raw] if raw else []:
+            if word := _text(entry):
+                info.keywords.append(word)
+
+        # Make and model together: the make alone lies ("DIGITAL CAMERA" for a film scanner), the
+        # model alone is often just a number.
+        info.device = (
+            " ".join(
+                part for part in (_text(exif.get(_TAG_MAKE)), _text(exif.get(_TAG_MODEL))) if part
+            )
+            or None
+        )
+
+        # Sorted by what the field *means*, not by which block it sits in: first whoever took the
+        # picture, then whoever supplied it, then whoever holds the rights. A credit line beside a
+        # photo names the photographer if anybody knows one, and the institution only when nobody
+        # does -- and both blocks can carry either.
+        info.credit = _first(
+            iptc.get(_IPTC_BYLINE),
+            exif.get(_TAG_ARTIST),
+            iptc.get(_IPTC_CREDIT),
+            iptc.get(_IPTC_COPYRIGHT),
+            exif.get(_TAG_COPYRIGHT),
+        )
+        info.source = _statement(iptc.get(_IPTC_SOURCE))
 
         exif_ifd = exif.get_ifd(_EXIF_IFD)
         info.exif_datetime = _exif_datetime(exif_ifd)
@@ -197,11 +284,36 @@ def read_image_info(path: Path) -> ImageInfo:
             if info.lat is None or info.lon is None:
                 info.lat = info.lon = None
 
-        _read_iptc(image, info)
-
     return info
+
+
+def is_scan(info: ImageInfo) -> bool:
+    """Whether the device that wrote this file is a scanner."""
+    return info.device is not None and any(word in info.device.lower() for word in _SCANNER_WORDS)
 
 
 def is_scan_date(moment: datetime | None, max_capture_year: int) -> bool:
     """Whether an EXIF date should count as a scan date rather than a capture date."""
     return moment is not None and moment.year > max_capture_year
+
+
+def capture_year(info: ImageInfo, max_capture_year: int) -> datetime | None:
+    """The EXIF date, but only where it plausibly dates the *picture*.
+
+    Three cases, and the middle one is the reason this function exists:
+
+    * **A scanner wrote the file** -- no date. The date belongs to the scanning run, not to the
+      photograph. 116 files of the Holm stock fall here, 91 of them from a single run in 2015.
+    * **A camera wrote the file** -- the date counts, *even past* ``max_capture_year``. The year
+      limit is a stand-in for "this is probably a scan"; where the file names the device, the
+      stand-in is not needed and would only throw away what we know. Without this the recent
+      photographs of the village -- taken with an Olympus in 2014, a Panasonic in 2018 -- would
+      all arrive undated.
+    * **No device at all** -- the year limit decides alone, as it always did.
+    """
+    moment = info.exif_datetime
+    if moment is None or is_scan(info):
+        return None
+    if info.device is None and is_scan_date(moment, max_capture_year):
+        return None
+    return moment
