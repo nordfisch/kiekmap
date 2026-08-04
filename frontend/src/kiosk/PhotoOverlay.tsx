@@ -7,13 +7,21 @@
  *
  * It closes everywhere: tapping beside it, the button, Escape. Whoever is stuck taps somewhere,
  * and that has to lead back.
+ *
+ * **Ein undatiertes Foto lässt sich hier auch datieren.** Wer es groß ansieht und weiß, wann das
+ * war, soll es nicht erst schließen und darauf hoffen müssen, dass der Beitragsbereich ihm
+ * dasselbe Foto vorlegt. Es ist dasselbe Auswahlverfahren wie dort -- Jahrzehnt, dann Jahr, alles
+ * über Knöpfe. Ein Zahlenfeld wäre hier ein Bedienelement, das ohne Tastatur nichts annimmt.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { type PhotoDetail, fetchPhoto } from "../api/client";
+import { type PhotoDetail, type Precision, fetchPhoto } from "../api/client";
+import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../texte/de";
+import { DatePicker } from "./DatePicker";
+import { offeredDecades } from "./jahrzehnte";
 
 export function PhotoOverlay() {
   const openStack = useKiosk((s) => s.openStack);
@@ -31,6 +39,11 @@ export function PhotoOverlay() {
    * Stapel. Der Platz bleibt trotzdem reserviert, sonst springt die Ansicht.
    */
   const [loadedId, setLoadedId] = useState<number | null>(null);
+  const [dating, setDating] = useState(false);
+
+  const collection = useKiosk((s) => s.fullRange);
+  const submitDateFor = useContribute((s) => s.submitDateFor);
+  const decades = useMemo(() => offeredDecades(collection), [collection]);
 
   const openPhotoId = openStack[openIndex] ?? null;
 
@@ -65,6 +78,27 @@ export function PhotoOverlay() {
   if (openPhotoId === null) return null;
 
   const close = () => openPhoto(null);
+
+  /**
+   * Ein Jahr für das Foto, das gerade zu sehen ist.
+   *
+   * Die Antwort des Backends ersetzt den lokalen Stand -- damit steht die Jahreszahl da, wo eben
+   * noch „Jahr unbekannt" stand, und die Knöpfe sind weg, weil `needs_date` nicht mehr gilt. Mehr
+   * Rückmeldung braucht es nicht: Die Änderung passiert an genau der Stelle, auf die geschaut wird.
+   */
+  async function pickDate(year: number, precision: Precision) {
+    if (!detail) return;
+    setDating(true);
+    setError(null);
+    try {
+      setDetail(await submitDateFor(detail.id, year, precision));
+    } catch (e) {
+      // Meist: Jemand anders war schneller (409). Das Backend formuliert das schon freundlich.
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setDating(false);
+    }
+  }
 
   return (
     <div
@@ -141,6 +175,17 @@ export function PhotoOverlay() {
             <>
               <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
               <p className="overlay__year">{detail.date_label}</p>
+              {/* Nur wenn nichts dasteht: Eine kuratierte oder schon beigetragene Datierung
+                  darf ein Besucher nicht überschreiben -- das Backend lehnt es ohnehin ab. */}
+              {detail.needs_date && (
+                <div className="overlay__date">
+                  <DatePicker
+                    decades={decades}
+                    disabled={dating}
+                    onPick={(y, p) => void pickDate(y, p)}
+                  />
+                </div>
+              )}
               {detail.place_name && <p className="overlay__place">{detail.place_name}</p>}
               {detail.description && <p className="overlay__description">{detail.description}</p>}
               {detail.tags.length > 0 && (

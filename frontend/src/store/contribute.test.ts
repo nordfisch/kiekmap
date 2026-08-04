@@ -16,6 +16,7 @@ import {
   fetchHistogram,
   fetchPhotos,
   fetchTask,
+  postDate,
   postLocation,
 } from "../api/client";
 import { useContribute } from "./contribute";
@@ -25,6 +26,7 @@ const geholt = vi.mocked(fetchTask);
 const fotosGeholt = vi.mocked(fetchPhotos);
 const histogrammGeholt = vi.mocked(fetchHistogram);
 const ortGesendet = vi.mocked(postLocation);
+const jahrGesendet = vi.mocked(postDate);
 
 function aufgabe(need: Need, fotoId: number | null, offen = 3, andere = 3): Task {
   return {
@@ -49,6 +51,7 @@ beforeEach(() => {
     .mockReset()
     .mockResolvedValue({ decades: [], undated: 0, collection_from: null, collection_to: null });
   ortGesendet.mockReset().mockResolvedValue({ id: 1 } as PhotoDetail);
+  jahrGesendet.mockReset().mockResolvedValue({ id: 1, needs_date: false } as PhotoDetail);
 
   useContribute.setState({
     need: "location",
@@ -222,5 +225,86 @@ describe("Die Karte beim Verorten", () => {
 
     expect(useKiosk.getState().timeRange).toEqual({ from: 1950, to: 1959 });
     expect(useKiosk.getState().rangeBefore).toBeNull();
+  });
+});
+
+describe("Datieren aus der Detailansicht", () => {
+  /**
+   * Wer ein undatiertes Foto groß ansieht, soll es dort datieren können — auch wenn der
+   * Beitragsbereich gerade nach etwas ganz anderem fragt.
+   */
+  it("datiert ein Foto, das gar nicht in der Frage steht", async () => {
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("location");
+
+    await useContribute.getState().submitDateFor(42, 1930, "decade");
+
+    expect(jahrGesendet).toHaveBeenCalledWith(
+      42,
+      expect.objectContaining({ year: 1930, precision: "decade" }),
+    );
+  });
+
+  it("zeigt keinen Dank", async () => {
+    // Die Rückmeldung ist die Ansicht selbst: Aus „Jahr unbekannt" wird die Jahreszahl, und die
+    // Knöpfe verschwinden. Ein Satz darüber blendete nur 2,2 Sekunden den Beitragsbereich aus.
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("location");
+
+    await useContribute.getState().submitDateFor(42, 1930, "decade");
+
+    expect(useContribute.getState().thanks).toBeNull();
+  });
+
+  it("aktualisiert Karte und Zeitleiste", async () => {
+    // Das Foto wandert aus „ohne Jahr" in einen Jahrzehnt-Balken. Ohne das sähe man es erst,
+    // wenn zufällig jemand die Karte verschiebt.
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("location");
+    fotosGeholt.mockClear();
+    histogrammGeholt.mockClear();
+
+    await useContribute.getState().submitDateFor(42, 1930, "decade");
+
+    expect(fotosGeholt).toHaveBeenCalled();
+    expect(histogrammGeholt).toHaveBeenCalled();
+  });
+
+  it("laedt die Frage neu, wenn sie dasselbe Foto nach dem Jahr fragte", async () => {
+    /**
+     * Der wichtigste Fall. Ohne ihn legt der Beitragsbereich gleich noch einmal dasselbe Foto vor,
+     * der Besucher antwortet ein zweites Mal — und bekommt „Dieses Foto hat inzwischen schon eine
+     * Angabe bekommen". Eine Meldung, die klingt, als sei jemand anders schneller gewesen, obwohl
+     * er selbst es war.
+     */
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("date");
+    expect(useContribute.getState().task?.photo?.id).toBe(8);
+
+    await useContribute.getState().submitDateFor(8, 1930, "decade");
+
+    expect(useContribute.getState().need).toBe("location");
+    expect(useContribute.getState().task?.photo?.id).toBe(7);
+  });
+
+  it("laesst die Ortsfrage stehen, auch bei demselben Foto", async () => {
+    // Das Foto braucht den Ort unverändert — datiert ist es jetzt, verortet nicht.
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("location");
+
+    await useContribute.getState().submitDateFor(7, 1930, "decade");
+
+    expect(useContribute.getState().need).toBe("location");
+    expect(useContribute.getState().task?.photo?.id).toBe(7);
+  });
+
+  it("laesst eine Frage zu einem anderen Foto in Ruhe", async () => {
+    // Sonst würfe ein Beitrag aus der Detailansicht einen halb gesetzten Pin weg.
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("date");
+
+    await useContribute.getState().submitDateFor(99, 1930, "decade");
+
+    expect(useContribute.getState().task?.photo?.id).toBe(8);
   });
 });

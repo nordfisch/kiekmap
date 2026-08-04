@@ -1076,3 +1076,46 @@ Zentralverzeichnis am Ende ist ein ZIP für `zipfile` schlicht kein ZIP.
 Am echten Bestand geprüft: 18 Fotos gesichert, fünf Dateien gelöscht, eingespielt — 18 wieder da,
 das Archiv in `_erledigt/`, der alte Stand in `vorher-2026-08-03-2341/`, und die Abschlussmeldung
 nennt beide.
+
+## Datieren in der Detailansicht
+
+4. August 2026.
+
+Wer ein undatiertes Foto groß ansah, las dort „Jahr unbekannt" und hatte keine Möglichkeit, es zu
+sagen — er hätte schließen und hoffen müssen, dass der Beitragsbereich ihm zufällig dasselbe Foto
+vorlegt. Jetzt steht die Auswahl in der Ansicht selbst.
+
+**Mit Knöpfen, nicht mit einem Zahlenfeld.** Die ganze Besucheransicht hat genau ein Eingabefeld,
+und ob das Gerät je eine Tastatur bekommt, ist im Backlog offen — ein Zahlenfeld wäre dort ein
+Bedienelement, das nichts annimmt. Es ist dasselbe zweistufige Verfahren wie im Beitragsbereich,
+und deshalb ist es jetzt ein Bauteil: `DatePicker` zeigt Jahrzehnt und Jahr, `DateTask` hängt den
+Beitrag der laufenden Frage daran, die Detailansicht den zum Foto, das gerade zu sehen ist.
+
+### Was der Weg absichtlich nicht tut
+
+`submitDateFor` geht **nicht** durch `contribute()`, und das sind zwei bewusste Auslassungen:
+
+- **Kein Dank.** Die Rückmeldung ist die Ansicht selbst — aus „Jahr unbekannt" wird „1963", und die
+  Knöpfe verschwinden, an genau der Stelle, auf die geschaut wird. Das ist der Fall, den der
+  Backlog unter *„Die Dankmeldung: brauchen wir sie, und stimmt sie immer?"* als den beschreibt, in
+  dem der Satz überflüssig ist: Wo die Ansicht sich sichtbar ändert, sagt sie es schon.
+- **Kein Kartenfokus.** Die Karte liegt unter der Detailansicht. Sie irgendwohin zu fahren, sähe
+  niemand.
+
+### Die Regel, die still gebrochen wäre
+
+**Der Beitragsbereich zieht nur weiter, wenn er dasselbe Foto nach dem Jahr fragte.** Ohne das legt
+er es gleich noch einmal vor, der Besucher antwortet ein zweites Mal — und bekommt „Dieses Foto hat
+inzwischen schon eine Angabe bekommen". Eine Meldung, die klingt, als sei jemand anders schneller
+gewesen, obwohl er selbst es war.
+
+Fragte er nach dem **Ort**, bleibt er stehen: Den braucht das Foto unverändert. Beide Fälle sind
+im Store getestet und am laufenden Gerät nachgestellt — bei der Ortsfrage blieb dasselbe Foto
+stehen, bei der Jahresfrage wechselte die Ansicht auf „Wo ist das?".
+
+### Reichweite
+
+Größer als erwartet: Undatierte Fotos stehen sehr wohl auf der Karte, weil die Kartenabfrage den
+Zeitfilter weglässt, solange der Schieber den ganzen Bestand umspannt. Erst wer den Zeitraum
+einengt, blendet sie aus — richtig so. Die Auswahl ist damit über den Marker *und* über „Foto groß
+anzeigen" erreichbar.

@@ -73,6 +73,7 @@ type ContributeState = {
   ) => void;
   submitLocation: () => Promise<void>;
   submitDate: (year: number, precision: Precision) => Promise<void>;
+  submitDateFor: (photoId: number, year: number, precision: Precision) => Promise<PhotoDetail>;
 };
 
 let abort: AbortController | null = null;
@@ -229,6 +230,41 @@ export const useContribute = create<ContributeState>((set, get) => {
         (photo) => postDate(photo.id, { year, precision, session_id: SESSION_ID }),
         t.help.thanksDate,
       );
+    },
+
+    /**
+     * Ein Jahr für ein Foto, das **nicht** in der laufenden Frage steht.
+     *
+     * Der Fall ist die Detailansicht: Wer ein undatiertes Foto groß ansieht und weiß, wann das
+     * war, soll es dort sagen können. Deshalb geht dieser Weg absichtlich **nicht** durch
+     * ``contribute()``:
+     *
+     *   * **Kein Dank.** Die Rückmeldung ist die Ansicht selbst -- aus „Jahr unbekannt" wird
+     *     „1932", und die Knöpfe verschwinden, genau dort, wohin der Besucher schaut. Ein Satz,
+     *     der das noch einmal sagt und dabei 2,2 Sekunden lang den Beitragsbereich ausblendet,
+     *     wäre hier nur im Weg.
+     *   * **Kein Kartenfokus.** Die Karte liegt unter der Detailansicht; sie irgendwohin zu
+     *     fahren, sähe niemand.
+     *
+     * Der Fehler bleibt beim Aufrufer: Die Detailansicht zeigt ihn an der Stelle, an der auch
+     * sonst ihre Meldungen stehen.
+     */
+    async submitDateFor(photoId, year, precision) {
+      const updated = await postDate(photoId, { year, precision, session_id: SESSION_ID });
+
+      // Karte und Zeitleiste muessen es zeigen: Das Foto wandert aus "ohne Jahr" in einen
+      // Jahrzehnt-Balken, und bei eingeengtem Zeitraum womoeglich aus der Ansicht heraus.
+      useKiosk.getState().refresh();
+
+      // Fragte der Beitragsbereich gerade *dieses* Foto nach dem Jahr, muss er weiterziehen. Sonst
+      // legt er es gleich noch einmal vor, der Besucher antwortet ein zweites Mal -- und bekommt
+      // "Dieses Foto hat inzwischen schon eine Angabe bekommen", eine Meldung, die klingt, als sei
+      // jemand anders schneller gewesen. Nach dem *Ort* darf er dasselbe Foto weiter fragen: den
+      // braucht es unveraendert.
+      const { task, need } = get();
+      if (need === "date" && task?.photo?.id === photoId) void load(otherNeed(need));
+
+      return updated;
     },
   };
 });

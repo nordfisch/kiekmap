@@ -140,6 +140,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   steht dasselbe Genauigkeitsfeld wie im Fotoeditor, „1920er" ist damit auch hier eintragbar. Eine
   bereits als Jahrzehnt gespeicherte Datierung bleibt eines, statt still zum Jahr zu werden
 
+- **Undatierte Fotos lassen sich in der Detailansicht datieren.** Wer ein Foto groß ansieht und
+  „Jahr unbekannt" liest, bekommt dort dieselbe Auswahl wie im „Hilf mit"-Bereich — erst das
+  Jahrzehnt, dann das Jahr, alles über Knöpfe. Bisher musste man schließen und hoffen, dass der
+  Beitragsbereich dasselbe Foto vorlegt. Eine Dankmeldung gibt es hier nicht: Aus „Jahr unbekannt"
+  wird die Jahreszahl, und die Knöpfe verschwinden — an genau der Stelle, auf die geschaut wird
+
 ### Geändert
 
 - Bezeichner und Code-Kommentare durchgängig auf Englisch; Deutsch bleibt für Oberfläche,
