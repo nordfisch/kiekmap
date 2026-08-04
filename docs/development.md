@@ -156,6 +156,7 @@ dort etwas ändert, sollte die Gegenprobe machen: mit `foreign_keys=ON` muss der
 ```bash
 make seed        # Bestand aus seed/ herstellen — loescht den vorhandenen!
 make seed-save   # den laufenden Bestand nach seed/ sichern
+make empty       # alles loeschen, ohne Ersatz — der Schritt vor einem Erstimport
 ```
 
 Sechzehn echte Aufnahmen aus Holm, bewusst lückenhaft: Fotos ohne Jahr, ohne Ort, gestaffelte

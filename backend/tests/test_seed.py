@@ -171,3 +171,99 @@ class TestFehlenderBestand:
 
         assert not (ziel / seed.IMAGE_DIR_NAME / "hochkant.jpg").exists()
         assert (ziel / seed.IMAGE_DIR_NAME / "scan_ohne_exif.jpg").exists()
+
+
+class TestBestandLeeren:
+    """``make empty`` -- der einzige Befehl, aus dem kein Weg zurueckfuehrt.
+
+    ``seed-load`` wirft den Bestand auch weg, setzt aber etwas an seine Stelle. Dieser hier laesst
+    nichts. Der Fehlerfall ist deshalb nicht "es loescht nicht", sondern **"es loescht, obwohl
+    jemand etwas anderes gemeint hat"** -- und der faellt erst auf, wenn 929 Fotos weg sind.
+    """
+
+    def test_eine_falsche_antwort_loescht_nichts(
+        self, session, settings, sample_image, fixtures_dir, monkeypatch, capsys
+    ):
+        from app.cli import main
+
+        _bestand(session, settings, sample_image, fixtures_dir)
+        monkeypatch.setattr("builtins.input", lambda _: "ja")
+
+        assert main(["empty"]) == 1
+
+        assert len(session.scalars(select(Photo)).all()) == 1
+        assert list(settings.photos_dir.rglob("*.jpg"))
+        assert "Abgebrochen" in capsys.readouterr().out
+
+    def test_die_anzahl_der_fotos_ist_die_bestaetigung(
+        self, session, settings, sample_image, fixtures_dir, monkeypatch
+    ):
+        """Getippt werden muss die Zahl, die eine Zeile weiter oben steht.
+
+        Ein "j/n" laesst sich beantworten, ohne gelesen zu haben. Eine Zahl nicht.
+        """
+        from app.cli import main
+
+        _bestand(session, settings, sample_image, fixtures_dir)
+        monkeypatch.setattr("builtins.input", lambda _: "1")
+
+        assert main(["empty"]) == 0
+
+        assert session.scalars(select(Photo)).all() == []
+        assert list(settings.photos_dir.rglob("*.jpg")) == []
+
+    def test_ohne_rueckfrage_nur_mit_der_ausdruecklichen_option(
+        self, session, settings, sample_image, fixtures_dir, monkeypatch
+    ):
+        """--yes ist fuer Skripte. Wird es gesetzt, darf nichts mehr nachfragen."""
+        from app.cli import main
+
+        _bestand(session, settings, sample_image, fixtures_dir)
+
+        def keine_eingabe(_):
+            raise AssertionError("es wurde trotz --yes nachgefragt")
+
+        monkeypatch.setattr("builtins.input", keine_eingabe)
+
+        assert main(["empty", "--yes"]) == 0
+        assert session.scalars(select(Photo)).all() == []
+
+    def test_ein_leerer_bestand_fragt_gar_nicht_erst(self, session, settings, monkeypatch):
+        from app.cli import main
+
+        def keine_eingabe(_):
+            raise AssertionError("ein leerer Bestand braucht keine Bestaetigung")
+
+        monkeypatch.setattr("builtins.input", keine_eingabe)
+
+        assert main(["empty"]) == 0
+
+    def test_der_ortsindex_bleibt_stehen(
+        self, session, settings, sample_image, fixtures_dir, monkeypatch
+    ):
+        """Er kommt aus einem Overpass-Lauf und hat mit den Fotos nichts zu tun.
+
+        Mitgeloescht muesste er ueber `make places` neu gebaut werden -- mit Netz, das der Pi im
+        Museum nicht hat.
+        """
+        from app.cli import main
+        from app.models import Place
+
+        _bestand(session, settings, sample_image, fixtures_dir)
+        session.add(
+            Place(
+                name="Hauptstrasse",
+                name_normalized="hauptstrasse",
+                lat=53.62,
+                lon=9.676,
+                kind="strasse",
+            )
+        )
+        session.commit()
+        monkeypatch.setattr("builtins.input", lambda _: "1")
+
+        assert main(["empty"]) == 0
+
+        # Erst wenn wirklich geloescht wurde, sagt der Ortsindex etwas aus.
+        assert session.scalars(select(Photo)).all() == []
+        assert session.scalars(select(Place)).all() != []

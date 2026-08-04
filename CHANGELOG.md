@@ -386,6 +386,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   bei einer Serie schreiben; 28 Dateien des Erstbestands sind eines. Sein erstes Bild ist ein
   gewöhnliches JPEG — abgewiesen wären 28 Aufnahmen an einem Containerformat gescheitert, das
   niemand ausgesucht hat
+- **`make empty` leert den Bestand** — der Schritt vor einem Erstimport. `make seed` wirft den
+  Bestand auch weg, setzt aber etwas an seine Stelle; dieser Befehl lässt nichts, und es gibt
+  keinen Weg zurück. Er nennt deshalb erst die Zahlen und will dann die **Anzahl der Fotos
+  getippt** haben: Ein „j/n" lässt sich beantworten, ohne gelesen zu haben, eine Zahl nicht. Für
+  Skripte gibt es `python -m app.cli empty --yes`. Ortsverzeichnis, Karte und Einstellungen
+  bleiben stehen
 - Drei neue Einstellungen für den Import, alle leer voreingestellt, damit nichts Ortsspezifisches
   im Code steht: `PHOTOMAP_IMPORT_TAGS` (Schlagwörter für jedes Foto — in Holm „Gebäude"),
   `PHOTOMAP_IMPORT_CREDIT` (Bildnachweis, wo die Datei niemanden nennt) und

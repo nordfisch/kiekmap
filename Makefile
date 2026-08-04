@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
-        migrate revision seed seed-save lint tiles places build prod prod-down clean
+        migrate revision seed seed-save empty lint tiles places build prod prod-down clean
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
@@ -81,6 +81,18 @@ seed: migrate  ## Beispielbestand aus seed/ herstellen (loescht den vorhandenen!
 
 seed-save: $(VENV)  ## Den laufenden Bestand nach seed/ sichern
 	cd backend && .venv/bin/python -m app.cli seed-export
+
+# --- Bestand leeren ---------------------------------------------------------
+#
+# Der Schritt vor einem Erstimport -- und der einzige hier, aus dem kein Weg zurueckfuehrt.
+# `make seed` wirft den Bestand auch weg, setzt aber etwas an seine Stelle; dieses Ziel laesst
+# nichts. Deshalb fragt es nach und will die Anzahl der Fotos getippt haben.
+#
+# Absichtlich nicht `clear` genannt: `make clean` steht eine Zeile weiter unten, ist harmlos, und
+# zwei Ziele, die sich um einen Buchstaben unterscheiden, waeren eine Falle.
+
+empty: migrate  ## Den ganzen Fotobestand loeschen (nicht rueckholbar!)
+	cd backend && .venv/bin/python -m app.cli empty
 
 # --- Pruefen ----------------------------------------------------------------
 

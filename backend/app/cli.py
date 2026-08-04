@@ -7,6 +7,7 @@
     python -m app.cli pin                        set the PIN for the admin area
     python -m app.cli seed-export                write the collection out to seed/
     python -m app.cli seed-load                  empty it and rebuild it from seed/
+    python -m app.cli empty                      throw the whole collection away
 
 The usual route for the museum team is the watched folder; these commands are for the initial fill
 with a few thousand scans and for troubleshooting.
@@ -138,6 +139,48 @@ def _cmd_seed_load(_: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_empty(args: argparse.Namespace) -> int:
+    """Throw the whole collection away, before an initial import.
+
+    The one command here from which there is no way back. ``seed-load`` also empties the
+    collection, but it puts something in its place; this leaves nothing. So it says what it is
+    about to destroy, in numbers, and **asks for the number of photos to be typed back**. A "j/n"
+    can be answered without reading -- a number cannot.
+    """
+    from app.models import Change
+    from app.services import seed
+
+    settings = get_settings()
+    settings.ensure_dirs()
+
+    with SessionLocal() as session:
+        photos = session.scalar(select(func.count()).select_from(Photo)) or 0
+        contributions = session.scalar(select(func.count()).select_from(Change)) or 0
+
+        if not photos:
+            print("Der Bestand ist schon leer.")
+            return 0
+
+        print(f"Im Bestand: {photos} Fotos und {contributions} Besucherbeitraege.")
+        print("Geloescht werden Zeilen, Originale und Vorschaubilder -- restlos.")
+        print("Ortsverzeichnis, Karte und Einstellungen bleiben.\n")
+        print("Zurueckholen laesst sich das nur aus einer Sicherung:")
+        print("  make seed-save    fuer den Entwicklungsbestand")
+        print("  Verwaltung -> Sicherung   fuer den echten Bestand\n")
+
+        if not args.yes:
+            antwort = input(f"Zum Bestaetigen die Anzahl der Fotos eingeben ({photos}): ")
+            if antwort.strip() != str(photos):
+                print("\nAbgebrochen, es wurde nichts geloescht.")
+                return 1
+
+        seed.clear(session, settings)
+        session.commit()
+
+    print(f"\n{photos} Fotos geloescht. Der Bestand ist leer.")
+    return 0
+
+
 def _cmd_pin(_: argparse.Namespace) -> int:
     """Ask for a PIN twice and print the line that belongs in the .env file.
 
@@ -196,6 +239,14 @@ def main(argv: list[str] | None = None) -> int:
 
     p_seed_load = commands.add_parser("seed-load", help="Bestand aus seed/ wiederherstellen")
     p_seed_load.set_defaults(handler=_cmd_seed_load)
+
+    p_empty = commands.add_parser("empty", help="Den ganzen Bestand loeschen")
+    p_empty.add_argument(
+        "--yes",
+        action="store_true",
+        help="Ohne Rueckfrage loeschen -- nur fuer Skripte",
+    )
+    p_empty.set_defaults(handler=_cmd_empty)
 
     args = parser.parse_args(argv)
     return args.handler(args)

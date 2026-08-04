@@ -99,6 +99,7 @@ make tiles        # Offline-Karte, Schriften, Symbole für die Region
 make places       # Ortsindex bauen und einlesen
 make seed         # Beispielbestand aus seed/ herstellen (löscht den vorhandenen!)
 make seed-save    # den laufenden Bestand nach seed/ sichern
+make empty        # den ganzen Bestand löschen (fragt nach; vor einem Erstimport)
 make prod         # alles in Containern, wie auf dem Pi
 ```
 
