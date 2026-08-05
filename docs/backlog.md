@@ -319,7 +319,7 @@ weitergegeben wird.
 ### Versionierung, Releaseprozess und Veröffentlichung des Codes
 
 **Stand:** `development.md` kündigt SemVer-Tags und Conventional Commits an, beides zusammen
-versioniert. Tatsächlich gibt es nach 62 Commits **keinen einzigen Tag**; `package.json` und
+versioniert. Tatsächlich gibt es nach 99 Commits **keinen einzigen Tag**; `package.json` und
 `pyproject.toml` stehen beide auf `0.1.0`, und `deploy/docker-compose.yml` baut Images mit
 `${PHOTOMAP_VERSION:-dev}`. Es fehlt also nicht die Entscheidung, sondern ihre Umsetzung: Was löst
 eine Version aus, wer setzt den Tag, und wie kommt die Nummer in die beiden Dateien und in das
@@ -336,26 +336,11 @@ und jeden Fehlversuch dauerhaft sichtbar; ein reines Release-Repo schützt davor
 Historie, die dieses Projekt gerade auszeichnet — die Commit-Nachrichten hier tragen die
 Begründungen.
 
-**Die beiden Blocker sind erledigt (5. August 2026)** — was hier stand, ist getan:
-
-- **Das Wappen ist raus.** `frontend/public/logo.png` war das Wappen der Gemeinde Holm. Es ist
-  urheberrechtlich frei (§ 5 UrhG, amtliches Werk), aber als Hoheitszeichen unabhängig davon in
-  der Nutzung beschränkt — und ein Hinweis heilt das nicht, weil es um Erlaubnis geht und nicht
-  um Zuschreibung. Im Repo liegt jetzt ein Platzhalter aus `tools/build_logo.py`; das echte
-  Wappen kommt auf dem Gerät an seinen Platz. Weil es seit dem ersten Auftauchen in jedem
-  Commit-Baum lag, ist es zugleich **aus der gesamten Historie entfernt** worden — solange das
-  Repo noch keinen Remote hatte. Begründung in [decisions.md](decisions.md), Punkt 21.
-- **Der Beispielbestand ist erfunden und liegt im Repo.** 18 gezeichnete Bilder aus
-  `tools/build_seed.py`, dazu ausgedachte Menschen, Bildnachweise und Herkunftsangaben. Echt sind
-  nur Straßennamen und Koordinaten — ohne sie zeigt die Karte nichts und die Ortssuche findet
-  nichts. `make seed` tut damit in einem frischen Clone endlich das, was das README verspricht.
-  Die Lücken des Bestands sind erhalten und werden vom Generator nachgezählt.
-- **Die Historie ist sonst sauber.** Geprüft am 5. August 2026 über alle 203 jemals hinzugefügten
-  Pfade: keine `.env`, keine Laufzeitdaten, keine Kartendateien, keine echten Fotos — nur
-  `deploy/.env.example`, die acht synthetischen Testbilder und der erfundene Beispielbestand.
-
-**Offen bleibt der Releaseprozess selbst** — und die Lizenzfrage im nächsten Punkt, die vor einer
-Veröffentlichung ebenfalls beantwortet sein muss.
+**Die beiden Blocker davor sind erledigt** (5. August 2026): das Wappen ist aus Repo und Historie
+verschwunden, der Beispielbestand ist erfunden und mitgeliefert. Wie das ausging und was dabei
+anders kam als geplant, steht in [history.md](history.md). **Offen bleibt der Releaseprozess
+selbst** — und die Lizenzfrage im nächsten Punkt, die vor einer Veröffentlichung ebenfalls
+beantwortet sein muss.
 
 ### Lizenz des Projekts und der verwendeten Komponenten
 

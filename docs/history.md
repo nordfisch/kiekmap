@@ -1270,3 +1270,82 @@ englischen Kommentar in einer Testdatei, beide mit Exitcode 1.
 
 Das ist die Lehre, die über diesen Tag hinausreicht: **Eine Gegenprobe, die nicht anschlägt,
 beweist erst einmal nichts über den Code — sie stellt eine Frage an die Probe.**
+
+## Zwei Blocker vor der Veröffentlichung
+
+`e43a3e1` … `ebcd793` · 5. August 2026.
+
+Der Backlog-Punkt zur Veröffentlichung nannte zwei Dinge, die vorher zu klären seien. Beide waren
+schnell geklärt — und beide anders, als die Frage gestellt war.
+
+### Das Wappen: keine Lizenzfrage
+
+Die Vermutung war „urheberrechtlich vermutlich heikel, also nachsehen und einen Hinweis
+aufnehmen". Die Wikipedia-Seite zum Holmer Wappen trägt aber **zwei** Bausteine, und nur der
+erste ist die gute Nachricht:
+
+> „Nach § 5 Abs. 1 UrhG (Deutschland) sind amtliche Werke wie Wappen gemeinfrei."
+
+> „Wappen sind allgemein unabhängig von ihrem urheberrechtlichen Status in ihrer Nutzung
+> gesetzlich beschränkt."
+
+**Urheberrechtlich ist nichts zu klären. Das Hindernis ist das Wappenrecht** — ein Hoheitszeichen,
+dessen Führung die Gemeinde regelt. Daraus folgt der Satz, an dem die ursprüngliche Absicht
+zerbrach: **Ein Hinweis heilt das nicht.** Bei einer Lizenz hilft Namensnennung, man nennt den
+Urheber und darf. Hier geht es um Erlaubnis, und die ist durch keine Fußnote zu ersetzen. Dazu
+kommt, dass die Erlaubnis für den eigenen Kiosk im eigenen Ort etwas anderes ist als die
+Erlaubnis, das Zeichen an jeden weiterzugeben, der ein Repo klont.
+
+Der Tausch selbst kostete eine Datei und keine Zeile Logik — weil im Code nirgends steht, was auf
+dem Bild zu sehen ist. Dieselbe Eigenschaft, die ein zweites Museum ohne Fork auskommen lässt, hat
+hier ein Rechtsproblem auf einen Dateitausch reduziert. Begründung: [decisions.md](decisions.md),
+Punkt 21.
+
+### Der Rewrite: erst „später", nach einer Prüfung „sofort"
+
+Der Plan sah den Schnitt durch die Historie für den Tag der Veröffentlichung vor — „heute
+ausgeführt zerbräche er jeden vorhandenen Klon". Dann kam die Rückfrage, ob das jemand von Hand
+tun müsse, und mit ihr der Blick auf etwas, das vorher niemand nachgesehen hatte: **Das Repo hat
+keinen Remote, einen Branch, eine Arbeitskopie.** Es war nie irgendwohin gepusht. Es gab also
+keinen fremden Klon, der zerbrechen konnte — und der Preis stieg mit jeder Woche.
+
+Der Preis war die Dokumentation, und er war messbar: **83 der 97 Kurz-Hashes änderten sich, 61
+Zitate in drei Dateien wurden ungültig**, allein `history.md` nennt 71 Commits. Genau diese
+Verweise machen die Historie hier wertvoll; sie aufzugeben wäre der eigentliche Verlust gewesen.
+Sie sind mitgezogen: `filter-branch` lässt die alte Historie unter `refs/original/` stehen, alt und
+neu ließen sich Position für Position paaren, gegengeprüft an den Betreffzeilen — 97 von 97
+paarweise gleich.
+
+**Die Abnahme war nicht der grüne Durchlauf**, sondern zweierlei: dass jeder der 76 zitierten
+Hashes `git cat-file` besteht (er tut es), und dass das echte Wappen in keinem Blob der Historie
+mehr auftaucht (es tut es nicht — geprüft über seinen SHA-256, nicht über den Dateinamen).
+
+### Der Beispielbestand: die Lücken sind der Wert, nicht die Schönheit
+
+Gegen erzeugte Bilder sprach der Einwand aus dem Backlog: „sieht aber nie aus wie ein Museum". Das
+stimmt — und trifft nicht, worum es geht. Der Wert dieses Bestands sind seine **Lücken**: drei
+Fotos ohne Jahr, zwei ohne Ort, eines ohne beides, zwei gelöschte, acht Besucherbeiträge davon
+zwei zurückgenommene. Ohne sie prüft der Bestand die Hälfte des Programms nicht. Achtzehn
+gezeichnete Ansichten aus `tools/build_seed.py` tun das genauso gut wie echte Aufnahmen, kosten
+1,1 statt 24 MB und stellen nie wieder eine Rechtsfrage. Der Generator zählt die Lücken nach jedem
+Lauf nach und bricht ab, wenn eine fehlt.
+
+**Echt bleiben nur Straßennamen und Koordinaten**, und das ist keine Nachlässigkeit: Die Punkte
+müssen in der `bbox` liegen, sonst zeigt die Karte nichts, und `place_name` muss zum Ortsindex
+passen, sonst findet die Ortssuche nichts — und die ist das Herzstück der Vorführung. Ein
+Personenbezug entstünde erst durch die Bindung von Namen an Adressen, und die ist erfunden.
+
+### Drei Dinge, die dabei schiefgingen
+
+- **Der Generator löschte die echten Museumsfotos**, bevor sie beiseitegelegt waren. Sie waren
+  vollständig zu retten, weil `data/` sie noch trug und `seed.export` sie an einen beliebigen Ort
+  schreiben kann — aber gerettet werden musste, was gar nicht erst hätte gefährdet sein dürfen.
+- **`seed.json` bekam zunächst keinen SHA-256.** Der ist der Änderungsmelder von `seed.load`; ohne
+  ihn warnte jedes `make seed` achtzehnmal. Eine Warnung, die immer kommt, ist eine, die niemand
+  mehr liest.
+- **`language_check.py` fand fünf deutsche Kommentare im neuen Generator** — im Werkzeug, das am
+  Tag zuvor genau dafür gebaut worden war. Es hat sich sofort bezahlt gemacht.
+
+Dazu eine Kleinigkeit mit derselben Lehre wie beim SHA-256: Der Zeitstempel in `seed.json` kam aus
+der Uhr und war damit das eine Feld, das jeder Neubau änderte. Jetzt steht dort der Tag, an dem
+der Bestand entworfen wurde — zweimal bauen erzeugt zweimal dasselbe.
