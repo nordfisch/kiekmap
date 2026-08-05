@@ -31,6 +31,19 @@ rsync -a frontend/public/tiles/ pi:/opt/photomap/frontend/public/tiles/
 rsync -a data/places.json       pi:/opt/photomap/data/places.json
 ```
 
+**Das Wappen kommt denselben Weg.** Im Repo liegt nur ein Platzhalter — ein Gemeindewappen darf
+dort nicht liegen, siehe [decisions.md](decisions.md), Punkt 21. Auf dem Gerät gehört das echte
+hin:
+
+```bash
+rsync -a wappen.png pi:/opt/photomap/frontend/public/logo.png
+```
+
+Danach das Frontend neu bauen (`make prod` baut die Images ohnehin neu) — die Datei wird beim Bau
+in das Abbild aufgenommen, nicht zur Laufzeit gelesen. Das Holmer Wappen liegt unter
+`~/Developer/Museum/Wappen/holm-wappen.png` auf dem Entwicklungsrechner; Quelle und
+Rechtelage stehen in [adaption.md](adaption.md), Abschnitt „Wappen einsetzen".
+
 ---
 
 ## Was beim Einschalten passiert

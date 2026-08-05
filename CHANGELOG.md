@@ -443,3 +443,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   `backlog.md` entstanden sind, und wurden seither nicht mehr gepflegt; in der Git-Historie
   bleiben sie lesbar. Der erledigte Punkt „Sprach- und Namenskonsistenz prüfen" ist aus dem
   Backlog in die Historie gewandert — ein Backlog führt Offenes
+- **Im Repo liegt kein Gemeindewappen mehr.** `frontend/public/logo.png` ist ein Platzhalter aus
+  `tools/build_logo.py`; das Holmer Wappen wird auf dem Gerät eingesetzt, wie die Kartendaten.
+  Der Grund ist keine Lizenzfrage — ein Wappen ist nach § 5 UrhG gemeinfrei —, sondern das
+  **Wappenrecht**: Ein Hoheitszeichen darf nicht an jeden weitergegeben werden, der ein Repo
+  klont, und ein Hinweis heilt das nicht, weil es um Erlaubnis geht und nicht um Zuschreibung.
+  Siehe [docs/decisions.md](docs/decisions.md) Punkt 21

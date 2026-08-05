@@ -91,7 +91,11 @@ auskommentieren; die Oberfläche überspringt den Hausnummernschritt dann von al
 damit, ob eine Verortung aus dem „Hilf mit"-Bereich überhaupt in der Region liegt. **Ohne diese
 Datei greift der Schutz nicht** (er lässt dann alles durch, statt grundlos abzulehnen).
 
-### 3. Wappen austauschen
+### 3. Wappen einsetzen
+
+**Mitgeliefert wird ein Platzhalter, kein Wappen** — ein schlichtes Schild aus
+[`tools/build_logo.py`](../tools/build_logo.py). Warum kein echtes, steht in
+[decisions.md](decisions.md), Punkt 21.
 
 [`frontend/public/logo.png`](../frontend/public/logo.png) durch das eigene ersetzen — gleicher
 Dateiname, sonst nichts. Das Bild liegt über der linken oberen Ecke der Karte und ist zugleich der
@@ -101,10 +105,31 @@ Vorlesewerkzeuge setzt sich aus `name` in der `region.json` zusammen.
 Hochkant oder quer ist gleich, das Bild wird in ein Quadrat von 4,5 rem eingepasst. Sinnvoll sind
 etwa 400 px Kantenlänge; PNG mit Transparenz sieht auf der Karte am besten aus.
 
-Ein Hinweis zum Recht: Gemeindewappen sind meist gemeinfrei im urheberrechtlichen Sinn, ihre
-Führung ist davon aber unabhängig geregelt. Für ein Heimatmuseum am Ort ist das in aller Regel
-unproblematisch — im Zweifel kurz bei der Gemeinde nachfragen. Das mitgelieferte Holmer Wappen
-stammt aus der Wikipedia (Public Domain, Hans-Frieder Kühne).
+> **Die ersetzte Datei nicht committen.** Sie trägt denselben Namen wie der Platzhalter, taucht
+> also als geänderte Datei auf. Auf dem eigenen Gerät ist das richtig; in einem Repo, das jemand
+> klonen kann, gibt sie das Wappen weiter — siehe unten.
+
+#### Zum Recht: zwei Fragen, die oft zu einer verschmolzen werden
+
+**Urheberrecht.** Ein Gemeindewappen ist nach § 5 Abs. 1 UrhG ein amtliches Werk und damit
+gemeinfrei. Von dieser Seite ist nichts zu klären.
+
+**Wappenrecht.** Davon unabhängig ist die *Führung* eines Wappens beschränkt: Es ist ein
+Hoheitszeichen, die Gemeinde regelt seinen Gebrauch, geschützt über das Namensrecht (§ 12 BGB) und
+die Vorschriften über Hoheitszeichen. Auch die Wikipedia weist auf ihren Wappenseiten
+ausdrücklich darauf hin.
+
+Daraus folgt zweierlei:
+
+- **Auf dem eigenen Gerät** ist das Wappen des eigenen Ortes für ein Heimatmuseum in aller Regel
+  unproblematisch — im Zweifel kurz bei der Gemeinde nachfragen.
+- **In einem öffentlichen Repo ist es etwas anderes.** Wer das Repo veröffentlicht, gibt jede
+  darin liegende Datei an jeden weiter, der sie klont. Eine Erlaubnis für das eigene Museum ist
+  keine Erlaubnis für Dritte, und ein Hinweis oder eine Namensnennung ändert daran nichts: Hier
+  geht es nicht um Zuschreibung, sondern um Erlaubnis.
+
+Deshalb liegt in diesem Repo ein Platzhalter, und das Wappen bleibt eine lokale Datei — wie
+`.env` und die gebaute Karte.
 
 ### 4. Sammlungsspezifisches prüfen
 

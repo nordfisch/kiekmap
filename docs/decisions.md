@@ -633,3 +633,43 @@ Import betitelt, gilt als betitelt und wird nicht mehr vorgelegt. Deshalb bleibt
 Nichtwerte streng, deshalb setzt die Pfad-Schicht nur leere Felder — und deshalb wandert ein
 Titel von mehr als 120 Zeichen in die Beschreibung, statt als Überschrift eine Textwand zu
 bilden (`TITLE_MAX`; im Archiv steht die ganze Bildunterschrift im Titelfeld, bis zu 223 Zeichen).
+
+## 21. Kein Gemeindewappen im Repo
+
+Über der linken oberen Ecke der Karte liegt ein Wappen — es führt die Kopfzeile an und ist
+zugleich der Weg in den Verwaltungsbereich (Punkt 7). Bis zum 5. August 2026 war das
+`frontend/public/logo.png` mit dem Wappen der Gemeinde Holm darin. Seitdem liegt dort ein
+**Platzhalter**, gezeichnet von `tools/build_logo.py`.
+
+Der Grund ist keine Lizenzfrage, und genau darin liegt die Falle. Ein Gemeindewappen ist nach
+**§ 5 Abs. 1 UrhG ein amtliches Werk und gemeinfrei** — urheberrechtlich ist es also frei
+verwendbar, und die Wikipedia-Seite zum Holmer Wappen sagt das auch so. Zwei Zeilen weiter steht
+dort aber der zweite Baustein:
+
+> „Wappen sind allgemein unabhängig von ihrem urheberrechtlichen Status in ihrer Nutzung
+> gesetzlich beschränkt."
+
+Das ist **Wappenrecht**: Ein Wappen ist ein Hoheitszeichen, seine Führung regelt die Gemeinde,
+geschützt über das Namensrecht (§ 12 BGB) und die Vorschriften über Hoheitszeichen.
+
+**Der entscheidende Satz: Ein Hinweis heilt das nicht.** Bei einer Lizenz hilft Namensnennung —
+man nennt den Urheber und darf. Hier geht es um *Erlaubnis*, und die ist nicht durch eine Fußnote
+zu ersetzen. Dazu kommt, dass die beiden Fälle verschieden sind:
+
+| | |
+|---|---|
+| Das Museum zeigt das Wappen seines Ortes auf seinem Kiosk | in aller Regel unproblematisch |
+| Ein öffentliches Repo enthält die Datei | gibt sie an jeden weiter, der klont |
+
+Eine Erlaubnis für den einen Fall ist keine für den anderen. Und weil ein Repo seine Historie
+mitliefert, hätte auch ein späteres Löschen nichts geholfen: Die Datei lag seit `2d237ff` in jedem
+Commit-Baum. Sie ist deshalb am 5. August 2026 aus der gesamten Historie entfernt worden — solange
+das Repo noch keinen Remote hatte und der Schnitt nur die eigene Arbeitskopie kostete.
+
+**Der Code war darauf vorbereitet**, und das ist der Grund, warum der Tausch eine Datei kostete
+und keine Zeile Logik: Nirgends steht, was auf dem Bild zu sehen ist; die Beschriftung für
+Vorlesewerkzeuge baut sich aus `name` in der `region.json` (`t.admin.logoLabel`). Dieselbe
+Eigenschaft, die ein zweites Museum ohne Fork auskommen lässt, hat hier ein Rechtsproblem auf
+einen Dateitausch reduziert.
+
+Vorgehen für den eigenen Ort: [adaption.md](adaption.md), Abschnitt „Wappen einsetzen".
