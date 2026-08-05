@@ -418,3 +418,23 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   nach Straßen abgelegten Stapel also genau die Information zerstört, die ihn ausmacht. Ein
   zweiter Lauf oder auch nur eine Stichprobe hatte danach nichts mehr zu lesen, und gleichnamige
   Dateien aus verschiedenen Häusern stapelten sich zu „023 (2).jpg"
+
+### Geändert
+
+- **Die Sprachregelung gilt jetzt überall, wo sie gelten sollte.** Sie stand seit Stufe 7 in
+  CLAUDE.md, war aber nur zur Hälfte umgesetzt: 338 deutsche Kommentare standen in 52
+  Produktivcode-Dateien neben 687 englischen, teils in derselben Datei, und neun Dateien hießen
+  deutsch. Nachgezogen statt aufgeweicht — andersherum wären 687 Kommentare zu übersetzen gewesen
+- Sechs Module und drei Testdateien heißen englisch. Zwei Namen sagen dabei endlich, was drinsteht:
+  `admin/jahr.ts` → `admin/yearInput.ts` (es enthält die Jahrzehnt-Regel) und `admin/paging.ts` →
+  `admin/pagination.ts` (es hieß nur so, weil `pager.ts` auf macOS mit `Pager.tsx` kollidierte).
+  Dazu `frontend/src/texte/` → `frontend/src/text/`
+- **Testdateien sind ganz deutsch**, nicht nur ihre Namen — 326 zu 10 war faktisch schon so. Ein
+  Test-Docstring ist die Fortsetzung des Testnamens und trägt dasselbe Warum
+- **Zitate und Datenwerte behalten ihre Umlaute.** Die Regel widersprach sich hier selbst: Sie
+  verbot Umlaute im Quelltext und gab zwei Absätze später `so that "muhlenweg" finds the
+  "Mühlenweg"` als erwünschtes Beispiel. `"März"` in der Monatsliste hat ohnehin keinen Ersatz —
+  der Kiosk zeigte sonst „Maerz"
+- Neu: `python tools/language_check.py` zählt deutsche und englische Kommentare je Datei und meldet
+  jede, die die Regel bricht. Bewusst **kein Test** — die Spracherkennung ist eine Heuristik, und
+  ein Test, der bei einem Fachbegriff falsch anschlägt, wird bald ausgeschaltet

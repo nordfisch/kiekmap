@@ -110,8 +110,8 @@ test-frontend: frontend/node_modules
 	cd frontend && npm run typecheck && npm test
 
 lint: $(VENV)  ## Code-Stil pruefen
-	$(VENV)/bin/ruff check backend tiles
-	$(VENV)/bin/ruff format --check backend tiles
+	$(VENV)/bin/ruff check backend tiles tools
+	$(VENV)/bin/ruff format --check backend tiles tools
 
 build: frontend/node_modules  ## Frontend-Bundle bauen (Ergebnis in frontend/dist)
 	cd frontend && npm run build

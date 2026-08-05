@@ -423,31 +423,19 @@ einer Datei steht, liest es sich am Stück und überlebt einen Kontextverlust �
 warum die Pläne früher so geführt wurden. Der Umzug lohnt, sobald mehr als eine Person daran
 arbeitet oder die Reihenfolge häufiger wechselt als die Inhalte.
 
-### Sprach- und Namenskonsistenz prüfen
+### Sprach- und Namenskonsistenz prüfen — erledigt am 5. August 2026
 
-Die Sprachregelung in [CLAUDE.md](../CLAUDE.md) ist klar, die Umsetzung ist es nicht. **Der
-deutlichste Fall sind die Dateinamen**, für die Englisch vorgeschrieben ist — tatsächlich stehen
-sie fast genau halbe-halbe:
+Gemessen, entschieden, umgesetzt. Vier Regeln wurden lückenlos eingehalten (Oberflächentexte in
+`text/de.ts`, API-Namen, CLI-Ausgaben, 90 von 90 Commits ohne Umlaut), zwei nicht: **338 deutsche
+Kommentare in 52 Produktivcode-Dateien** und neun deutsche Dateinamen.
 
-| | |
-|---|---|
-| deutsch | `focus.ts`, `houseNumbers.ts`, `decades.ts`, `stacks.ts`, `timeAxis.ts`, `yearInput.ts` (samt Tests), `tests/fixtures/build_test_images.py` |
-| englisch | `idle.ts`, `mapStyle.ts`, `filename.ts`, `format.ts`, `pagination.ts`, `scrollArea.tsx`, `useLoaded.ts` |
+Beides ist nachgezogen statt die Regel aufzuweichen — bei den Kommentaren zugleich der billigere
+Weg, andersherum wären 687 zu übersetzen gewesen. Zwei Umbenennungen lösten dabei die Sinnfrage
+mit: `jahr.ts` → `yearInput.ts` (enthält die Jahrzehnt-Regel), `paging.ts` → `pagination.ts`
+(hieß nur so wegen einer Namenskollision mit `Pager.tsx`).
 
-Beide Gruppen sind Module derselben Art — kleine reine Fachlogik neben den Komponenten. Es gibt
-also keine Regel dahinter, nur die Reihenfolge ihrer Entstehung. Zu entscheiden ist, ob die Regel
-gilt (dann sechs Umbenennungen) oder ob Fachlogik-Module die Ausnahme sind wie die Testnamen (dann
-gehört das in die Regel geschrieben).
+Zwei Präzisierungen an der Regel selbst, beide aus der Messung: **Testdateien sind ganz deutsch**,
+nicht nur ihre Namen (326 zu 10 war faktisch schon so), und **Zitate und Datenwerte behalten ihre
+Umlaute** — die Regel widersprach sich hier selbst.
 
-**Dasselbe für Kommentare.** Sie sollen englisch sein; in den jüngeren Dateien sind viele deutsch,
-und teils stehen beide Sprachen in einer Datei nebeneinander. Auch hier: entweder nachziehen oder
-die Regel ändern — aber nicht offenlassen, denn genau daran orientiert sich, wer als Nächstes etwas
-hinzufügt.
-
-**Dazu die Sinnfrage.** Nicht nur die Sprache eines Dateinamens ist zu prüfen, sondern ob er sagt,
-was drinsteht: `yearInput.ts` enthält die Jahrzehnt-Regel des Verwaltungsbereichs, `format.ts` formatiert
-Tagesangaben, `pagination.ts` heißt so, weil `pager.ts` auf macOS mit `Pager.tsx` kollidierte. Solche
-Namen kosten jedes Mal einen Blick in die Datei.
-
-**Commit-Nachrichten** sind deutsch und ohne Umlaute — das ist bisher durchgehalten; ein Durchgang
-über `git log` sollte es bestätigen statt es anzunehmen.
+Ob es auseinanderläuft, beantwortet ab jetzt `python tools/language_check.py`.

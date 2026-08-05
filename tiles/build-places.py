@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Baut den Ortsindex fuer die Suche im "Hilf mit"-Bereich.
+"""Builds the gazetteer for the search in the "Hilf mit" panel.
 
     python3 tiles/build-places.py
 
-Fragt einmalig die Overpass-API nach den Strassen im Ausschnitt aus ``tiles/region.json`` und
-nach ihren Hausnummern, und schreibt beides nach ``data/places.json``.
-Das Backend laedt die Datei beim Start.
+Asks the Overpass API once for the streets inside the extent from ``tiles/region.json`` and for
+their house numbers, and writes both to ``data/places.json``. The backend loads that file at
+startup.
 
-Warum nicht Nominatim: fuer den einen Zweck, den wir haben -- "Wo ist das?" mit einem Strassennamen
-beantworten -- waere ein vollwertiger Geokodierer auf einem Pi ueberdimensioniert. Ein Dorf hat
-einige hundert benannte Dinge; die passen in eine Tabelle und werden mit LIKE durchsucht.
+Why not Nominatim: for the one purpose we have -- answering "where is this?" with a street name --
+a full geocoder would be oversized on a Pi. A village has a few hundred named things; they fit in
+one table and are searched with LIKE.
 
-Laeuft auf dem Entwicklungsrechner mit Internet, nicht auf dem Pi.
+Runs on the development machine with internet, not on the Pi.
 """
 
 import json
@@ -24,56 +24,56 @@ import urllib.request
 from pathlib import Path
 
 from geometry import (
-    Linie,
-    Punkt,
-    entfernung_m,
-    gruppiere,
-    mittlere_hausnummer,
-    nach_hausnummer,
-    naechste_gruppe,
-    niedrigste_hausnummer,
-    vertreterpunkt,
+    Line,
+    Point,
+    by_housenumber,
+    distance_m,
+    group_lines,
+    lowest_housenumber,
+    median_housenumber,
+    nearest_group,
+    representative_point,
 )
 
-WURZEL = Path(__file__).resolve().parent.parent
-REGION = WURZEL / "tiles" / "region.json"
-ZIEL = WURZEL / "data" / "places.json"
+ROOT = Path(__file__).resolve().parent.parent
+REGION = ROOT / "tiles" / "region.json"
+TARGET = ROOT / "data" / "places.json"
 
 OVERPASS = "https://overpass-api.de/api/interpreter"
 
-#: Overpass weist Anfragen ohne aussagekraeftigen User-Agent mit "406 Not Acceptable" ab.
-#: Die Kennung soll erkennen lassen, wer da fragt -- so will es die Nutzungsordnung.
-KENNUNG = "photomap-museum/0.1 (Ortsindex fuer einen Museums-Kiosk, einmaliger Aufruf)"
+#: Overpass rejects requests without a meaningful user agent with "406 Not Acceptable".
+#: The identifier should show who is asking -- the terms of use ask for that.
+USER_AGENT = "photomap-museum/0.1 (Ortsindex fuer einen Museums-Kiosk, einmaliger Aufruf)"
 
-#: Strassen kommen mit vollem Verlauf zurueck, Adressen als einzelne Punkte.
+#: Streets come back with their full course, addresses as single points.
 #:
-#: `out center` liefert die Mitte des umschliessenden Rechtecks -- bei einer gebogenen Strasse
-#: liegt die neben der Fahrbahn. Fuer Strassen wird deshalb `out geom` gebraucht.
-STRASSEN_ABFRAGE = 'way["highway"]["name"]'
+#: `out center` returns the centre of the bounding box -- on a curved street that lies beside the
+#: carriageway. Streets therefore need `out geom`.
+STREET_QUERY = 'way["highway"]["name"]'
 
-#: Adressen. Ohne sie bekaeme jedes Foto einer 800 m langen Strasse denselben Punkt. Beide Formen
-#: kommen vor: ein eigener Adressknoten und ein Gebaeudeumriss mit Adresstags.
-ADRESS_ABFRAGEN = [
+#: Addresses. Without them every photo of an 800 m street would get the same point. Both forms
+#: occur: an address node of its own, and a building outline carrying address tags.
+ADDRESS_QUERIES = [
     'node["addr:housenumber"]["addr:street"]',
     'way["addr:housenumber"]["addr:street"]',
 ]
 
 
-def normalisiere(name: str) -> str:
-    """Kleinschreibung ohne diakritische Zeichen, damit "Muhlenweg" den "Mühlenweg" findet.
+def normalize(name: str) -> str:
+    """Lowercased and without diacritics, so that "muhlenweg" finds the "Mühlenweg".
 
-    Das ss fuer ß muss vor dem Zerlegen stehen: NFKD laesst ß unangetastet.
+    The ss for the sharp s has to happen before decomposing: NFKD leaves it untouched.
     """
-    ohne_scharf = name.replace("ß", "ss").replace("ẞ", "ss")
-    zerlegt = unicodedata.normalize("NFKD", ohne_scharf)
-    return "".join(z for z in zerlegt if not unicodedata.combining(z)).lower().strip()
+    without_sharp_s = name.replace("ß", "ss").replace("ẞ", "ss")
+    decomposed = unicodedata.normalize("NFKD", without_sharp_s)
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).lower().strip()
 
 
-def lade_region() -> tuple[str, list[float], Punkt]:
-    """Name, Ausschnitt und Ortsmitte.
+def load_region() -> tuple[str, list[float], Point]:
+    """Name, extent and the centre of the village.
 
-    Die Mitte entscheidet bei gleichnamigen Strassen, welche die des Museumsortes ist -- der
-    Ausschnitt reicht ueber den Ort hinaus und enthaelt Nachbardoerfer mit denselben Namen.
+    The centre decides which of several streets of equal name is the museum village's -- the
+    extent reaches beyond the village and holds neighbouring ones with the same street names.
     """
     region = json.loads(REGION.read_text(encoding="utf-8"))
     if region["name"] == "PLATZHALTER":
@@ -82,197 +82,199 @@ def lade_region() -> tuple[str, list[float], Punkt]:
     return region["name"], region["bbox"], (lat, lon)
 
 
-def baue_abfrage(bbox: list[float]) -> str:
-    # Overpass erwartet sued,west,nord,ost -- genau umgekehrt zu unserer bbox.
+def build_query(bbox: list[float]) -> str:
+    # Overpass expects south,west,north,east -- exactly the other way round from our bbox.
     min_lon, min_lat, max_lon, max_lat = bbox
-    rahmen = f"{min_lat},{min_lon},{max_lat},{max_lon}"
-    adressen = "\n  ".join(f"{muster}({rahmen});" for muster in ADRESS_ABFRAGEN)
-    # Zwei Ausgaben in einer Anfrage: Strassen mit Verlauf, Adressen mit ihrem Punkt. Alles mit
-    # `out geom` zu holen waere ein Vielfaches an Daten, ohne irgendwo gebraucht zu werden.
+    frame = f"{min_lat},{min_lon},{max_lat},{max_lon}"
+    addresses = "\n  ".join(f"{pattern}({frame});" for pattern in ADDRESS_QUERIES)
+    # Two outputs in one request: streets with their course, addresses with their point. Fetching
+    # everything with `out geom` would be a multiple of the data, needed nowhere.
     return (
         "[out:json][timeout:180];\n"
-        f"({STRASSEN_ABFRAGE}({rahmen});)->.strassen;\n"
-        f"(\n  {adressen}\n)->.adressen;\n"
+        f"({STREET_QUERY}({frame});)->.strassen;\n"
+        f"(\n  {addresses}\n)->.adressen;\n"
         ".strassen out geom tags;\n"
         ".adressen out center tags;"
     )
 
 
-def frage_overpass(abfrage: str, versuche: int = 3) -> dict:
-    daten = urllib.parse.urlencode({"data": abfrage}).encode()
+def ask_overpass(query: str, attempts: int = 3) -> dict:
+    data = urllib.parse.urlencode({"data": query}).encode()
 
-    for versuch in range(1, versuche + 1):
-        anfrage = urllib.request.Request(
-            OVERPASS, data=daten, headers={"User-Agent": KENNUNG, "Accept": "application/json"}
+    for attempt in range(1, attempts + 1):
+        request = urllib.request.Request(
+            OVERPASS, data=data, headers={"User-Agent": USER_AGENT, "Accept": "application/json"}
         )
         try:
-            with urllib.request.urlopen(anfrage, timeout=180) as antwort:
-                return json.load(antwort)
-        except urllib.error.HTTPError as fehler:
-            # 429 und 504 heissen "gerade zu viel los" und gehen von selbst vorbei. Alles andere
-            # im 4xx-Bereich liegt an der Anfrage selbst -- da hilft Warten nicht.
-            if fehler.code not in (429, 504) or versuch == versuche:
+            with urllib.request.urlopen(request, timeout=180) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as error:
+            # 429 and 504 mean "busy right now" and pass by themselves. Anything else in the 4xx
+            # range is about the request itself -- waiting does not help there.
+            if error.code not in (429, 504) or attempt == attempts:
                 raise
-            wartezeit = 15 * versuch
-            print(f"  Overpass ist ausgelastet ({fehler.code}), warte {wartezeit} s ...")
-            time.sleep(wartezeit)
-        except (urllib.error.URLError, TimeoutError) as fehler:
-            if versuch == versuche:
+            pause = 15 * attempt
+            print(f"  Overpass ist ausgelastet ({error.code}), warte {pause} s ...")
+            time.sleep(pause)
+        except (urllib.error.URLError, TimeoutError) as error:
+            if attempt == attempts:
                 raise
-            wartezeit = 10 * versuch
-            print(f"  Versuch {versuch} fehlgeschlagen ({fehler}), warte {wartezeit} s ...")
-            time.sleep(wartezeit)
+            pause = 10 * attempt
+            print(f"  Versuch {attempt} fehlgeschlagen ({error}), warte {pause} s ...")
+            time.sleep(pause)
 
     raise RuntimeError("nicht erreichbar")
 
 
-def adresse_von(tags: dict) -> tuple[str, str] | None:
-    """(Strasse, Hausnummer) -- oder None, wenn das kein Adresselement ist."""
-    strasse = (tags.get("addr:street") or "").strip()
-    nummer = (tags.get("addr:housenumber") or "").strip()
-    return (strasse, nummer) if strasse and nummer else None
+def address_of(tags: dict) -> tuple[str, str] | None:
+    """(street, house number) -- or None when this is not an address element."""
+    street = (tags.get("addr:street") or "").strip()
+    number = (tags.get("addr:housenumber") or "").strip()
+    return (street, number) if street and number else None
 
 
-def punkt_von(element: dict) -> Punkt | None:
-    """Der Mittelpunkt eines Elements -- bei Knoten es selbst, bei Wegen ihr ``center``."""
-    mitte = element.get("center") or element
-    lat, lon = mitte.get("lat"), mitte.get("lon")
+def point_of(element: dict) -> Point | None:
+    """An element's centre -- for a node itself, for a way its ``center``."""
+    centre = element.get("center") or element
+    lat, lon = centre.get("lat"), centre.get("lon")
     return None if lat is None or lon is None else (lat, lon)
 
 
-def verlauf_von(element: dict) -> Linie:
-    """Der Wegverlauf aus ``out geom``, oder eine leere Liste."""
+def course_of(element: dict) -> Line:
+    """The way's course out of ``out geom``, or an empty list."""
     return [(p["lat"], p["lon"]) for p in element.get("geometry") or []]
 
 
-def waehle_strasse(
-    gruppen: list[list[Linie]],
-    adressen_je_gruppe: list[list[tuple[str, Punkt]]],
-    zentrum: Punkt,
+def choose_street(
+    groups: list[list[Line]],
+    addresses_per_group: list[list[tuple[str, Point]]],
+    centre: Point,
 ) -> int:
-    """Welche von mehreren gleichnamigen Strassen ist die des Museumsortes?
+    """Which of several streets of equal name is the museum village's?
 
-    **Die Hausnummer 1 entscheidet.** In einem gewachsenen Dorf liegt sie am Ortskern, und sie
-    bleibt dort, auch wenn die Strasse weit hinausfuehrt. Die Mitte einer Strasse taugt dafuer
-    schlechter: Eine lange Strasse zieht sie mit sich aus dem Ort heraus.
+    **House number 1 decides.** In a village that grew it lies at the centre, and it stays there
+    even when the street leads far out. A street's middle is worse for this: a long street drags
+    it out of the village along with itself.
 
-    Hat keine der Gruppen Hausnummern -- rund ein Drittel der Strassen im Ausschnitt hat gar
-    keine --, entscheidet ersatzweise der Verlauf.
+    If none of the groups has house numbers -- about a third of the streets in the extent have
+    none at all -- the course decides instead.
     """
-    mit_adressen = [i for i, adressen in enumerate(adressen_je_gruppe) if adressen]
-    if mit_adressen:
-        kandidaten = [niedrigste_hausnummer(adressen_je_gruppe[i]) for i in mit_adressen]
-        return mit_adressen[naechste_gruppe(kandidaten, zentrum)]
-    return naechste_gruppe([vertreterpunkt(linien) for linien in gruppen], zentrum)
+    with_addresses = [i for i, addresses in enumerate(addresses_per_group) if addresses]
+    if with_addresses:
+        candidates = [lowest_housenumber(addresses_per_group[i]) for i in with_addresses]
+        return with_addresses[nearest_group(candidates, centre)]
+    return nearest_group([representative_point(lines) for lines in groups], centre)
 
 
-def in_region(punkt: Punkt, bbox: list[float]) -> bool:
-    """Liegt der Punkt im Ausschnitt? Draussen weist ihn das Backend beim Beitrag ohnehin ab."""
+def in_region(point: Point, bbox: list[float]) -> bool:
+    """Is the point inside the extent? Outside it the backend refuses a contribution anyway."""
     min_lon, min_lat, max_lon, max_lat = bbox
-    return min_lat <= punkt[0] <= max_lat and min_lon <= punkt[1] <= max_lon
+    return min_lat <= point[0] <= max_lat and min_lon <= point[1] <= max_lon
 
 
 def main() -> int:
-    name, bbox, zentrum = lade_region()
-    print(f"Ortsindex fuer {name} bauen (Ortsmitte {zentrum[0]:.5f}, {zentrum[1]:.5f}) ...")
+    name, bbox, centre = load_region()
+    print(f"Ortsindex fuer {name} bauen (Ortsmitte {centre[0]:.5f}, {centre[1]:.5f}) ...")
 
-    antwort = frage_overpass(baue_abfrage(bbox))
-    elemente = antwort.get("elements", [])
-    print(f"  {len(elemente)} Elemente von Overpass erhalten")
+    response = ask_overpass(build_query(bbox))
+    elements = response.get("elements", [])
+    print(f"  {len(elements)} Elemente von Overpass erhalten")
 
-    strassenstuecke: dict[str, list[Linie]] = {}
-    adressen: dict[str, list[tuple[str, Punkt]]] = {}
+    street_pieces: dict[str, list[Line]] = {}
+    addresses: dict[str, list[tuple[str, Point]]] = {}
 
-    for element in elemente:
+    for element in elements:
         tags = element.get("tags", {})
 
-        # Adressen zuerst, und zwar VOR der Pruefung auf "name": ein Adressknoten hat keinen
-        # Namen. Ohne diesen Zweig faellt jede Adresse hier still heraus -- die Abfrage liefe
-        # gruen durch und der Index bliebe leer.
-        if (adresse := adresse_von(tags)) is not None:
-            strasse, nummer = adresse
-            punkt = punkt_von(element)
-            if punkt is not None and in_region(punkt, bbox):
-                adressen.setdefault(strasse, []).append((nummer, punkt))
+        # Addresses first, and BEFORE the check for "name": an address node has no name. Without
+        # this branch every address would silently drop out here -- the query would run green and
+        # the gazetteer stay empty.
+        if (address := address_of(tags)) is not None:
+            street, number = address
+            point = point_of(element)
+            if point is not None and in_region(point, bbox):
+                addresses.setdefault(street, []).append((number, point))
             continue
 
-        ort_name = (tags.get("name") or "").strip()
-        if not ort_name:
+        place_name = (tags.get("name") or "").strip()
+        if not place_name:
             continue
 
-        # Auf den Ausschnitt zuschneiden: Overpass liefert jeden Weg vollstaendig, sobald er die
-        # bbox beruehrt. Ein Vertreterpunkt auf dem Stueck ausserhalb waere fuer einen Beitrag
-        # unbrauchbar -- das Backend weist ihn ab.
-        verlauf = [punkt for punkt in verlauf_von(element) if in_region(punkt, bbox)]
-        if verlauf:
-            strassenstuecke.setdefault(ort_name, []).append(verlauf)
+        # Clipped to the extent: Overpass returns every way in full as soon as it touches the
+        # bbox. A representative point on the piece outside would be useless for a contribution --
+        # the backend refuses it.
+        course = [point for point in course_of(element) if in_region(point, bbox)]
+        if course:
+            street_pieces.setdefault(place_name, []).append(course)
 
-    orte: list[dict] = []
-    fremde_hausnummern = 0
+    places: list[dict] = []
+    foreign_housenumbers = 0
 
-    for ort_name in sorted(strassenstuecke):
-        stuecke = strassenstuecke[ort_name]
-        gruppen = [[stuecke[i] for i in indizes] for indizes in gruppiere(stuecke)]
+    for place_name in sorted(street_pieces):
+        pieces = street_pieces[place_name]
+        groups = [[pieces[i] for i in indices] for indices in group_lines(pieces)]
 
-        # Jede Hausnummer gehoert zu der gleichnamigen Strasse, die ihr am naechsten liegt. Bei
-        # nur einer Gruppe ist nichts zu entscheiden -- und das ist der Normalfall.
-        adressen_je_gruppe: list[list[tuple[str, Punkt]]] = [[] for _ in gruppen]
-        for nummer, punkt in adressen.get(ort_name, []):
-            naechste = min(
-                range(len(gruppen)),
+        # Every house number belongs to the street of equal name lying closest to it. With only
+        # one group there is nothing to decide -- and that is the normal case.
+        addresses_per_group: list[list[tuple[str, Point]]] = [[] for _ in groups]
+        for number, point in addresses.get(place_name, []):
+            nearest = min(
+                range(len(groups)),
                 key=lambda k: min(
-                    entfernung_m(punkt, stuetz) for linie in gruppen[k] for stuetz in linie
+                    distance_m(point, vertex) for line in groups[k] for vertex in line
                 ),
             )
-            adressen_je_gruppe[naechste].append((nummer, punkt))
+            addresses_per_group[nearest].append((number, point))
 
-        gewaehlt = waehle_strasse(gruppen, adressen_je_gruppe, zentrum)
-        eigene = adressen_je_gruppe[gewaehlt]
-        fremde_hausnummern += sum(len(a) for i, a in enumerate(adressen_je_gruppe) if i != gewaehlt)
+        chosen = choose_street(groups, addresses_per_group, centre)
+        own = addresses_per_group[chosen]
+        foreign_housenumbers += sum(
+            len(a) for i, a in enumerate(addresses_per_group) if i != chosen
+        )
 
-        # Der Vertreterpunkt liegt an einem Haus, wenn es eines gibt: Fuer "Wo war das?" ist die
-        # mittlere Hausnummer die brauchbarere Antwort als ein Punkt auf der Fahrbahn.
-        lat, lon = mittlere_hausnummer(eigene) if eigene else vertreterpunkt(gruppen[gewaehlt])
-        orte.append(
+        # The representative point sits at a house where there is one: for "Wo war das?" the
+        # middle house number is a more usable answer than a point on the carriageway.
+        lat, lon = median_housenumber(own) if own else representative_point(groups[chosen])
+        places.append(
             {
-                "name": ort_name,
-                "name_normalized": normalisiere(ort_name),
+                "name": place_name,
+                "name_normalized": normalize(place_name),
                 "lat": round(lat, 7),
                 "lon": round(lon, 7),
                 "kind": "strasse",
             }
         )
 
-        for nummer, (adr_lat, adr_lon) in nach_hausnummer(eigene):
-            voller_name = f"{ort_name} {nummer}"
-            orte.append(
+        for number, (address_lat, address_lon) in by_housenumber(own):
+            full_name = f"{place_name} {number}"
+            places.append(
                 {
-                    "name": voller_name,
-                    "name_normalized": normalisiere(voller_name),
-                    "lat": round(adr_lat, 7),
-                    "lon": round(adr_lon, 7),
+                    "name": full_name,
+                    "name_normalized": normalize(full_name),
+                    "lat": round(address_lat, 7),
+                    "lon": round(address_lon, 7),
                     "kind": "adresse",
-                    "street": ort_name,
-                    "housenumber": nummer,
+                    "street": place_name,
+                    "housenumber": number,
                 }
             )
 
-    ohne_weg = sorted(set(adressen) - set(strassenstuecke))
-    if ohne_weg:
-        print(f"  {len(ohne_weg)} Strassen nur als Adresse bekannt, ohne Weg -- weggelassen")
-    if fremde_hausnummern:
-        print(f"  {fremde_hausnummern} Hausnummern gleichnamiger Strassen anderer Orte entfernt")
+    without_way = sorted(set(addresses) - set(street_pieces))
+    if without_way:
+        print(f"  {len(without_way)} Strassen nur als Adresse bekannt, ohne Weg -- weggelassen")
+    if foreign_housenumbers:
+        print(f"  {foreign_housenumbers} Hausnummern gleichnamiger Strassen anderer Orte entfernt")
 
-    ZIEL.parent.mkdir(parents=True, exist_ok=True)
-    ZIEL.write_text(json.dumps(orte, ensure_ascii=False, indent=1), encoding="utf-8")
+    TARGET.parent.mkdir(parents=True, exist_ok=True)
+    TARGET.write_text(json.dumps(places, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    nach_art: dict[str, int] = {}
-    for ort in orte:
-        nach_art[ort["kind"]] = nach_art.get(ort["kind"], 0) + 1
+    by_kind: dict[str, int] = {}
+    for place in places:
+        by_kind[place["kind"]] = by_kind.get(place["kind"], 0) + 1
 
-    print(f"\n{len(orte)} Orte nach {ZIEL.relative_to(WURZEL)} geschrieben:")
-    for art, anzahl in sorted(nach_art.items(), key=lambda x: -x[1]):
-        print(f"  {art:12} {anzahl}")
+    print(f"\n{len(places)} Orte nach {TARGET.relative_to(ROOT)} geschrieben:")
+    for kind, count in sorted(by_kind.items(), key=lambda x: -x[1]):
+        print(f"  {kind:12} {count}")
     return 0
 
 
