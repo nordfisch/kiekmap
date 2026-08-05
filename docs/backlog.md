@@ -97,7 +97,7 @@ Karte liegt, kommt über den Pin **nicht** ans Ziel. Für den ist die Suche der 
 
 Auf dem Besucherschirm gibt es heute keinen Weg, die Anzeige zurückzusetzen. Es gibt drei
 Umwege: fünf Minuten warten (der Leerlauf lädt neu), die PIN eingeben und die Verwaltung wieder
-verlassen (lädt seit `a3a5be7` ebenfalls neu), oder den Netzstecker.
+verlassen (lädt seit `1e99559` ebenfalls neu), oder den Netzstecker.
 
 Für einen Besucher, der sich verhakt hat, sind alle drei keine Antwort. Für eine ehrenamtliche
 Person, die danebensteht, reicht der Weg über die Verwaltung — aber nur, wenn sie die PIN weiß.
@@ -105,7 +105,7 @@ Person, die danebensteht, reicht der Weg über die Verwaltung — aber nur, wenn
 **Was dagegen spricht**, und deshalb ist es eine Frage und keine Aufgabe: Ein Knopf im
 Besucherbild, den fast niemand braucht, wird trotzdem gedrückt — von Kindern zuerst. Er nimmt
 Fläche, und er wirft die Arbeit weg, die gerade jemand angefangen hat. Die Ansicht kann sich
-ausserdem kaum noch verhaken: Der Leerlauf lädt neu statt zurückzusetzen, seit `c32748d`.
+ausserdem kaum noch verhaken: Der Leerlauf lädt neu statt zurückzusetzen, seit `8c1f880`.
 
 **Der naheliegende Mittelweg wäre eine unauffällige Geste** — ein langer Druck auf das Wappen etwa.
 Genau diese Bauform wurde in Stufe 8 für den Verwaltungszugang **verworfen**, weil eine unsichtbare
@@ -179,7 +179,7 @@ kein Ersatz.
   es im zweistelligen Megabyte-Bereich bleiben, das ist zu messen.
 
 *Der billige Teil ist bereits gebaut: der Kartenstil „Papier" in den Farben der Oberfläche
-(`09de5a5`).*
+(`2e648f6`).*
 
 ### Kopfzeile des Zeitschiebers aufräumen
 
@@ -231,7 +231,7 @@ Stelle einzeln eingehalten statt an einer.
 
 ### „Hilf mit:" hat seine Akzentfarbe verloren
 
-Beim Angleichen an „Bilder aus" (`cc5a437`) wurde aus dem Akzentbraun eine stille graue Zeile. Das
+Beim Angleichen an „Bilder aus" (`45ae42d`) wurde aus dem Akzentbraun eine stille graue Zeile. Das
 war die bewusste Folge einer bewussten Entscheidung — aber es war zugleich der einzige Blickfang
 der linken Spalte. Falls der Beitragsbereich seinen Zug aufs Auge zurückbekommen soll, ist das die
 Stelle.
