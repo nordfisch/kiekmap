@@ -48,12 +48,12 @@ class DatePrecision(StrEnum):
 
 
 class PhotoStatus(StrEnum):
-    """Ob ein Foto zum Bestand gehoert.
+    """Whether a photo belongs to the collection.
 
-    ``DELETED`` heisst *aus der Ausstellung genommen*, nicht *von der Platte entfernt*: Die Zeile
-    bleibt stehen, die Bilddatei liegen, und "Wiederherstellen" holt beides zurueck. Der Status
-    hiess frueher ``hidden`` -- aber niemand im Museumsteam sucht unter "verstecken" nach dem
-    Loeschen, und ein Fehlscan will geloescht werden, nicht versteckt.
+    ``DELETED`` means *taken out of the exhibition*, not *removed from the disk*: the row stays,
+    the image file stays, and "Wiederherstellen" brings both back. The status used to be called
+    ``hidden`` -- but nobody on the museum team looks under "hide" for deleting, and a botched
+    scan wants deleting, not hiding.
     """
 
     PUBLISHED = "published"

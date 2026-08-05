@@ -714,7 +714,7 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
         done = 0
         for entry in entries:
             relative = entry.filename[len(prefix) :]
-            # Ein Eintrag, der aus dem Arbeitsordner herausfuehrt, kommt nicht aus unserem Archiv.
+            # An entry that leads out of the work directory did not come from our archive.
             target = (work / relative).resolve()
             if not target.is_relative_to(work.resolve()):
                 raise BackupError("Die Datei enthaelt einen unerwarteten Eintrag.")
@@ -729,8 +729,8 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
 
     message = _swap_in(settings, work, total, report)
 
-    # Erst hier importiert: Auf Modulebene entstuende ein Ring, weil der Importeur seinerseits
-    # nichts von der Sicherung wissen soll.
+    # Imported here rather than at module level, where it would close a ring: the importer in
+    # turn is to know nothing about the backup.
     from app.services.importer import DONE_DIR, move_to_done
 
     move_to_done(archive, settings.incoming_dir)

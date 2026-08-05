@@ -70,10 +70,10 @@ class IncomingWatcher:
             if path.is_file()
             and not path.name.startswith(".")
             and not SPECIAL_DIRS & set(path.relative_to(inbox).parts)
-            # Eine Sicherung ist kein Foto. Ohne diese Zeile liefe sie in ``import_file``, waere
-            # dort "Kein lesbares Bild" und landete in ``_problem/``. Sie bleibt stattdessen
-            # liegen, bis jemand im Verwaltungsbereich zustimmt -- siehe services/backup.py,
-            # ``waiting_archive``. Der Eingangsordner soll nichts von allein ersetzen.
+            # A backup is not a photo. Without this line it would run into ``import_file``, be
+            # "Kein lesbares Bild" there and land in ``_problem/``. Instead it stays put until
+            # somebody in the admin area agrees -- see services/backup.py, ``waiting_archive``.
+            # The inbox is to replace nothing of its own accord.
             and not backup.looks_like_archive(path.name)
         ]
 

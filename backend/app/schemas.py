@@ -179,7 +179,7 @@ class DateInput(BaseModel):
     precision: DatePrecision = DatePrecision.YEAR
 
 
-# --- "Hilf mit" -------------------------------------------------------------
+# --- the "Hilf mit" panel ---------------------------------------------------
 
 
 class LocationContribution(BaseModel):
@@ -377,14 +377,14 @@ class DriveItem(BaseModel):
 
 
 class WaitingBackup(BackupOnDrive):
-    """Eine Sicherung, die im Eingangsordner liegt und auf ihre Bestaetigung wartet.
+    """A backup lying in the inbox and waiting to be confirmed.
 
-    Sie reist mit der Laufwerksabfrage mit, die der Sicherungsbereich ohnehin alle paar Sekunden
-    stellt -- eine zweite Schleife dafuer waere Aufwand ohne Gewinn.
+    It travels along with the drive query the backup area makes every few seconds anyway -- a
+    second polling loop for it would be effort without gain.
     """
 
-    #: Der Dateiname. Er geht beim Einspielen zurueck, damit am Ende genau die Datei genommen
-    #: wird, die auf dem Schirm stand -- und nicht eine, die inzwischen dazugekommen ist.
+    #: The file name. It goes back on restore so that the file finally taken is exactly the one
+    #: that stood on screen -- and not one that has arrived in the meantime.
     file: str
 
 
@@ -394,7 +394,7 @@ class DriveList(BaseModel):
     photos: int
     needed_bytes: int
     reminder: BackupReminder
-    #: Eine Sicherung, die im Eingangsordner auf Bestaetigung wartet.
+    #: A backup waiting in the inbox to be confirmed.
     incoming: WaitingBackup | None = None
 
 
@@ -403,7 +403,7 @@ class DriveChoice(BaseModel):
 
 
 class IncomingChoice(BaseModel):
-    """Welche Datei aus dem Eingangsordner eingespielt werden soll."""
+    """Which file from the inbox is to be restored."""
 
     file: str = Field(max_length=255)
 
@@ -466,7 +466,7 @@ class Overview(BaseModel):
     on_map: int
     without_location: int
     without_date: int
-    #: Geloescht heisst hier: aus der Ausstellung genommen. Datei und Zeile bleiben.
+    #: Deleted here means: taken out of the exhibition. File and row stay.
     deleted: int
     #: Visitor contributions not yet reverted. Something to look through, not a problem.
     visitor_changes: int

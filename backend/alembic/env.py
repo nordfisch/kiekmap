@@ -1,8 +1,8 @@
-"""Alembic-Umgebung.
+"""Alembic environment.
 
-Die Datenbank-URL kommt aus ``app.config``, nicht aus alembic.ini -- so gibt es genau eine Stelle,
-an der der Pfad zur Datenbank steht, und Migrationen treffen im Container automatisch dieselbe
-Datei wie die Anwendung.
+The database URL comes from ``app.config``, not from alembic.ini -- so there is exactly one place
+where the path to the database stands, and inside the container migrations automatically hit the
+same file as the application.
 """
 
 from logging.config import fileConfig
@@ -31,7 +31,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        # SQLite kann Spalten nicht direkt aendern; Alembic baut die Tabelle dann neu.
+        # SQLite cannot alter columns directly; Alembic rebuilds the table in that case.
         render_as_batch=True,
     )
     with context.begin_transaction():
@@ -47,18 +47,18 @@ def run_migrations_online() -> None:
 
     @event.listens_for(connectable, "connect")
     def _migrations_without_cascades(dbapi_connection, connection_record) -> None:
-        """Fremdschluessel aus, solange migriert wird -- und das ist kein Detail.
+        """Foreign keys off while migrating -- and that is not a detail.
 
-        SQLite kann Spalten und Constraints nicht aendern; Alembic baut die Tabelle deshalb neu:
-        Kopie anlegen, **Original loeschen**, umbenennen. Mit eingeschalteten Fremdschluesseln
-        raeumt genau dieses DROP alles ab, was daran haengt -- ``changes`` mit ON DELETE CASCADE,
-        ``photo_tags`` ebenso, und ``import_log`` verliert seine Verknuepfung durch
-        ON DELETE SET NULL. Der Schaden faellt nicht auf: Die Migration laeuft gruen durch, und
-        erst Wochen spaeter fehlen im Museum alle Besucherbeitraege.
+        SQLite cannot alter columns or constraints; Alembic therefore rebuilds the table: make a
+        copy, **drop the original**, rename. With foreign keys switched on it is exactly that DROP
+        which clears out everything hanging off it -- ``changes`` with ON DELETE CASCADE,
+        ``photo_tags`` likewise, and ``import_log`` loses its link through ON DELETE SET NULL. The
+        damage does not show: the migration runs green, and only weeks later are all visitor
+        contributions missing in the museum.
 
-        ``app/db.py`` schaltet die Pruefung fuer *jede* Engine des Prozesses ein, auch fuer diese
-        hier -- deshalb muss sie an dieser Stelle ausdruecklich wieder aus. Im Betrieb bleibt sie
-        selbstverstaendlich an.
+        ``app/db.py`` switches the check on for *every* engine in the process, this one included --
+        which is why it has to be explicitly switched off again here. In production it stays on, of
+        course.
         """
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=OFF")

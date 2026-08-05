@@ -51,8 +51,8 @@ def next_task(
     filters = [Photo.status == PhotoStatus.PUBLISHED, _missing_filter(need)]
     open_count = session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
 
-    # Auch die andere Frage zaehlen: Danach entscheidet der Bildschirm, ob "Weiss ich nicht"
-    # ueberhaupt noch irgendwohin fuehrt. Ist sonst nichts mehr offen, kaeme dasselbe Foto zurueck.
+    # Count the other question too: from it the screen decides whether "Weiss ich nicht" still
+    # leads anywhere at all. With nothing else open the same photo would come back.
     other: Need = "date" if need == "location" else "location"
     open_other = (
         session.scalar(

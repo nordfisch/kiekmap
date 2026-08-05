@@ -1,8 +1,8 @@
-"""Shared test setup.
+"""Gemeinsame Testeinrichtung.
 
-Every test gets a fresh, temporary data directory. That has to happen *before* ``app.db`` is used,
-because the engine is created at import time -- hence the ``get_settings.cache_clear()`` dance and
-the rebinding of the session.
+Jeder Test bekommt ein frisches, temporaeres Datenverzeichnis. Das muss geschehen, *bevor*
+``app.db`` benutzt wird, denn die Engine entsteht beim Import -- daher der Tanz um
+``get_settings.cache_clear()`` und das Neubinden der Sitzung.
 """
 
 import os
@@ -19,7 +19,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 @pytest.fixture
 def fixtures_dir() -> Path:
-    """The test images. Produced by ``tests/fixtures/build_test_images.py``."""
+    """Die Testbilder. Erzeugt von ``tests/fixtures/build_test_images.py``."""
     return FIXTURES
 
 
@@ -50,14 +50,14 @@ def settings(data_dir: Path):
 
 @pytest.fixture
 def session(settings) -> Iterator[Session]:
-    """Fresh database with all tables.
+    """Frische Datenbank mit allen Tabellen.
 
-    Tables are created straight from the models rather than through Alembic -- faster, and the
-    migrations themselves run at container start anyway.
+    Die Tabellen entstehen direkt aus den Modellen statt ueber Alembic -- schneller, und die
+    Migrationen selbst laufen ohnehin beim Containerstart.
     """
     import app.db
     from app.db import Base
-    from app.models import Photo  # noqa: F401 -- registers every table on Base
+    from app.models import Photo  # noqa: F401 -- meldet jede Tabelle an Base an
 
     app.db.engine = app.db.create_db_engine()
     app.db.SessionLocal.configure(bind=app.db.engine)
@@ -75,17 +75,17 @@ def client(session: Session) -> Iterator[TestClient]:
         yield test_client
 
 
-#: PIN of the test device. Any four digits will do -- what matters is that it is not the hash.
+#: Die PIN des Testgeraets. Vier beliebige Ziffern -- wichtig ist nur, dass sie nicht der Hash ist.
 TEST_PIN = "4711"
 
 
 @pytest.fixture(autouse=True)
 def reset_process_state() -> Iterator[None]:
-    """Everything the service keeps in memory rather than in the database.
+    """Alles, was der Dienst im Speicher haelt statt in der Datenbank.
 
-    Admin sessions, the failure counter and the one backup job all outlive a test otherwise --
-    a test that mistypes the PIN five times would take the whole suite down with it, and a
-    finished backup job would still be reported to the next test.
+    Anmeldungen, der Fehlversuchszaehler und der eine Sicherungsauftrag ueberleben sonst einen
+    Test -- einer, der die PIN fuenfmal falsch eingibt, risse die ganze Testreihe mit, und ein
+    fertiger Sicherungsauftrag wuerde dem naechsten Test noch gemeldet.
     """
     from app.services import auth, backup
 
@@ -102,11 +102,11 @@ def reset_process_state() -> Iterator[None]:
 
 @pytest.fixture
 def admin_pin(settings, monkeypatch: pytest.MonkeyPatch) -> str:
-    """Set up a PIN for the device -- with far fewer rounds than in production.
+    """Eine PIN fuer das Geraet einrichten -- mit weit weniger Runden als im Betrieb.
 
-    The real 200 000 rounds cost about a tenth of a second per sign-in, on purpose. This suite
-    signs in dozens of times. The round count is stored inside the hash, so verification follows
-    along by itself.
+    Die echten 200 000 Runden kosten mit Absicht rund eine Zehntelsekunde je Anmeldung. Diese
+    Testreihe meldet sich dutzendfach an. Die Rundenzahl steht im Hash, die Pruefung zieht also
+    von selbst mit.
     """
     from app.services import auth
 
@@ -117,7 +117,7 @@ def admin_pin(settings, monkeypatch: pytest.MonkeyPatch) -> str:
 
 @pytest.fixture
 def admin_client(client: TestClient, admin_pin: str) -> TestClient:
-    """A signed-in client. The token goes into the header of every following request."""
+    """Ein angemeldeter Client. Der Token steht danach im Kopf jeder Anfrage."""
     response = client.post("/api/admin/login", json={"pin": admin_pin})
     assert response.status_code == 200, response.text
     client.headers["X-Admin-Token"] = response.json()["token"]
@@ -126,10 +126,11 @@ def admin_client(client: TestClient, admin_pin: str) -> TestClient:
 
 @pytest.fixture
 def make_photo(session: Session):
-    """Create a photo row without files -- for tests that only care about queries.
+    """Eine Fotozeile ohne Dateien -- fuer Tests, denen es nur um Abfragen geht.
 
-    Defaults to Holm and the year 1932; every field is overridable. ``year=None`` and ``lat=None``
-    produce the gaps the "Hilf mit" panel is about.
+    Voreingestellt sind Holm und das Jahr 1932; jedes Feld laesst sich ueberschreiben.
+    ``year=None`` und ``lat=None`` erzeugen genau die Luecken, um die es im "Hilf mit"-Bereich
+    geht.
     """
     from app.models import Photo, PhotoStatus, Source
     from app.services.dates import date_range
@@ -176,9 +177,10 @@ def make_photo(session: Session):
 
 @pytest.fixture
 def sample_image(tmp_path: Path):
-    """Copy a test image somewhere writable and return the path.
+    """Ein Testbild an eine beschreibbare Stelle kopieren und den Pfad zurueckgeben.
 
-    Copied because the import may move files aside, and the templates in the repo must stay put.
+    Kopiert, weil der Import Dateien beiseiteraeumen kann und die Vorlagen im Repo liegen
+    bleiben muessen.
     """
     work_dir = tmp_path / "source"
     work_dir.mkdir()

@@ -102,11 +102,11 @@ def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
 
 
 def move_to_done(path: Path, inbox: Path) -> None:
-    """Raeumt eine erledigte Datei weg -- oeffentlich, weil die Sicherung sie auch braucht.
+    """File a finished file away -- public, because the backup needs it too.
 
-    Ein eingespieltes Archiv wandert nach ``_erledigt`` wie jedes Foto, das durch diesen Ordner
-    kam. Der eigene Name statt eines oeffentlichen ``move_aside``: In ``import_file`` heisst ein
-    Parameter so, und der wuerde die Funktion in seinem Geltungsbereich verdecken.
+    A restored archive moves to ``_erledigt`` like every photo that came through this folder. Its
+    own name rather than a public ``move_aside``: a parameter of ``import_file`` is called that,
+    and it would shadow the function inside its scope.
     """
     _move_aside(path, inbox, DONE_DIR)
 

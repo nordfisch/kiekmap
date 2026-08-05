@@ -39,9 +39,8 @@ from app.services import backup as service
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin/backup", tags=["sicherung"])
 
-# Der Stick-Import wohnt hier, obwohl er kein Backup ist: Er teilt sich das Erkennen der
-# Datentraeger und den einen Auftrag mit der Sicherung. Beides zweimal zu haben waere schlimmer
-# als ein Modul, das zwei Dinge kann.
+# The stick import lives here although it is not a backup: it shares drive detection and the one
+# job with the backup. Having both twice would be worse than one module that does two things.
 import_router = APIRouter(prefix="/admin/import", tags=["import"])
 
 
@@ -89,11 +88,11 @@ def drives(admin: Admin, settings: Config) -> DriveList:
 
 
 def _waiting(settings: Settings) -> WaitingBackup | None:
-    """Eine Sicherung, die im Eingangsordner auf ihre Bestaetigung wartet.
+    """A backup waiting in the inbox for somebody to confirm it.
 
-    Sie spielt sich nie von selbst ein. Der Ordner nimmt sonst Fotos auf -- hinzufuegend und
-    folgenlos --, waehrend das hier den ganzen Bestand ersetzt; deshalb dieselbe Rueckfrage, die
-    der Stick-Weg schon stellt.
+    It never restores itself. That folder otherwise takes photos in -- additively and without
+    consequence -- while this replaces the entire collection; hence the same confirmation the
+    stick route already asks for.
     """
     found = service.waiting_archive(settings)
     if found is None:
@@ -154,10 +153,10 @@ def restore(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
 
 @router.post("/incoming/restore", response_model=JobState, summary="Restore from the inbox")
 def restore_from_incoming(choice: IncomingChoice, admin: Admin, settings: Config) -> JobState:
-    """Spielt eine Sicherung ein, die als ZIP-Datei im Eingangsordner liegt.
+    """Restore a backup lying in the inbox as a ZIP file.
 
-    Derselbe Weg wie beim Stick: derselbe Auftrag, derselbe Fortschrittsbalken, dasselbe
-    Beiseitelegen des bisherigen Bestands. Nur die Quelle ist eine andere.
+    The same route as from a stick: the same job, the same progress bar, the same setting aside
+    of the previous collection. Only the source is a different one.
     """
     archive = _pick_archive(settings, choice.file)
 
@@ -174,11 +173,11 @@ def restore_from_incoming(choice: IncomingChoice, admin: Admin, settings: Config
 
 
 def _pick_archive(settings: Settings, name: str) -> Path:
-    """Nur eine Datei, die wirklich im Eingangsordner liegt und eine Sicherung ist.
+    """Only a file that really lies in the inbox and really is a backup.
 
-    Der Name kommt aus dem Browser, ist also Eingabe und keine Tatsache. Ohne diese Pruefung waere
-    die Verwaltung ein Weg, jede beliebige Datei des Geraets als Sicherung einzuspielen -- und ein
-    aufgeloester Pfad wird verglichen, damit ``..`` niemanden aus dem Ordner herausbringt.
+    The name comes from the browser, so it is input and not fact. Without this check the admin
+    area would be a way to restore any file on the device as a backup -- and a resolved path is
+    what gets compared, so that ``..`` takes nobody out of the folder.
     """
     inbox = settings.incoming_dir
     wanted = (inbox / name).resolve()
@@ -262,20 +261,20 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
     return status(admin)
 
 
-#: Bis hierher lohnt sich die Nacharbeits-Tabelle, darueber nicht mehr.
+#: Up to here the review table is worth it, beyond it no longer.
 #:
-#: Wer vierzig ausgesuchte Bilder hochlaedt, will sie gleich beschriften. Wer einen Ordner mit
-#: zweihundert einliest, will keine Tabelle mit zweihundert Zeilen -- fuer den ist die
-#: "Ohne Ort"-Liste die Arbeitsflaeche. Die Zahl steht auch im Frontend; beide Seiten nennen die
-#: jeweils andere im Kommentar.
+#: Whoever uploads forty selected pictures wants to caption them right away. Whoever takes in a
+#: folder of two hundred does not want a table with two hundred rows -- for them the "Ohne Ort"
+#: list is the work surface. The number also stands in the frontend; each side names the other in
+#: its comment.
 REVIEW_LIMIT = 30
 
 
 def _review_rows(outcomes: list[importer.ImportOutcome]) -> list[dict] | None:
-    """Die Zeilen fuer die Nacharbeit -- oder None, wenn es zu viele waeren.
+    """The rows for the review table -- or None when there would be too many.
 
-    Sie reisen im Auftragsstatus mit, der im Sekundentakt abgefragt wird. Zweihundert Fotos darin
-    waeren eine Nutzlast, die bei jeder Abfrage neu ueber die Leitung ginge.
+    They travel inside the job status, which is polled once a second. Two hundred photos in there
+    would be a payload going over the wire again on every poll.
     """
     if len(outcomes) > REVIEW_LIMIT:
         return None
@@ -308,20 +307,20 @@ def _pick_folder(settings: Settings, path: str) -> Path:
     raise HTTPException(404, "Diesen Ordner gibt es auf dem Stick nicht mehr.")
 
 
-# --- die Sicherung als eine Datei -------------------------------------------
+# --- the backup as one file -------------------------------------------------
 #
-# Der zweite Weg aus der Sammlung heraus, fuer den Fall, dass kein Stick zur Hand ist. Er laeuft
-# **nicht** ueber den Auftrag: Es gibt nichts zu ueberwachen, der Browser fuehrt die Uebertragung
-# und zeigt sie selbst an. Das Archiv entsteht dabei im Strom -- siehe services/backup.py.
+# The second way out of the collection, for when no stick is at hand. It does **not** go through
+# the job: there is nothing to watch, the browser runs the transfer and shows it itself. The
+# archive is built as a stream -- see services/backup.py.
 
 
 @router.post("/zip/ticket", response_model=DownloadTicket, summary="Permit for one download")
 def zip_ticket(admin: Admin) -> DownloadTicket:
-    """Ein Browser-Download kann keinen ``X-Admin-Token`` mitschicken -- deshalb dieser Umweg.
+    """A browser download cannot send an ``X-Admin-Token`` -- hence this detour.
 
-    Die Sitzung selbst in die URL zu haengen waere kuerzer und falsch: Adressen landen im Verlauf,
-    in Lesezeichen und in Proxy-Protokollen, und dieser Token oeffnet den ganzen
-    Verwaltungsbereich. Das Ticket kauft genau einen Download und ist danach verbraucht.
+    Hanging the session itself into the URL would be shorter and wrong: addresses end up in
+    history, in bookmarks and in proxy logs, and this token opens the whole admin area. The ticket
+    buys exactly one download and is spent afterwards.
     """
     ticket, expires_in_s = auth.tickets.issue()
     return DownloadTicket(ticket=ticket, expires_in_s=expires_in_s)
@@ -332,13 +331,13 @@ def zip_download(settings: Config, ticket: str = Query(description="From /zip/ti
     if not auth.tickets.redeem(ticket):
         raise HTTPException(401, "Dieser Link ist abgelaufen. Bitte noch einmal herunterladen.")
 
-    # Waehrend einer Wiederherstellung wuerden die Dateien unter dem laufenden Strom ausgetauscht,
-    # und das Archiv enthielte am Ende zwei verschiedene Bestaende.
+    # During a restore the files would be swapped out from under the running stream,
+    # and the archive would end up holding two different collections.
     if service.job.running:
         raise HTTPException(409, "Es ist gerade etwas im Gange. Bitte warten, bis es fertig ist.")
 
     def strom():
-        # Eigene Sitzung: Der Generator laeuft weiter, nachdem die Anfrage beantwortet ist.
+        # Its own session: the generator runs on after the request has been answered.
         with SessionLocal() as session:
             yield from service.stream_archive(session, settings)
 
@@ -347,9 +346,9 @@ def zip_download(settings: Config, ticket: str = Query(description="From /zip/ti
     return StreamingResponse(
         strom(),
         media_type="application/zip",
-        # Ohne Laengenangabe: Bei ZIP_STORED waere sie ausrechenbar, aber die Rechnung ueber
-        # Eintragskopf, Zentralverzeichnis und ZIP64-Zusatzfelder ist zerbrechlich -- und eine
-        # falsche Zahl ist schlimmer als keine. Der Browser zeigt dafuer keinen Fortschritt.
+        # No content length: with ZIP_STORED it could be worked out, but the arithmetic
+        # over entry headers, the central directory and ZIP64 extra fields is brittle
+        # -- and a wrong number is worse than none. The browser shows no progress.
         headers={"Content-Disposition": f'attachment; filename="{name}"'},
     )
 

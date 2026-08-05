@@ -40,9 +40,18 @@ ENGLISH = set(
 )
 
 
+#: Quoted material: examples, values, messages. Not the prose being judged.
+#:
+#: A German example inside an English comment is explicitly wanted (CLAUDE.md), and a German
+#: setting value is not a sentence somebody wrote in German -- it is the thing the sentence is
+#: about. Without this the checker reported a violation on config.py that could only have been
+#: fixed by falsifying the example.
+QUOTED = re.compile("``.*?``|\"[^\"]*\"|„[^“]*“|'[^']*'", re.S)
+
+
 def language(text: str) -> str | None:
     """ "de", "en", or None when the text carries no function words either way."""
-    words = re.findall(r"[a-zA-ZäöüÄÖÜß]+", text.lower())
+    words = re.findall(r"[a-zA-ZäöüÄÖÜß]+", QUOTED.sub(" ", text).lower())
     german = sum(1 for w in words if w in GERMAN)
     english = sum(1 for w in words if w in ENGLISH)
     if german == english:

@@ -171,8 +171,9 @@ def overview(admin: Admin, session: Db, settings: Config) -> Overview:
 
 # --- photo care -------------------------------------------------------------
 
-# Ort und Jahr getrennt, nicht als ein "unvollstaendig": Verorten und Datieren sind zwei
-# verschiedene Arbeiten. Wer die Fotos ohne Ort abarbeitet, will die ohne Jahr nicht dazwischen.
+# Place and year kept apart, not merged into one "incomplete": locating and dating
+# are two different jobs. Whoever works through the photos without a place does
+# not want the ones without a year in between.
 Selection = Literal["all", "without_location", "without_date", "deleted"]
 
 

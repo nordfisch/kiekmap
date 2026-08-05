@@ -153,8 +153,8 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
             }
         )
 
-    # Was nicht mehr im Bestand ist, hat hier nichts mehr zu suchen. Ohne dieses Aufraeumen bliebe
-    # jedes einmal geloeschte Foto als Datei liegen -- und ein Ordner, der nur waechst, ist kein
+    # What is no longer in the collection has no business here. Without this tidying every photo
+    # ever deleted would stay behind as a file -- and a folder that only grows is no
     # Abbild eines Zustands mehr.
     for datei in images.iterdir():
         if datei.is_file() and datei.name not in taken:
@@ -246,9 +246,9 @@ def load(session: Session, settings: Settings, source: Path) -> tuple[int, int]:
 
         photos += 1
 
-    # Der Import legt Schlagwoerter aus den Dateien an; die Zeile darueber haengt sie wieder ab,
-    # wenn der Bestand andere vorgibt. Ohne dieses Aufraeumen sammelten sich verwaiste Eintraege,
-    # und die Schlagwortliste der Verwaltung fuellte sich mit Woertern, die an keinem Foto haengen.
+    # The import creates tags out of the files; the line above detaches them again when the
+    # collection prescribes different ones. Without this tidying orphaned entries would pile up,
+    # and the admin area's tag list would fill with words attached to no photo.
     session.flush()
     session.execute(delete(Tag).where(~Tag.photos.any()))
     session.flush()
