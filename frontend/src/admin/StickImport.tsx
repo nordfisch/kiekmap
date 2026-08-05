@@ -1,12 +1,13 @@
 /**
- * Die Ordnerauswahl auf einem eingesteckten USB-Stick.
+ * Choosing a folder on a plugged-in USB stick.
  *
- * Nur die Auswahl — Fortschritt und Ergebnis gehören seit dem Umbau nach `ImportView`, weil sie
- * dort für beide Wege gelten. Was hier bleibt, ist das, was nur den Stick betrifft: die Ordner
- * suchen, während jemand davorsteht, und melden, wenn der Auftrag im Gerät durch ist.
+ * The choice only -- progress and result belong to `ImportView` since the rebuild, because there
+ * they hold for both routes. What stays here is what concerns the stick alone: looking for the
+ * folders while somebody stands in front of it, and reporting when the job inside the device is
+ * through.
  *
- * **Auf dem Stick wird nichts verändert.** Anders als im überwachten Eingangsordner, wo
- * Aufgenommenes beiseitegeräumt wird — ein fremder Datenträger wird nur gelesen.
+ * **Nothing on the stick is changed.** Unlike the watched inbox, where what was taken in gets
+ * moved aside -- somebody else's drive is only read.
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -21,7 +22,7 @@ import {
 import { t } from "../text/de";
 import { DropZone } from "./DropZone";
 
-/** Steckt einer? Während gelesen wird schneller, damit der Balken läuft. */
+/** Is one plugged in? Faster while reading, so the bar keeps moving. */
 const IDLE_POLL_MS = 4000;
 const BUSY_POLL_MS = 800;
 
@@ -33,9 +34,9 @@ export function StickFolders({
 }: {
   selected: ImportFolder | null;
   onSelect: (folder: ImportFolder) => void;
-  /** Meldet jeden Auftragsstand -- ImportView entscheidet, was daraus wird. */
+  /** Reports every job state -- ImportView decides what becomes of it. */
   onJob: (state: JobState) => void;
-  /** True, solange ein Auftrag läuft: dann wird nur noch der Fortschritt abgefragt. */
+  /** True while a job runs: then only the progress is polled. */
   watching?: boolean;
 }) {
   const [found, setFound] = useState<ImportFolders | null>(null);
@@ -45,7 +46,7 @@ export function StickFolders({
     try {
       const status = await fetchJob();
       if (status.kind === "import" && status.phase !== "idle") onJob(status);
-      // Während gelesen wird ändert sich die Ordnerliste nicht -- und sie durchsucht den Stick.
+      // While reading, the folder list does not change -- and finding it walks the stick.
       if (status.phase !== "running") setFound(await fetchImportFolders());
       setError(null);
     } catch (e) {
@@ -63,8 +64,8 @@ export function StickFolders({
 
   if (error) return <p className="admin__error">{error}</p>;
 
-  // Drei Zustaende, nicht zwei: eine leere Ordnerliste heisst entweder "kein Stick" oder "Stick
-  // ohne Bilder", und wer gerade eingesteckt hat, darf nicht "Bitte einstecken" lesen.
+  // Three states, not two: an empty folder list means either "no stick" or "stick without
+  // pictures", and whoever just plugged one in must not read "Bitte einstecken".
   if (!found) return <DropZone title={t.admin.stick.searching} />;
 
   if (found.drives.length === 0) {

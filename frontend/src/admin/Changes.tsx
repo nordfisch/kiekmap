@@ -38,10 +38,15 @@ export function Changes() {
   const [busy, setBusy] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Das Häkchen ändert die Menge -- also von vorn, sonst stünde man hinter deren Ende.
+  // The checkbox changes the set -- so start over, or you would stand past its end.
   useEffect(() => setOffset(0), [includeReverted]);
 
-  const { data, error: loadError, loading, reload } = useLoaded(
+  const {
+    data,
+    error: loadError,
+    loading,
+    reload,
+  } = useLoaded(
     useCallback(() => fetchChanges(includeReverted, offset), [includeReverted, offset]),
   );
 

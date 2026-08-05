@@ -13,14 +13,16 @@
 const EXTENSION = /\.(jpe?g|png|tiff?|webp|gif|bmp)$/i;
 
 export function titleFromFilename(filename: string): string {
-  return filename
-    .replace(EXTENSION, "")
-    // Underscores are always a stand-in for a space.
-    .replace(/_+/g, " ")
-    // A hyphen with spaces around it separates; one inside a word belongs to it ("Süd-West").
-    .replace(/\s+-\s+/g, " ")
-    // "bild (2)" is a copy counter, not a title.
-    .replace(/\s*\(\d+\)\s*$/, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    filename
+      .replace(EXTENSION, "")
+      // Underscores are always a stand-in for a space.
+      .replace(/_+/g, " ")
+      // A hyphen with spaces around it separates; one inside a word belongs to it ("Süd-West").
+      .replace(/\s+-\s+/g, " ")
+      // "bild (2)" is a copy counter, not a title.
+      .replace(/\s*\(\d+\)\s*$/, "")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }

@@ -8,10 +8,10 @@
  * It closes everywhere: tapping beside it, the button, Escape. Whoever is stuck taps somewhere,
  * and that has to lead back.
  *
- * **Ein undatiertes Foto lässt sich hier auch datieren.** Wer es groß ansieht und weiß, wann das
- * war, soll es nicht erst schließen und darauf hoffen müssen, dass der Beitragsbereich ihm
- * dasselbe Foto vorlegt. Es ist dasselbe Auswahlverfahren wie dort -- Jahrzehnt, dann Jahr, alles
- * über Knöpfe. Ein Zahlenfeld wäre hier ein Bedienelement, das ohne Tastatur nichts annimmt.
+ * **An undated photo can be dated right here.** Whoever looks at it large and knows when it was
+ * should not first have to close it and hope the contribution panel puts the same photo up. It is
+ * the same two-step choice as there -- decade, then year, all through buttons. A number field
+ * would be a control that accepts nothing without a keyboard.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -31,12 +31,12 @@ export function PhotoOverlay() {
   const [detail, setDetail] = useState<PhotoDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   /**
-   * Welches Foto fertig geladen ist — und nur das wird gezeichnet.
+   * Which photo has finished loading -- and only that one gets drawn.
    *
-   * Das Seitenverhältnis steht als `aspect-ratio` am Bild, die Box hat ihre volle Größe also
-   * schon, während die Datei noch unterwegs ist. Ohne diese Bremse stünde in dieser Zeit ein
-   * leeres Rechteck mit Schlagschatten im Bild — beim Öffnen und bei jedem Schritt durch einen
-   * Stapel. Der Platz bleibt trotzdem reserviert, sonst springt die Ansicht.
+   * The aspect ratio sits on the image as `aspect-ratio`, so the box already has its full size
+   * while the file is still on its way. Without this brake an empty rectangle with a drop shadow
+   * would stand there for that time -- on opening and on every step through a stack. The space
+   * stays reserved regardless, otherwise the view jumps.
    */
   const [loadedId, setLoadedId] = useState<number | null>(null);
   const [dating, setDating] = useState(false);
@@ -80,11 +80,11 @@ export function PhotoOverlay() {
   const close = () => openPhoto(null);
 
   /**
-   * Ein Jahr für das Foto, das gerade zu sehen ist.
+   * A year for the photo currently on screen.
    *
-   * Die Antwort des Backends ersetzt den lokalen Stand -- damit steht die Jahreszahl da, wo eben
-   * noch „Jahr unbekannt" stand, und die Knöpfe sind weg, weil `needs_date` nicht mehr gilt. Mehr
-   * Rückmeldung braucht es nicht: Die Änderung passiert an genau der Stelle, auf die geschaut wird.
+   * The backend's answer replaces the local state -- so the year stands where "Jahr unbekannt"
+   * stood a moment ago, and the buttons are gone because `needs_date` no longer holds. No more
+   * feedback is needed: the change happens at exactly the spot being looked at.
    */
   async function pickDate(year: number, precision: Precision) {
     if (!detail) return;
@@ -93,7 +93,7 @@ export function PhotoOverlay() {
     try {
       setDetail(await submitDateFor(detail.id, year, precision));
     } catch (e) {
-      // Meist: Jemand anders war schneller (409). Das Backend formuliert das schon freundlich.
+      // Most common case: somebody else was quicker (409). The backend phrases that kindly.
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setDating(false);
@@ -111,9 +111,9 @@ export function PhotoOverlay() {
       {/* Clicks inside must not close -- otherwise you cannot look at the photo without losing it.
           Beside it they do: whoever is stuck taps somewhere, and that has to lead back. */}
       <div className="overlay__content" onClick={(e) => e.stopPropagation()}>
-        {/* Eigene Kopfzeile über beiden Spalten, damit der Knopf dort sitzt, wo ihn jeder sucht:
-            oben rechts. Er stand eine Zeit lang in der Kopfzeile der Textspalte — das fluchtete
-            zwar, las sich aber nicht wie ein Schließen-Knopf. */}
+        {/* Its own header across both columns, so the button sits where everybody looks for it:
+            top right. It stood in the text column's header for a while -- that lined up, but it
+            did not read like a close button. */}
         <div className="overlay__head">
           <button type="button" className="overlay__close" onClick={close}>
             <span aria-hidden="true">×</span>
@@ -131,17 +131,17 @@ export function PhotoOverlay() {
               alt={detail.title ?? t.map.photoAlt}
               style={{ aspectRatio: `${detail.width} / ${detail.height}` }}
               onLoad={() => setLoadedId(detail.id)}
-              // Aus dem Cache ist das Bild unter Umständen schon fertig, bevor React ``onLoad``
-              // hängen kann -- dann bliebe es unsichtbar. Derselbe Wert noch einmal gesetzt ist
-              // für React ein Nichtstun, das schleift also nicht.
+              // Out of the cache the image may be complete before React can attach ``onLoad`` --
+              // then it would stay invisible. Setting the same value again is a no-op for React,
+              // so this does not loop.
               ref={(node) => {
                 if (node?.complete && node.naturalWidth > 0) setLoadedId(detail.id);
               }}
             />
           )}
 
-          {/* Blättern durch die Fotos, die an derselben Stelle liegen -- mittig unter dem Bild,
-              damit die Knöpfe zu dem gehören, was sie wechseln. */}
+          {/* Paging through the photos that lie at the same spot -- centred below the picture,
+              so the buttons belong to what they change. */}
           {openStack.length > 1 && (
             <div className="overlay__pager">
               <button
@@ -167,16 +167,16 @@ export function PhotoOverlay() {
           )}
         </div>
 
-        {/* Oben bündig mit der Oberkante des Bildes, und scrollt für sich, wenn der Text lang
-            wird — statt unter den Bildschirmrand zu laufen. */}
+        {/* Flush with the top edge of the picture, and scrolls on its own when the text gets
+            long -- rather than running off the bottom of the screen. */}
         <div className="overlay__text">
           {error && <p className="overlay__notice">{error}</p>}
           {detail && (
             <>
               <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
               <p className="overlay__year">{detail.date_label}</p>
-              {/* Nur wenn nichts dasteht: Eine kuratierte oder schon beigetragene Datierung
-                  darf ein Besucher nicht überschreiben -- das Backend lehnt es ohnehin ab. */}
+              {/* Only when nothing stands there: a visitor must not overwrite a curated or
+                  already contributed date -- the backend refuses it anyway. */}
               {detail.needs_date && (
                 <div className="overlay__date">
                   <DatePicker
@@ -195,8 +195,8 @@ export function PhotoOverlay() {
                   ))}
                 </ul>
               )}
-              {/* Zuletzt und leise: Der Nachweis gehört zum Bild, aber niemand kommt an den
-                  Touchscreen, um ihn zu lesen. */}
+              {/* Last and quiet: the credit belongs to the picture, but nobody walks up to the
+                  touchscreen to read it. */}
               {detail.credit && <p className="overlay__credit">{detail.credit}</p>}
             </>
           )}

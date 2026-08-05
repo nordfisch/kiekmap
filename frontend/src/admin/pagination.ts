@@ -1,31 +1,31 @@
 /**
- * Die Rechnung hinter dem Blättern.
+ * The arithmetic behind paging.
  *
- * Als reine Funktionen, weil beide Fälle, die hier schiefgehen können, still schiefgehen: eine
- * Liste, die auf einer leeren Seite steht, sieht aus wie eine kaputte Abfrage.
+ * Pure functions, because both ways this can go wrong go wrong silently: a list standing on an
+ * empty page looks like a broken query.
  */
 
-/** Zeilen je Seite. Rund drei Bildschirmseiten -- so weit trägt ein Wisch mit dem Finger. */
+/** Rows per page. About three screenfuls -- as far as one swipe of a finger carries. */
 export const PAGE_SIZE = 30;
 
 export function pageCount(total: number, size = PAGE_SIZE): number {
-  // Auch eine leere Liste hat eine Seite: "Seite 1 von 0" wäre eine Auskunft über nichts.
+  // An empty list has a page too: "Seite 1 von 0" would be a statement about nothing.
   return Math.max(1, Math.ceil(total / size));
 }
 
 /**
- * Den Versatz auf eine Seite ziehen, die es noch gibt.
+ * Pull the offset onto a page that still exists.
  *
- * Der Normalfall dieser Ansichten, nicht die Ausnahme: Wer den letzten Eintrag der letzten Seite
- * von „Ohne Ort" verortet, steht danach hinter dem Ende — die Liste wird beim Abarbeiten ja
- * kürzer. Ohne diese Klammer bliebe eine leere Seite stehen.
+ * The normal case in these views, not the exception: whoever locates the last entry of the last
+ * page of "Ohne Ort" then stands past the end -- working through it makes the list shorter, after
+ * all. Without this clamp an empty page would be left standing.
  */
 export function clampOffset(offset: number, total: number, size = PAGE_SIZE): number {
   if (offset <= 0) return 0;
   return Math.min(offset, (pageCount(total, size) - 1) * size);
 }
 
-/** Die Seitenzahl, die auf dem Schirm steht — von 1 an gezählt, wie ein Mensch zählt. */
+/** The page number shown on screen -- counted from 1, the way a person counts. */
 export function pageNumber(offset: number, size = PAGE_SIZE): number {
   return Math.floor(Math.max(0, offset) / size) + 1;
 }

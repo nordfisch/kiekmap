@@ -26,11 +26,11 @@ const CLUSTER_MAXZOOM = 17;
 type PhotoProps = { stack: Stack };
 
 /**
- * Was ein Kreis zusammenfasst.
+ * What a circle stands for.
  *
- * Nicht die Anzahl der Punkte, sondern die der **Fotos**: Ein Stapel ist für supercluster ein
- * einziger Punkt (siehe stacks.ts), und ein Kreis über einem Achterstapel und zwei Einzelbildern
- * hätte sonst eine 3 getragen statt einer 10.
+ * Not the number of points but the number of **photos**: a stack is one single point to
+ * supercluster (see stacks.ts), and a circle over a stack of eight plus two singles would
+ * otherwise have carried a 3 instead of a 10.
  */
 type ClusterProps = Supercluster.ClusterProperties & { photos: number };
 
@@ -45,14 +45,14 @@ export function buildIndex(photos: PhotoMarker[]): Supercluster<PhotoProps, Clus
   const index = new Supercluster<PhotoProps, ClusterProps>({
     radius: CLUSTER_RADIUS,
     maxZoom: CLUSTER_MAXZOOM,
-    // Beim Zusammenfassen die Fotos zaehlen, nicht die Punkte.
+    // When merging, count the photos, not the points.
     map: (props) => ({ photos: props.stack.photos.length }) as ClusterProps,
     reduce: (summe, props) => {
       summe.photos += props.photos;
     },
   });
-  // Vor dem Clustern gruppiert: supercluster bekommt keine Dubletten zu sehen, und ein Stapel
-  // bleibt auf jeder Zoomstufe ein Marker. Siehe stacks.ts.
+  // Grouped before clustering: supercluster never sees duplicates, and a stack stays one marker
+  // at every zoom level. See stacks.ts.
   index.load(
     groupByLocation(photos).map((stack) => ({
       type: "Feature" as const,
@@ -92,7 +92,7 @@ function photoElement(stack: Stack, onSelect: () => void): HTMLElement {
   year.textContent = photo.date_label;
   root.appendChild(year);
 
-  // Die Anzahl in der Ecke: Der Besucher soll vor dem Tippen wissen, dass mehr dahintersteckt.
+  // The count in the corner: the visitor should know there is more behind it before tapping.
   if (count > 1) {
     const badge = document.createElement("span");
     badge.className = "marker__count";

@@ -34,10 +34,10 @@ export function LocationTask() {
   /** The street whose house numbers are on offer, or null while none is. */
   const [street, setStreet] = useState<Place | null>(null);
   const [numbers, setNumbers] = useState<Place[]>([]);
-  /** Der gewählte Bereich einer langen Straße, oder null, solange die Bereiche dastehen. */
+  /** The chosen block of a long street, or null while the blocks are still on screen. */
   const [block, setBlock] = useState<NumberBlock | null>(null);
 
-  // Zusammenfassen und Aufteilen in einem Zug -- beides haengt nur an der geholten Liste.
+  // Grouping and splitting in one go -- both depend on the fetched list alone.
   const blocks = useMemo(() => blocksOf(groupByBase(numbers)), [numbers]);
 
   useEffect(() => {
@@ -93,27 +93,27 @@ export function LocationTask() {
     setBlock(null);
   }
 
-  /** Den zweiten Schritt schliessen. Was mit dem Pin geschieht, entscheidet der Aufrufer. */
+  /** Close the second step. What happens to the pin is the caller's decision. */
   function closeNumbers() {
     setStreet(null);
     setNumbers([]);
     setBlock(null);
   }
 
-  /** „Doch nicht": zurueck auf Anfang, ohne gesetzten Punkt. Das Gegenteil von „Reicht so". */
+  /** "Doch nicht": back to the start, with no point set. The opposite of "Reicht so". */
   function cancelStreet() {
     closeNumbers();
     setPin(null);
   }
 
   /**
-   * Ein Tipp auf die Karte beendet die Hausnummern-Auswahl.
+   * A tap on the map ends the house-number choice.
    *
-   * Sonst liefe beides nebeneinander her: Der Pin waere versetzt, das Knopfraster stuende noch da,
-   * und der naechste Tipp auf eine Hausnummer wuerfe den eben gesetzten Punkt wieder weg. Ein Tipp
-   * auf die Karte ist die bestimmtere Aussage -- dort hat jemand gerade gezielt.
+   * Otherwise both would run side by side: the pin moved, the grid of buttons still standing, and
+   * the next tap on a house number throwing the point just set away again. A tap on the map is
+   * the more definite statement -- that is where somebody just aimed.
    *
-   * Erkennbar am fehlenden Etikett: Nur die Ortssuche setzt eines (siehe store/contribute.ts).
+   * Told apart by the missing label: only the place search sets one (see store/contribute.ts).
    */
   useEffect(() => {
     if (street && pinLabel === null) closeNumbers();
@@ -122,8 +122,8 @@ export function LocationTask() {
   // Second step: the street is set, now the number. The search steps aside meanwhile, so that
   // nothing but the numbers is on offer.
   if (street) {
-    // Bei einer langen Straße kommt ein Bereich davor -- wie das Jahrzehnt vor dem Jahr. Passt
-    // alles auf eine Seite, gibt `blocksOf` einen einzigen zurück und der Schritt entfällt.
+    // A long street gets a block step in front -- like the decade before the year. If everything
+    // fits on one page, `blocksOf` returns a single one and the step falls away.
     const shown = block ? [block] : blocks;
     const asking = !block && blocks.length > 1;
 
@@ -167,8 +167,8 @@ export function LocationTask() {
           {t.location.noHouseNumber}
         </button>
 
-        {/* Leiser als „Reicht so", weil es keine Antwort ist, sondern ein Rueckweg -- dieselbe
-            Form wie „Anderer Abschnitt" darueber. */}
+        {/* Quieter than "Reicht so", because it is not an answer but a way back -- the same
+            shape as "Anderer Abschnitt" above it. */}
         <button type="button" className="button button--quiet" onClick={cancelStreet}>
           {t.location.cancelStreet}
         </button>

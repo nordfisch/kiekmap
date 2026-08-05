@@ -104,20 +104,19 @@ export const useAdmin = create<AdminState>((set, get) => ({
     }
     get().dropSession();
 
-    // Wer die Verwaltung verlässt, hat meist etwas geändert: importiert, datiert, verortet,
-    // etwas versteckt. Die Besucheransicht hat davon nichts mitbekommen -- sie hielt ihre Marker
-    // und ihr Histogramm die ganze Zeit über fest. Ohne das Neuladen stünde also der Bestand von
-    // vorher da, und die naheliegende Erklärung ("es hat nicht geklappt") wäre die falsche.
+    // Whoever leaves the admin area has usually changed something: imported, dated, located,
+    // hidden. The visitor view saw none of it -- it held on to its markers and its histogram the
+    // whole time. Without the reload the old collection would be standing there, and the obvious
+    // explanation ("it did not work") would be the wrong one.
     window.location.reload();
   },
 
   /**
-   * Session ist zu Ende, ohne dass jemand sie beendet hat -- Ablauf der Zeit oder ein vom Backend
-   * abgelehntes Token.
+   * The session ended without anybody ending it -- time ran out, or the backend refused a token.
    *
-   * **Hier darf nicht neu geladen werden**, anders als in ``leave``. Ein abgelaufenes Token aus
-   * der sessionStorage lässt ``restore`` beim Start über ``onAdminSignedOut`` genau hier landen --
-   * ein Neuladen an dieser Stelle lüde die Seite endlos neu.
+   * **Nothing may be reloaded here**, unlike in ``leave``. An expired token out of sessionStorage
+   * makes ``restore`` land exactly here at startup via ``onAdminSignedOut`` -- a reload at this
+   * point would load the page over and over.
    */
   dropSession() {
     setAdminToken(null);

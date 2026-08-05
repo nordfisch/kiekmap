@@ -16,9 +16,7 @@ import { useContribute } from "../store/contribute";
 import { t } from "../text/de";
 
 export function PinLayer({ map }: { map: maplibregl.Map }) {
-  const active = useContribute(
-    (s) => s.need === "location" && s.task?.photo != null && !s.thanks,
-  );
+  const active = useContribute((s) => s.need === "location" && s.task?.photo != null && !s.thanks);
   const pin = useContribute((s) => s.pin);
   const setPin = useContribute((s) => s.setPin);
   const marker = useRef<Marker | null>(null);

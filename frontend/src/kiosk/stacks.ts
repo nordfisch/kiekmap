@@ -1,31 +1,31 @@
 /**
- * Fotos, die auf demselben Punkt liegen.
+ * Photos that lie on the same point.
  *
- * Am Gasthof Petersen liegen acht Fotos auf identischen Koordinaten. supercluster fasst sie
- * unterhalb von `CLUSTER_MAXZOOM` zu einem Kreis zusammen, darüber gar nicht mehr — dann werden
- * es acht Marker exakt übereinander, von denen nur der oberste erreichbar ist. Und der Weg dorthin
- * war eine Sackgasse: Ein Tipp auf den Kreis zoomte genau in diesen Stapel hinein, denn
- * **identische Punkte trennen sich bei keiner Zoomstufe.**
+ * At the Gasthof Petersen eight photos sit on identical coordinates. Below `CLUSTER_MAXZOOM`
+ * supercluster merges them into one circle, above it not at all -- then there are eight markers
+ * exactly on top of each other, of which only the topmost can be reached. And the way there was a
+ * dead end: tapping the circle zoomed straight into that stack, because **identical points never
+ * separate at any zoom level.**
  *
- * Deshalb wird hier **vor** dem Clustern gruppiert. supercluster sieht damit gar keine Dubletten
- * mehr, und ein Stapel ist auf jeder Zoomstufe ein Marker.
+ * So the grouping happens here, **before** clustering. supercluster never sees a duplicate, and a
+ * stack is one marker at every zoom level.
  */
 
 import type { PhotoMarker } from "../api/client";
 
 /**
- * Fünf Nachkommastellen, also rund ein Meter.
+ * Five decimal places, so about one metre.
  *
- * Trifft den tatsächlichen Fall: Fotos, die über die Ortssuche verortet wurden, tragen exakt
- * dieselbe Koordinate der Straße. Wer den Punkt von Hand gesetzt hat, liegt daneben und bleibt ein
- * eigener Marker — richtig so, denn dann *ist* es eine andere Stelle.
+ * Hits the actual case: photos located through the place search carry exactly the same coordinate
+ * of the street. Whoever set the point by hand lands beside it and stays a marker of their own --
+ * rightly so, because then it *is* a different spot.
  */
 const PLACES = 5;
 
 export type Stack = {
   lat: number;
   lon: number;
-  /** In der Reihenfolge der Liste; vorne das zuletzt bearbeitete Foto. */
+  /** In the order of the list; the most recently edited photo first. */
   photos: PhotoMarker[];
 };
 
@@ -40,7 +40,7 @@ export function groupByLocation(photos: PhotoMarker[]): Stack[] {
     const id = key(photo);
     const stack = stacks.get(id);
     if (stack) stack.photos.push(photo);
-    // Der Ort des Stapels ist der des ersten Fotos -- die anderen liegen ohnehin im Meter daneben.
+    // The stack's place is the first photo's -- the others lie within a metre of it anyway.
     else stacks.set(id, { lat: photo.lat, lon: photo.lon, photos: [photo] });
   }
 

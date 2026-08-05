@@ -97,9 +97,9 @@ export const useContribute = create<ContributeState>((set, get) => {
     abort = new AbortController();
     const signal = abort.signal;
 
-    // Beim Wechsel des Fotos oder der Frage steht die Karte wieder da, wo der Besucher war.
-    // Deckt "Weiss ich nicht" mit ab; nach einer Bestaetigung hat der Dank-Zeitgeber es schon
-    // getan, und ein zweites Mal schadet nicht.
+    // Changing photo or question puts the map back where the visitor had it. Covers "Weiss ich
+    // nicht" as well; after a contribution the thank-you timer has already done it, and doing it
+    // twice does no harm.
     useKiosk.getState().releaseFocus();
 
     set({ loading: true, error: null, pin: null, pinLabel: null, pinAccuracy: null });
@@ -127,8 +127,8 @@ export const useContribute = create<ContributeState>((set, get) => {
     thanksTimer = setTimeout(() => {
       thanksTimer = null;
       set({ thanks: null });
-      // Karte und Zeitraum kehren zurueck, sobald der Dank verschwindet -- beide leben damit
-      // genau so lange wie er, ohne einen zweiten Zeitgeber.
+      // Map and time range come back as the thank-you goes -- both live exactly as long as it
+      // does, without a second timer.
       useKiosk.getState().releaseFocus();
       void load(next);
     }, THANKS_MS);
@@ -143,15 +143,15 @@ export const useContribute = create<ContributeState>((set, get) => {
 
     set({ loading: true, error: null });
     try {
-      // Das Backend gibt das aktualisierte Foto zurueck -- Ort und Datierung kommen damit aus
-      // erster Hand, statt dass hier irgendetwas nachgeraten wird.
+      // The backend hands back the updated photo -- place and date therefore come first hand
+      // instead of being guessed at again here.
       const updated = await action(task.photo);
       set({ loading: false, pin: null, pinLabel: null, pinAccuracy: null });
 
       // Map and timeline have to show it now. The thank-you note promises exactly that -- and
       // before this line it only came true once somebody happened to pan the map.
       useKiosk.getState().refresh();
-      // Und die Ansicht stellt sich auf dieses eine Foto ein, solange der Dank steht.
+      // And the view settles on this one photo for as long as the thank-you stands.
       useKiosk.getState().showPhoto(updated);
 
       showThanks(thanksText, otherNeed(need));
@@ -200,12 +200,12 @@ export const useContribute = create<ContributeState>((set, get) => {
         pinAccuracy: details?.accuracyM ?? null,
       });
 
-      // Aus der Ortssuche (nur die setzt ein Label) nimmt die Karte den Besucher mit -- er hat den
-      // Punkt ja nicht selbst gesetzt und will sehen, wo er gelandet ist. Ein auf die Karte
-      // getippter oder verschobener Pin laesst sie stehen: Dort hat er gerade gezielt, und eine
-      // Karte, die unter dem Finger wegspringt, fuehlt sich an wie ein Verrutschen.
+      // Out of the place search -- the only thing that sets a label -- the map takes the visitor
+      // along: they did not place the pin themselves and want to see where it landed. A pin
+      // tapped onto the map or dragged leaves it alone: that is where they just aimed, and a map
+      // that jumps out from under a finger feels like slipping.
       if (pin && details?.label) useKiosk.getState().showLocation(pin.lat, pin.lon);
-      // "Punkt entfernen" nimmt auch den Zoom zurueck.
+      // "Punkt entfernen" takes the zoom back too.
       if (!pin) useKiosk.getState().releaseFocus();
     },
 
@@ -233,34 +233,33 @@ export const useContribute = create<ContributeState>((set, get) => {
     },
 
     /**
-     * Ein Jahr für ein Foto, das **nicht** in der laufenden Frage steht.
+     * A year for a photo that is **not** the one the running question is about.
      *
-     * Der Fall ist die Detailansicht: Wer ein undatiertes Foto groß ansieht und weiß, wann das
-     * war, soll es dort sagen können. Deshalb geht dieser Weg absichtlich **nicht** durch
-     * ``contribute()``:
+     * The case is the detail view: whoever looks at an undated photo full screen and knows when
+     * it was should be able to say so right there. Which is why this route deliberately does
+     * **not** go through ``contribute()``:
      *
-     *   * **Kein Dank.** Die Rückmeldung ist die Ansicht selbst -- aus „Jahr unbekannt" wird
-     *     „1932", und die Knöpfe verschwinden, genau dort, wohin der Besucher schaut. Ein Satz,
-     *     der das noch einmal sagt und dabei 2,2 Sekunden lang den Beitragsbereich ausblendet,
-     *     wäre hier nur im Weg.
-     *   * **Kein Kartenfokus.** Die Karte liegt unter der Detailansicht; sie irgendwohin zu
-     *     fahren, sähe niemand.
+     *   * **No thank-you.** The feedback is the view itself -- "Jahr unbekannt" becomes "1932"
+     *     and the buttons disappear, exactly where the visitor is looking. A sentence saying so
+     *     again, and hiding the contribution panel for 2.2 seconds while it does, would only be
+     *     in the way here.
+     *   * **No map focus.** The map lies underneath the detail view; moving it anywhere would be
+     *     seen by nobody.
      *
-     * Der Fehler bleibt beim Aufrufer: Die Detailansicht zeigt ihn an der Stelle, an der auch
-     * sonst ihre Meldungen stehen.
+     * Errors stay with the caller: the detail view shows them where its messages always stand.
      */
     async submitDateFor(photoId, year, precision) {
       const updated = await postDate(photoId, { year, precision, session_id: SESSION_ID });
 
-      // Karte und Zeitleiste muessen es zeigen: Das Foto wandert aus "ohne Jahr" in einen
-      // Jahrzehnt-Balken, und bei eingeengtem Zeitraum womoeglich aus der Ansicht heraus.
+      // Map and timeline have to show it: the photo moves out of "ohne Jahr" into a decade bar,
+      // and with a narrowed time range possibly out of view altogether.
       useKiosk.getState().refresh();
 
-      // Fragte der Beitragsbereich gerade *dieses* Foto nach dem Jahr, muss er weiterziehen. Sonst
-      // legt er es gleich noch einmal vor, der Besucher antwortet ein zweites Mal -- und bekommt
-      // "Dieses Foto hat inzwischen schon eine Angabe bekommen", eine Meldung, die klingt, als sei
-      // jemand anders schneller gewesen. Nach dem *Ort* darf er dasselbe Foto weiter fragen: den
-      // braucht es unveraendert.
+      // Was the contribution panel asking about *this* photo's year, it has to move on. Otherwise
+      // it puts it up again, the visitor answers a second time -- and gets "Dieses Foto hat
+      // inzwischen schon eine Angabe bekommen", a message that sounds as though somebody else had
+      // been quicker. About the *place* it may keep asking for the same photo: that one is still
+      // needed.
       const { task, need } = get();
       if (need === "date" && task?.photo?.id === photoId) void load(otherNeed(need));
 

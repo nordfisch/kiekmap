@@ -1,21 +1,20 @@
 /**
- * Wie sich die Ansicht auf ein eben ergänztes Foto einstellt.
+ * How the view settles on a photo just completed.
  *
- * Der Dank verspricht „Das Foto ist jetzt auf der Karte". Damit das stimmt, fährt die Karte für
- * die Dauer des Dankes zu dem Foto, und der Zeitraum stellt sich so, dass es auch wirklich zu
- * sehen ist. Danach kehrt beides zurück — nichts, was der Besucher selbst eingestellt hat, geht
- * verloren.
+ * The thank-you promises "Das Foto ist jetzt auf der Karte". For that to be true, the map travels
+ * to the photo for the duration of the thank-you, and the time range sets itself so that it is
+ * really visible. Afterwards both come back -- nothing the visitor set themselves is lost.
  *
- * Entschieden wird allein nach dem Foto, wie es jetzt dasteht, nicht danach, welcher der beiden
- * Wege den Beitrag ausgelöst hat.
+ * Decided from the photo as it now stands, not from which of the two routes triggered the
+ * contribution.
  */
 
 import type { PhotoDetail, TimeRange } from "../api/client";
 
-/** Wie nah die Karte herangeht. Ein Radius, keine Zoomstufe: die hängt von der Fenstergröße ab. */
+/** How close the map goes. A radius, not a zoom level: that depends on the window size. */
 export const FOCUS_RADIUS_M = 100;
 
-/** Grad Breite je Meter. Für die Länge kommt der Kosinus der Breite dazu. */
+/** Degrees of latitude per metre. For longitude the cosine of the latitude comes on top. */
 const M_PER_DEGREE = 111_320;
 
 export function decadeOf(year: number): number {
@@ -23,14 +22,14 @@ export function decadeOf(year: number): number {
 }
 
 /**
- * Der Zeitraum, in dem dieses Foto zu sehen ist.
+ * The time range in which this photo is visible.
  *
- * - Mit Jahr: sein Jahrzehnt. Wer eben „1932" getippt hat, sieht die Griffe auf die 1930er
- *   springen und sein Foto darin auftauchen.
- * - Ohne Jahr: ganz auf. **Undatierte Fotos stehen nur dann auf der Karte, wenn kein Zeitfilter
- *   aktiv ist** (siehe `_viewport_filters` im Backend). Wer den Schieber eingeengt hat und dann
- *   ein undatiertes Foto verortet, bekäme sonst eine leere Stelle zu sehen — unter dem Satz, das
- *   Foto sei jetzt auf der Karte.
+ * - With a year: its decade. Whoever just tapped "1932" sees the handles jump to the 1930s and
+ *   their photo appear inside them.
+ * - Without a year: wide open. **Undated photos are on the map only while no time filter is
+ *   active** (see `_viewport_filters` in the backend). Whoever narrowed the slider and then
+ *   locates an undated photo would otherwise be shown an empty spot -- under a sentence saying
+ *   the photo is now on the map.
  */
 export function rangeForPhoto(photo: PhotoDetail, fullRange: TimeRange | null): TimeRange | null {
   if (photo.lat === null || photo.lon === null) return null;
@@ -42,7 +41,7 @@ export function rangeForPhoto(photo: PhotoDetail, fullRange: TimeRange | null): 
   return fullRange;
 }
 
-/** Das Quadrat um einen Punkt, das die Karte einpasst: [[West, Süd], [Ost, Nord]]. */
+/** The square around a point that the map fits: [[west, south], [east, north]]. */
 export function boundsAround(
   lat: number,
   lon: number,

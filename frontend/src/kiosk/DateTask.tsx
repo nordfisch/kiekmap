@@ -1,9 +1,9 @@
 /**
- * „Wann war das?" -- ein Foto datieren, im Beitragsbereich.
+ * "Wann war das?" -- dating a photo, in the contribution panel.
  *
- * Nur noch die Verdrahtung: Der sichtbare Ablauf steht in `DatePicker`, weil die Detailansicht
- * ihn ebenfalls zeigt. Was hier bleibt, ist die eine Zuordnung, die diese Stelle ausmacht -- der
- * Beitrag geht an das Foto der laufenden Frage.
+ * Only the wiring now: the visible flow lives in `DatePicker`, because the detail view shows it
+ * too. What stays here is the one binding that makes this place what it is -- the contribution
+ * goes to the photo of the running question.
  */
 
 import { useMemo } from "react";
@@ -18,7 +18,7 @@ export function DateTask() {
   const loading = useContribute((s) => s.loading);
   const collection = useKiosk((s) => s.fullRange);
 
-  // Was zur Wahl steht, ergibt sich aus dem Bestand -- siehe kiosk/decades.ts.
+  // What is on offer follows from the collection -- see kiosk/decades.ts.
   const decades = useMemo(() => offeredDecades(collection), [collection]);
 
   return (

@@ -27,7 +27,7 @@ export type Overview = {
   without_date: number;
   deleted: number;
   visitor_changes: number;
-  /** Fertig gerechnete Tage: siehe services/dates.days_since im Backend. */
+  /** Days already worked out: see services/dates.days_since in the backend. */
   days_since_import: number | null;
   days_since_change: number | null;
   backup: BackupReminder;
@@ -50,7 +50,7 @@ export type DriveItem = {
   backup: BackupOnDrive | null;
 };
 
-/** Eine Sicherung, die als ZIP-Datei im Eingangsordner auf ihre Bestätigung wartet. */
+/** A backup waiting in the inbox as a ZIP file for somebody to confirm it. */
 export type WaitingBackup = BackupOnDrive & { file: string };
 
 export type DriveList = {
@@ -69,7 +69,7 @@ export type JobState = {
   total: number;
   message: string;
   error: string | null;
-  /** Zeilen für die Nacharbeit, wenn es wenige genug waren. Siehe REVIEW_LIMIT im Backend. */
+  /** Rows for the review table, when there were few enough. See REVIEW_LIMIT in the backend. */
   items: UploadItem[] | null;
 };
 
@@ -102,7 +102,7 @@ export type ChangeItem = {
   revertable: boolean;
 };
 
-/** Die Gesamtzahl gilt für den Filter, nicht für die Seite -- daraus entsteht die Seitenzahl. */
+/** The total is for the filter, not for the page -- the page count comes out of it. */
 export type ChangeList = {
   changes: ChangeItem[];
   total: number;
@@ -148,11 +148,11 @@ export type BatchDefaults = {
 };
 
 /**
- * Ein Foto, wie die Verwaltung es sieht.
+ * A photo as the admin area sees it.
  *
- * `provenance` ist der Grund für den eigenen Typ: Woher das Bild kam und ob eine Freigabe
- * vorliegt, geht den Besucherschirm nichts an — die Kiosk-Endpunkte liefern `PhotoDetail`
- * und haben das Feld deshalb gar nicht erst.
+ * `provenance` is the reason for the separate type: where the picture came from and whether there
+ * is a release is none of the visitor screen's business -- the kiosk endpoints return
+ * `PhotoDetail`, which has no such field in the first place.
  */
 export type PhotoAdminDetail = PhotoDetail & { provenance: string | null };
 
@@ -324,10 +324,10 @@ export type ImportFolder = {
 };
 
 /**
- * Die Laufwerksnamen kommen mit.
+ * The drive names come along.
  *
- * Eine leere Ordnerliste hiesse sonst zweierlei: kein Stick, oder ein Stick ohne Bilder. Der
- * Bildschirm haelt dem, der gerade eingesteckt hat, sonst "Bitte USB-Stick einstecken" entgegen.
+ * An empty folder list would otherwise mean two things: no stick, or a stick without pictures.
+ * The screen would answer somebody who just plugged one in with "Bitte USB-Stick einstecken".
  */
 export type ImportFolders = {
   drives: string[];
@@ -363,7 +363,7 @@ export function fetchJob(): Promise<JobState> {
 }
 
 /** Tell the device the result has been seen, so the screen goes back to the start. */
-/** Spielt eine Sicherung ein, die im Eingangsordner liegt. Ersetzt den ganzen Bestand. */
+/** Restores a backup lying in the inbox. Replaces the entire collection. */
 export function restoreFromIncoming(file: string): Promise<JobState> {
   return adminFetch<JobState>("/backup/incoming/restore", {
     method: "POST",
@@ -377,16 +377,15 @@ export function acknowledgeJob(): Promise<JobState> {
 }
 
 /**
- * Die Sicherung als eine Datei herunterladen.
+ * Download the backup as one file.
  *
- * Der Umweg über ein Ticket hat einen Grund: Den Download führt der Browser, und dem lässt sich
- * kein `X-Admin-Token` mitgeben. Den Sitzungstoken in die Adresse zu schreiben wäre kürzer und
- * falsch — Adressen landen im Verlauf und in Protokollen. Das Ticket gilt eine Minute und genau
- * einen Download lang.
+ * The detour through a ticket has a reason: the browser runs the download, and there is no way to
+ * give it an `X-Admin-Token`. Putting the session token into the address would be shorter and
+ * wrong -- addresses end up in history and in logs. The ticket is good for one minute and exactly
+ * one download.
  *
- * Geladen wird über einen unsichtbaren Link, nicht über `fetch`: Sonst läge das ganze Archiv im
- * Speicher des Browsers, bevor irgendjemand es zu Gesicht bekäme — bei zweitausend Fotos mehrere
- * Gigabyte.
+ * Fetched through an invisible link rather than `fetch`: otherwise the whole archive would sit in
+ * the browser's memory before anybody saw any of it -- several gigabytes at two thousand photos.
  */
 export async function downloadBackupZip(): Promise<void> {
   const { ticket } = await adminFetch<{ ticket: string; expires_in_s: number }>(

@@ -1,50 +1,50 @@
 /**
- * Die Rechnung hinter dem Zeitschieber.
+ * The arithmetic behind the time slider.
  *
- * Als reine Funktionen, weil hier ein Fehler steckte, den man nicht am Code sieht, sondern erst
- * auf dem Bildschirm: Die Achse kam aus dem Histogramm des sichtbaren Ausschnitts und änderte sich
- * bei jedem Zoom, die Auswahl blieb stehen. Nach dem Hineinzoomen auf zwei Fotos aus den 1950ern
- * stand die Achse auf 1950–1960, die Auswahl aber weiterhin auf 1920–2019 — und der Auswahlbalken
- * lief mit `left: -300%` quer über Wappen und Titel.
+ * Pure functions, because a fault sat here that is invisible in the code and only shows on
+ * screen: the axis came from the histogram of the visible viewport and changed with every zoom
+ * while the selection stayed put. After zooming in on two photos from the 1950s the axis read
+ * 1950-1960 but the selection still 1920-2019 -- and the selection bar ran across the coat of
+ * arms and the title at `left: -300%`.
  *
- * Zwei Riegel dagegen, beide hier:
+ * Two bolts against that, both here:
  *
- *   1. Die Achse spannt über den ganzen Bestand und steht still (`collection_from`/`collection_to`
- *      aus dem Histogramm). Der Schieber bedeutet damit immer dasselbe.
- *   2. `fraction()` ist auf 0…1 geklammert. Selbst wenn Achse und Auswahl je wieder auseinander-
- *      laufen, kann kein Element mehr aus seiner Zelle laufen.
+ *   1. The axis spans the whole collection and stands still (`collection_from`/`collection_to`
+ *      out of the histogram). The slider therefore always means the same thing.
+ *   2. `fraction()` is clamped to 0…1. Even if axis and selection ever drift apart again, no
+ *      element can leave its cell.
  */
 
 import type { TimeRange } from "../api/client";
 
 export type Bounds = { min: number; max: number };
 
-/** Auf- und abrunden auf volle Jahrzehnte -- das liest sich schlicht besser als 1923 bis 2019. */
+/** Rounded out to whole decades -- that simply reads better than 1923 to 2019. */
 function roundToDecade(year: number, direction: "down" | "up"): number {
   return direction === "down" ? Math.floor(year / 10) * 10 : Math.ceil(year / 10) * 10;
 }
 
 /**
- * Die Enden der Achse.
+ * The ends of the axis.
  *
- * Null, solange der Bestand kein einziges datiertes Foto hat — dann gibt es nichts zu schieben.
+ * Null as long as the collection holds not one dated photo -- then there is nothing to slide.
  */
 export function axisBounds(fullRange: TimeRange | null): Bounds | null {
   if (!fullRange) return null;
   const min = roundToDecade(fullRange.from, "down");
   const max = roundToDecade(fullRange.to, "up");
-  // Ein einzelnes Jahr ergäbe sonst eine Achse ohne Länge und jede Rechnung darauf eine Division
-  // durch null.
+  // A single year would otherwise give an axis without length, and every calculation on it a
+  // division by zero.
   return { min, max: max > min ? max : min + 10 };
 }
 
-/** Wo auf der Achse ein Jahr liegt: 0 am linken Ende, 1 am rechten. Nie daneben. */
+/** Where a year sits on the axis: 0 at the left end, 1 at the right. Never outside. */
 export function fraction(year: number, bounds: Bounds): number {
   const raw = (year - bounds.min) / (bounds.max - bounds.min);
   return Math.min(1, Math.max(0, raw));
 }
 
-/** Eine Auswahl in die Achse ziehen, damit der Zustand gar nicht erst ungültig wird. */
+/** Pull a selection into the axis, so the state cannot become invalid in the first place. */
 export function clampRange(range: TimeRange, bounds: Bounds): TimeRange {
   const from = Math.min(Math.max(range.from, bounds.min), bounds.max);
   const to = Math.min(Math.max(range.to, bounds.min), bounds.max);

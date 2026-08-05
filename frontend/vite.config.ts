@@ -6,8 +6,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Damit in Entwicklung und im Kiosk dieselben relativen Pfade gelten: kein Umschalten von
-      // URLs im Code, keine CORS-Sonderfaelle.
+      // So that development and the kiosk use the same relative paths: no switching URLs in the
+      // code, no CORS special cases.
       "/api": {
         target: "http://127.0.0.1:8000",
         changeOrigin: true,
@@ -15,8 +15,8 @@ export default defineConfig({
     },
   },
   build: {
-    // Auf dem Pi zaehlt jede Sekunde beim Start. Sourcemaps kosten Uebertragung ohne Nutzen.
+    // On the Pi every second of startup counts. Sourcemaps cost transfer for no benefit.
     sourcemap: false,
-    chunkSizeWarningLimit: 1200, // maplibre-gl ist nun mal gross
+    chunkSizeWarningLimit: 1200, // maplibre-gl simply is large
   },
 });

@@ -23,7 +23,7 @@ export type PhotoDetail = {
   id: number;
   title: string | null;
   description: string | null;
-  /** Bildnachweis, steht in der Detailansicht unter der Beschreibung. */
+  /** Credit line, shown in the detail view below the description. */
   credit: string | null;
   date_from: string | null;
   date_to: string | null;
@@ -57,10 +57,10 @@ export type Histogram = {
   /** Photos without a date: not on the timeline, but in the "Hilf mit" panel. */
   undated: number;
   /**
-   * Spanne des ganzen Bestands — die Achse des Zeitschiebers.
+   * Span of the whole collection -- the axis of the time slider.
    *
-   * Die Balken zeigen den Kartenausschnitt, die Achse nicht: Sie darf sich nicht unter der Hand
-   * des Besuchers verschieben. Siehe kiosk/timeAxis.ts.
+   * The bars show the map viewport, the axis does not: it must not shift under the visitor's
+   * hand. See kiosk/timeAxis.ts.
    */
   collection_from: number | null;
   collection_to: number | null;
@@ -77,7 +77,7 @@ export type Task = {
   need: Need;
   /** How many photos of this kind are still open. It motivates. */
   open_count: number;
-  /** Offene Aufgaben der anderen Frage -- sagt, ob „Weiß ich nicht" noch irgendwohin führt. */
+  /** Open tasks of the other question -- says whether "Weiß ich nicht" still leads anywhere. */
   open_other: number;
   /** null means nothing is missing any more. A pleasant state. */
   photo: PhotoDetail | null;

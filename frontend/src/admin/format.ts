@@ -25,11 +25,11 @@ export function formatCount(value: number): string {
 }
 
 /**
- * Wie lange etwas her ist, als Kopfzeile einer Kachel.
+ * How long ago something was, as the heading of a tile.
  *
- * Die Ränder bekommen ein Wort statt einer Zahl: „0 Tage seit der letzten Sicherung" ist für
- * jemanden, der zweimal im Jahr an dieses Gerät tritt, eine Denksportaufgabe. Groß geschrieben,
- * weil der Wert die Zeile anfängt.
+ * The edges get a word instead of a number: "0 Tage seit der letzten Sicherung" is a puzzle for
+ * somebody who walks up to this device twice a year. Capitalised, because the value starts the
+ * line.
  */
 export function formatDaysSince(days: number | null): string {
   if (days === null) return "Noch nie";

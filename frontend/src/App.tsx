@@ -27,8 +27,8 @@ function MapNotice() {
 
 export function App() {
   const [region, setRegion] = useState<Region | null>(null);
-  // Alles vollständig heisst: eine Aufgabe wurde geholt und es gab keine. Der Dank zaehlt noch
-  // nicht dazu -- er soll zu Ende stehen duerfen, bevor die Spalte verschwindet.
+  // Everything complete means: a task was fetched and there was none. The thank-you does not
+  // count yet -- it should be allowed to finish before the column disappears.
   const complete = useContribute((s) => s.task !== null && s.task.photo === null && !s.thanks);
   const [error, setError] = useState<string | null>(null);
   const view = useAdmin((s) => s.view);
@@ -79,8 +79,8 @@ export function App() {
 
         <TimeSlider />
 
-        {/* Ist alles vollständig, fällt die Spalte ganz weg statt eine Erfolgsmeldung
-            stehenzulassen -- und die Karte bekommt die Breite. */}
+        {/* When everything is complete the column falls away entirely rather than leaving a
+              success message standing -- and the map gets the width. */}
         {!complete && <HelpPanel />}
 
         <div className="app__map">

@@ -11,7 +11,6 @@
 
 import { create } from "zustand";
 
-
 import {
   type Bbox,
   type Histogram,
@@ -50,42 +49,46 @@ type KioskState = {
   error: string | null;
 
   /**
-   * Die Fotos, die gerade im Vollbild stehen, und welches davon.
+   * The photos currently shown full screen, and which of them.
    *
-   * Eine Liste statt einer Id, weil Fotos am selben Ort als ein Stapel geöffnet werden und sich
-   * durchblättern lassen. Ein einzelnes Foto ist der Stapel der Länge eins.
+   * A list rather than one id, because photos at the same spot open as a stack that can be paged
+   * through. A single photo is the stack of length one.
    */
   openStack: number[];
   openIndex: number;
 
   /**
-   * Wohin die Karte für die Dauer des Dankes fährt, oder null.
+   * Where the map travels for the duration of the thank-you, or null.
    *
-   * Die Karte gehört `MapView`, der Zustand diesem Store -- dies ist die Brücke dazwischen, wie
-   * beim Rücksprung nach Leerlauf. `seq` sorgt dafür, dass zweimal derselbe Ort auch zweimal
-   * auslöst.
+   * The map belongs to `MapView`, the state to this store -- this is the bridge between them, as
+   * with the reset after idling. `seq` makes sure the same place twice fires twice.
    */
-  focus: { lat: number; lon: number; bounds: [[number, number], [number, number]]; seq: number } | null;
-  /** Der Zeitraum, den der Besucher eingestellt hatte, bevor der Fokus ihn verstellt hat. */
+  focus: {
+    lat: number;
+    lon: number;
+    bounds: [[number, number], [number, number]];
+    seq: number;
+  } | null;
+  /** The time range the visitor had set before the focus moved it. */
   rangeBefore: TimeRange | null;
 
   setViewport: (bbox: Bbox) => void;
   setTimeRange: (timeRange: TimeRange) => void;
-  /** Ein einzelnes Foto — die Kurzform für einen Stapel der Länge eins. */
+  /** A single photo -- the short form for a stack of length one. */
   openPhoto: (id: number | null) => void;
   openStackAt: (ids: number[], index?: number) => void;
-  /** Im geöffneten Stapel blättern; bleibt an den Enden stehen. */
+  /** Page through the open stack; stops at either end. */
   stepInStack: (delta: number) => void;
   /**
-   * Nur die Karte an eine Stelle holen — für den gesetzten Pin, bevor etwas beigetragen ist.
+   * Move only the map somewhere -- for the pin just set, before anything has been contributed.
    *
-   * Rührt den Zeitraum nicht an: Es ist noch kein Beitrag, es geht allein darum, dem Besucher zu
-   * zeigen, wo sein Punkt gelandet ist.
+   * Leaves the time range alone: this is not a contribution yet, it is only about showing the
+   * visitor where their point landed.
    */
   showLocation: (lat: number, lon: number) => void;
-  /** Nach einem Beitrag: Karte und Zeitraum so stellen, dass dieses Foto zu sehen ist. */
+  /** After a contribution: set map and time range so that this photo is visible. */
   showPhoto: (photo: PhotoDetail) => void;
-  /** Beides zusammen zurücknehmen -- am Ende des Dankes. */
+  /** Take both back together -- at the end of the thank-you. */
   releaseFocus: () => void;
   refresh: () => void;
 };
@@ -206,8 +209,8 @@ export const useKiosk = create<KioskState>((set, get) => {
     },
 
     setTimeRange(timeRange) {
-      // In die Achse geklammert, damit der Zustand gar nicht erst ungueltig werden kann. Der
-      // Schieber selbst klammert seine Anzeige noch einmal -- siehe kiosk/timeAxis.ts.
+      // Clamped to the axis so the state cannot become invalid in the first place. The slider
+      // clamps its own display once more -- see kiosk/timeAxis.ts.
       const bounds = axisBounds(get().fullRange);
       const next = bounds ? clampRange(timeRange, bounds) : timeRange;
 
@@ -239,11 +242,11 @@ export const useKiosk = create<KioskState>((set, get) => {
     },
 
     /**
-     * Die Ansicht auf ein eben ergänztes Foto einstellen -- für die Dauer des Dankes.
+     * Settle the view on a photo just completed -- for the duration of the thank-you.
      *
-     * Karte und Zeitraum werden zusammen verstellt und von ``releaseFocus`` zusammen
-     * zurückgenommen. Ein Foto ohne Ort lässt beides in Ruhe: Es ist auf keiner Karte zu finden,
-     * und den Schieber zu verstellen würde nur andere Fotos ausblenden.
+     * Map and time range are moved together and taken back together by ``releaseFocus``. A photo
+     * without a place leaves both alone: it is on no map, and moving the slider would only hide
+     * other photos.
      */
     showPhoto(photo) {
       const range = rangeForPhoto(photo, get().fullRange);
@@ -256,9 +259,9 @@ export const useKiosk = create<KioskState>((set, get) => {
           bounds: boundsAround(photo.lat as number, photo.lon as number),
           seq: (state.focus?.seq ?? 0) + 1,
         },
-        // Nur beim ersten Mal merken. Trägt jemand zweimal schnell hintereinander bei, würde der
-        // zweite Aufruf sonst den Zeitraum des ersten Fokus für "vorher" halten -- und der
-        // Besucher bekäme am Ende ein Jahrzehnt zurück, das er nie eingestellt hat.
+        // Remembered on the first pass only. If somebody contributes twice in quick succession,
+        // the second call would otherwise take the first focus's range for "before" -- and the
+        // visitor would end up with a decade they never set.
         rangeBefore: state.rangeBefore ?? state.timeRange,
         timeRange: range ?? state.timeRange,
       }));

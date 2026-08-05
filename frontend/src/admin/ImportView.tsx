@@ -1,17 +1,18 @@
 /**
- * Fotos hereinholen — vom Rechner oder vom USB-Stick.
+ * Taking photos in -- from the computer or from a USB stick.
  *
- * Drei Schritte, und die Reihenfolge ist die Aussage: **erst woher, dann was für alle gilt, dann
- * ein Knopf.** Vorher stand das Formular für Jahr und Ort ganz oben, bevor überhaupt gesagt war,
- * woher die Bilder kommen, und der Stick hing als Nachtrag unter einer Trennlinie darunter.
+ * Three steps, and their order is the statement: **first where from, then what holds for all of
+ * them, then one button.** The form for year and place used to sit at the very top, before
+ * anybody had said where the pictures come from, and the stick hung below a rule as an
+ * afterthought.
  *
- * Jahr und Ort werden **einmal** gefragt und gelten für beide Wege. Bei vierzig Bildern derselben
- * Kirchweih ist das der ganze Unterschied — sie füllen aber nur, was der Import leer gelassen
- * hat; was die Datei selbst weiß, gewinnt.
+ * Year and place are asked **once** and hold for both routes. With forty pictures of the same
+ * village fair that is the whole difference -- but they only fill what the import left empty;
+ * what the file itself knows wins.
  *
- * Danach dieselbe Regel für beide Wege: bis REVIEW_LIMIT Bilder die Nacharbeits-Tabelle, darüber
- * nur die Zusammenfassung. Wer zweihundert Bilder einliest, will keine Tabelle mit zweihundert
- * Zeilen — für den ist die „Ohne Ort"-Liste die Arbeitsfläche.
+ * After that the same rule for both routes: up to REVIEW_LIMIT pictures the review table, beyond
+ * it only the summary. Whoever takes in two hundred pictures does not want a table with two
+ * hundred rows -- for them the "Ohne Ort" list is the work surface.
  */
 
 import { useEffect, useLayoutEffect, useState } from "react";
@@ -36,7 +37,7 @@ import { YearField } from "./YearField";
 import { StickFolders } from "./StickImport";
 import { useScrollArea } from "./scrollArea";
 
-/** Muss zu REVIEW_LIMIT in backend/app/api/backup.py passen. */
+/** Has to match REVIEW_LIMIT in backend/app/api/backup.py. */
 const REVIEW_LIMIT = 30;
 
 type Source = "computer" | "stick";
@@ -45,12 +46,12 @@ type Phase = "choose" | "working" | "review";
 type Row = {
   key: string;
   filename: string;
-  /** imported | duplicate | rejected -- nur das erste ist bearbeitbar. */
+  /** imported | duplicate | rejected -- only the first can be edited. */
   result: string;
   message: string;
   photo: PhotoDetail | null;
   title: string;
-  /** Jahr und Genauigkeit zusammen -- dieselbe Form wie im Fotoeditor. */
+  /** Year and precision together -- the same shape as in the photo editor. */
   date: YearInput;
   place: PickedPlace | null;
   busy: boolean;
@@ -65,11 +66,10 @@ function toRow(item: UploadItem, defaults: { year: YearInput; place: PickedPlace
     result: item.result,
     message: item.message,
     photo,
-    // Was die Datei selbst mitbrachte, schlaegt den Dateinamen -- ein Scan bringt aber selten
-    // etwas mit.
+    // What the file brought along beats the file name -- though a scan rarely brings anything.
     title: photo?.title ?? titleFromFilename(item.filename),
-    // Die Genauigkeit kommt aus dem Foto, nicht aus der Jahreszahl: Ein bereits als Jahrzehnt
-    // gespeichertes 1920 darf beim Nachbearbeiten nicht stillschweigend zum Jahr 1920 werden.
+    // The precision comes from the photo, not from the year: a 1920 already stored as a decade
+    // must not quietly become the year 1920 while somebody edits the row.
     date: photo?.date_from ? fromPhoto(photo.date_from, photo.date_precision) : defaults.year,
     place:
       photo?.lat != null && photo.lon != null
@@ -97,9 +97,9 @@ export function ImportView({ onReview }: { onReview: () => void }) {
   const [summary, setSummary] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Dieselbe Ursache wie beim Fotoeditor: Der Phasenwechsel tauscht den Inhalt, nicht den
-  // scrollenden Bereich darum. Wer unten auf „Importieren" tippt, stünde sonst mitten in der
-  // Ergebnistabelle, statt bei ihrer Überschrift.
+  // Same cause as in the photo editor: changing phase swaps the content, not the scrolling area
+  // around it. Whoever taps "Importieren" at the bottom would otherwise land in the middle of the
+  // result table instead of at its heading.
   const scrollArea = useScrollArea();
   useLayoutEffect(() => {
     scrollArea?.current?.scrollTo({ top: 0 });
@@ -112,7 +112,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
     return {
       ...(date ? { year: date.year, precision: date.precision } : {}),
       ...(place ? { lat: place.lat, lon: place.lon, placeName: place.name } : {}),
-      // Eine Kiste Scans kommt fast immer von einer Person -- deshalb gilt beides fuer alle.
+      // A box of scans almost always comes from one person -- so both hold for all of them.
       ...(credit.trim() ? { credit: credit.trim() } : {}),
       ...(provenance.trim() ? { provenance: provenance.trim() } : {}),
     };
@@ -120,7 +120,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
 
   function finish(items: UploadItem[] | null, text: string) {
     setSummary(text);
-    // Keine Tabelle bei zu vielen -- und keine, wenn das Backend sie gar nicht erst geschickt hat.
+    // No table when there are too many -- and none when the backend did not send one at all.
     setRows(
       items && items.length <= REVIEW_LIMIT
         ? items
@@ -148,7 +148,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
         tally.rejected += result.rejected;
         collected.push(...result.items);
       } catch (e) {
-        // Eine kaputte Datei darf die anderen neununddreissig nicht aufhalten.
+        // One broken file must not hold up the other thirty-nine.
         collected.push({
           filename: file.name,
           result: "rejected",
@@ -174,7 +174,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
     }
   }
 
-  /** Der Stick-Auftrag läuft im Gerät; StickFolders meldet, wenn er durch ist. */
+  /** The stick job runs inside the device; StickFolders reports when it is through. */
   function stickFinished(state: JobState) {
     setJob(state);
     if (state.phase === "done") {
@@ -198,7 +198,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
     try {
       await patchPhoto(row.photo.id, {
         title: row.title.trim() || null,
-        // null heisst "Datierung loeschen" -- ein leeres Jahresfeld ist genau das, wie im Editor.
+        // null means "clear the date" -- an empty year field is exactly that, as in the editor.
         date: toDate(row.date),
         location: row.place
           ? { lat: row.place.lat, lon: row.place.lon, place_name: row.place.name || null }
@@ -211,8 +211,8 @@ export function ImportView({ onReview }: { onReview: () => void }) {
   }
 
   async function applyAll() {
-    // Nacheinander: vierzig gleichzeitige Schreibzugriffe auf eine SQLite-Datei auf einem Pi sind
-    // ein Weg, Sperrfehler zu erzeugen, und auf die Millisekunde wartet niemand.
+    // One after another: forty concurrent writes to one SQLite file on a Pi is a way to produce
+    // lock errors, and nobody is waiting on the millisecond.
     for (const row of rows.filter((candidate) => candidate.photo)) {
       await apply(row);
     }
@@ -227,7 +227,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
     setJob(null);
   }
 
-  // --- Schritt 3: was daraus geworden ist ---------------------------------
+  // --- Step 3: what became of it ------------------------------------------
 
   if (phase === "review") {
     return (
@@ -268,7 +268,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
     );
   }
 
-  // --- Während es läuft ---------------------------------------------------
+  // --- While it runs -------------------------------------------------------
 
   if (phase === "working") {
     const isStick = source === "stick";
@@ -297,7 +297,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
     );
   }
 
-  // --- Schritt 1 und 2 ----------------------------------------------------
+  // --- Steps 1 and 2 -------------------------------------------------------
 
   return (
     <div className="upload">
@@ -392,7 +392,7 @@ function ReviewTable({
   onChange: (key: string, patch: Partial<Row>) => void;
   onApply: (row: Row) => Promise<void>;
 }) {
-  /** Welches Foto gerade groß zu sehen ist. */
+  /** Which photo is currently shown large. */
   const [zoomed, setZoomed] = useState<PhotoDetail | null>(null);
 
   return (
@@ -400,9 +400,9 @@ function ReviewTable({
       <ul className="upload-rows">
         {rows.map((row) => (
           <li key={row.key} className="upload-row">
-            {/* Das Vorschaubild ist so klein, dass sich Kirchweih und Feuerwehrfest darauf nicht
-                unterscheiden lassen -- gerade das braucht man aber, um Titel und Jahr zu prüfen.
-                Ein Klick zeigt es groß. */}
+            {/* The thumbnail is so small that a village fair and a fire brigade party cannot be
+                told apart on it -- which is exactly what checking title and year needs. One click
+                shows it large. */}
             {row.photo && (
               <button
                 type="button"
@@ -427,8 +427,8 @@ function ReviewTable({
                 onChange={(event) => onChange(row.key, { title: event.target.value })}
               />
               <div className="field__row">
-                {/* Dasselbe Bauteil wie im Fotoeditor: Ohne die Genauigkeit daneben ließe sich
-                    hier kein Jahrzehnt eintragen, und „1920er" ist im Bestand der Normalfall. */}
+                {/* The same component as in the photo editor: without the precision beside it no
+                    decade could be entered here, and "1920er" is the normal case. */}
                 <YearField value={row.date} onChange={(date) => onChange(row.key, { date })} />
                 <PlaceField
                   value={row.place}
@@ -457,12 +457,11 @@ function ReviewTable({
 }
 
 /**
- * Ein Foto groß, über der Liste.
+ * One photo large, above the list.
  *
- * Bewusst kein Link in einen neuen Tab: Der Verwaltungsbereich läuft auf demselben Chromium wie
- * der Kiosk, und der hat keine Tableiste — wer dort einen zweiten Tab öffnet, kommt nicht mehr
- * zurück. Gezeigt wird das 1200er Vorschaubild, dasselbe wie im Fotoeditor; das Original kann ein
- * 80-MB-Scan sein.
+ * Deliberately not a link into a new tab: the admin area runs in the same Chromium as the kiosk,
+ * and that one has no tab bar -- whoever opens a second tab there never gets back. What is shown
+ * is the 1200 px thumbnail, the same as in the photo editor; the original can be an 80 MB scan.
  */
 function ZoomView({ photo, onClose }: { photo: PhotoDetail; onClose: () => void }) {
   useEffect(() => {

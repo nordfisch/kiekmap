@@ -3,10 +3,9 @@
  *
  * Newest import at the top, because that is what someone is looking for right after an upload.
  *
- * „Ohne Ort" und „Ohne Jahr" sind die eigentlichen Arbeitsansichten -- die Listen, die ein
- * Ehrenamtlicher an einem Winternachmittag durchgeht. Getrennt, weil Verorten und Datieren zwei
- * verschiedene Arbeiten sind: Wer Straßennamen zuordnet, ist in einem anderen Kopf als jemand,
- * der Jahrzehnte schätzt.
+ * "Ohne Ort" and "Ohne Jahr" are the actual working views -- the lists a volunteer goes through
+ * on a winter afternoon. Kept apart because locating and dating are two different jobs: whoever
+ * is matching street names is in a different frame of mind from somebody estimating decades.
  */
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -25,8 +24,8 @@ import { clampOffset } from "./pagination";
 import { useScrollArea } from "./scrollArea";
 import { useLoaded } from "./useLoaded";
 
-// Ort und Jahr getrennt: Verorten und Datieren sind zwei Arbeiten, und wer die eine macht, will
-// die andere nicht dazwischen haben.
+// Place and year kept apart: locating and dating are two jobs, and whoever is doing one does not
+// want the other in between.
 const FILTERS: { value: Selection; label: string }[] = [
   { value: "all", label: t.admin.photos.filterAll },
   { value: "without_location", label: t.admin.photos.filterWithoutLocation },
@@ -46,28 +45,28 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Filter- oder Suchwechsel fängt wieder auf Seite eins an. Wer auf Seite 5 von „Alle" steht und
-  // auf „Ohne Ort" umschaltet, sähe sonst eine leere Liste und hielte den Filter für kaputt.
+  // Changing filter or search starts over at page one. Whoever is on page 5 of "Alle" and
+  // switches to "Ohne Ort" would otherwise see an empty list and think the filter was broken.
   useEffect(() => setOffset(0), [show, debounced]);
 
   const { data, error, loading, reload } = useLoaded(
     useCallback(() => fetchAdminPhotos(show, debounced, offset), [show, debounced, offset]),
   );
 
-  // Beim Abarbeiten wird die Liste kürzer -- wer den letzten Eintrag der letzten Seite verortet,
-  // stünde sonst hinter dem Ende.
+  // Working through it makes the list shorter -- whoever locates the last entry of the last page
+  // would otherwise stand past the end.
   useEffect(() => {
     if (data) setOffset((current) => clampOffset(current, data.total));
   }, [data]);
 
-  // Der Editor fängt oben an, die Liste kommt an ihre Stelle zurück. Gescrollt wird der Bereich um
-  // beide herum (siehe scrollArea.tsx); ohne das erbte das Formular die Position der Liste und
-  // öffnete sich mittendrin.
+  // The editor starts at the top, the list returns to where it was. What scrolls is the area
+  // around both (see scrollArea.tsx); without that the form inherited the list's position and
+  // opened halfway down.
   const scrollArea = useScrollArea();
   const listScroll = useRef(0);
 
-  // Zählt hoch, sobald eine Zeile gelöscht wurde: Der Effekt darunter muss dann noch einmal
-  // laufen, obwohl sich `editing` nicht geändert hat.
+  // Counts up as soon as a row was deleted: the effect below has to run again even though
+  // `editing` did not change.
   const [restoreScroll, setRestoreScroll] = useState(0);
 
   useLayoutEffect(() => {
@@ -80,14 +79,17 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
     setEditing(await fetchAdminPhoto(id));
   }
 
-  /* Löschen und Wiederherstellen direkt aus der Liste, ohne den Umweg über den Editor -- beim
-     Aussortieren nach einem Import geht es reihenweise. Die Zeile verschwindet danach aus der
-     Ansicht (jeder Filter zeigt entweder Gelöschte oder die anderen), die Liste bleibt aber
-     stehen, wo sie stand: Der nächste Griff soll dieselbe Stelle treffen.
+  /* Delete and restore straight from the list, without the detour through the editor -- sorting
+     out after an import goes row by row. The row then disappears from view (every filter shows
+     either the deleted ones or the others), but the list stays where it stood: the next reach
+     should land in the same place.
 
-     Nur das Löschen fragt zurück. Wiederherstellen macht nichts kaputt. */
+     Only deleting asks back. Restoring breaks nothing. */
   async function setDeleted(id: number, title: string | null, deleted: boolean) {
-    if (deleted && !window.confirm(t.admin.editor.deleteConfirm(title || t.admin.photos.untitled))) {
+    if (
+      deleted &&
+      !window.confirm(t.admin.editor.deleteConfirm(title || t.admin.photos.untitled))
+    ) {
       return;
     }
     const stand = scrollArea?.current?.scrollTop ?? 0;

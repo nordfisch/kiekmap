@@ -1,17 +1,18 @@
 /**
- * Die Fläche unter den beiden Quellenkacheln.
+ * The area below the two source tiles.
  *
- * Sie steht immer an derselben Stelle und wechselt nur ihren Inhalt — beim Umschalten der Quelle
- * springt die Maske sonst, weil links ein Betriebssystem-Dateifeld und rechts eine Ordnerliste
- * stünde. Gestrichelt, solange gewartet wird; mit vollem Rand, sobald etwas da ist. Genau die
- * Dramaturgie des Sicherungsbereichs, die jemand aus dem Team schon kennt.
+ * It always sits in the same place and only changes its content -- switching source would
+ * otherwise make the form jump, because on the left there would be an operating-system file
+ * field and on the right a folder list. Dashed while it waits, full border as soon as something
+ * is there. Exactly the choreography of the backup area, which somebody from the team already
+ * knows.
  */
 
 import { type ReactNode, useRef, useState } from "react";
 
 import { t } from "../text/de";
 
-/** Dieselben Formate, die auch das Dateifeld annimmt. */
+/** The same formats the file field accepts. */
 const ACCEPT = "image/jpeg,image/png,image/tiff,image/webp";
 
 function isImage(file: File): boolean {
@@ -28,7 +29,7 @@ export function DropZone({
   title?: string;
   /** Graue zweite Zeile. */
   hint?: ReactNode;
-  /** Voller Rand statt gestrichelt: es gibt etwas zu sehen. */
+  /** Full border instead of dashed: there is something to see. */
   filled?: boolean;
   children?: ReactNode;
 }) {
@@ -42,12 +43,11 @@ export function DropZone({
 }
 
 /**
- * Die Fläche für „Vom Rechner": Dateien annehmen, per Knopf oder per Ablegen.
+ * The area for "Vom Rechner": take files, by button or by dropping.
  *
- * **Der Knopf ist der verlässliche Weg.** Auf dem Kiosk mit Touch gibt es kein Ziehen und Ablegen;
- * das Ablegen ist die Zugabe für die, die am Rechner sitzen. Deshalb ein echter Knopf, der das
- * versteckte Dateifeld auslöst, und kein als Knopf verkleidetes Label — das wäre mit der Tastatur
- * nicht erreichbar.
+ * **The button is the reliable route.** On the touch kiosk there is no dragging and dropping;
+ * dropping is the extra for those sitting at a computer. Hence a real button that triggers the
+ * hidden file field, and not a label dressed up as one -- that would be unreachable by keyboard.
  */
 export function FileDropZone({
   files,
@@ -63,15 +63,11 @@ export function FileDropZone({
 
   return (
     <div
-      className={[
-        "dropzone",
-        chosen ? "dropzone--filled" : "",
-        over ? "dropzone--over" : "",
-      ]
+      className={["dropzone", chosen ? "dropzone--filled" : "", over ? "dropzone--over" : ""]
         .filter(Boolean)
         .join(" ")}
       onDragOver={(event) => {
-        // Ohne das Abfangen öffnet der Browser die Datei einfach selbst.
+        // Without intercepting it the browser simply opens the file itself.
         event.preventDefault();
         setOver(true);
       }}
@@ -79,7 +75,7 @@ export function FileDropZone({
       onDrop={(event) => {
         event.preventDefault();
         setOver(false);
-        // Was sonst noch im Ordner lag, bleibt liegen -- nicht kommentarlos mitschicken.
+        // Whatever else lay in the folder stays there -- not sent along without a word.
         onFiles(Array.from(event.dataTransfer.files).filter(isImage));
       }}
     >

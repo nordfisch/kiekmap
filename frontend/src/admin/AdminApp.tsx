@@ -22,8 +22,8 @@ import { PhotoCare } from "./PhotoCare";
 import { ScrollAreaProvider } from "./scrollArea";
 
 /**
- * Reihenfolge mit Absicht: erst die Pflege des Bestands, dann das Hinzufügen, dann das
- * Technische. „Moderation" steht neben „Fotos", weil beides Inhaltsarbeit ist.
+ * The order is deliberate: first tending the collection, then adding to it, then the technical
+ * part. "Moderation" sits beside "Fotos" because both are work on content.
  */
 type Section = "overview" | "photos" | "moderation" | "import" | "log" | "backup";
 
@@ -46,16 +46,16 @@ export function AdminApp() {
   const [minutes, setMinutes] = useState<number | null>(null);
   const body = useRef<HTMLElement>(null);
 
-  // Ein Abschnittswechsel fängt oben an. Sonst stünde man im neuen Abschnitt an der Stelle, bis zu
-  // der man im alten gescrollt hatte -- bei „Protokoll" nach langer Fotoliste mitten im Nichts.
+  // Changing section starts at the top. Otherwise you would stand in the new section at the point
+  // you had scrolled to in the old one -- in "Protokoll" after a long photo list, in mid-air.
   useLayoutEffect(() => {
     body.current?.scrollTo({ top: 0 });
   }, [section]);
 
-  /** Ein Weg für alle Kacheln der Übersicht: Abschnitt und Filter zusammen setzen. */
+  /** One route for every tile of the overview: set section and filter together. */
   function navigate(target: Target) {
-    // „Auf der Karte zu sehen" führt aus der Verwaltung heraus, denselben Weg wie der Knopf oben
-    // rechts -- also mit Abmelden und Neuladen. Wer zurück will, gibt die PIN erneut ein.
+    // "Auf der Karte zu sehen" leads out of the admin area, the same way as the button top right
+    // -- so with signing out and reloading. Whoever wants back in types the PIN again.
     if (target.section === "kiosk") {
       void leave();
       return;
@@ -105,7 +105,7 @@ export function AdminApp() {
         ))}
       </nav>
 
-      {/* Der scrollende Bereich, nicht die Ansicht darin -- siehe scrollArea.tsx. */}
+      {/* The scrolling area, not the view inside it -- see scrollArea.tsx. */}
       <main className="admin__body" ref={body}>
         <ScrollAreaProvider value={body}>
           {section === "overview" && <Overview onNavigate={navigate} />}

@@ -83,12 +83,13 @@ export function MapView({ region }: { region: Region }) {
   /**
    * Back to the state the device should be in each morning.
    *
-   * Nach fünf Minuten ohne Berührung wird die Seite **neu geladen**, nicht nur zurückgesetzt. Im
-   * Kiosk gibt es keine Browser-Bedienung — kein Reload-Knopf, keine Adressleiste, keine Tastatur
-   * (`--kiosk` unter cage, siehe deploy/pi/photomap-kiosk). Ein verhakter Zustand bliebe sonst bis
-   * zum nächsten Netzstecker stehen. So heilt sich das Gerät selbst, und niemand muss davon wissen.
+   * After five minutes without a touch the page is **reloaded**, not merely reset. The kiosk has
+   * no browser controls -- no reload button, no address bar, no keyboard (`--kiosk` under cage,
+   * see deploy/pi/photomap-kiosk). A stuck state would otherwise stand there until somebody
+   * pulled the plug. This way the device heals itself and nobody has to know about it.
    *
-   * Es kostet nichts: Die Kacheln liegen im Cache, und ohne Besucher stört das Nachladen keinen.
+   * It costs nothing: the tiles are cached, and with no visitor around the reload disturbs
+   * nobody.
    */
   useEffect(() => {
     if (!map) return;
@@ -96,11 +97,11 @@ export function MapView({ region }: { region: Region }) {
   }, [map]);
 
   /**
-   * Die Kamera merken, solange ein Fokus läuft — und am Ende dorthin zurückfahren.
+   * Remember the camera while a focus runs -- and travel back there at the end.
    *
-   * Bewusst an `focused` gebunden und nicht an den Fokus selbst: Während einer Verortung wechselt
-   * er zweimal (erst der gesetzte Punkt, dann das bestätigte Foto). Hinge die Rückfahrt am Objekt,
-   * würde die Karte beim Bestätigen kurz heraus- und sofort wieder hineinfahren.
+   * Deliberately tied to `focused` and not to the focus itself: during one locating it changes
+   * twice (first the pin set, then the confirmed photo). If the return trip hung on the object,
+   * the map would briefly fly out and straight back in on confirmation.
    */
   const focused = focus !== null;
   const cameraBefore = useRef<{ center: maplibregl.LngLat; zoom: number } | null>(null);
@@ -112,15 +113,15 @@ export function MapView({ region }: { region: Region }) {
     return () => {
       const before = cameraBefore.current;
       cameraBefore.current = null;
-      // Eine bereits entfernte Karte darf nicht mehr bewegt werden -- beim Wechsel in den
-      // Verwaltungsbereich verschwindet sie mitsamt ihrem Container aus dem Dokument.
+      // A map already removed must not be moved any more -- switching into the admin area takes
+      // it out of the document together with its container.
       if (before && map.getContainer().isConnected) {
         map.easeTo({ ...before, duration: 800 });
       }
     };
   }, [map, focused]);
 
-  // Hinfahren, wann immer der Fokus auf eine neue Stelle zeigt.
+  // Travel there whenever the focus points at a new spot.
   useEffect(() => {
     if (!map || !focus) return;
     map.fitBounds(focus.bounds, { padding: 40, duration: 800 });

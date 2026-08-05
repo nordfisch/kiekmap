@@ -45,9 +45,7 @@ export function PinPad() {
           {Array.from({ length: MAX_LENGTH }, (_, index) => (
             <span
               key={index}
-              className={
-                index < pin.length ? "pinpad__dot pinpad__dot--filled" : "pinpad__dot"
-              }
+              className={index < pin.length ? "pinpad__dot pinpad__dot--filled" : "pinpad__dot"}
               hidden={index >= Math.max(MIN_LENGTH, pin.length)}
             />
           ))}
@@ -75,12 +73,7 @@ export function PinPad() {
           >
             {t.admin.pin.delete}
           </button>
-          <button
-            type="button"
-            className="pinpad__key"
-            onClick={() => press("0")}
-            disabled={busy}
-          >
+          <button type="button" className="pinpad__key" onClick={() => press("0")} disabled={busy}>
             0
           </button>
           <button

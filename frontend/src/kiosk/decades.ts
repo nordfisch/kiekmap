@@ -1,25 +1,24 @@
 /**
- * Welche Jahrzehnte im „Hilf mit"-Bereich zur Auswahl stehen.
+ * Which decades the "Hilf mit" panel offers.
  *
- * Sie ergeben sich aus dem **Bestand**, nicht aus einer Einstellung: Was eine Sammlung umspannt,
- * weiß die Sammlung selbst am besten. Bisher stand das in `region.json` — einer Datei, in der
- * jeder andere Schlüssel Geografie beschreibt und die vom Kartenbau gelesen wird. Zwei
- * Jahreszahlen zu ändern zog damit einen Netzzugang und einen kompletten Kartenbau hinter sich
- * her.
+ * They follow from the **collection**, not from a setting: what a collection spans is something
+ * the collection itself knows best. This used to sit in `region.json` -- a file where every other
+ * key describes geography and which the map build reads. Changing two years therefore dragged an
+ * internet connection and a complete map build along behind it.
  *
- * Dazu ein garantiertes Mindestfenster: Ein Gerät ohne ein einziges datiertes Foto hätte sonst
- * überhaupt keinen Knopf, und ein Bestand, der zufällig nur die 1950er umfasst, ließe einen
- * Besucher nicht sagen, was er weiß. Wächst die Sammlung darüber hinaus, wächst die Reihe mit —
- * ohne dass jemand eine Einstellung suchen muss.
+ * Plus a guaranteed minimum window: a device without a single dated photo would otherwise have no
+ * button at all, and a collection that happens to span only the 1950s would not let a visitor say
+ * what they know. If the collection grows past it, the row grows along -- without anybody having
+ * to go looking for a setting.
  */
 
 import type { TimeRange } from "../api/client";
 
 /**
- * Die Jahrzehnte, die immer zur Wahl stehen.
+ * The decades that are always on offer.
  *
- * Kein sammlungsabhängiger Wert, sondern die Untergrenze für jeden Kiosk: das Jahrhundert, aus dem
- * die Fotos eines Heimatmuseums üblicherweise stammen.
+ * Not a collection-dependent value but the floor for every kiosk: the century a local museum's
+ * photographs usually come from.
  */
 export const MINIMUM_DECADES = { first: 1920, last: 2010 };
 
@@ -27,7 +26,7 @@ function decadeOf(year: number): number {
   return Math.floor(year / 10) * 10;
 }
 
-/** Von der ältesten bis zur jüngsten, aufsteigend — so stehen sie auch auf dem Schirm. */
+/** From oldest to youngest, ascending -- the order they stand in on screen. */
 export function offeredDecades(collection: TimeRange | null): number[] {
   const first = Math.min(
     MINIMUM_DECADES.first,

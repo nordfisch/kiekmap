@@ -10,12 +10,12 @@
  */
 
 /**
- * Die Beschriftung unter einer Statuskachel der Übersicht.
+ * The caption under a status tile of the overview.
  *
- * Der Wert steht darüber (`formatDaysSince()`), Wert und Beschriftung ergeben zusammen einen Satz:
- * „34 Tage seit der letzten Sicherung", „Heute gesichert", „Noch nie gesichert". Deshalb wechselt
- * die Beschriftung mit, sobald aus der Zahl ein Wort wird — und deshalb steht hier die Einzahl:
- * „1 Tage" fällt auf einem Museumsgerät auf.
+ * The value stands above it (`formatDaysSince()`), and value plus caption make one sentence:
+ * "34 Tage seit der letzten Sicherung", "Heute gesichert", "Noch nie gesichert". Which is why the
+ * caption changes along as soon as the number turns into a word -- and why the singular is
+ * handled here: "1 Tage" would stand out on a museum device.
  */
 function since(days: number | null, what: string, done: string): string {
   if (days === null || days <= 0) return done;
@@ -25,11 +25,11 @@ function since(days: number | null, what: string, done: string): string {
 export const t = {
   app: {
     /**
-     * Der Titel über dem „Hilf mit"-Bereich, zweizeilig neben dem Wappen.
+     * The title above the "Hilf mit" panel, two lines beside the coat of arms.
      *
-     * Der Ortsname steht bewusst nicht hier, sondern kommt aus `region.json` — sonst wäre der
-     * einzige Ort im Projekt, an dem „Holm" im Code stünde, ausgerechnet die größte Schrift
-     * auf dem Bildschirm.
+     * The place name deliberately does not stand here but comes from `region.json` -- otherwise
+     * the one spot in the project where "Holm" sat in the code would be the largest type on the
+     * screen.
      */
     titleLead: "Bilder aus",
     loadingMap: "Karte wird geladen …",
@@ -41,7 +41,7 @@ export const t = {
       `${count} Fotos in diesem Ausschnitt — für mehr Übersicht näher heranzoomen`,
     markerLabel: (title: string, date: string) => `${title}, ${date} — groß anzeigen`,
     clusterLabel: (count: number) => `${count} Fotos — hineinzoomen`,
-    /** Mehrere Fotos an derselben Stelle: Hineinzoomen hilft hier nicht, Blättern schon. */
+    /** Several photos at the same spot: zooming in does not help here, paging does. */
     stackLabel: (count: number) => `${count} Fotos von dieser Stelle — ansehen`,
     pinLabel: "Gesetzter Ort, verschiebbar",
     untitled: "Ohne Titel",
@@ -66,7 +66,7 @@ export const t = {
   },
 
   help: {
-    /** Mit Doppelpunkt: Der Titel fuehrt in die Frage darunter, statt fuer sich zu stehen. */
+    /** With a colon: the title leads into the question below it rather than standing alone. */
     title: "Hilf mit:",
     askLocation: "Wo ist das?",
     askDate: "Wann war das?",
@@ -88,17 +88,17 @@ export const t = {
     confirm: "Hier war das",
     clear: "Punkt entfernen",
     /**
-     * Zweiter Schritt: Straße gewählt, jetzt die Hausnummer — wie Jahrzehnt, dann Jahr.
+     * Second step: street chosen, now the house number -- like decade, then year.
      *
-     * „Reicht so" ist eine vollwertige Antwort, kein Ausweichen: Nicht jedes Haus steht in
-     * OpenStreetMap, und niemand weiß bei jedem Foto die Hausnummer.
+     * "Reicht so" is a full answer, not a dodge: not every house is in OpenStreetMap, and nobody
+     * knows the house number for every photo.
      */
     askHouseNumber: (street: string) => `Welche Hausnummer im ${street}?`,
-    /** Bei langen Straßen ein Schritt davor — wie das Jahrzehnt vor dem Jahr. */
+    /** For long streets one step before that -- like the decade before the year. */
     askArea: (street: string) => `In welchem Abschnitt vom ${street}?`,
     otherArea: "Anderer Abschnitt",
     noHouseNumber: "Reicht so — die Straße genügt",
-    /** Das Gegenteil von „Reicht so": nichts behalten, zurück auf Anfang. */
+    /** The opposite of "Reicht so": keep nothing, back to the start. */
     cancelStreet: "Doch nicht — von vorn",
     otherStreet: "Andere Straße",
     kinds: {
@@ -124,11 +124,11 @@ export const t = {
   },
 
   /**
-   * Der Admin-Bereich.
+   * The admin area.
    *
-   * Er wird ein- bis zweimal im Jahr von Ehrenamtlichen benutzt. Deshalb steht hier überall
-   * Klartext statt Kürze: „Foto ist versteckt" ist länger als „ausgeblendet", aber niemand muss
-   * überlegen, was gemeint ist.
+   * Used once or twice a year by volunteers. Which is why everything here is plain speech rather
+   * than brevity: "Foto ist versteckt" is longer than "ausgeblendet", but nobody has to work out
+   * what is meant.
    */
   admin: {
     logoLabel: (place: string) => `Wappen von ${place}`,
@@ -202,7 +202,7 @@ export const t = {
       description: "Beschreibung",
       year: "Jahr",
       yearHint: "Leer lassen, wenn das Jahr unbekannt ist.",
-      /** Die Beschriftung des Rahmens beim Importieren -- dort steht mehr als nur die Jahreszahl. */
+      /** The caption of the fieldset while importing -- more stands there than just the year. */
       time: "Zeit",
       precision: "Genauigkeit",
       precisionYear: "Jahr",
@@ -214,10 +214,10 @@ export const t = {
       tags: "Schlagwörter",
       tagsHint: "Mit Komma getrennt.",
 
-      /* Zwei Felder, weil sie zwei verschiedene Leser haben: Der Nachweis steht neben dem Bild
-         im Museum, die Herkunft ist eine interne Notiz und verlässt den Verwaltungsbereich nie.
-         Die Hinweiszeilen sagen genau das — sonst landet der Name des Leihgebers auf dem
-         Besucherschirm. */
+      /* Two fields, because they have two different readers: the credit stands beside the
+         picture in the museum, the provenance is an internal note and never leaves the admin
+         area. The hint lines say exactly that -- otherwise the lender's name ends up on the
+         visitor's screen. */
       credit: "Bildnachweis",
       creditHint:
         "Steht in der Detailansicht unter der Beschreibung. Zum Beispiel: Sammlung Heimatmuseum Holm.",
@@ -233,8 +233,8 @@ export const t = {
       cancel: "Abbrechen",
       saved: "Gespeichert.",
 
-      /* Löschen nimmt das Foto aus der Ausstellung, wirft es aber nicht weg — das sagt die
-         Rückfrage, damit niemand zögert, und der Weg zurück steht daneben. */
+      /* Deleting takes the photo out of the exhibition but does not throw it away -- the
+         confirmation says so, so that nobody hesitates, and the way back stands beside it. */
       delete: "Löschen",
       deleteConfirm: (title: string) =>
         `„${title}“ löschen? Das Foto verschwindet aus der Karte und aus allen Listen — ` +
@@ -248,11 +248,11 @@ export const t = {
       fromComputer: "Vom Rechner",
       fromStick: "Vom USB-Stick",
       chooseHint: "Bilder auf diesem Rechner auswählen",
-      /** Die Zusicherung bleibt in der Kachel stehen, auch wenn der Rest des Hinweises weg ist. */
+      /** The promise stays in the tile even when the rest of the hint is gone. */
       fromStickHint: "Auf dem Stick wird nichts verändert, nur gelesen.",
 
       dropTitle: "Bitte Bilder auswählen.",
-      /** „Ablegen", nicht „droppen": die Zielgruppe steht oft mit sechzig davor. */
+      /** "Ablegen", not "droppen": the people in front of this are often sixty. */
       dropHint: "Bilder hier ablegen oder",
       dropButton: "Auswählen",
       dropAgain: "Andere auswählen",
@@ -287,11 +287,11 @@ export const t = {
     },
 
     /**
-     * Import vom USB-Stick.
+     * Import from a USB stick.
      *
-     * Anders als beim Upload über den Rechner steht hier nach dem Lesen keine Tabelle: Bei zwei-
-     * hundert Bildern aus einem Ordner ist die „Unvollständig"-Liste der bessere Ort zum
-     * Nacharbeiten — dafür ist sie gebaut. Deshalb endet dieser Weg mit einem Sprung dorthin.
+     * Unlike the upload from a computer, no table follows here: with two hundred pictures out of
+     * one folder the "Unvollständig" list is the better place to work them over -- that is what
+     * it was built for. So this route ends by jumping there.
      */
     stick: {
       title: "Oder von einem USB-Stick",
@@ -299,7 +299,7 @@ export const t = {
 
       waitTitle: "Bitte USB-Stick einstecken.",
       waitHint: "Die Ordner mit Bildern erscheinen dann von allein.",
-      /** Der Stick steckt, nur ist nichts darauf -- eine andere Auskunft als „bitte einstecken". */
+      /** The stick is in, only there is nothing on it -- a different answer from "please plug one in". */
       noImages: (drive: string) => `Auf „${drive}" sind keine Bilder.`,
       noImagesHint: "Gesucht wird in allen Ordnern des Sticks.",
       folder: (name: string, drive: string) => `${name} (auf ${drive})`,
@@ -333,11 +333,11 @@ export const t = {
     },
 
     /**
-     * Sicherung auf USB-Stick.
+     * Backup onto a USB stick.
      *
-     * Hier steht bewusst mehr Text als anderswo. Wer einmal im Jahr eine Sicherung macht, soll
-     * nach jedem Schritt lesen können, was gerade passiert ist und was als Nächstes zu tun ist —
-     * bis hin zu „Sie können den Stick jetzt abziehen".
+     * Deliberately more text here than elsewhere. Whoever makes a backup once a year should be
+     * able to read after every step what just happened and what to do next -- down to "Sie können
+     * den Stick jetzt abziehen".
      */
     backup: {
       title: "Sicherung",
@@ -345,8 +345,8 @@ export const t = {
         "Die Sicherung schreibt alle Fotos und alle Angaben aus dem Gerät heraus — " +
         "auf einen USB-Stick oder als eine Datei zum Herunterladen.",
 
-      /* Zwei Kacheln wie beim Importieren. Der Stick steht links, weil er der Weg für das Museum
-         ist: Er schreibt beim zweiten Mal nur das Neue und bleibt auch halbfertig brauchbar. */
+      /* Two tiles as in the import. The stick sits on the left because it is the museum's route:
+         the second time it writes only what is new, and it stays usable half-finished. */
       whereTo: "Wohin gesichert wird",
       toStick: "Auf USB-Stick",
       toStickHint:
@@ -355,19 +355,19 @@ export const t = {
       toZipHint: "Ein Download für den Rechner, an dem Sie gerade sitzen. Ohne Stick.",
 
       zipTitle: "Sicherung herunterladen",
-      /* „Achtung, das dauert!" steht für den ganzen Absatz, der hier einmal stand: dass jedes Mal
-         alles neu gepackt wird und ein Abbruch die Datei unbrauchbar macht. Die Begründung dazu
-         steht im Handbuch und in decisions.md — auf dem Bildschirm reicht die Warnung. */
+      /* "Achtung, das dauert!" stands in for the whole paragraph that used to be here: that
+         everything is packed anew each time and that an abort leaves the file useless. The
+         reasoning is in the manual and in decisions.md -- on screen the warning is enough. */
       zipIntro:
         "Sie bekommen den ganzen Bestand als eine ZIP-Datei: alle Fotos, alle Vorschaubilder " +
         "und alle Angaben. Achtung, das dauert!",
-      /* Ohne diesen Satz sähe die fehlende Rückrichtung wie ein Fehler aus. */
+      /* Without this sentence the missing way back would look like a defect. */
       zipRestoreHint:
         "Zum Zurückspielen die Datei auf einen USB-Stick entpacken, den Stick einstecken und " +
         "links „Zurückspielen“ wählen.",
-      /* Der zweite Zustand derselben Kachel: Liegt eine Sicherung im Eingangsordner, wird sie
-         nicht eingespielt, sondern vorgelegt. Der Ordner nimmt sonst Fotos auf — hinzufügend und
-         folgenlos —, während das hier den ganzen Bestand ersetzt. */
+      /* The second state of the same tile: a backup lying in the inbox is not restored but put
+         up for confirmation. That folder otherwise takes photos in -- additively and without
+         consequence -- while this replaces the entire collection. */
       incomingTitle: "Sicherung einspielen",
       incomingFound: (date: string, photos: string) =>
         `Im Eingangsordner liegt eine Sicherung vom ${date} mit ${photos} Fotos — zurückspielen?`,
@@ -376,8 +376,8 @@ export const t = {
         "Der jetzige Bestand wird dabei nicht gelöscht, sondern auf dem Gerät beiseitegelegt — " +
         "in einen Ordner mit dem heutigen Datum. Danach steht die Sicherung an seiner Stelle, " +
         "mit allen Fotos und allen Angaben.",
-      /* Der einzige Moment, in dem man den jetzigen Bestand nicht mehr sichern könnte, wäre
-         ausgerechnet der unmittelbar vor dem Überschreiben. Deshalb bleibt der Download hier. */
+      /* The one moment at which the current collection could no longer be saved would be the
+         one right before it is overwritten. Which is why the download stays here. */
       incomingDownloadFirst: "Vorher noch den jetzigen Bestand sichern?",
 
       zipStart: "Sicherung herunterladen",

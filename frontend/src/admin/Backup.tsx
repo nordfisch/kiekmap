@@ -53,9 +53,9 @@ export function Backup() {
   const running = job?.phase === "running";
   const waiting = drives?.incoming ?? null;
 
-  /* Liegt eine Sicherung im Eingangsordner, ist sie das Wichtigste auf diesem Bildschirm --
-     also wird die Kachel vorgewählt. Einmalig, nicht bei jedem Abruf: Wer danach bewusst auf
-     „Auf USB-Stick" wechselt, soll nicht vier Sekunden später zurückgeschoben werden. */
+  /* A backup lying in the inbox is the most important thing on this screen -- so its tile is
+     preselected. Once only, not on every poll: whoever then deliberately switches to "Auf
+     USB-Stick" should not be pushed back four seconds later. */
   const announced = useRef<string | null>(null);
   useEffect(() => {
     if (waiting && announced.current !== waiting.file) {
@@ -211,11 +211,11 @@ export function Backup() {
 }
 
 /**
- * Die Fläche, wenn im Eingangsordner eine Sicherung liegt.
+ * The area for when a backup lies in the inbox.
  *
- * Sie wird **vorgelegt, nicht eingespielt**. Der Eingangsordner nimmt sonst Fotos auf — das ist
- * hinzufügend und folgenlos —, während dies den ganzen Bestand ersetzt. Deshalb dieselbe
- * Rückfrage mit Datum und Anzahl, die der Stick-Weg schon stellt.
+ * It is **put up for confirmation, not restored**. The inbox otherwise takes photos in -- which
+ * is additive and without consequence -- while this replaces the entire collection. Hence the
+ * same confirmation with date and count that the stick route already asks.
  */
 function IncomingCard({
   waiting,
@@ -241,8 +241,8 @@ function IncomingCard({
 
       <p className="admin__note">{t.admin.backup.incomingWhat}</p>
 
-      {/* Sonst wäre der einzige Moment, in dem man den jetzigen Bestand nicht mehr sichern kann,
-          ausgerechnet der unmittelbar vor dem Überschreiben. */}
+      {/* Otherwise the one moment at which the current collection can no longer be saved
+          would be the one right before it is overwritten. */}
       <p className="admin__note">{t.admin.backup.incomingDownloadFirst}</p>
       <button type="button" className="button" onClick={onDownload}>
         {t.admin.backup.zipStart}
@@ -253,11 +253,11 @@ function IncomingCard({
 }
 
 /**
- * Die Fläche für den Download — an derselben Stelle wie die Laufwerkskachel daneben.
+ * The area for the download -- in the same place as the drive tile beside it.
  *
- * Kein Fortschrittsbalken: Der Browser führt die Übertragung und zeigt sie selbst an. Was hier
- * steht, ist die Einordnung — dass jedes Mal alles neu gepackt wird und wie eine solche Datei
- * wieder ins Gerät kommt.
+ * No progress bar: the browser runs the transfer and shows it itself. What stands here is the
+ * context -- that everything is packed anew each time, and how such a file gets back into the
+ * device.
  */
 function ZipCard({ downloading, onStart }: { downloading: boolean; onStart: () => void }) {
   return (

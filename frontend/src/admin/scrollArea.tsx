@@ -1,14 +1,14 @@
 /**
- * Der scrollende Bereich der Verwaltung, für die Ansichten darin erreichbar.
+ * The admin area's scrolling container, reachable from the views inside it.
  *
- * Gescrollt wird nicht die einzelne Ansicht, sondern `.admin__body` um sie herum. Wechselt eine
- * Ansicht ihren Inhalt -- Fotoliste zu Editor, Importauswahl zu Ergebnis --, bleibt dieser
- * Container stehen und behält seinen `scrollTop`. Das neue Formular öffnet sich dann mittendrin,
- * und seine Überschrift steht oberhalb des Bildschirmrands.
+ * What scrolls is not the individual view but `.admin__body` around it. When a view swaps its
+ * content -- photo list to editor, import choice to result -- that container stays put and keeps
+ * its `scrollTop`. The new form then opens halfway down, with its heading above the top edge of
+ * the screen.
  *
- * Weil der Container `AdminApp` gehört, der Wechsel aber in der Ansicht passiert, reicht ihn ein
- * Context durch. Das ist die Alternative dazu, jeder Ansicht ein weiteres Prop mitzugeben, das
- * mit ihrer eigentlichen Aufgabe nichts zu tun hat.
+ * Because the container belongs to `AdminApp` while the swap happens inside the view, a context
+ * passes it through. That is the alternative to giving every view one more prop that has nothing
+ * to do with its actual job.
  */
 
 import { type RefObject, createContext, useContext } from "react";
@@ -18,10 +18,10 @@ const ScrollAreaContext = createContext<RefObject<HTMLElement | null> | null>(nu
 export const ScrollAreaProvider = ScrollAreaContext.Provider;
 
 /**
- * Der scrollende Bereich, oder `null` ausserhalb der Verwaltung.
+ * The scrolling container, or `null` outside the admin area.
  *
- * Nur in Effekten benutzen: Das Ref sagt nicht Bescheid, wenn es sich füllt, und beim ersten
- * Rendern steht es noch leer.
+ * Use in effects only: the ref does not announce when it fills, and on the first render it is
+ * still empty.
  */
 export function useScrollArea(): RefObject<HTMLElement | null> | null {
   return useContext(ScrollAreaContext);

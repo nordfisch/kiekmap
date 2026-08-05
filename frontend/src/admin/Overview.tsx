@@ -1,13 +1,13 @@
 /**
- * Die Startseite der Verwaltung: was da ist, was fehlt, und wann zuletzt etwas geschah.
+ * The admin area's start page: what is there, what is missing, and when something last happened.
  *
- * Jede Zahl ist ein Weg. Vorher nannte diese Seite sechs Zahlen, von denen genau eine
- * irgendwohin führte — wer „4 ohne Ort" las, musste sich selbst zum Filter durchklicken. Für
- * jemanden, der zweimal im Jahr hier ist, ist das die halbe Bedienung.
+ * Every number is a route. This page used to name six numbers, exactly one of which led anywhere
+ * -- whoever read "4 ohne Ort" had to click their own way to the filter. For somebody who is here
+ * twice a year that is half of the operation.
  *
- * Oben der Bestand, unter der Trennlinie der Betrieb: seit wann nicht gesichert, seit wann nichts
- * aufgenommen, seit wann kein Besucher etwas beigetragen. Dieselben drei Spalten, damit die untere
- * Zeile nicht „ungefähr", sondern durch dasselbe Raster bündig steht.
+ * The collection above, the running of the device below the rule: how long since a backup, since
+ * anything was taken in, since a visitor contributed. The same three columns, so the lower row
+ * lines up through the same grid rather than "roughly".
  */
 
 import { useCallback } from "react";
@@ -18,7 +18,7 @@ import { t } from "../text/de";
 import { formatDaysSince } from "./format";
 import { useLoaded } from "./useLoaded";
 
-/** Wohin eine Kachel führt. `filter` gilt nur für den Fotobereich, `kiosk` verlässt die Verwaltung. */
+/** Where a tile leads. `filter` applies to the photo section only, `kiosk` leaves the admin area. */
 export type Target = {
   section: "photos" | "moderation" | "log" | "backup" | "kiosk";
   filter?: Selection;
@@ -34,7 +34,7 @@ function Figure({
   label: string;
   value: string;
   muted?: boolean;
-  /** Nur die Sicherungskachel: rot, sobald sie fällig ist. */
+  /** The backup tile only: red as soon as it is due. */
   overdue?: boolean;
   onClick?: () => void;
 }) {
@@ -54,7 +54,7 @@ function Figure({
     </>
   );
 
-  // Ohne Ziel bleibt es eine Anzeige. Ein Knopf, der nichts tut, ist schlimmer als kein Knopf.
+  // Without a target it stays a readout. A button that does nothing is worse than no button.
   if (!onClick) return <div className={className}>{content}</div>;
 
   return (
@@ -80,7 +80,7 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
           value={String(data.total)}
           onClick={() => onNavigate({ section: "photos", filter: "all" })}
         />
-        {/* Der einzige Weg hier heraus statt tiefer hinein -- derselbe wie „Verwaltung beenden". */}
+        {/* The only way out of here rather than deeper in -- the same as "Verwaltung beenden". */}
         <Figure
           label={t.admin.overview.onMap}
           value={String(data.on_map)}
@@ -132,13 +132,13 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
         />
       </div>
 
-      {/* Im Kiosk gibt es keine Browser-Bedienung -- kein Reload-Knopf, keine Adressleiste, keine
-          Tastatur. Ohne diesen Knopf bliebe bei einer verhakten Anzeige nur der Netzstecker (oder
-          fünf Minuten warten, bis der Leerlauf neu lädt).
+      {/* The kiosk has no browser controls -- no reload button, no address bar, no
+          keyboard. Without this button a stuck display would leave only the power plug (or five
+          minutes of waiting until the idle reset reloads).
 
-          Seit „Verwaltung beenden" selbst neu lädt, tut er technisch dasselbe. Er bleibt trotzdem
-          stehen: Wer eine verhakte Anzeige reparieren will, sucht nach „neu laden" und nicht nach
-          „beenden". Der Knopf ist der Name für den Weg, nicht ein zweiter Weg. */}
+          Since "Verwaltung beenden" reloads by itself, it technically does the same thing. It
+          stays anyway: whoever wants to fix a stuck display looks for "neu laden", not for
+          "beenden". The button is the name for the route, not a second route. */}
       <div className="overview__repair">
         <button type="button" className="button" onClick={() => void leave()}>
           {t.admin.overview.reload}

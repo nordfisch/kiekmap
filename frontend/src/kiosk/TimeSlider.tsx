@@ -103,9 +103,9 @@ export function TimeSlider() {
     moveHandle(handle, event.clientX);
   }
 
-  // Nur wenn der ganze Bestand kein datiertes Foto hat, gibt es nichts zu schieben. Ein Ausschnitt
-  // ohne datierte Fotos lässt die Achse dagegen stehen und zeigt einfach keine Balken -- die
-  // Ansicht springt dann nicht zwischen zwei Bauformen hin und her.
+  // Only when the whole collection holds no dated photo is there nothing to slide. A viewport
+  // without dated photos leaves the axis standing and simply shows no bars -- the view then does
+  // not jump back and forth between two layouts.
   if (!bounds || !timeRange || !histogram) {
     return (
       <div className="timeline timeline--empty">
@@ -127,8 +127,8 @@ export function TimeSlider() {
         {histogram.undated > 0 ? (
           <span className="timeline__undated">{t.timeline.undated(histogram.undated)}</span>
         ) : (
-          // Keine Balken und auch nichts Undatiertes: hier ist schlicht nichts. Das gehört gesagt,
-          // sonst wirkt die leere Achse wie ein Fehler.
+          // No bars and nothing undated either: there is simply nothing here. That needs saying,
+          // or the empty axis looks like a fault.
           histogram.decades.length === 0 && (
             <span className="timeline__undated">{t.timeline.empty}</span>
           )

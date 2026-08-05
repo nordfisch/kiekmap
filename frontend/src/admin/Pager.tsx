@@ -1,12 +1,11 @@
 /**
- * „Zurück · Seite 2 von 8 · Weiter" unter einer Liste.
+ * "Zurück · Seite 2 von 8 · Weiter" underneath a list.
  *
- * Seitenweise statt „Weitere anzeigen": Wer ein Foto bearbeitet, kommt danach auf dieselbe Seite
- * zurück. Beim Abarbeiten von „Ohne Ort" ist das der Unterschied zwischen Weiterarbeiten und
- * Wiederfinden.
+ * Pages rather than "show more": whoever edits a photo comes back to the same page afterwards.
+ * When working through "Ohne Ort" that is the difference between carrying on and searching again.
  *
- * Passt alles auf eine Seite, ist hier nichts — bei siebenundzwanzig Fotos soll die Verwaltung
- * nicht nach Aktenverwaltung aussehen.
+ * If everything fits on one page there is nothing here -- with twenty-seven photos the admin area
+ * should not look like records management.
  */
 
 import { t } from "../text/de";

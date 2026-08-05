@@ -1,37 +1,34 @@
 /**
- * Aus einer Hausnummernliste eine Auswahl machen, die auf einen Bildschirm passt.
+ * Turning a list of house numbers into a choice that fits on one screen.
  *
- * Die Pinneberger Straße hat 163 Adressen, der Lehmweg 139, selbst der Mühlenweg 78. Als
- * Knopfraster ist das keine Auswahl mehr, sondern eine Suchaufgabe. Zwei Kürzungen, in dieser
- * Reihenfolge:
+ * The Pinneberger Straße has 163 addresses, the Lehmweg 139, even the Mühlenweg 78. As a grid of
+ * buttons that is no longer a choice but a search task. Two cuts, in this order:
  *
- *   1. **Buchstabenzusätze fallen weg.** Jede fünfte Adresse in Holm ist eine (3a–3z am
- *      Mühlenweg ist eine Reihenhauszeile); räumlich fügen sie nichts hinzu — 3a und 3c liegen
- *      wenige Meter auseinander, und die Genauigkeitsangabe steht ohnehin bei 15 m. Beim
- *      Mühlenweg halbiert das die Liste.
- *   2. **Bleiben es zu viele, kommt ein Bereich davor** — „1–19", „20–39" —, genau wie das
- *      Jahrzehnt vor dem Jahr. Geschnitten wird nach Anzahl, nicht nach Zahlenwert: Straßen sind
- *      löchrig nummeriert, und zehn gleich große Blöcke sind besser als einundzwanzig verschieden
- *      volle.
+ *   1. **Letter suffixes fall away.** Every fifth address in Holm is one (3a-3z on the Mühlenweg
+ *      is a terrace); spatially they add nothing -- 3a and 3c lie a few metres apart, and the
+ *      accuracy is stated as 15 m anyway. On the Mühlenweg this halves the list.
+ *   2. **If too many remain, a block step comes first** -- "1-19", "20-39" -- exactly like the
+ *      decade before the year. Cut by count, not by numeric value: streets are numbered with
+ *      gaps, and ten equally sized blocks beat twenty-one differently full ones.
  */
 
 import type { Place } from "../api/client";
 
-/** So viele Knöpfe verträgt eine Stufe. Darüber wird geteilt. */
+/** As many buttons as one step can carry. Beyond that it is split. */
 export const MAX_BUTTONS = 12;
 
-/** Die führende Zahl: aus „3c" wird 3, aus „10-18" wird 10. */
+/** The leading number: "3c" becomes 3, "10-18" becomes 10. */
 export function baseNumber(housenumber: string): number | null {
   const match = /^\d+/.exec(housenumber.trim());
   return match ? Number.parseInt(match[0], 10) : null;
 }
 
 /**
- * Je Grundzahl ein Eintrag.
+ * One entry per base number.
  *
- * Vertreter ist die nackte Zahl, wenn es sie gibt — sonst der erste Eintrag der Gruppe. Die
- * Beschriftung bleibt damit immer eine Adresse, die es wirklich gibt: „3" wo 3 existiert, „3a" wo
- * die Zeile bei 3a anfängt. (Im ganzen Ort betrifft das 284 von 6174 Gruppen.)
+ * The representative is the bare number where it exists -- otherwise the first entry of the
+ * group. The label therefore always stays an address that really exists: "3" where 3 exists, "3a"
+ * where the terrace starts at 3a. (Across the whole village that affects 284 of 6174 groups.)
  */
 export function groupByBase(numbers: Place[]): Place[] {
   const groups = new Map<number, Place[]>();
@@ -52,11 +49,11 @@ export function groupByBase(numbers: Place[]): Place[] {
 export type NumberBlock = { label: string; numbers: Place[] };
 
 /**
- * Die Bereiche der ersten Stufe — oder ein einziger, wenn alles auf eine Seite passt.
+ * The blocks of the first step -- or a single one when everything fits on one page.
  *
- * Der Aufrufer überspringt die Stufe, sobald nur ein Block herauskommt. Bei Holms mittlerer Straße
- * (15 Adressen, nach dem Zusammenfassen meist ein Dutzend) ist das der Normalfall: Dort bleibt es
- * bei einem Schritt wie bisher.
+ * The caller skips the step as soon as only one block comes out. For Holm's average street (15
+ * addresses, usually a dozen after merging) that is the normal case: there it stays at one step
+ * as before.
  */
 export function blocksOf(numbers: Place[], max = MAX_BUTTONS): NumberBlock[] {
   if (numbers.length <= max) return [{ label: "", numbers }];

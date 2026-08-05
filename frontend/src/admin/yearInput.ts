@@ -1,36 +1,34 @@
 /**
- * Die Regel für „Jahrzehnt".
+ * The rule behind "Jahrzehnt".
  *
- * `date_range()` im Backend **rundet ein Jahrzehnt ab**: Aus 1934 mit Genauigkeit „Jahrzehnt"
- * werden kommentarlos die 1930er. Die 4 verschwindet, ohne dass jemand es merkt — genau die Art
- * Fehler, die in einem Museumsbestand jahrelang unentdeckt bleibt.
+ * `date_range()` in the backend **rounds a decade down**: 1934 with precision "decade" quietly
+ * becomes the 1930s. The 4 disappears without anybody noticing -- exactly the kind of mistake
+ * that stays undetected in a museum collection for years.
  *
- * Deshalb ist die Auswahl nur bei vollen Jahrzehnten zu haben. Wer 1934 meint, meint 1934.
+ * Which is why the choice is only on offer for whole decades. Whoever means 1934 means 1934.
  */
 
 export type Precision = "year" | "decade";
 
 export type YearInput = { year: string; precision: Precision };
 
-/** Volle Jahrzehnte, und nur die: 1920 ja, 1923 nein, „Kirchweih" nein. */
+/** Whole decades and only those: 1920 yes, 1923 no, "Kirchweih" no. */
 export function decadeAllowed(year: string): boolean {
   const parsed = Number.parseInt(year, 10);
   return Number.isFinite(parsed) && String(parsed) === year.trim() && parsed % 10 === 0;
 }
 
 /**
- * Eine neue Jahreszahl übernehmen — und die Genauigkeit mitnehmen, wenn sie nicht mehr zulässig
- * ist.
+ * Take a new year -- and take the precision along with it when it is no longer allowed.
  *
- * Das Auswahlfeld nur zu sperren genügt nicht: Ein gesetztes, aber gesperrtes Feld schickt beim
- * Absenden weiterhin „Jahrzehnt" mit und macht aus der 1923 stillschweigend die 1920er — also
- * genau der Fehler, den die Regel verhindern soll.
+ * Merely disabling the select is not enough: a set but disabled field still submits "decade" and
+ * quietly turns 1923 into the 1920s -- exactly the mistake the rule is there to prevent.
  */
 export function withYear(current: YearInput, year: string): YearInput {
   return { year, precision: decadeAllowed(year) ? current.precision : "year" };
 }
 
-/** Was daraus für die API wird: nichts, ein Jahr, oder ein Jahrzehnt. */
+/** What becomes of it for the API: nothing, a year, or a decade. */
 export function toDate(input: YearInput): { year: number; precision: Precision } | null {
   const parsed = Number.parseInt(input.year, 10);
   if (!Number.isFinite(parsed)) return null;
@@ -41,12 +39,11 @@ export function toDate(input: YearInput): { year: number; precision: Precision }
 }
 
 /**
- * Was ein gespeichertes Foto für die Eingabefelder bedeutet.
+ * What a stored photo means for the input fields.
  *
- * Die Genauigkeit kommt aus dem Foto, **nicht** aus der Jahreszahl. Sonst würde aus einem als
- * Jahrzehnt gespeicherten 1920 beim Nachbearbeiten stillschweigend das Jahr 1920 — und die
- * Zeitleiste zeigte danach einen Punkt statt einer Spanne, ohne dass jemand etwas eingegeben
- * hätte.
+ * The precision comes from the photo, **not** from the year. Otherwise a 1920 stored as a decade
+ * would quietly become the year 1920 while somebody edits it -- and the timeline would show a
+ * point instead of a span, without anybody having typed a thing.
  */
 export function fromPhoto(dateFrom: string | null, precision: string): YearInput {
   if (!dateFrom) return { year: "", precision: "year" };

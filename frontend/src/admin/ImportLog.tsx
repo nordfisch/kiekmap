@@ -30,7 +30,7 @@ export function ImportLog() {
   const [result, setResult] = useState("");
   const [offset, setOffset] = useState(0);
 
-  // Ein anderer Reiter ist eine andere Liste -- also wieder von vorn.
+  // A different tab is a different list -- so start over again.
   useEffect(() => setOffset(0), [result]);
 
   const { data, error, loading } = useLoaded(

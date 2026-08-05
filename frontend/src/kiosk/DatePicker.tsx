@@ -1,16 +1,16 @@
 /**
- * Ein Jahr aussuchen: erst das Jahrzehnt, dann das Jahr.
+ * Picking a year: the decade first, then the year.
  *
- * Nicht aus Bequemlichkeit so, sondern weil es der ehrlichen Antwort entspricht: Wer ein altes
- * Foto sieht, weiß meist „die Zwanziger", nicht „1924". Ein Zahlenfeld verlangte eine Genauigkeit,
- * die niemand hat -- und auf einem Touchscreen ist es für ältere Finger ohnehin mühsam.
+ * Not out of convenience but because it matches the honest answer: whoever sees an old photo
+ * usually knows "the twenties", not "1924". A number field would demand a precision nobody has --
+ * and on a touchscreen it is awkward for older fingers anyway.
  *
- * „Ganze 1920er Jahre" ist deshalb eine vollwertige Antwort und kein Ausweichen: Sie wird als
- * Intervall gespeichert, und der Zeitfilter fragt auf Überlappung ab.
+ * "Ganze 1920er Jahre" is therefore a full answer and not a dodge: it is stored as an interval,
+ * and the time filter queries on overlap.
  *
- * **Nur die Anzeige, kein Zustand von aussen.** Dasselbe Bauteil bedient zwei Stellen -- den
- * Beitragsbereich und die Detailansicht --, und beide legen etwas anderes darüber: Der eine
- * schickt den Beitrag zum Foto seiner Frage, die andere zu dem, das gerade groß zu sehen ist.
+ * **Display only, no state from outside.** The same component serves two places -- the
+ * contribution panel and the detail view -- and each puts something different on top: one sends
+ * the contribution to the photo of its question, the other to the one currently shown large.
  */
 
 import { useState } from "react";

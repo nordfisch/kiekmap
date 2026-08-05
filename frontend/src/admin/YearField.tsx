@@ -1,12 +1,12 @@
 /**
- * Jahreszahl und Genauigkeit, nebeneinander und gleich breit.
+ * Year and precision, side by side and equally wide.
  *
- * Ein Bauteil für beide Stellen, an denen datiert wird: den Stapel beim Importieren und das
- * einzelne Foto im Editor. Vorher war es zweierlei — dort ein Ankreuzfeld unter der Zahl, hier
- * ein Auswahlfeld daneben, und die Regel für „Jahrzehnt" galt nur an einer der beiden Stellen.
+ * One component for both places where dating happens: the batch during import and the single
+ * photo in the editor. It used to be two -- a checkbox under the number there, a select beside it
+ * here, and the rule for "Jahrzehnt" held in only one of the two places.
  *
- * Die Genauigkeit ist gesperrt, solange kein Jahr dasteht: ohne Jahr gibt es nichts, dessen
- * Genauigkeit sich angeben ließe.
+ * The precision is disabled while no year stands there: without a year there is nothing whose
+ * precision could be stated.
  */
 
 import { useId } from "react";
@@ -53,7 +53,7 @@ export function YearField({
           onChange={(event) => onChange({ ...value, precision: event.target.value as Precision })}
         >
           <option value="year">{t.admin.editor.precisionYear}</option>
-          {/* Sichtbar, aber nicht wählbar: sonst würde aus einer 1934 still das Jahrzehnt 1930. */}
+          {/* Visible but not selectable: otherwise a 1934 would quietly become the decade 1930. */}
           <option value="decade" disabled={!decadeAllowed(value.year)}>
             {t.admin.editor.precisionDecade}
           </option>

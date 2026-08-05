@@ -53,7 +53,7 @@ function toPatch(draft: Draft, deleted = draft.deleted): PhotoPatch {
     description: draft.description.trim() || null,
     credit: draft.credit.trim() || null,
     provenance: draft.provenance.trim() || null,
-    // null heisst "Datierung loeschen" -- ein leeres Jahresfeld ist genau das, siehe unten.
+    // null means "clear the date" -- an empty year field is exactly that, see below.
     date: toDate(draft.date),
     location: draft.place
       ? { lat: draft.place.lat, lon: draft.place.lon, place_name: draft.place.name || null }
@@ -97,9 +97,9 @@ export function PhotoEditor({
     }
   }
 
-  /* Löschen speichert und kehrt zurück wie „Speichern" -- nur mit dem anderen Status. Die übrigen
-     Änderungen im Formular gehen dabei mit; sie wegzuwerfen wäre die größere Überraschung.
-     Wiederherstellen fragt nicht zurück: Es macht nichts kaputt. */
+  /* Deleting saves and returns like "Speichern" -- only with the other status. The remaining
+     changes in the form go along; throwing them away would be the bigger surprise. Restoring does
+     not ask back: it breaks nothing. */
   function remove() {
     if (window.confirm(t.admin.editor.deleteConfirm(photo.title || t.admin.photos.untitled))) {
       void save(true);

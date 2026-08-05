@@ -18,8 +18,8 @@ export type Region = {
   maxZoom: number;
 };
 
-// Welche Jahrzehnte die Datumsfrage anbietet, stand hier einmal mit -- es beschreibt aber die
-// Sammlung und nicht den Ort. Es ergibt sich jetzt aus dem Bestand, siehe kiosk/decades.ts.
+// Which decades the date question offers used to stand here too -- but that describes the
+// collection, not the place. It now follows from the collection, see kiosk/decades.ts.
 
 export async function loadRegion(signal?: AbortSignal): Promise<Region> {
   const response = await fetch("/tiles/region.json", { signal });

@@ -29,10 +29,10 @@ export function HelpPanel() {
 
   const photo = task?.photo ?? null;
 
-  // Bei jedem Wechsel nach oben: neues Foto, andere Frage, Dank. Sonst bliebe der Bereich dort
-  // stehen, wo ihn der letzte Finger hingeschoben hat -- und die neue Frage staende ausserhalb
-  // des Bildes. Die Zwischenschritte einer Aufgabe ("Andere Strasse") lassen ihn stehen: dort
-  // bleibt der Blick ohnehin an derselben Stelle.
+  // Back to the top on every change: new photo, other question, thank-you. Otherwise the panel
+  // would stay where the last finger pushed it -- and the new question would stand off-screen.
+  // The intermediate steps of one task ("Andere Strasse") leave it alone: there the eye stays in
+  // the same place anyway.
   const panel = useRef<HTMLElement>(null);
   useEffect(() => {
     panel.current?.scrollTo({ top: 0 });
@@ -59,9 +59,9 @@ export function HelpPanel() {
             {need === "location" ? t.help.askLocation : t.help.askDate}
           </p>
 
-          {/* Genauer hinsehen ist das, was jemand tut, bevor er sagt, wo das war -- auf einem
-              160 px breiten Bild ist ein Hof kaum zu erkennen. Derselbe Weg wie beim Tippen auf
-              einen Marker, samt Schliessen per Tipp daneben, Knopf oder Escape. */}
+          {/* Looking closer is what somebody does before saying where it was -- on a
+              160 px wide picture a farmstead is barely recognisable. The same route as tapping a
+              marker, including closing by tapping beside it, by button or by Escape. */}
           <button
             type="button"
             className="help-panel__zoom"
@@ -88,8 +88,8 @@ export function HelpPanel() {
 
           {need === "location" ? <LocationTask /> : <DateTask />}
 
-          {/* Ist dies die letzte offene Aufgabe, fuehrt "Weiss ich nicht" nirgendwohin -- dasselbe
-              Foto kaeme zurueck. Dann steht der Knopf besser gar nicht da. */}
+          {/* If this is the last open task, "Weiss ich nicht" leads nowhere -- the same
+              photo would come back. Then the button is better not there at all. */}
           {task && (task.open_count > 1 || task.open_other > 0) && (
             <button type="button" className="button button--quiet help-panel__next" onClick={skip}>
               {t.help.next}

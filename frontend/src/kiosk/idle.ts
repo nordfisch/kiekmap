@@ -26,11 +26,7 @@ const ACTIVITY = ["pointerdown", "keydown", "wheel", "touchstart"] as const;
  * The event target is passed in rather than reaching for ``window`` -- that is what lets this be
  * tested without a browser.
  */
-export function watchForIdle(
-  target: EventTarget,
-  idleMs: number,
-  onIdle: () => void,
-): () => void {
+export function watchForIdle(target: EventTarget, idleMs: number, onIdle: () => void): () => void {
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   function stop() {

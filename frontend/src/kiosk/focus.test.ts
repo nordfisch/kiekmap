@@ -50,7 +50,9 @@ describe("Zeitraum, in dem das Foto zu sehen ist", () => {
   it("laesst die Ansicht bei einem Foto ohne Ort in Ruhe", () => {
     // Es ist auf keiner Karte zu finden. Den Schieber trotzdem zu verstellen wuerde nur andere
     // Fotos ausblenden, ohne dass etwas sichtbar wird.
-    expect(rangeForPhoto(foto({ lat: null, lon: null, date_from: "1932-01-01" }), BESTAND)).toBeNull();
+    expect(
+      rangeForPhoto(foto({ lat: null, lon: null, date_from: "1932-01-01" }), BESTAND),
+    ).toBeNull();
   });
 });
 
