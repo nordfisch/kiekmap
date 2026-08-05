@@ -449,3 +449,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   **Wappenrecht**: Ein Hoheitszeichen darf nicht an jeden weitergegeben werden, der ein Repo
   klont, und ein Hinweis heilt das nicht, weil es um Erlaubnis geht und nicht um Zuschreibung.
   Siehe [docs/decisions.md](docs/decisions.md) Punkt 21
+- **Der Beispielbestand liegt jetzt im Repo — und ist erfunden.** 18 gezeichnete Bilder aus
+  `tools/build_seed.py` (1,1 MB statt 24 MB), dazu ausgedachte Menschen, Bildnachweise und
+  Herkunftsangaben. Echt sind nur Straßennamen und Koordinaten: Ohne sie zeigt die Karte nichts
+  und die Ortssuche im „Hilf mit"-Bereich findet nichts. Damit tut `make seed` in einem frischen
+  Clone endlich das, was das README verspricht. Die Lücken des Bestands — 3 ohne Jahr, 2 ohne Ort,
+  2 gelöschte, 8 Beiträge davon 2 zurückgenommene — zählt der Generator nach jedem Lauf nach und
+  bricht ab, wenn eine fehlt
+- Der Hinweis, dass alles erfunden ist, steht in `seed/README.md`, im README und in der Ausgabe
+  von `make seed` selbst. Umgekehrt warnt `make seed-save` davor, echte Fotos zu committen

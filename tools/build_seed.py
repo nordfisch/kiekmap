@@ -23,7 +23,6 @@ import hashlib
 import json
 import random
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import NamedTuple
 
@@ -40,6 +39,10 @@ from app.services.dates import date_range  # noqa: E402
 
 #: One fixed start value: the same command always produces the same collection, byte for byte.
 RANDOM_SEED = 20260805
+
+#: The day this collection was designed -- not the day it was last generated. A timestamp of
+#: the run would be the one field that changes on every rebuild, dirtying the repo for nothing.
+CREATED = "2026-08-05T16:00:00+02:00"
 
 #: Real addresses out of the Holm gazetteer -- see the module docstring for why they are real.
 #: Test data is the documented exception to "nothing place-specific in the code" (CLAUDE.md).
@@ -211,7 +214,7 @@ COLLECTION = [
         description="Der Saal rechts wurde nach dem Krieg abgetragen.",
         tags=(*GASTHOF, "Postkarte"),
     ),
-    # Ohne Jahr, mit einem zurueckgenommenen Beitrag.
+    # Without a year, and with a contribution that was taken back.
     Photo("056.jpg", "Gasthof Petersen, Hofseite", address="Hauptstraße 14", tags=GASTHOF),
     Photo(
         "118.jpg",
@@ -223,7 +226,7 @@ COLLECTION = [
         tags=GASTHOF,
         portrait=True,
     ),
-    # Zwei geloeschte -- fuer die Liste, die es dafuer gibt.
+    # Two deleted ones -- for the list that exists for them.
     Photo(
         "P1304935a (1024x683).jpg",
         "Gasthof Petersen im Schnee",
@@ -307,7 +310,7 @@ COLLECTION = [
         "Bewohner: Familie Sieveking, spaeter mehrere Fluechtlingsfamilien.",
         tags=HOF,
     ),
-    # Ohne Ort, mit einem zurueckgenommenen Beitrag.
+    # Without a place, and with a contribution that was taken back.
     Photo(
         "168.JPG",
         "Hof Sieveking, Rückseite",
@@ -317,14 +320,14 @@ COLLECTION = [
         tags=(*HOF, "Repro"),
         portrait=True,
     ),
-    # Ohne Jahr.
+    # Without a year.
     Photo(
         "17.jpg",
         "Hauptstraße 47",
         address="Hauptstraße 47",
         description="Blatt 17 einer Haus-Dokumentation. Frühere Eigentümer: Familie Boysen.",
     ),
-    # Weder Jahr noch Ort noch Bildnachweis -- das Foto, an dem beide Fragen haengen.
+    # Neither year nor place nor credit -- the photo both questions hang on.
     Photo("pic_012.jpg", "Schule und Kindergarten", credit=None),
     Photo(
         "Bild_2024-03-11.jpg",
@@ -420,7 +423,7 @@ def main() -> int:
     (SEED_DIR / "seed.json").write_text(
         json.dumps(
             {
-                "created": datetime.now().astimezone().isoformat(timespec="seconds"),
+                "created": CREATED,
                 "photos": photos,
             },
             ensure_ascii=False,

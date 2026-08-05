@@ -336,31 +336,26 @@ und jeden Fehlversuch dauerhaft sichtbar; ein reines Release-Repo schützt davor
 Historie, die dieses Projekt gerade auszeichnet — die Commit-Nachrichten hier tragen die
 Begründungen.
 
-**Zwei Dinge sind vor jeder Veröffentlichung zu klären, und eines davon ist ein echter Blocker:**
+**Die beiden Blocker sind erledigt (5. August 2026)** — was hier stand, ist getan:
 
-- **`frontend/public/logo.png` ist das Wappen der Gemeinde Holm.** Ein Gemeindewappen ist kein
-  freies Werk, sondern ein hoheitliches Zeichen; seine Verwendung braucht die Erlaubnis der
-  Gemeinde, und in einem öffentlichen Repo liegt es für jeden zum Mitnehmen. Der Code ist darauf
-  vorbereitet — im Code steht nirgends, was auf dem Bild zu sehen ist —, die Datei müsste also nur
-  durch einen Platzhalter ersetzt werden. **Vor der Veröffentlichung zu entscheiden, nicht danach:
-  aus der Git-Historie bekommt man sie nur mit einem Rewrite wieder heraus.**
-- **Dürfen und wollen wir Beispielfotos ausliefern?** Seit dem 3. August gibt es einen
-  Beispielbestand unter `seed/` — sechzehn echte historische Aufnahmen aus Holm, mit denen `make
-  seed` in einer Minute einen brauchbaren Entwicklungsstand herstellt. **Er ist bewusst nicht
-  committet**, denn die Bilder gehören dem Museum. Damit steht `make seed` im README als
-  Kommando, das für einen frischen Clone nichts tut — der Zustand ist ehrlich dokumentiert
-  (`seed/README.md` und eine Klartextmeldung), aber er ist kein Endzustand.
+- **Das Wappen ist raus.** `frontend/public/logo.png` war das Wappen der Gemeinde Holm. Es ist
+  urheberrechtlich frei (§ 5 UrhG, amtliches Werk), aber als Hoheitszeichen unabhängig davon in
+  der Nutzung beschränkt — und ein Hinweis heilt das nicht, weil es um Erlaubnis geht und nicht
+  um Zuschreibung. Im Repo liegt jetzt ein Platzhalter aus `tools/build_logo.py`; das echte
+  Wappen kommt auf dem Gerät an seinen Platz. Weil es seit dem ersten Auftauchen in jedem
+  Commit-Baum lag, ist es zugleich **aus der gesamten Historie entfernt** worden — solange das
+  Repo noch keinen Remote hatte. Begründung in [decisions.md](decisions.md), Punkt 21.
+- **Der Beispielbestand ist erfunden und liegt im Repo.** 18 gezeichnete Bilder aus
+  `tools/build_seed.py`, dazu ausgedachte Menschen, Bildnachweise und Herkunftsangaben. Echt sind
+  nur Straßennamen und Koordinaten — ohne sie zeigt die Karte nichts und die Ortssuche findet
+  nichts. `make seed` tut damit in einem frischen Clone endlich das, was das README verspricht.
+  Die Lücken des Bestands sind erhalten und werden vom Generator nachgezählt.
+- **Die Historie ist sonst sauber.** Geprüft am 5. August 2026 über alle 203 jemals hinzugefügten
+  Pfade: keine `.env`, keine Laufzeitdaten, keine Kartendateien, keine echten Fotos — nur
+  `deploy/.env.example`, die acht synthetischen Testbilder und der erfundene Beispielbestand.
 
-  Die Frage hat drei Antworten, und sie ist mit der Wappen-Frage verwandt: **mitliefern** (braucht
-  die schriftliche Freigabe des Museums und einen Bildnachweis je Foto — das Feld dafür gibt es
-  seit demselben Tag), **durch gemeinfreie Bilder ersetzen** (Wikimedia Commons oder ein
-  Landesarchiv, je Bild eine Lizenzprüfung), oder **durch erzeugte Bilder mit erkennbarem Motiv
-  ersetzen** (rechtlich unbedenklich, sieht aber nie aus wie ein Museum). Der Weg entscheidet
-  zugleich, ob ein zweites Museum das Projekt mit einem gefüllten Bildschirm ausprobieren kann
-  oder mit einem leeren.
-- **Die Historie ist sonst sauber.** Keine `.env`, keine Laufzeitdaten, keine Kartendateien, keine
-  echten Fotos — nur `deploy/.env.example` und die sechs synthetischen Testbilder. Das ist vor dem
-  Veröffentlichen noch einmal zu prüfen, aber der Ausgangspunkt ist gut.
+**Offen bleibt der Releaseprozess selbst** — und die Lizenzfrage im nächsten Punkt, die vor einer
+Veröffentlichung ebenfalls beantwortet sein muss.
 
 ### Lizenz des Projekts und der verwendeten Komponenten
 
