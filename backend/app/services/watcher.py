@@ -101,7 +101,11 @@ class IncomingWatcher:
         count = 0
         with SessionLocal() as session:
             for path in ready:
-                outcome = import_file(session, path, self.settings, move_aside=True)
+                # ``root`` is the inbox itself: whoever copies in a stack filed by street has
+                # said something about every photo in it -- see services/foldermeta.py.
+                outcome = import_file(
+                    session, path, self.settings, move_aside=True, root=self.settings.incoming_dir
+                )
                 self._sizes.pop(path, None)
                 log.info("%s: %s -- %s", outcome.result, path.name, outcome.message)
                 if outcome.succeeded:

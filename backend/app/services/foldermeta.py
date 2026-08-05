@@ -171,8 +171,12 @@ def parse_path(parts: Sequence[str], streets: Mapping[str, str]) -> FolderMeta:
     return FolderMeta()
 
 
-def _relative(path: Path, root: Path) -> Path:
-    """The file's path below the import root -- or its bare name if it lies outside."""
+def relative_to_root(path: Path, root: Path) -> Path:
+    """The file's path below the import root -- or its bare name if it lies outside.
+
+    Public because moving a finished file aside needs the same answer: ``_erledigt/`` mirrors the
+    folder tree it came from, see importer._move_aside.
+    """
     try:
         return path.relative_to(root)
     except ValueError:
@@ -243,7 +247,7 @@ def apply_folder_meta(
         photo.title_source = Source.CURATOR
 
     if not photo.provenance and settings.import_provenance:
-        photo.provenance = settings.import_provenance + str(_relative(path, root))
+        photo.provenance = settings.import_provenance + str(relative_to_root(path, root))
 
     # The street goes on *every* photo below it, house number or not. For the ones without a
     # number it is the only trace left; for the rest it makes the whole street findable at once.

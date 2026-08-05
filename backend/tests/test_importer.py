@@ -394,3 +394,47 @@ class TestVerzeichnisimport:
         assert len(abgewiesen) == 1
         # Originale des Nutzers bleiben unangetastet.
         assert len(list(quelle.iterdir())) == 9
+
+
+class TestWoDiePfadSchichtNichtGilt:
+    """Der Upload hat keinen Pfad -- und darf sich keinen ausdenken.
+
+    Die Gegenrichtung zum Fehler im Eingangsordner. Beim Hochladen im Browser landet die Datei in
+    einem temporaeren Verzeichnis; dessen Name sagt ueber niemandes Archiv etwas aus. Wuerde dieser
+    Weg die Pfad-Schicht mitbekommen, waeren die Angaben frei erfunden, saehen aber aus wie
+    gelesene -- und weil der Import nur leere Felder fuellt, kaeme das Foto nie zur Korrektur.
+    """
+
+    def test_hochladen_hat_keinen_pfad_und_erfindet_keinen(
+        self, session, settings, fixtures_dir: Path, monkeypatch
+    ):
+        from app.models import Place
+        from app.services.importer import import_upload
+        from app.services.places import normalize
+
+        monkeypatch.setattr(settings, "import_provenance", "Archiv/")
+
+        # Die Strasse heisst wie das Datenverzeichnis, in dem die Ablage liegt. Nur so trifft der
+        # Test wirklich etwas: Der temporaere Ordner heisst "upload-a1b2c3", den findet kein
+        # Strassenname. Der Ordner darueber heisst auf jedem Geraet gleich.
+        strasse = settings.data_dir.name
+        session.add(
+            Place(
+                name=strasse,
+                name_normalized=normalize(strasse),
+                lat=53.62,
+                lon=9.676,
+                kind="strasse",
+            )
+        )
+        session.commit()
+
+        with (fixtures_dir / "scan_ohne_exif.jpg").open("rb") as datei:
+            foto = import_upload(session, "023.jpg", datei, settings).photo
+
+        assert foto is not None
+        assert foto.needs_location
+        assert foto.place_name is None
+        assert foto.title is None
+        assert foto.provenance is None
+        assert foto.tags == []

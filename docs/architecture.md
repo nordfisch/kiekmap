@@ -179,6 +179,10 @@ Schichten** aus, was schon dasteht (Begründung in [decisions.md](decisions.md) 
 | **Metadaten** | `import_file()` | alle vier Wege | Datum, GPS, Titel, Beschreibung, Bildnachweis, Herkunft, Schlagwörter aus EXIF/IPTC |
 | **Pfad** | `foldermeta.py` | 1, 3, 4 | Straße und Hausnummer aus den Ordnernamen |
 
+Angeschaltet wird die zweite über den `root`-Parameter von `import_file()` — den Ordner, auf dem
+der Import gestartet wurde. Dass die Entscheidung dort sitzt und nicht beim Aufrufer, ist keine
+Geschmacksfrage: Sie hing eine Zeit lang am Aufrufer, und der Eingangsordner hatte sie nicht.
+
 Beim Hochladen gibt es keinen Pfad — dort greift nur die erste Schicht, und die gemeinsamen
 Angaben kommen wie bisher aus der Maske. Die zweite ist ein reines Modul ohne HTTP-Bezug: Sie
 bekommt die Pfadteile und den Ortsindex und gibt zurück, welche Straße und welche Hausnummer

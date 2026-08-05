@@ -402,3 +402,19 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Tests lasen die `.env` des Entwicklers mit.** Damit hing das Ergebnis davon ab, was auf
   *diesem* Rechner eingestellt ist — ein Eintrag wie `PHOTOMAP_IMPORT_CREDIT` ließ Tests
   fehlschlagen, die mit den Voreinstellungen rechnen. Die Testumgebung liest die Datei nicht mehr
+- **Der Eingangsordner hat die Ordnernamen nicht ausgewertet** — ausgerechnet er, den CLAUDE.md
+  „den üblichen Weg für das Museumsteam" nennt. Der Erstbestand kam so herein: 929 Fotos, deren
+  Straße und Hausnummer im Pfad standen und danach nirgends in der Datenbank. 413 statt 852
+  verortet, **null** hausgenau, kein einziger Ortsname, 126 statt 922 Titel, 169 statt 926
+  Herkunftsangaben. Auffällig war es nicht, weil die Metadaten-Schicht sauber lief — der Bestand
+  sah nicht kaputt aus, nur leer.
+
+  Die Ursache war nicht die vergessene Zeile, sondern **dass sie vergessen werden konnte**: Die
+  Pfad-Schicht hing an den Aufrufern, und einer von vieren hatte sie nicht. Sie hängt jetzt am
+  `root`-Parameter von `import_file` — wer einen fünften Importweg baut, muss die Frage „was ist
+  die Wurzel dieser Datei?" *beantworten*, statt sie zu übersehen. Nebenbei sagt das
+  Import-Protokoll nicht mehr „es fehlt noch: Ort" für Fotos, die gleich danach verortet werden
+- **`_erledigt/` behält die Ordnerstruktur.** Bisher landete alles flach nebeneinander — bei einem
+  nach Straßen abgelegten Stapel also genau die Information zerstört, die ihn ausmacht. Ein
+  zweiter Lauf oder auch nur eine Stichprobe hatte danach nichts mehr zu lesen, und gleichnamige
+  Dateien aus verschiedenen Häusern stapelten sich zu „023 (2).jpg"

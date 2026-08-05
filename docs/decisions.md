@@ -550,8 +550,20 @@ danebensteht — und lässt Ehrenamtliche 929 Adressen abtippen, die schon da si
 | **Pfad** (`foldermeta.py`) | Eingangsordner, CLI, USB-Stick | Straße und Hausnummer aus den Ordnernamen |
 
 Beim Hochladen im Browser gibt es keinen Pfad — dort greift nur die erste Schicht, und die
-gemeinsamen Angaben der Maske kommen wie bisher darüber. Damit brauchte kein Aufrufer geändert zu
-werden, um die Metadaten-Regeln zu bekommen, und keiner bekommt die Pfad-Regeln versehentlich.
+gemeinsamen Angaben der Maske kommen wie bisher darüber.
+
+**Angeschaltet wird die zweite Schicht über den `root`-Parameter von `import_file()`** — den
+Ordner, auf dem der Import gestartet wurde. Das war zuerst anders und ist die Lehre aus einem
+Fehler, der 929 Fotos gekostet hat: Die Pfad-Schicht stand als eigener Aufruf bei den Aufrufern,
+und der Eingangsordner — laut CLAUDE.md „der übliche Weg für das Museumsteam" — hatte sie nicht.
+Straße und Hausnummer standen im Pfad und danach nirgends in der Datenbank. Aufgefallen ist es
+erst an der fertigen Karte, weil die Metadaten-Schicht sauber lief: Der Bestand sah nicht kaputt
+aus, nur leer.
+
+Die Lehre ist nicht „besser aufpassen", sondern **eine Frage, die man beantworten muss statt sie
+übersehen zu können**. Wer einen fünften Importweg baut, entscheidet jetzt über einen Parameter,
+was die Wurzel dieser Datei ist; der Browser-Upload antwortet mit `None`, weil ein Browser keinen
+Pfad schickt.
 
 ### Erst das Gerät, dann die Jahresgrenze
 

@@ -75,23 +75,30 @@ def _log_outcome(
     )
 
 
-def _free_name(folder: Path, name: str) -> Path:
+def _free_name(target: Path) -> Path:
     """Make sure nothing is overwritten when moving files aside."""
-    target = folder / name
     if not target.exists():
         return target
-    stem, suffix = Path(name).stem, Path(name).suffix
+    stem, suffix = target.stem, target.suffix
     for counter in range(2, 1000):
-        target = folder / f"{stem} ({counter}){suffix}"
-        if not target.exists():
-            return target
-    raise RuntimeError(f"no free name for {name} in {folder}")
+        candidate = target.with_name(f"{stem} ({counter}){suffix}")
+        if not candidate.exists():
+            return candidate
+    raise RuntimeError(f"no free name for {target.name} in {target.parent}")
 
 
 def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
-    target_folder = inbox / subfolder
-    target_folder.mkdir(parents=True, exist_ok=True)
-    shutil.move(str(path), _free_name(target_folder, path.name))
+    """File a finished photo away under ``_erledigt/`` or ``_problem/`` -- **keeping its folders**.
+
+    ``incoming/Hauptstraße/14 Museum/x.jpg`` becomes ``_erledigt/Hauptstraße/14 Museum/x.jpg``,
+    not ``_erledigt/x.jpg``. Flattened, a stack filed by street was a one-way trip: the folder
+    names are what say where those photos are (see foldermeta.py), so a second run or even a spot
+    check afterwards had nothing left to read -- and equal file names from different houses piled
+    up as "023 (2).jpg", "023 (3).jpg".
+    """
+    target = inbox / subfolder / foldermeta.relative_to_root(path, inbox)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(path), _free_name(target))
 
 
 def move_to_done(path: Path, inbox: Path) -> None:
@@ -148,11 +155,23 @@ def import_file(
     settings: Settings,
     *,
     move_aside: bool = False,
+    root: Path | None = None,
 ) -> ImportOutcome:
     """Take in a single file.
 
     ``move_aside`` applies to the watched folder. When importing from an arbitrary directory the
     user's files are left untouched.
+
+    ``root`` is the folder the import was started on. Given one, the import reads the folder names
+    below it as statements about the photo -- street, house number, name; see
+    app/services/foldermeta.py. Without one it reads only the file itself.
+
+    **That this decision sits here and not at the call site is the point.** It used to be a line
+    each caller had to remember, and the busiest of them -- the watched inbox, which CLAUDE.md
+    calls the museum team's usual route -- did not have it. 929 photographs came in with their
+    street standing in the path and nowhere in the database. A fifth import route now has to
+    *answer* the question "what is this file's root?" rather than silently skip it; the browser
+    upload answers it with ``None``, because a browser sends no path.
     """
     inbox = settings.incoming_dir
 
@@ -254,6 +273,11 @@ def import_file(
     # After the flush, not before: add_tags writes a new tag out at once, and doing that while
     # the photo is still transient would drop the link between the two.
     add_tags(session, photo, [*info.keywords, *settings.import_tags])
+
+    # And before the closing message is put together, so that it tells the truth: a photo the
+    # folder is about to locate must not be logged as "es fehlt noch: Ort".
+    if root is not None:
+        foldermeta.apply_folder_meta(session, photo, path, root, settings)
 
     missing = [
         label
@@ -437,14 +461,12 @@ def import_from_folder(
     outcomes: list[ImportOutcome] = []
 
     for index, path in enumerate(images, start=1):
-        # move_aside stays False -- see the note at the top of this section.
-        outcome = import_file(session, path, settings)
-        if outcome.succeeded and outcome.photo is not None:
-            # The folder first, the batch form after it: both only fill what is empty, and the
-            # form's statement ("all of these are from the Kirchweih") is the coarser of the two.
-            foldermeta.apply_folder_meta(session, outcome.photo, path, folder, settings)
-            if defaults:
-                defaults(outcome.photo)
+        # move_aside stays False -- see the note at the top of this section. The folder names are
+        # read inside import_file; the batch form comes after, because both only fill what is
+        # empty and the form's statement ("all of these are from the Kirchweih") is the coarser.
+        outcome = import_file(session, path, settings, root=folder)
+        if outcome.succeeded and outcome.photo is not None and defaults:
+            defaults(outcome.photo)
         session.commit()
 
         outcome.source = path
@@ -486,6 +508,10 @@ def import_upload(
     Written to disk first rather than held in memory: a batch of scans is a gigabyte in no time,
     and the Pi has less RAM than that. From there on it is the ordinary import -- the watched
     folder, the CLI and the upload all go through the same code.
+
+    **No ``root``, deliberately.** A browser sends a bare file name; the temporary directory this
+    writes to says nothing about anybody's archive. What the whole batch has in common comes from
+    the form instead, through ``apply_batch_defaults``.
     """
     settings.ensure_dirs()
     # Inside the data directory, so the later copy to photos/ stays on one filesystem.
@@ -512,9 +538,6 @@ def import_directory(
         if SPECIAL_DIRS & set(path.relative_to(directory).parts):
             continue
 
-        outcome = import_file(session, path, settings, move_aside=move_aside)
-        if outcome.succeeded and outcome.photo is not None:
-            foldermeta.apply_folder_meta(session, outcome.photo, path, directory, settings)
-        outcomes.append(outcome)
+        outcomes.append(import_file(session, path, settings, move_aside=move_aside, root=directory))
 
     return outcomes
