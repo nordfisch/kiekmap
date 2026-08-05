@@ -1,8 +1,9 @@
 # Entstehung
 
 Was gebaut wurde, in der Reihenfolge, in der es gebaut wurde — und vor allem: **was dabei anders
-kam als geplant.** Das ist der Zweck dieser Datei. Sie ist aus den drei Plandokumenten
-zusammengeführt, die inzwischen unter [archiv/](archiv/) liegen.
+kam als geplant.** Das ist der Zweck dieser Datei. Sie ist aus drei Plandokumenten zusammengeführt
+— dem Stufenplan, dem Umbau des Verwaltungsmenüs und der Besucheransicht —, die danach entfielen;
+in der Git-Historie sind sie weiter zu lesen.
 
 Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Fragen:
 
@@ -307,7 +308,8 @@ gleichzeitige Schreibläufe auf dieselbe SQLite-Datei wären eine Fehlerquelle o
 
 # Teil II — Umbau des Verwaltungsmenüs
 
-`63828e2` · 30. Juli 2026. Plan: [archiv/umbau-verwaltung.md](archiv/umbau-verwaltung.md).
+`63828e2` · 30. Juli 2026. Der Plan dazu stand in `docs/archiv/umbau-verwaltung.md`, bis das
+Verzeichnis am 5. August 2026 entfiel.
 
 Der Admin-Bereich war über die Stufen 8 bis 10 gewachsen, und man sah es ihm an. Drei Dinge
 störten konkret: Der Filter kannte nur „Unvollständig" und warf zwei verschiedene Arbeiten
@@ -409,8 +411,8 @@ entgegengehalten — die Art Sackgasse, in der eine ehrenamtliche Person aufgibt
 
 # Teil IV — Besucheransicht: Fehler und Verbesserungen
 
-`cc5a437` … `006f9ee` · 31. Juli 2026. Plan:
-[archiv/besucheransicht.md](archiv/besucheransicht.md).
+`cc5a437` … `006f9ee` · 31. Juli 2026. Der Plan dazu stand in
+`docs/archiv/besucheransicht.md`, bis das Verzeichnis am 5. August 2026 entfiel.
 
 Sechs Punkte aus dem Durchsehen der Kioskansicht: ein handfester Fehler, zwei Sackgassen in der
 Bedienung, drei Verbesserungen. Abgearbeitet wurden sie in der Reihenfolge 2 – 1 – 3 – 4 – 5 – 6:
@@ -1200,3 +1202,71 @@ Importwege, Pfad nur für die drei, die einen haben. Damit bekam das Hochladen i
 Metadaten-Regeln geschenkt, ohne die Pfad-Regeln zu erben — und der USB-Stick verhält sich seither
 wie der Eingangsordner, weil er dieselbe Schicht durchläuft. Wäre es ein einmaliges Skript
 geworden, hätte das nächste Archiv wieder eines gebraucht.
+
+## Sprach- und Namenskonsistenz
+
+`e29c161` … `692ebfc` · 5. August 2026.
+
+Die Sprachregelung stand seit Stufe 7.5 in CLAUDE.md und galt als geklärt. Der Backlog-Punkt dazu
+forderte etwas anderes: **nachsehen statt annehmen.** Die Messung über alle 108 Quelldateien war
+die eigentliche Arbeit — was danach zu tun war, ergab sich fast von selbst.
+
+### Vier Regeln waren lückenlos eingehalten, ohne dass es jemand geprüft hatte
+
+Kein deutscher Oberflächentext stand fest im TSX, kein deutscher Name in einem API-Pfad, einem
+Query-Parameter oder einem JSON-Feld, die CLI-Ausgaben waren durchweg deutsch — und **90 von 90
+Commit-Nachrichten trugen keinen einzigen Umlaut**. Genau das hatte der Backlog-Punkt verlangt:
+„ein Durchgang über `git log` sollte es bestätigen statt es anzunehmen."
+
+Zwei Regeln waren es nicht: **338 deutsche Kommentare in 52 Produktivcode-Dateien** neben 687
+englischen, teils in derselben Datei, und neun deutsche Dateinamen. Nachgezogen statt aufgeweicht
+— bei den Kommentaren war das zugleich der billigere Weg, andersherum wären 687 zu übersetzen
+gewesen.
+
+### Die Regel widersprach sich selbst
+
+Sie verbot Umlaute im Python-Quelltext und gab zwei Absätze weiter ``so that "muhlenweg" finds the
+"Mühlenweg"`` als *erwünschtes* Beispiel — mit Umlaut. Alle fünfzehn gefundenen Stellen waren von
+dieser Art: zitierte Beispiele oder Datenwerte. `"März"` in der Monatsliste von `services/dates.py`
+hat ohnehin keinen Ersatz; ohne Umlaut zeigte der Kiosk „Maerz".
+
+Daraus wurde die Präzisierung: **In deutscher Prosa im Quelltext werden Umlaute umschrieben, in
+Zitaten und Datenwerten bleiben sie.** Das ist keine Ausnahme von der Regel, sondern ihre
+Ausformulierung — Prosa ist etwas anderes als der Gegenstand, über den sie spricht.
+
+### Die Tests waren längst eine eigene, stimmige Welt
+
+326 deutsche gegen 10 englische Kommentare. Die Regel nannte als Ausnahme nur die *Testnamen* und
+beschrieb damit die Hälfte der Wirklichkeit — dabei ist ein Test-Docstring die Fortsetzung des
+Testnamens und trägt dasselbe Warum („Das EXIF sagt 2019, das Foto ist historisch"). Seitdem steht
+in der Regel, was ohnehin galt: **Testdateien sind ganz deutsch.** Die zehn englischen Ausreißer
+in `conftest.py` zogen nach.
+
+### Zwei Umbenennungen lösten die Sinnfrage mit
+
+Der Backlog-Punkt hatte nicht nur nach der Sprache gefragt, sondern danach, ob ein Dateiname sagt,
+was drinsteht. `admin/jahr.ts` enthielt die Jahrzehnt-Regel und heißt jetzt `yearInput.ts`, wie das
+`YearField`, dem es dient. `admin/paging.ts` hieß nur so, weil `pager.ts` auf macOS mit `Pager.tsx`
+kollidiert wäre; als `pagination.ts` kollidiert nichts mehr.
+
+### Das Prüfskript meldete einen Verstoß, der keiner war
+
+`tools/language_check.py` zählt deutsche und englische Kommentare je Datei. Es fand `config.py`
+schuldig — wegen ``PHOTOMAP_IMPORT_PROVENANCE="Online-Archiv des Museums, Verzeichnis 01 Orte/"``,
+einem Einstellungswert. Zu „beheben" wäre das nur durch Fälschen des Beispiels gewesen. Das Skript
+streicht Zitiertes deshalb, bevor es zählt; die Regel oben ist dieselbe Einsicht in Worten.
+
+**Bewusst kein Test.** Die Spracherkennung ist eine Wortlisten-Heuristik, und ein Test, der bei
+einem Fachbegriff falsch anschlägt, wird binnen eines Monats ausgeschaltet — danach ist gar nichts
+mehr bewacht.
+
+### Und die erste Gegenprobe griff nicht
+
+Um zu prüfen, ob das Skript überhaupt etwas findet, wurde ein deutscher Satz eingeschmuggelt — und
+das Skript schwieg. Nicht weil es blind war: Der Satz hing vorn in einem langen englischen
+Docstring, dessen übrige Wörter ihn überstimmten. Die Probe war falsch gebaut, nicht das Werkzeug.
+Als eigenständiger Kommentar gesetzt, fand es ihn sofort — und in der Gegenrichtung auch einen
+englischen Kommentar in einer Testdatei, beide mit Exitcode 1.
+
+Das ist die Lehre, die über diesen Tag hinausreicht: **Eine Gegenprobe, die nicht anschlägt,
+beweist erst einmal nichts über den Code — sie stellt eine Frage an die Probe.**

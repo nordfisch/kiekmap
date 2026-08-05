@@ -276,7 +276,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   sich an Menschen. Aus den drei Plandokumenten, die alle Erledigtes mit Offenem mischten, sind
   **`docs/history.md`** (was gebaut wurde, in der Reihenfolge der Arbeit, und was dabei anders kam
   als geplant) und **`docs/backlog.md`** (was offen ist, nach Verwaltung, Besucher-Interface und
-  Infrastruktur) geworden. Die Originalpläne liegen unter `docs/archiv/`
+  Infrastruktur) geworden
 - Gespeicherte Zeitstempel sind durchgängig UTC — auch die der Sicherungsdatei und der Kopfdaten
   auf dem Stick, die bisher Ortszeit schrieben. „Wie lange her" zählt **Kalendertage** entlang der
   deutschen Tagesgrenze: eine Sicherung von gestern Abend ist „1 Tag", nicht „Heute"
@@ -438,3 +438,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Neu: `python tools/language_check.py` zählt deutsche und englische Kommentare je Datei und meldet
   jede, die die Regel bricht. Bewusst **kein Test** — die Spracherkennung ist eine Heuristik, und
   ein Test, der bei einem Fachbegriff falsch anschlägt, wird bald ausgeschaltet
+- **`docs/archiv/` ist weg** — die drei Plandokumente (Stufenplan, Umbau des Verwaltungsmenüs,
+  Besucheransicht, zusammen 1156 Zeilen). Sie waren die Quelle, aus der `history.md` und
+  `backlog.md` entstanden sind, und wurden seither nicht mehr gepflegt; in der Git-Historie
+  bleiben sie lesbar. Der erledigte Punkt „Sprach- und Namenskonsistenz prüfen" ist aus dem
+  Backlog in die Historie gewandert — ein Backlog führt Offenes

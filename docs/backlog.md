@@ -422,20 +422,3 @@ in einer Gliederung, die nur nach Bereich sortiert. Was fehlt:
 einer Datei steht, liest es sich am Stück und überlebt einen Kontextverlust — genau der Grund,
 warum die Pläne früher so geführt wurden. Der Umzug lohnt, sobald mehr als eine Person daran
 arbeitet oder die Reihenfolge häufiger wechselt als die Inhalte.
-
-### Sprach- und Namenskonsistenz prüfen — erledigt am 5. August 2026
-
-Gemessen, entschieden, umgesetzt. Vier Regeln wurden lückenlos eingehalten (Oberflächentexte in
-`text/de.ts`, API-Namen, CLI-Ausgaben, 90 von 90 Commits ohne Umlaut), zwei nicht: **338 deutsche
-Kommentare in 52 Produktivcode-Dateien** und neun deutsche Dateinamen.
-
-Beides ist nachgezogen statt die Regel aufzuweichen — bei den Kommentaren zugleich der billigere
-Weg, andersherum wären 687 zu übersetzen gewesen. Zwei Umbenennungen lösten dabei die Sinnfrage
-mit: `jahr.ts` → `yearInput.ts` (enthält die Jahrzehnt-Regel), `paging.ts` → `pagination.ts`
-(hieß nur so wegen einer Namenskollision mit `Pager.tsx`).
-
-Zwei Präzisierungen an der Regel selbst, beide aus der Messung: **Testdateien sind ganz deutsch**,
-nicht nur ihre Namen (326 zu 10 war faktisch schon so), und **Zitate und Datenwerte behalten ihre
-Umlaute** — die Regel widersprach sich hier selbst.
-
-Ob es auseinanderläuft, beantwortet ab jetzt `python tools/language_check.py`.

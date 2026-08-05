@@ -50,10 +50,3 @@ Bedienung, `operations.md` die Technik dahinter.
 `CHANGELOG.md` und `history.md` beschreiben beide Gebautes und sind trotzdem beide da: Der eine
 listet **was**, die andere erzählt **wie und warum**. Wer sucht, ob eine Funktion existiert, nimmt
 den CHANGELOG; wer wissen will, warum sie so aussieht, die Historie.
-
-## Archiv
-
-[archiv/](archiv/) enthält die drei Plandokumente, aus denen `history.md` und `backlog.md`
-entstanden sind — der Stufenplan, der Umbau des Verwaltungsmenüs und die Besucheransicht. Sie
-bleiben als Originale lesbar und werden **nicht mehr gepflegt**. Was daraus gebaut wurde, steht in
-der Historie; was offen blieb, im Backlog.
