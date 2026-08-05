@@ -14,7 +14,7 @@ import { useCallback } from "react";
 
 import { type Selection, fetchOverview } from "../api/admin";
 import { useAdmin } from "../store/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { formatDaysSince } from "./format";
 import { useLoaded } from "./useLoaded";
 

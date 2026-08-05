@@ -19,7 +19,7 @@ import {
   postDate,
   postLocation,
 } from "../api/client";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { useKiosk } from "./kiosk";
 
 /** How long the thank-you note stays before the next question arrives. */

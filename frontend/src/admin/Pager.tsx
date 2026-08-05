@@ -9,8 +9,8 @@
  * nicht nach Aktenverwaltung aussehen.
  */
 
-import { t } from "../texte/de";
-import { PAGE_SIZE, pageCount, pageNumber } from "./paging";
+import { t } from "../text/de";
+import { PAGE_SIZE, pageCount, pageNumber } from "./pagination";
 
 export function Pager({
   total,

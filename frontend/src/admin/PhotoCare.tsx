@@ -18,10 +18,10 @@ import {
   fetchAdminPhotos,
   patchPhoto,
 } from "../api/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { Pager } from "./Pager";
 import { PhotoEditor } from "./PhotoEditor";
-import { clampOffset } from "./paging";
+import { clampOffset } from "./pagination";
 import { useScrollArea } from "./scrollArea";
 import { useLoaded } from "./useLoaded";
 

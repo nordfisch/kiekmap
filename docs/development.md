@@ -57,7 +57,7 @@ Der Grund ist nicht Konvention um ihrer selbst willen: `def zeitraum(...) -> Dat
 an jeder Grenze zwischen eigenem Code und einer Bibliothek einen Bruch. Und Coding-Agents wie
 spätere Mitstreiter stolpern über gemischten Code messbar häufiger.
 
-Deutsch bleibt für: Oberflächentexte (`frontend/src/texte/de.ts`), Meldungen an Besucher und
+Deutsch bleibt für: Oberflächentexte (`frontend/src/text/de.ts`), Meldungen an Besucher und
 Kuratoren, CLI-Ausgaben, Dokumentation, Commit-Nachrichten. Deutsche Beispiele in englischen
 Kommentaren sind erwünscht, wo sie den Fall erklären.
 
@@ -76,13 +76,18 @@ Deutsch, sonst Englisch.*
 Die CLI ist die Ausnahme von der Ausnahme: `python -m app.cli import` führt beim Erstbefüllen auch
 das Museumsteam aus, deshalb bleiben ihre Ausgaben deutsch.
 
-**Testnamen sind die Ausnahme und bleiben deutsch.** Sie sind keine Bezeichner im üblichen Sinn,
-sondern Spezifikationssätze — `test_scandatum_datiert_das_foto_nicht` sagt sofort, welche Zusage
-der Test schützt. Übersetzt verlöre das an Schärfe, und gerade diese Sätze sind die wertvollste
-Dokumentation im Repo.
+**Testdateien sind die Ausnahme und bleiben ganz deutsch** — Name, Docstring, Kommentar. Ein
+Testname ist kein Bezeichner im üblichen Sinn, sondern ein Spezifikationssatz:
+`test_scandatum_datiert_das_foto_nicht` sagt sofort, welche Zusage der Test schützt, und der
+Docstring darunter trägt das Warum. Übersetzt verlöre das an Schärfe, und gerade diese Sätze sind
+die wertvollste Dokumentation im Repo.
 
-Umlaute werden in Python-Quelltext, Shell-Skripten und Commit-Nachrichten umschrieben
-(`ue`, `oe`, `ae`, `ss`); in Texten für Menschen normal geschrieben.
+Umlaute werden in deutscher Prosa im Quelltext, in Shell-Skripten und in Commit-Nachrichten
+umschrieben (`ue`, `oe`, `ae`, `ss`); in Texten für Menschen normal geschrieben. **Zitate und
+Datenwerte behalten sie**: `"Mühlenweg"` als Beispiel in einem Kommentar, `["Gebäude"]` als
+Einstellungswert, `"März"` in der Monatsliste — ohne Umlaut wären sie schlicht falsch.
+
+Ob eine Datei sich daran hält, beantwortet `python tools/language_check.py`.
 
 ## Testen
 
@@ -120,7 +125,7 @@ performance.getEntriesByType('resource')
 `sample_image` kopiert ein echtes Testbild (für die Import-Pipeline). Die Testbilder in
 `backend/tests/fixtures/` decken bewusst die schwierigen Fälle ab: Scan ohne EXIF, Scan mit
 Scandatum von 2019, hochkant über EXIF-Orientierung, CMYK-TIFF, Datei ohne Bild. Neu erzeugen mit
-`python tests/fixtures/erzeuge_testbilder.py`.
+`python tests/fixtures/build_test_images.py`.
 
 Jeder Test bekommt über die `settings`-Fixture ein eigenes temporäres Datenverzeichnis. Niemals im
 Test auf `data/` zugreifen.
@@ -148,7 +153,7 @@ verloren, wenn man nicht hinsieht.
 Was beim Neubau einer Tabelle schiefgehen kann, ist einmal schiefgegangen und kostete alle
 Besucherbeiträge: `app/db.py` schaltet `PRAGMA foreign_keys=ON` für *jede* Engine des Prozesses
 ein, auch für die von Alembic, und der Neubau löscht das Original. `alembic/env.py` schaltet die
-Prüfung deshalb für die Dauer einer Migration ab. `tests/test_migrationen.py` bewacht das — wer
+Prüfung deshalb für die Dauer einer Migration ab. `tests/test_migrations.py` bewacht das — wer
 dort etwas ändert, sollte die Gegenprobe machen: mit `foreign_keys=ON` muss der Test rot sein.
 
 ## Beispielbestand

@@ -16,7 +16,7 @@
 import { useState } from "react";
 
 import type { Precision } from "../api/client";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 
 export function DatePicker({
   decades,

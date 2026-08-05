@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { PhotoMarker } from "../api/client";
-import { groupByLocation } from "./stapel";
+import { groupByLocation } from "./stacks";
 
 function marker(id: number, lat: number, lon: number): PhotoMarker {
   return {

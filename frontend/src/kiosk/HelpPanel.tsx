@@ -10,7 +10,7 @@ import { useEffect, useRef } from "react";
 
 import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { DateTask } from "./DateTask";
 import { LocationTask } from "./LocationTask";
 

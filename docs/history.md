@@ -107,7 +107,7 @@ bei Eingabe ohne Umlaut und läuft ohne Internet.
 ## Stufe 7.5 — Sprachregelung
 
 `09f1f62`, `2622975`, `29a276e`, `b8ee5a6`, `dcd1f93` · Bezeichner und Code-Kommentare
-durchgängig englisch, Oberflächentexte in `frontend/src/texte/de.ts`, `CLAUDE.md`,
+durchgängig englisch, Oberflächentexte in `frontend/src/text/de.ts`, `CLAUDE.md`,
 `docs/development.md`, `docs/adaption.md`, der Stufenplan.
 
 Der Grund ist nicht Konvention um ihrer selbst willen: `def zeitraum(...) -> DatePrecision` erzeugt
@@ -709,7 +709,7 @@ Tabellenneubau ab, was auf die Tabelle zeigt.
 **jede künftige Batch-Migration**, nicht nur für diese eine — dieselbe Falle stünde sonst beim
 nächsten Constraint wieder auf.
 
-Dazu ein Test, der die Migration wirklich fährt (`tests/test_migrationen.py`): Foto, Beitrag,
+Dazu ein Test, der die Migration wirklich fährt (`tests/test_migrations.py`): Foto, Beitrag,
 Schlagwort und Protokolleintrag anlegen, migrieren, nachzählen. Ohne die Reparatur ist er rot.
 
 > **Verloren sind die Testdaten dieser Entwicklungsdatenbank** — 21 Besucherbeiträge, die
@@ -842,7 +842,7 @@ verschwand auch die Migration, die den Datenverlust angerichtet hatte.
 Beinahe verschwunden wäre damit aber der Test, der ihn seither verhindert: Er zog namentlich auf
 die Revision `b7c41d0a92e3` hoch. Ein Test, der mit dem Fehler stirbt, den er bewacht, ist keiner.
 
-Er läuft jetzt gegen eine **Probe-Migration** unter `tests/fixtures/migrationsprobe/` — eine
+Er läuft jetzt gegen eine **Probe-Migration** unter `tests/fixtures/sample_migration/` — eine
 einzige Revision, die `photos` mit `recreate="always"` neu baut und sonst nichts. Ihre `env.py`
 tut nur eines: sie führt die **echte** aus. Eine eigene Kopie der Fremdschlüssel-Regel würde nur
 sich selbst bestätigen. Die Gegenprobe steht: Wird das `PRAGMA foreign_keys=OFF` in

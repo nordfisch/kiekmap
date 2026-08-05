@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { PhotoDetail } from "../api/client";
-import { boundsAround, rangeForPhoto } from "./fokus";
+import { boundsAround, rangeForPhoto } from "./focus";
 
 const BESTAND = { from: 1920, to: 2019 };
 

@@ -60,7 +60,7 @@ export type Histogram = {
    * Spanne des ganzen Bestands — die Achse des Zeitschiebers.
    *
    * Die Balken zeigen den Kartenausschnitt, die Achse nicht: Sie darf sich nicht unter der Hand
-   * des Besuchers verschieben. Siehe kiosk/zeitachse.ts.
+   * des Besuchers verschieben. Siehe kiosk/timeAxis.ts.
    */
   collection_from: number | null;
   collection_to: number | null;

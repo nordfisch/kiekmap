@@ -165,7 +165,7 @@ class Histogram(BaseModel):
     #: Photos without a date. In no time selection, but in the "Hilf mit" panel.
     undated: int
     #: Span of the whole collection, deliberately **not** of the viewport: the slider axis must not
-    #: move under the visitor's hand while they pan the map. See frontend kiosk/zeitachse.ts.
+    #: move under the visitor's hand while they pan the map. See frontend kiosk/timeAxis.ts.
     collection_from: int | None
     collection_to: int | None
 

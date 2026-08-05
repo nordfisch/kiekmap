@@ -16,8 +16,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { type Place, fetchHouseNumbers, searchPlaces } from "../api/client";
 import { useContribute } from "../store/contribute";
-import { t } from "../texte/de";
-import { type NumberBlock, blocksOf, groupByBase } from "./hausnummern";
+import { t } from "../text/de";
+import { type NumberBlock, blocksOf, groupByBase } from "./houseNumbers";
 
 /** How long the input has to rest before searching. */
 const DEBOUNCE_MS = 200;

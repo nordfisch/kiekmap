@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { axisBounds, clampRange, fraction } from "./zeitachse";
+import { axisBounds, clampRange, fraction } from "./timeAxis";
 
 describe("Achse", () => {
   it("rundet auf volle Jahrzehnte auf", () => {

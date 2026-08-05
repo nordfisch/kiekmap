@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PAGE_SIZE, clampOffset, pageCount, pageNumber } from "./paging";
+import { PAGE_SIZE, clampOffset, pageCount, pageNumber } from "./pagination";
 
 describe("Seitenzahl", () => {
   it("gibt auch einer leeren Liste eine Seite", () => {

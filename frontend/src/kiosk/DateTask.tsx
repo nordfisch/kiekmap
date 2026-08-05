@@ -11,14 +11,14 @@ import { useMemo } from "react";
 import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { DatePicker } from "./DatePicker";
-import { offeredDecades } from "./jahrzehnte";
+import { offeredDecades } from "./decades";
 
 export function DateTask() {
   const submitDate = useContribute((s) => s.submitDate);
   const loading = useContribute((s) => s.loading);
   const collection = useKiosk((s) => s.fullRange);
 
-  // Was zur Wahl steht, ergibt sich aus dem Bestand -- siehe kiosk/jahrzehnte.ts.
+  // Was zur Wahl steht, ergibt sich aus dem Bestand -- siehe kiosk/decades.ts.
   const decades = useMemo(() => offeredDecades(collection), [collection]);
 
   return (

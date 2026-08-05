@@ -34,8 +34,8 @@ Wer diese drei nicht kennt, baut etwas, das erst im Museum auffällt:
 |---|---|
 | Bezeichner (Variablen, Funktionen, Klassen, CSS-Klassen, Dateinamen) | **Englisch** |
 | Code-Kommentare und Docstrings | **Englisch** |
-| **Testnamen** (`def test_…`, `class Test…`, `it("…")`) | **Deutsch** |
-| Oberflächentexte | Deutsch, in `frontend/src/texte/de.ts` |
+| **Alles in einer Testdatei** — Namen, Docstrings, Kommentare | **Deutsch** |
+| Oberflächentexte | Deutsch, in `frontend/src/text/de.ts` |
 | Meldungen, die im Kiosk oder Admin-Bereich erscheinen können | Deutsch, direkt im Code |
 | Meldungen, die nur beim Arbeiten gegen die API auftauchen | Englisch |
 | API-Pfade, Query-Parameter, JSON-Felder, OpenAPI-Beschreibungen | Englisch |
@@ -50,25 +50,36 @@ gelöschtes Foto landet im Overlay des Besuchers (deutsch), eine kaputte `bbox` 
 API selbst aufruft (englisch). Die CLI ist die Ausnahme: sie führt beim Erstbefüllen auch das
 Museumsteam aus, nicht nur Entwickler.
 
-**Testnamen sind die bewusste Ausnahme** von der Englisch-Regel. Sie sind keine Bezeichner im
-üblichen Sinn, sondern Spezifikationssätze: `test_scandatum_datiert_das_foto_nicht` sagt einem
-deutschsprachigen Leser sofort, welche Zusage der Test schützt. Das ist hier die wertvollste
-Dokumentation im Repo — englisch übersetzt verlöre sie an Schärfe. Klassennamen ebenso
+**Testdateien sind die bewusste Ausnahme** von der Englisch-Regel, und zwar vollständig: Name,
+Docstring und Kommentar. Ein Testname ist kein Bezeichner im üblichen Sinn, sondern ein
+Spezifikationssatz — `test_scandatum_datiert_das_foto_nicht` sagt einem deutschsprachigen Leser
+sofort, welche Zusage der Test schützt. Der Docstring darunter ist dessen Fortsetzung und trägt
+das Warum („Das EXIF sagt 2019, das Foto ist historisch"). Beides zusammen ist die wertvollste
+Dokumentation im Repo; englisch übersetzt verlöre sie an Schärfe. Klassennamen ebenso
 (`class TestUeberlappung`).
 
 Deutsche Beispiele in englischen Kommentaren sind erwünscht, wo sie den Fall erklären
 (`so that "muhlenweg" finds the "Mühlenweg"`).
 
-**Umlaute:** In deutschen Texten für Menschen normal schreiben (Mühlenweg). In Python-Quelltext,
-Shell-Skripten und Commit-Nachrichten werden sie umschrieben (`ue`, `oe`, `ae`, `ss`).
+**Umlaute:** In deutschen Texten für Menschen normal schreiben (Mühlenweg). In deutscher Prosa
+**im Quelltext** — Meldungen, Docstrings, Kommentare — sowie in Shell-Skripten und
+Commit-Nachrichten werden sie umschrieben (`ue`, `oe`, `ae`, `ss`).
 
-Daraus folgt eine Regel für deutsche Meldungen **im Python-Code, die auf dem Bildschirm landen
-können**: so formulieren, dass sie ohne Umlaut auskommen. Nicht „Sie koennen den Stick jetzt
-abziehen", sondern „Der Stick kann jetzt abgezogen werden". Das ist bisher jedes Mal gelungen und
-liest sich meist sogar besser, weil es zum Umformulieren zwingt.
+**Zitate und Datenwerte behalten ihre Umlaute.** `"Mühlenweg"` als Beispiel in einem englischen
+Kommentar, `["Gebäude"]` als Einstellungswert, `"März"` in der Monatsliste von
+`services/dates.py`: Das sind keine Prosa, sondern Gegenstände, über die der Text spricht. Ohne
+Umlaut wären sie schlicht falsch — der Kiosk zeigte „Maerz".
+
+Für deutsche Meldungen **im Python-Code, die auf dem Bildschirm landen können**, folgt daraus:
+so formulieren, dass sie ohne Umlaut auskommen. Nicht „Sie koennen den Stick jetzt abziehen",
+sondern „Der Stick kann jetzt abgezogen werden". Das ist bisher jedes Mal gelungen und liest sich
+meist sogar besser, weil es zum Umformulieren zwingt.
 
 Das `ss` ist die Ausnahme in der Ausnahme: „ausserhalb" ist gültiges Deutsch, „koennen" ist es
 nicht. `ß` darf also ersetzt werden, die drei Umlaute nicht.
+
+**`tiles/` gilt mit.** Die Bauskripte laufen zwar nur auf dem Entwicklungsrechner, sind aber
+gewöhnlicher Quelltext dieses Repos — keine Fußnote, keine eigene Sprache.
 
 ## Aufbau
 

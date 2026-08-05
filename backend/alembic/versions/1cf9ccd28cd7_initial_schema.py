@@ -15,7 +15,7 @@ Two of the folded revisions are worth remembering rather than the files themselv
   * ``status`` renamed from ``hidden`` to ``deleted``. That one **destroyed data**: rebuilding
     the table with foreign keys switched on took every visitor contribution with it. What came of
     that is the ``PRAGMA foreign_keys=OFF`` in ``alembic/env.py`` and the test in
-    ``tests/test_migrationen.py``; both stay, the migration file does not.
+    ``tests/test_migrations.py``; both stay, the migration file does not.
 
 Revision ID: 1cf9ccd28cd7
 Revises:

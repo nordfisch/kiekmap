@@ -17,7 +17,7 @@ Ergebnis: eine gruen durchlaufende Migration und ein Bestand ohne Beitraege. Des
 **Warum eine Probe-Migration statt der echten.** Frueher zog dieser Test namentlich auf die
 Revision hoch, die den Schaden anrichtete. Beim Zusammenfassen der Migrationen zu einem
 Anfangsschema verschwand sie -- und mit ihr waere der einzige Schutz vor der Wiederholung
-gegangen. Die Probe unter ``tests/fixtures/migrationsprobe/`` haengt an keiner Revisionsnummer:
+gegangen. Die Probe unter ``tests/fixtures/sample_migration/`` haengt an keiner Revisionsnummer:
 sie baut ``photos`` neu, sonst nichts, und ihre ``env.py`` fuehrt die **echte** aus.
 """
 
@@ -29,7 +29,7 @@ from alembic.config import Config
 from alembic import command
 
 BACKEND = Path(__file__).resolve().parent.parent
-PROBE = Path(__file__).resolve().parent / "fixtures" / "migrationsprobe"
+PROBE = Path(__file__).resolve().parent / "fixtures" / "sample_migration"
 
 
 def _probe_config() -> Config:

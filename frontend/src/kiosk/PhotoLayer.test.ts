@@ -20,7 +20,7 @@ function foto(lat: number, lon: number): PhotoMarker {
 describe("Was auf einem Kreis steht", () => {
   it("zaehlt die Fotos, nicht die Stellen", () => {
     // Ein Achterstapel und zwei Einzelbilder daneben: Der Kreis darueber muss 10 tragen, nicht 3.
-    // Fuer supercluster ist ein Stapel naemlich ein einziger Punkt -- siehe stapel.ts.
+    // Fuer supercluster ist ein Stapel naemlich ein einziger Punkt -- siehe stacks.ts.
     const stapel = Array.from({ length: 8 }, () => foto(53.619588, 9.6747118));
     const index = buildIndex([...stapel, foto(53.6192, 9.6684), foto(53.6193, 9.6685)]);
 

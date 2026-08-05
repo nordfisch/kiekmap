@@ -9,7 +9,7 @@
 import { useEffect, useId, useState } from "react";
 
 import { type Place, searchPlaces } from "../api/client";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 
 const DEBOUNCE_MS = 250;
 const MIN_QUERY = 2;

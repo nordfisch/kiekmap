@@ -43,7 +43,7 @@ Erst die Pflege des Bestands, dann das Hinzufügen, dann das Technische. „Beit
 
 `frontend/src/admin/AdminApp.tsx`: `SECTIONS`-Liste umsortieren, `Section`-Typ anpassen
 (`upload` → `import`, `changes` → `moderation`). Beschriftungen in
-`frontend/src/texte/de.ts` unter `admin.shell.sections`.
+`frontend/src/text/de.ts` unter `admin.shell.sections`.
 
 ## 2. Fotos: Filter aufteilen
 
@@ -191,7 +191,7 @@ Bei der Sicherung ist nichts zu tun.
 
 **Frontend** — `admin/AdminApp.tsx` (Menü, Navigation), `admin/Overview.tsx` (verlinkte Kacheln),
 `admin/PhotoCare.tsx` (vier Filter), `admin/BatchUpload.tsx` → `admin/ImportView.tsx` (neue Maske),
-`admin/StickImport.tsx` (nur noch Ordnerauswahl), `api/admin.ts` (Typen), `texte/de.ts` (Namen),
+`admin/StickImport.tsx` (nur noch Ordnerauswahl), `api/admin.ts` (Typen), `text/de.ts` (Namen),
 `styles/admin.css` (Kachel-Knöpfe, Quellenauswahl).
 
 ## Prüfung
@@ -203,7 +203,7 @@ Bei der Sicherung ist nichts zu tun.
 - `test_import_stick.py`: `test_kleiner_stapel_liefert_die_zeilen_mit` und
   `test_grosser_stapel_liefert_keine_zeilen` — die Grenze, ab der der Status nicht mehr die halbe
   Sammlung mitschleppt.
-- Neu `frontend/src/admin/jahr.test.ts` für die Jahrzehnt-Regel als reine Funktion
+- Neu `frontend/src/admin/yearInput.test.ts` für die Jahrzehnt-Regel als reine Funktion
   (`decadeAllowed(year)` und das Zurücknehmen des Häkchens):
   `test_jahrzehnt_nur_bei_vollen_jahrzehnten`, `test_geaendertes_jahr_nimmt_das_haekchen_zurueck`
   — der Fall, der sonst still eine 1934 zur 1930er macht.

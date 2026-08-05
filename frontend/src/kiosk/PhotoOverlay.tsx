@@ -19,9 +19,9 @@ import { useEffect, useMemo, useState } from "react";
 import { type PhotoDetail, type Precision, fetchPhoto } from "../api/client";
 import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { DatePicker } from "./DatePicker";
-import { offeredDecades } from "./jahrzehnte";
+import { offeredDecades } from "./decades";
 
 export function PhotoOverlay() {
   const openStack = useKiosk((s) => s.openStack);

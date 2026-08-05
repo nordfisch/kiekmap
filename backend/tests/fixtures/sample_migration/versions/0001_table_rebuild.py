@@ -5,7 +5,7 @@ Original loeschen, umbenennen. Ohne das Erzwingen entschiede Alembic je nach Aen
 ein Neubau noetig ist -- und die Probe pruefte irgendwann nichts mehr.
 
 Diese Revision ist kein Teil des Schemas. Sie liegt unter ``tests/fixtures/`` und laeuft nur in
-``tests/test_migrationen.py``.
+``tests/test_migrations.py``.
 """
 
 from collections.abc import Sequence

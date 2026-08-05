@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { decadeAllowed, fromPhoto, toDate, withYear } from "./jahr";
+import { decadeAllowed, fromPhoto, toDate, withYear } from "./yearInput";
 
 describe("Jahrzehnt nur bei vollen Jahrzehnten", () => {
   it("laesst 1920 und 1930 zu", () => {

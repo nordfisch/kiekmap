@@ -20,8 +20,8 @@ import {
 } from "react";
 
 import { useKiosk } from "../store/kiosk";
-import { t } from "../texte/de";
-import { axisBounds, fraction } from "./zeitachse";
+import { t } from "../text/de";
+import { axisBounds, fraction } from "./timeAxis";
 
 type Handle = "start" | "end";
 

@@ -130,7 +130,7 @@ aus, was gerade nicht auf der Karte ist.
 - `store/kiosk.ts`, `loadHistogram()` — `fullRange` aus den neuen Feldern. Der Kommentar bei
   `timeRange: timeRange ?? span` wird angepasst: Die Spanne ändert sich beim Verschieben der Karte
   jetzt gar nicht mehr.
-- **Neu `kiosk/zeitachse.ts`** — die Rechnung, die gebrochen ist, als reine Funktionen:
+- **Neu `kiosk/timeAxis.ts`** — die Rechnung, die gebrochen ist, als reine Funktionen:
   `axisBounds(fullRange)` (das heutige `roundToDecade`-Paar), `fraction(year, bounds)` **auf 0…1
   geklammert** und `clampRange(range, bounds)`.
 - `kiosk/TimeSlider.tsx` — benutzt sie. Die Klammer auf 0…1 ist der bauliche Riegel: Selbst wenn
@@ -149,7 +149,7 @@ datiertes Foto) bleibt die heutige Ersatzanzeige.
 
 - `backend/tests/test_api_photos.py`: `test_spanne_ignoriert_den_kartenausschnitt` — ein Foto
   ausserhalb der `bbox` muss die Achse trotzdem aufspannen. Das ist der ganze Punkt.
-- Neu `frontend/src/kiosk/zeitachse.test.ts`:
+- Neu `frontend/src/kiosk/timeAxis.test.ts`:
   `test_auswahl_ausserhalb_der_achse_bleibt_im_bild` (der Fehler von oben, als Rechnung),
   `test_jahrzehnte_runden_die_achse_auf`.
 - `frontend/src/store/kiosk.test.ts`: `test_zoomen_veraendert_die_achse_nicht`.
@@ -174,7 +174,7 @@ Formular als Ausstellung.
 unterscheiden sich danach nur noch durch den Papierton gegen die Karte — das ist die einzige
 Kante, die eine Aufgabe hat.
 
-**Der Titel neben dem Wappen** (`texte/de.ts`, `styles/global.css`):
+**Der Titel neben dem Wappen** (`text/de.ts`, `styles/global.css`):
 
 | | heute | neu |
 |---|---|---|
@@ -273,11 +273,11 @@ schon als genau so ein Fallwert dort — er bekommt nur eine klarere Rolle und p
 
 ### Änderungen
 
-- `frontend/src/texte/de.ts` — `help.askDate`.
+- `frontend/src/text/de.ts` — `help.askDate`.
 - `tiles/region.json` — `firstDecade`/`lastDecade` samt ihrem Absatz im `$kommentar` entfernen.
 - `frontend/src/region.ts` — `DEFAULT_DECADES` → `MINIMUM_DECADES`; die beiden optionalen Felder
   fallen aus dem `Region`-Typ.
-- **Neu `frontend/src/kiosk/jahrzehnte.ts`** — `offeredDecades(collection: TimeRange | null)` als
+- **Neu `frontend/src/kiosk/decades.ts`** — `offeredDecades(collection: TimeRange | null)` als
   reine Funktion: runden, vereinigen, aufzählen.
 - `frontend/src/kiosk/DateTask.tsx` — nimmt die Liste von dort und die Spanne aus
   `useKiosk(s => s.fullRange)`. **Die `region`-Eigenschaft entfällt** — sie war nur für die
@@ -290,7 +290,7 @@ schon als genau so ein Fallwert dort — er bekommt nur eine klarere Rolle und p
 
 ### Prüfung
 
-- Neu `frontend/src/kiosk/jahrzehnte.test.ts`:
+- Neu `frontend/src/kiosk/decades.test.ts`:
   `test_leerer_bestand_zeigt_das_mindestfenster`,
   `test_aelteres_foto_erweitert_die_reihe_nach_vorn` (Bestand ab 1890 → erster Knopf 1890er),
   `test_bestand_innerhalb_des_fensters_aendert_nichts`.
@@ -373,7 +373,7 @@ Leerlauf-Rücksprung, der aus demselben Grund in `MapView` wohnt:
 - `kiosk/MapView.tsx` — ein Effekt auf `focus`: Kamera merken, `fitBounds` auf das 200-m-Quadrat;
   die **Aufräumfunktion** des Effekts fährt zur gemerkten Kamera zurück. Mit demselben
   `disposed`-Riegel wie beim `load`-Rückruf, sonst bewegt sie eine bereits entfernte Karte.
-- **Neu `kiosk/fokus.ts`** — die Entscheidungen als reine Funktionen:
+- **Neu `kiosk/focus.ts`** — die Entscheidungen als reine Funktionen:
   `decadeOf(dateFrom)`, `rangeForPhoto(photo, fullRange)` (die Tabelle oben) und
   `boundsAround(lat, lon, radiusM)`.
 - `reset()` (Leerlauf) löscht Fokus und `rangeBefore` mit — sonst spielte ein Rücksprung mitten im
@@ -391,7 +391,7 @@ Leerlauf-Rücksprung, der aus demselben Grund in `MapView` wohnt:
 
 ### Prüfung
 
-- Neu `frontend/src/kiosk/fokus.test.ts`:
+- Neu `frontend/src/kiosk/focus.test.ts`:
   `test_foto_mit_jahr_stellt_den_schieber_auf_das_jahrzehnt`,
   `test_foto_ohne_jahr_oeffnet_den_schieber_ganz` (der Fall mit der falschen Zusage),
   `test_foto_ohne_ort_laesst_die_ansicht_stehen`.
@@ -453,7 +453,7 @@ hin, und das Foto liegt oben.
 
 - `app/api/photos.py` — die neue Sortierung. Sie bestimmt zugleich, welches Vorschaubild den Stapel
   vertritt.
-- **Neu `frontend/src/kiosk/stapel.ts`** — `groupByLocation(photos)` als reine Funktion: gleiche
+- **Neu `frontend/src/kiosk/stacks.ts`** — `groupByLocation(photos)` als reine Funktion: gleiche
   gerundete Koordinate, Reihenfolge erhalten.
 - `frontend/src/kiosk/PhotoLayer.tsx` — gruppiert vor `buildIndex()`; ein Stapel wird zu einem
   Marker mit Anzahl, der `openStack(ids)` auslöst. Die bestehende Cluster-Logik bleibt für
@@ -464,14 +464,14 @@ hin, und das Foto liegt oben.
   einzelnen. Blättern heißt dann nur, `openIndex` zu bewegen.
 - `frontend/src/kiosk/PhotoOverlay.tsx` — zwei Knöpfe und die Positionsangabe; die Pfeiltasten
   blättern mit, wie heute schon Escape schließt. Bei einem Stapel von eins bleibt alles wie bisher.
-- `frontend/src/texte/de.ts` — `overlay.prev`, `overlay.next`, `overlay.position(i, n)`,
+- `frontend/src/text/de.ts` — `overlay.prev`, `overlay.next`, `overlay.position(i, n)`,
   `map.stackLabel(count, title)` für die Beschriftung des Markers.
 - `frontend/src/styles/global.css` — die Anzahl-Ecke am Marker, die beiden Blätterknöpfe
   (mindestens 48 px, am unteren Rand in Daumennähe).
 
 ### Prüfung
 
-- Neu `frontend/src/kiosk/stapel.test.ts`: `test_gleiche_koordinate_wird_ein_marker`,
+- Neu `frontend/src/kiosk/stacks.test.ts`: `test_gleiche_koordinate_wird_ein_marker`,
   `test_ein_meter_daneben_bleibt_ein_eigener_marker`,
   `test_reihenfolge_der_liste_bleibt_erhalten` (sonst läge nicht das zuletzt bearbeitete oben).
 - `backend/tests/test_api_photos.py`: `test_zuletzt_bearbeitetes_foto_kommt_zuerst`.
@@ -505,7 +505,7 @@ ihn die Marker auf der Karte schon haben, und öffnet dieselbe Vollbildansicht:
 buchstäblich derselbe wie beim Tippen auf einen Marker, samt Schließen per Tipp daneben, Knopf
 oder Escape.
 
-- `texte/de.ts` — `help.enlarge: "Foto groß anzeigen"`.
+- `text/de.ts` — `help.enlarge: "Foto groß anzeigen"`.
 - `styles/global.css` — `.help-panel__zoom` ohne eigene Optik (kein Rahmen, kein Grund), nur mit
   `:active`-Rückmeldung wie beim Wappen. Es soll ein Bild bleiben, kein Knopf werden.
 

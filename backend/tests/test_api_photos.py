@@ -159,7 +159,7 @@ class TestHistogramm:
             {"decade": 1950, "count": 1},
         ]
         # Die Spanne der Sammlung, nicht die der Balken: auf Jahrzehnte gerundet wird erst in der
-        # Anzeige (kiosk/zeitachse.ts).
+        # Anzeige (kiosk/timeAxis.ts).
         assert daten["collection_from"] == 1923
         assert daten["collection_to"] == 1955
 

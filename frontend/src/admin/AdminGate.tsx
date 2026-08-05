@@ -11,7 +11,7 @@
  */
 
 import { useAdmin } from "../store/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 
 export function AdminGate({ regionName }: { regionName: string }) {
   const askPin = useAdmin((s) => s.askPin);

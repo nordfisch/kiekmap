@@ -9,7 +9,7 @@
 import { useState } from "react";
 
 import { useAdmin } from "../store/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 
 const MIN_LENGTH = 4;
 const MAX_LENGTH = 12;

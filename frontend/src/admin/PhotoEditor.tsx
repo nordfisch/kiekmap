@@ -12,8 +12,8 @@
 import { useEffect, useState } from "react";
 
 import { type PhotoAdminDetail, type PhotoPatch, patchPhoto } from "../api/admin";
-import { t } from "../texte/de";
-import { type YearInput, toDate } from "./jahr";
+import { t } from "../text/de";
+import { type YearInput, toDate } from "./yearInput";
 import { PlaceField, type PickedPlace } from "./PlaceField";
 import { YearField } from "./YearField";
 

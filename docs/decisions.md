@@ -401,7 +401,7 @@ mit weniger Jahrzehnten als der Gesamtbestand, im Museum also ständig.
 **Was die feste Achse zusätzlich kann.** Eine leere Achse mit einem einzelnen Balken bei 1950 sagt
 etwas, das die mitskalierende Achse verschwieg: *hier gibt es nur Fotos aus den 1950ern.*
 
-**Der Riegel darunter.** `fraction()` in `kiosk/zeitachse.ts` klammert auf 0…1, `setTimeRange()`
+**Der Riegel darunter.** `fraction()` in `kiosk/timeAxis.ts` klammert auf 0…1, `setTimeRange()`
 zieht die Auswahl in die Achse. Selbst wenn beide je wieder auseinanderlaufen, kann kein Element
 mehr aus seiner Zelle laufen. Die Regel steht als reine Funktion mit Test da, weil sie sich nicht
 am Code ablesen ließ, sondern erst auf dem Bildschirm.
@@ -479,7 +479,7 @@ Das Zusammenfassen wäre dann kein Aufräumen mehr, sondern ein Datenverlust mit
 **Was bleiben musste, blieb:** Das `PRAGMA foreign_keys=OFF` in `alembic/env.py` ist die Lehre aus
 dem Verlust und steht unverändert. Der Test, der es bewacht, hing allerdings namentlich an einer
 der gelöschten Revisionen — ein Test, der mit dem Fehler stirbt, den er bewacht, ist keiner. Er
-läuft jetzt gegen eine Probe-Migration unter `tests/fixtures/migrationsprobe/`, die an keiner
+läuft jetzt gegen eine Probe-Migration unter `tests/fixtures/sample_migration/`, die an keiner
 Revisionsnummer hängt und deren `env.py` die echte ausführt.
 
 ## 18. Der Beispielbestand liegt als Bilder plus JSON, nicht als Datenbankabzug

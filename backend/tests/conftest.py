@@ -19,7 +19,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 @pytest.fixture
 def fixtures_dir() -> Path:
-    """The test images. Produced by ``tests/fixtures/erzeuge_testbilder.py``."""
+    """The test images. Produced by ``tests/fixtures/build_test_images.py``."""
     return FIXTURES
 
 

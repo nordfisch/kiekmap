@@ -27,9 +27,9 @@ import {
   uploadPhoto,
 } from "../api/admin";
 import type { PhotoDetail } from "../api/client";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { titleFromFilename } from "./filename";
-import { type YearInput, fromPhoto, toDate } from "./jahr";
+import { type YearInput, fromPhoto, toDate } from "./yearInput";
 import { FileDropZone } from "./DropZone";
 import { PlaceField, type PickedPlace } from "./PlaceField";
 import { YearField } from "./YearField";

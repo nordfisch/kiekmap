@@ -13,9 +13,9 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { fetchChanges, revertChange } from "../api/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { Pager } from "./Pager";
-import { clampOffset } from "./paging";
+import { clampOffset } from "./pagination";
 import { useLoaded } from "./useLoaded";
 
 const FIELD_NAMES: Record<string, string> = {

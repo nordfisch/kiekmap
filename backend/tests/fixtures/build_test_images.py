@@ -1,6 +1,6 @@
 """Erzeugt die Testbilder in diesem Verzeichnis.
 
-Aufruf: ``python tests/fixtures/erzeuge_testbilder.py``
+Aufruf: ``python tests/fixtures/build_test_images.py``
 
 Die Bilder decken bewusst die Faelle ab, an denen ein Import scheitert oder -- schlimmer -- still
 etwas Falsches tut:

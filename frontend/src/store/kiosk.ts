@@ -21,8 +21,8 @@ import {
   fetchHistogram,
   fetchPhotos,
 } from "../api/client";
-import { boundsAround, rangeForPhoto } from "../kiosk/fokus";
-import { axisBounds, clampRange } from "../kiosk/zeitachse";
+import { boundsAround, rangeForPhoto } from "../kiosk/focus";
+import { axisBounds, clampRange } from "../kiosk/timeAxis";
 
 /** How long the map has to stand still before loading. */
 export const DEBOUNCE_MS = 250;
@@ -37,7 +37,7 @@ type KioskState = {
    * Span of the whole collection -- the axis of the slider.
    *
    * Deliberately not the span of the current viewport: the axis must not move under the visitor's
-   * hand while they pan the map. See kiosk/zeitachse.ts.
+   * hand while they pan the map. See kiosk/timeAxis.ts.
    */
   fullRange: TimeRange | null;
 
@@ -207,7 +207,7 @@ export const useKiosk = create<KioskState>((set, get) => {
 
     setTimeRange(timeRange) {
       // In die Achse geklammert, damit der Zustand gar nicht erst ungueltig werden kann. Der
-      // Schieber selbst klammert seine Anzeige noch einmal -- siehe kiosk/zeitachse.ts.
+      // Schieber selbst klammert seine Anzeige noch einmal -- siehe kiosk/timeAxis.ts.
       const bounds = axisBounds(get().fullRange);
       const next = bounds ? clampRange(timeRange, bounds) : timeRange;
 

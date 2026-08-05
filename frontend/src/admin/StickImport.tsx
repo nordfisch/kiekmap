@@ -18,7 +18,7 @@ import {
   fetchImportFolders,
   fetchJob,
 } from "../api/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { DropZone } from "./DropZone";
 
 /** Steckt einer? Während gelesen wird schneller, damit der Balken läuft. */

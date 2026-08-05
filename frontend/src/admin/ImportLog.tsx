@@ -8,9 +8,9 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { fetchImportLog } from "../api/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { Pager } from "./Pager";
-import { clampOffset } from "./paging";
+import { clampOffset } from "./pagination";
 import { useLoaded } from "./useLoaded";
 
 const RESULTS: { value: string; label: string }[] = [

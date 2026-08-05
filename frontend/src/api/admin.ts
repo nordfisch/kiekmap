@@ -6,8 +6,8 @@
  * back on screen -- which is what `onAdminSignedOut` is for.
  */
 
-import { PAGE_SIZE } from "../admin/paging";
-import { t } from "../texte/de";
+import { PAGE_SIZE } from "../admin/pagination";
+import { t } from "../text/de";
 import { type PhotoDetail, readError } from "./client";
 
 export type AdminSession = { token: string; expires_in_s: number };

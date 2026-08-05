@@ -14,8 +14,8 @@ import Supercluster from "supercluster";
 
 import type { PhotoMarker } from "../api/client";
 import { useKiosk } from "../store/kiosk";
-import { t } from "../texte/de";
-import { type Stack, groupByLocation } from "./stapel";
+import { t } from "../text/de";
+import { type Stack, groupByLocation } from "./stacks";
 
 /** Radius in pixels within which photos are merged. About a thumb's width. */
 const CLUSTER_RADIUS = 70;
@@ -29,7 +29,7 @@ type PhotoProps = { stack: Stack };
  * Was ein Kreis zusammenfasst.
  *
  * Nicht die Anzahl der Punkte, sondern die der **Fotos**: Ein Stapel ist für supercluster ein
- * einziger Punkt (siehe stapel.ts), und ein Kreis über einem Achterstapel und zwei Einzelbildern
+ * einziger Punkt (siehe stacks.ts), und ein Kreis über einem Achterstapel und zwei Einzelbildern
  * hätte sonst eine 3 getragen statt einer 10.
  */
 type ClusterProps = Supercluster.ClusterProperties & { photos: number };
@@ -52,7 +52,7 @@ export function buildIndex(photos: PhotoMarker[]): Supercluster<PhotoProps, Clus
     },
   });
   // Vor dem Clustern gruppiert: supercluster bekommt keine Dubletten zu sehen, und ein Stapel
-  // bleibt auf jeder Zoomstufe ein Marker. Siehe stapel.ts.
+  // bleibt auf jeder Zoomstufe ein Marker. Siehe stacks.ts.
   index.load(
     groupByLocation(photos).map((stack) => ({
       type: "Feature" as const,

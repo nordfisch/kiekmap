@@ -12,7 +12,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { type Selection } from "../api/admin";
 import { useAdmin } from "../store/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { Backup } from "./Backup";
 import { Changes } from "./Changes";
 import { ImportLog } from "./ImportLog";

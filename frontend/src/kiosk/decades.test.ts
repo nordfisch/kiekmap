@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { MINIMUM_DECADES, offeredDecades } from "./jahrzehnte";
+import { MINIMUM_DECADES, offeredDecades } from "./decades";
 
 describe("Jahrzehnte zur Auswahl", () => {
   it("zeigt ohne datiertes Foto das Mindestfenster", () => {

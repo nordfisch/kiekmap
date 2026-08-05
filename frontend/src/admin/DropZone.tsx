@@ -9,7 +9,7 @@
 
 import { type ReactNode, useRef, useState } from "react";
 
-import { t } from "../texte/de";
+import { t } from "../text/de";
 
 /** Dieselben Formate, die auch das Dateifeld annimmt. */
 const ACCEPT = "image/jpeg,image/png,image/tiff,image/webp";

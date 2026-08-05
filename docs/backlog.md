@@ -124,7 +124,7 @@ Warum der Eindruck entstanden ist, ist trotzdem die interessante Spur — und da
 handfester Fall:
 
 **Beim Datieren eines Fotos ohne Ort ist der Dank eine falsche Zusage.** `rangeForPhoto()` in
-`kiosk/fokus.ts:36` gibt für ein Foto ohne Koordinaten `null` zurück, die Ansicht stellt sich also
+`kiosk/focus.ts:36` gibt für ein Foto ohne Koordinaten `null` zurück, die Ansicht stellt sich also
 bewusst *nicht* ein — richtig so, denn ein Foto ohne Ort steht auf keiner Karte. Auf dem Schirm
 steht dann aber „Das Foto ist jetzt auf der Zeitleiste", und sichtbar wird nichts. Beim Verorten
 fährt die Karte sichtbar heran; beim Datieren springt bestenfalls der Schieber, und in diesem Fall
@@ -431,8 +431,8 @@ sie fast genau halbe-halbe:
 
 | | |
 |---|---|
-| deutsch | `fokus.ts`, `hausnummern.ts`, `jahrzehnte.ts`, `stapel.ts`, `zeitachse.ts`, `jahr.ts` (samt Tests), `tests/fixtures/erzeuge_testbilder.py` |
-| englisch | `idle.ts`, `mapStyle.ts`, `filename.ts`, `format.ts`, `paging.ts`, `scrollArea.tsx`, `useLoaded.ts` |
+| deutsch | `focus.ts`, `houseNumbers.ts`, `decades.ts`, `stacks.ts`, `timeAxis.ts`, `yearInput.ts` (samt Tests), `tests/fixtures/build_test_images.py` |
+| englisch | `idle.ts`, `mapStyle.ts`, `filename.ts`, `format.ts`, `pagination.ts`, `scrollArea.tsx`, `useLoaded.ts` |
 
 Beide Gruppen sind Module derselben Art — kleine reine Fachlogik neben den Komponenten. Es gibt
 also keine Regel dahinter, nur die Reihenfolge ihrer Entstehung. Zu entscheiden ist, ob die Regel
@@ -445,8 +445,8 @@ die Regel ändern — aber nicht offenlassen, denn genau daran orientiert sich, 
 hinzufügt.
 
 **Dazu die Sinnfrage.** Nicht nur die Sprache eines Dateinamens ist zu prüfen, sondern ob er sagt,
-was drinsteht: `jahr.ts` enthält die Jahrzehnt-Regel des Verwaltungsbereichs, `format.ts` formatiert
-Tagesangaben, `paging.ts` heißt so, weil `pager.ts` auf macOS mit `Pager.tsx` kollidierte. Solche
+was drinsteht: `yearInput.ts` enthält die Jahrzehnt-Regel des Verwaltungsbereichs, `format.ts` formatiert
+Tagesangaben, `pagination.ts` heißt so, weil `pager.ts` auf macOS mit `Pager.tsx` kollidierte. Solche
 Namen kosten jedes Mal einen Blick in die Datei.
 
 **Commit-Nachrichten** sind deutsch und ohne Umlaute — das ist bisher durchgehalten; ein Durchgang

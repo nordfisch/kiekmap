@@ -6,7 +6,7 @@
  * viewport can be adjusted on the Pi without rebuilding the frontend.
  */
 
-import { t } from "./texte/de";
+import { t } from "./text/de";
 
 export type Region = {
   name: string;
@@ -19,7 +19,7 @@ export type Region = {
 };
 
 // Welche Jahrzehnte die Datumsfrage anbietet, stand hier einmal mit -- es beschreibt aber die
-// Sammlung und nicht den Ort. Es ergibt sich jetzt aus dem Bestand, siehe kiosk/jahrzehnte.ts.
+// Sammlung und nicht den Ort. Es ergibt sich jetzt aus dem Bestand, siehe kiosk/decades.ts.
 
 export async function loadRegion(signal?: AbortSignal): Promise<Region> {
   const response = await fetch("/tiles/region.json", { signal });

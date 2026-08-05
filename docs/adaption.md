@@ -181,11 +181,11 @@ einer Stelle eine bewusste Entscheidung im Weg steht.
 
 ### Was schon vorbereitet ist
 
-Alle Oberflächentexte stehen in [`frontend/src/texte/de.ts`](../frontend/src/texte/de.ts), im Code
+Alle Oberflächentexte stehen in [`frontend/src/text/de.ts`](../frontend/src/text/de.ts), im Code
 stehen nur Schlüssel. Eine zweite Sprache ist dort eine Datei:
 
 ```ts
-// frontend/src/texte/en.ts
+// frontend/src/text/en.ts
 export const t = { app: { title: "Pictures from our village", … } } as const;
 ```
 

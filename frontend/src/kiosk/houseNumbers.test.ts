@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Place } from "../api/client";
-import { baseNumber, blocksOf, groupByBase } from "./hausnummern";
+import { baseNumber, blocksOf, groupByBase } from "./houseNumbers";
 
 let id = 0;
 function adresse(housenumber: string): Place {

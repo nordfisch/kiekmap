@@ -31,7 +31,7 @@ import {
   startBackup,
   startRestore,
 } from "../api/admin";
-import { t } from "../texte/de";
+import { t } from "../text/de";
 import { formatBytes, formatCount, formatDate } from "./format";
 
 /** While idle: has a stick appeared? While running: how far along is it? */
