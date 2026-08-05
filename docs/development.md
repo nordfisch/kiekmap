@@ -168,8 +168,11 @@ Sechzehn echte Aufnahmen aus Holm, bewusst lückenhaft: Fotos ohne Jahr, ohne Or
 Textlängen, gelöschte Fotos, Besucherbeiträge samt einem zurückgenommenen. Ohne diese Lücken prüft
 der Bestand die Hälfte des Programms nicht — der „Hilf mit"-Bereich hätte nichts vorzulegen.
 
-**Die Bilder sind noch nicht im Repo**, weil sie dem Museum gehören; `make seed` sagt das im
-Klartext, wenn `seed/` leer ist. Alles Weitere in [../seed/README.md](../seed/README.md).
+**Alles in diesem Bestand ist erfunden** — gezeichnete Bilder, ausgedachte Menschen, erzeugt
+von [../tools/build_seed.py](../tools/build_seed.py). Echt sind nur Straßennamen und
+Koordinaten, und das muss so sein: Ohne sie zeigt die Karte nichts und die Ortssuche findet
+nichts. Die echten Aufnahmen gehören dem Museum und liegen nicht im Repo. Alles Weitere in
+[../seed/README.md](../seed/README.md).
 
 ## Aufbau
 

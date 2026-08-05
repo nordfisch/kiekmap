@@ -1,0 +1,470 @@
+{
+ "created": "2026-08-05T15:50:37+02:00",
+ "photos": [
+  {
+   "file": "01.jpg",
+   "sha256": "c3229ab1734c5d84a9a5836b2ff86f55a59a658c1a226c3f3757234d86ad89e4",
+   "title": "Gasthof Petersen",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": null,
+   "tags": [
+    "Gebäude",
+    "Gasthof"
+   ],
+   "status": "published",
+   "date_from": "1910-01-01",
+   "date_to": "1919-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "lat": 53.619244,
+   "lon": 9.6747475,
+   "place_name": "Hauptstraße 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "02.jpg",
+   "sha256": "b11330f9b4c4c7a4eec2fa17b60283600d300724556444ab1ed12a291a9b8645",
+   "title": "Gasthof Petersen von Nordosten",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": "Mappe 3, Blatt 7",
+   "tags": [
+    "Gebäude",
+    "Gasthof"
+   ],
+   "status": "published",
+   "date_from": "1935-01-01",
+   "date_to": "1935-12-31",
+   "date_precision": "year",
+   "date_source": "curator",
+   "lat": 53.619244,
+   "lon": 9.6747475,
+   "place_name": "Hauptstraße 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "049.jpg",
+   "sha256": "3c7806f40621361ff171c86f0edd372181c4ced2f895ed4db29387fad0766315",
+   "title": "Postkarte: Gasthof Petersen mit Saalanbau",
+   "title_source": "curator",
+   "description": "Der Saal rechts wurde nach dem Krieg abgetragen.",
+   "credit": "Nachlass Familie Wendt",
+   "provenance": "Uebergeben 2019",
+   "tags": [
+    "Gebäude",
+    "Gasthof",
+    "Postkarte"
+   ],
+   "status": "published",
+   "date_from": "1920-01-01",
+   "date_to": "1929-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "lat": 53.619244,
+   "lon": 9.6747475,
+   "place_name": "Hauptstraße 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "056.jpg",
+   "sha256": "cc7f39e605245842b1e7b05dfbd5692ff1b384ce8c7007e6f7015013f7da365b",
+   "title": "Gasthof Petersen, Hofseite",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": null,
+   "tags": [
+    "Gebäude",
+    "Gasthof"
+   ],
+   "status": "published",
+   "lat": 53.619244,
+   "lon": 9.6747475,
+   "place_name": "Hauptstraße 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator",
+   "changes": [
+    {
+     "field": "date",
+     "old_value": null,
+     "new_value": "1940er",
+     "source": "visitor",
+     "session_id": "sitzung-11",
+     "reverted": true
+    }
+   ]
+  },
+  {
+   "file": "118.jpg",
+   "sha256": "e904f8e8983cd63263581590a5c28246568a07aa12f7e2c3d00326489786b5eb",
+   "title": "Gasthof Petersen mit Kastanie",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Foto: A. Brahms",
+   "provenance": null,
+   "tags": [
+    "Gebäude",
+    "Gasthof"
+   ],
+   "status": "published",
+   "date_from": "1950-01-01",
+   "date_to": "1959-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "lat": 53.619244,
+   "lon": 9.6747475,
+   "place_name": "Hauptstraße 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "P1304935a (1024x683).jpg",
+   "sha256": "c5b1511a8bd35ee6ab7137b9f9ad1a72a8b6583271665650cd3d76afc1a35e25",
+   "title": "Gasthof Petersen im Schnee",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Foto: A. Brahms",
+   "provenance": null,
+   "tags": [
+    "Gebäude",
+    "Winter"
+   ],
+   "status": "deleted",
+   "date_from": "1962-01-01",
+   "date_to": "1962-12-31",
+   "date_precision": "year",
+   "date_source": "curator",
+   "lat": 53.619244,
+   "lon": 9.6747475,
+   "place_name": "Hauptstraße 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "P3099187 (1024x768).jpg",
+   "sha256": "91bf2dd2217aef1156e56a0ead546d3e2a88504d90e89c35950296c745e5703b",
+   "title": "Gasthof Petersen, unscharf",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Foto: A. Brahms",
+   "provenance": null,
+   "tags": [
+    "Gebäude"
+   ],
+   "status": "deleted",
+   "date_from": "1962-01-01",
+   "date_to": "1962-12-31",
+   "date_precision": "year",
+   "date_source": "curator",
+   "lat": 53.619244,
+   "lon": 9.6747475,
+   "place_name": "Hauptstraße 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "Scannen0092.jpg",
+   "sha256": "21dfd734cf4ef04fbdf348da8583f3f6eeab0e501d7877137d9527d5a3d7be74",
+   "title": "Blick über die Dächer zum Gasthof",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": "Digitalisat des Museums",
+   "tags": [
+    "Luftaufnahme",
+    "Gebäude"
+   ],
+   "status": "published",
+   "date_from": "1950-01-01",
+   "date_to": "1959-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "lat": 53.619244,
+   "lon": 9.6747475,
+   "place_name": "Hauptstraße 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator",
+   "changes": [
+    {
+     "field": "date",
+     "old_value": null,
+     "new_value": "1950er",
+     "source": "visitor",
+     "session_id": "sitzung-15",
+     "reverted": false
+    }
+   ]
+  },
+  {
+   "file": "107.jpg",
+   "sha256": "78c87f96febee06282463a0a9c05c55d10821e3e8a828810e09d139c4dc2a150",
+   "title": "Altenteil Wendt",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Nachlass Familie Wendt",
+   "provenance": "Uebergeben 2019",
+   "tags": [
+    "Gebäude"
+   ],
+   "status": "published",
+   "date_from": "1928-01-01",
+   "date_to": "1928-12-31",
+   "date_precision": "year",
+   "date_source": "curator",
+   "lat": 53.6247861,
+   "lon": 9.6758864,
+   "place_name": "Bredhornweg 14",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "108.jpg",
+   "sha256": "076607fba1f55908cbb2ba8899a20d0dcc5367b67fdefa295486b0b547ccb1ac",
+   "title": "Hof Wendt",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Nachlass Familie Wendt",
+   "provenance": "Uebergeben 2019",
+   "tags": [
+    "Gebäude",
+    "Hof"
+   ],
+   "status": "published",
+   "date_from": "1930-01-01",
+   "date_to": "1939-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "lat": 53.6248887,
+   "lon": 9.6763609,
+   "place_name": "Bredhornweg 18",
+   "location_accuracy_m": 15,
+   "location_source": "curator",
+   "changes": [
+    {
+     "field": "date",
+     "old_value": null,
+     "new_value": "1930er",
+     "source": "visitor",
+     "session_id": "sitzung-4",
+     "reverted": false
+    }
+   ]
+  },
+  {
+   "file": "pic_158-1.jpg",
+   "sha256": "19cc6403810b82398c40ab0aee2439d23a53bb11dccb007910807a1eb657e76e",
+   "title": "Ladengeschäft Rohlf",
+   "title_source": "curator",
+   "description": "Vorn links Jürgen Rohlf, hinten rechts das Fischgeschäft Timm.",
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": null,
+   "tags": [
+    "Gebäude",
+    "Laden"
+   ],
+   "status": "published",
+   "date_from": "1950-01-01",
+   "date_to": "1959-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "lat": 53.61611,
+   "lon": 9.6707144,
+   "place_name": "Friedhofsweg 30",
+   "location_accuracy_m": 15,
+   "location_source": "curator",
+   "changes": [
+    {
+     "field": "date",
+     "old_value": null,
+     "new_value": "1950er",
+     "source": "visitor",
+     "session_id": "sitzung-2",
+     "reverted": false
+    },
+    {
+     "field": "location",
+     "old_value": null,
+     "new_value": "53.616110,9.670714 (Friedhofsweg 30)",
+     "source": "visitor",
+     "session_id": "sitzung-2",
+     "reverted": false
+    }
+   ]
+  },
+  {
+   "file": "pic_158-12.jpg",
+   "sha256": "de746bf1ab034550ebc88085ec9e54539c9932cadf21e85839c52cdd4e911995",
+   "title": "Ladengeschäft Rohlf, Schaufenster",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": null,
+   "tags": [
+    "Gebäude",
+    "Laden"
+   ],
+   "status": "published",
+   "date_from": "1950-01-01",
+   "date_to": "1959-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "lat": 53.61611,
+   "lon": 9.6707144,
+   "place_name": "Friedhofsweg 30",
+   "location_accuracy_m": 15,
+   "location_source": "curator",
+   "changes": [
+    {
+     "field": "date",
+     "old_value": null,
+     "new_value": "1950er",
+     "source": "visitor",
+     "session_id": "sitzung-3",
+     "reverted": false
+    },
+    {
+     "field": "location",
+     "old_value": null,
+     "new_value": "53.616110,9.670714 (Friedhofsweg 30)",
+     "source": "visitor",
+     "session_id": "sitzung-3",
+     "reverted": false
+    }
+   ]
+  },
+  {
+   "file": "052.jpg",
+   "sha256": "fec6195804343efbb018d069cf4f715d1df73cc9a5c5f449c7af3d774ba07708",
+   "title": "Hof Sieveking nach dem Brand",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": "Digitalisat des Museums",
+   "tags": [
+    "Gebäude",
+    "Hof"
+   ],
+   "status": "published",
+   "date_from": "1943-01-01",
+   "date_to": "1943-12-31",
+   "date_precision": "year",
+   "date_source": "curator",
+   "lat": 53.6192181,
+   "lon": 9.6683868,
+   "place_name": "Hauenweg 1",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "099.jpg",
+   "sha256": "f60eea3ed5a9f7f1d6878ebb3ec0d2c061eb535333e81d539490eebb2f89d6f5",
+   "title": "Hof Sieveking mit Reetdach",
+   "title_source": "curator",
+   "description": "Aufnahme vor dem Krieg, Ecke Hauenweg und Hinterm Hof.\nIn den siebziger Jahren abgetragen.\nBewohner: Familie Sieveking, spaeter mehrere Fluechtlingsfamilien.",
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": "Uebergeben von H. Sieveking, 2019",
+   "tags": [
+    "Gebäude",
+    "Hof"
+   ],
+   "status": "published",
+   "date_from": "1930-01-01",
+   "date_to": "1939-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "lat": 53.6192181,
+   "lon": 9.6683868,
+   "place_name": "Hauenweg 1",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "168.JPG",
+   "sha256": "0bcaffdb1f4ca95af6784a4d3d09b34e81fdbc7c051c1e6eceff74fd8551a401",
+   "title": "Hof Sieveking, Rückseite",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": "Uebergeben von H. Sieveking, 2019",
+   "tags": [
+    "Gebäude",
+    "Hof",
+    "Repro"
+   ],
+   "status": "published",
+   "date_from": "1930-01-01",
+   "date_to": "1939-12-31",
+   "date_precision": "decade",
+   "date_source": "curator",
+   "changes": [
+    {
+     "field": "location",
+     "old_value": null,
+     "new_value": "53.619753,9.675549",
+     "source": "visitor",
+     "session_id": "sitzung-7",
+     "reverted": true
+    }
+   ]
+  },
+  {
+   "file": "17.jpg",
+   "sha256": "c9ebe02c783d51ed779e155be850e9e8beb3875bdb81f1adab81e8286f45c0c3",
+   "title": "Hauptstraße 47",
+   "title_source": "curator",
+   "description": "Blatt 17 einer Haus-Dokumentation. Frühere Eigentümer: Familie Boysen.",
+   "credit": "Sammlung Heimatmuseum",
+   "provenance": null,
+   "tags": [
+    "Gebäude"
+   ],
+   "status": "published",
+   "lat": 53.6243442,
+   "lon": 9.6711054,
+   "place_name": "Hauptstraße 47",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  },
+  {
+   "file": "pic_012.jpg",
+   "sha256": "c54732b7c68428d781128090c5393d8f4808be8c05a213c884b9bf1495108873",
+   "title": "Schule und Kindergarten",
+   "title_source": "curator",
+   "description": null,
+   "credit": null,
+   "provenance": null,
+   "tags": [
+    "Gebäude"
+   ],
+   "status": "published"
+  },
+  {
+   "file": "Bild_2024-03-11.jpg",
+   "sha256": "c7177a57057fd4e728814fe129366145b565474b0f354250315a3e557fa6f8de",
+   "title": "Schulstraße 5, heutiger Zustand",
+   "title_source": "curator",
+   "description": null,
+   "credit": "Foto: A. Brahms",
+   "provenance": null,
+   "tags": [
+    "Gebäude"
+   ],
+   "status": "published",
+   "date_from": "2019-01-01",
+   "date_to": "2019-12-31",
+   "date_precision": "year",
+   "date_source": "curator",
+   "lat": 53.6220941,
+   "lon": 9.6745468,
+   "place_name": "Schulstraße 5",
+   "location_accuracy_m": 15,
+   "location_source": "curator"
+  }
+ ]
+}

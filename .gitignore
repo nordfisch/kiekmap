@@ -3,12 +3,10 @@
 /data/*
 !/data/.gitkeep
 
-# Beispielbestand fuer Entwicklung und Test. Noch nicht im Repo: es sind echte Aufnahmen aus
-# Holm, und ob wir sie mitliefern duerfen und wollen, ist offen -- siehe docs/backlog.md unter
-# "Versionierung, Releaseprozess und Veroeffentlichung". Bis dahin holt sich jeder seinen eigenen
-# ueber `make seed-save`; seed/README.md sagt, was dort hingehoert.
-/seed/*
-!/seed/README.md
+# Der Beispielbestand unter seed/ liegt im Repo -- aber erfunden: gezeichnete Bilder,
+# ausgedachte Menschen. Erzeugt von tools/build_seed.py, siehe seed/README.md.
+# Wer mit echten Fotos entwickelt, holt sie sich ueber `make seed-save` und committet
+# sie nicht: die echten Aufnahmen gehoeren dem Museum.
 
 # Kartendaten: zu gross fuers Repo, werden per `make tiles` gebaut.
 # Versioniert wird nur das Bauskript und tiles/region.json.

@@ -114,6 +114,9 @@ def _cmd_seed_export(_: argparse.Namespace) -> int:
 
     print(f"{photos} Fotos und {contributions} Besucherbeitraege nach {target} geschrieben.")
     print("Zurueckspielen mit: make seed")
+    # The collection in the repo is invented; this one probably is not.
+    print("\nAchtung: Der Beispielbestand im Repo ist erfunden. Echte Fotos gehoeren nicht")
+    print("in einen Commit -- siehe seed/README.md.")
     return 0
 
 
@@ -136,6 +139,7 @@ def _cmd_seed_load(_: argparse.Namespace) -> int:
         session.commit()
 
     print(f"{photos} Fotos und {contributions} Besucherbeitraege eingelesen.")
+    print("Erfundener Beispielbestand -- siehe seed/README.md.")
     return 0
 
 
