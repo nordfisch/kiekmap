@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
+from app.config import Settings, get_settings
 from app.db import get_session
 from app.models import Place
 from app.services import places as place_service
@@ -56,6 +57,24 @@ def search_places(
     Addresses only take part once the input holds a digit; see the service for why.
     """
     return [_out(place) for place in place_service.search(session, q)]
+
+
+@router.get("/streets", response_model=list[PlaceOut], summary="Streets offered as buttons")
+def streets(
+    session: Annotated[Session, Depends(get_session)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> list[PlaceOut]:
+    """The streets the "Hilf mit" panel puts up for choice, alphabetically.
+
+    Which ones, and how many, is the service's decision -- see ``nearby_streets``. Registered
+    before the ``/{place_id}`` route below, otherwise "streets" would be read as an id.
+    """
+    return [
+        _out(place)
+        for place in place_service.nearby_streets(
+            session, settings.region_center(), settings.street_choice()
+        )
+    ]
 
 
 @router.get(

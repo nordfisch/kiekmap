@@ -474,3 +474,17 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   gesagt hat, wann das war, kennt das Foto und schaut es an. Erst wenn nichts mehr fehlt, kommt
   ein neues Bild; „Weiß ich nicht" bleibt der Ausweg. Siehe
   [docs/decisions.md](docs/decisions.md) Punkt 23
+
+### Geändert
+
+- **Die Strasse wird im „Hilf mit"-Bereich gewählt statt getippt.** Erst der Anfangsbuchstabe, dann
+  die Straße, dann die Hausnummer — dieselbe Bauform wie Jahrzehnt und Jahr. Damit hat die
+  Besucheransicht **kein einziges Eingabefeld mehr** und braucht keine Tastatur; das Suchfeld war
+  ohne eine nicht zu bedienen und sah aus wie ein defektes Bedienelement. Die Gruppen werden aus
+  dem Ortsindex gerechnet, nicht aufgeschrieben: In Holm sind es zehn Knöpfe, von denen sieben
+  direkt zur Straßenliste führen. Der Verwaltungsbereich behält seine Suche — dort ist eine
+  Tastatur zur Hand. Siehe [docs/decisions.md](docs/decisions.md) Punkt 24
+- Neu in `tiles/region.json`: **`streetChoice`** — wie viele Straßen zur Wahl stehen, die dem
+  Ortsmittelpunkt nächsten. Der Ortsindex reicht sieben Kilometer weit und umfasst die
+  Nachbardörfer; was darüber hinaus liegt, wird weiterhin auf der Karte angetippt. Fehlt der
+  Schlüssel, gilt 80

@@ -47,7 +47,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 3 | [Perceptual Hash gegen zugeschnittene Dubletten](#3--perceptual-hash-gegen-zugeschnittene-dubletten) | Idee | — |
 | 4 | [Volltextsuche über SQLite FTS5](#4--volltextsuche-über-sqlite-fts5) | Idee | — |
 | | **Besucher-Interface** | | |
-| 6 | [Tastatur: was ist ohne sie erreichbar, und wollen wir eine?](#6--tastatur-was-ist-ohne-sie-erreichbar-und-wollen-wir-eine) | Frage | wichtig · dringend |
 | 7 | [Zeitschieber verfeinern](#7--zeitschieber-verfeinern) | Aufgabe | wichtig |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Attract-Mode](#9--attract-mode) | Idee | wichtig |
@@ -63,6 +62,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 18 | [Wiederherstellung wirklich proben](#18--wiederherstellung-wirklich-proben) | Aufgabe | wichtig |
 | 19 | [Displayauflösung und -orientierung des Museumsgeräts](#19--displayauflösung-und--orientierung-des-museumsgeräts) | Frage | wichtig |
 | 20 | [Read-Only-Overlay-Dateisystem](#20--read-only-overlay-dateisystem) | Idee | — |
+| 24 | [Eine Tastatur für die Pflege am Gerät](#24--eine-tastatur-für-die-pflege-am-gerät) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
@@ -121,39 +121,6 @@ den Titel.
 ---
 
 ## Besucher-Interface
-
-### 6 · Tastatur: was ist ohne sie erreichbar, und wollen wir eine?
-
-**Die ganze Besucheransicht hat genau ein Eingabefeld** — die Ortssuche in
-`kiosk/LocationTask.tsx:159`. Alles andere ist Knopf: Zeitschieber, Jahrzehnte, Jahre,
-Hausnummern, Marker, Blättern, Schließen. Diese eine Stelle entscheidet also die ganze Frage.
-
-**Ohne Tastatur bleibt der Beitragsbereich vollständig bedienbar** — aber auf dem zweiten Weg:
-Pin auf die Karte tippen statt Straßennamen suchen. Datieren geht ohnehin nur über Knöpfe. Es
-fehlt also keine *Funktion*, es fehlt der bequemere von zwei Wegen zum selben Ziel. Zu prüfen ist,
-ob das in der Praxis stimmt: Wer den Hof auf dem Foto kennt, aber nicht weiß, wo er auf einer
-Karte liegt, kommt über den Pin **nicht** ans Ziel. Für den ist die Suche der einzige Weg.
-
-**Zu klären, in dieser Reihenfolge:**
-
-1. **Ist der Zustand konsistent?** Ein Suchfeld, das ohne Tastatur nichts annimmt, sieht aus wie
-   ein defektes Bedienelement — schlimmer als gar keins. Wenn keine Tastatur kommt, gehört es
-   entweder weg oder muss sagen, dass hier getippt werden kann.
-2. **Echte Tastatur oder Bildschirmtastatur?** Eine echte Tastatur im Ausstellungsraum ist ein
-   Gegenstand, der wegkommt, verschmutzt und nach Büro aussieht; sie öffnet ausserdem Tastenwege
-   in Chromium, die der Kiosk gerade zumacht (F11, Strg-W, Alt-Tab). Eine Bildschirmtastatur
-   kostet Fläche, muss aber nur dort erscheinen, wo sie gebraucht wird — und ist bei
-   Touchbedienung das Erwartete.
-3. **Chromium unter `cage` blendet keine Bildschirmtastatur ein.** Es gibt keine vom System; sie
-   müsste im Frontend gebaut werden — ein Tastenraster wie das PIN-Feld, aber mit Buchstaben und
-   Umlauten. Der Aufwand ist überschaubar, die Fläche ist das Problem.
-
-> **Der Zusammenhang, der die Entscheidung mitbestimmt:** Der Verwaltungsbereich hat **13**
-> Eingabefelder in sieben Dateien — Titel, Beschreibung, Schlagwörter, Suche, Jahr, Ortssuche. Die
-> sind ohne Tastatur nicht zu bedienen. Wer Fotos am Gerät pflegen will, braucht also ohnehin
-> eine; die PIN auf dem Zahlenfeld ändert daran nichts. Denkbar ist deshalb: **keine Tastatur für
-> Besucher, eine ausleihbare für die Pflege** — dann muss die Besucheransicht ohne auskommen, und
-> Punkt 1 ist zu beantworten.
 
 ### 7 · Zeitschieber verfeinern
 
@@ -372,6 +339,23 @@ nachgemessen; die Variable `--crest` hat für schmale Schirme bereits eine Media
 
 Gegen SD-Karten-Korruption bei Stromausfall. Der Pi wird im Museum nicht heruntergefahren, sondern
 ausgeschaltet — das ist auf Dauer der wahrscheinlichste Ausfallgrund.
+
+### 24 · Eine Tastatur für die Pflege am Gerät
+
+Der Rest der Tastaturfrage aus Punkt 6, und der bleibt: **Der Verwaltungsbereich hat 13
+Eingabefelder in sieben Dateien** — Titel, Beschreibung, Schlagwörter, Suche, Jahr, Ortssuche. Die
+sind ohne Tastatur nicht zu bedienen, und daran soll sich nichts ändern: Wer Fotos pflegt, tippt,
+und die PIN auf dem Zahlenfeld hilft dabei nicht.
+
+Die Besucheransicht braucht seit dem 8. August 2026 keine mehr (siehe [history.md](history.md)).
+Damit ist die Frage nicht mehr, *ob* eine Tastatur an das Gerät gehört, sondern **welche und
+wann**: eine ausleihbare, die nur zur Pflege angesteckt wird, ist die naheliegende Antwort. Sie
+liegt dann nicht im Ausstellungsraum herum, verschmutzt nicht und öffnet den Besuchern keine
+Tastenwege in Chromium, die der Kiosk gerade zumacht (F11, Strg-W, Alt-Tab).
+
+**Zu prüfen ist nur eins:** ob eine USB-Tastatur am laufenden Kiosk erkannt wird, ohne dass jemand
+den Pi neu startet. Das ist eine Frage an das Gerät, keine an den Code — sie gehört zu
+[Punkt 15](#15--abnahme-auf-dem-ersten-pi).
 
 ---
 

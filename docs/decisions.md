@@ -761,3 +761,43 @@ ich nicht" bleibt der Ausweg, und die Kette endet von selbst, sobald dem Foto ni
 
 **Die beiden alten Sätze stehen seitdem nur noch da, wo sie stimmen.** Das ist die eigentliche
 Regel hinter dem Ganzen: Eine Meldung darf nur behaupten, was die Ansicht im selben Moment zeigt.
+
+---
+
+## 24. Die Straße wird gewählt, nicht getippt
+
+Der „Hilf mit"-Bereich hatte ein Suchfeld für den Straßennamen. Seit dem 8. August 2026 steht dort
+eine Folge von Knöpfen: erst der Anfangsbuchstabe, dann die Straße, dann die Hausnummer. **Die
+Besucheransicht hat damit kein einziges Eingabefeld mehr**, und das soll so bleiben.
+
+**Der Anlass war die Tastaturfrage, die Antwort war, sie überflüssig zu machen.** Ein Kiosk hat
+keine Tastatur; eine echte im Ausstellungsraum ist ein Gegenstand, der wegkommt und Tastenwege in
+Chromium öffnet, die der Kiosk gerade zumacht. Eine Bildschirmtastatur hätte gebaut werden müssen,
+denn Chromium unter `cage` blendet keine ein. Beides wäre Aufwand gewesen, um ein Bedienelement zu
+retten, das es an genau **einer** Stelle gab — und das ohne Tastatur wie defekt aussieht.
+
+Die Form war schon da: Der Zeitpunkt wird als Jahrzehnt und dann Jahr erfragt, die Hausnummer bei
+langen Straßen als Abschnitt und dann Nummer. Die Straße ist dieselbe Bauform, eine Ebene weiter
+vorn.
+
+**Die Gruppen werden gerechnet, nicht aufgeschrieben.** Ein Buchstabe mit wenigen Straßen wird mit
+dem Nachbarn verschmolzen, bis höchstens zehn Knöpfe bleiben; eine Gruppe mit mehr als zehn
+Straßen teilt sich eine Ebene tiefer, und der Schnitt folgt dabei den Namen statt einer festen
+Tiefe — die vierzehn Holmer „Am …"-Straßen kommen erst nach vier Zeichen auseinander. Für Holm
+ergibt das zehn Knöpfe, von denen sieben direkt zur Straßenliste führen; A, H und I bekommen einen
+Zwischenschritt. Ein zweites Museum bekommt seinen eigenen Baum, ohne dass jemand Buchstaben
+abzählt.
+
+Gruppiert wird über den **entschärften** Namen. Sonst bekäme ein „Ölmühlenweg" einen einsamen
+Ö-Knopf und stünde hinter dem Z. In Holm gibt es keine solche Straße — anderswo schon, und dann
+fiele es niemandem auf.
+
+**Nicht alle Straßen stehen zur Wahl, sondern die `streetChoice` ortsnächsten.** Der Ortsindex
+reicht sieben Kilometer weit und umfasst die Nachbardörfer; alle 486 Straßen in Knöpfe zu fassen
+kostete eine vierte Frage, allein „Am …" hat dort 29 Einträge. Die Fotos eines Heimatmuseums zeigen
+seinen eigenen Ort, und was weiter draußen liegt, wird auf der Karte angetippt — den Weg gab es
+immer. Eine **Anzahl** statt eines Radius, weil sie das Knopfbudget unabhängig davon hält, wie
+dicht ein Ort bebaut ist.
+
+**Der Verwaltungsbereich behält sein Suchfeld.** Dort wird gepflegt, nicht besucht, und eine
+Tastatur ist zur Hand. Der Suchendpunkt bleibt deshalb, was er war.

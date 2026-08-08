@@ -1461,3 +1461,69 @@ fragt und dasselbe Bild mit der Ortsfrage zurückkommt, jetzt mit „1920er" neb
 man es dann, endet die Kette und ein neues Foto kommt.
 
 Punkt 5 ist damit erledigt; seine Nummer bleibt vergriffen.
+
+## Die Tastaturfrage, beantwortet ohne Tastatur
+
+8. August 2026. Punkt 6 des Backlogs war seit Stufe 6 offen und hieß „was ist ohne sie erreichbar,
+und wollen wir eine?". Er beschrieb sorgfältig drei Wege — echte Tastatur, Bildschirmtastatur,
+gar keine — und übersah, dass es einen vierten gibt.
+
+Denn der Punkt trug seine eigene Auflösung schon mit: **Die ganze Besucheransicht hat genau ein
+Eingabefeld.** Alles andere ist Knopf. Wer diese eine Stelle in Knöpfe verwandelt, muss die Frage
+nach der Tastatur nicht beantworten, sondern hat sie nicht mehr.
+
+### Erst messen, dann entwerfen
+
+Die Idee stand schnell: die Straße erfragen wie das Jahr, erst grob, dann genau. Ob das in zwei
+oder drei Fragen mit je zehn Knöpfen aufgeht, ist aber keine Geschmacksfrage — also wurde der
+echte Ortsindex ausgezählt, bevor eine Zeile Code entstand:
+
+| | |
+|---|---|
+| Straßen im Index | **486**, bis 7 km hinaus, mit den Nachbardörfern |
+| davon im 2-km-Umkreis | **73** |
+| Ballungen bei 700 m Nachbarschaft | **16** — davon eine mit 379 Straßen |
+
+Die dritte Zeile hat eine Idee erledigt, die vorher plausibel klang: nach **Gegend** gliedern,
+Ortskern und Elbufer und Neubaugebiet. Das Straßennetz hängt zusammen; die Dörfer trennen sich
+geografisch nicht, sie müssten von Hand gezogen werden — je Ort neu, was genau die Eigenschaft
+zerstört hätte, die ein zweites Museum ohne Fork auskommen lässt.
+
+Die zweite Zeile entschied den Zuschnitt. **Alle 486 kosten eine vierte Frage** — „Am …" allein
+hat 29 Einträge, „Sch …" 18. Die ortsnächsten achtzig dagegen fallen in zehn Buchstabengruppen,
+von denen sieben direkt zur Straßenliste führen.
+
+### Was der laufende Kiosk zeigte
+
+```
+A · B–D · E · F–G · H · I · K–L · M–R · S · T–Z
+  H  →  Ha · He · Hinterm Hof · Ho
+  A  →  Achter de Möhl · Ahrensbergweg · Al · Am · An
+```
+
+Zwei Dinge daran waren nicht geplant und ergaben sich aus den Daten. **Gruppen mit genau einer
+Straße zeigen deren Namen** statt eines Kürzels — ein Knopf „Hi", der zu einem einzigen
+„Hinterm Hof" führt, wäre ein Schritt für nichts. Und die Gruppen mussten **nach den Namen**
+schneiden statt nach fester Tiefe: Die vierzehn Straßen hinter dem A kommen erst nach vier Zeichen
+auseinander, weil dreizehn davon mit „Am " oder „An " anfangen.
+
+Der erste Entwurf des Verfahrens verfeinerte, bis genügend Gruppen zusammenkamen. Das teilte zu
+fein — ein Testfall mit drei O-Straßen zerlegte sie in „Olm" und „Ost", statt beide unter O zu
+lassen. Die Regel heißt seitdem umgekehrt: **den gröbsten Schnitt nehmen, der überhaupt trennt.**
+
+### Zwei Fehler in einem Nachmittag
+
+- **Die Blattebene zeigte eine einzige Straße.** Im JSX lief die Blattebene noch über die
+  *Gruppen* statt über die Straßen darin — bei zehn Straßen wäre eine erschienen. Beim Lesen des
+  eigenen Codes aufgefallen, vor dem ersten Aufruf.
+- **Gleich weite Straßen wurden willkürlich ausgewählt.** Zwei Straßen können denselben Punkt
+  haben; welche von beiden es dann in die achtzig schafft, hing an der Reihenfolge, in der SQLite
+  die Zeilen herausgab. Ein Test, dessen Erwartung ich für falsch hielt, war in Wahrheit der
+  Hinweis darauf. Der Name entscheidet seitdem den Gleichstand.
+
+Die Abnahme am Ende war ein einziger Ausdruck im laufenden Kiosk: `felder: 0`. Die Besucheransicht
+hat kein Eingabefeld mehr.
+
+Was von Punkt 6 bleibt, ist der Verwaltungsteil — dreizehn Eingabefelder in sieben Dateien, die
+Eingabefelder bleiben sollen. Er steht jetzt als eigener Punkt 24 im Backlog, und die Frage lautet
+dort nicht mehr *ob* eine Tastatur, sondern *welche und wann*.

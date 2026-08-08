@@ -12,6 +12,12 @@
     "Ortskern. Beim Aufbau am echten Display nachjustieren; Nachkommastellen sind erlaubt.",
     "minZoom 13 zeigt den gesamten Ausschnitt auf einmal.",
     "",
+    "streetChoice ist die Anzahl der Strassen, die im 'Hilf mit'-Bereich als Knoepfe zur Wahl",
+    "stehen -- die dem 'center' naechsten. Eine Anzahl und kein Radius, weil sie das Knopfbudget",
+    "unabhaengig davon haelt, wie dicht ein Ort bebaut ist: 80 Strassen passen in zwei Fragen mit",
+    "je hoechstens zehn Knoepfen. Der Ortsindex darf ruhig weiter reichen, alles darueber hinaus",
+    "wird auf der Karte angetippt.",
+    "",
     "Diese Datei ist alles, was ein anderer Ort anpassen muss. Siehe docs/adaption.md."
   ],
   "name": "Holm",
@@ -19,5 +25,6 @@
   "center": [9.67601, 53.62053],
   "defaultZoom": 14.8,
   "minZoom": 13,
-  "maxZoom": 15
+  "maxZoom": 15,
+  "streetChoice": 80
 }

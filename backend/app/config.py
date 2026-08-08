@@ -101,15 +101,50 @@ class Settings(BaseSettings):
         """
         return self.data_dir / "region.json"
 
+    def _region(self) -> dict:
+        """The region file as a dict, empty when it is missing or broken.
+
+        Every reader below tolerates an empty region: without ``make tiles`` there is no map
+        either, and the parts that do work should keep working.
+        """
+        if not self.region_file.is_file():
+            return {}
+        try:
+            content = json.loads(self.region_file.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return {}
+        return content if isinstance(content, dict) else {}
+
     def region_bbox(self) -> tuple[float, float, float, float] | None:
         """[minLon, minLat, maxLon, maxLat], or None when no region is configured."""
-        if not self.region_file.is_file():
-            return None
         try:
-            bbox = json.loads(self.region_file.read_text(encoding="utf-8"))["bbox"]
+            bbox = self._region()["bbox"]
             return (float(bbox[0]), float(bbox[1]), float(bbox[2]), float(bbox[3]))
-        except (json.JSONDecodeError, KeyError, IndexError, TypeError, ValueError):
+        except (KeyError, IndexError, TypeError, ValueError):
             return None
+
+    def region_center(self) -> tuple[float, float] | None:
+        """(lat, lon) of the village centre, or None when no region is configured.
+
+        Turned around against the file, which holds [lon, lat] the way GeoJSON does. Everything
+        inside the backend speaks (lat, lon), and the one place to get that wrong is here.
+        """
+        try:
+            center = self._region()["center"]
+            return (float(center[1]), float(center[0]))
+        except (KeyError, IndexError, TypeError, ValueError):
+            return None
+
+    def street_choice(self) -> int:
+        """How many streets the "Hilf mit" panel offers as buttons -- the nearest ones.
+
+        See the comment in ``tiles/region.json``. The fallback keeps a village without the key
+        usable rather than leaving the panel empty.
+        """
+        try:
+            return max(1, int(self._region()["streetChoice"]))
+        except (KeyError, TypeError, ValueError):
+            return 80
 
     def ensure_dirs(self) -> None:
         for path in (self.data_dir, self.photos_dir, self.thumbs_dir, self.incoming_dir):

@@ -110,6 +110,74 @@ class TestHausnummern:
         assert place_service.housenumbers(ortsindex, andere) == []
 
 
+class TestStrassenZurWahl:
+    """Die Strassen, die der Beitragsbereich als Knoepfe vorlegt.
+
+    Sie ersetzen dort das Suchfeld -- ohne Tastatur ist es das einzige Bedienelement der
+    Besucheransicht, das nichts annimmt.
+    """
+
+    @pytest.fixture
+    def weitlaeufig(self, session):
+        """Zwei Strassen im Ort, eine im Nachbardorf sieben Kilometer weiter."""
+
+        def anlegen(name, lat, lon):
+            session.add(
+                Place(
+                    name=name,
+                    name_normalized=place_service.normalize(name),
+                    lat=lat,
+                    lon=lon,
+                    kind="strasse",
+                )
+            )
+
+        anlegen("Zippelhornweg", 53.6205, 9.6762)
+        anlegen("Hauptstrasse", 53.6210, 9.6755)
+        anlegen("Ferner Deich", 53.5800, 9.7400)
+        session.commit()
+        return session
+
+    def test_nimmt_die_ortsnaechsten(self, weitlaeufig):
+        gewaehlt = place_service.nearby_streets(weitlaeufig, (53.62053, 9.67601), limit=2)
+
+        assert [ort.name for ort in gewaehlt] == ["Hauptstrasse", "Zippelhornweg"]
+
+    def test_liefert_alphabetisch_und_nicht_nach_entfernung(self, weitlaeufig):
+        """Der Besucher sucht seine Strasse im Alphabet, nicht im Umkreis.
+
+        Die Naehe entscheidet nur, *welche* Strassen dabei sind.
+        """
+        gewaehlt = place_service.nearby_streets(weitlaeufig, (53.62053, 9.67601), limit=9)
+
+        assert [ort.name for ort in gewaehlt] == ["Ferner Deich", "Hauptstrasse", "Zippelhornweg"]
+
+    def test_umlaut_sortiert_wie_der_grundbuchstabe(self, session):
+        """Sonst stuende der Oelmuehlenweg hinter dem Z und bekaeme einen eigenen Knopf.
+
+        In Holm gibt es keine solche Strasse -- beim zweiten Museum faellt es sonst still auf.
+        """
+        for name in ("Zwickauer Weg", "Ölmühlenweg", "Ostweg"):
+            session.add(
+                Place(
+                    name=name,
+                    name_normalized=place_service.normalize(name),
+                    lat=53.62,
+                    lon=9.676,
+                    kind="strasse",
+                )
+            )
+        session.commit()
+
+        gewaehlt = place_service.nearby_streets(session, (53.62, 9.676), limit=9)
+
+        assert [ort.name for ort in gewaehlt] == ["Ölmühlenweg", "Ostweg", "Zwickauer Weg"]
+
+    def test_ohne_region_lieber_leer_als_beliebig(self, weitlaeufig):
+        """Ohne 'make tiles' gibt es keinen Mittelpunkt -- dann ist keine Strasse die naechste."""
+        assert place_service.nearby_streets(weitlaeufig, None, limit=9) == []
+
+
 class TestUeberDieApi:
     def test_hausnummern_ueber_die_nummer_der_strasse(self, client: TestClient, ortsindex):
         strasse = place_service.search(ortsindex, "muehlenweg")[0]
@@ -122,6 +190,19 @@ class TestUeberDieApi:
         antwort = client.get("/api/places/9999/housenumbers")
 
         assert antwort.status_code == 404
+
+    def test_strassen_zur_wahl(self, client: TestClient, ortsindex, settings):
+        """'/streets' darf nicht als Ortsnummer gelesen werden -- daher stehen die Routen so."""
+        import json
+
+        settings.region_file.write_text(
+            json.dumps({"center": [9.676, 53.62], "streetChoice": 1}), encoding="utf-8"
+        )
+
+        daten = client.get("/api/places/streets").json()
+
+        assert [eintrag["name"] for eintrag in daten] == ["Alte Muehlenstrasse"]
+        assert daten[0]["accuracy_m"] == place_service.ACCURACY_STREET_M
 
     def test_hausnummer_ist_genauer_als_die_strasse(self, client: TestClient, ortsindex):
         """Die Genauigkeit reist mit -- der Kurator sieht spaeter, worauf Verlass ist."""

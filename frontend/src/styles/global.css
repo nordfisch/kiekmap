@@ -396,66 +396,27 @@ button {
   margin: 0.75rem 0;
 }
 
-/* --- place search -------------------------------------------------------- */
+/* --- choosing the street -------------------------------------------------- */
 
-.search__label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-.search__field {
-  width: 100%;
-  min-height: 3rem;
-  padding: 0 0.8rem;
-  border: 2px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
-  font: inherit;
-  color: inherit;
-  /* The search field must allow selecting and typing, unlike the rest of the kiosk. */
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-.search__field:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-.search__results {
-  margin: 0.5rem 0 0;
-  padding: 0;
-  list-style: none;
-  max-height: 16rem;
-  overflow-y: auto;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.search__result {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+/* Initials behave like the decade buttons: a grid of thumb-sized targets. The step that shows
+ * street names takes a column of its own -- "Heinrich-Eschenburg-Weg" does not fit beside a
+ * second one, and half a name is worse than a longer list. */
+.streets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
   gap: 0.5rem;
-  width: 100%;
-  min-height: 3rem;
-  padding: 0.5rem 0.8rem;
-  border: none;
-  border-bottom: 1px solid var(--line);
-  background: #fff;
+  max-height: 40vh;
+  overflow-y: auto;
+  margin-bottom: 0.75rem;
+}
+
+.streets--names {
+  grid-template-columns: 1fr;
+}
+
+.button--street {
+  margin: 0;
   text-align: left;
-}
-
-.search__results li:last-child .search__result {
-  border-bottom: none;
-}
-
-.search__kind {
-  flex: 0 0 auto;
-  font-size: 0.75rem;
-  color: var(--muted);
 }
 
 /* --- pin on the map ------------------------------------------------------ */

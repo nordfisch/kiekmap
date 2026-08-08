@@ -2,10 +2,15 @@
  * "Where is this?" -- locating a photo by a visitor.
  *
  * Two routes, because people who know the village differ: whoever recognises the spot on the map
- * taps it directly. Whoever knows the street name but cannot find the spot types it. Both lead to
- * the same pin, which can still be dragged afterwards.
+ * taps it directly. Whoever knows the street but cannot find the spot picks it from buttons --
+ * the initial first, then the street. Both lead to the same pin, which can still be dragged
+ * afterwards.
  *
- * Picking a street opens a second step: which house number? The same shape as the dating, where
+ * **Nothing here is typed.** A search box that takes nothing without a keyboard looks like a
+ * broken control, and this was the only text field on the visitor's side; see decisions.md. The
+ * admin area keeps its search -- there a keyboard is at hand.
+ *
+ * Picking a street opens a further step: which house number? The same shape as the dating, where
  * the decade comes before the year -- and for the same reason. A street of 800 m has one point,
  * so without the number every photo on it would land in the same spot. "Reicht so" is a full
  * answer, not an evasion: not every house is in OpenStreetMap, and nobody knows the number for
@@ -14,13 +19,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { type Place, fetchHouseNumbers, searchPlaces } from "../api/client";
+import { type Place, fetchHouseNumbers, fetchStreets } from "../api/client";
 import { useContribute } from "../store/contribute";
 import { t } from "../text/de";
 import { type NumberBlock, blocksOf, groupByBase } from "./houseNumbers";
-
-/** How long the input has to rest before searching. */
-const DEBOUNCE_MS = 200;
+import { type StreetGroup, groupStreets } from "./streetGroups";
 
 export function LocationTask() {
   const pin = useContribute((s) => s.pin);
@@ -29,8 +32,13 @@ export function LocationTask() {
   const submitLocation = useContribute((s) => s.submitLocation);
   const loading = useContribute((s) => s.loading);
 
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Place[]>([]);
+  /** All streets on offer. Fetched once -- a village fits in a few kilobytes. */
+  const [streets, setStreets] = useState<Place[]>([]);
+  /**
+   * The groups tapped so far. Empty means the top level; every tap appends one, "Anderer
+   * Buchstabe" takes the last one back.
+   */
+  const [trail, setTrail] = useState<StreetGroup[]>([]);
   /** The street whose house numbers are on offer, or null while none is. */
   const [street, setStreet] = useState<Place | null>(null);
   const [numbers, setNumbers] = useState<Place[]>([]);
@@ -40,32 +48,30 @@ export function LocationTask() {
   // Grouping and splitting in one go -- both depend on the fetched list alone.
   const blocks = useMemo(() => blocksOf(groupByBase(numbers)), [numbers]);
 
-  useEffect(() => {
-    if (query.trim().length < 2) {
-      setResults([]);
-      return;
-    }
-    const abort = new AbortController();
-    const timer = setTimeout(() => {
-      searchPlaces(query.trim(), abort.signal)
-        .then(setResults)
-        .catch(() => {
-          /* If the visitor keeps typing, another answer is on its way. */
-        });
-    }, DEBOUNCE_MS);
+  const atHand = trail.at(-1)?.streets ?? streets;
+  // A single group means everything fits on one page -- then the step falls away, exactly as it
+  // does for the house numbers.
+  const groups = useMemo(() => groupStreets(atHand), [atHand]);
+  const leaves = groups.length === 1;
+  // Street names need a column of their own -- "Heinrich-Eschenburg-Weg" does not fit next to a
+  // second one. Initials do not, so a step made purely of them stays a grid.
+  const wide = leaves || groups.some((group) => group.streets.length === 1);
 
-    return () => {
-      clearTimeout(timer);
-      abort.abort();
-    };
-  }, [query]);
+  useEffect(() => {
+    const abort = new AbortController();
+    fetchStreets(abort.signal)
+      .then(setStreets)
+      .catch(() => {
+        /* Without the gazetteer the map stays -- the panel says so below. */
+      });
+    return () => abort.abort();
+  }, []);
 
   function choosePlace(place: Place) {
-    // The pin sits on the street straight away -- the second step only moves it. Whoever stops
+    // The pin sits on the street straight away -- the further step only moves it. Whoever stops
     // here has still answered.
     setPin({ lat: place.lat, lon: place.lon }, { label: place.name, accuracyM: place.accuracy_m });
-    setQuery("");
-    setResults([]);
+    setTrail([]);
     setStreet(null);
     setNumbers([]);
     setBlock(null);
@@ -178,33 +184,61 @@ export function LocationTask() {
 
   return (
     <div className="task">
-      <p className="task__hint">{pin ? t.location.hintSet : t.location.hintEmpty}</p>
+      <p className="task__hint">
+        {pin ? t.location.hintSet : streets.length ? t.location.hintEmpty : t.location.noStreets}
+      </p>
 
-      <label className="search">
-        <span className="search__label">{t.location.searchLabel}</span>
-        <input
-          className="search__field"
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t.location.searchPlaceholder}
-          autoComplete="off"
-          spellCheck={false}
-          enterKeyHint="search"
-        />
-      </label>
+      {streets.length > 0 && (
+        <>
+          <p className="task__hint">{leaves ? t.location.askStreet : t.location.askInitial}</p>
 
-      {results.length > 0 && (
-        <ul className="search__results">
-          {results.map((place) => (
-            <li key={place.id}>
-              <button type="button" className="search__result" onClick={() => choosePlace(place)}>
-                <span className="search__name">{place.name}</span>
-                <span className="search__kind">{t.location.kinds[place.kind] ?? place.kind}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+          <div className={wide ? "streets streets--names" : "streets"}>
+            {leaves
+              ? atHand.map((place) => (
+                  <button
+                    key={place.id}
+                    type="button"
+                    className="button button--street"
+                    onClick={() => choosePlace(place)}
+                  >
+                    {place.name}
+                  </button>
+                ))
+              : groups.map((group) =>
+                  // A group holding a single street shows that street: a button reading "Ac" that
+                  // leads to one name would be a step for nothing.
+                  group.streets.length === 1 ? (
+                    <button
+                      key={group.streets[0]!.id}
+                      type="button"
+                      className="button button--street"
+                      onClick={() => choosePlace(group.streets[0]!)}
+                    >
+                      {group.streets[0]!.name}
+                    </button>
+                  ) : (
+                    <button
+                      key={group.label}
+                      type="button"
+                      className="button button--year"
+                      onClick={() => setTrail([...trail, group])}
+                    >
+                      {group.label}
+                    </button>
+                  ),
+                )}
+          </div>
+
+          {trail.length > 0 && (
+            <button
+              type="button"
+              className="button button--quiet"
+              onClick={() => setTrail(trail.slice(0, -1))}
+            >
+              {t.location.otherInitial}
+            </button>
+          )}
+        </>
       )}
 
       {pin && (

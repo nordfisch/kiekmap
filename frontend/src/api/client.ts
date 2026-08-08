@@ -179,8 +179,19 @@ export function postDate(
   return postJson<PhotoDetail>(`/api/contribute/${id}/date`, body);
 }
 
+/** Free search over the gazetteer. Used by the admin area, which has a keyboard. */
 export function searchPlaces(query: string, signal?: AbortSignal): Promise<Place[]> {
   return getJson<Place[]>(`/api/places?q=${encodeURIComponent(query)}`, signal);
+}
+
+/**
+ * The streets the visitor can choose from, alphabetically.
+ *
+ * Which ones and how many the backend decides -- the nearest to the village centre, as many as
+ * `streetChoice` in `region.json` says. Fetched once; a village fits in a few kilobytes.
+ */
+export function fetchStreets(signal?: AbortSignal): Promise<Place[]> {
+  return getJson<Place[]>("/api/places/streets", signal);
 }
 
 /**

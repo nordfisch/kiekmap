@@ -90,9 +90,19 @@ export const t = {
   },
 
   location: {
-    hintEmpty: "Tippen Sie auf der Karte auf die Stelle — oder suchen Sie den Straßennamen.",
+    hintEmpty: "Tippen Sie auf der Karte auf die Stelle — oder wählen Sie die Straße.",
     hintSet: "Stimmt die Stelle? Der Punkt lässt sich auf der Karte noch verschieben.",
-    searchLabel: "Straße oder Ort suchen",
+    /**
+     * The street is chosen, not typed -- the initial first, then the street.
+     *
+     * The visitor's side has no text field at all, so no keyboard is needed; see decisions.md.
+     * `searchPlaceholder` and `kinds` below stay for the admin area, which has one.
+     */
+    askInitial: "Womit fängt die Straße an?",
+    askStreet: "In welcher Straße?",
+    otherInitial: "Anderer Buchstabe",
+    /** Without `make places` there is no gazetteer -- then the map is the only way. */
+    noStreets: "Tippen Sie die Stelle bitte auf der Karte an.",
     searchPlaceholder: "z. B. Mühlenweg",
     confirm: "Hier war das",
     clear: "Punkt entfernen",
@@ -109,7 +119,6 @@ export const t = {
     noHouseNumber: "Reicht so — die Straße genügt",
     /** The opposite of "Reicht so": keep nothing, back to the start. */
     cancelStreet: "Doch nicht — von vorn",
-    otherStreet: "Andere Straße",
     kinds: {
       strasse: "Straße",
       ortsteil: "Ortsteil",

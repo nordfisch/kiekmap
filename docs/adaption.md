@@ -27,9 +27,16 @@ Nur eine Datei: [`tiles/region.json`](../tiles/region.json).
   "center": [lon, lat],
   "defaultZoom": 14.8,
   "minZoom": 13,
-  "maxZoom": 15
+  "maxZoom": 15,
+  "streetChoice": 80
 }
 ```
+
+`streetChoice` ist die Anzahl der Straßen, die der „Hilf mit"-Bereich als Knöpfe zur Wahl stellt —
+die dem `center` nächsten. Der Ortsindex darf weiter reichen; was darüber hinaus liegt, wird auf
+der Karte angetippt. **Eine Anzahl und kein Radius**, weil sie das Knopfbudget unabhängig davon
+hält, wie dicht ein Ort bebaut ist: 80 Straßen passen in zwei Fragen mit je höchstens zehn Knöpfen
+(siehe [decisions.md](decisions.md), Punkt 24). Fehlt der Schlüssel, gilt 80.
 
 Die Datei beschreibt einen **Ort** und sonst nichts. Welche Jahrzehnte der „Hilf mit"-Bereich zur
 Auswahl stellt, stand hier einmal mit — das gehört aber zur Sammlung und ergibt sich inzwischen aus

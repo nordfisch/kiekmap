@@ -8,6 +8,7 @@ name, without internet. A village has a few hundred named things; they fit in on
 
 import json
 import logging
+import math
 import unicodedata
 from pathlib import Path
 
@@ -123,6 +124,49 @@ def search(session: Session, query: str, limit: int = MAX_RESULTS) -> list[Place
             .limit(limit)
         ).all()
     )
+
+
+#: Metres per degree of latitude. For longitude the cosine of the latitude comes on top.
+_M_PER_DEGREE = 111_320
+
+
+def _distance_m(a: tuple[float, float], b: tuple[float, float]) -> float:
+    """Rough distance between two (lat, lon) points.
+
+    Flat earth on purpose: over a village this is off by centimetres, and all it has to do is
+    rank streets by how near they are.
+    """
+    mean_lat = math.radians((a[0] + b[0]) / 2)
+    north = (a[0] - b[0]) * _M_PER_DEGREE
+    east = (a[1] - b[1]) * _M_PER_DEGREE * math.cos(mean_lat)
+    return math.hypot(north, east)
+
+
+def nearby_streets(session: Session, center: tuple[float, float] | None, limit: int) -> list[Place]:
+    """The streets nearest the village centre, in alphabetical order.
+
+    The panel offers them as buttons instead of a search field, so their number decides how many
+    questions it takes to reach one. The gazetteer reaches several kilometres out and holds the
+    neighbouring villages too -- all of them would cost a fourth question, and the photos of a
+    local museum show its own village. What lies beyond stays reachable by tapping the map.
+
+    Sorted the same way the search matches (``normalize``), so that "Ölmühlenweg" files under O
+    and not behind Z.
+
+    Empty without a region: then nothing is near anything, and the panel says so rather than
+    offering an arbitrary eighty.
+    """
+    if center is None:
+        return []
+
+    streets = session.scalars(select(Place).where(Place.kind == "strasse")).all()
+    # The name decides ties. Two streets can share a point -- and which of them makes the cut
+    # must not depend on the order the database happens to hand them over in.
+    nearest = sorted(
+        streets,
+        key=lambda place: (_distance_m(center, (place.lat, place.lon)), normalize(place.name)),
+    )[:limit]
+    return sorted(nearest, key=lambda place: normalize(place.name))
 
 
 def sort_key(housenumber: str) -> tuple[int, str]:
