@@ -8,14 +8,76 @@ Jeder Eintrag trägt mit, was beim Aufgreifen sonst erst wieder herausgefunden w
 ist der Grund, warum er hier steht und nicht in einer Stichwortliste: Ein Punkt ohne seinen
 Zusammenhang kostet beim zweiten Anlauf dieselbe Arbeit wie beim ersten.
 
-Nichts hiervon ist terminiert. Innerhalb der Abschnitte stehen **Fehler zuerst**, danach der
-Ausbau grob nach Gewicht. Zurzeit ist kein Fehler offen — alles hier ist Ausbau.
+## Wie diese Datei zu lesen ist
+
+Jeder Punkt hat eine **Nummer**, eine **Art** und eine **Einordnung**. Alle drei stehen in der
+Tabelle unten, und zwar nur dort — der Fließtext bleibt Text.
+
+**Die Nummer ist die Kennung.** Sie wird einmal vergeben und **nie wieder**, auch nicht, wenn der
+Punkt erledigt ist und in die [history.md](history.md) zieht; dort wird sie beim Umzug genannt.
+Zitiert wird sie als „Punkt 7". Neue Punkte bekommen die nächste freie Nummer, nicht die nächste
+Zeile — die Reihenfolge in dieser Datei darf sich also von der Zählung lösen, und genau das ist der
+Sinn einer stabilen Kennung.
+
+**Vier Arten**, weil vier verschiedene Dinge zu tun sind:
+
+| Art | Was es heißt |
+|---|---|
+| **Fehler** | Etwas tut nicht, was es zusagt. |
+| **Aufgabe** | Klar umrissen, es fehlt nur die Arbeit. |
+| **Frage** | Vor der Arbeit ist zu entscheiden, *was* gebaut wird. |
+| **Idee** | Noch nicht entschieden, ob überhaupt. |
+
+**Zwei Achsen, und sie sind nicht dasselbe** — das ist der ganze Grund, sie zu trennen:
+
+- **dringend** — es trifft heute jemanden (einen Besucher am Gerät oder das Museumsteam bei der
+  Arbeit), oder es blockiert einen anderen Punkt.
+- **wichtig** — ohne das ist das Projekt auf Dauer nicht das, was es sein soll.
+
+Innerhalb jedes Bereichs steht oben, was beides ist, dann was wichtig ist, dann der Rest; bei
+Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
+
+## Übersicht
+
+| # | Punkt | Art | Einordnung |
+|---|---|---|---|
+| | **Verwaltung** | | |
+| 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
+| 2 | [Jahreszahl aus dem Dateinamen raten](#2--jahreszahl-aus-dem-dateinamen-raten) | Idee | — |
+| 3 | [Perceptual Hash gegen zugeschnittene Dubletten](#3--perceptual-hash-gegen-zugeschnittene-dubletten) | Idee | — |
+| 4 | [Volltextsuche über SQLite FTS5](#4--volltextsuche-über-sqlite-fts5) | Idee | — |
+| | **Besucher-Interface** | | |
+| 5 | [Die Dankmeldung: brauchen wir sie, und stimmt sie immer?](#5--die-dankmeldung-brauchen-wir-sie-und-stimmt-sie-immer) | **Fehler** | wichtig · dringend |
+| 6 | [Tastatur: was ist ohne sie erreichbar, und wollen wir eine?](#6--tastatur-was-ist-ohne-sie-erreichbar-und-wollen-wir-eine) | Frage | wichtig · dringend |
+| 7 | [Zeitschieber verfeinern](#7--zeitschieber-verfeinern) | Aufgabe | wichtig |
+| 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
+| 9 | [Attract-Mode](#9--attract-mode) | Idee | wichtig |
+| 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
+| 11 | [Braucht der Kiosk einen eigenen Reload-Knopf?](#11--braucht-der-kiosk-einen-eigenen-reload-knopf) | Frage | — |
+| 12 | [Der 100-m-Fokus liegt über der Kachelauflösung](#12--der-100-m-fokus-liegt-über-der-kachelauflösung) | Frage | — |
+| 13 | [„Hilf mit:" hat seine Akzentfarbe verloren](#13--hilf-mit-hat-seine-akzentfarbe-verloren) | Idee | — |
+| | **Infrastruktur** | | |
+| 14 | [Bedienbarkeitstest mit der echten Zielgruppe](#14--bedienbarkeitstest-mit-der-echten-zielgruppe) | Aufgabe | wichtig · dringend |
+| 15 | [Abnahme auf dem ersten Pi](#15--abnahme-auf-dem-ersten-pi) | Aufgabe | wichtig |
+| 16 | [Die vier Prüfungen, die das Gerät brauchen](#16--die-vier-prüfungen-die-das-gerät-brauchen) | Aufgabe | wichtig |
+| 17 | [Containerbetrieb prüfen](#17--containerbetrieb-prüfen) | Aufgabe | wichtig |
+| 18 | [Wiederherstellung wirklich proben](#18--wiederherstellung-wirklich-proben) | Aufgabe | wichtig |
+| 19 | [Displayauflösung und -orientierung des Museumsgeräts](#19--displayauflösung-und--orientierung-des-museumsgeräts) | Frage | wichtig |
+| 20 | [Read-Only-Overlay-Dateisystem](#20--read-only-overlay-dateisystem) | Idee | — |
+| | **Entwicklung** | | |
+| 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
+| 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
+| 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
+
+**Zwei Fehler sind offen**, und beide sind erst durch diese Einordnung als solche benannt worden:
+Punkt 5 gibt einem Besucher eine falsche Zusage, Punkt 10 zerdrückt das Foto auf einem kleinen
+Schirm. Vorher galt diese Datei als fehlerfrei.
 
 ---
 
 ## Verwaltung
 
-### Der Erstbestand braucht eine Durchsicht
+### 1 · Der Erstbestand braucht eine Durchsicht
 
 929 Fotos sind eingelesen, und der Import hat aus Dateien und Ordnernamen herausgeholt, was
 darin stand. Was er *nicht* konnte, ist jetzt Handarbeit — und weil es Ortskenntnis braucht,
@@ -35,7 +97,7 @@ gehört sie dem Museumsteam, nicht dem Rechner:
 Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene Nacharbeits-Liste reicht, ist Teil
 der Frage.
 
-### Jahreszahl aus dem Dateinamen raten
+### 2 · Jahreszahl aus dem Dateinamen raten
 
 `Kirchweih_1932_Muehle.jpg` trägt seine Datierung im Namen, und beim Erstimport von einigen
 hundert Scans ist das viel wert.
@@ -45,13 +107,13 @@ als **Vorschlag** markiert werden, nie als Tatsache — sonst entsteht genau der
 EXIF-Regel aus Stufe 3 vermeidet: ein falsch datiertes Foto, das nie zur Korrektur vorgelegt wird,
 weil es als datiert gilt.
 
-### Perceptual Hash gegen zugeschnittene Dubletten
+### 3 · Perceptual Hash gegen zugeschnittene Dubletten
 
 Der SHA-256 erkennt nur bitgleiche Dateien. Zwei Scans desselben Fotos mit unterschiedlichem
 Zuschnitt oder Kontrast sind für ihn zwei verschiedene Bilder — im Museumsbestand ein realistischer
 Fall, wenn dasselbe Original zweimal durch den Scanner ging.
 
-### Volltextsuche über SQLite FTS5
+### 4 · Volltextsuche über SQLite FTS5
 
 Über Titel, Beschreibung und Schlagwörter. Heute sucht die Fotoliste im Verwaltungsbereich nur über
 den Titel.
@@ -60,7 +122,42 @@ den Titel.
 
 ## Besucher-Interface
 
-### Tastatur: was ist ohne sie erreichbar, und wollen wir eine?
+### 5 · Die Dankmeldung: brauchen wir sie, und stimmt sie immer?
+
+**Zuerst die Tatsache, weil die Vermutung eine andere war:** Den Dank gibt es bei **beiden**
+Beiträgen. `submitLocation()` und `submitDate()` gehen durch dieselbe Funktion `contribute()`
+(`store/contribute.ts:136`), die ihn mit dem jeweiligen Text auslöst — „Danke! Das Foto ist jetzt
+auf der Karte." beziehungsweise „… auf der Zeitleiste.". Es ist also **nichts zu vereinheitlichen**;
+die Wege sind schon einer.
+
+Warum der Eindruck entstanden ist, ist trotzdem die interessante Spur — und dahinter steckt der
+Fehler, der diesen Punkt zu einem macht:
+
+**Beim Datieren eines Fotos ohne Ort ist der Dank eine falsche Zusage.** `rangeForPhoto()` in
+`kiosk/focus.ts:36` gibt für ein Foto ohne Koordinaten `null` zurück, die Ansicht stellt sich also
+bewusst *nicht* ein — richtig so, denn ein Foto ohne Ort steht auf keiner Karte. Auf dem Schirm
+steht dann aber „Das Foto ist jetzt auf der Zeitleiste", und sichtbar wird nichts. Beim Verorten
+fährt die Karte sichtbar heran; beim Datieren springt bestenfalls der Schieber, und in diesem Fall
+passiert gar nichts. Das ist dieselbe Sorte Fehler, die beim Verorten schon einmal behoben wurde
+(siehe [history.md](history.md), Teil IV, Punkt 4) — nur an der anderen Frage.
+
+Im Museumsbestand ist das **nicht** der Randfall: Ein frisch importierter Scan hat typischerweise
+weder Ort noch Jahr, und welche der beiden Fragen zuerst kommt, entscheidet der Zufall.
+
+**Zu klären:**
+
+- **Braucht es die Meldung überhaupt?** Sie steht 2,2 Sekunden und blendet den Beitragsbereich so
+  lange aus. Die eigentliche Rückmeldung ist die Ansicht selbst — die Karte fährt hin, das Foto
+  taucht auf. Wo das eintritt, ist der Satz vielleicht überflüssig; wo es *nicht* eintritt, ist er
+  irreführend. Beides spricht gegen ihn, aus entgegengesetzten Richtungen.
+- **Falls sie bleibt: was sagt sie im Fall ohne Ort?** Ehrlich wäre etwa „Danke! Sobald jemand
+  weiß, wo das war, erscheint es auf der Karte." — das benennt zugleich, was noch fehlt, und
+  könnte den nächsten Beitrag anstoßen.
+- **Die 2,2 Sekunden sind zugleich die Fokusdauer.** Zoom und Schieberstellung leben genau so
+  lange wie der Dank, ohne zweiten Zeitgeber (`showThanks` in `store/contribute.ts:123`). Wer die
+  Meldung streicht, muss diesen Zeitgeber ersetzen, sonst kehrt die Karte nie zurück.
+
+### 6 · Tastatur: was ist ohne sie erreichbar, und wollen wir eine?
 
 **Die ganze Besucheransicht hat genau ein Eingabefeld** — die Ortssuche in
 `kiosk/LocationTask.tsx:159`. Alles andere ist Knopf: Zeitschieber, Jahrzehnte, Jahre,
@@ -93,61 +190,47 @@ Karte liegt, kommt über den Pin **nicht** ans Ziel. Für den ist die Suche der 
 > Besucher, eine ausleihbare für die Pflege** — dann muss die Besucheransicht ohne auskommen, und
 > Punkt 1 ist zu beantworten.
 
-### Braucht der Kiosk einen eigenen Reload-Knopf?
+### 7 · Zeitschieber verfeinern
 
-Auf dem Besucherschirm gibt es heute keinen Weg, die Anzeige zurückzusetzen. Es gibt drei
-Umwege: fünf Minuten warten (der Leerlauf lädt neu), die PIN eingeben und die Verwaltung wieder
-verlassen (lädt seit `1e99559` ebenfalls neu), oder den Netzstecker.
+Drei Dinge am selben Bedienelement, die zusammen entschieden werden sollten — die Kopfzeile ist
+nur die kleinste davon.
 
-Für einen Besucher, der sich verhakt hat, sind alle drei keine Antwort. Für eine ehrenamtliche
-Person, die danebensteht, reicht der Weg über die Verwaltung — aber nur, wenn sie die PIN weiß.
+**1. Die Kopfzeile soll weg.** Zurückgestellt, aber gewollt: sowohl „1920 bis 2019" als auch
+„x Fotos ohne Jahr". Vorher zu klären, zwei Dinge:
 
-**Was dagegen spricht**, und deshalb ist es eine Frage und keine Aufgabe: Ein Knopf im
-Besucherbild, den fast niemand braucht, wird trotzdem gedrückt — von Kindern zuerst. Er nimmt
-Fläche, und er wirft die Arbeit weg, die gerade jemand angefangen hat. Die Ansicht kann sich
-ausserdem kaum noch verhaken: Der Leerlauf lädt neu statt zurückzusetzen, seit `8c1f880`.
+1. Mit der Kopfzeile verschwindet die einzige Stelle, an der der gewählte Zeitraum als **Zahl**
+   steht. Bleibt es bei der Skala unter dem Schieber (den beiden Enden der Achse), oder tragen die
+   Griffe ihre Jahreszahl mit sich?
+2. Ohne Kopfzeile braucht die obere Zeile weniger als die heutigen 9 rem. Schrumpft sie auf etwa
+   6,5 rem, gewinnt die Karte die Differenz.
 
-**Der naheliegende Mittelweg wäre eine unauffällige Geste** — ein langer Druck auf das Wappen etwa.
-Genau diese Bauform wurde in Stufe 8 für den Verwaltungszugang **verworfen**, weil eine unsichtbare
-Geste etwas ist, das Ehrenamtliche sich merken müssten (siehe [history.md](history.md), Stufe 8).
-Wer sie hier wieder aufgreift, sollte das wissen und begründen.
+Dazu ein Erbe aus dem Umbau der Zeitachse: Der Satz „Für diesen Ausschnitt gibt es keine datierten
+Fotos." steht in dieser Kopfzeile. Fällt sie, muss er woanders hin — oder ganz weg, denn die Karte
+sagt mit „Hier gibt es noch keine Fotos im gewählten Zeitraum." ohnehin dasselbe.
 
-### Die Dankmeldung: brauchen wir sie, und stimmt sie immer?
+**2. Die Balken zeigen die Menge bei großem Bestand falsch.** `TimeSlider.tsx:117` skaliert linear
+gegen das höchste Jahrzehnt, mit einer Untergrenze von 6 % (Zeile 159). Bei achtzehn
+Beispielfotos geht das auf; bei einem Bestand, dessen Schwerpunkt in einem Jahrzehnt liegt, wird
+jedes andere auf diesen Sockel gedrückt und ist von einem leeren Jahrzehnt nicht mehr zu
+unterscheiden — genau dann also, wenn der Bestand groß genug ist, dass die Verteilung etwas
+aussagen würde.
 
-**Zuerst die Tatsache, weil die Vermutung eine andere war:** Den Dank gibt es bei **beiden**
-Beiträgen. `submitLocation()` und `submitDate()` gehen durch dieselbe Funktion `contribute()`
-(`store/contribute.ts:136`), die ihn mit dem jeweiligen Text auslöst — „Danke! Das Foto ist jetzt
-auf der Karte." beziehungsweise „… auf der Zeitleiste.". Es ist also **nichts zu vereinheitlichen**;
-die Wege sind schon einer.
+Naheliegend ist eine Stauchung (Wurzel oder Logarithmus), aber die Frage dahinter ist die
+eigentliche: **Soll der Balken die Menge zeigen oder nur, wo überhaupt etwas ist?** Der Docstring
+von `TimeSlider.tsx` sagt heute das Zweite („shows the visitor where anything is to be found at
+all"), die lineare Skala verspricht das Erste. Eins von beidem ist zu streichen.
 
-Warum der Eindruck entstanden ist, ist trotzdem die interessante Spur — und dahinter steckt ein
-handfester Fall:
+**3. Ein dritter Anfasser in der Mitte.** Links „von", rechts „bis" — und **mittig der gewählte
+Bereich selbst, zum Verschieben**. Mit gleichbleibender Spanne durch die Zeit zu wandern ist die
+Bewegung, die man am Kiosk eigentlich machen will, und sie kostet heute zwei Griffe hintereinander,
+bei denen die Spanne zwischendurch falsch ist.
 
-**Beim Datieren eines Fotos ohne Ort ist der Dank eine falsche Zusage.** `rangeForPhoto()` in
-`kiosk/focus.ts:36` gibt für ein Foto ohne Koordinaten `null` zurück, die Ansicht stellt sich also
-bewusst *nicht* ein — richtig so, denn ein Foto ohne Ort steht auf keiner Karte. Auf dem Schirm
-steht dann aber „Das Foto ist jetzt auf der Zeitleiste", und sichtbar wird nichts. Beim Verorten
-fährt die Karte sichtbar heran; beim Datieren springt bestenfalls der Schieber, und in diesem Fall
-passiert gar nichts. Das ist dieselbe Sorte Fehler, die beim Verorten schon einmal behoben wurde
-(siehe [history.md](history.md), Teil IV, Punkt 4) — nur an der anderen Frage.
+Der Schieber ist von Hand gebaut und nicht aus einer Bibliothek, genau um solche Griffe zu
+ermöglichen — die Begründung steht oben in `TimeSlider.tsx`. Zu klären ist die Fingergröße: drei
+Zonen auf einer Achse, jede mindestens 48 px, und die mittlere darf die äußeren nicht verdecken,
+wenn die Spanne schmal wird.
 
-Im Museumsbestand ist das **nicht** der Randfall: Ein frisch importierter Scan hat typischerweise
-weder Ort noch Jahr, und welche der beiden Fragen zuerst kommt, entscheidet der Zufall.
-
-**Zu klären:**
-
-- **Braucht es die Meldung überhaupt?** Sie steht 2,2 Sekunden und blendet den Beitragsbereich so
-  lange aus. Die eigentliche Rückmeldung ist die Ansicht selbst — die Karte fährt hin, das Foto
-  taucht auf. Wo das eintritt, ist der Satz vielleicht überflüssig; wo es *nicht* eintritt, ist er
-  irreführend. Beides spricht gegen ihn, aus entgegengesetzten Richtungen.
-- **Falls sie bleibt: was sagt sie im Fall ohne Ort?** Ehrlich wäre etwa „Danke! Sobald jemand
-  weiß, wo das war, erscheint es auf der Karte." — das benennt zugleich, was noch fehlt, und
-  könnte den nächsten Beitrag anstoßen.
-- **Die 2,2 Sekunden sind zugleich die Fokusdauer.** Zoom und Schieberstellung leben genau so
-  lange wie der Dank, ohne zweiten Zeitgeber (`showThanks` in `store/contribute.ts:123`). Wer die
-  Meldung streicht, muss diesen Zeitgeber ersetzen, sonst kehrt die Karte nie zurück.
-
-### Historische Karte als umschaltbare Grundkarte
+### 8 · Historische Karte als umschaltbare Grundkarte
 
 **Der größte Posten auf dieser Seite** — und die einzige Idee, die aus einer schönen Karte eine
 Aussage macht.
@@ -181,24 +264,12 @@ kein Ersatz.
 *Der billige Teil ist bereits gebaut: der Kartenstil „Papier" in den Farben der Oberfläche
 (`2e648f6`).*
 
-### Kopfzeile des Zeitschiebers aufräumen
+### 9 · Attract-Mode
 
-Zurückgestellt, aber gewollt: Die Kopfzeile über dem Schieber soll weg — sowohl „1920 bis 2019"
-als auch „x Fotos ohne Jahr".
+Diashow bei Leerlauf statt Standardansicht. Heute lädt der Leerlauf nach fünf Minuten die Seite
+neu — ein bewegtes Bild würde Besucher eher an das Gerät holen.
 
-**Vorher zu klären, zwei Dinge:**
-
-1. Mit der Kopfzeile verschwindet die einzige Stelle, an der der gewählte Zeitraum als **Zahl**
-   steht. Bleibt es bei der Skala unter dem Schieber (den beiden Enden der Achse), oder tragen die
-   Griffe ihre Jahreszahl mit sich?
-2. Ohne Kopfzeile braucht die obere Zeile weniger als die heutigen 9 rem. Schrumpft sie auf etwa
-   6,5 rem, gewinnt die Karte die Differenz.
-
-Dazu ein Erbe aus dem Umbau der Zeitachse: Der Satz „Für diesen Ausschnitt gibt es keine datierten
-Fotos." steht in dieser Kopfzeile. Fällt sie, muss er woanders hin — oder ganz weg, denn die Karte
-sagt mit „Hier gibt es noch keine Fotos im gewählten Zeitraum." ohnehin dasselbe.
-
-### Detailansicht: Maße aufräumen
+### 10 · Detailansicht: Maße aufräumen
 
 Zwei Kleinigkeiten an derselben Ansicht — die zweite zieht allerdings deutlich mehr nach sich als
 die erste.
@@ -210,8 +281,10 @@ einem querformatigen Scan gut ein Drittel des Schirms. Der `minmax(16rem, …)` 
 `grid-template-columns` federt das nicht ab: Er gibt nur eine Untergrenze an, die Spalte bleibt bei
 ihrer Wunschbreite, solange sie passt.
 
-Das hängt an der offenen Frage nach **Displayauflösung und -orientierung** (siehe *Infrastruktur*)
-— auf 1920 × 1080 ist nichts zu tun, auf einem 1024er Panel schon. Naheliegend wäre, die Spalte
+Das ist der Grund, warum dieser Punkt als Fehler geführt wird und nicht als Ausbau: Eine Ansicht,
+die bei kleinerer Auflösung ihr Hauptobjekt zerdrückt, tut nicht, was sie zusagt. **Wie schlimm es
+ist, hängt an [Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts)** — auf
+1920 × 1080 ist nichts zu tun, auf einem 1024er Panel schon. Naheliegend wäre, die Spalte
 mitwachsen zu lassen (`clamp(16rem, 28vw, 24rem)`) statt sie zu setzen. Zu klären ist vorher, ob
 der Text dann noch ohne unruhige Umbrüche steht.
 
@@ -229,34 +302,61 @@ soll. Betroffen sind beide Bereiche: Besucheransicht und Verwaltung haben eigene
 Eingabefelder und deren Mindesthöhe, und die 48 px aus der Zielgruppen-Regel sind bisher an jeder
 Stelle einzeln eingehalten statt an einer.
 
-### „Hilf mit:" hat seine Akzentfarbe verloren
+### 11 · Braucht der Kiosk einen eigenen Reload-Knopf?
+
+Auf dem Besucherschirm gibt es heute keinen Weg, die Anzeige zurückzusetzen. Es gibt drei
+Umwege: fünf Minuten warten (der Leerlauf lädt neu), die PIN eingeben und die Verwaltung wieder
+verlassen (lädt seit `1e99559` ebenfalls neu), oder den Netzstecker.
+
+Für einen Besucher, der sich verhakt hat, sind alle drei keine Antwort. Für eine ehrenamtliche
+Person, die danebensteht, reicht der Weg über die Verwaltung — aber nur, wenn sie die PIN weiß.
+
+**Was dagegen spricht**, und deshalb ist es eine Frage und keine Aufgabe: Ein Knopf im
+Besucherbild, den fast niemand braucht, wird trotzdem gedrückt — von Kindern zuerst. Er nimmt
+Fläche, und er wirft die Arbeit weg, die gerade jemand angefangen hat. Die Ansicht kann sich
+ausserdem kaum noch verhaken: Der Leerlauf lädt neu statt zurückzusetzen, seit `8c1f880`.
+
+**Der naheliegende Mittelweg wäre eine unauffällige Geste** — ein langer Druck auf das Wappen etwa.
+Genau diese Bauform wurde in Stufe 8 für den Verwaltungszugang **verworfen**, weil eine unsichtbare
+Geste etwas ist, das Ehrenamtliche sich merken müssten (siehe [history.md](history.md), Stufe 8).
+Wer sie hier wieder aufgreift, sollte das wissen und begründen.
+
+### 12 · Der 100-m-Fokus liegt über der Kachelauflösung
+
+Nach einem Besucherbeitrag fährt die Karte auf hundert Meter heran; die Vektorkacheln reichen bis
+Zoom 15. MapLibre skaliert sauber hoch, die Beschriftungen werden dabei aber groß. Falls das im
+Museum unruhig wirkt, ist **der Radius die Stellschraube, nicht die Bauform** — zu beurteilen ist
+das erst am Gerät, also mit [Punkt 15](#15--abnahme-auf-dem-ersten-pi).
+
+### 13 · „Hilf mit:" hat seine Akzentfarbe verloren
 
 Beim Angleichen an „Bilder aus" (`45ae42d`) wurde aus dem Akzentbraun eine stille graue Zeile. Das
 war die bewusste Folge einer bewussten Entscheidung — aber es war zugleich der einzige Blickfang
 der linken Spalte. Falls der Beitragsbereich seinen Zug aufs Auge zurückbekommen soll, ist das die
 Stelle.
 
-### Der 100-m-Fokus liegt über der Kachelauflösung
-
-Nach einem Besucherbeitrag fährt die Karte auf hundert Meter heran; die Vektorkacheln reichen bis
-Zoom 15. MapLibre skaliert sauber hoch, die Beschriftungen werden dabei aber groß. Falls das im
-Museum unruhig wirkt, ist **der Radius die Stellschraube, nicht die Bauform**.
-
-### Attract-Mode
-
-Diashow bei Leerlauf statt Standardansicht. Heute lädt der Leerlauf nach fünf Minuten die Seite
-neu — ein bewegtes Bild würde Besucher eher an das Gerät holen.
-
 ---
 
 ## Infrastruktur
 
-### Abnahme auf dem ersten Pi
+### 14 · Bedienbarkeitstest mit der echten Zielgruppe
 
-**Der wichtigste offene Punkt des Projekts.** Alles unter `deploy/pi/` ist **ungeprüft** — beim
-Bauen gab es kein Gerät. Die Shell-Syntax stimmt, gelaufen ist nichts. Betroffen sind
-`setup-pi.sh`, `photomap-kiosk`, `photomap-kiosk.service`, `update.sh`, `99-photomap-usb.rules`
-und `photomap-usb-mount`.
+Eine ehrenamtliche Person die Sicherung durchführen lassen, **ohne zu helfen**, und zusehen, wo sie
+stockt. Der aussagekräftigste Test des ganzen Projekts — und die zweite Hälfte des
+Abnahmekriteriums von Stufe 9, die bisher fehlt.
+
+**Dringend ist er, weil er kein Gerät braucht.** Über
+[Punkt 21](#21--deployment-auf-einem-webserver-evaluieren) steht das System dem Museumsteam zur
+Verfügung, bevor Display und Pi beschafft sind — und damit ist dieser Test heute durchführbar statt
+erst nach der Beschaffung. Was er zutage fördert, ändert womöglich Dinge, die danach teurer zu
+ändern sind.
+
+### 15 · Abnahme auf dem ersten Pi
+
+**Der gewichtigste offene Punkt des Projekts** — dringend ist er nur nicht, weil das Gerät fehlt.
+Alles unter `deploy/pi/` ist **ungeprüft**; beim Bauen gab es keins. Die Shell-Syntax stimmt,
+gelaufen ist nichts. Betroffen sind `setup-pi.sh`, `photomap-kiosk`, `photomap-kiosk.service`,
+`update.sh`, `99-photomap-usb.rules` und `photomap-usb-mount`.
 
 **Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10.** Was zuerst hakt, gehört nach
 [operations.md](operations.md).
@@ -272,7 +372,9 @@ Die erwarteten Stolpersteine, damit sie nicht erst gesucht werden müssen:
   der vier Sitzungszeilen `PAMName`, `TTYPath`, `StandardInput`, `UtmpIdentifier` in der
   systemd-Unit, oder der Benutzer ist nicht in den Gruppen `video`/`render`.
 
-### Die vier Prüfungen, die das Gerät brauchen
+### 16 · Die vier Prüfungen, die das Gerät brauchen
+
+Der praktische Teil von [Punkt 15](#15--abnahme-auf-dem-ersten-pi), und ohne Gerät nicht zu haben:
 
 - **Kaltstart.** Netzstecker ziehen und wieder einstecken. Ohne Tastatur, ohne Klick, ohne
   Fehlerseite zurück in die Karte.
@@ -283,28 +385,25 @@ Die erwarteten Stolpersteine, damit sie nicht erst gesucht werden müssen:
 - **Touch-Test am Zielgerät.** Marker, Slider-Griffe und die Schließfläche mit dem Finger bedienen,
   nicht mit der Maus. Ziel: unter 1,5 s vom Loslassen bis zu aktualisierten Markern.
 
-### Wiederherstellung wirklich proben
+### 17 · Containerbetrieb prüfen
+
+`make prod` ist ungeprüft, weil beim Bauen kein Docker lief. Auf dem Pi ist das der einzige
+Betriebsmodus — und für
+[Punkt 21](#21--deployment-auf-einem-webserver-evaluieren) ist es der Weg, auf dem das System
+überhaupt irgendwo hinkommt.
+
+### 18 · Wiederherstellung wirklich proben
 
 Auf ein zweites, leeres Gerät zurückspielen. **Ein ungetestetes Backup ist kein Backup.** Erprobt
 ist bisher nur der Weg gegen ein `hdiutil`-Prüfvolumen auf dem Mac.
 
-### Bedienbarkeitstest mit der echten Zielgruppe
+### 19 · Displayauflösung und -orientierung des Museumsgeräts
 
-Eine ehrenamtliche Person die Sicherung durchführen lassen, **ohne zu helfen**, und zusehen, wo sie
-stockt. Der aussagekräftigste Test des ganzen Projekts — und die zweite Hälfte des
-Abnahmekriteriums von Stufe 9, die bisher fehlt.
-
-### Containerbetrieb prüfen
-
-`make prod` ist ungeprüft, weil beim Bauen kein Docker lief. Auf dem Pi ist das der einzige
-Betriebsmodus.
-
-### Displayauflösung und -orientierung des Museumsgeräts
-
-Steht noch nicht fest und beeinflusst die Layoutmaße. Die Ansicht ist bisher gegen 1280 × 800
+Steht noch nicht fest und beeinflusst die Layoutmaße; an dieser Antwort hängt
+[Punkt 10](#10--detailansicht-maße-aufräumen). Die Ansicht ist bisher gegen 1280 × 800
 nachgemessen; die Variable `--crest` hat für schmale Schirme bereits eine Media Query.
 
-### Read-Only-Overlay-Dateisystem
+### 20 · Read-Only-Overlay-Dateisystem
 
 Gegen SD-Karten-Korruption bei Stromausfall. Der Pi wird im Museum nicht heruntergefahren, sondern
 ausgeschaltet — das ist auf Dauer der wahrscheinlichste Ausfallgrund.
@@ -316,7 +415,37 @@ ausgeschaltet — das ist auf Dauer der wahrscheinlichste Ausfallgrund.
 Nicht das Programm, sondern die Arbeit daran: wie das Projekt geordnet, veröffentlicht und
 weitergegeben wird.
 
-### Versionierung, Releaseprozess und Veröffentlichung des Codes
+### 21 · Deployment auf einem Webserver evaluieren
+
+Das System dem Museumsteam **zunächst online** anbieten — zur Erprobung und vor allem zum Aufbau
+der Fotodatenbank, bevor ein Pi im Ausstellungsraum steht. Die Bilder könnten so über Monate von
+zu Hause aus eingepflegt werden.
+
+**Das macht diesen Punkt dringend**, obwohl er nach einer Evaluierung aussieht: Sein Wert ist
+zeitgebunden. Solange kein Zugang steht, pflegt niemand Fotos ein, und jede Woche Verzögerung ist
+eine verlorene Woche Datenbankaufbau. Ausserdem hängt
+[Punkt 14](#14--bedienbarkeitstest-mit-der-echten-zielgruppe) daran — der Bedienbarkeitstest wird
+so möglich, bevor Hardware beschafft ist.
+
+Technisch ist der Weg kurz: Es läuft schon in Containern (`make prod`), das Frontend ist statisch,
+nginx steht davor, und die Datenbank ist eine Datei. Die Fragen liegen woanders:
+
+- **Zugriffsschutz.** Die PIN ist für einen Touchscreen in einem Museumsraum gebaut — vier Ziffern,
+  gesichert durch eine Sperre nach fünf Fehlversuchen. Im offenen Netz ist das zu wenig, und vor
+  allem schützt sie nur die Verwaltung: Der „Hilf mit"-Bereich nimmt **Beiträge ohne jede
+  Anmeldung** an. Online wäre das eine offene Tür. Naheliegend ist ein Schutz **vor** der ganzen
+  Anwendung (HTTP-Basisauthentifizierung im nginx oder ein Zugang über VPN), nicht ein zweiter
+  Schutz in der Anwendung.
+- **Was aus dem Offline-Versprechen wird.** Die Regel „null Anfragen an eine fremde Herkunft" bleibt
+  erfüllt, sie kostet online nur nichts mehr. Umgekehrt gilt: Kartendatei und Ortsindex sind auf
+  einen Rechner im Ausstellungsraum zugeschnitten — 4,6 MB Kacheln und 1,5 MB Ortsindex über eine
+  langsame Leitung sind spürbar, aber tragbar.
+- **Wie die Daten zurück auf den Pi kommen.** Das ist der eigentliche Zweck, und dafür gibt es das
+  Werkzeug bereits: Sicherung und Wiederherstellung. Zu prüfen ist, ob der Weg auch als
+  Übertragungsweg taugt — dann wäre der Umzug vom Webserver ins Museum ein bekannter Vorgang und
+  kein Sonderfall.
+
+### 22 · Versionierung, Releaseprozess und Veröffentlichung des Codes
 
 **Stand:** `development.md` kündigt SemVer-Tags und Conventional Commits an, beides zusammen
 versioniert. Tatsächlich gibt es nach 99 Commits **keinen einzigen Tag**; `package.json` und
@@ -339,12 +468,13 @@ Begründungen.
 **Die beiden Blocker davor sind erledigt** (5. August 2026): das Wappen ist aus Repo und Historie
 verschwunden, der Beispielbestand ist erfunden und mitgeliefert. Wie das ausging und was dabei
 anders kam als geplant, steht in [history.md](history.md). **Offen bleibt der Releaseprozess
-selbst** — und die Lizenzfrage im nächsten Punkt, die vor einer Veröffentlichung ebenfalls
-beantwortet sein muss.
+selbst** — und [Punkt 23](#23--lizenz-des-projekts-und-der-verwendeten-komponenten), der vor einer
+Veröffentlichung ebenfalls beantwortet sein muss.
 
-### Lizenz des Projekts und der verwendeten Komponenten
+### 23 · Lizenz des Projekts und der verwendeten Komponenten
 
-Noch festzulegen. Zwei getrennte Fragen, die oft verwechselt werden:
+Noch festzulegen, und **Voraussetzung für [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)**.
+Zwei getrennte Fragen, die oft verwechselt werden:
 
 - **Unter welcher Lizenz steht Photomap selbst?** Für ein Projekt, das ausdrücklich für ein zweites
   Museum nachnutzbar sein soll, ist das keine Formalie — ohne Lizenz ist Nachnutzung rechtlich
@@ -358,47 +488,3 @@ Noch festzulegen. Zwei getrennte Fragen, die oft verwechselt werden:
   ist.
 
 Gehört anschließend in eine `LICENSE`-Datei und in den Lizenzabschnitt des README.
-
-### Deployment auf einem Webserver evaluieren
-
-Das System dem Museumsteam **zunächst online** anbieten — zur Erprobung und vor allem zum Aufbau
-der Fotodatenbank, bevor ein Pi im Ausstellungsraum steht. Die Bilder könnten so über Monate von
-zu Hause aus eingepflegt werden.
-
-Technisch ist der Weg kurz: Es läuft schon in Containern (`make prod`), das Frontend ist statisch,
-nginx steht davor, und die Datenbank ist eine Datei. Die Fragen liegen woanders:
-
-- **Zugriffsschutz.** Die PIN ist für einen Touchscreen in einem Museumsraum gebaut — vier Ziffern,
-  gesichert durch eine Sperre nach fünf Fehlversuchen. Im offenen Netz ist das zu wenig, und vor
-  allem schützt sie nur die Verwaltung: Der „Hilf mit"-Bereich nimmt **Beiträge ohne jede
-  Anmeldung** an. Online wäre das eine offene Tür. Naheliegend ist ein Schutz **vor** der ganzen
-  Anwendung (HTTP-Basisauthentifizierung im nginx oder ein Zugang über VPN), nicht ein zweiter
-  Schutz in der Anwendung.
-- **Was aus dem Offline-Versprechen wird.** Die Regel „null Anfragen an eine fremde Herkunft" bleibt
-  erfüllt, sie kostet online nur nichts mehr. Umgekehrt gilt: Kartendatei und Ortsindex sind auf
-  einen Rechner im Ausstellungsraum zugeschnitten — 4,6 MB Kacheln und 1,5 MB Ortsindex über eine
-  langsame Leitung sind spürbar, aber tragbar.
-- **Wie die Daten zurück auf den Pi kommen.** Das ist der eigentliche Zweck, und dafür gibt es das
-  Werkzeug bereits: Sicherung und Wiederherstellung. Zu prüfen ist, ob der Weg auch als
-  Übertragungsweg taugt — dann wäre der Umzug vom Webserver ins Museum ein bekannter Vorgang und
-  kein Sonderfall.
-
-### Backlog ordnen und klassifizieren
-
-Diese Datei wächst. Sie mischt inzwischen Fehler, konkrete Aufgaben, Entscheidungsfragen und Ideen
-in einer Gliederung, die nur nach Bereich sortiert. Was fehlt:
-
-- **Trennung nach Art:** Fehler, Aufgabe, offene Frage, Idee. Fehler stehen heute nur durch eine
-  Namenskonvention („Fehler: …") vorn.
-- **Einordnung nach Dringlichkeit und Wichtigkeit** — die beiden sind nicht dasselbe, und gerade
-  hier fällt es auf: Der Straßenfehler ist wichtig *und* dringend (er trifft Besucher heute), die
-  historische Karte ist wichtig und gar nicht dringend, die Akzentfarbe von „Hilf mit:" ist beides
-  nicht.
-- **Stabile Kennungen**, damit ein Punkt referenzierbar wird — in einem Commit, in einer
-  Besprechung, in einem Auftrag an einen Coding-Agent. Heute geht das nur über die Überschrift, und
-  die ändert sich.
-
-**Das ist ausdrücklich die Vorstufe zu einem Ticketsystem**, nicht sein Ersatz. Solange alles in
-einer Datei steht, liest es sich am Stück und überlebt einen Kontextverlust — genau der Grund,
-warum die Pläne früher so geführt wurden. Der Umzug lohnt, sobald mehr als eine Person daran
-arbeitet oder die Reihenfolge häufiger wechselt als die Inhalte.

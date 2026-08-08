@@ -662,7 +662,7 @@ zu ersetzen. Dazu kommt, dass die beiden Fälle verschieden sind:
 | Ein öffentliches Repo enthält die Datei | gibt sie an jeden weiter, der klont |
 
 Eine Erlaubnis für den einen Fall ist keine für den anderen. Und weil ein Repo seine Historie
-mitliefert, hätte auch ein späteres Löschen nichts geholfen: Die Datei lag seit `2d237ff` in jedem
+mitliefert, hätte auch ein späteres Löschen nichts geholfen: Die Datei lag seit `e14802b` in jedem
 Commit-Baum. Sie ist deshalb am 5. August 2026 aus der gesamten Historie entfernt worden — solange
 das Repo noch keinen Remote hatte und der Schnitt nur die eigene Arbeitskopie kostete.
 
@@ -673,3 +673,53 @@ Eigenschaft, die ein zweites Museum ohne Fork auskommen lässt, hat hier ein Rec
 einen Dateitausch reduziert.
 
 Vorgehen für den eigenen Ort: [adaption.md](adaption.md), Abschnitt „Wappen einsetzen".
+
+---
+
+## 22. Der Backlog wird klassifiziert und bleibt trotzdem eine Datei
+
+Am 8. August 2026 hat [backlog.md](backlog.md) drei Dinge bekommen, die er vorher nicht hatte:
+eine **Art** je Punkt, eine **Einordnung** nach Wichtigkeit und Dringlichkeit, und eine **Nummer**.
+Die Begründung für jedes der drei ist eine eigene.
+
+**Vier Arten, weil vier verschiedene Dinge zu tun sind.** *Fehler* (etwas tut nicht, was es
+zusagt), *Aufgabe* (klar umrissen, es fehlt nur die Arbeit), *Frage* (vor der Arbeit ist zu
+entscheiden, was gebaut wird), *Idee* (noch nicht entschieden, ob überhaupt). Der Schnitt sitzt
+dort, wo er die Arbeit ändert: Eine Aufgabe kann man an einem Nachmittag aufgreifen, eine Frage
+nicht — wer sie wie eine Aufgabe behandelt, baut etwas, das anschließend zur Diskussion steht. Eine
+fünfte Art („Recherche", „Wartung") wäre schon nicht mehr trennscharf gewesen.
+
+**Wichtigkeit und Dringlichkeit sind zwei Achsen, weil sie hier auseinanderfallen.** Und zwar
+sichtbar: „Abnahme auf dem ersten Pi" ist der gewichtigste offene Punkt des Projekts und trotzdem
+nicht dringend, weil das Gerät fehlt. Eine einzige Prioritätsspalte hätte diesen Punkt entweder
+nach oben gelogen oder seine Bedeutung kleingeredet. Damit die Einordnung nicht Geschmackssache
+wird, hat jede Achse eine Definition, die in der Datei steht: **dringend** heißt, es trifft heute
+jemanden oder es blockiert einen anderen Punkt; **wichtig** heißt, ohne das ist das Projekt auf
+Dauer nicht das, was es sein soll.
+
+Der Nutzen zeigte sich sofort: Die Achse hat die Reihenfolge des Projekts umgestellt. Dringend sind
+nur noch die Wege, die ohne Hardware auskommen — und die Klassifizierung hat nebenbei zwei Punkte
+als **Fehler** ausgewiesen, die als Ausbau geführt waren, in einer Datei, die von sich behauptete,
+es sei keiner offen.
+
+**Die Nummer wird nie neu vergeben.** Auch nicht, wenn ein Punkt erledigt ist — dann zieht sie mit
+ihm in die [history.md](history.md). Der Grund ist der Zweck der Kennung: Sie soll in einem Commit,
+einer Besprechung oder einem Auftrag an einen Coding-Agent auf genau eine Sache zeigen, und zwar
+auch noch, wenn die Überschrift sich geändert hat. Eine wiederverwendete Nummer zeigt später auf
+etwas anderes; das ist schlimmer als keine Nummer. Der Preis: Die Reihenfolge in der Datei löst
+sich mit der Zeit von der Zählung. Das ist hinnehmbar — sortiert wird nach Einordnung, nicht nach
+Nummer.
+
+Diese Datei hier hält es unausgesprochen längst so: **Punkt 8 fehlt.** Er hieß „Sicherung ist eine
+Funktion, kein Skript" und ging später in einer größeren Entscheidung auf; nachgerückt ist niemand.
+Die Lücke stört beim Lesen nicht — eine falsche Zuordnung hätte gestört.
+
+**Die Einordnung steht nur in der Übersichtstabelle**, nicht zusätzlich unter jeder Überschrift.
+Zwei Stellen für dieselbe Angabe laufen auseinander, und welche dann stimmt, weiß niemand.
+
+**Und es bleibt eine Datei.** Das ist die eigentliche Entscheidung, denn alles oben ist ein
+Ticketsystem in Zeitlupe. Solange der Backlog eine Datei ist, liest er sich am Stück, steht in
+derselben Historie wie der Code, den er beschreibt, und überlebt einen Kontextverlust eines
+Coding-Agents — genau der Grund, warum auch die Pläne früher so geführt wurden. **Der Umzug lohnt,
+sobald mehr als eine Person daran arbeitet oder die Reihenfolge häufiger wechselt als die
+Inhalte.** Bis dahin ist die Klassifizierung die Vorstufe, nicht der Ersatz.

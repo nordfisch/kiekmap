@@ -1349,3 +1349,61 @@ Personenbezug entstünde erst durch die Bindung von Namen an Adressen, und die i
 Dazu eine Kleinigkeit mit derselben Lehre wie beim SHA-256: Der Zeitstempel in `seed.json` kam aus
 der Uhr und war damit das eine Feld, das jeder Neubau änderte. Jetzt steht dort der Tag, an dem
 der Bestand entworfen wurde — zweimal bauen erzeugt zweimal dasselbe.
+
+## Der Backlog bekommt eine Ordnung — und liefert zwei Fehler ab
+
+8. August 2026. Punkt 24 des Backlogs, „Backlog ordnen und klassifizieren", war der letzte Eintrag
+der Datei und beschrieb ihr eigenes Problem: Sie mischte auf 405 Zeilen Fehler, Aufgaben,
+Entscheidungsfragen und Ideen in einer Gliederung, die nur nach Bereich sortierte, und kein Punkt
+war zitierbar, weil es ihn nur unter seiner Überschrift gab.
+
+Was daraus wurde, steht in [decisions.md](decisions.md), Punkt 22: vier Arten, zwei Achsen, eine
+Nummer je Punkt, alles in einer Übersichtstabelle am Dateianfang. Erwartet war Aufräumarbeit.
+Herausgekommen sind zwei Dinge, die die Datei vorher nicht gesagt hatte.
+
+### Zwei Fehler in einer Datei, die sich für fehlerfrei hielt
+
+Über der Gliederung stand der Satz „Zurzeit ist kein Fehler offen — alles hier ist Ausbau." Beim
+Durchgehen der 24 Einträge mit der Frage *tut das, was dasteht, nicht was es zusagt?* blieben zwei
+hängen:
+
+- **Punkt 5, die Dankmeldung.** Wer ein Foto **ohne Ort** datiert, liest „Danke! Das Foto ist jetzt
+  auf der Zeitleiste" — und sieht nichts, weil `rangeForPhoto()` für ein Foto ohne Koordinaten
+  bewusst `null` liefert. Eine falsche Zusage an einen Besucher, und der Eintrag nennt den Fall
+  selbst den Regelfall im Museumsbestand.
+- **Punkt 10, die Detailansicht.** `--overlay-aside` steht fest auf 24 rem; auf einem 1024er Panel
+  bleiben dem Foto dadurch 466 px.
+
+Beide standen seit Wochen ausführlich beschrieben in der Datei — als Gestaltungsfragen. Die Sache
+war jedes Mal richtig aufgeschrieben und falsch einsortiert. **Eine Ordnung ist nicht nur Ordnung;
+sie stellt eine Frage, die vorher niemand gestellt hat.** Das war der überraschendste Ertrag
+dieser Aufräumarbeit, und er kostete nichts weiter als eine Spalte.
+
+### Die Dringlichkeit hat das Projekt umsortiert
+
+Die zweite Achse — dringend, nicht nur wichtig — war als Feinheit gedacht und hat die Reihenfolge
+des Projekts gedreht. „Abnahme auf dem ersten Pi" war der Punkt, der überall als der wichtigste
+offene genannt wurde, in dieser Datei, in der `CLAUDE.md`, in der `index.md`. Wichtig ist er
+geblieben. **Dringend ist er nicht — es gibt kein Gerät.** Dasselbe gilt für alles daran Hängende:
+die vier Prüfungen, der Containerbetrieb, die Wiederherstellung, das Read-Only-Overlay.
+
+Dringend ist stattdessen der Weg, der ohne Gerät auskommt: das System dem Museumsteam über einen
+Webserver zur Verfügung stellen. Daran hängt der Bedienbarkeitstest mit einer ehrenamtlichen
+Person — der aussagekräftigste Test des Projekts, bisher aufgeschoben bis zum fertigen Pi, und
+plötzlich heute machbar. Was er zutage fördert, ist danach teurer zu ändern.
+
+Aus vier gerätegebundenen Punkten weit oben wurde so ein dringendes Paar in einem Bereich, in dem
+vorher gar nichts dringend war. Es hat sich nichts am Projekt geändert, nur die Frage, die man an
+die Liste stellt.
+
+### Was dabei noch auffiel
+
+Punkt 7 hieß „Kopfzeile des Zeitschiebers aufräumen" und war der kleinste Eintrag der
+Besucherseite. Er heißt jetzt **„Zeitschieber verfeinern"** und trägt zwei weitere Dinge: dass die
+Histogrammbalken linear gegen das höchste Jahrzehnt skalieren und deshalb bei großem Bestand alles
+außer dem Schwerpunkt auf denselben Sockel drücken — die Beispieldaten mit ihren achtzehn Fotos
+konnten das nie zeigen — und den Wunsch nach einem dritten Anfasser in der Mitte, mit dem sich der
+gewählte Zeitraum als Ganzes verschieben lässt.
+
+Punkt 24 ist mit diesem Commit erledigt und seine Nummer damit vergriffen; der nächste neue Punkt
+bekommt die 25.
