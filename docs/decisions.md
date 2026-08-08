@@ -723,3 +723,41 @@ derselben Historie wie der Code, den er beschreibt, und überlebt einen Kontextv
 Coding-Agents — genau der Grund, warum auch die Pläne früher so geführt wurden. **Der Umzug lohnt,
 sobald mehr als eine Person daran arbeitet oder die Reihenfolge häufiger wechselt als die
 Inhalte.** Bis dahin ist die Klassifizierung die Vorstufe, nicht der Ersatz.
+
+---
+
+## 23. Nach einem Beitrag zählt dasselbe Foto, nicht das nächste
+
+Wer im „Hilf mit"-Bereich eine Frage beantwortet, bekommt anschließend **dasselbe Foto mit der
+anderen Frage** vorgelegt, solange dieser Frage noch etwas fehlt. Erst wenn nichts mehr fehlt,
+kommt ein neues Foto.
+
+**Der Anlass war ein Fehler, nicht eine Idee.** Der Dank sagte nach jedem Beitrag „Das Foto ist
+jetzt auf der Zeitleiste" — auch dann, wenn das Foto keinen Ort hat. Dann fährt die Karte nirgends
+hin (`showPhoto()` steigt ohne Koordinaten sofort aus), der Zeitschieber springt nicht, und der
+Besucher liest einen Satz und sieht nichts. Bei 673 Fotos ohne Jahr und 77 ohne Ort ist das kein
+Randfall.
+
+**Die naheliegende Reparatur wäre ein vierter Satz gewesen** — „Sobald jemand weiß, wo das war,
+erscheint es auf der Karte." Damit wäre die Meldung ehrlich, aber der Besucher stünde immer noch
+vor einer Sackgasse, unmittelbar nachdem er bewiesen hat, dass er dieses Foto kennt. Stattdessen
+wird die Lage aufgelöst: Wo etwas fehlt, fragt der Dank danach („Und wissen Sie auch, wo das
+war?"), und die nächste Frage gilt demselben Foto.
+
+**Das ist die vorhandene Regel zu Ende gedacht, keine neue.** „Weiß ich nicht" wechselt schon immer
+*die Frage* und nicht nur das Bild, weil jemand, der einen Ort nicht kennt, das Jahrzehnt sehr wohl
+kennen kann. Nach einem geglückten Beitrag wechselte die Frage bisher auch — nur sprang das Foto
+dabei unnötig weg, ausgerechnet im ergiebigsten Moment, den der Bereich je bekommt: Der Besucher
+hat gerade gezeigt, dass er dieses Bild kennt, und schaut es an.
+
+**Es kostete keine API-Änderung.** Der Beitrag gibt das aktualisierte Foto zurück, und `PhotoDetail`
+trägt `needs_location` und `needs_date` mit — der Store weiß also bereits, was noch fehlt. Die
+Zähler kommen weiter aus dem regulären Abruf, nur das Foto wird ersetzt; die Zeile „Noch n Fotos
+ohne Ort" bleibt damit richtig.
+
+**Was dabei bewusst übergangen wird:** die Liste der weggetippten Fotos. Wer eins vorhin weggewischt
+hat und jetzt doch etwas dazu beiträgt, bekommt es mit der anderen Frage wieder vorgelegt. „Weiß
+ich nicht" bleibt der Ausweg, und die Kette endet von selbst, sobald dem Foto nichts mehr fehlt.
+
+**Die beiden alten Sätze stehen seitdem nur noch da, wo sie stimmen.** Das ist die eigentliche
+Regel hinter dem Ganzen: Eine Meldung darf nur behaupten, was die Ansicht im selben Moment zeigt.

@@ -7,6 +7,10 @@
  *
  * Decided from the photo as it now stands, not from which of the two routes triggered the
  * contribution.
+ *
+ * A photo without a place is the one case where nothing here can move. The thank-you does not
+ * claim otherwise: it asks where the photo was and hands it straight on to that question -- see
+ * ``contribute()`` in `store/contribute.ts`.
  */
 
 import type { PhotoDetail, TimeRange } from "../api/client";

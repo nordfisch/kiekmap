@@ -458,3 +458,19 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   bricht ab, wenn eine fehlt
 - Der Hinweis, dass alles erfunden ist, steht in `seed/README.md`, im README und in der Ausgabe
   von `make seed` selbst. Umgekehrt warnt `make seed-save` davor, echte Fotos zu committen
+
+### Behoben
+
+- **Der Dank versprach etwas, das nicht eintrat.** Wer ein Foto **ohne Ort** datierte, las „Danke!
+  Das Foto ist jetzt auf der Zeitleiste" — und sah nichts: Ein Foto ohne Koordinaten steht auf
+  keiner Karte, der Fokus bleibt stehen, der Zeitschieber springt nicht. Bei 673 Fotos ohne Jahr
+  und 77 ohne Ort ist das kein Randfall
+
+### Geändert
+
+- **Nach einem Beitrag kommt dasselbe Foto mit der anderen Frage**, solange dieser Frage noch etwas
+  fehlt — der Dank kündigt sie an („Danke! Und wissen Sie auch, wo das war?"). Damit gibt es die
+  falsche Zusage nicht mehr, und der ergiebigste Moment des Bereichs wird genutzt: Wer gerade
+  gesagt hat, wann das war, kennt das Foto und schaut es an. Erst wenn nichts mehr fehlt, kommt
+  ein neues Bild; „Weiß ich nicht" bleibt der Ausweg. Siehe
+  [docs/decisions.md](docs/decisions.md) Punkt 23

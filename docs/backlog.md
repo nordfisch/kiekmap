@@ -47,7 +47,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 3 | [Perceptual Hash gegen zugeschnittene Dubletten](#3--perceptual-hash-gegen-zugeschnittene-dubletten) | Idee | — |
 | 4 | [Volltextsuche über SQLite FTS5](#4--volltextsuche-über-sqlite-fts5) | Idee | — |
 | | **Besucher-Interface** | | |
-| 5 | [Die Dankmeldung: brauchen wir sie, und stimmt sie immer?](#5--die-dankmeldung-brauchen-wir-sie-und-stimmt-sie-immer) | **Fehler** | wichtig · dringend |
 | 6 | [Tastatur: was ist ohne sie erreichbar, und wollen wir eine?](#6--tastatur-was-ist-ohne-sie-erreichbar-und-wollen-wir-eine) | Frage | wichtig · dringend |
 | 7 | [Zeitschieber verfeinern](#7--zeitschieber-verfeinern) | Aufgabe | wichtig |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
@@ -69,9 +68,10 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Zwei Fehler sind offen**, und beide sind erst durch diese Einordnung als solche benannt worden:
-Punkt 5 gibt einem Besucher eine falsche Zusage, Punkt 10 zerdrückt das Foto auf einem kleinen
-Schirm. Vorher galt diese Datei als fehlerfrei.
+**Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm. Beide Fehler, die
+diese Datei kennt, sind erst durch die Einordnung als solche benannt worden — vorher galt sie als
+fehlerfrei. Der andere, **Punkt 5**, ist am 8. August 2026 behoben und in die
+[history.md](history.md) gezogen; seine Nummer bleibt vergriffen.
 
 ---
 
@@ -121,41 +121,6 @@ den Titel.
 ---
 
 ## Besucher-Interface
-
-### 5 · Die Dankmeldung: brauchen wir sie, und stimmt sie immer?
-
-**Zuerst die Tatsache, weil die Vermutung eine andere war:** Den Dank gibt es bei **beiden**
-Beiträgen. `submitLocation()` und `submitDate()` gehen durch dieselbe Funktion `contribute()`
-(`store/contribute.ts:136`), die ihn mit dem jeweiligen Text auslöst — „Danke! Das Foto ist jetzt
-auf der Karte." beziehungsweise „… auf der Zeitleiste.". Es ist also **nichts zu vereinheitlichen**;
-die Wege sind schon einer.
-
-Warum der Eindruck entstanden ist, ist trotzdem die interessante Spur — und dahinter steckt der
-Fehler, der diesen Punkt zu einem macht:
-
-**Beim Datieren eines Fotos ohne Ort ist der Dank eine falsche Zusage.** `rangeForPhoto()` in
-`kiosk/focus.ts:36` gibt für ein Foto ohne Koordinaten `null` zurück, die Ansicht stellt sich also
-bewusst *nicht* ein — richtig so, denn ein Foto ohne Ort steht auf keiner Karte. Auf dem Schirm
-steht dann aber „Das Foto ist jetzt auf der Zeitleiste", und sichtbar wird nichts. Beim Verorten
-fährt die Karte sichtbar heran; beim Datieren springt bestenfalls der Schieber, und in diesem Fall
-passiert gar nichts. Das ist dieselbe Sorte Fehler, die beim Verorten schon einmal behoben wurde
-(siehe [history.md](history.md), Teil IV, Punkt 4) — nur an der anderen Frage.
-
-Im Museumsbestand ist das **nicht** der Randfall: Ein frisch importierter Scan hat typischerweise
-weder Ort noch Jahr, und welche der beiden Fragen zuerst kommt, entscheidet der Zufall.
-
-**Zu klären:**
-
-- **Braucht es die Meldung überhaupt?** Sie steht 2,2 Sekunden und blendet den Beitragsbereich so
-  lange aus. Die eigentliche Rückmeldung ist die Ansicht selbst — die Karte fährt hin, das Foto
-  taucht auf. Wo das eintritt, ist der Satz vielleicht überflüssig; wo es *nicht* eintritt, ist er
-  irreführend. Beides spricht gegen ihn, aus entgegengesetzten Richtungen.
-- **Falls sie bleibt: was sagt sie im Fall ohne Ort?** Ehrlich wäre etwa „Danke! Sobald jemand
-  weiß, wo das war, erscheint es auf der Karte." — das benennt zugleich, was noch fehlt, und
-  könnte den nächsten Beitrag anstoßen.
-- **Die 2,2 Sekunden sind zugleich die Fokusdauer.** Zoom und Schieberstellung leben genau so
-  lange wie der Dank, ohne zweiten Zeitgeber (`showThanks` in `store/contribute.ts:123`). Wer die
-  Meldung streicht, muss diesen Zeitgeber ersetzen, sonst kehrt die Karte nie zurück.
 
 ### 6 · Tastatur: was ist ohne sie erreichbar, und wollen wir eine?
 

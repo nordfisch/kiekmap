@@ -84,6 +84,24 @@ export function otherNeed(current: Need): Need {
   return current === "location" ? "date" : "location";
 }
 
+/** Does this photo still owe an answer to that question? */
+export function stillNeeds(photo: PhotoDetail, need: Need): boolean {
+  return need === "location" ? photo.needs_location : photo.needs_date;
+}
+
+/**
+ * The thank-you for an answered question.
+ *
+ * Only where the photo is complete may it name what became visible. Where the other question
+ * follows, it asks that one -- a promise nobody can see kept is worse than no sentence at all.
+ */
+export function thanksFor(answered: Need, chained: boolean): string {
+  if (answered === "location") {
+    return chained ? t.help.thanksLocationAskDate : t.help.thanksLocation;
+  }
+  return chained ? t.help.thanksDateAskLocation : t.help.thanksDate;
+}
+
 export const useContribute = create<ContributeState>((set, get) => {
   /**
    * Fetch the next task, and fall back to the other question when this one has run dry.
@@ -91,8 +109,11 @@ export const useContribute = create<ContributeState>((set, get) => {
    * The fallback is what makes taking turns safe. Both kinds empty out at different rates -- in a
    * collection where every photo is placed but half of them are undated, always asking "where is
    * this?" would report "everything is complete" while hundreds of photos still wait for a year.
+   *
+   * ``prefer`` carries a photo that has just been contributed to. If it still owes an answer to
+   * this question, it is put up instead of the random one -- see the chain in ``contribute()``.
    */
-  async function load(need: Need) {
+  async function load(need: Need, prefer?: PhotoDetail | null) {
     abort?.abort();
     abort = new AbortController();
     const signal = abort.signal;
@@ -105,6 +126,15 @@ export const useContribute = create<ContributeState>((set, get) => {
     set({ loading: true, error: null, pin: null, pinLabel: null, pinAccuracy: null });
     try {
       const task = await fetchTask(need, get().skipped, signal);
+
+      // The counts come from the fetch, only the photo is swapped -- so the panel keeps saying
+      // truthfully how much is still open. Deliberately ignores ``skipped``: whoever waved a
+      // photo away earlier and has now told us something about it after all gets it back with
+      // the other question, and "Weiß ich nicht" remains the way out.
+      if (prefer && stillNeeds(prefer, need)) {
+        set({ task: { ...task, photo: prefer }, need, loading: false });
+        return;
+      }
 
       if (!task.photo) {
         const fallback = await fetchTask(otherNeed(need), get().skipped, signal);
@@ -121,7 +151,7 @@ export const useContribute = create<ContributeState>((set, get) => {
     }
   }
 
-  function showThanks(text: string, next: Need) {
+  function showThanks(text: string, next: Need, prefer: PhotoDetail | null) {
     if (thanksTimer) clearTimeout(thanksTimer);
     set({ thanks: text });
     thanksTimer = setTimeout(() => {
@@ -130,14 +160,23 @@ export const useContribute = create<ContributeState>((set, get) => {
       // Map and time range come back as the thank-you goes -- both live exactly as long as it
       // does, without a second timer.
       useKiosk.getState().releaseFocus();
-      void load(next);
+      void load(next, prefer);
     }, THANKS_MS);
   }
 
-  async function contribute(
-    action: (photo: PhotoDetail) => Promise<PhotoDetail>,
-    thanksText: string,
-  ) {
+  /**
+   * Apply a contribution, then thank -- and hand the same photo on where something is still open.
+   *
+   * **The chain is what keeps the thank-you honest.** "Das Foto ist jetzt auf der Zeitleiste" is a
+   * promise the view cannot keep for a photo without a place: ``showPhoto()`` leaves map and
+   * slider alone, so the visitor reads a sentence and sees nothing. Where something is missing,
+   * the thank-you therefore asks about it instead of claiming anything -- and the next question is
+   * about *this* photo rather than a random one. Somebody who has just shown they know this
+   * picture, and is looking straight at it, is the best moment the panel ever gets.
+   *
+   * It ends by itself: once nothing is missing, ``stillNeeds`` is false and the next photo comes.
+   */
+  async function contribute(action: (photo: PhotoDetail) => Promise<PhotoDetail>) {
     const { task, need } = get();
     if (!task?.photo) return;
 
@@ -154,7 +193,9 @@ export const useContribute = create<ContributeState>((set, get) => {
       // And the view settles on this one photo for as long as the thank-you stands.
       useKiosk.getState().showPhoto(updated);
 
-      showThanks(thanksText, otherNeed(need));
+      const next = otherNeed(need);
+      const chain = stillNeeds(updated, next) ? updated : null;
+      showThanks(thanksFor(need, chain !== null), next, chain);
     } catch (e) {
       // Most common case: somebody else was quicker (HTTP 409). The backend already phrases that
       // message kindly.
@@ -212,24 +253,19 @@ export const useContribute = create<ContributeState>((set, get) => {
     async submitLocation() {
       const { pin, pinLabel, pinAccuracy } = get();
       if (!pin) return;
-      await contribute(
-        (photo) =>
-          postLocation(photo.id, {
-            lat: pin.lat,
-            lon: pin.lon,
-            ...(pinLabel ? { place_name: pinLabel } : {}),
-            ...(pinAccuracy !== null ? { accuracy_m: pinAccuracy } : {}),
-            session_id: SESSION_ID,
-          }),
-        t.help.thanksLocation,
+      await contribute((photo) =>
+        postLocation(photo.id, {
+          lat: pin.lat,
+          lon: pin.lon,
+          ...(pinLabel ? { place_name: pinLabel } : {}),
+          ...(pinAccuracy !== null ? { accuracy_m: pinAccuracy } : {}),
+          session_id: SESSION_ID,
+        }),
       );
     },
 
     async submitDate(year, precision) {
-      await contribute(
-        (photo) => postDate(photo.id, { year, precision, session_id: SESSION_ID }),
-        t.help.thanksDate,
-      );
+      await contribute((photo) => postDate(photo.id, { year, precision, session_id: SESSION_ID }));
     },
 
     /**
@@ -260,8 +296,10 @@ export const useContribute = create<ContributeState>((set, get) => {
       // inzwischen schon eine Angabe bekommen", a message that sounds as though somebody else had
       // been quicker. About the *place* it may keep asking for the same photo: that one is still
       // needed.
+      // The place is usually already known here -- a photo reaches the detail view by way of its
+      // marker. Where it is not, ``prefer`` carries the chain into this route as well.
       const { task, need } = get();
-      if (need === "date" && task?.photo?.id === photoId) void load(otherNeed(need));
+      if (need === "date" && task?.photo?.id === photoId) void load(otherNeed(need), updated);
 
       return updated;
     },

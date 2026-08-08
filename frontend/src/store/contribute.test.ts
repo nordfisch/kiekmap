@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../api/client", () => ({
   fetchTask: vi.fn(),
@@ -19,6 +19,7 @@ import {
   postDate,
   postLocation,
 } from "../api/client";
+import { t } from "../text/de";
 import { useContribute } from "./contribute";
 import { useKiosk } from "./kiosk";
 
@@ -176,6 +177,123 @@ describe("Karte und Zeitleiste nach einem Beitrag", () => {
     await useContribute.getState().submitLocation();
 
     expect(fotosGeholt).not.toHaveBeenCalled();
+  });
+});
+
+describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
+  /**
+   * Ein frisch eingelesener Scan hat oft weder Ort noch Jahr — im Museumsbestand sind das 673
+   * Fotos ohne Jahr und 77 ohne Ort. Welche Frage zuerst kommt, entscheidet der Zufall.
+   */
+  const datiertOhneOrt = {
+    id: 1,
+    lat: null,
+    lon: null,
+    needs_location: true,
+    needs_date: false,
+  } as PhotoDetail;
+
+  const verortetOhneJahr = {
+    id: 1,
+    lat: 53.62,
+    lon: 9.676,
+    needs_location: false,
+    needs_date: true,
+  } as PhotoDetail;
+
+  const vollstaendig = {
+    id: 1,
+    lat: 53.62,
+    lon: 9.676,
+    needs_location: false,
+    needs_date: false,
+  } as PhotoDetail;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // Die Aufgaben, die der Bestand von sich aus liefern würde: Foto 2 und Foto 3. Kommt statt
+    // ihrer die 1, hat die Kette gegriffen.
+    bestand(aufgabe("location", 2), aufgabe("date", 3));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("dankt ohne Versprechen, solange der Ort fehlt", async () => {
+    /**
+     * Der Fehler, um den es hier geht. „Das Foto ist jetzt auf der Zeitleiste" war eine Zusage,
+     * die die Ansicht nicht einlösen kann: Ein Foto ohne Ort steht auf keiner Karte, der Fokus
+     * bleibt stehen, und der Besucher liest einen Satz und sieht nichts.
+     */
+    useContribute.setState({ need: "date", task: aufgabe("date", 1) });
+    jahrGesendet.mockResolvedValue(datiertOhneOrt);
+
+    await useContribute.getState().submitDate(1930, "decade");
+
+    expect(useContribute.getState().thanks).not.toContain("Zeitleiste");
+    expect(useContribute.getState().thanks).toBe(t.help.thanksDateAskLocation);
+  });
+
+  it("legt dasselbe Foto zur Ortsfrage vor, wenn es datiert wurde", async () => {
+    // Wer gerade gesagt hat, wann das war, kennt das Foto — und schaut es an. Ein zufälliges
+    // anderes vorzulegen verschenkt genau diesen Moment.
+    useContribute.setState({ need: "date", task: aufgabe("date", 1) });
+    jahrGesendet.mockResolvedValue(datiertOhneOrt);
+
+    await useContribute.getState().submitDate(1930, "decade");
+    await vi.advanceTimersByTimeAsync(2200);
+
+    expect(useContribute.getState().need).toBe("location");
+    expect(useContribute.getState().task?.photo?.id).toBe(1);
+  });
+
+  it("legt dasselbe Foto zur Jahresfrage vor, wenn es verortet wurde", async () => {
+    // Dieselbe Regel in die andere Richtung, damit sie eine Regel bleibt und kein Sonderfall.
+    useContribute.setState({
+      need: "location",
+      task: aufgabe("location", 1),
+      pin: { lat: 53.62, lon: 9.676 },
+    });
+    ortGesendet.mockResolvedValue(verortetOhneJahr);
+
+    await useContribute.getState().submitLocation();
+    expect(useContribute.getState().thanks).toBe(t.help.thanksLocationAskDate);
+
+    await vi.advanceTimersByTimeAsync(2200);
+
+    expect(useContribute.getState().need).toBe("date");
+    expect(useContribute.getState().task?.photo?.id).toBe(1);
+  });
+
+  it("verspricht die Karte erst, wenn das Foto darauf zu sehen ist", async () => {
+    // Der alte Satz bleibt — nur dort, wo er stimmt.
+    useContribute.setState({
+      need: "location",
+      task: aufgabe("location", 1),
+      pin: { lat: 53.62, lon: 9.676 },
+    });
+    ortGesendet.mockResolvedValue(vollstaendig);
+
+    await useContribute.getState().submitLocation();
+
+    expect(useContribute.getState().thanks).toBe(t.help.thanksLocation);
+  });
+
+  it("geht zum naechsten Foto, wenn nichts mehr fehlt", async () => {
+    // Die Kette muss enden, sonst bekäme der Besucher dasselbe Foto ein zweites Mal vorgelegt.
+    useContribute.setState({
+      need: "location",
+      task: aufgabe("location", 1),
+      pin: { lat: 53.62, lon: 9.676 },
+    });
+    ortGesendet.mockResolvedValue(vollstaendig);
+
+    await useContribute.getState().submitLocation();
+    await vi.advanceTimersByTimeAsync(2200);
+
+    expect(useContribute.getState().need).toBe("date");
+    expect(useContribute.getState().task?.photo?.id).toBe(3);
   });
 });
 

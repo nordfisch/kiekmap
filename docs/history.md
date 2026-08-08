@@ -1407,3 +1407,57 @@ gewählte Zeitraum als Ganzes verschieben lässt.
 
 Punkt 24 ist mit diesem Commit erledigt und seine Nummer damit vergriffen; der nächste neue Punkt
 bekommt die 25.
+
+## Der Dank, der nichts einlöste
+
+8. August 2026. Der erste Punkt, den die neue Einordnung als Fehler ausgewiesen hatte, war zugleich
+der billigste zu beheben — und derjenige, bei dem die naheliegende Reparatur die schlechtere
+gewesen wäre.
+
+Der Befund stand seit Wochen im Backlog, nur unter der falschen Überschrift: Nach jedem Beitrag
+stand „Danke! Das Foto ist jetzt auf der Zeitleiste." Für ein Foto **ohne Ort** ist das eine Zusage,
+die die Ansicht nicht einlösen kann. `showPhoto()` steigt ohne Koordinaten sofort aus, die Karte
+bleibt stehen, der Schieber springt nicht — und der Besucher liest einen Satz und sieht nichts. Bei
+673 Fotos ohne Jahr und 77 ohne Ort trifft das nicht den Rand des Bestands, sondern seine Mitte.
+
+### Die Reparatur, die nicht genommen wurde
+
+Der Backlog schlug selbst einen ehrlicheren Satz vor: „Sobald jemand weiß, wo das war, erscheint es
+auf der Karte." Damit wäre die Meldung wahr gewesen — und der Besucher stünde weiterhin in einer
+Sackgasse, unmittelbar nachdem er gezeigt hat, dass er dieses Foto kennt. **Ein wahrer Satz war
+nicht dasselbe wie eine gelöste Lage.**
+
+Genommen wurde deshalb die Kette: Wo dem Foto noch etwas fehlt, fragt der Dank danach — „Danke! Und
+wissen Sie auch, wo das war?" — und die nächste Frage gilt **demselben** Foto. Der Fall „Zusage ins
+Leere" kann damit nicht mehr entstehen; wo nichts zu zeigen ist, steht die nächste Frage.
+
+Das war keine neue Idee, sondern eine vorhandene zu Ende gedacht. „Weiß ich nicht" wechselt seit
+Stufe 6 *die Frage* und nicht nur das Bild, weil wer den Ort nicht kennt, das Jahrzehnt sehr wohl
+kennen kann. Nach einem geglückten Beitrag wechselte die Frage auch schon — nur sprang das Foto
+dabei weg, ausgerechnet im ergiebigsten Moment, den der Bereich je bekommt.
+
+### Warum es so billig war
+
+Kein Backend, keine API-Änderung, kein neuer Zustand. Der Grund liegt in einer Entscheidung von
+früher: Ein Beitrag gibt das **aktualisierte Foto** zurück, statt den Client raten zu lassen — und
+`PhotoDetail` trägt `needs_location` und `needs_date` mit. Der Store wusste also längst, was dem
+Foto noch fehlt; es hatte nur nie jemand gefragt. Die Zähler kommen weiter aus dem regulären Abruf,
+ersetzt wird allein das Foto, damit „Noch 2 Fotos ohne Ort" richtig bleibt.
+
+Der Dank blieb, samt seiner 2,2 Sekunden. Er ist zugleich der Zeitgeber für den Kartenfokus, und
+als Übergang zwischen zwei Fragen ist die Pause für die Zielgruppe eher Gewinn.
+
+### Die Abnahme war der Gegenversuch
+
+Fünf Tests, alle grün — das sagt für sich genommen wenig. Aussagekräftig war der Gegenversuch: die
+Kette im Store abgeschaltet und noch einmal laufen lassen. Drei der fünf fielen um, darunter der
+eine, der den Fehler beschreibt („dankt ohne Versprechen, solange der Ort fehlt"); die zwei, die
+den unveränderten Fall prüfen, blieben grün. Genau so sollte es aussehen.
+
+Dazu der Durchgang am laufenden Kiosk, weil sich der Fehler nur dort zeigte: ein Foto **mit** Ort
+datiert (Karte fährt hin, „auf der Zeitleiste" stimmt), dann das eine Foto des Beispielbestands
+**ohne** Ort und ohne Jahr — dafür ist es da — datiert und gesehen, wie der Dank nach dem Ort
+fragt und dasselbe Bild mit der Ortsfrage zurückkommt, jetzt mit „1920er" neben dem Titel. Verortet
+man es dann, endet die Kette und ein neues Foto kommt.
+
+Punkt 5 ist damit erledigt; seine Nummer bleibt vergriffen.

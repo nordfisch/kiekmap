@@ -76,8 +76,17 @@ export const t = {
     next: "Weiß ich nicht — nächstes Foto",
     stillOpen: (count: number, need: "location" | "date") =>
       `Noch ${count} Fotos ohne ${need === "location" ? "Ort" : "Jahr"}`,
+    /**
+     * Four thank-yous, because two of them are promises the view has to keep.
+     *
+     * "Das Foto ist jetzt auf der Karte" is only true where the map actually travels to it -- and
+     * it does not for a photo without a place. Where something is still missing, the thank-you
+     * therefore asks the other question instead of claiming anything.
+     */
     thanksLocation: "Danke! Das Foto ist jetzt auf der Karte.",
     thanksDate: "Danke! Das Foto ist jetzt auf der Zeitleiste.",
+    thanksLocationAskDate: "Danke! Und wissen Sie auch, wann das war?",
+    thanksDateAskLocation: "Danke! Und wissen Sie auch, wo das war?",
   },
 
   location: {
