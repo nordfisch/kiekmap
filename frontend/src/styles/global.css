@@ -581,9 +581,11 @@ button {
   color: var(--muted);
 }
 
+/* The strip and the trimmer over it, after the fashion of a video editor: the bars are the
+ * content, the chosen period lies on top of them. */
 .timeline__track {
   position: relative;
-  height: 3rem;
+  height: 3.5rem;
   touch-action: none; /* otherwise the page scrolls instead of moving the handle */
 }
 
@@ -603,32 +605,64 @@ button {
   background: var(--accent-light);
 }
 
-.timeline__rail,
-.timeline__selected {
+.timeline__rail {
   position: absolute;
+  left: 0;
+  right: 0;
   bottom: 0.6rem;
   height: 5px;
   border-radius: 999px;
-}
-
-.timeline__rail {
-  left: 0;
-  right: 0;
   background: var(--line);
 }
 
+/* Not a thin line any more but a graspable body: this is what the finger takes hold of to move
+ * the whole period. Reaches over the bars so that what is selected is visible as one block. */
 .timeline__selected {
-  background: var(--accent);
+  position: absolute;
+  top: 0;
+  bottom: 0.5rem;
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  /* Barely a tint: which bars are selected is already said by their colour, and a stronger fill
+   * would dull the very strip it lies on. */
+  background: rgb(139 94 60 / 6%);
+  cursor: grab;
+  touch-action: none;
+}
+
+.timeline__selected--active {
+  cursor: grabbing;
+}
+
+.timeline__selected:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Three lines in the middle, the way a grip is drawn everywhere. Always present: a period
+ * narrowed to a single year leaves no surface, and then this is all there is. */
+.timeline__gripper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.1rem;
+  height: 1.1rem;
+  transform: translate(-50%, -50%);
+  border-left: 3px solid var(--accent);
+  border-right: 3px solid var(--accent);
+  box-sizing: border-box;
 }
 
 /* Finger-sized: the visible disc is 1.6 rem, the grab zone around it considerably larger --
  * that is the difference between usable and infuriating on a touchscreen. */
 .timeline__handle {
   position: absolute;
-  bottom: 0.6rem;
+  /* Centred on the selected block, whose lower edge sits 0.5rem above the track's. */
+  top: calc(50% - 0.25rem);
   width: 3rem;
   height: 3rem;
-  margin: 0 0 -1.4rem -1.5rem;
+  margin-left: -1.5rem;
+  transform: translateY(-50%);
   border-radius: 50%;
   touch-action: none;
   cursor: grab;

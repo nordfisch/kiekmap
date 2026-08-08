@@ -63,6 +63,8 @@ export const t = {
     undated: (count: number) => `${count} ${count === 1 ? "Foto" : "Fotos"} ohne Jahr`,
     startHandle: "Anfangsjahr",
     endHandle: "Endjahr",
+    /** The middle grip: it moves the whole period, it does not change its length. */
+    rangeHandle: "Zeitraum verschieben",
   },
 
   help: {

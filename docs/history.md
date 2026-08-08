@@ -1527,3 +1527,58 @@ hat kein Eingabefeld mehr.
 Was von Punkt 6 bleibt, ist der Verwaltungsteil — dreizehn Eingabefelder in sieben Dateien, die
 Eingabefelder bleiben sollen. Er steht jetzt als eigener Punkt 24 im Backlog, und die Frage lautet
 dort nicht mehr *ob* eine Tastatur, sondern *welche und wann*.
+
+## Was der Erstbestand über den Zeitschieber verriet
+
+9. August 2026. Punkt 7 des Backlogs hieß „Zeitschieber verfeinern" und bündelte drei Dinge: die
+Kopfzeile solle weg, die Mengenanzeige stimme nicht, und ein dritter Anfasser fehle. Eines davon
+ist entschieden statt umgesetzt — **die Kopfzeile bleibt**. Die beiden anderen sind gebaut.
+
+### Erst messen
+
+Der Bestand war frisch eingespielt, und das war der Unterschied. Die Anzeige an achtzehn erfundenen
+Beispielfotos zu beurteilen hätte nichts gebracht; an 929 echten fiel sofort auf, was fehlt:
+
+| | |
+|---|---|
+| Fotos | 929, davon **673 ohne Jahr** |
+| datiert | 256 — ausnahmslos taggenau, aus dem Kamera-EXIF |
+| Jahrzehnte | **zwei**: 2010er mit 245, 2020er mit 11 |
+| Jahre | 2010:47 · 2011:7 · 2013:2 · **2014:118** · 2016:7 · 2017:25 · 2018:30 · 2019:9 · 2020:1 · 2024:10 |
+
+Zwei Balken, einer voll, einer auf dem Sockel. Und die Zeile darunter zeigt, was dabei verloren
+ging: 2014 ist der Ausreißer dieses Bestands, 2012 und 2015 sind leer, und beides war auf der
+Leiste nicht zu sehen.
+
+### Die Regel, die dabei entstand
+
+Die naheliegende Antwort — „dann eben Jahresbalken" — wäre eine Falle gewesen, und zwar eine, die
+erst in einem Jahr zuschnappt. Ein auf „1920er" datiertes Foto trägt `date_from = 1920-01-01`;
+sobald das Museum historische Fotos datiert, türmten sich zehn Jahrgänge auf dem Balken 1920. Das
+sähe nicht nach Fehler aus, sondern nach Befund.
+
+Also **nie feiner als die gröbste Datierung im Bestand**, dazu eine Breite, die in dreißig Balken
+passt. Heute ergibt das Jahresbalken, morgen Jahrzehnte — und der Umschwung kommt genau in dem
+Moment, in dem er muss. Begründung in [decisions.md](decisions.md), Punkt 25.
+
+### Zwei Fehler, die nur der laufende Kiosk zeigte
+
+Beide Tests waren grün, als sie auftraten.
+
+- **Der letzte Balken lief aus der Bahn.** Mit der auf die Bündelbreite gerundeten Achse endet
+  diese auf 2024 — und der Balken *für* 2024 begann damit bei 100 % und stand daneben. Die Achse
+  muss über das letzte Jahr hinausreichen, damit der letzte Balken darauf Platz hat. Denselben
+  Fehler hatte der alte Code auch schon, nur brauchte er eine Aufnahme im letzten Jahrzehnt der
+  Achse, um sichtbar zu werden.
+- **Der mittlere Griff bewegte nichts.** `onPointerMove` hing am Griff *und* an der Bahn darunter,
+  und weil Zeigerereignisse aufsteigen, lief er zweimal je Bewegung. Für die beiden Enden war das
+  folgenlos — denselben Anfasser zweimal an dieselbe Stelle zu setzen ändert nichts. Das
+  Verschieben des ganzen Zeitraums aber rechnet mit einer Differenz, und der zweite Aufruf sah
+  noch den alten Zustand und legte ihn zurück. Der Griff ließ sich anfassen, färbte sich, und der
+  Zeitraum stand still. **Ein Fehler, den keine reine Funktion hätte zeigen können**: Die
+  Rechnung war richtig, sie lief nur zweimal.
+
+Die Bewegung selbst hat einen eigenen Test bekommen, weil sie an einer Stelle still falsch wird:
+Am Rand der Achse darf der Zeitraum nicht *schrumpfen*. Begrenzt wird deshalb die Verschiebung, nie
+die Enden einzeln — am Gerät nachgefahren, von 2014–2018 bis 2021–2025 und zurück auf 2010–2014,
+die Spanne blieb bei vier Jahren.

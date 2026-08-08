@@ -3,7 +3,43 @@ from datetime import UTC, date, datetime, timedelta
 import pytest
 
 from app.models import DatePrecision
-from app.services.dates import date_range, days_since, format_label, overlaps
+from app.services.dates import MAX_BARS, bar_width, date_range, days_since, format_label, overlaps
+
+
+class TestBalkenbreite:
+    """Wie viele Jahre ein Balken des Zeitschiebers umfasst.
+
+    Die Regel schuetzt vor einem stillen Fehler in der *Anzeige*: Ein auf "1920er" datiertes Foto
+    traegt ``date_from = 1920-01-01``, und in Jahresbalken tuermten sich dann zehn Jahrgaenge auf
+    einem einzigen Balken.
+    """
+
+    def test_jahrgenauer_bestand_bekommt_jahresbalken(self):
+        assert bar_width(span_years=15, finest=1) == 1
+
+    def test_ein_jahrzehnt_im_bestand_verbietet_jahresbalken(self):
+        """Auch bei kurzer Spanne -- die Genauigkeit entscheidet, nicht die Laenge."""
+        assert bar_width(span_years=15, finest=10) == 10
+
+    def test_lange_spanne_wird_gebuendelt(self):
+        """Sonst stuenden 130 Balken nebeneinander: eine Hecke, kein Bild."""
+        breite = bar_width(span_years=130, finest=1)
+
+        assert breite > 1
+        assert 130 / breite <= MAX_BARS
+
+    def test_die_spanne_passt_immer_in_dreissig_balken(self):
+        for spanne in (0, 1, 29, 30, 31, 200, 500):
+            breite = bar_width(span_years=spanne, finest=1)
+            assert spanne / breite <= MAX_BARS, f"Spanne {spanne} sprengt die Leiste"
+
+    def test_sehr_alte_sammlung_sprengt_die_breiten_nicht(self):
+        """Jenseits der breitesten Stufe wird nicht gerechnet, sondern genommen, was da ist."""
+        assert bar_width(span_years=5000, finest=1) == 50
+
+    def test_leere_sammlung_bleibt_beim_jahr(self):
+        """Ohne Datierungen ist die Spanne null -- das darf keine Division sprengen."""
+        assert bar_width(span_years=0, finest=1) == 1
 
 
 class TestZeitraum:

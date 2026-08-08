@@ -11,8 +11,9 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.config import Settings, get_settings
 from app.db import get_session
-from app.models import Photo, PhotoStatus, Tag
-from app.schemas import DecadeCount, Histogram, PhotoDetail, PhotoList, PhotoMarker
+from app.models import DatePrecision, Photo, PhotoStatus, Tag
+from app.schemas import Bar, Histogram, PhotoDetail, PhotoList, PhotoMarker
+from app.services.dates import bar_width
 from app.services.storage import THUMBNAIL_SIZES, original_path, thumbnail_path
 
 log = logging.getLogger(__name__)
@@ -124,9 +125,7 @@ def list_photos(
     )
 
 
-@router.get(
-    "/histogram", response_model=Histogram, summary="Photo count per decade in the viewport"
-)
+@router.get("/histogram", response_model=Histogram, summary="Photo count per bar in the viewport")
 def histogram(
     viewport: Annotated[Viewport, Depends()],
     session: Annotated[Session, Depends(get_session)],
@@ -139,8 +138,31 @@ def histogram(
     viewport.from_year = viewport.to_year = None
     filters = _viewport_filters(viewport)
 
+    # The axis, and deliberately without the viewport: it spans the whole collection and stays put
+    # while the visitor pans the map. Otherwise the same spot on the slider would mean a different
+    # year after every zoom -- and a selection made earlier would end up outside its own track.
+    # See frontend kiosk/timeAxis.ts.
+    dated = [Photo.status == PhotoStatus.PUBLISHED, Photo.date_from.is_not(None)]
+    collection_from = session.scalar(
+        select(func.min(cast(func.substr(Photo.date_from, 1, 4), Integer))).where(*dated)
+    )
+    collection_to = session.scalar(
+        select(func.max(cast(func.substr(Photo.date_to, 1, 4), Integer))).where(*dated)
+    )
+
+    # How wide a bar is follows the collection, not the viewport -- otherwise the bars would change
+    # meaning under the visitor's hand, the same reason the axis stands still.
+    coarse = session.scalar(
+        select(func.count())
+        .select_from(Photo)
+        .where(*dated)
+        .where(Photo.date_precision == DatePrecision.DECADE)
+    )
+    span = (collection_to - collection_from) if collection_from and collection_to else 0
+    step = bar_width(span, 10 if coarse else 1)
+
     # SQLite has no DATE_TRUNC. From "1932-05-14" the first four characters give the number 1932;
-    # truncated division by ten and multiplication by ten yields 1930.
+    # truncated division by the step and multiplication by it yields the start of the bar.
     #
     # Two traps hide in these two lines:
     #   * Do not compute with strings -- in SQLite "+" is addition, not concatenation.
@@ -148,13 +170,13 @@ def histogram(
     #   * The second cast is required -- "/" is true division in SQLAlchemy, 1932/10 would be
     #     193.2 and that would turn back into 1932. Only truncation makes it 193.
     year = cast(func.substr(Photo.date_from, 1, 4), Integer)
-    decade = cast(year / 10, Integer) * 10
+    bar_start = cast(year / step, Integer) * step
 
     rows = session.execute(
-        select(decade.label("decade"), func.count().label("count"))
+        select(bar_start.label("year"), func.count().label("count"))
         .where(*filters, Photo.date_from.is_not(None))
-        .group_by(decade)
-        .order_by(decade)
+        .group_by(bar_start)
+        .order_by(bar_start)
     ).all()
 
     undated = (
@@ -171,21 +193,9 @@ def histogram(
         or 0
     )
 
-    # The axis of the slider, and deliberately without the viewport: it spans the whole collection
-    # and stays put while the visitor pans the map. Otherwise the same spot on the slider would
-    # mean a different year after every zoom -- and a selection made earlier would end up outside
-    # its own track. See frontend kiosk/timeAxis.ts.
-    dated = [Photo.status == PhotoStatus.PUBLISHED, Photo.date_from.is_not(None)]
-    collection_from = session.scalar(
-        select(func.min(cast(func.substr(Photo.date_from, 1, 4), Integer))).where(*dated)
-    )
-    collection_to = session.scalar(
-        select(func.max(cast(func.substr(Photo.date_to, 1, 4), Integer))).where(*dated)
-    )
-
-    decades = [DecadeCount(decade=int(row.decade), count=row.count) for row in rows]
     return Histogram(
-        decades=decades,
+        bars=[Bar(year=int(row.year), count=row.count) for row in rows],
+        step=step,
         undated=undated,
         collection_from=collection_from,
         collection_to=collection_to,

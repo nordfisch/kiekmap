@@ -50,10 +50,17 @@ export type PhotoDetail = {
   thumb_url: string;
 };
 
-export type DecadeCount = { decade: number; count: number };
+export type Bar = { year: number; count: number };
 
 export type Histogram = {
-  decades: DecadeCount[];
+  bars: Bar[];
+  /**
+   * How many years one bar covers.
+   *
+   * Follows the collection instead of being fixed at a decade: as long as every dating fits inside
+   * a year, the bars are yearly. See `bar_width` in `app/services/dates.py`.
+   */
+  step: number;
   /** Photos without a date: not on the timeline, but in the "Hilf mit" panel. */
   undated: number;
   /**

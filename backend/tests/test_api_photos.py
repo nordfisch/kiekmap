@@ -147,21 +147,65 @@ class TestReihenfolge:
 
 
 class TestHistogramm:
-    def test_zaehlt_je_jahrzehnt(self, client: TestClient, session, make_photo):
-        for jahr, titel in ((1923, "a"), (1927, "b"), (1955, "c")):
-            make_photo(year=jahr, title=titel, sha=f"{jahr:064d}")
+    """Die Balken hinter dem Zeitschieber -- und wie breit ein Balken ist.
+
+    Der teure Fehler steckt in der Breite, nicht in der Zaehlung: Ein auf "1920er" datiertes Foto
+    traegt ``date_from = 1920-01-01``. In Jahresbalken tuermten sich dann zehn Jahrgaenge auf dem
+    Balken 1920 -- ein Turm, wo in Wahrheit ein Jahrzehnt liegt.
+    """
+
+    def test_jahrgenauer_bestand_bekommt_jahresbalken(
+        self, client: TestClient, session, make_photo
+    ):
+        for jahr in (2010, 2014, 2014, 2024):
+            make_photo(year=jahr)
         session.commit()
 
         daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten["decades"] == [
-            {"decade": 1920, "count": 2},
-            {"decade": 1950, "count": 1},
+        assert daten["step"] == 1
+        assert daten["bars"] == [
+            {"year": 2010, "count": 1},
+            {"year": 2014, "count": 2},
+            {"year": 2024, "count": 1},
         ]
-        # Die Spanne der Sammlung, nicht die der Balken: auf Jahrzehnte gerundet wird erst in der
-        # Anzeige (kiosk/timeAxis.ts).
-        assert daten["collection_from"] == 1923
-        assert daten["collection_to"] == 1955
+
+    def test_eine_jahrzehnt_datierung_vergroebert_alles(
+        self, client: TestClient, session, make_photo
+    ):
+        """Der wichtigste Test dieser Klasse.
+
+        Sobald *ein* Foto auf ein Jahrzehnt datiert ist, sind Jahresbalken eine Luege -- und zwar
+        eine stille: Man saehe einen Turm auf 1920 und haette keinen Anlass, ihn anzuzweifeln.
+        """
+        make_photo(year=2010)
+        make_photo(year=2014)
+        make_photo(year=1920, precision="decade")
+        session.commit()
+
+        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+
+        assert daten["step"] == 10
+        assert daten["bars"] == [
+            {"year": 1920, "count": 1},
+            {"year": 2010, "count": 2},
+        ]
+
+    def test_lange_spanne_bekommt_breitere_buendel(self, client: TestClient, session, make_photo):
+        """130 Jahre in Jahresbalken waeren eine Hecke, kein Bild.
+
+        Wie breit genau, entscheidet die Regel in services/dates.py -- hier zaehlt, dass die
+        Spanne nicht mehr in Jahren zerlegt wird und in dreissig Balken passt.
+        """
+        make_photo(year=1890)
+        make_photo(year=2020)
+        session.commit()
+
+        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+
+        spanne = daten["collection_to"] - daten["collection_from"]
+        assert daten["step"] > 1
+        assert spanne / daten["step"] <= 30
 
     def test_spanne_ignoriert_den_kartenausschnitt(self, client: TestClient, session, make_photo):
         """Die Achse des Zeitschiebers gehoert der Sammlung, nicht dem Ausschnitt.
@@ -169,43 +213,60 @@ class TestHistogramm:
         Sonst bedeutete dieselbe Stelle des Schiebers nach jedem Zoom ein anderes Jahr -- und eine
         vorher getroffene Auswahl laege ausserhalb ihrer eigenen Bahn.
         """
-        make_photo(year=1930, sha="a" * 64)
+        make_photo(year=1930)
         # Weit weg, ausserhalb der abgefragten bbox.
-        make_photo(year=1890, lat=48.0, lon=11.0, sha="b" * 64)
+        make_photo(year=1890, lat=48.0, lon=11.0)
         session.commit()
 
         daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten["decades"] == [{"decade": 1930, "count": 1}], "Balken zeigen den Ausschnitt"
+        assert daten["bars"] == [{"year": 1930, "count": 1}], "Balken zeigen den Ausschnitt"
         assert daten["collection_from"] == 1890, "die Achse zeigt den ganzen Bestand"
+
+    def test_die_breite_gehoert_ebenfalls_der_sammlung(
+        self, client: TestClient, session, make_photo
+    ):
+        """Sonst wechselte die Bedeutung der Balken beim Verschieben der Karte.
+
+        Das Jahrzehnt-Foto liegt ausserhalb des Ausschnitts und vergroebert die Anzeige trotzdem --
+        genau wie die Achse.
+        """
+        make_photo(year=2014)
+        make_photo(year=1920, precision="decade", lat=48.0, lon=11.0)
+        session.commit()
+
+        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+
+        assert daten["step"] == 10
 
     def test_zeigt_auch_ausserhalb_der_auswahl(self, client: TestClient, session, make_photo):
         """Der Schieber soll zeigen, wo ueberhaupt etwas liegt -- auch jenseits der Auswahl."""
-        make_photo(year=1923, sha=f"{1923:064d}")
-        make_photo(year=1980, sha=f"{1980:064d}")
+        make_photo(year=1923)
+        make_photo(year=1980)
         session.commit()
 
         daten = client.get(
             "/api/photos/histogram", params={"bbox": BBOX, "from_year": 1920, "to_year": 1930}
         ).json()
 
-        assert len(daten["decades"]) == 2
+        assert len(daten["bars"]) == 2
 
     def test_undatierte_werden_getrennt_gezaehlt(self, client: TestClient, session, make_photo):
-        make_photo(year=None, sha="a" * 64)
-        make_photo(year=1932, sha="b" * 64)
+        make_photo(year=None)
+        make_photo(year=1932)
         session.commit()
 
         daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
         assert daten["undated"] == 1
-        assert daten["decades"] == [{"decade": 1930, "count": 1}]
+        assert daten["bars"] == [{"year": 1932, "count": 1}]
 
     def test_leerer_ausschnitt(self, client: TestClient, session):
         daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
         assert daten == {
-            "decades": [],
+            "bars": [],
+            "step": 1,
             "undated": 0,
             "collection_from": None,
             "collection_to": None,

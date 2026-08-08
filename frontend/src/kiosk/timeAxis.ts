@@ -19,23 +19,55 @@ import type { TimeRange } from "../api/client";
 
 export type Bounds = { min: number; max: number };
 
-/** Rounded out to whole decades -- that simply reads better than 1923 to 2019. */
-function roundToDecade(year: number, direction: "down" | "up"): number {
-  return direction === "down" ? Math.floor(year / 10) * 10 : Math.ceil(year / 10) * 10;
+/** Rounded out to whole bars -- that simply reads better, and the bars then fill the axis. */
+function roundToStep(year: number, step: number, direction: "down" | "up"): number {
+  const scaled = year / step;
+  return (direction === "down" ? Math.floor(scaled) : Math.ceil(scaled)) * step;
 }
 
 /**
  * The ends of the axis.
  *
+ * Rounded to the width of a bar rather than always to decades: with yearly bars, 2010 to 2024
+ * would otherwise become 2010 to 2030 -- six years of empty track in which nothing will ever lie.
+ *
  * Null as long as the collection holds not one dated photo -- then there is nothing to slide.
  */
-export function axisBounds(fullRange: TimeRange | null): Bounds | null {
+export function axisBounds(fullRange: TimeRange | null, step = 10): Bounds | null {
   if (!fullRange) return null;
-  const min = roundToDecade(fullRange.from, "down");
-  const max = roundToDecade(fullRange.to, "up");
-  // A single year would otherwise give an axis without length, and every calculation on it a
-  // division by zero.
-  return { min, max: max > min ? max : min + 10 };
+  const min = roundToStep(fullRange.from, step, "down");
+  // Past the last year, not up to it: the bar for 2024 has to have its own year of track to
+  // stand on. Rounding to 2024 exactly would put it at the very end and let it run off the rail
+  // -- the same thing happened to a decade bar starting in the last decade of the axis.
+  const max = roundToStep(fullRange.to + 1, step, "up");
+  // A collection from a single year would otherwise give an axis without length, and every
+  // calculation on it a division by zero.
+  return { min, max: max > min ? max : min + step };
+}
+
+/**
+ * How tall a bar stands, in percent.
+ *
+ * **Square root, not linear.** In the Holm collection the 2020s hold 11 photos against the 2010s'
+ * 245 -- linearly 4.5 %, which the floor below flattens to the same stub an empty decade would
+ * get. The root makes it 21 %: clearly smaller, clearly there. The floor keeps a single photo
+ * visible; zero stays zero, because nothing is not a little.
+ */
+export function barHeight(count: number, tallest: number): number {
+  if (count <= 0) return 0;
+  return Math.max(8, (Math.sqrt(count) / Math.sqrt(Math.max(1, tallest))) * 100);
+}
+
+/**
+ * Move the whole selection along the axis, keeping its span.
+ *
+ * The quiet mistake sits at the ends: clamping each end for itself lets the range **shrink** when
+ * it is pushed past the start of the axis -- the visitor drags sideways and watches their period
+ * narrow. So the shift is what gets limited, never the ends.
+ */
+export function shiftRange(range: TimeRange, delta: number, bounds: Bounds): TimeRange {
+  const possible = Math.min(Math.max(delta, bounds.min - range.from), bounds.max - range.to);
+  return { from: range.from + possible, to: range.to + possible };
 }
 
 /** Where a year sits on the axis: 0 at the left end, 1 at the right. Never outside. */

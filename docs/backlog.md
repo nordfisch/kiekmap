@@ -47,7 +47,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 3 | [Perceptual Hash gegen zugeschnittene Dubletten](#3--perceptual-hash-gegen-zugeschnittene-dubletten) | Idee | — |
 | 4 | [Volltextsuche über SQLite FTS5](#4--volltextsuche-über-sqlite-fts5) | Idee | — |
 | | **Besucher-Interface** | | |
-| 7 | [Zeitschieber verfeinern](#7--zeitschieber-verfeinern) | Aufgabe | wichtig |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Attract-Mode](#9--attract-mode) | Idee | wichtig |
 | 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
@@ -121,46 +120,6 @@ den Titel.
 ---
 
 ## Besucher-Interface
-
-### 7 · Zeitschieber verfeinern
-
-Drei Dinge am selben Bedienelement, die zusammen entschieden werden sollten — die Kopfzeile ist
-nur die kleinste davon.
-
-**1. Die Kopfzeile soll weg.** Zurückgestellt, aber gewollt: sowohl „1920 bis 2019" als auch
-„x Fotos ohne Jahr". Vorher zu klären, zwei Dinge:
-
-1. Mit der Kopfzeile verschwindet die einzige Stelle, an der der gewählte Zeitraum als **Zahl**
-   steht. Bleibt es bei der Skala unter dem Schieber (den beiden Enden der Achse), oder tragen die
-   Griffe ihre Jahreszahl mit sich?
-2. Ohne Kopfzeile braucht die obere Zeile weniger als die heutigen 9 rem. Schrumpft sie auf etwa
-   6,5 rem, gewinnt die Karte die Differenz.
-
-Dazu ein Erbe aus dem Umbau der Zeitachse: Der Satz „Für diesen Ausschnitt gibt es keine datierten
-Fotos." steht in dieser Kopfzeile. Fällt sie, muss er woanders hin — oder ganz weg, denn die Karte
-sagt mit „Hier gibt es noch keine Fotos im gewählten Zeitraum." ohnehin dasselbe.
-
-**2. Die Balken zeigen die Menge bei großem Bestand falsch.** `TimeSlider.tsx:117` skaliert linear
-gegen das höchste Jahrzehnt, mit einer Untergrenze von 6 % (Zeile 159). Bei achtzehn
-Beispielfotos geht das auf; bei einem Bestand, dessen Schwerpunkt in einem Jahrzehnt liegt, wird
-jedes andere auf diesen Sockel gedrückt und ist von einem leeren Jahrzehnt nicht mehr zu
-unterscheiden — genau dann also, wenn der Bestand groß genug ist, dass die Verteilung etwas
-aussagen würde.
-
-Naheliegend ist eine Stauchung (Wurzel oder Logarithmus), aber die Frage dahinter ist die
-eigentliche: **Soll der Balken die Menge zeigen oder nur, wo überhaupt etwas ist?** Der Docstring
-von `TimeSlider.tsx` sagt heute das Zweite („shows the visitor where anything is to be found at
-all"), die lineare Skala verspricht das Erste. Eins von beidem ist zu streichen.
-
-**3. Ein dritter Anfasser in der Mitte.** Links „von", rechts „bis" — und **mittig der gewählte
-Bereich selbst, zum Verschieben**. Mit gleichbleibender Spanne durch die Zeit zu wandern ist die
-Bewegung, die man am Kiosk eigentlich machen will, und sie kostet heute zwei Griffe hintereinander,
-bei denen die Spanne zwischendurch falsch ist.
-
-Der Schieber ist von Hand gebaut und nicht aus einer Bibliothek, genau um solche Griffe zu
-ermöglichen — die Begründung steht oben in `TimeSlider.tsx`. Zu klären ist die Fingergröße: drei
-Zonen auf einer Achse, jede mindestens 48 px, und die mittlere darf die äußeren nicht verdecken,
-wenn die Spanne schmal wird.
 
 ### 8 · Historische Karte als umschaltbare Grundkarte
 

@@ -30,6 +30,32 @@ MONTH_NAMES = (
     "Dezember",
 )
 
+#: Widths a bar of the histogram may have, in years. Readable steps, no odd ones.
+BAR_WIDTHS = (1, 5, 10, 25, 50)
+
+#: More bars than this and the strip becomes a hedge rather than a picture.
+MAX_BARS = 30
+
+
+def bar_width(span_years: int, finest: int) -> int:
+    """How many years one bar of the time slider covers.
+
+    Two rules, and the first is the one that matters:
+
+    **Never finer than the coarsest dating in the collection.** A photo dated "the 1920s" has
+    ``date_from`` on 1 January 1920. Drawn in yearly bars, all ten of its years would pile onto
+    1920 -- a tower where in truth a decade lies. That is the mistake the whole date model exists
+    to avoid, only in the display. ``finest`` is therefore 10 as soon as one decade dating exists,
+    and 1 while every statement fits inside a year.
+
+    **And wide enough that the span stays readable.** Over 130 years yearly bars would be a hedge;
+    the width grows until at most ``MAX_BARS`` remain.
+    """
+    for width in BAR_WIDTHS:
+        if width >= finest and span_years <= width * MAX_BARS:
+            return width
+    return BAR_WIDTHS[-1]
+
 
 def date_range(
     year: int | None,

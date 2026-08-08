@@ -48,9 +48,13 @@ function bestand(nachOrt: Task, nachJahr: Task) {
 beforeEach(() => {
   geholt.mockReset();
   fotosGeholt.mockReset().mockResolvedValue({ photos: [], total: 0, truncated: false });
-  histogrammGeholt
-    .mockReset()
-    .mockResolvedValue({ decades: [], undated: 0, collection_from: null, collection_to: null });
+  histogrammGeholt.mockReset().mockResolvedValue({
+    bars: [],
+    step: 1,
+    undated: 0,
+    collection_from: null,
+    collection_to: null,
+  });
   ortGesendet.mockReset().mockResolvedValue({ id: 1 } as PhotoDetail);
   jahrGesendet.mockReset().mockResolvedValue({ id: 1, needs_date: false } as PhotoDetail);
 

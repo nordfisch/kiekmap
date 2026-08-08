@@ -488,3 +488,24 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Ortsmittelpunkt nächsten. Der Ortsindex reicht sieben Kilometer weit und umfasst die
   Nachbardörfer; was darüber hinaus liegt, wird weiterhin auf der Karte angetippt. Fehlt der
   Schlüssel, gilt 80
+
+### Behoben
+
+- **Die Mengenanzeige des Zeitschiebers zeigte die Menge nicht.** Die Balken bündelten fest nach
+  Jahrzehnten und skalierten linear gegen das hoechste — im Erstbestand mit seinen 256 taggenauen
+  Aufnahmen aus 2010 bis 2024 waren das **zwei** Balken, einer voll und einer auf dem Sockel, auf
+  dem auch ein Jahrzehnt mit einem einzigen Foto gelandet waere. Jetzt richtet sich die Bündelung
+  nach dem Bestand: nie feiner als die gröbste Datierung darin, und so breit, dass die Spanne in
+  dreißig Balken passt. Die Höhe folgt der Wurzel statt der geraden Linie, ein leerer Balken bleibt
+  leer. Siehe [docs/decisions.md](docs/decisions.md) Punkt 25
+- Der letzte Balken der Leiste begann am rechten Rand und lief darüber hinaus. Die Achse reicht
+  jetzt über das letzte Jahr hinaus, damit er darauf Platz hat
+
+### Geändert
+
+- **Der Zeitschieber ist ein Trimmer mit drei Anfassern**, nach dem Vorbild eines Videoschnitts:
+  links und rechts je ein Anfasser für die Enden, und der ganze gewählte Bereich lässt sich
+  anfassen und durch die Zeit schieben — ein Griff in seiner Mitte zeigt es an. Mit
+  gleichbleibender Spanne durch die Jahrzehnte zu wandern kostete vorher zwei Griffe hintereinander,
+  bei denen die Spanne zwischendurch falsch war. Am Rand der Achse bleibt die Spanne erhalten,
+  statt zu schrumpfen. Die Pfeiltasten verschieben ebenfalls

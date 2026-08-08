@@ -147,10 +147,10 @@ class PhotoList(BaseModel):
     truncated: bool
 
 
-class DecadeCount(BaseModel):
+class Bar(BaseModel):
     """One bar in the histogram behind the time slider."""
 
-    decade: int = Field(description="Start of the decade, e.g. 1920")
+    year: int = Field(description="First year the bar covers, e.g. 1920 or 2014")
     count: int
 
 
@@ -161,7 +161,10 @@ class Histogram(BaseModel):
     ``latest`` any more: the bars belong to the viewport, the axis to the whole collection.
     """
 
-    decades: list[DecadeCount]
+    bars: list[Bar]
+    #: How many years one bar covers. Follows the collection rather than being fixed at a decade --
+    #: see ``bar_width`` in services/dates.py for why that matters.
+    step: int
     #: Photos without a date. In no time selection, but in the "Hilf mit" panel.
     undated: int
     #: Span of the whole collection, deliberately **not** of the viewport: the slider axis must not

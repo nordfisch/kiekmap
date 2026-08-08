@@ -801,3 +801,42 @@ dicht ein Ort bebaut ist.
 
 **Der Verwaltungsbereich behält sein Suchfeld.** Dort wird gepflegt, nicht besucht, und eine
 Tastatur ist zur Hand. Der Suchendpunkt bleibt deshalb, was er war.
+
+---
+
+## 25. Die Balken bündeln, was der Bestand hergibt
+
+Hinter dem Zeitschieber liegen Balken, die zeigen, wo überhaupt Fotos liegen. Wie viele Jahre ein
+Balken umfasst, stand bis zum 9. August 2026 fest auf zehn. Seitdem rechnet
+`bar_width()` in [services/dates.py](../backend/app/services/dates.py) es aus, nach zwei Regeln.
+
+**Erstens: nie feiner als die gröbste Datierung im Bestand.** Ein auf „1920er" datiertes Foto
+trägt `date_from = 1920-01-01`. In Jahresbalken türmten sich seine zehn Jahrgänge auf dem einen
+Balken 1920 — ein Turm, wo in Wahrheit ein Jahrzehnt liegt. Das ist derselbe Fehler, dessentwegen
+das ganze Datenmodell mit Intervallen arbeitet (Punkt 1), nur in der Anzeige: Er sieht nicht nach
+Fehler aus, sondern nach Befund. Solange jede Angabe in ein Jahr passt — tag-, monats- oder
+jahresgenau — sind Jahresbalken dagegen exakt.
+
+**Zweitens: so breit, dass die Spanne in dreißig Balken passt.** Über 130 Jahre wären Jahresbalken
+eine Hecke. Gewählt wird aus 1, 5, 10, 25, 50 Jahren, damit die Beschriftung lesbar bleibt.
+
+**Warum das nötig wurde.** Der eingelesene Erstbestand hat es gezeigt: 929 Fotos, davon 673 ohne
+Jahr, und die 256 datierten stammen ausnahmslos aus Kamera-EXIF — Spanne 2010 bis 2024, also
+**zwei** Jahrzehnte. Der Schieber zeigte zwei Balken, einen vollen und einen Stummel. In Jahren
+zerlegt zeigt derselbe Bestand einen Ausreißer 2014 und leere Jahrgänge 2012 und 2015. Dieselben
+Daten, ein anderes Bild.
+
+**Die Höhe wird mit der Wurzel skaliert, nicht linear.** 11 Fotos gegen 245 sind linear 4,5 % —
+und darunter klemmte die Untergrenze alles auf denselben Sockel, den auch ein Jahrzehnt mit einem
+einzigen Foto bekam. Mit der Wurzel sind es 21 %: klar kleiner, klar vorhanden. Ein **leerer**
+Balken bleibt bei null, denn nichts ist nicht wenig — ein Sockel dort schickte den Besucher an eine
+Stelle, wo nichts liegt.
+
+**Die Breite gehört der Sammlung, nicht dem Ausschnitt** — genau wie die Achse. Sonst wechselte
+die Bedeutung eines Balkens beim Verschieben der Karte, und der Besucher verglich Bilder, die nicht
+vergleichbar sind.
+
+**Die Achse reicht über das letzte Jahr hinaus.** Der Balken für 2024 braucht sein eigenes Stück
+Bahn; endete die Achse auf 2024, begänne er am rechten Rand und liefe darüber hinaus. Bei
+Jahrzehnten fiel das selten auf — nämlich nur, wenn die jüngste Aufnahme im letzten Jahrzehnt der
+Achse liegt.
