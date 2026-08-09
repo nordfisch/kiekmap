@@ -8,7 +8,7 @@ Spalte sagt, was drinsteht, die zweite, für wen.**
 | Datei | Frage | Für wen |
 |---|---|---|
 | [architecture.md](architecture.md) | *Was* gibt es, und wie greift es ineinander? | wer einsteigt |
-| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — 21 Entscheidungen mit Begründung | wer etwas ändern will |
+| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — 25 Entscheidungen mit Begründung | wer etwas ändern will |
 | [history.md](history.md) | *Wie* ist es dazu gekommen? — und was dabei anders kam als geplant | wer wissen will, ob eine Idee schon einmal da war |
 
 `decisions.md` ist die Datei, die man **vor** einer Änderung liest; `history.md` die, die man liest,

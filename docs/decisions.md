@@ -169,6 +169,11 @@ begrüßt das Museum seine Besucher morgens für ein paar Sekunden mit einer Feh
 **Entscheidung.** Ein Klick auf das Ortswappen über der linken oberen Ecke der Karte öffnet ein
 Zahlenfeld mit großen Tasten. Danach der Admin-Bereich, mit ablaufender Sitzung.
 
+> **Fortgeschrieben durch [Punkt 26](#26-zwei-türen-in-die-verwaltung-und-keine-davon-ist-mehr-das-wappen)**
+> (9. August 2026): Die Tür ist künftig der Titel, dazu ein Stift in der Detailansicht; das Wappen
+> lädt neu. Alles Weitere hier — PIN statt Passwort, die Sperre, die Sitzungen im Arbeitsspeicher —
+> gilt unverändert und für beide Türen.
+
 **Warum sichtbar statt versteckt?** *Geändert in Stufe 8.* Ursprünglich war ein drei Sekunden
 langer Druck auf die untere linke Bildschirmecke vorgesehen — unsichtbar für Besucher. Dagegen
 sprach beim Bauen zweierlei: Das Schloss ist die PIN, nicht das Versteck; und eine unsichtbare
@@ -840,3 +845,51 @@ vergleichbar sind.
 Bahn; endete die Achse auf 2024, begänne er am rechten Rand und liefe darüber hinaus. Bei
 Jahrzehnten fiel das selten auf — nämlich nur, wenn die jüngste Aufnahme im letzten Jahrzehnt der
 Achse liegt.
+
+---
+
+## 26. Zwei Türen in die Verwaltung, und keine davon ist mehr das Wappen
+
+*Entschieden am 9. August 2026, gebaut noch nicht* — die Umsetzung steht als Punkt 25 und 29 im
+[backlog.md](backlog.md). Diese Entscheidung schreibt [Punkt 7](#7-admin-aufs-wappen-tippen-dann-pin)
+fort, der genau **eine** Tür festgelegt hatte.
+
+**Entscheidung.** Es gibt künftig zwei Wege in den Verwaltungsbereich, beide sichtbar, beide durch
+dieselbe PIN gesichert:
+
+| Wo | Wohin |
+|---|---|
+| Der Titel „Bilder aus Holm" im Kopfbereich, ohne Unterstreichung | in die Verwaltung, wie bisher über das Wappen |
+| Ein Stift neben dem Titel der Detailansicht | direkt in die Bearbeitung **dieses** Fotos |
+
+**Das Wappen verliert diese Aufgabe** und bekommt eine andere: Ein Tipp darauf lädt neu und setzt
+die Filter zurück.
+
+**Warum das keine Aufweichung von Punkt 7 ist.** Was dort entschieden wurde, war nicht „genau eine
+Tür", sondern **„sichtbar statt versteckt"** — gegen die unsichtbare Drei-Sekunden-Geste in der
+Bildschirmecke, und mit der Begründung, das Schloss sei die PIN und nicht das Versteck. Beide neuen
+Türen sind sichtbar und tragen dasselbe Schloss. Die Zahl der Türen war eine Folge dieser
+Entscheidung, keine eigene: Es gab damals nur eine sichtbare Fläche, die sich dafür anbot.
+
+**Warum die zweite Tür überhaupt.** Wer am Gerät ein falsch beschriftetes Foto sieht, hat heute
+keinen kurzen Weg dorthin — er muss in der Verwaltung nach dem Foto suchen, und wonach er sucht,
+ist ausgerechnet der Titel, der falsch ist. Der Stift führt ohne Umweg zu diesem einen Foto. Das
+ist auch der Grund, warum es **keine sichtbare Kennung** braucht, die sich jemand notiert.
+
+**Warum das Wappen das Zurücksetzen bekommt und nicht ein eigener Knopf.** Der Besucherschirm hat
+bisher keinen Weg zurück in den Anfangszustand; es gibt drei Umwege — fünf Minuten warten, die PIN
+eingeben und die Verwaltung wieder verlassen, oder den Netzstecker. Für einen Besucher, der sich
+verhakt hat, ist keiner davon eine Antwort. Ein *zusätzlicher* Knopf dafür wäre allerdings ein
+Knopf, den fast niemand braucht und den trotzdem jemand drückt — Kinder zuerst —, und er wirft die
+Arbeit weg, die gerade jemand angefangen hat. Das Wappen kostet keine zusätzliche Fläche und ist
+bereits als tippbar bekannt.
+
+**Der Preis, und er ist zu nennen:** Wer das Wappen antippt, weil er in die Verwaltung will, setzt
+stattdessen die Ansicht zurück. Für ein bis zwei Ehrenamtliche im Jahr ist das verkraftbar; es ist
+trotzdem die eine Stelle, an der diese Entscheidung jemandem wehtut, und sie steht deshalb hier und
+nicht nur im Backlog.
+
+**Was das über die Regel „genau eine Tür" sagt.** Sie war nie das Ziel, sondern eine Zahl, die sich
+ergeben hat — und sie stand danach zweimal beiläufig im Backlog als „ist fortzuschreiben", ohne
+dass jemand sie fortgeschrieben hätte. Eine Entscheidung, die an zwei Stellen halb widerrufen wird,
+ist an keiner Stelle mehr auffindbar. Sie gehört an eine.

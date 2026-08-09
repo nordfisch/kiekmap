@@ -168,10 +168,10 @@ heute in einen Bereich springt.
 
 **Drei Dinge, die dabei zu bedenken sind:**
 
-- **Es ist eine zweite Tür in die Verwaltung.** [decisions.md](decisions.md), Punkt 7, hat bewusst
-  genau eine festgelegt — das Wappen —, und in Stufe 8 wurde eine unsichtbare Geste dafür
-  verworfen. Diese Tür ist sichtbar und durch dieselbe PIN gesichert, widerspricht dem also nicht;
-  aber sie ändert die Entscheidung, und das gehört dort vermerkt.
+- **Es ist eine zweite Tür in die Verwaltung** — und dass sie erlaubt ist, ist entschieden und
+  nicht mehr hier zu klären: [decisions.md](decisions.md), Punkt 26. Was dort steht und beim Bauen
+  gilt: Sie ist sichtbar und trägt dieselbe PIN; der Punkt 7 von damals hat „sichtbar statt
+  versteckt" festgelegt, nicht eine Höchstzahl an Türen.
 - **Der Rückweg ist ein Neustart.** Die Verwaltung zu verlassen lädt die Seite neu (`leave()` in
   `store/admin.ts:99`), und das aus gutem Grund: Der Bestand hat sich gerade geändert. Wer einen
   Titel berichtigt und zurückgeht, steht also wieder in der Standardansicht, nicht bei seinem Foto.
@@ -814,11 +814,10 @@ fort. Das Wappen kostet immerhin keine zusätzliche Fläche, und die Bauform ist
 Geste — die wurde in Stufe 8 aus gutem Grund verworfen (siehe [history.md](history.md)).
 
 **4. Der Titel „Bilder aus Holm" führt in die Verwaltung**, weiterhin über die PIN und **ohne
-Unterstreichung**. Das tauscht die Rollen: Bisher war das Wappen die Tür.
-[decisions.md](decisions.md), Punkt 7, hält genau das fest und ist fortzuschreiben — zusammen mit
-[Punkt 25](#25--vom-foto-direkt-in-seine-bearbeitung), der eine zweite Tür in der Detailansicht
-vorsieht. Danach gibt es zwei Türen, und keine davon ist mehr das Wappen; das gehört an einer
-Stelle entschieden und nicht zweimal nebenbei.
+Unterstreichung**. Das tauscht die Rollen: Bisher war das Wappen die Tür. Zusammen mit dem Stift
+aus [Punkt 25](#25--vom-foto-direkt-in-seine-bearbeitung) gibt es danach zwei Türen, und keine
+davon ist mehr das Wappen — **entschieden ist das bereits**, in [decisions.md](decisions.md),
+Punkt 26, an einer Stelle statt zweimal nebenbei. Hier bleibt die Arbeit.
 
 ---
 
