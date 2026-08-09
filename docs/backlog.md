@@ -70,13 +70,12 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
 | 39 | [Den Code prüfen lassen](#39--den-code-prüfen-lassen) | Aufgabe | wichtig |
-| 37 | [Die Straßenauswahl in der Adaptionsanleitung erklären](#37--die-straßenauswahl-in-der-adaptionsanleitung-erklären) | Aufgabe | wichtig |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
 **Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Vierzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 26, 32, 33. Sie sind erledigt,
+**Fünfzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 26, 32, 33, 37. Sie sind erledigt,
 aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
 neue Punkt bekommt die **43**.
 
@@ -893,31 +892,6 @@ einen zweiten Menschen.
 
 Kein Selbstzweck: Der Nutzen entsteht dort, wo jemand ohne die Vorgeschichte liest — und deshalb
 Annahmen sieht, die dem, der sie getroffen hat, unsichtbar sind.
-
-### 37 · Die Straßenauswahl in der Adaptionsanleitung erklären
-
-[adaption.md](adaption.md) sagt einem zweiten Museum, was es anfassen muss. Die Straßenauswahl im
-„Hilf mit"-Bereich — seit dem 8. August der Hauptweg zur Verortung — kommt dort bisher nur als
-eine Zeile zu `streetChoice` vor. Das reicht nicht: Wer die Software für seinen Ort aufsetzt, muss
-wissen, **wie er prüft, dass der Baum trägt**, und was er tut, wenn er es nicht tut.
-
-Hineingehört:
-
-- **Woher die Straßen kommen** — `make places` holt sie über Overpass aus OpenStreetMap in den
-  Ortsindex; ohne diesen Schritt bleibt der Bereich leer und sagt das auch (`t.location.noStreets`).
-- **Wie `streetChoice` zu wählen ist.** Der Wert entscheidet, wie viele Fragen bis zur Straße
-  nötig sind. In Holm ergeben 80 Straßen zehn Buchstabengruppen, sieben davon führen direkt zur
-  Liste. Ein dichter bebauter Ort braucht einen kleineren Wert, ein weitläufiger verträgt einen
-  größeren — **die Zahl ist zu prüfen, nicht zu übernehmen.**
-- **Wie man das nachsieht, ohne zu raten**: `GET /api/places/streets` liefert genau die Liste, die
-  der Baum bekommt. Wer sie sich ansieht, weiß vor dem ersten Besucher, ob der Ortskern
-  vollständig drin ist und wie viele Fremdorte mitkommen.
-- **Was schiefgehen kann.** Der Ortsindex reicht so weit wie die `bbox`; bei einem knapp gesetzten
-  Ausschnitt fehlen Randstraßen, bei einem weiten kommen Nachbardörfer mit und verdrängen die
-  eigenen aus den nächsten `streetChoice`.
-
-Das ist die Sorte Wissen, die genau einmal erarbeitet wurde und beim zweiten Museum sonst noch
-einmal erarbeitet werden müsste — siehe [decisions.md](decisions.md), Punkt 24.
 
 ### 22 · Versionierung, Releaseprozess und Veröffentlichung des Codes
 

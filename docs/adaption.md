@@ -38,6 +38,9 @@ der Karte angetippt. **Eine Anzahl und kein Radius**, weil sie das Knopfbudget u
 hält, wie dicht ein Ort bebaut ist: 80 Straßen passen in zwei Fragen mit je höchstens zehn Knöpfen
 (siehe [decisions.md](decisions.md), Punkt 24). Fehlt der Schlüssel, gilt 80.
 
+**Der Wert ist zu prüfen, nicht zu übernehmen** — wie, steht in
+[Schritt 3](#3-die-straßenauswahl-prüfen).
+
 Die Datei beschreibt einen **Ort** und sonst nichts. Welche Jahrzehnte der „Hilf mit"-Bereich zur
 Auswahl stellt, stand hier einmal mit — das gehört aber zur Sammlung und ergibt sich inzwischen aus
 ihr: angeboten wird, was der Bestand umspannt, mindestens jedoch 1920er bis 2010er. Ein Museum, das
@@ -98,7 +101,64 @@ auskommentieren; die Oberfläche überspringt den Hausnummernschritt dann von al
 damit, ob eine Verortung aus dem „Hilf mit"-Bereich überhaupt in der Region liegt. **Ohne diese
 Datei greift der Schutz nicht** (er lässt dann alles durch, statt grundlos abzulehnen).
 
-### 3. Wappen einsetzen
+### 3. Die Straßenauswahl prüfen
+
+Der „Hilf mit"-Bereich fragt nach dem Ort eines Fotos, und der **Hauptweg dorthin sind Knöpfe**:
+erst der Anfangsbuchstabe, dann die Straße, dann die Hausnummer. Ein Suchfeld gibt es dort nicht —
+die Besucheransicht hat überhaupt kein Eingabefeld, weil am Kiosk keine Tastatur steht (siehe
+[decisions.md](decisions.md), Punkt 24). Ob dieser Weg trägt, entscheidet sich am Ortsindex, und
+das lässt sich vor dem ersten Besucher nachsehen.
+
+**Woher die Straßen kommen.** Aus `make places`: Das Skript fragt einmal die Overpass-API nach
+allem, was innerhalb der `bbox` liegt, und schreibt es in den Ortsindex. Wer diesen Schritt
+auslässt, bekommt keinen Fehler — der Bereich sagt dann „Tippen Sie die Stelle bitte auf der Karte
+an" und schaltet die Karte von sich aus scharf. Das ist ein funktionierender Notweg, aber eben ein
+Notweg: Ohne Ortsindex ist auch die Hausnummer nicht zu haben, und jedes Foto einer 800 m langen
+Straße bekäme denselben Punkt.
+
+**Wie man nachsieht, ohne zu raten.** Ein Aufruf liefert genau die Liste, die der Baum bekommt:
+
+```bash
+curl -s localhost:8000/api/places/streets | python3 -c "
+import json,sys
+namen = [p['name'] for p in json.load(sys.stdin)]
+print(f'{len(namen)} Strassen zur Wahl:')
+print('  ' + ', '.join(namen))
+"
+```
+
+Wer sie sich ansieht, weiß dreierlei: ob der Ortskern vollständig drin ist, wie viele Fremdorte
+mitkommen, und ob `streetChoice` passt.
+
+**Wie `streetChoice` zu wählen ist.** Der Wert entscheidet, wie viele Fragen bis zur Straße nötig
+sind. Die Gruppen werden gerechnet, nicht aufgeschrieben: Aus höchstens zehn Knöpfen je Stufe
+ergibt sich der Baum von selbst. Für Holm sieht das so aus:
+
+| | |
+|---|---|
+| Straßen zur Wahl (`streetChoice` 80) | 80 |
+| Knöpfe auf der ersten Stufe | 10 — `A` `B–D` `E` `F–G` `H` `I` `K–L` `M–R` `S` `T–Z` |
+| davon direkt zur Straßenliste | 7 |
+| mit einem Zwischenschritt | 3 — `A` (15), `H` (11), `I` (11) |
+
+Zwei Fragen im Regelfall, drei im Ausnahmefall. **Das ist die Zielgröße.** Ein dichter bebauter Ort
+braucht einen kleineren Wert, ein weitläufiger verträgt einen größeren — nachrechnen lässt sich das
+mit derselben Abfrage oben: Kommen mehr als etwa hundert Straßen zusammen, gerät die dritte Stufe
+zum Regelfall, und der Weg zur Hausnummer wird lang.
+
+**Was schiefgehen kann, und beides fällt erst am Gerät auf:**
+
+- **Die `bbox` ist zu eng gesetzt.** Der Ortsindex reicht nur so weit wie sie; Randstraßen fehlen
+  dann ganz und stehen weder in der Suche noch auf einem Knopf.
+- **Die `bbox` ist zu weit gesetzt.** Dann kommen Nachbardörfer mit — und weil `streetChoice` die
+  *nächsten* nimmt, verdrängen deren Straßen die eigenen aus der Auswahl. In Holm liegen 486
+  Straßen im Index und nur 80 auf den Knöpfen; wäre der Ausschnitt doppelt so groß, wären darunter
+  Straßen, die kein Foto der Sammlung je zeigt.
+
+Beides ist an der Liste oben zu sehen, bevor jemand davorsteht. Erwartet man einen Straßennamen
+und findet ihn nicht, ist die `bbox` der erste Verdacht, nicht der Code.
+
+### 4. Wappen einsetzen
 
 **Mitgeliefert wird ein Platzhalter, kein Wappen** — ein schlichtes Schild aus
 [`tools/build_logo.py`](../tools/build_logo.py). Warum kein echtes, steht in
@@ -138,7 +198,7 @@ Daraus folgt zweierlei:
 Deshalb liegt in diesem Repo ein Platzhalter, und das Wappen bleibt eine lokale Datei — wie
 `.env` und die gebaute Karte.
 
-### 4. Sammlungsspezifisches prüfen
+### 5. Sammlungsspezifisches prüfen
 
 In der `.env`:
 
@@ -176,7 +236,7 @@ cd backend && .venv/bin/python -m app.cli pin
 Die PIN selbst wird nirgends gespeichert. Ist `PHOTOMAP_ADMIN_PIN_HASH` leer, sagt der
 Admin-Bereich das im Klartext, statt jede Eingabe abzulehnen.
 
-### 5. Prüfen
+### 6. Alles zusammen prüfen
 
 ```bash
 make dev
@@ -184,7 +244,8 @@ make dev
 
 - Zeigt die Karte den richtigen Ort im richtigen Ausschnitt?
 - Lässt sich die Karte nicht über die Region hinausschieben?
-- Findet die Ortssuche im „Hilf mit"-Bereich lokale Straßennamen?
+- Führen die Knöpfe im „Hilf mit"-Bereich in zwei bis drei Schritten zu einer echten Straße
+  (siehe [Schritt 3](#3-die-straßenauswahl-prüfen))?
 - **WLAN abschalten und die Karte bewegen** — Beschriftungen müssen sichtbar bleiben.
 
 Der letzte Punkt ist der wichtigste. Prüfung ohne Hinsehen:

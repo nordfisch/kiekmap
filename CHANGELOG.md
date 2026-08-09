@@ -559,3 +559,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   beim ersten Einengen des Zeitraums, also in dem Moment, in dem die Auswahl anfängt, etwas zu
   bedeuten. Wer ihn danach von Hand wieder einschaltet, bei dem bleibt er an. Die API kennt dafür
   `include_undated`; eingeschaltet lautet die Bedingung „kein Datum **oder** Überlappung"
+
+### Geändert
+
+- **Die Adaptionsanleitung erklärt die Straßenauswahl.** Neuer Schritt 3 in
+  [docs/adaption.md](docs/adaption.md): woher die Straßen kommen, wie man mit
+  `GET /api/places/streets` nachsieht, was der Knopfbaum bekommt, wie `streetChoice` zu wählen ist
+  und was eine zu eng oder zu weit gesetzte `bbox` anrichtet. Dazu zwei überholte Stellen
+  berichtigt — die Prüfliste fragte noch nach der Ortssuche im „Hilf mit"-Bereich, die es dort
+  nicht mehr gibt

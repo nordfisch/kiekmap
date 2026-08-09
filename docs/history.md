@@ -1752,3 +1752,30 @@ alten Wert aus, bevor die Logik ueberhaupt erreicht war. Ein gruener Test, der n
 vorbeikam, die er zu schuetzen vorgibt. Er setzt jetzt einen Zeitraum, der sich wirklich aendert
 und die Spanne trotzdem ueberdeckt: Endgriff von 2030 auf 2026, waehrend das juengste Foto bei 2024
 liegt.
+
+## Die Strassenauswahl in der Adaptionsanleitung
+
+9. August 2026. Punkt 37, und der guenstigste des Tages: reine Dokumentation. Die
+[adaption.md](adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Strassenauswahl
+kam dort seit dem 8. August nur als eine Zeile zu `streetChoice` vor, obwohl sie inzwischen der
+Hauptweg zur Verortung ist.
+
+Der neue Schritt 3 beantwortet vier Fragen, die sonst beim zweiten Museum noch einmal erarbeitet
+werden muessten: woher die Strassen kommen (`make places` ueber Overpass), wie man nachsieht, was
+der Baum bekommt (`GET /api/places/streets`, mit fertigem Aufruf), wie `streetChoice` zu waehlen
+ist, und was schiefgehen kann — eine zu enge `bbox` laesst Randstrassen fehlen, eine zu weite
+holt Nachbardoerfer herein, die die eigenen aus den naechsten `streetChoice` verdraengen.
+
+**Die Zahlen darin sind nachgerechnet, nicht abgeschrieben.** Der Backlog behauptete zehn
+Buchstabengruppen, sieben davon direkt zur Liste; nachgefahren mit `nearby_streets` und
+`groupStreets` gegen den laufenden Ortsindex kam genau das heraus — 80 Strassen, 10 Knoepfe,
+7 direkt, und A, H und I mit einem Zwischenschritt. Die Doku nennt die Gruppen jetzt beim Namen,
+damit ein zweites Museum sein eigenes Ergebnis danebenhalten kann.
+
+**Zwei Stellen waren nebenbei veraltet.** Die Pruefliste am Ende fragte noch, ob „die Ortssuche im
+Hilf mit-Bereich lokale Strassennamen findet" — die gibt es dort seit dem 8. August nicht mehr.
+Und der Fall ohne Ortsindex sieht seit dem Kartenschalter vom selben Tag anders aus: Der Bereich
+sagt nicht nur, man moege auf die Karte tippen, er schaltet sie auch von sich aus scharf.
+
+`tools/check_anchors.py` prueft die `adaption.md` ab jetzt mit — sie hat seit diesem Punkt
+Verweise auf ihre eigenen Abschnitte, und die Abschnitte sind dabei umnummeriert worden.

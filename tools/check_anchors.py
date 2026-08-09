@@ -20,7 +20,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 #: Files whose in-page links are checked. Anchors only ever point inside their own file here.
-DOCUMENTS = ("docs/backlog.md", "docs/decisions.md", "docs/history.md", "docs/index.md")
+DOCUMENTS = (
+    "docs/backlog.md",
+    "docs/decisions.md",
+    "docs/history.md",
+    "docs/index.md",
+    "docs/adaption.md",
+)
 
 
 def slug(heading: str) -> str:
