@@ -102,6 +102,71 @@ describe("Der Zeitraum beim ersten Laden", () => {
   });
 });
 
+describe("Der Schalter für die Fotos ohne Jahr", () => {
+  /**
+   * Ein Foto ohne Datum überlappt keinen Zeitraum, fällt also aus jeder Auswahl heraus — beim
+   * Erstbestand zwei Drittel der Sammlung. Bisher war das eine Nebenwirkung der Schieberstellung,
+   * die niemandem angesagt wurde; jetzt ist es ein Schalter, den der Schieber genau einmal für
+   * den Besucher umlegt.
+   */
+  beforeEach(() => {
+    vi.mocked(fetchPhotos).mockResolvedValue({ photos: [], total: 0, truncated: false });
+    useKiosk.setState({
+      bbox: [9.6, 53.57, 9.75, 53.67],
+      fullRange: { from: 2010, to: 2024 },
+      histogram: null,
+      timeRange: { from: 2010, to: 2030 },
+      showUndated: true,
+      undatedByHand: false,
+    });
+  });
+
+  it("steht anfangs an", () => {
+    // Der erste Blick zeigt, was das Museum hat. Niemand verliert etwas, ohne es getan zu haben.
+    expect(useKiosk.getInitialState().showUndated).toBe(true);
+  });
+
+  it("geht aus, sobald der Zeitraum eingeengt wird", () => {
+    useKiosk.getState().setTimeRange({ from: 2014, to: 2016 });
+
+    expect(useKiosk.getState().showUndated).toBe(false);
+  });
+
+  it("bleibt an, solange die Auswahl die ganze Spanne überdeckt", () => {
+    /**
+     * Die Achse reicht bis 2030, das jüngste Foto liegt bei 2024: Der Endgriff kann ein Stück
+     * wandern, ohne dass irgendetwas herausfiele. ``queryTimeFilter`` schickt dann keinen Filter,
+     * und wo nichts gefiltert wird, ist auch nichts abzuschalten — sonst nähme der Schieber die
+     * undatierten Fotos schon beim ersten Antippen weg, ganz ohne Wirkung auf den Rest.
+     */
+    useKiosk.getState().setTimeRange({ from: 2010, to: 2026 });
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 2010, to: 2026 });
+    expect(useKiosk.getState().showUndated).toBe(true);
+  });
+
+  it("greift nicht mehr, wenn der Besucher ihn selbst angefasst hat", () => {
+    /**
+     * Der Fall, der die Automatik sonst zur Plage macht: Wer die undatierten Fotos von Hand
+     * wieder einschaltet und danach den Schieber anfasst, verlöre sie sofort wieder — genau die
+     * Nebenwirkung, gegen die dieser Schalter gebaut ist, nur eine Ebene höher.
+     */
+    useKiosk.getState().setTimeRange({ from: 2014, to: 2016 });
+    useKiosk.getState().setShowUndated(true);
+
+    useKiosk.getState().setTimeRange({ from: 2018, to: 2020 });
+
+    expect(useKiosk.getState().showUndated).toBe(true);
+  });
+
+  it("geht auch von Hand wieder aus", () => {
+    useKiosk.getState().setShowUndated(false);
+
+    expect(useKiosk.getState().showUndated).toBe(false);
+    expect(useKiosk.getState().undatedByHand).toBe(true);
+  });
+});
+
 describe("Fokus nach einem Beitrag", () => {
   function machFoto(felder: Record<string, unknown>) {
     return {

@@ -141,6 +141,7 @@ export function fetchPhotos(
   bbox: Bbox,
   timeRange: TimeRange | null,
   limit: number,
+  showUndated: boolean,
   signal?: AbortSignal,
 ): Promise<PhotoList> {
   const params = new URLSearchParams({ bbox: bboxParam(bbox), limit: String(limit) });
@@ -148,6 +149,9 @@ export function fetchPhotos(
     params.set("from_year", String(timeRange.from));
     params.set("to_year", String(timeRange.to));
   }
+  // Sent even when it is on, which is the default: the parameter is what the switch beside the
+  // slider stands for, and a request that leaves it out says nothing about it either way.
+  params.set("include_undated", String(showUndated));
   return getJson<PhotoList>(`/api/photos?${params}`, signal);
 }
 

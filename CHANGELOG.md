@@ -548,3 +548,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Schirm. Angeboten wird der Knopf über der jeweiligen Auswahl und in jedem Schritt — auch bei der
   Hausnummer, wo er am meisten einbringt: Wer die Straße kennt, aber die Nummer nicht, zeigt auf
   das Haus. Der gesetzte Punkt bleibt unabhängig davon sichtbar und lässt sich weiter ziehen
+
+### Hinzugefügt
+
+- **Ein Schalter für die Fotos ohne Jahr**, neben dem Zeitschieber. Aus der Meldung „507 Fotos ohne
+  Jahr" ist „507 Fotos ohne Jahr **anzeigen**" mit Haken geworden. Ein Foto ohne Datum überlappt
+  keinen Zeitraum und fiel deshalb aus jeder Auswahl heraus, sobald jemand den Schieber
+  zusammenzog — bei diesem Bestand zwei Drittel der Sammlung, ohne dass irgendwo gestanden hätte,
+  dass das passieren würde. Der Schalter steht anfangs an und geht **genau einmal** von selbst aus:
+  beim ersten Einengen des Zeitraums, also in dem Moment, in dem die Auswahl anfängt, etwas zu
+  bedeuten. Wer ihn danach von Hand wieder einschaltet, bei dem bleibt er an. Die API kennt dafür
+  `include_undated`; eingeschaltet lautet die Bedingung „kein Datum **oder** Überlappung"

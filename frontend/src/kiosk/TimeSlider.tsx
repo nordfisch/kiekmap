@@ -42,6 +42,8 @@ export function TimeSlider() {
   const fullRange = useKiosk((s) => s.fullRange);
   const timeRange = useKiosk((s) => s.timeRange);
   const setTimeRange = useKiosk((s) => s.setTimeRange);
+  const showUndated = useKiosk((s) => s.showUndated);
+  const setShowUndated = useKiosk((s) => s.setShowUndated);
 
   const track = useRef<HTMLDivElement>(null);
 
@@ -177,7 +179,24 @@ export function TimeSlider() {
           {timeRange.from} <span className="timeline__to">{t.timeline.to}</span> {timeRange.to}
         </span>
         {histogram.undated > 0 ? (
-          <span className="timeline__undated">{t.timeline.undated(histogram.undated)}</span>
+          /* The count was standing here anyway; it is now the label of the switch that decides
+             what happens to it. Photos without a date overlap no period, so a time range drops
+             every one of them -- and until this switch existed, that was something the visitor
+             found out only by watching the map empty out. */
+          <button
+            type="button"
+            className="timeline__undated"
+            onClick={() => setShowUndated(!showUndated)}
+            aria-pressed={showUndated}
+          >
+            <span
+              className={`timeline__box${showUndated ? " timeline__box--on" : ""}`}
+              aria-hidden="true"
+            >
+              ✓
+            </span>
+            {t.timeline.undated(histogram.undated)}
+          </button>
         ) : (
           // No bars and nothing undated either: there is simply nothing here. That needs saying,
           // or the empty axis looks like a fault.

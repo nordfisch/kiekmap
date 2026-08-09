@@ -934,3 +934,46 @@ Fotowechsel abgebaut, ein `useState` faellt dort also von selbst zurueck — nur
 Weg, auf dem `load()` zur urspruenglichen Frage zurueckfaellt, weil die andere leergelaufen ist.
 Genau dieser Fall tritt ein, wenn eine Art von Luecke abgearbeitet ist, und er hinterliesze eine
 scharfe Karte ueber einem Foto, das der Besucher noch nicht angesehen hat.
+
+---
+
+## 28. Fotos ohne Jahr sind ein Schalter, keine Nebenwirkung
+
+Ein Foto ohne Datum ueberlappt keinen Zeitraum. Es fiel damit aus **jeder** Auswahl heraus, sobald
+der Besucher den Schieber auch nur ein Stueck zusammenzog — bei diesem Bestand zwei Drittel der
+Sammlung, ohne dass irgendwo gestanden haette, dass das passieren wuerde. Seit dem 9. August 2026
+steht neben dem Schieber ein Schalter: **„507 Fotos ohne Jahr anzeigen"**, mit Haken.
+
+**Die Zahl stand ohnehin dort.** Sie war bisher eine Meldung; jetzt ist sie die Beschriftung einer
+Handlung. Das ist der ganze Trick an der Stelle — es kommt kein Bedienelement hinzu, ein
+vorhandenes bekommt einen Zweck.
+
+**Eingeschaltet heiszt „kein Datum ODER Ueberlappung".** Der Zeitraum gilt dann nicht mehr fuer
+alles, was auf dem Schirm steht. Das ist eine echte Einbusze an Genauigkeit, und sie ist
+vertretbar, weil der Besucher sie sieht und sie selbst eingestellt hat. Die Gegenrichtung — der
+Schalter wirkt nur, wenn ohnehin kein Zeitfilter geht — waere eine Anzeige gewesen und kein
+Schalter: Beim ersten Anfassen des Schiebers waeren die Fotos trotzdem verschwunden.
+
+**Er steht anfangs an und geht genau einmal von selbst aus** — beim ersten Zusammenziehen des
+Zeitraums. Das ist der Moment, in dem die Auswahl anfaengt, etwas zu bedeuten: Bis dahin hat der
+Besucher nichts eingestellt, ab da schon. Der Anfangszustand zeigt also alles, was das Museum hat,
+und niemand verliert etwas, ohne es getan zu haben.
+
+**Danach gehoert der Schalter dem Besucher.** Wer ihn von Hand wieder einschaltet, bei dem bleibt
+er an, auch beim naechsten Zug am Schieber. Ginge er jedes Mal wieder aus, waere genau die
+Nebenwirkung zurueck, gegen die dieser Punkt gebaut ist — nur eine Ebene hoeher und aergerlicher,
+weil sie eine Entscheidung ueberschriebe, die jemand gerade getroffen hat. Im Store steht dafuer
+ein zweiter Wert (`undatedByHand`), der nie zurueckfaellt.
+
+**Wonach die Automatik greift, ist `queryTimeFilter`** — dieselbe Funktion, die entscheidet, ob
+ueberhaupt ein Zeitfilter zum Backend geht. Damit geht der Schalter exakt dort aus, wo sonst Fotos
+anfingen zu verschwinden. Eine zweite, eigene Regel dafuer waere eine zweite Wahrheit gewesen.
+
+**Das Histogramm zaehlt die undatierten Fotos immer mit**, gleich wie der Schalter steht. Sonst
+stuende dort nach dem Abschalten eine Null, das Etikett verschwaende — und mit ihm der einzige Weg
+zurueck.
+
+Der Schalter ist ein Knopf mit gezeichnetem Kaestchen, kein `input[type=checkbox]`: Der ist rund
+13 px grosz, die Zielgruppe braucht 48. Die Kopfzeile des Schiebers ist dadurch hoeher geworden;
+was das fuer die drei Elemente der oberen Zeile bedeutet, gehoert zu Punkt 29 im
+[backlog.md](backlog.md).

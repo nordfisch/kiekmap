@@ -49,7 +49,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
-| 33 | [Fotos ohne Jahr: ein Schalter statt einer Nebenwirkung](#33--fotos-ohne-jahr-ein-schalter-statt-einer-nebenwirkung) | Frage | wichtig · dringend |
 | 36 | [„Hilf mit" soll auch nachschärfen, nicht nur füllen](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) | Frage | wichtig |
 | 27 | [Unter dem Vorschaubild: Adresse und Jahr](#27--unter-dem-vorschaubild-adresse-und-jahr) | Aufgabe | wichtig |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
@@ -77,7 +76,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Dreizehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 26, 32. Sie sind erledigt,
+**Vierzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 26, 32, 33. Sie sind erledigt,
 aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
 neue Punkt bekommt die **43**.
 
@@ -309,42 +308,6 @@ Nicht wichtig, nicht dringend — erst zu prüfen und zu bewerten, dann zu spezi
 ---
 
 ## Besucher-Interface
-
-### 33 · Fotos ohne Jahr: ein Schalter statt einer Nebenwirkung
-
-Ob undatierte Fotos auf der Karte stehen, entscheidet heute niemand — es ergibt sich. Sie sind da,
-**solange kein Zeitfilter aktiv ist**, und verschwinden, sobald der Besucher den Schieber
-zusammenzieht. Denn ein Foto ohne Datum überlappt keinen Zeitraum, also fällt es aus jeder Auswahl
-heraus.
-
-Bei diesem Bestand ist das keine Feinheit: **673 von 929 Fotos haben kein Jahr.** Wer den Schieber
-auch nur ein Stück zusammenzieht, verliert schlagartig drei Viertel der Karte — ohne dass ihm
-jemand gesagt hätte, dass das passieren würde.
-
-**Vorschlag: ein Schalter dort, wo die Zahl ohnehin steht.** Aus „673 Fotos ohne Jahr" in der
-Kopfzeile des Schiebers wird „673 Fotos ohne Jahr anzeigen" mit einem Kästchen daneben. Dann ist
-es eine Entscheidung des Besuchers statt einer Nebenwirkung der Schieberstellung.
-
-**Was dafür zu klären ist:**
-
-- **Was „anzeigen" bei engem Zeitraum heißt.** Ein undatiertes Foto passt in keinen Zeitraum; es
-  mitzuzeigen bedeutet, den Zeitfilter für diese Fotos zu übergehen — in der Abfrage ein *oder*:
-  kein Datum **oder** Überlappung. Das ist eine Zeile in `_viewport_filters`, aber eine mit
-  Bedeutung: Der Zeitraum gilt dann nicht mehr für alles, was auf dem Schirm steht.
-- **Wie der Schalter anfangs steht.** Eingeschaltet zeigt beim ersten Blick alles, was das Museum
-  hat — das ist die heutige Wirkung und die freundlichere. Ausgeschaltet macht den Schieber sofort
-  wahrhaftig, kostet aber drei Viertel der Karte, bevor jemand etwas getan hat.
-- **Was aus dem stillen Kniff wird.** `queryTimeFilter` schickt heute keinen Filter, wenn die
-  ganze Spanne gewählt ist — genau damit die undatierten Fotos stehen bleiben. Mit einem
-  ausdrücklichen Schalter braucht es diesen Umweg womöglich nicht mehr, und die Absicht stünde
-  dann dort, wo der Besucher sie sieht, statt in einer Bedingung im Store.
-
-**Der verwandte Fehler ist behoben, dieser Punkt bleibt.** Punkt 32 — die Verwaltungskachel, die
-undatierte Fotos nicht als sichtbar zählte — ist am 9. August 2026 erledigt worden (siehe
-[history.md](history.md)). Beide kamen daher, dass „undatiert" und „unsichtbar" nicht dasselbe
-sind, im Kopf aber leicht zusammenfallen. Bei 32 zählte deshalb eine Zahl falsch; hier stimmt die
-Anzeige, aber der Besucher erfährt nie, was ihm beim Zusammenziehen des Schiebers abhandenkommt.
-Das ist die schwerere Hälfte, und sie ist noch offen.
 
 ### 36 · „Hilf mit" soll auch nachschärfen, nicht nur füllen
 
@@ -735,6 +698,12 @@ Wurzelschrift:
 | Titelblock | 13,5 px | 85,0 px | 71,5 px |
 | Wappen | 13,5 px | **98,0 px** | 84,5 px |
 | Zeitschieber, erste Zeile bis Jahresskala | 13,5 px | **133,6 px** | 120,1 px |
+
+**Die Zahlen sind vom 9. August 2026 vormittags und schon überholt:** Seit dem Schalter „507 Fotos
+ohne Jahr anzeigen" ([decisions.md](decisions.md), Punkt 28) trägt die Kopfzeile des Schiebers einen
+50 px hohen Knopf statt eines Wortes und ist entsprechend gewachsen. Die Größenordnung des
+Problems ändert das nicht — sie vergrößert es. **Nachmessen gehört zum ersten Schritt dieses
+Punktes**, nicht das Übernehmen der Tabelle.
 
 Fast fünfzig Pixel Unterschied an den Unterkanten. Das CSS behauptet an dieser Stelle das
 Gegenteil: Ein Kommentar bei `.app__heading-lead` rechnet vor, dass beide Titelzeilen zusammen

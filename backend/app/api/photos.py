@@ -6,7 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import FileResponse
-from sqlalchemy import Integer, cast, func, select
+from sqlalchemy import Integer, and_, cast, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.config import Settings, get_settings
@@ -52,6 +52,10 @@ class Viewport:
         to_year: Annotated[
             int | None, Query(ge=1800, le=2100, description="Latest year to include")
         ] = None,
+        include_undated: Annotated[
+            bool,
+            Query(description="Keep photos that carry no date at all, whatever the time range"),
+        ] = True,
     ) -> None:
         parts = bbox.split(",")
         if len(parts) != 4:
@@ -67,6 +71,7 @@ class Viewport:
         if from_year is not None and to_year is not None and from_year > to_year:
             from_year, to_year = to_year, from_year
         self.from_year, self.to_year = from_year, to_year
+        self.include_undated = include_undated
 
     @property
     def time_range(self) -> tuple[date, date] | None:
@@ -81,6 +86,12 @@ def _viewport_filters(viewport: Viewport):
     The time filter queries for **overlap** of the intervals, not containment. Otherwise a photo
     dated "the 1920s" would vanish from the selection 1925-1930 -- precisely the loosely dated
     photos a local history museum mostly has. See app/services/dates.py.
+
+    **Photos without any date are a third case, and the caller decides it.** They overlap no
+    period at all, so a time range drops every one of them -- in this collection two thirds of it,
+    silently. ``include_undated`` therefore widens the condition to "no date **or** overlap": the
+    time range then no longer holds for everything on screen, which is why the visitor has to say
+    so. See the switch beside the slider.
     """
     filters = [
         Photo.status == PhotoStatus.PUBLISHED,
@@ -90,11 +101,18 @@ def _viewport_filters(viewport: Viewport):
     ]
     if (selection := viewport.time_range) is not None:
         selected_start, selected_end = selection
-        filters += [
+        overlaps = and_(
             Photo.date_from.is_not(None),
             Photo.date_from <= selected_end,
             Photo.date_to >= selected_start,
-        ]
+        )
+        filters.append(
+            or_(Photo.date_from.is_(None), overlaps) if viewport.include_undated else overlaps
+        )
+    elif not viewport.include_undated:
+        # No range, but the undated are unwanted: without this the switch would do nothing at the
+        # one setting where the slider covers the whole axis -- and that is where it starts.
+        filters.append(Photo.date_from.is_not(None))
     return filters
 
 
@@ -134,8 +152,14 @@ def histogram(
 
     Deliberately without the time filter: the slider should show where anything is to be found at
     all -- including outside the current selection.
+
+    ``include_undated`` is forced on for the same reason. This endpoint reports how many undated
+    photos the viewport *holds*, not how many are currently shown -- and that count is what the
+    switch beside the slider is labelled with. Counted out, the label would disappear along with
+    the only way of switching them back on.
     """
     viewport.from_year = viewport.to_year = None
+    viewport.include_undated = True
     filters = _viewport_filters(viewport)
 
     # The axis, and deliberately without the viewport: it spans the whole collection and stays put

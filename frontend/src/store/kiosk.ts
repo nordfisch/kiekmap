@@ -40,6 +40,25 @@ type KioskState = {
    */
   fullRange: TimeRange | null;
 
+  /**
+   * Are photos without any date on the map?
+   *
+   * They overlap no period, so every time range drops all of them -- two thirds of this
+   * collection. That used to be a side effect of touching the slider; now it is a switch beside
+   * it, and this is its state.
+   */
+  showUndated: boolean;
+  /**
+   * Has the visitor worked that switch themselves?
+   *
+   * Until they have, the first narrowing of the range turns it off for them -- that is the moment
+   * the period starts to mean something, so it is the moment to stop showing what lies outside
+   * it. **Afterwards it stays where they put it.** Turning it off again on every further drag
+   * would fight a choice somebody had just made by hand, and land right back at the complaint
+   * this whole thing is about: the map losing photos without being asked.
+   */
+  undatedByHand: boolean;
+
   photos: PhotoMarker[];
   total: number;
   truncated: boolean;
@@ -74,6 +93,7 @@ type KioskState = {
 
   setViewport: (bbox: Bbox) => void;
   setTimeRange: (timeRange: TimeRange) => void;
+  setShowUndated: (on: boolean) => void;
   /** A single photo -- the short form for a stack of length one. */
   openPhoto: (id: number | null) => void;
   openStackAt: (ids: number[], index?: number) => void;
@@ -120,7 +140,7 @@ export function queryTimeFilter(
 
 export const useKiosk = create<KioskState>((set, get) => {
   async function loadPhotos() {
-    const { bbox, timeRange, fullRange } = get();
+    const { bbox, timeRange, fullRange, showUndated } = get();
     if (!bbox) return;
 
     // Discard superseded requests: on a touchscreen people swipe in quick succession, and the
@@ -135,6 +155,7 @@ export const useKiosk = create<KioskState>((set, get) => {
         bbox,
         queryTimeFilter(timeRange, fullRange),
         MAX_PHOTOS,
+        showUndated,
         signal,
       );
       set({
@@ -199,6 +220,8 @@ export const useKiosk = create<KioskState>((set, get) => {
     bbox: null,
     timeRange: null,
     fullRange: null,
+    showUndated: true,
+    undatedByHand: false,
     photos: [],
     total: 0,
     truncated: false,
@@ -229,7 +252,25 @@ export const useKiosk = create<KioskState>((set, get) => {
 
       const current = get().timeRange;
       if (current && current.from === next.from && current.to === next.to) return;
-      set({ timeRange: next });
+
+      // The first narrowing takes the undated off the map -- once, and only while nobody has
+      // touched the switch.
+      //
+      // This is the moment the period starts to mean something: up to here the visitor has set
+      // nothing, from here they have. Leaving photos on the map that lie in no period at all
+      // would make the slider say something it does not do. ``queryTimeFilter`` is the right
+      // question to ask, because it answers "is a filter going out at all" -- the switch goes off
+      // exactly where photos would otherwise begin to vanish unasked.
+      const { undatedByHand, fullRange } = get();
+      const narrowed = queryTimeFilter(next, fullRange) !== null;
+      set({ timeRange: next, ...(undatedByHand || !narrowed ? {} : { showUndated: false }) });
+      scheduleLoad();
+    },
+
+    setShowUndated(on) {
+      // ``undatedByHand`` never goes back: from here the switch is the visitor's, and the slider
+      // stops reaching for it.
+      set({ showUndated: on, undatedByHand: true });
       scheduleLoad();
     },
 

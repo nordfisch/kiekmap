@@ -559,8 +559,11 @@ button {
 
 .timeline__header {
   display: flex;
-  align-items: baseline;
+  /* Zentriert statt an der Grundlinie, seit rechts ein Schalter steht statt eines Wortes: Eine
+   * Flaeche von 48 px an einer Schriftgrundlinie auszurichten setzt sie sichtbar zu tief. */
+  align-items: center;
   justify-content: space-between;
+  gap: var(--gap);
 }
 
 .timeline__selection {
@@ -576,9 +579,54 @@ button {
   margin: 0 0.15rem;
 }
 
+/* Der Schalter fuer die Fotos ohne Jahr -- und die blosse Meldung, wenn es nichts zu schalten
+ * gibt. Beide tragen dieselbe Klasse, damit die Kopfzeile in beiden Faellen gleich hoch bleibt.
+ *
+ * Kein `input[type=checkbox]`: Der ist rund 13 px gross und damit weit unter den 48 px, die diese
+ * Zielgruppe braucht. Das Kaestchen ist deshalb gezeichnet, der Knopf traegt den Zustand. */
 .timeline__undated {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
   font-size: 0.8rem;
   color: var(--muted);
+  text-align: left;
+}
+
+button.timeline__undated {
+  padding: 0 0.4rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: none;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+button.timeline__undated:hover {
+  background: rgb(0 0 0 / 4%);
+}
+
+.timeline__box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--line);
+  border-radius: 0.3rem;
+  background: var(--paper);
+  color: transparent;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.timeline__box--on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--paper);
 }
 
 /* The strip and the trimmer over it, after the fashion of a video editor: the bars are the

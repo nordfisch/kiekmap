@@ -60,7 +60,11 @@ export const t = {
     empty: "Für diesen Ausschnitt gibt es keine datierten Fotos.",
     loading: "…",
     to: "bis",
-    undated: (count: number) => `${count} ${count === 1 ? "Foto" : "Fotos"} ohne Jahr`,
+    /**
+     * The switch beside the slider -- the count is the label, because that is where it stood
+     * anyway. "anzeigen" makes it a thing one can do, not a fact one has to put up with.
+     */
+    undated: (count: number) => `${count} ${count === 1 ? "Foto" : "Fotos"} ohne Jahr anzeigen`,
     startHandle: "Anfangsjahr",
     endHandle: "Endjahr",
     /** The middle grip: it moves the whole period, it does not change its length. */

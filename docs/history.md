@@ -1700,3 +1700,55 @@ Ruecksetzung in `load()` deckte, weil alle ueber `skip()` oder `contribute()` li
 zuruecksetzen. `load()` ist aber die Stelle, die jeden Fotowechsel sieht. Der Test dafuer ruft
 `load()` seitdem unmittelbar auf — geschrieben, weil die Gegenprobe nicht fiel, nicht weil eine
 Luecke aufgefallen waere.
+
+## Was der Schieber wegnahm, ohne es zu sagen
+
+9. August 2026. Punkt 33 des Backlogs, und der zweite Teil desselben Missverstaendnisses wie
+Punkt 32 am selben Tag: „undatiert" und „unsichtbar" sind nicht dasselbe, fallen im Kopf aber
+leicht zusammen. Bei 32 zaehlte deshalb eine Zahl falsch. Hier war es schlimmer — die Zahl stimmte,
+aber der Besucher erfuhr nie, was ihm abhandenkam.
+
+Ein Foto ohne Datum ueberlappt keinen Zeitraum. Es fiel damit aus **jeder** Auswahl heraus, sobald
+jemand den Schieber auch nur ein Stueck zusammenzog: zwei Drittel der Sammlung, lautlos, ohne dass
+irgendwo gestanden haette, dass das passieren wuerde. Am laufenden Bestand nachgemessen — 855 Fotos
+ohne Zeitfilter, 3 in der Auswahl 1950 bis 1994.
+
+Aus der Meldung „507 Fotos ohne Jahr" neben dem Schieber ist deshalb ein **Schalter** geworden:
+„507 Fotos ohne Jahr anzeigen", mit Haken. Die Zahl stand ohnehin dort; es kommt kein
+Bedienelement hinzu, ein vorhandenes bekommt einen Zweck.
+
+### Die Frage, an der es haengt, hat der Auftraggeber besser beantwortet als der Vorschlag
+
+Der Backlog hatte zwei Moeglichkeiten fuer den Anfangszustand aufgeschrieben und keine gute dabei:
+**an** zeigt beim ersten Blick alles, macht den Schieber aber unehrlich; **aus** macht ihn sofort
+ehrlich und kostet drei Viertel der Karte, bevor jemand etwas getan hat.
+
+Die Antwort war keine von beiden: **an — und beim ersten Zusammenziehen des Zeitraums geht er von
+selbst aus.** Das ist genau der Moment, in dem die Auswahl anfaengt, etwas zu bedeuten. Bis dahin
+hat der Besucher nichts eingestellt und soll alles sehen; ab da hat er etwas eingestellt und soll
+sehen, was das bewirkt.
+
+Beim Bauen kam eine Praezisierung dazu, ohne die der Einfall sich selbst im Weg gestanden haette:
+**automatisch nur einmal.** Wer den Schalter von Hand wieder einschaltet, bei dem bleibt er an,
+auch beim naechsten Zug am Schieber. Ginge er jedes Mal wieder aus, waere genau die Nebenwirkung
+zurueck, gegen die der ganze Punkt gebaut ist — nur eine Ebene hoeher, und aergerlicher, weil sie
+eine Entscheidung ueberschriebe, die jemand gerade getroffen hat.
+
+Wonach die Automatik greift, ist `queryTimeFilter` — dieselbe Funktion, die entscheidet, ob
+ueberhaupt ein Zeitfilter zum Backend geht. Der Schalter geht damit exakt dort aus, wo sonst Fotos
+anfingen zu verschwinden. Eine eigene Regel dafuer waere eine zweite Wahrheit gewesen.
+
+### Zwei Fallen, die beim Schreiben der Tests auffielen
+
+**Das Histogramm haette sich selbst abgeschaltet.** Es zaehlt die undatierten Fotos, und diese Zahl
+ist die Beschriftung des Schalters. Haette es `include_undated` mitbeachtet, stuende dort nach dem
+Abschalten eine Null — das Etikett verschwaende, und mit ihm der einzige Weg zurueck. Der Endpunkt
+erzwingt den Wert deshalb, so wie er den Zeitfilter schon immer verworfen hat.
+
+**Ein Test prueft nichts, wenn der Store vorher aussteigt.** Die Gegenprobe lief einzeln gegen alle
+drei Bedingungen der Automatik, und die dritte fiel nicht: Der Test dafuer setzte einen Zeitraum,
+den das Einklemmen an der Achse unveraendert liesz — `setTimeRange` stieg beim Vergleich mit dem
+alten Wert aus, bevor die Logik ueberhaupt erreicht war. Ein gruener Test, der nie an der Stelle
+vorbeikam, die er zu schuetzen vorgibt. Er setzt jetzt einen Zeitraum, der sich wirklich aendert
+und die Spanne trotzdem ueberdeckt: Endgriff von 2030 auf 2026, waehrend das juengste Foto bei 2024
+liegt.

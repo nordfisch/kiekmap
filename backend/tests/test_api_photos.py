@@ -84,19 +84,6 @@ class TestZeitfilter:
             )
             assert antwort.json()["total"] == 1, f"{von}-{bis} muss 1932 enthalten"
 
-    def test_undatiertes_foto_erscheint_in_keiner_zeitauswahl(
-        self, client: TestClient, session, make_photo
-    ):
-        make_photo(year=None)
-        session.commit()
-
-        mit_zeit = client.get(
-            "/api/photos", params={"bbox": BBOX, "from_year": 1800, "to_year": 2100}
-        )
-        assert mit_zeit.json()["total"] == 0
-        # Ohne Zeitauswahl aber schon -- sonst waere es unsichtbar.
-        assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 1
-
     def test_vertauschte_jahre_werden_gedreht(self, client: TestClient, session, make_photo):
         make_photo(year=1932)
         session.commit()
@@ -105,6 +92,91 @@ class TestZeitfilter:
             "/api/photos", params={"bbox": BBOX, "from_year": 1950, "to_year": 1900}
         )
         assert antwort.json()["total"] == 1
+
+
+class TestUndatierte:
+    """Fotos ohne Jahr sind der dritte Fall, und wer fragt, entscheidet ihn.
+
+    Sie ueberlappen keinen Zeitraum, fielen also aus jeder Auswahl heraus -- in diesem Bestand
+    zwei Drittel davon, lautlos. ``include_undated`` ist deshalb ein eigener Schalter und nicht
+    eine Nebenwirkung der Schieberstellung.
+    """
+
+    def test_bleiben_standardmaessig_in_der_zeitauswahl(
+        self, client: TestClient, session, make_photo
+    ):
+        # Der Regelfall: Wer den Schieber anfasst, soll nicht ohne Ansage drei Viertel der Karte
+        # verlieren. Frueher war genau das die Wirkung.
+        make_photo(year=None)
+        session.commit()
+
+        antwort = client.get(
+            "/api/photos", params={"bbox": BBOX, "from_year": 1920, "to_year": 1930}
+        )
+
+        assert antwort.json()["total"] == 1
+
+    def test_fallen_heraus_wenn_der_schalter_aus_ist(self, client: TestClient, session, make_photo):
+        make_photo(year=None)
+        session.commit()
+
+        antwort = client.get(
+            "/api/photos",
+            params={"bbox": BBOX, "from_year": 1920, "to_year": 1930, "include_undated": False},
+        )
+
+        assert antwort.json()["total"] == 0
+
+    def test_der_schalter_wirkt_auch_ohne_zeitauswahl(
+        self, client: TestClient, session, make_photo
+    ):
+        """Die Stellung, bei der der Schieber steht, wenn niemand ihn angefasst hat.
+
+        Ueber die ganze Achse schickt der Kiosk bewusst keinen Zeitfilter. Griffe der Schalter
+        nur zusammen mit einem, taete er ausgerechnet dort nichts, wo er anfaengt.
+        """
+        make_photo(year=None, sha="a" * 64)
+        make_photo(year=1932, sha="b" * 64)
+        session.commit()
+
+        antwort = client.get("/api/photos", params={"bbox": BBOX, "include_undated": False})
+
+        assert antwort.json()["total"] == 1
+
+    def test_datierte_bleiben_von_dem_schalter_unberuehrt(
+        self, client: TestClient, session, make_photo
+    ):
+        """Die Gegenprobe: Der Schalter erweitert die Auswahl, er ersetzt sie nicht.
+
+        Waere aus ``kein Datum ODER Ueberlappung`` versehentlich nur ``kein Datum``, stuende
+        ploetzlich nichts Datiertes mehr auf der Karte -- und der Test oben faende das gut.
+        """
+        make_photo(year=1932, sha="c" * 64)
+        session.commit()
+
+        drin = client.get("/api/photos", params={"bbox": BBOX, "from_year": 1930, "to_year": 1935})
+        draussen = client.get(
+            "/api/photos", params={"bbox": BBOX, "from_year": 1950, "to_year": 1955}
+        )
+
+        assert drin.json()["total"] == 1
+        assert draussen.json()["total"] == 0
+
+    def test_das_histogramm_zaehlt_sie_immer(self, client: TestClient, session, make_photo):
+        """Sonst verschwaende mit der Zahl auch der Schalter, der sie zurueckholt.
+
+        Das Etikett neben dem Schieber heisst „670 Fotos ohne Jahr anzeigen". Zaehlte das
+        Histogramm nur die gerade sichtbaren, stuende dort nach dem Abschalten eine Null -- und
+        der Weg zurueck waere weg.
+        """
+        make_photo(year=None)
+        session.commit()
+
+        antwort = client.get(
+            "/api/photos/histogram", params={"bbox": BBOX, "include_undated": False}
+        )
+
+        assert antwort.json()["undated"] == 1
 
 
 class TestBegrenzung:
