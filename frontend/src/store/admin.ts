@@ -36,8 +36,23 @@ type AdminState = {
   /** How long a session lasts, as the backend reported it. Not a number of our own. */
   lifetimeMs: number;
 
-  askPin: () => void;
+  /**
+   * A photo to open in the editor as soon as the PIN goes through, or null for the usual way in.
+   *
+   * The pencil beside the title in the detail view sets it. Without it the admin area could only
+   * be entered at its front door, and finding one particular photo again meant searching for it
+   * -- by the very title that is the thing being corrected.
+   *
+   * Cleared by whoever acts on it (see ``AdminApp``), so that closing the editor does not put the
+   * same photo up again, and by every route out of the PIN pad.
+   */
+  editPhotoId: number | null;
+
+  /** The number pad. With a photo id: after signing in, that photo opens for editing. */
+  askPin: (editPhotoId?: number) => void;
   cancelPin: () => void;
+  /** Called once the target has been acted on -- otherwise it would fire again on every render. */
+  clearTarget: () => void;
   signIn: (pin: string) => Promise<void>;
   /** Deliberately leaving the admin area. Signs out **and reloads** -- see the action. */
   leave: () => Promise<void>;
@@ -69,13 +84,18 @@ export const useAdmin = create<AdminState>((set, get) => ({
   error: null,
   expiresAt: null,
   lifetimeMs: 30 * 60 * 1000,
+  editPhotoId: null,
 
-  askPin() {
-    set({ view: "pin", error: null });
+  askPin(editPhotoId) {
+    set({ view: "pin", error: null, editPhotoId: editPhotoId ?? null });
   },
 
   cancelPin() {
-    set({ view: "kiosk", error: null });
+    set({ view: "kiosk", error: null, editPhotoId: null });
+  },
+
+  clearTarget() {
+    set({ editPhotoId: null });
   },
 
   async signIn(pin) {
@@ -121,7 +141,7 @@ export const useAdmin = create<AdminState>((set, get) => ({
   dropSession() {
     setAdminToken(null);
     remember(null);
-    set({ view: "kiosk", expiresAt: null, error: null });
+    set({ view: "kiosk", expiresAt: null, error: null, editPhotoId: null });
   },
 
   /** Called once at startup. A token from before only counts if the backend still knows it. */

@@ -43,6 +43,8 @@ export type PhotoDetail = {
   /** For a scan, the date of the scanning run -- shown to the curator, never used as a dating. */
   exif_datetime: string | null;
   original_filename: string;
+  /** The photo's identity independent of any database -- the file name is this hash. */
+  sha256: string;
   imported_at: string;
   width: number;
   height: number;

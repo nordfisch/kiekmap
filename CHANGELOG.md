@@ -577,3 +577,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   auf einer Übersichtskarte niemand sucht, und unter den rund 670 undatierten Fotos siebenhundertmal
   „Jahr unbekannt". Ein Stapel zeigt die Adresse, die alle seine Fotos teilen, aber kein Jahr; fehlt
   beides, fällt die Zeile weg. Die Beschriftung für Vorlesewerkzeuge behält das volle Datum
+
+### Hinzugefügt
+
+- **Vom Foto direkt in seine Bearbeitung.** Neben dem Titel in der Detailansicht steht ein Stift;
+  ein Tipp darauf fragt die PIN ab und öffnet danach **dieses** Foto im Bearbeiten-Bildschirm der
+  Verwaltung. Wer am Gerät eine falsche Beschriftung sieht, musste bisher die Verwaltung öffnen,
+  die PIN eingeben, in die Fotoliste gehen und suchen — und wonach man sucht, ist ausgerechnet der
+  Titel, der falsch ist
+- **Die ersten acht Zeichen des SHA-256** stehen in der Detailansicht ganz unten, unter dem
+  Bildnachweis, klein und grau. Sie sind die Identität des Fotos unabhängig von der Datenbank, und
+  **die Fotosuche der Verwaltung findet sie** — ohne das wäre es eine Kennung, die sich nirgends
+  nachschlagen lässt

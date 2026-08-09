@@ -41,7 +41,19 @@ const TICK_MS = 10_000;
 export function AdminApp() {
   const leave = useAdmin((s) => s.leave);
   const dropSession = useAdmin((s) => s.dropSession);
-  const [section, setSection] = useState<Section>("overview");
+  const clearTarget = useAdmin((s) => s.clearTarget);
+
+  /**
+   * Came in through the pencil in the detail view? Then a photo is waiting, not the overview.
+   *
+   * Read once at mount and kept, because the store clears it right away: it is a way in, not a
+   * state. Otherwise closing the editor would put the same photo up again -- and leaving the
+   * section and coming back would do it a third time.
+   */
+  const [target] = useState(() => useAdmin.getState().editPhotoId);
+  useEffect(() => clearTarget(), [clearTarget]);
+
+  const [section, setSection] = useState<Section>(target === null ? "overview" : "photos");
   const [photoFilter, setPhotoFilter] = useState<Selection>("all");
   const [minutes, setMinutes] = useState<number | null>(null);
   const body = useRef<HTMLElement>(null);
@@ -110,7 +122,9 @@ export function AdminApp() {
         <ScrollAreaProvider value={body}>
           {section === "overview" && <Overview onNavigate={navigate} />}
           {/* Remounted when the filter changes, so the list starts on the right one. */}
-          {section === "photos" && <PhotoCare key={photoFilter} initialFilter={photoFilter} />}
+          {section === "photos" && (
+            <PhotoCare key={photoFilter} initialFilter={photoFilter} openPhotoId={target} />
+          )}
           {section === "import" && (
             <ImportView
               onReview={() => navigate({ section: "photos", filter: "without_location" })}

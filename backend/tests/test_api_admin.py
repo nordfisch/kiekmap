@@ -776,3 +776,30 @@ class TestNachweisUndHerkunft:
         foto = session.scalars(select(Photo)).one()
         assert foto.credit == "Sammlung Heimatmuseum Holm"
         assert foto.provenance == "Kiste Dachboden Petersen"
+
+
+class TestSucheUeberDenHash:
+    """Die acht Zeichen aus der Detailansicht muessen die Verwaltung wiederfinden.
+
+    Sonst stuende dort eine Kennung, die sich nirgends nachschlagen laesst -- Zierrat statt
+    Auskunft. Sie ist der Weg zurueck zu einem Foto, dessen Titel gerade das Falsche ist.
+    """
+
+    def test_findet_ein_foto_ueber_den_anfang_seines_hashes(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        make_photo(sha="abc12345" + "0" * 56, title="Falsch beschriftet")
+        make_photo(sha="f" * 64, title="Ein anderes")
+        session.commit()
+
+        daten = admin_client.get("/api/admin/photos", params={"q": "abc12345"}).json()
+
+        assert daten["total"] == 1
+        assert daten["photos"][0]["title"] == "Falsch beschriftet"
+
+    def test_der_hash_steht_in_der_detailansicht(self, client: TestClient, session, make_photo):
+        # Und zwar in der oeffentlichen: Die Besucheransicht zeigt ihn unter dem Bildnachweis.
+        foto = make_photo(sha="abc12345" + "0" * 56)
+        session.commit()
+
+        assert client.get(f"/api/photos/{foto.id}").json()["sha256"].startswith("abc12345")

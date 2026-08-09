@@ -17,11 +17,36 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { type PhotoDetail, type Precision, fetchPhoto } from "../api/client";
+import { useAdmin } from "../store/admin";
 import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
 import { DatePicker } from "./DatePicker";
 import { offeredDecades } from "./decades";
+
+/**
+ * How much of the hash is shown.
+ *
+ * Eight hex characters are four billion possibilities -- for a collection of a few thousand
+ * photos that is a collision every few million, and short enough to read off a screen and type
+ * into the search field. The same length git uses for the same reason.
+ */
+const HASH_CHARS = 8;
+
+/** Drawn here rather than fetched: no CDN, no icon font -- see CLAUDE.md on offline. */
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <path
+        d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5 4 20z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function PhotoOverlay() {
   const openStack = useKiosk((s) => s.openStack);
@@ -42,6 +67,7 @@ export function PhotoOverlay() {
   const [dating, setDating] = useState(false);
 
   const collection = useKiosk((s) => s.fullRange);
+  const askPin = useAdmin((s) => s.askPin);
   const submitDateFor = useContribute((s) => s.submitDateFor);
   const decades = useMemo(() => offeredDecades(collection), [collection]);
 
@@ -173,7 +199,23 @@ export function PhotoOverlay() {
           {error && <p className="overlay__notice">{error}</p>}
           {detail && (
             <>
-              <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
+              {/* The title and, beside it, the way into its correction.
+
+                  Whoever stands at the device and sees a wrong caption has no short way there
+                  otherwise: open the admin area, PIN, photo list, search -- and what one would
+                  search by is the very title that is wrong. See decisions.md, point 26. */}
+              <div className="overlay__title-row">
+                <h2 className="overlay__title">{detail.title ?? t.map.untitled}</h2>
+                <button
+                  type="button"
+                  className="overlay__edit"
+                  aria-label={t.overlay.edit}
+                  title={t.overlay.edit}
+                  onClick={() => askPin(detail.id)}
+                >
+                  <PencilIcon />
+                </button>
+              </div>
               <p className="overlay__year">{detail.date_label}</p>
               {/* Only when nothing stands there: a visitor must not overwrite a curated or
                   already contributed date -- the backend refuses it anyway. */}
@@ -198,6 +240,12 @@ export function PhotoOverlay() {
               {/* Last and quiet: the credit belongs to the picture, but nobody walks up to the
                   touchscreen to read it. */}
               {detail.credit && <p className="overlay__credit">{detail.credit}</p>}
+
+              {/* Below even that, smaller still: the photo's identity independent of any
+                  database. A rebuilt collection hands out new running numbers, but the same scan
+                  keeps its hash -- so this names a photo without anybody having to open it. Eight
+                  characters are enough to find it again, and the admin search knows them. */}
+              <p className="overlay__hash">{detail.sha256.slice(0, HASH_CHARS)}</p>
             </>
           )}
         </div>

@@ -851,8 +851,8 @@ Achse liegt.
 
 ## 26. Zwei Türen in die Verwaltung, und keine davon ist mehr das Wappen
 
-*Entschieden am 9. August 2026, gebaut noch nicht* — die Umsetzung steht als Punkt 25 und 29 im
-[backlog.md](backlog.md). Diese Entscheidung schreibt [Punkt 7](#7-admin-aufs-wappen-tippen-dann-pin)
+*Entschieden am 9. August 2026.* **Die zweite Tür — der Stift — ist am selben Tag gebaut worden**
+(Punkt 25); der Titel und das neu ladende Wappen stehen als Punkt 29 im [backlog.md](backlog.md). Diese Entscheidung schreibt [Punkt 7](#7-admin-aufs-wappen-tippen-dann-pin)
 fort, der genau **eine** Tür festgelegt hatte.
 
 **Entscheidung.** Es gibt künftig zwei Wege in den Verwaltungsbereich, beide sichtbar, beide durch
@@ -884,6 +884,17 @@ verhakt hat, ist keiner davon eine Antwort. Ein *zusätzlicher* Knopf dafür wä
 Knopf, den fast niemand braucht und den trotzdem jemand drückt — Kinder zuerst —, und er wirft die
 Arbeit weg, die gerade jemand angefangen hat. Das Wappen kostet keine zusätzliche Fläche und ist
 bereits als tippbar bekannt.
+
+**Zur Kennung unter dem Bildnachweis.** In der Detailansicht stehen ganz unten, klein und grau,
+die **ersten acht Zeichen des SHA-256**. Sie sind die Identität des Fotos unabhängig von jeder
+Datenbank: Ein neu aufgebauter Bestand vergibt neue laufende Nummern, derselbe Scan behält seinen
+Hash. Acht Hexzeichen sind vier Milliarden Möglichkeiten — kurz genug zum Abschreiben, eindeutig
+genug für einen Museumsbestand, dieselbe Länge, die git aus demselben Grund nimmt. **Die
+Verwaltungssuche findet sie**, und das ist die Bedingung, unter der sie dort stehen darf: Eine
+Kennung, die sich nirgends nachschlagen lässt, wäre Zierrat.
+
+Sie ersetzt den Stift nicht, sondern deckt den Fall ab, den er nicht kann — jemanden, der sich ein
+Foto notiert und später an einem anderen Gerät danach sucht.
 
 **Der Preis, und er ist zu nennen:** Wer das Wappen antippt, weil er in die Verwaltung will, setzt
 stattdessen die Ansicht zurück. Für ein bis zwei Ehrenamtliche im Jahr ist das verkraftbar; es ist

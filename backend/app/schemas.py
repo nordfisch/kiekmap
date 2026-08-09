@@ -86,6 +86,10 @@ class PhotoDetail(BaseModel):
     exif_datetime: datetime | None
 
     original_filename: str
+    #: The photo's identity independent of any database -- the file name is this hash. A rebuilt
+    #: collection hands out new running numbers, but the same scan keeps its hash. The overlay
+    #: shows the first eight characters, and the admin search finds a photo by them.
+    sha256: str
     width: int
     height: int
     bytes: int
@@ -124,6 +128,7 @@ class PhotoDetail(BaseModel):
             location_source=photo.location_source,
             exif_datetime=photo.exif_datetime,
             original_filename=photo.original_filename,
+            sha256=photo.sha256,
             width=photo.width,
             height=photo.height,
             bytes=photo.bytes,

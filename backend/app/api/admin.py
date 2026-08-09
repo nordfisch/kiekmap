@@ -211,6 +211,11 @@ def list_photos(
                 Photo.title.ilike(pattern),
                 Photo.place_name.ilike(pattern),
                 Photo.original_filename.ilike(pattern),
+                # The hash the visitor view shows at the foot of the detail overlay. Without this
+                # line those eight characters would be a number that can be read and looked up
+                # nowhere -- decoration instead of information. It is the way back to a photo when
+                # its title is the very thing that is wrong.
+                Photo.sha256.ilike(pattern),
             )
         )
 

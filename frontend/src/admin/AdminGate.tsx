@@ -16,12 +16,14 @@ import { t } from "../text/de";
 export function AdminGate({ regionName }: { regionName: string }) {
   const askPin = useAdmin((s) => s.askPin);
 
+  // ``askPin`` is wrapped rather than passed straight through: it takes an optional photo id
+  // since the pencil in the detail view uses it, and the click event would arrive in its place.
   return (
     <button
       type="button"
       className="admin-gate"
       title={t.admin.cornerHint}
-      onClick={askPin}
+      onClick={() => askPin()}
       onContextMenu={(event) => event.preventDefault()}
     >
       <img className="admin-gate__logo" src="/logo.png" alt={t.admin.logoLabel(regionName)} />

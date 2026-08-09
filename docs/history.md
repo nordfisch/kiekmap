@@ -1809,3 +1809,48 @@ am Bestand kommt der breiteste Fall auf 147 px und bleibt darunter.
 
 Die Testfixture `make_photo` kennt seitdem `month`, `day` und `place_name` — ohne die drei liesz
 sich der Fall „22. März 2014 wird zu 2014" gar nicht aufschreiben.
+
+## Der kurze Weg vom Foto in seine Bearbeitung
+
+9. August 2026. Punkt 25, die zweite Tuer aus Entscheidung 26 — und der Punkt, dessen Arbeit an
+einer Stelle lag, die man ihm nicht ansieht. Der Stift neben dem Titel war eine Stunde Arbeit; die
+PIN-Abfrage gab es, den Bearbeiten-Bildschirm auch. **Was fehlte, war die Moeglichkeit, von aussen
+„Verwaltung bei Foto 412 oeffnen" zu sagen.** Die Fotoliste oeffnete ihren Editor ueber eigenen
+Zustand, und dieser Zustand war von nirgendwo erreichbar.
+
+Das Ziel reist jetzt durch den Admin-Store, `AdminApp` und die Fotoliste — verwandt mit dem
+`Target`, ueber das die Uebersicht schon in einen Bereich springt.
+
+**Die eigentliche Frage war nicht, wie es hineinkommt, sondern wann es wieder verschwindet.** Ein
+Ziel, das stehen bleibt, legt beim Schliessen des Editors dasselbe Foto wieder vor — und an der
+Fotoliste kaeme niemand mehr vorbei. Es faellt deshalb an vier Stellen zurueck: beim Abbrechen der
+PIN, beim Ende der Sitzung, sobald die Verwaltung es aufgegriffen hat, und beim naechsten Ziel.
+`AdminApp` liest es einmal beim Aufbau in eigenen Zustand und raeumt es sofort weg; die Fotoliste
+oeffnet einmal und merkt sich, dass sie es getan hat. Zwei Riegel, weil einer davon in einem
+`useEffect` sitzt und ein zweiter Lauf sonst genuegt.
+
+**Der Typpruefer hat dabei einen Fehler gefunden, den kein Test gefunden haette.** `AdminGate`
+reichte `askPin` direkt als `onClick` durch. Seit die Funktion eine optionale Fotonummer nimmt,
+waere das Klickereignis an deren Stelle angekommen — ein `MouseEvent` als Fotonummer, und die
+Verwaltung haette beim Tippen auf das Wappen versucht, ein Foto zu oeffnen, das es nicht gibt.
+
+### Die Kennung, und was sie kosten darf
+
+Unter dem Bildnachweis stehen jetzt die ersten acht Zeichen des SHA-256. Acht Hexzeichen sind vier
+Milliarden Moeglichkeiten — kurz genug zum Abschreiben, eindeutig genug fuer einen
+Museumsbestand, dieselbe Laenge, die git aus demselben Grund nimmt.
+
+**Sie steht dort nur, weil die Verwaltungssuche sie findet.** Der Backlog hatte das als offene
+Frage notiert, und es war die richtige: Ohne die eine zusaetzliche Zeile im vorhandenen `or_(…)`
+waere das eine Zahl, die sich nirgends nachschlagen laesst — Zierrat statt Auskunft. Sie ersetzt
+den Stift nicht, sondern deckt den Fall ab, den er nicht kann: jemanden, der sich ein Foto notiert
+und spaeter an einem anderen Geraet danach sucht.
+
+### Was ungeprueft blieb
+
+Die Besucherseite ist am laufenden Kiosk nachgefahren: Stift neben dem Titel, 50 px Flaeche,
+Kennung `21b56ce1` unter dem Bildnachweis, ein Tipp bringt das Zahlenfeld. **Der Weg dahinter
+nicht** — dafuer braucht es die PIN dieses Geraets, und die gehoert nicht in eine Sitzung wie
+diese. Gedeckt ist er durch Tests des Stores und durch die Gegenprobe an allen vier
+Ruecksetzungen; was am Bildschirm noch niemand gesehen hat, ist der Sprung in den
+Bearbeiten-Bildschirm selbst.

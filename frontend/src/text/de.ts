@@ -65,6 +65,13 @@ export const t = {
     prev: "Vorheriges",
     next: "Nächstes",
     position: (current: number, count: number) => `${current} von ${count}`,
+    /**
+     * The pencil beside the title. Only a label, no visible caption -- the icon carries it.
+     *
+     * Says what it opens rather than what it is ("Bearbeiten"), because a tap on it asks for the
+     * PIN first. Somebody who reads it should not be surprised by a number pad.
+     */
+    edit: "In der Verwaltung bearbeiten — fragt die PIN ab",
   },
 
   timeline: {

@@ -33,7 +33,14 @@ const FILTERS: { value: Selection; label: string }[] = [
   { value: "deleted", label: t.admin.photos.filterDeleted },
 ];
 
-export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection }) {
+export function PhotoCare({
+  initialFilter = "all",
+  openPhotoId = null,
+}: {
+  initialFilter?: Selection;
+  /** One photo to open straight away -- the way in from the pencil in the visitor's detail view. */
+  openPhotoId?: number | null;
+}) {
   const [show, setShow] = useState<Selection>(initialFilter);
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -78,6 +85,24 @@ export function PhotoCare({ initialFilter = "all" }: { initialFilter?: Selection
     listScroll.current = scrollArea?.current?.scrollTop ?? 0;
     setEditing(await fetchAdminPhoto(id));
   }
+
+  /**
+   * Opened by way of the pencil: this photo goes up before the list has even arrived.
+   *
+   * Runs exactly once. ``AdminApp`` holds the id for the lifetime of the area, so a second run
+   * would put the photo back up the moment somebody closed it -- and there would be no way past
+   * it into the list.
+   */
+  const [entered, setEntered] = useState(false);
+  useEffect(() => {
+    if (openPhotoId === null || entered) return;
+    setEntered(true);
+    void open(openPhotoId).catch(() => {
+      /* Deleted in the meantime, or a broken link: then the plain list is the right answer. */
+    });
+    // ``open`` is deliberately not a dependency -- it is re-created on every render, and the
+    // guard above is what limits this effect, not the list of deps.
+  }, [openPhotoId, entered]);
 
   /* Delete and restore straight from the list, without the detour through the editor -- sorting
      out after an import goes row by row. The row then disappears from view (every filter shows

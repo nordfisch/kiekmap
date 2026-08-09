@@ -44,7 +44,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | | **Verwaltung** | | |
 | 41 | [Den Erstbestand maschinell vorbereiten](#41--den-erstbestand-maschinell-vorbereiten) | Aufgabe | wichtig · dringend |
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
-| 25 | [Vom Foto direkt in seine Bearbeitung](#25--vom-foto-direkt-in-seine-bearbeitung) | Aufgabe | wichtig |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
@@ -74,8 +73,8 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Sechzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 26, 27, 32, 33,
-37. Sie sind erledigt,
+**Siebzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 32,
+33, 37. Sie sind erledigt,
 aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
 neue Punkt bekommt die **43**.
 
@@ -114,50 +113,6 @@ Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene Nacharbeits-Liste
 der Frage. Was davon **ohne Ortskenntnis** zu machen ist — Titel, Zusätze, Archivkürzel —, nimmt
 [Punkt 41](#41--den-erstbestand-maschinell-vorbereiten) ab; hier bleibt, was nur das Museumsteam
 weiß.
-
-### 25 · Vom Foto direkt in seine Bearbeitung
-
-Wer am Gerät ein falsch beschriftetes Foto sieht, hat heute keinen kurzen Weg dorthin: Verwaltung
-öffnen, PIN, Fotoliste, suchen. Und Suchen heißt hier raten — wonach man sucht, ist ausgerechnet
-der Titel, der falsch ist.
-
-**Neben dem Titel der Detailansicht steht deshalb ein Stift** (oder der Titel selbst wird die
-Fläche, das ist noch offen). Ein Tipp darauf fragt die PIN ab und öffnet danach **dieses** Foto im
-Bearbeiten-Bildschirm. Kein Suchen, kein Nachschlagen — und deshalb auch keine Kennung, die sich
-jemand aufschreiben müsste.
-
-**Ganz unten, unter dem Bildnachweis, stehen die ersten acht Zeichen des SHA-256**, klein und grau.
-Sie sind die Identität des Fotos unabhängig von jeder Datenbank: Ein neu aufgebauter Bestand
-vergibt neue laufende Nummern, aber derselbe Scan behält seinen Hash. Damit lässt sich ein Foto
-benennen, ohne es zu öffnen.
-
-**Was fehlt, ist der Weg hinein.** Die PIN-Abfrage gibt es (`askPin` in `store/admin.ts`), den
-Bearbeiten-Bildschirm auch (`admin/PhotoEditor.tsx`) — aber die Fotoliste öffnet ihn über eigenen
-Zustand (`open(id)` in `admin/PhotoCare.tsx:77`). Von außen lässt sich „Verwaltung bei Foto 412
-öffnen" nicht sagen. Das ist die eigentliche Arbeit: ein Ziel, das durch `useAdmin` und `AdminApp`
-bis in die Fotoliste durchgereicht wird — verwandt mit dem `Target`, über das die Übersicht schon
-heute in einen Bereich springt.
-
-**Drei Dinge, die dabei zu bedenken sind:**
-
-- **Es ist eine zweite Tür in die Verwaltung** — und dass sie erlaubt ist, ist entschieden und
-  nicht mehr hier zu klären: [decisions.md](decisions.md), Punkt 26. Was dort steht und beim Bauen
-  gilt: Sie ist sichtbar und trägt dieselbe PIN; der Punkt 7 von damals hat „sichtbar statt
-  versteckt" festgelegt, nicht eine Höchstzahl an Türen.
-- **Der Rückweg ist ein Neustart.** Die Verwaltung zu verlassen lädt die Seite neu (`leave()` in
-  `store/admin.ts:99`), und das aus gutem Grund: Der Bestand hat sich gerade geändert. Wer einen
-  Titel berichtigt und zurückgeht, steht also wieder in der Standardansicht, nicht bei seinem Foto.
-- **Findet die Verwaltungssuche den Hash-Anfang?** Wenn nicht, steht in der Detailansicht eine
-  Kennung, die sich nirgends nachschlagen lässt. Es wäre eine Zeile mehr im vorhandenen `or_(…)`
-  (`api/admin.py:205`) — eine Zugabe, aber sie entscheidet, ob der Hash Auskunft ist oder Zierrat.
-
-**Was von der Volltextsuche übrig bleibt.** Sie stand bis zum 9. August 2026 als eigener Punkt 4
-hier, mit der Begründung, die Fotoliste suche „nur über den Titel". Das stimmte nicht: Das `or_(…)`
-an derselben Stelle deckt Titel, **Ortsname und Dateiname** ab. Und wer über den Stift direkt vom
-Foto in dessen Bearbeitung kommt, sucht überhaupt nicht mehr. Übrig bleibt eine Zeile —
-**Beschreibung und Schlagwörter mit durchsuchen**, zwei weitere `ilike` im selben `or_(…)`. Ein
-FTS5-Index dafür wäre bei 929 Fotos Aufwand ohne Wirkung; ein `LIKE` über wenige tausend Zeilen ist
-in SQLite nicht messbar langsam. Erst bei einem Vielfachen des Bestands lohnt die Frage neu.
 
 ### 31 · Einstellungen in der Verwaltung pflegen statt in der `.env`
 
@@ -698,10 +653,12 @@ fort. Das Wappen kostet immerhin keine zusätzliche Fläche, und die Bauform ist
 Geste — die wurde in Stufe 8 aus gutem Grund verworfen (siehe [history.md](history.md)).
 
 **4. Der Titel „Bilder aus Holm" führt in die Verwaltung**, weiterhin über die PIN und **ohne
-Unterstreichung**. Das tauscht die Rollen: Bisher war das Wappen die Tür. Zusammen mit dem Stift
-aus [Punkt 25](#25--vom-foto-direkt-in-seine-bearbeitung) gibt es danach zwei Türen, und keine
-davon ist mehr das Wappen — **entschieden ist das bereits**, in [decisions.md](decisions.md),
-Punkt 26, an einer Stelle statt zweimal nebenbei. Hier bleibt die Arbeit.
+Unterstreichung**. Das tauscht die Rollen: Bisher war das Wappen die Tür. Die zweite Tür — der
+Stift in der Detailansicht — steht seit dem 9. August 2026 (Punkt 25, erledigt); mit dieser hier
+gibt es zwei, und keine davon ist mehr das Wappen. **Entschieden ist das bereits**, in
+[decisions.md](decisions.md), Punkt 26, an einer Stelle statt zweimal nebenbei. Hier bleibt die
+Arbeit — und mit ihr der Rest: Solange das Wappen die einzige Tür ist, kann es noch nicht neu
+laden.
 
 ---
 

@@ -851,10 +851,42 @@ button.timeline__undated:hover {
   color: #f4efe8;
 }
 
+/* Titel und Stift in einer Zeile. Der Stift bleibt oben buendig, damit er bei einem zweizeiligen
+ * Titel neben dessen erster Zeile steht und nicht in dessen Mitte rutscht. */
+.overlay__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
 .overlay__title {
   margin: 0 0 0.4rem;
   font-size: 1.7rem;
   line-height: 1.2;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Die zweite Tuer in die Verwaltung (siehe decisions.md, Punkt 26). Sichtbar, aber leise: Sie
+ * gehoert nicht dem Besucher, und ein farbiger Knopf neben dem Titel zoege den Blick dorthin.
+ * Die Flaeche misst trotzdem die vollen 48 px -- daran aendert die Zielgruppe nichts. */
+.overlay__edit {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.4rem;
+  background: none;
+  color: rgb(216 208 198 / 70%);
+}
+
+.overlay__edit:hover,
+.overlay__edit:focus-visible {
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
 }
 
 .overlay__year {
@@ -894,6 +926,17 @@ button.timeline__undated:hover {
   font-size: 0.8rem;
   line-height: 1.4;
   color: rgb(216 208 198 / 65%);
+}
+
+/* Die Kennung ganz unten, kleiner und leiser als der Bildnachweis: Sie ist keine Angabe zum Bild,
+ * sondern ein Griff, um es wiederzufinden. Wer sie nicht sucht, soll sie nicht lesen muessen.
+ * Zeichen mit gleicher Breite, weil sie abgetippt wird. */
+.overlay__hash {
+  margin: 0.6rem 0 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: rgb(216 208 198 / 40%);
 }
 
 /* Blättern durch die Fotos einer Stelle: mittig unter dem Bild, nicht mittig im Schirm. Über dem
