@@ -17,6 +17,7 @@ import { useState } from "react";
 
 import type { Precision } from "../api/client";
 import { t } from "../text/de";
+import { BackIcon, CheckIcon } from "./icons";
 
 export function DatePicker({
   decades,
@@ -59,6 +60,7 @@ export function DatePicker({
         onClick={() => onPick(decade, "decade")}
         disabled={disabled}
       >
+        <CheckIcon />
         {t.date.wholeDecade(decade)}
       </button>
 
@@ -76,7 +78,8 @@ export function DatePicker({
         ))}
       </div>
 
-      <button type="button" className="button button--quiet" onClick={() => setDecade(null)}>
+      <button type="button" className="button button--back" onClick={() => setDecade(null)}>
+        <BackIcon />
         {t.date.otherDecade}
       </button>
     </div>

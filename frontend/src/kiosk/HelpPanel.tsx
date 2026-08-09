@@ -13,6 +13,7 @@ import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
 import { DateTask } from "./DateTask";
 import { LocationTask } from "./LocationTask";
+import { SkipIcon } from "./icons";
 
 export function HelpPanel() {
   const need = useContribute((s) => s.need);
@@ -88,10 +89,15 @@ export function HelpPanel() {
 
           {need === "location" ? <LocationTask /> : <DateTask />}
 
-          {/* If this is the last open task, "Weiss ich nicht" leads nowhere -- the same
-              photo would come back. Then the button is better not there at all. */}
+          {/* Set apart from everything above it, by a rule and by its arrow: this is the one
+              button here that puts the photo away instead of staying with it. It used to look
+              exactly like "Anderer Buchstabe", which stays.
+
+              If this is the last open task, "Weiss ich nicht" leads nowhere -- the same photo
+              would come back. Then the button is better not there at all. */}
           {task && (task.open_count > 1 || task.open_other > 0) && (
-            <button type="button" className="button button--quiet help-panel__next" onClick={skip}>
+            <button type="button" className="button button--skip help-panel__next" onClick={skip}>
+              <SkipIcon />
               {t.help.next}
             </button>
           )}

@@ -589,3 +589,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Bildnachweis, klein und grau. Sie sind die Identität des Fotos unabhängig von der Datenbank, und
   **die Fotosuche der Verwaltung findet sie** — ohne das wäre es eine Kennung, die sich nirgends
   nachschlagen lässt
+
+### Geändert
+
+- **Die Knopfsprache der Besucheransicht.** Aus fünf Formen sind vier Rollen geworden — auswählen,
+  übernehmen, zurück, überspringen —, und jede sieht wie ein Knopf aus. Die randlose graue Form
+  las sich als Text und ist weg; sie hatte außerdem zwei verschiedene Dinge zusammengeworfen:
+  *zurückgehen* bleibt beim Foto, *überspringen* legt es weg. „Weiß ich nicht — nächstes Foto" ist
+  jetzt durch eine Linie vom Rest getrennt. „Reicht so — die Straße genügt" ist eine vollwertige
+  Antwort und sieht seitdem aus wie „Hier war das". Vier Handlungen tragen ein Symbol **neben** der
+  Beschriftung — Haken, Pfeil links, Pfeil rechts, Fadenkreuz —, gezeichnet im Quelltext, weil das
+  Gerät offline läuft

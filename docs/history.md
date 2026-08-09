@@ -1854,3 +1854,59 @@ nicht** — dafuer braucht es die PIN dieses Geraets, und die gehoert nicht in e
 diese. Gedeckt ist er durch Tests des Stores und durch die Gegenprobe an allen vier
 Ruecksetzungen; was am Bildschirm noch niemand gesehen hat, ist der Sprung in den
 Bearbeiten-Bildschirm selbst.
+
+## Fuenf Formen, vier Rollen
+
+9. August 2026. Punkt 28, und der erste des Tages, bei dem der Backlog eine Frage stellte statt
+eine Aufgabe zu beschreiben. Die Bestandsaufnahme zuerst: **zwanzig Knoepfe in fuenf Formen**, und
+keine Form sagte, was ihr Knopf tut. Dahinter lagen vier Rollen — auswaehlen, uebernehmen,
+zurueck, ueberspringen —, und die Formen schnitten quer dazu.
+
+**Der schlimmste Schnitt lief mitten durch eine Rolle.** Dieselbe leise, randlose Form trug
+„Anderer Buchstabe" und „Weiss ich nicht — naechstes Foto". Das eine geht einen Schritt zurueck und
+bleibt beim Foto, das andere legt das Foto weg. Sie sahen gleich aus.
+
+Und die Form selbst war das zweite Problem: grau, ohne Rand, kleiner als alles andere — sie las
+sich als Text. Fuer eine Zielgruppe, die einmal im Jahr vor diesem Geraet steht, ist ein Knopf, der
+nicht nach Knopf aussieht, kein Knopf.
+
+### Zwei Fragen, die der Auftraggeber entschieden hat
+
+**Wie laut darf „Reicht so — die Strasse genuegt" sein?** Es war ein schlichter weisser Knopf,
+waehrend „Hier war das" und „Ganze 1920er Jahre" gefuellt waren — obwohl alle drei dasselbe tun:
+abschliessen. Dagegen stand die Sorge, ein gefuellter Knopf ziehe den Blick von den Hausnummern
+darueber weg. Entschieden: **genauso laut.** Nicht jedes Haus steht in OpenStreetMap, und wer die
+Nummer nicht kennt, soll das ohne Zoegern sagen koennen; Konkurrenz entsteht nicht, weil in diesem
+Schritt kein zweiter gefuellter Knopf auf dem Schirm steht.
+
+**Wie setzt sich „Ueberspringen" ab?** Entschieden: dieselbe Knopfform wie die uebrigen — damit es
+wie ein Knopf aussieht —, getrennt durch eine Linie und deutlichen Abstand, mit einem Pfeil nach
+rechts. Keine eigene Farbe: Die Ansicht kommt mit Papier, Tinte und einem Akzentbraun aus, und das
+soll sie.
+
+Beim Bauen kam eine Kleinigkeit dazu, die nur am Geraet auffaellt: Der Abstand ueber dem Knopf
+gehoert **ausserhalb** von ihm. Als Innenabstand waere er mittippbar gewesen — ein zwei Zentimeter
+hoher Streifen ueber der Beschriftung, der das Foto weglegt.
+
+### Die Symbole
+
+Vier: Haken, Pfeil links, Pfeil rechts, Fadenkreuz. **Neben der Beschriftung, nie an ihrer
+Stelle** — ein Piktogramm allein verlangt Vorwissen, neben den Worten muss es nur bestaetigen, was
+gelesen wurde. Und deshalb so wenige: Ein Symbol auf jedem Knopf waere Zierde, und Zierde erklaert
+nichts.
+
+Gezeichnet in `kiosk/icons.tsx`, nicht geladen. Kein Symbolzeichensatz, kein CDN — das Geraet ist
+offline, und ein Symbol, das nicht laedt, hinterlaesst einen Knopf, der nichts sagt. Der Stift aus
+Punkt 25 ist bei der Gelegenheit dorthin gezogen; er ist das einzige Symbol ohne Beschriftung, und
+das darf er, weil er nicht dem Besucher gehoert.
+
+### Was sich dabei nebenbei geloest hat
+
+[Punkt 10](backlog.md#10--detailansicht-maße-aufräumen) wartete auf diesen hier: Sein
+Schliessen-Knopf ist an die Blaetterknoepfe gebunden, damit die Detailansicht *eine* Knopfform
+kennt. Jetzt gibt es vier benannte Rollen — und keine heisst „schliessen". Aus „darf er aus dem
+Raster?" ist damit „welche Rolle bekommt er?" geworden, und das steht dort jetzt als erster
+Schritt.
+
+Nachgemessen am laufenden Kiosk: fuenf Rollen im Einsatz (die vier plus das Jahresraster),
+Mindesthoehe 54 px, und kein Knopf ausserhalb der Raster ohne Symbol.

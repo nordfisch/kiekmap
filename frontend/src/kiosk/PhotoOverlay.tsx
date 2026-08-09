@@ -22,6 +22,7 @@ import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
 import { DatePicker } from "./DatePicker";
+import { PencilIcon } from "./icons";
 import { offeredDecades } from "./decades";
 
 /**
@@ -32,21 +33,6 @@ import { offeredDecades } from "./decades";
  * into the search field. The same length git uses for the same reason.
  */
 const HASH_CHARS = 8;
-
-/** Drawn here rather than fetched: no CDN, no icon font -- see CLAUDE.md on offline. */
-function PencilIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-      <path
-        d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5 4 20z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 export function PhotoOverlay() {
   const openStack = useKiosk((s) => s.openStack);
@@ -213,7 +199,7 @@ export function PhotoOverlay() {
                   title={t.overlay.edit}
                   onClick={() => askPin(detail.id)}
                 >
-                  <PencilIcon />
+                  <PencilIcon className="overlay__edit-icon" />
                 </button>
               </div>
               <p className="overlay__year">{detail.date_label}</p>

@@ -28,6 +28,7 @@ import { type Place, fetchHouseNumbers, fetchStreets } from "../api/client";
 import { useContribute } from "../store/contribute";
 import { t } from "../text/de";
 import { type NumberBlock, blocksOf, groupByBase } from "./houseNumbers";
+import { BackIcon, CheckIcon, CrosshairIcon } from "./icons";
 import { type StreetGroup, groupStreets } from "./streetGroups";
 
 export function LocationTask() {
@@ -167,9 +168,11 @@ export function LocationTask() {
         onClick={() => void submitLocation()}
         disabled={loading}
       >
+        <CheckIcon />
         {t.location.confirm}
       </button>
-      <button type="button" className="button button--quiet" onClick={() => setPin(null)}>
+      <button type="button" className="button button--back" onClick={() => setPin(null)}>
+        <BackIcon />
         {t.location.clear}
       </button>
     </div>
@@ -182,10 +185,12 @@ export function LocationTask() {
    * last resort after scrolling past everything. And in the house-number step too, because that
    * is where it earns the most: whoever does not know the number can still point at the house.
    *
-   * A full button rather than a quiet one: this leads to an answer, it is not a way back out.
+   * A plain button, not a back one: it leads towards an answer rather than away from the
+   * question. In the language of the buttons here it is a choice -- which of the two routes.
    */
   const mapButton = (
     <button type="button" className="button" onClick={() => setPicking(true)}>
+      <CrosshairIcon />
       {t.location.pickOnMap}
     </button>
   );
@@ -209,7 +214,8 @@ export function LocationTask() {
             there is, the wording names the step that is still standing behind this one -- the
             house numbers, unless a tap on the map has already made them beside the point. */}
         {streets.length > 0 && (
-          <button type="button" className="button button--quiet" onClick={() => setPicking(false)}>
+          <button type="button" className="button button--back" onClick={() => setPicking(false)}>
+            <BackIcon />
             {street ? t.location.backToNumbers : t.location.backToStreets}
           </button>
         )}
@@ -258,18 +264,25 @@ export function LocationTask() {
         </div>
 
         {block && (
-          <button type="button" className="button button--quiet" onClick={() => setBlock(null)}>
+          <button type="button" className="button button--back" onClick={() => setBlock(null)}>
+            <BackIcon />
             {t.location.otherArea}
           </button>
         )}
 
-        <button type="button" className="button" onClick={closeNumbers}>
+        {/* A full answer, not an evasion: not every house is in OpenStreetMap, and whoever does
+            not know the number should be able to say so without hesitating. Hence the same shape
+            as "Hier war das" -- and no competition, because in this step there is no other filled
+            button on screen. */}
+        <button type="button" className="button button--primary" onClick={closeNumbers}>
+          <CheckIcon />
           {t.location.noHouseNumber}
         </button>
 
-        {/* Quieter than "Reicht so", because it is not an answer but a way back -- the same
-            shape as "Anderer Abschnitt" above it. */}
-        <button type="button" className="button button--quiet" onClick={cancelStreet}>
+        {/* A way back, not an answer: it keeps nothing. The same shape as "Anderer Abschnitt"
+            above it, because both stay with this photo. */}
+        <button type="button" className="button button--back" onClick={cancelStreet}>
+          <BackIcon />
           {t.location.cancelStreet}
         </button>
       </div>
@@ -326,9 +339,10 @@ export function LocationTask() {
           {trail.length > 0 && (
             <button
               type="button"
-              className="button button--quiet"
+              className="button button--back"
               onClick={() => setTrail(trail.slice(0, -1))}
             >
+              <BackIcon />
               {t.location.otherInitial}
             </button>
           )}

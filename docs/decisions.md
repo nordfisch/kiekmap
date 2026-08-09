@@ -1036,3 +1036,54 @@ Marker beide Formen.
 Ist der Erstbestand erst aufgeraeumt ([backlog.md](backlog.md), Punkt 41), waere „Gasthof Timm
 — 1953" die bessere Beschriftung. Der Marker traegt den Titel schon mit; die Entscheidung ist dann
 neu zu treffen und kostet eine Zeile.
+
+---
+
+## 30. Vier Rollen, und jede sieht wie ein Knopf aus
+
+Der „Hilf mit"-Bereich ist ueber mehrere Stufen gewachsen, und man sah es: zwanzig Knoepfe in fuenf
+Formen, ohne dass die Form gesagt haette, was der Knopf tut. Seit dem 9. August 2026 gibt es **vier
+Rollen**, und mehr sollen es nicht werden:
+
+| Rolle | Form | Symbol | Beispiele |
+|---|---|---|---|
+| **auswaehlen** | weiss mit Rand | — | Buchstabe, Strasse, Jahrzehnt, Jahr, Hausnummer, Abschnitt, „Auf der Karte zeigen" |
+| **uebernehmen** | gefuellt, Akzentbraun | Haken | „Hier war das", „Ganze 1920er Jahre", „Reicht so — die Strasse genuegt" |
+| **zurueck** | weiss mit Rand, graue Schrift | Pfeil links | „Anderer Buchstabe", „Anderes Jahrzehnt", „Doch nicht — von vorn", „Punkt entfernen" |
+| **ueberspringen** | wie zurueck, durch eine Linie abgesetzt | Pfeil rechts | „Weiss ich nicht — naechstes Foto" |
+
+**Die randlose Form ist weg.** Sie war grau, ohne Rand und las sich als Text — fuer eine
+Zielgruppe, die einmal im Jahr vor diesem Geraet steht, genau das Falsche. Leiser wird ein Knopf
+jetzt ueber die Schriftfarbe, nicht ueber die Form; Rand und Hoehe sind bei allen gleich, und die
+gemessene Mindesthoehe liegt bei 54 px.
+
+**Die wichtigste Grenze verlief an der falschen Stelle.** Dieselbe leise Form trug *zurueckgehen*
+und *ueberspringen* — das eine bleibt beim Foto, das andere legt es weg. „Weiss ich nicht —
+naechstes Foto" sieht deshalb aus wie „Anderer Buchstabe" und ist durch eine Linie davon getrennt:
+Was ueber der Linie steht, gehoert zur Frage, was darunter steht zum Foto. Der Abstand liegt
+ueberwiegend ausserhalb des Knopfes, damit kein mittippbarer Streifen ueber der Beschriftung
+entsteht.
+
+**„Reicht so — die Strasse genuegt" ist eine Antwort und sieht seitdem danach aus.** Es war ein
+schlichter weisser Knopf, waehrend „Hier war das" gefuellt war — obwohl beide dasselbe tun:
+abschliessen. Nicht jedes Haus steht in OpenStreetMap, und wer die Nummer nicht kennt, soll das
+ohne Zoegern sagen koennen. Konkurrenz entsteht dabei nicht: In diesem Schritt steht kein zweiter
+gefuellter Knopf auf dem Schirm.
+
+**Symbole neben der Beschriftung, nie an ihrer Stelle.** Ein Piktogramm allein verlangt Vorwissen,
+das aeltere Besucher nicht mitbringen muessen; neben den Worten muss es nur bestaetigen, was
+gelesen wurde. Deshalb ist der Satz klein — Haken, Pfeil links, Pfeil rechts, Fadenkreuz —, und
+alles andere traegt keins. Ein Symbol auf jedem Knopf waere Zierde, und Zierde erklaert nichts.
+
+**Gezeichnet, nicht geladen** (`kiosk/icons.tsx`): kein Symbolzeichensatz, kein CDN, kein Sprite
+aus dem Netz. Das Geraet ist offline, und ein Symbol, das nicht laedt, hinterlaesst einen Knopf,
+der nichts sagt.
+
+**Der Verwaltungsbereich bleibt ausdruecklich draussen.** Er hat eigene Masze, wird ein- bis
+zweimal im Jahr benutzt und folgt einer anderen Regel: Dort zaehlt Klartext mehr als Kompaktheit.
+Die alte leise Form steht deshalb noch — fuer „Zurueck zur Karte" am Zahlenfeld, das aus der
+Verwaltungstuer herausfuehrt und zu keiner Besucherfrage gehoert.
+
+Was daran haengt: [backlog.md](backlog.md), Punkt 10. Der Schliessen-Knopf der Detailansicht war
+an die Blaetterknoepfe gebunden, damit die Ansicht *eine* Knopfform kennt. Jetzt gibt es vier
+benannte Rollen, und keine heisst „schliessen" — welche er bekommt, ist dort zu entscheiden.

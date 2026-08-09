@@ -55,7 +55,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 38 | [Sprünge beim Gruppieren, und wie genau die Punkte überhaupt liegen](#38--sprünge-beim-gruppieren-und-wie-genau-die-punkte-überhaupt-liegen) | Frage | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
-| 28 | [Die Knopfsprache der Besucheransicht](#28--die-knopfsprache-der-besucheransicht) | Aufgabe | wichtig |
 | 29 | [Der Kopfbereich: Maße, Wappen, Titel](#29--der-kopfbereich-maße-wappen-titel) | Aufgabe | wichtig |
 | 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
 | | **Infrastruktur** | | |
@@ -73,8 +72,8 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Siebzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 32,
-33, 37. Sie sind erledigt,
+**Achtzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
+32, 33, 37. Sie sind erledigt,
 aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
 neue Punkt bekommt die **43**.
 
@@ -426,12 +425,12 @@ Die Ansicht ist über zehn Stufen gewachsen, und jede Stufe hat für sich gestim
 der Blick auf das Ganze: Rückmeldungen einholen, auf Einheitlichkeit prüfen, sammeln, was auffällt,
 und es dann in einem Zug umsetzen statt in zwölf Einzelentscheidungen.
 
-**Drei Befunde stehen schon als eigene Punkte** und sind damit die erste Ernte dieses Durchgangs,
-nicht sein Ersatz:
-[Punkt 10](#10--detailansicht-maße-aufräumen) (Maße der Detailansicht),
-[Punkt 28](#28--die-knopfsprache-der-besucheransicht) (fünf Knopfformen, und die leiseste trägt
-die folgenreichste Handlung) und
-[Punkt 29](#29--der-kopfbereich-maße-wappen-titel) (drei Elemente, fast fünfzig Pixel Höhenspanne).
+**Drei Befunde standen schon als eigene Punkte** und waren damit die erste Ernte dieses
+Durchgangs, nicht sein Ersatz: [Punkt 10](#10--detailansicht-maße-aufräumen) (Maße der
+Detailansicht), [Punkt 29](#29--der-kopfbereich-maße-wappen-titel) (drei Elemente, fast fünfzig
+Pixel Höhenspanne) — und Punkt 28, die Knopfsprache, seit dem 9. August 2026 erledigt. Dass ein
+Befund einzeln lösbar war, spricht nicht gegen diesen Punkt: Die Knopfsprache stand als eigener
+Punkt da, *weil* jemand sie am Stück angesehen hatte. Genau das soll hier für den Rest passieren.
 
 **Was dieser Punkt darüber hinaus leistet:**
 
@@ -563,46 +562,13 @@ sitzt er bündig mit der rechten Kante der Textspalte. Bei einem breiten Foto is
 nach innen. Er soll stattdessen **immer** in der Ecke stehen, mit einem vernünftigen Abstand zum
 Rand.
 
-**Der zweite Teil wartet auf [Punkt 28](#28--die-knopfsprache-der-besucheransicht)**, und deshalb
-ist er nicht längst erledigt: Der Schließen-Knopf ist heute absichtlich so hoch wie die
-Blätterknöpfe (3,5 rem), damit die Ansicht genau eine Knopfform kennt. Löst man ihn aus dem Raster,
-ist diese Bindung weg — dann sollte vorher feststehen, welche Größen es überhaupt geben soll.
-
-### 28 · Die Knopfsprache der Besucheransicht
-
-Der „Hilf mit"-Bereich ist über mehrere Stufen gewachsen, und man sieht es. **Jede Handlung soll
-ein Knopf sein und wie einer aussehen** — heute gibt es fünf Formen, und die wichtigste Grenze
-verläuft an der falschen Stelle:
-
-| Handlung | Form heute |
-|---|---|
-| Buchstabe, Straße, Jahrzehnt, Jahr, Hausnummer, Abschnitt | Raster- bzw. Listenknopf, weiß mit Rand, 3 rem |
-| „Hier war das", „Ganze 1920er Jahre" | gefüllt, braun, 1,1 rem Schrift |
-| „Reicht so — die Straße genügt" | weiß mit Rand, volle Breite |
-| „Anderer Buchstabe", „Anderes Jahrzehnt", „Doch nicht — von vorn", „Punkt entfernen" | **randlos, grau, 2,75 rem** |
-| „Weiß ich nicht — nächstes Foto" | dieselbe randlose Form |
-
-**Zwei Dinge stimmen daran nicht.** Die randlose Form (`.button--quiet`) sieht nicht nach Knopf
-aus, sondern nach Text — für die Zielgruppe genau das Falsche. Und sie wirft zwei verschiedene
-Dinge zusammen: **zurückgehen** („Anderer Buchstabe", „Doch nicht") und **überspringen** („Weiß ich
-nicht — nächstes Foto"). Das eine bleibt beim Foto, das andere legt es weg; sie sollten nicht
-gleich aussehen.
-
-Dazu kommt das Maß: `.button--quiet` ist 2,75 rem hoch, bei 18 px Wurzelschrift also 49,5 px. Die
-48 px aus der Zielgruppen-Regel sind damit eingehalten — aber knapp, und an jeder Stelle einzeln
-statt an einer.
-
-**Zu klären: Symbole wie und wo.** Für Übernehmen, Zurück, Abbrechen und Nächstes Foto liegen sie
-nahe. Bei der Zielgruppe ist ein Symbol **neben** der Beschriftung der sichere Weg; ein Symbol
-**statt** der Beschriftung spart Platz und verlangt Vorwissen, das ältere Besucher nicht
-mitbringen müssen. Und Symbole müssen mitgeliefert werden — kein CDN, keine Icon-Schriftart aus
-dem Netz; entweder als Inline-SVG im Quelltext oder gar nicht.
-
-**Was daran hängt:** [Punkt 10](#10--detailansicht-maße-aufräumen) wartet darauf. Der
-Schließen-Knopf der Detailansicht ist an die Blätterknöpfe gebunden, damit die Ansicht eine
-Knopfform kennt; erst wenn feststeht, welche Größen es gibt, kann er aus dem Raster. **Der
-Verwaltungsbereich bleibt ausdrücklich außen vor** — er hat eigene Maße, wird ein- bis zweimal im
-Jahr benutzt und folgt einer anderen Regel: Dort zählt Klartext mehr als Kompaktheit.
+**Der zweite Teil wartete auf die Knopfsprache, und die steht seit dem 9. August 2026** (Punkt 28,
+erledigt; siehe [decisions.md](decisions.md), Punkt 30). Der Schließen-Knopf war absichtlich so
+hoch wie die Blätterknöpfe, damit die Ansicht genau eine Knopfform kennt; jetzt gibt es vier
+benannte Rollen, und keine davon ist „Schließen". **Damit ist die Frage nicht mehr, ob er aus dem
+Raster darf, sondern welche Rolle er bekommt** — er schließt eine Ansicht, ohne etwas zu
+beantworten oder zurückzugehen. Das ist entweder eine fünfte Rolle oder ein Sonderfall, den die
+Detailansicht für sich behält. **Diese Entscheidung gehört an den Anfang dieses Punktes.**
 
 ### 29 · Der Kopfbereich: Maße, Wappen, Titel
 

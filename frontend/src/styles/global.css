@@ -269,8 +269,11 @@ button {
   font-size: 0.9rem;
 }
 
+/* Den Abstand bringt jetzt `.button--skip` mit, samt der Linie darueber -- er gehoert zur Rolle
+ * und nicht zu dieser einen Stelle. Die Klasse bleibt als Griff fuer den Fall, dass sich an dieser
+ * Stelle noch etwas aendert. */
 .help-panel__next {
-  margin-top: 0.75rem;
+  margin-bottom: 0;
 }
 
 /* The thank-you note should land, not merely inform -- it is the reward for joining in. */
@@ -316,8 +319,22 @@ button {
 }
 
 /* Every button at least a fingertip wide -- the kiosk is used standing, with the pad of a finger. */
+/* Die Knopfsprache der Besucheransicht. Vier Rollen, und jede sieht wie ein Knopf aus:
+ *
+ *   .button            auswaehlen -- Buchstabe, Strasse, Jahrzehnt, Jahr, Hausnummer, Abschnitt,
+ *                      dazu die neutrale Handlung („Auf der Karte zeigen")
+ *   .button--primary   uebernehmen -- die Antwort. Gefuellt, mit Haken.
+ *   .button--back      zurueck. Bleibt beim selben Foto. Mit Pfeil nach links.
+ *   .button--skip      ueberspringen. Legt das Foto weg. Mit Pfeil nach rechts, und durch eine
+ *                      Linie vom Rest getrennt -- es gehoert zum Foto, nicht zur Frage.
+ *
+ * Flex statt block, seit Symbole neben den Beschriftungen stehen. Am Aussehen der Rasterknoepfe
+ * aendert das nichts: mittig zentriert ist, was `text-align: center` vorher tat. */
 .button {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   width: 100%;
   min-height: 3rem;
   margin-bottom: 0.5rem;
@@ -327,6 +344,11 @@ button {
   background: #fff;
   font-size: 1rem;
   text-align: center;
+}
+
+/* Faellt beim Umbrechen nicht in sich zusammen und waechst nicht mit der Schrift mit. */
+.button__icon {
+  flex: none;
 }
 
 .button:active {
@@ -345,6 +367,33 @@ button {
   font-size: 1.1rem;
 }
 
+/* Zurueck: leiser als eine Antwort, aber unverkennbar ein Knopf. Die Vorgaengerform war randlos
+ * und las sich als Text -- fuer eine Zielgruppe, die einmal im Jahr vor diesem Geraet steht, genau
+ * das Falsche. Rand und Hoehe stimmen jetzt mit allen anderen ueberein; leiser wird sie ueber die
+ * Schriftfarbe, nicht ueber die Form. */
+.button--back {
+  color: var(--muted);
+}
+
+/* Ueberspringen sieht aus wie Zurueck und tut etwas anderes: Es legt das Foto weg. Die Linie
+ * darueber ist der ganze Unterschied, und sie ist die Aussage -- was darueber steht, gehoert zur
+ * Frage, dieser Knopf zum Foto. */
+.button--skip {
+  /* Der Abstand liegt ueberwiegend *ausserhalb* des Knopfes: Innenabstand waere mittippbar, und
+   * ein Streifen ueber der Beschriftung, der das Foto weglegt, gehoert nicht dazu. */
+  margin-top: 1.5rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  background: none;
+  color: var(--muted);
+}
+
+/* Bleibt fuer das Zahlenfeld: „Zurueck zur Karte" fuehrt aus der Verwaltungstuer heraus und
+ * gehoert nicht zur Knopfsprache der Besucherfragen. */
 .button--quiet {
   border-color: transparent;
   background: none;
@@ -416,6 +465,7 @@ button {
 
 .button--street {
   margin: 0;
+  justify-content: flex-start;
   text-align: left;
 }
 
@@ -881,6 +931,12 @@ button.timeline__undated:hover {
   border-radius: 0.4rem;
   background: none;
   color: rgb(216 208 198 / 70%);
+}
+
+/* Der Stift ist das einzige Symbol ohne Beschriftung -- siehe kiosk/icons.tsx. Er steht deshalb
+ * nicht im Knopffluss und braucht die Abstandsregel von `.button__icon` nicht. */
+.overlay__edit-icon {
+  display: block;
 }
 
 .overlay__edit:hover,
