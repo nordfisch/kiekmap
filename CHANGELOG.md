@@ -568,3 +568,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   und was eine zu eng oder zu weit gesetzte `bbox` anrichtet. Dazu zwei überholte Stellen
   berichtigt — die Prüfliste fragte noch nach der Ortssuche im „Hilf mit"-Bereich, die es dort
   nicht mehr gibt
+
+### Geändert
+
+- **Unter dem Vorschaubild auf der Karte steht jetzt Adresse und Jahr** statt der ausgeschriebenen
+  Datumsangabe: „Lehmweg 17b — 1953", und wo kein Jahr bekannt ist, „Im Sande 18" allein. Die alte
+  Zeile war an dieser Stelle zweimal falsch — unter den Kameraaufnahmen stand der Aufnahmetag, den
+  auf einer Übersichtskarte niemand sucht, und unter den rund 670 undatierten Fotos siebenhundertmal
+  „Jahr unbekannt". Ein Stapel zeigt die Adresse, die alle seine Fotos teilen, aber kein Jahr; fehlt
+  beides, fällt die Zeile weg. Die Beschriftung für Vorlesewerkzeuge behält das volle Datum

@@ -87,10 +87,25 @@ function photoElement(stack: Stack, onSelect: () => void): HTMLElement {
   image.style.aspectRatio = `${photo.width} / ${photo.height}`;
   root.appendChild(image);
 
-  const year = document.createElement("span");
-  year.className = "marker__year";
-  year.textContent = photo.date_label;
-  root.appendChild(year);
+  // Address and year, and nothing where neither is known -- see t.map.markerCaption.
+  //
+  // A stack shows the address but no year. Photos land on one marker because they share a
+  // coordinate, which here means they share an address -- fifty-one pictures of Schulstraße 2 are
+  // all of Schulstraße 2. Their years are not shared, and taking the topmost one would put a
+  // date under fifty photos that do not carry it. The address is only claimed where every photo
+  // in the stack agrees: EXIF-located photos can land within a metre of each other without
+  // having anything to do with one another.
+  const shared = stack.photos.every((other) => other.place_name === photo.place_name);
+  const caption = t.map.markerCaption(
+    shared ? photo.place_name : null,
+    count > 1 ? "" : photo.date_short,
+  );
+  if (caption) {
+    const line = document.createElement("span");
+    line.className = "marker__caption";
+    line.textContent = caption;
+    root.appendChild(line);
+  }
 
   // The count in the corner: the visitor should know there is more behind it before tapping.
   if (count > 1) {

@@ -1779,3 +1779,33 @@ sagt nicht nur, man moege auf die Karte tippen, er schaltet sie auch von sich au
 
 `tools/check_anchors.py` prueft die `adaption.md` ab jetzt mit — sie hat seit diesem Punkt
 Verweise auf ihre eigenen Abschnitte, und die Abschnitte sind dabei umnummeriert worden.
+
+## Siebenhundertmal „Jahr unbekannt"
+
+9. August 2026. Punkt 27, und der letzte des Tages. Unter jedem Vorschaubild auf der Karte stand
+die fertige Datumsangabe — eine Zeile, die an dieser Stelle in beide Richtungen danebenlag: unter
+den 256 Kameraaufnahmen „22. März 2014", unter den rund 670 undatierten Fotos „Jahr unbekannt",
+siebenhundertmal untereinander.
+
+Jetzt steht dort **Adresse und Jahr**. Die Entscheidung fuer die Adresse statt des Titels hatte der
+Bestand laengst getroffen: Keine der 922 Adressen ist laenger als dreissig Zeichen, 105 Titel sind
+laenger als vierzig, und achtzehn heiszen „Intel(R) JPEG Library". Die Adresse passt immer unter
+ein Vorschaubild, der Titel oft nicht.
+
+**Der Stapel war der Fall, den der Backlog nicht bedacht hatte.** Er beschrieb nur „jedes
+Vorschaubild" — aber ein Marker mit einundfuenfzig Fotos ist ein Sonderfall mit einer eigenen
+Antwort. Die Adresse teilen alle, denn genau deshalb liegen sie auf einem Marker; das Jahr teilen
+sie nicht, und das oberste zu nehmen setzte ein Datum unter fuenfzig Fotos, die es nicht tragen.
+Ein Stapel zeigt seitdem die Adresse und kein Jahr — und die Adresse nur, wenn wirklich **alle**
+seine Fotos sie teilen: Zwei ueber EXIF verortete Aufnahmen koennen auf einen Meter zusammenfallen,
+ohne miteinander zu tun zu haben. Am laufenden Kiosk stand genau so ein Marker: einer ganz ohne
+Zeile, neben „Wedeler Straße 2" mit zweien und „Bredhornweg 17 — 2017" mit einem.
+
+**Zwei Kleinigkeiten fielen beim Bauen auf.** Die CSS-Klasse hiesz `marker__year` und haette
+danach gelogen — sie heiszt jetzt `marker__caption`. Und die Zeile brauchte eine Breitengrenze:
+„Uetersener Straße 12 — 1953" ist gut doppelt so breit wie das Vorschaubild darueber und haette
+sich ueber die Nachbarmarker geschoben. Neun rem, dann zwei Zeilen, dann abgeschnitten; nachgemessen
+am Bestand kommt der breiteste Fall auf 147 px und bleibt darunter.
+
+Die Testfixture `make_photo` kennt seitdem `month`, `day` und `place_name` — ohne die drei liesz
+sich der Fall „22. März 2014 wird zu 2014" gar nicht aufschreiben.

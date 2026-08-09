@@ -483,16 +483,31 @@ button {
   background: var(--line);
 }
 
-.marker__year {
-  display: block;
-  margin-top: 2px;
+/* Seit hier eine Adresse steht und nicht mehr eine Jahreszahl, braucht die Zeile eine Grenze.
+ * „Uetersener Straße 12 — 1953" ist gut doppelt so breit wie das Vorschaubild darueber; ohne
+ * Deckel schoebe sie sich ueber die Nachbarmarker. Zwei Zeilen, dann wird abgeschnitten -- der
+ * volle Text steht ohnehin in der Beschriftung fuer Vorlesewerkzeuge und in der Detailansicht. */
+.marker__caption {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  max-width: 9rem;
+  margin: 2px auto 0;
   font-size: 0.7rem;
   font-weight: 600;
+  line-height: 1.2;
   text-align: center;
+  overflow-wrap: anywhere;
   color: #fff;
   text-shadow:
     0 1px 2px rgb(0 0 0 / 90%),
     0 0 4px rgb(0 0 0 / 60%);
+}
+
+/* Mittig unter der Beschriftung, sobald diese breiter wird als das Bild. */
+.marker__image {
+  margin-inline: auto;
 }
 
 .cluster {

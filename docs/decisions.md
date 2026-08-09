@@ -977,3 +977,51 @@ Der Schalter ist ein Knopf mit gezeichnetem Kaestchen, kein `input[type=checkbox
 13 px grosz, die Zielgruppe braucht 48. Die Kopfzeile des Schiebers ist dadurch hoeher geworden;
 was das fuer die drei Elemente der oberen Zeile bedeutet, gehoert zu Punkt 29 im
 [backlog.md](backlog.md).
+
+---
+
+## 29. Unter dem Vorschaubild steht die Adresse, nicht das Datum
+
+Unter jedem Vorschaubild auf der Karte stand die fertige Datumsangabe. Seit dem 9. August 2026
+steht dort **Adresse und Jahr**: „Lehmweg 17b — 1953", und wo kein Jahr bekannt ist, „Im Sande 18"
+allein.
+
+**Die alte Zeile war an dieser Stelle zweimal falsch.** Unter den 256 Kameraaufnahmen stand
+„22. März 2014" — der Tag ist auf einer Uebersichtskarte nie der Punkt. Und unter den rund 670
+Fotos ohne Datierung stand „Jahr unbekannt", siebenhundertmal dieselbe Zeile: eine Fehlanzeige, die
+ueber siebenhundert Bilder nichts sagt.
+
+**Warum die Adresse und nicht der Titel**, obwohl der naheliegender klingt: Der Bestand hat es
+entschieden. Alle 922 vorhandenen `place_name` bleiben unter dreissig Zeichen — die laengste ist
+„Uetersener Straße 12". 105 Titel sind laenger als vierzig Zeichen, und achtzehn lauten
+„Intel(R) JPEG Library, version […]". Die Adresse passt also immer unter ein Vorschaubild, der
+Titel oft nicht. Dass die Position auf der Karte die Adresse schon ungefaehr verraet, spricht nicht
+dagegen: Auf einer Dorfkarte sieht man die Strasse, nicht die Hausnummer.
+
+**Ein Stapel bekommt die Adresse, aber kein Jahr.** Fotos landen auf einem Marker, weil sie eine
+Koordinate teilen — und das heisst hier: dieselbe Adresse. Einundfuenfzig Bilder von Schulstraße 2
+sind alle von Schulstraße 2. Ihre Jahre sind nicht geteilt; das oberste zu nehmen setzte ein Datum
+unter fuenfzig Fotos, die es nicht tragen. Die Adresse wird nur behauptet, wo **alle** Fotos des
+Stapels sie teilen: Zwei ueber EXIF verortete Aufnahmen koennen auf einen Meter zusammenfallen,
+ohne miteinander zu tun zu haben.
+
+**Fehlt beides, faellt die Zeile weg** — kein Gedankenstrich, keine Fehlanzeige. Eine leere Stelle
+unter einem Bild verlangt nichts vom Besucher.
+
+**Die kurze Datumsform gehoert ins Backend**, neben `format_label` (`services/dates.py`), nicht als
+Zeichenkettenschnipselei ins Frontend. Sie kuerzt Tag und Monat auf das Jahr, laesst ein Jahrzehnt
+ein Jahrzehnt („1930er" wird nicht „1930" — das erfaende eine Genauigkeit) und gibt fuer
+Undatiertes eine leere Zeichenkette.
+
+**`PhotoMarker` traegt dafuer den `place_name`, und das ist die eine bewusste Ausnahme** von seiner
+Regel, moeglichst wenig zu tragen. Der Preis wurde gemessen statt geschaetzt: Bei fuenfhundert
+Markern sind das rund 13 kB, auf einem Geraet, das seine Karte aus dem Nebenzimmer bekommt. Fuer
+alles andere gilt die Regel weiter.
+
+**Die Beschriftung fuer Vorlesewerkzeuge behaelt das volle Datum.** Dort stoert die Genauigkeit
+nicht, und wer sich die Karte vorlesen laesst, hat den Marker nicht im Blick. Deshalb liefert der
+Marker beide Formen.
+
+Ist der Erstbestand erst aufgeraeumt ([backlog.md](backlog.md), Punkt 41), waere „Gasthof Timm
+— 1953" die bessere Beschriftung. Der Marker traegt den Titel schon mit; die Entscheidung ist dann
+neu zu treffen und kostet eine Zeile.

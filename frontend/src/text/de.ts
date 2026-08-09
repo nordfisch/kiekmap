@@ -40,6 +40,17 @@ export const t = {
     tooMany: (count: number) =>
       `${count} Fotos in diesem Ausschnitt — für mehr Übersicht näher heranzoomen`,
     markerLabel: (title: string, date: string) => `${title}, ${date} — groß anzeigen`,
+    /**
+     * What stands under a thumbnail on the map: address and year.
+     *
+     * Both parts may be missing, and neither absence gets a placeholder. A photo located from
+     * EXIF alone has no address and shows the year; two thirds of this collection have no date
+     * and show the address. Where both are missing the caption falls away entirely -- an empty
+     * line under a picture asks nothing of the visitor, "Jahr unbekannt" seven hundred times over
+     * does, and answers nothing.
+     */
+    markerCaption: (place: string | null, date: string) =>
+      place && date ? `${place} — ${date}` : (place ?? date),
     clusterLabel: (count: number) => `${count} Fotos — hineinzoomen`,
     /** Several photos at the same spot: zooming in does not help here, paging does. */
     stackLabel: (count: number) => `${count} Fotos von dieser Stelle — ansehen`,

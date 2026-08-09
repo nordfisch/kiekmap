@@ -142,15 +142,18 @@ def make_photo(session: Session):
         lat: float | None = 53.62,
         lon: float | None = 9.676,
         year: int | None = 1932,
+        month: int | None = None,
+        day: int | None = None,
         precision=None,
         title: str = "Testfoto",
+        place_name: str | None = None,
         status: str = PhotoStatus.PUBLISHED,
         sha: str | None = None,
     ) -> Photo:
         nonlocal counter
         counter += 1
 
-        start, end, resolved = date_range(year, precision=precision)
+        start, end, resolved = date_range(year, month, day, precision)
         photo = Photo(
             sha256=sha or f"{counter:064d}",
             original_filename=f"{title}.jpg",
@@ -159,6 +162,7 @@ def make_photo(session: Session):
             width=900,
             height=640,
             title=title,
+            place_name=place_name,
             lat=lat,
             lon=lon,
             date_from=start,

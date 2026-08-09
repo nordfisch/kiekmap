@@ -3,7 +3,15 @@ from datetime import UTC, date, datetime, timedelta
 import pytest
 
 from app.models import DatePrecision
-from app.services.dates import MAX_BARS, bar_width, date_range, days_since, format_label, overlaps
+from app.services.dates import (
+    MAX_BARS,
+    bar_width,
+    date_range,
+    days_since,
+    format_label,
+    format_short,
+    overlaps,
+)
 
 
 class TestBalkenbreite:
@@ -85,6 +93,45 @@ class TestBeschriftung:
     def test_format_label(self, jahr, monat, tag, genauigkeit, erwartet):
         von, bis, g = date_range(jahr, monat, tag, genauigkeit)
         assert format_label(von, bis, g) == erwartet
+
+
+class TestKurzeBeschriftung:
+    """Was unter einem Vorschaubild auf der Karte steht.
+
+    Drei Unterschiede zur ausgeschriebenen Form, und jeder behebt etwas, was die Karte schlecht
+    kann. Der Tag gehoert nicht unter ein 160 px breites Bild; ein Jahrzehnt bleibt eines; und
+    „Jahr unbekannt" siebenhundertmal untereinander sagt ueber siebenhundert Bilder nichts.
+    """
+
+    @pytest.mark.parametrize(
+        ("jahr", "monat", "tag", "genauigkeit", "erwartet"),
+        [
+            (2014, 3, 22, None, "2014"),
+            (1955, 6, None, None, "1955"),
+            (1932, None, None, None, "1932"),
+            (1926, None, None, DatePrecision.DECADE, "1920er"),
+            (None, None, None, None, ""),
+        ],
+    )
+    def test_format_short(self, jahr, monat, tag, genauigkeit, erwartet):
+        von, _, g = date_range(jahr, monat, tag, genauigkeit)
+        assert format_short(von, g) == erwartet
+
+    def test_das_jahrzehnt_wird_nicht_zum_jahr_verkuerzt(self):
+        """Der Fall, der still eine Genauigkeit erfaende, die es nicht gibt.
+
+        „1930er" auf „1930" zu kuerzen sieht nach Aufraeumen aus und behauptet ein Jahr, das
+        niemand kennt -- derselbe Fehler, dessentwegen das ganze Datenmodell mit Intervallen
+        arbeitet.
+        """
+        von, _, g = date_range(1937, None, None, DatePrecision.DECADE)
+
+        assert format_short(von, g) == "1930er"
+
+    def test_ohne_datierung_bleibt_die_zeile_leer(self):
+        # Nicht „Jahr unbekannt": Unter dem Bild steht dann die Adresse allein, und das ist eine
+        # Auskunft statt einer Fehlanzeige.
+        assert format_short(None, DatePrecision.UNKNOWN) == ""
 
 
 class TestUeberlappung:

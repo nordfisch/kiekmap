@@ -128,6 +128,27 @@ def format_label(start: date | None, end: date | None, precision: str | DatePrec
             )
 
 
+def format_short(start: date | None, precision: str | DatePrecision) -> str:
+    """The dating as it fits under a thumbnail on the map. German, empty where nothing is known.
+
+    Three differences to :func:`format_label`, and each answers something the map does badly:
+
+      * **Day and month collapse to the year.** "22. März 2014" under a 160 px picture on an
+        overview map claims a precision nobody is looking for there; the year is the question a
+        map answers.
+      * **A decade stays a decade.** "1930er" is not a rounded year but the whole of what is
+        known, and shortening it to "1930" would invent a precision.
+      * **Undated is empty, not "Jahr unbekannt".** Two thirds of this collection carry no date,
+        and seven hundred identical lines say nothing about seven hundred pictures. The caption
+        then holds the address alone.
+    """
+    if start is None:
+        return ""
+    if DatePrecision(precision) is DatePrecision.DECADE:
+        return f"{start.year}er"
+    return str(start.year)
+
+
 def overlaps(
     start: date | None, end: date | None, selected_start: date, selected_end: date
 ) -> bool:

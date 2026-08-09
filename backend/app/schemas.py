@@ -6,7 +6,7 @@ from typing import Self
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models import DatePrecision, ImportLog, Photo, PhotoStatus
-from app.services.dates import format_label
+from app.services.dates import format_label, format_short
 
 
 class PhotoMarker(BaseModel):
@@ -14,14 +14,25 @@ class PhotoMarker(BaseModel):
 
     Deliberately narrow: with several hundred markers in view the response size matters, and
     description, tags and origin fields are only needed once a photo is tapped.
+
+    **``place_name`` is the one deliberate exception to that narrowness.** It is what stands under
+    the thumbnail, and the rule above would have kept it out. The cost was measured rather than
+    guessed: no address in this collection exceeds thirty characters, so five hundred markers add
+    some 13 kB -- on a device that serves its own map from the next room. The rule holds for
+    everything else.
     """
 
     id: int
     lat: float
     lon: float
     title: str | None
+    #: The address, as it stands under the thumbnail. Absent for a photo located from EXIF alone.
+    place_name: str | None
     #: Ready-made German label ("1932", "1920er") so the frontend does no date arithmetic.
+    #: Spelled out, for screen readers -- what is *shown* is ``date_short``.
     date_label: str
+    #: The same dating as it fits on a map: the year, a decade as "1930er", undated empty.
+    date_short: str
     width: int
     height: int
     thumb_url: str
@@ -33,7 +44,9 @@ class PhotoMarker(BaseModel):
             lat=photo.lat,  # type: ignore[arg-type] -- the query excludes NULL
             lon=photo.lon,  # type: ignore[arg-type]
             title=photo.title,
+            place_name=photo.place_name,
             date_label=format_label(photo.date_from, photo.date_to, photo.date_precision),
+            date_short=format_short(photo.date_from, photo.date_precision),
             width=photo.width,
             height=photo.height,
             thumb_url=f"/api/photos/{photo.id}/thumb?size=240",

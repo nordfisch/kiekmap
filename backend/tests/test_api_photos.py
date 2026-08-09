@@ -94,6 +94,34 @@ class TestZeitfilter:
         assert antwort.json()["total"] == 1
 
 
+class TestMarkerbeschriftung:
+    """Was die Karte je Foto braucht, um Adresse und Jahr darunter zu setzen."""
+
+    def test_marker_traegt_adresse_und_kurzes_datum(self, client: TestClient, session, make_photo):
+        make_photo(year=2014, month=3, day=22, place_name="Lehmweg 17b")
+        session.commit()
+
+        marker = client.get("/api/photos", params={"bbox": BBOX}).json()["photos"][0]
+
+        assert marker["place_name"] == "Lehmweg 17b"
+        # Der Tag gehoert nicht unter ein Vorschaubild -- auf der Karte zaehlt das Jahr.
+        assert marker["date_short"] == "2014"
+        # Die ausgeschriebene Form bleibt daneben stehen: Sie traegt die Beschriftung fuer
+        # Vorlesewerkzeuge, wo die Genauigkeit nicht stoert.
+        assert marker["date_label"] == "22. März 2014"
+
+    def test_undatiertes_foto_bekommt_eine_leere_kurzform(
+        self, client: TestClient, session, make_photo
+    ):
+        make_photo(year=None, place_name="Im Sande 18")
+        session.commit()
+
+        marker = client.get("/api/photos", params={"bbox": BBOX}).json()["photos"][0]
+
+        assert marker["date_short"] == ""
+        assert marker["date_label"] == "Jahr unbekannt"
+
+
 class TestUndatierte:
     """Fotos ohne Jahr sind der dritte Fall, und wer fragt, entscheidet ihn.
 

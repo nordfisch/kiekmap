@@ -50,7 +50,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
 | 36 | [„Hilf mit" soll auch nachschärfen, nicht nur füllen](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) | Frage | wichtig |
-| 27 | [Unter dem Vorschaubild: Adresse und Jahr](#27--unter-dem-vorschaubild-adresse-und-jahr) | Aufgabe | wichtig |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 35 | [Hausnummern auf der Karte](#35--hausnummern-auf-der-karte) | Idee | — |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
@@ -75,7 +74,8 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Fünfzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 26, 32, 33, 37. Sie sind erledigt,
+**Sechzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 26, 27, 32, 33,
+37. Sie sind erledigt,
 aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
 neue Punkt bekommt die **43**.
 
@@ -237,10 +237,14 @@ Beschreibung, die bei 720 Fotos leer ist.
 verdoppeln den Ort; „Förderkreis-Cloud", „ArchivHolm" und „Or01-1" sind Archivarbeit. Erst danach
 wird [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern) überhaupt sinnvoll.
 
-**Und eine Folge, die nicht übersehen werden darf:** [Punkt 27](#27--unter-dem-vorschaubild-adresse-und-jahr)
-hat sich für Adresse statt Titel unter dem Vorschaubild entschieden — **weil die Titel heute
-Adressen sind**. Sind sie erst aufgeräumt, ist „Gasthof Timm — 1953" die bessere Beschriftung
-als „Hauptstraße 11a — 1953". Die Entscheidung von Punkt 27 ist dann neu zu treffen.
+**Und eine Folge, die nicht übersehen werden darf:** Unter dem Vorschaubild auf der Karte steht
+seit dem 9. August 2026 die **Adresse** und nicht der Titel (Punkt 27, erledigt; Begründung in
+[decisions.md](decisions.md), Punkt 29) — **und zwar weil die Titel heute Adressen sind**. Sind sie
+erst aufgeräumt, ist „Gasthof Timm — 1953" die bessere Beschriftung als
+„Hauptstraße 11a — 1953". **Diese Entscheidung gehört dann neu getroffen**, und sie ist billig
+geworden: `PhotoMarker` trägt Titel und Adresse längst beide, die Änderung wäre eine Zeile in
+`t.map.markerCaption`. Was sie *nicht* billig macht, ist die Frage dahinter — ein Titel passt
+nicht immer unter ein Vorschaubild, eine Adresse immer.
 
 **Und die Jahreszahl im Dateinamen gehört hierher.** Sie stand bis zum 9. August 2026 als eigener
 Punkt 2 im Backlog, gedacht für den Erstimport — der ist gelaufen, und geraten wurde nichts.
@@ -348,44 +352,6 @@ Grund, warum Besucherbeiträge überhaupt ohne Moderation durchgehen dürfen.
 sondern **unbekannt**: Das Gerät weiß, wo der Fotograf stand — nicht, was er fotografiert hat. Wer
 von der anderen Straßenseite knipst, liegt zwanzig Meter daneben. Sie alle vorzulegen wäre viel;
 sie nie vorzulegen lässt einen stillen Fehler stehen. Diese Frage gehört getrennt beantwortet.
-
-### 27 · Unter dem Vorschaubild: Adresse und Jahr
-
-Unter jedem Vorschaubild auf der Karte steht heute die fertige Datumsangabe — und die ist an dieser
-Stelle zweimal falsch. Für die 256 Kameraaufnahmen steht dort **„22. März 2014"**: Der Tag ist auf
-einer Übersichtskarte nie der Punkt. Und unter den 673 Fotos ohne Datierung steht **„Jahr
-unbekannt"**, siebenhundertmal dieselbe Zeile.
-
-**Stattdessen: Adresse und Jahr** — „Lehmweg 17b — 1953", und wo kein Jahr bekannt ist, nur
-„Im Sande 18".
-
-**Warum die Adresse und nicht der Titel**, obwohl der naheliegender klingt: Der Bestand hat es
-entschieden.
-
-| | |
-|---|---|
-| `place_name` vorhanden | **922 von 929** |
-| davon länger als 30 Zeichen | **keine** — die längste ist „Uetersener Straße 12" |
-| Titel länger als 40 Zeichen | 105 |
-| Titel, die „Intel(R) JPEG Library, version […]" lauten | 18 |
-
-Die Adresse passt also immer unter ein Vorschaubild, der Titel oft nicht. Dass die Position auf der
-Karte die Adresse schon ungefähr verrät, spricht nicht dagegen: Auf einer Dorfkarte sieht man die
-Straße, nicht die Hausnummer.
-
-**Zwei Dinge fehlen dafür im Datenweg:**
-
-- **`PhotoMarker` trägt keinen `place_name`** (`schemas.py:12`). Sein Docstring begründet die
-  schmale Form damit, dass bei mehreren hundert Markern die Antwortgröße zählt — eine kurze
-  Zeichenkette je Marker sind bei 500 Markern rund 7 kB, also tragbar, aber die Begründung gehört
-  bewusst überschrieben und nicht übersehen.
-- **Es braucht eine kurze Datumsform.** `date_label` ist die ausgeschriebene Angabe für die
-  Detailansicht; für die Karte wird das Jahr gebraucht („2014"), bei Jahrzehnten weiterhin
-  „1930er" und bei Undatiertem gar nichts. Das gehört ins Backend neben `format_label`
-  (`services/dates.py:108`), nicht als Zeichenkettenschnipselei ins Frontend.
-
-**Die Beschriftung für Vorlesewerkzeuge behält das volle Datum** (`t.map.markerLabel`) — dort
-stört die Genauigkeit nicht, und wer sich die Karte vorlesen lässt, hat den Marker nicht im Blick.
 
 ### 30 · Die Karte nach Schlagwörtern filtern
 

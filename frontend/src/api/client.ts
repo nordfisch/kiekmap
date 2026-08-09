@@ -5,8 +5,12 @@ export type PhotoMarker = {
   lat: number;
   lon: number;
   title: string | null;
-  /** Ready-made German label ("1932", "1920er") -- the frontend does no date arithmetic. */
+  /** The address under the thumbnail. Absent for a photo located from EXIF alone. */
+  place_name: string | null;
+  /** Spelled out, for screen readers. What is *shown* is `date_short`. */
   date_label: string;
+  /** The same dating as it fits on a map: the year, a decade as "1930er", undated empty. */
+  date_short: string;
   width: number;
   height: number;
   thumb_url: string;
