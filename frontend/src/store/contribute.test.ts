@@ -65,6 +65,7 @@ beforeEach(() => {
     error: null,
     thanks: null,
     skipped: [],
+    pickingOnMap: false,
     pin: null,
     pinLabel: null,
   });
@@ -138,6 +139,71 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
 
     expect(useContribute.getState().need).toBe("date");
     expect(useContribute.getState().task?.photo?.id).toBe(9);
+  });
+});
+
+describe("Die scharfe Karte faellt zurueck", () => {
+  /**
+   * Der Kartentipp ist nur nach ausdruecklicher Ansage scharf — und diese Ansage gilt fuer
+   * *dieses* Foto. Ueberlebte sie den Wechsel, verortete der naechste Tipp ein Foto, das der
+   * Besucher noch gar nicht angesehen hat.
+   */
+  beforeEach(() => {
+    bestand(aufgabe("location", 5), aufgabe("date", 6));
+  });
+
+  it("beim naechsten Foto", async () => {
+    useContribute.setState({ need: "location", task: aufgabe("location", 4), pickingOnMap: true });
+
+    useContribute.getState().skip();
+    await vi.waitFor(() => expect(useContribute.getState().loading).toBe(false));
+
+    expect(useContribute.getState().pickingOnMap).toBe(false);
+  });
+
+  it("auch dann, wenn die Frage dieselbe bleibt", async () => {
+    /**
+     * Der Weg, der die Komponente stehen laesst: Hat die andere Frage nichts mehr, faellt
+     * ``load`` auf die urspruengliche zurueck. ``need`` bleibt „location", ``LocationTask``
+     * bleibt montiert — ein ``useState`` in der Komponente wuerde hier nicht zurueckfallen.
+     * Genau deshalb wohnt der Schalter im Store.
+     */
+    bestand(aufgabe("location", 5), aufgabe("date", null));
+    useContribute.setState({ need: "location", task: aufgabe("location", 4), pickingOnMap: true });
+
+    useContribute.getState().skip();
+    await vi.waitFor(() => expect(useContribute.getState().task?.photo?.id).toBe(5));
+
+    expect(useContribute.getState().need).toBe("location");
+    expect(useContribute.getState().pickingOnMap).toBe(false);
+  });
+
+  it("bei jedem Laden, nicht nur auf den beiden bequemen Wegen", async () => {
+    /**
+     * ``skip`` und ``contribute`` setzen selbst zurueck — deshalb faellt es nicht auf, wenn
+     * ``load`` es nicht taete. ``load`` ist aber die Stelle, die *jeden* Fotowechsel sieht, auch
+     * den aus der Detailansicht und den beim ersten Aufbau des Bereichs. Dieser Test deckt genau
+     * die Zeile, die den beiden anderen sonst nur hinterherraeumt.
+     */
+    useContribute.setState({ need: "location", task: aufgabe("location", 4), pickingOnMap: true });
+
+    await useContribute.getState().load();
+
+    expect(useContribute.getState().pickingOnMap).toBe(false);
+  });
+
+  it("nach einem Beitrag", async () => {
+    useContribute.setState({ need: "location", task: aufgabe("location", 4), pickingOnMap: true });
+    useContribute.getState().setPin({ lat: 53.62, lon: 9.676 });
+
+    await useContribute.getState().submitLocation();
+
+    expect(useContribute.getState().pickingOnMap).toBe(false);
+  });
+
+  it("ist von vornherein aus", () => {
+    // Wer nur schauen will, soll die Frage nicht versehentlich beantworten.
+    expect(useContribute.getInitialState().pickingOnMap).toBe(false);
   });
 });
 

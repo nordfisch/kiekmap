@@ -1658,3 +1658,45 @@ die neue Regel, sondern auch, woran sie haengt und wo ihr Gegenstueck liegt
 Die beiden Tests dazu beschreiben den Fehlerfall, nicht den Erfolgsfall:
 `test_foto_ohne_jahr_steht_auf_der_karte` und die Gegenprobe ohne Ort. Zurueckgedreht faellt der
 erste sofort — nachgeprueft, bevor der Commit stand.
+
+## Die Karte antwortet erst, wenn sie gefragt wird
+
+9. August 2026. Punkt 26 des Backlogs. Solange „Wo ist das?" auf dem Schirm stand, war die ganze
+Karte scharf — jeder Tipp auf eine freie Flaeche setzte einen Punkt. Wer nur schauen wollte,
+beantwortete die Frage dabei versehentlich, und weil der Bereich danach **„Hier war das"** anbot,
+brauchte es nur einen zweiten, bestaetigenden Tipp, damit im Bestand eine Verortung stand, die
+niemand gemeint hat.
+
+Die Umsetzung war ein Schalter und eine Trennung. **Der Schalter** heiszt „Auf der Karte zeigen"
+und liegt im Store, nicht in der Komponente — das war die eine Entscheidung, die beim Aufschreiben
+des Punktes Arbeit gekostet hat und beim Bauen keine Minute. `LocationTask` wird bei fast jedem
+Fotowechsel abgebaut, ein `useState` faellt dort also von selbst zurueck; nur auf dem einen Weg
+nicht, auf dem `load()` zur urspruenglichen Frage zurueckfaellt, weil die andere leergelaufen ist.
+Genau dieser Weg kommt, wenn eine Art von Luecke abgearbeitet ist. Er ist heute kaum zu treffen und
+waere spaeter schwer zu finden gewesen.
+
+**Die Trennung** betrifft `PinLayer`: Ob ein Tipp einen Punkt setzt und ob der Punkt gezeichnet und
+gezogen werden kann, sind seitdem zwei Bedingungen. Haette man beides zusammen abgeschaltet, waere
+mit dem scharfen Tipp auch der Punkt verschwunden, den die **Strassenwahl** gesetzt hat — und die
+Zusage „Der Punkt laesst sich auf der Karte noch verschieben" haette nicht mehr gegolten.
+
+**Beim Pruefen kam der Zusatz, der den Punkt erst rund macht.** Erst stand der Knopf unter der
+Strassenwahl und nur dort. Er gehoert **darueber** — er ist die Alternative *zu* der Liste, nicht
+der letzte Ausweg dahinter — und er gehoert **auch in den Hausnummernschritt**, wo er am meisten
+einbringt: Wer die Strasse kennt, die Nummer aber nicht, zeigt auf das Haus, statt „Reicht so" zu
+druecken. Das ist derselbe Fall, den [Punkt 36](backlog.md#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen)
+fuer den Bestand loesen will — hier faellt er nebenbei mit ab.
+
+### Was die Gegenprobe ueber die eigenen Tests sagte
+
+Zurueckgedreht wurde einzeln an allen drei Stellen, die den Schalter zuruecksetzen. Zwei fielen,
+eine nicht: `skip()` setzt zwar selbst zurueck, ruft danach aber `load()`, und dessen `set` laeuft
+noch vor dem ersten `await` — die Zeile ist nachweislich wirkungslos. Sie steht trotzdem, weil
+direkt darueber Punkt, Etikett und Genauigkeit dieselbe Symmetrie haben und eine fehlende Zeile
+dort wie ein Versehen laese.
+
+Wertvoller war der erste Durchgang der Gegenprobe: Er zeigte, dass **keiner** der neuen Tests die
+Ruecksetzung in `load()` deckte, weil alle ueber `skip()` oder `contribute()` liefen, die je selbst
+zuruecksetzen. `load()` ist aber die Stelle, die jeden Fotowechsel sieht. Der Test dafuer ruft
+`load()` seitdem unmittelbar auf — geschrieben, weil die Gegenprobe nicht fiel, nicht weil eine
+Luecke aufgefallen waere.

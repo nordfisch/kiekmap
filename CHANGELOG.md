@@ -537,3 +537,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   und schickte es datieren, was längst zu sehen war. Gezählt wird jetzt: veröffentlicht und mit
   Ort. Derselbe Fehler steckte in `python -m app.cli stats`, das dabei zugleich gelöschte Fotos
   mitzählte, wo die Verwaltung sie herausnimmt — beide Zahlen folgen jetzt derselben Regel
+
+### Geändert
+
+- **Der Kartentipp im „Hilf mit"-Bereich ist erst nach Ansage scharf.** Solange „Wo ist das?"
+  stand, setzte jeder Tipp auf eine freie Kartenfläche einen Punkt — auch der von jemandem, der
+  sich nur orientieren wollte. Ein Tipp daneben, ein bestätigender danach, und im Bestand stand
+  eine Verortung, die niemand gemeint hat. Jetzt führt ein Knopf **„Auf der Karte zeigen"** dorthin,
+  und solange er gedrückt ist, tritt die Straßenauswahl beiseite: Es ist immer nur ein Weg auf dem
+  Schirm. Angeboten wird der Knopf über der jeweiligen Auswahl und in jedem Schritt — auch bei der
+  Hausnummer, wo er am meisten einbringt: Wer die Straße kennt, aber die Nummer nicht, zeigt auf
+  das Haus. Der gesetzte Punkt bleibt unabhängig davon sichtbar und lässt sich weiter ziehen

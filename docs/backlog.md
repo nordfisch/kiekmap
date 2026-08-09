@@ -51,7 +51,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | | **Besucher-Interface** | | |
 | 33 | [Fotos ohne Jahr: ein Schalter statt einer Nebenwirkung](#33--fotos-ohne-jahr-ein-schalter-statt-einer-nebenwirkung) | Frage | wichtig · dringend |
 | 36 | [„Hilf mit" soll auch nachschärfen, nicht nur füllen](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) | Frage | wichtig |
-| 26 | [Der Punkt auf der Karte erst nach Ansage](#26--der-punkt-auf-der-karte-erst-nach-ansage) | Aufgabe | wichtig |
 | 27 | [Unter dem Vorschaubild: Adresse und Jahr](#27--unter-dem-vorschaubild-adresse-und-jahr) | Aufgabe | wichtig |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 35 | [Hausnummern auf der Karte](#35--hausnummern-auf-der-karte) | Idee | — |
@@ -78,7 +77,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Zwölf Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 32. Sie sind erledigt,
+**Dreizehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 26, 32. Sie sind erledigt,
 aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
 neue Punkt bekommt die **43**.
 
@@ -387,74 +386,6 @@ Grund, warum Besucherbeiträge überhaupt ohne Moderation durchgehen dürfen.
 sondern **unbekannt**: Das Gerät weiß, wo der Fotograf stand — nicht, was er fotografiert hat. Wer
 von der anderen Straßenseite knipst, liegt zwanzig Meter daneben. Sie alle vorzulegen wäre viel;
 sie nie vorzulegen lässt einen stillen Fehler stehen. Diese Frage gehört getrennt beantwortet.
-
-### 26 · Der Punkt auf der Karte erst nach Ansage
-
-Solange die Frage „Wo ist das?" steht, ist **die ganze Karte scharf**: Jeder Tipp auf eine freie
-Fläche setzt einen Punkt (`PinLayer.tsx:28`). Wer während der Frage nur schauen will — die Karte
-verschieben, sich orientieren, ein Foto in der Nähe suchen — beantwortet sie dabei versehentlich.
-
-Das ist mehr als unsauber, es geht an die Datenqualität: Sobald ein Punkt steht, wechselt der
-Beitragsbereich auf „Stimmt die Stelle?" und bietet **„Hier war das"** an. Ein Tipp daneben und ein
-bestätigender Tipp danach — und im Bestand steht eine Verortung, die niemand gemeint hat.
-
-**Der Kartentipp soll deshalb erst nach ausdrücklicher Ansage scharf sein**, über einen Knopf im
-Beitragsbereich: „Auf der Karte zeigen" oder ein Fadenkreuz. Das passt zu dem, was seit dem
-8. August ohnehin der Hauptweg ist — die Straße wird über Knöpfe gewählt (Punkt 6, erledigt). Der
-Kartentipp ist der zweite Weg für den, der die Stelle kennt, aber den Straßennamen nicht; ihn eine
-Ansage kosten zu lassen, ist bei einem Weg für den Ausnahmefall vertretbar.
-
-**Die Falle steckt im `active`-Schalter.** Er hängt heute an drei Dingen zugleich: ob der
-Kartentipp einen Punkt setzt, ob der Punkt überhaupt gezeichnet wird, und ob er sich ziehen lässt
-(`PinLayer.tsx:19, 42, 57`). Wer nur das Erste abschalten will und das Ganze abschaltet, nimmt
-damit auch den Punkt weg, den die **Straßenwahl** gesetzt hat — und die Zusage „Der Punkt lässt
-sich auf der Karte noch verschieben" (`t.location.hintSet`) gilt nicht mehr. Zu trennen sind also
-**Scharfschaltung** und **Anzeige samt Ziehen**.
-
-**Solange der Kartentipp scharf ist, verschwindet die Straßenwahl.** Nicht ausgegraut, sondern
-weg: Wer „Auf der Karte zeigen" gedrückt hat, hat sich für den einen Weg entschieden, und der
-Beitragsbereich zeigt dann nur noch, was zu diesem Weg gehört. Zwei Wege gleichzeitig anzubieten
-ist genau das, was den Bereich heute unruhig macht — eine Wand aus Knöpfen rechts, eine scharfe
-Karte links, und nichts sagt, welcher der beiden gerade gilt.
-
-**Das ist kein neuer Gedanke, sondern die andere Hälfte eines vorhandenen.** Die Gegenrichtung ist
-schon gebaut: Ein Tipp auf die Karte beendet die Hausnummernauswahl (`useEffect` in
-`LocationTask.tsx`, erkannt am fehlenden Etikett). Der Kommentar dort begründet es bereits mit dem
-Fall, um den es hier geht — „sonst liefen beide nebeneinander: der Punkt verschoben, das Raster
-noch da, und der nächste Tipp auf eine Hausnummer wirft den eben gesetzten Punkt weg". Bisher
-räumt der Kartentipp die Knöpfe weg, sobald er *stattfindet*; künftig räumt die Scharfschaltung
-sie weg, bevor er stattfindet. Danach ist der vorhandene `useEffect` womöglich überflüssig — zu
-prüfen, nicht anzunehmen.
-
-**Was dabei stehen bleiben muss**, sonst ist der Weg eine Sackgasse:
-
-- **Der Bestätigungsblock** (`task__confirm` mit „Hier war das"). Er ist der Sinn der Übung; er
-  erscheint ohnehin erst, wenn ein Punkt steht.
-- **Ein Weg zurück** zur Straßenwahl, für den, der die Karte doch nicht wiedererkennt. Nach der
-  Knopfsprache aus [Punkt 28](#28--die-knopfsprache-der-besucheransicht) ist das ein Zurück, kein
-  Überspringen — es bleibt beim selben Foto.
-
-**Und daran entscheidet sich, wo der neue Zustand liegt: im Store, nicht in der Komponente.** Der
-Reflex wäre ein `useState` in `LocationTask` — dort steht schon `trail`, `street` und `numbers`.
-Das trägt fast immer, und genau das ist die Gefahr. `HelpPanel.tsx:89` rendert
-`need === "location" ? <LocationTask /> : <DateTask />`; jeder Fotowechsel führt heute über
-`load(otherNeed(need))` und damit über einen Abbau der Komponente, der ihren Zustand mitnimmt. Es
-sieht also aufgeräumt aus, ohne dass jemand aufgeräumt hätte.
-
-**Ein Weg umgeht das.** Findet die andere Frage kein Foto, fällt `load()` auf die ursprüngliche
-zurück (`contribute.ts:139-145`) — dann bleibt `need` stehen, die Komponente bleibt montiert und
-ihr Zustand auch. Heute ist das kaum zu treffen, weil beide Vorräte gut gefüllt sind (670 ohne
-Jahr, 74 ohne Ort). Genau dann kommt es aber: wenn eine der beiden Fragen leerläuft, also nach
-erfolgreicher Arbeit. Und die Folge wäre die schlimmste, die dieser Punkt kennt — eine scharfe
-Karte über einem Foto, das der Besucher noch nicht angesehen hat.
-
-Der Schalter gehört deshalb dorthin, wo `load()` schon heute Punkt, Etikett und Genauigkeit
-zurücksetzt: nach `store/contribute.ts`. Dann fällt er auf **jedem** Weg zurück und nicht nur auf
-den heute üblichen.
-
-Und `t.location.hintEmpty` sagt derzeit „Tippen Sie auf der Karte auf die Stelle — oder wählen Sie
-die Straße."; das stimmt danach nicht mehr, und zwar in beiden Zuständen: vorher gibt es nur die
-Straße, nachher nur die Karte. Es werden also **zwei** Texte.
 
 ### 27 · Unter dem Vorschaubild: Adresse und Jahr
 

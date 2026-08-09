@@ -6,6 +6,12 @@
  *
  * Tapping the map drops it, dragging moves it. Both have to work: some tap roughly first and
  * correct afterwards, others hit it straight away.
+ *
+ * **Two conditions, not one.** Whether a tap drops the pin (``armed``) and whether the pin is
+ * drawn and can be dragged (``active``) are separate: the street buttons set a pin too, and that
+ * one has to be visible and draggable without the whole map being live under the visitor's
+ * finger. Conflating them would either arm the map for everyone or take away the pin that the
+ * street choice just placed -- and with it the promise in ``t.location.hintSet``.
  */
 
 import type maplibregl from "maplibre-gl";
@@ -17,13 +23,16 @@ import { t } from "../text/de";
 
 export function PinLayer({ map }: { map: maplibregl.Map }) {
   const active = useContribute((s) => s.need === "location" && s.task?.photo != null && !s.thanks);
+  const picking = useContribute((s) => s.pickingOnMap);
   const pin = useContribute((s) => s.pin);
   const setPin = useContribute((s) => s.setPin);
   const marker = useRef<Marker | null>(null);
 
-  // Tapping the map drops the pin.
+  const armed = active && picking;
+
+  // Tapping the map drops the pin -- but only once the visitor has asked for that.
   useEffect(() => {
-    if (!active) return;
+    if (!armed) return;
 
     function onClick(event: maplibregl.MapMouseEvent) {
       setPin({ lat: event.lngLat.lat, lon: event.lngLat.lng });
@@ -35,7 +44,7 @@ export function PinLayer({ map }: { map: maplibregl.Map }) {
       map.off("click", onClick);
       map.getCanvas().style.cursor = "";
     };
-  }, [map, active, setPin]);
+  }, [map, armed, setPin]);
 
   // Create, move, remove the pin.
   useEffect(() => {

@@ -801,7 +801,8 @@ fiele es niemandem auf.
 reicht sieben Kilometer weit und umfasst die Nachbardörfer; alle 486 Straßen in Knöpfe zu fassen
 kostete eine vierte Frage, allein „Am …" hat dort 29 Einträge. Die Fotos eines Heimatmuseums zeigen
 seinen eigenen Ort, und was weiter draußen liegt, wird auf der Karte angetippt — den Weg gab es
-immer. Eine **Anzahl** statt eines Radius, weil sie das Knopfbudget unabhängig davon hält, wie
+immer. (Seit [Punkt 27](#27-der-kartentipp-ist-erst-nach-ansage-scharf) kostet er einen Knopfdruck
+vorher.) Eine **Anzahl** statt eines Radius, weil sie das Knopfbudget unabhängig davon hält, wie
 dicht ein Ort bebaut ist.
 
 **Der Verwaltungsbereich behält sein Suchfeld.** Dort wird gepflegt, nicht besucht, und eine
@@ -893,3 +894,43 @@ nicht nur im Backlog.
 ergeben hat — und sie stand danach zweimal beiläufig im Backlog als „ist fortzuschreiben", ohne
 dass jemand sie fortgeschrieben hätte. Eine Entscheidung, die an zwei Stellen halb widerrufen wird,
 ist an keiner Stelle mehr auffindbar. Sie gehört an eine.
+
+---
+
+## 27. Der Kartentipp ist erst nach Ansage scharf
+
+Solange „Wo ist das?" steht, war **die ganze Karte scharf**: Jeder Tipp auf eine freie Flaeche
+setzte einen Punkt. Seit dem 9. August 2026 muss der Besucher das erst verlangen — ueber den Knopf
+**„Auf der Karte zeigen"**. Vorher passiert bei einem Tipp auf die Karte nichts.
+
+**Der Grund ist die Datenqualitaet, nicht die Sauberkeit.** Wer waehrend der Frage nur schauen will
+— die Karte verschieben, sich orientieren, ein Foto in der Naehe suchen —, beantwortete sie dabei
+versehentlich. Und sobald ein Punkt stand, bot der Bereich **„Hier war das"** an: ein Tipp daneben,
+ein bestaetigender Tipp danach, und im Bestand stand eine Verortung, die niemand gemeint hat.
+
+**Es ist immer nur ein Weg auf dem Schirm.** Wer die Karte scharf schaltet, dem verschwindet die
+Strassenwahl; wer zurueckgeht, bekommt sie wieder. Nebeneinander standen sie sich im Weg: Das
+Knopfraster wirft bei der naechsten Beruehrung weg, was der Kartentipp gerade gesetzt hat. Der
+Knopf steht deshalb **ueber** der jeweiligen Auswahl, nicht darunter — er ist die Alternative *zu*
+ihr, und darunter laese er sich als letzter Ausweg nach dem Scrollen.
+
+**Angeboten wird er in jedem Schritt, auch bei der Hausnummer**, und dort verdient er am meisten:
+Wer die Strasse kennt, die Nummer aber nicht, zeigt auf das Haus statt „Reicht so" zu druecken.
+Danach ist die Nummernfrage hinfaellig — ein Punkt auf der Karte sagt mehr als eine Zahl aus einer
+Liste.
+
+**Zwei Dinge bleiben unabhaengig davon scharf.** Der gesetzte Punkt wird immer gezeichnet und laesst
+sich immer ziehen, gleich wer ihn gesetzt hat — sonst gaelte die Zusage „Der Punkt laesst sich auf
+der Karte noch verschieben" fuer den Punkt aus der Strassenwahl nicht mehr. Im Code sind das
+deshalb zwei Bedingungen und nicht eine (`armed` und `active` in `kiosk/PinLayer.tsx`).
+
+**Ohne Ortsverzeichnis gibt es keine zweite Wahl** — dann ist die Karte von Anfang an scharf, denn
+sonst waere der Bereich unbedienbar. Das trifft eine Einrichtung, die `make places` nie gelaufen
+hat. [Punkt 24](#24-die-straße-wird-gewählt-nicht-getippt) sagt, was weiter drauszen liegt, werde
+„auf der Karte angetippt"; das gilt weiter, kostet jetzt aber einen Knopfdruck vorher.
+
+**Der Schalter liegt im Store, nicht in der Komponente.** `LocationTask` wird bei fast jedem
+Fotowechsel abgebaut, ein `useState` faellt dort also von selbst zurueck — nur nicht auf dem einen
+Weg, auf dem `load()` zur urspruenglichen Frage zurueckfaellt, weil die andere leergelaufen ist.
+Genau dieser Fall tritt ein, wenn eine Art von Luecke abgearbeitet ist, und er hinterliesze eine
+scharfe Karte ueber einem Foto, das der Besucher noch nicht angesehen hat.

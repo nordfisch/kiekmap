@@ -92,8 +92,24 @@ export const t = {
   },
 
   location: {
-    hintEmpty: "Tippen Sie auf der Karte auf die Stelle — oder wählen Sie die Straße.",
+    /**
+     * Two hints for two states, because the map is only live in one of them.
+     *
+     * A single sentence naming both routes would be wrong in both directions: before the visitor
+     * asks for it, tapping the map does nothing; afterwards, the street buttons are gone.
+     */
+    hintEmpty: "Wählen Sie die Straße — oder zeigen Sie die Stelle auf der Karte.",
+    hintPicking: "Tippen Sie auf der Karte auf die Stelle.",
     hintSet: "Stimmt die Stelle? Der Punkt lässt sich auf der Karte noch verschieben.",
+    pickOnMap: "Auf der Karte zeigen",
+    /**
+     * Back out of the map route -- worded for wherever it leads back to.
+     *
+     * Only ever offered when there is something to go back to: without a gazetteer the map is the
+     * only route, and a way back would lead nowhere.
+     */
+    backToStreets: "Doch die Straße wählen",
+    backToNumbers: "Doch die Hausnummer wählen",
     /**
      * The street is chosen, not typed -- the initial first, then the street.
      *

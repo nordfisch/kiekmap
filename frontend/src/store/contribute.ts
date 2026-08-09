@@ -53,6 +53,22 @@ type ContributeState = {
   /** Photos the visitor has just dismissed. This session only. */
   skipped: number[];
 
+  /**
+   * Is a tap on the map allowed to drop the pin?
+   *
+   * Off by default: while "Wo ist das?" stands, somebody who only wants to look around -- pan the
+   * map, get their bearings, find a photo nearby -- would otherwise answer the question by
+   * accident, and one confirming tap later a place nobody meant is in the collection.
+   *
+   * **Lives here rather than in ``LocationTask``** so that it falls back on *every* route to the
+   * next photo. The component is normally torn down on the way (``HelpPanel`` swaps it for
+   * ``DateTask``), which would clear a ``useState`` by itself -- but not when ``load`` falls back
+   * to the question it started from because the other one has run dry. That case arrives exactly
+   * when one kind of gap has been worked off, and it would leave the map armed over a photo the
+   * visitor has not looked at yet.
+   */
+  pickingOnMap: boolean;
+
   /** Pin dropped on the map while the location question is running. */
   pin: { lat: number; lon: number } | null;
   /** Name from the place search, when set that way. */
@@ -67,6 +83,7 @@ type ContributeState = {
 
   load: (need?: Need) => Promise<void>;
   skip: () => void;
+  setPickingOnMap: (on: boolean) => void;
   setPin: (
     pin: { lat: number; lon: number } | null,
     details?: { label?: string | null; accuracyM?: number | null },
@@ -123,7 +140,14 @@ export const useContribute = create<ContributeState>((set, get) => {
     // twice does no harm.
     useKiosk.getState().releaseFocus();
 
-    set({ loading: true, error: null, pin: null, pinLabel: null, pinAccuracy: null });
+    set({
+      loading: true,
+      error: null,
+      pin: null,
+      pinLabel: null,
+      pinAccuracy: null,
+      pickingOnMap: false,
+    });
     try {
       const task = await fetchTask(need, get().skipped, signal);
 
@@ -185,7 +209,7 @@ export const useContribute = create<ContributeState>((set, get) => {
       // The backend hands back the updated photo -- place and date therefore come first hand
       // instead of being guessed at again here.
       const updated = await action(task.photo);
-      set({ loading: false, pin: null, pinLabel: null, pinAccuracy: null });
+      set({ loading: false, pin: null, pinLabel: null, pinAccuracy: null, pickingOnMap: false });
 
       // Map and timeline have to show it now. The thank-you note promises exactly that -- and
       // before this line it only came true once somebody happened to pan the map.
@@ -210,6 +234,7 @@ export const useContribute = create<ContributeState>((set, get) => {
     error: null,
     thanks: null,
     skipped: [],
+    pickingOnMap: false,
     pin: null,
     pinLabel: null,
     pinAccuracy: null,
@@ -230,8 +255,13 @@ export const useContribute = create<ContributeState>((set, get) => {
         pin: null,
         pinLabel: null,
         pinAccuracy: null,
+        pickingOnMap: false,
       });
       void load(otherNeed(need));
+    },
+
+    setPickingOnMap(on) {
+      set({ pickingOnMap: on });
     },
 
     setPin(pin, details) {

@@ -1,10 +1,15 @@
 /**
  * "Where is this?" -- locating a photo by a visitor.
  *
- * Two routes, because people who know the village differ: whoever recognises the spot on the map
- * taps it directly. Whoever knows the street but cannot find the spot picks it from buttons --
- * the initial first, then the street. Both lead to the same pin, which can still be dragged
+ * Two routes, because people who know the village differ: whoever knows the street picks it from
+ * buttons -- the initial first, then the street. Whoever recognises the spot but not its name
+ * says so and then taps the map. Both lead to the same pin, which can still be dragged
  * afterwards.
+ *
+ * **Only ever one of the two is on screen.** The street route is the default; the map route has
+ * to be asked for, and asking for it takes the buttons away. Side by side they got in each
+ * other's way -- a stray tap on the map answered a question the visitor was still thinking about,
+ * and the buttons standing behind it would throw that answer away at the next tap.
  *
  * **Nothing here is typed.** A search box that takes nothing without a keyboard looks like a
  * broken control, and this was the only text field on the visitor's side; see decisions.md. The
@@ -31,9 +36,14 @@ export function LocationTask() {
   const setPin = useContribute((s) => s.setPin);
   const submitLocation = useContribute((s) => s.submitLocation);
   const loading = useContribute((s) => s.loading);
+  const picking = useContribute((s) => s.pickingOnMap);
+  const setPicking = useContribute((s) => s.setPickingOnMap);
+  const photoId = useContribute((s) => s.task?.photo?.id ?? null);
 
   /** All streets on offer. Fetched once -- a village fits in a few kilobytes. */
   const [streets, setStreets] = useState<Place[]>([]);
+  /** Has that fetch finished? Until it has, an empty list means "not yet", not "none". */
+  const [ready, setReady] = useState(false);
   /**
    * The groups tapped so far. Empty means the top level; every tap appends one, "Anderer
    * Buchstabe" takes the last one back.
@@ -62,10 +72,25 @@ export function LocationTask() {
     fetchStreets(abort.signal)
       .then(setStreets)
       .catch(() => {
-        /* Without the gazetteer the map stays -- the panel says so below. */
+        /* Without the gazetteer the map stays -- see the arming below. */
+      })
+      .finally(() => {
+        if (!abort.signal.aborted) setReady(true);
       });
     return () => abort.abort();
   }, []);
+
+  /**
+   * No gazetteer, no second route: then the map is live from the start.
+   *
+   * Runs again for every photo on purpose. The store disarms the map on each new one, and without
+   * the photo in the dependencies an install that never ran ``make places`` would be usable for
+   * the first photo and dead for all the rest -- with a panel that says "tippen Sie die Stelle
+   * bitte auf der Karte an" while nothing happens.
+   */
+  useEffect(() => {
+    if (ready && streets.length === 0) setPicking(true);
+  }, [ready, streets.length, photoId, setPicking]);
 
   function choosePlace(place: Place) {
     // The pin sits on the street straight away -- the further step only moves it. Whoever stops
@@ -113,17 +138,84 @@ export function LocationTask() {
   }
 
   /**
-   * A tap on the map ends the house-number choice.
+   * Moving the pin by hand ends the house-number choice.
    *
    * Otherwise both would run side by side: the pin moved, the grid of buttons still standing, and
-   * the next tap on a house number throwing the point just set away again. A tap on the map is
-   * the more definite statement -- that is where somebody just aimed.
+   * the next tap on a house number throwing the point just set away again. Dragging is the more
+   * definite statement -- that is where somebody just aimed.
    *
    * Told apart by the missing label: only the place search sets one (see store/contribute.ts).
+   *
+   * **Two ways in, since the map has to be armed.** Dragging the pin, which stays live throughout
+   * so that the promise in ``t.location.hintSet`` holds for a pin the street buttons placed. And
+   * a tap after "Auf der Karte zeigen" was pressed *in this step* -- somebody who does not know
+   * the number but recognises the house. Either way the number question is void afterwards: a
+   * point on the map says more than a number from a list.
    */
   useEffect(() => {
     if (street && pinLabel === null) closeNumbers();
   }, [street, pinLabel]);
+
+  // Belongs to every step: once a point stands it can be confirmed or taken back, no matter which
+  // route put it there.
+  const confirm = pin && (
+    <div className="task__confirm">
+      {pinLabel && <p className="task__chosen">{pinLabel}</p>}
+      <button
+        type="button"
+        className="button button--primary"
+        onClick={() => void submitLocation()}
+        disabled={loading}
+      >
+        {t.location.confirm}
+      </button>
+      <button type="button" className="button button--quiet" onClick={() => setPin(null)}>
+        {t.location.clear}
+      </button>
+    </div>
+  );
+
+  /**
+   * The way to the other route, above whatever is on offer -- and offered in every step.
+   *
+   * Above, because it is the alternative *to* the list below it; underneath it would read as the
+   * last resort after scrolling past everything. And in the house-number step too, because that
+   * is where it earns the most: whoever does not know the number can still point at the house.
+   *
+   * A full button rather than a quiet one: this leads to an answer, it is not a way back out.
+   */
+  const mapButton = (
+    <button type="button" className="button" onClick={() => setPicking(true)}>
+      {t.location.pickOnMap}
+    </button>
+  );
+
+  // The map route. Nothing else is on offer while it runs -- that is the whole point of asking
+  // for it; see the module docstring.
+  if (picking) {
+    return (
+      <div className="task">
+        <p className="task__hint">
+          {pin
+            ? t.location.hintSet
+            : streets.length
+              ? t.location.hintPicking
+              : t.location.noStreets}
+        </p>
+
+        {confirm}
+
+        {/* Without streets there is nowhere to go back to, and the map is the only route. Where
+            there is, the wording names the step that is still standing behind this one -- the
+            house numbers, unless a tap on the map has already made them beside the point. */}
+        {streets.length > 0 && (
+          <button type="button" className="button button--quiet" onClick={() => setPicking(false)}>
+            {street ? t.location.backToNumbers : t.location.backToStreets}
+          </button>
+        )}
+      </div>
+    );
+  }
 
   // Second step: the street is set, now the number. The search steps aside meanwhile, so that
   // nothing but the numbers is on offer.
@@ -138,6 +230,8 @@ export function LocationTask() {
         <p className="task__hint">
           {asking ? t.location.askArea(street.name) : t.location.askHouseNumber(street.name)}
         </p>
+
+        {mapButton}
 
         <div className="housenumbers">
           {asking
@@ -184,9 +278,9 @@ export function LocationTask() {
 
   return (
     <div className="task">
-      <p className="task__hint">
-        {pin ? t.location.hintSet : streets.length ? t.location.hintEmpty : t.location.noStreets}
-      </p>
+      <p className="task__hint">{pin ? t.location.hintSet : t.location.hintEmpty}</p>
+
+      {mapButton}
 
       {streets.length > 0 && (
         <>
@@ -241,22 +335,7 @@ export function LocationTask() {
         </>
       )}
 
-      {pin && (
-        <div className="task__confirm">
-          {pinLabel && <p className="task__chosen">{pinLabel}</p>}
-          <button
-            type="button"
-            className="button button--primary"
-            onClick={() => void submitLocation()}
-            disabled={loading}
-          >
-            {t.location.confirm}
-          </button>
-          <button type="button" className="button button--quiet" onClick={() => setPin(null)}>
-            {t.location.clear}
-          </button>
-        </div>
-      )}
+      {confirm}
     </div>
   );
 }
