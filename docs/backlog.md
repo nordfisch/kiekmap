@@ -42,7 +42,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | # | Punkt | Art | Einordnung |
 |---|---|---|---|
 | | **Verwaltung** | | |
-| 32 | [„Auf der Karte zu sehen" zählt falsch](#32--auf-der-karte-zu-sehen-zählt-falsch) | **Fehler** | wichtig · dringend |
 | 41 | [Den Erstbestand maschinell vorbereiten](#41--den-erstbestand-maschinell-vorbereiten) | Aufgabe | wichtig · dringend |
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
 | 25 | [Vom Foto direkt in seine Bearbeitung](#25--vom-foto-direkt-in-seine-bearbeitung) | Aufgabe | wichtig |
@@ -77,10 +76,9 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Zwei Fehler sind offen**: Punkt 32 meldet der Verwaltung 252 sichtbare Fotos, wo 854 sichtbar
-sind, und Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
+**Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Elf Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24. Sie sind erledigt,
+**Zwölf Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 32. Sie sind erledigt,
 aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
 neue Punkt bekommt die **43**.
 
@@ -88,45 +86,17 @@ neue Punkt bekommt die **43**.
 
 ## Verwaltung
 
-### 32 · „Auf der Karte zu sehen" zählt falsch
-
-Die Übersicht der Verwaltung meldet für den Erstbestand **252** Fotos als auf der Karte zu sehen.
-Zu sehen sind **854**.
-
-Die Kachel zählt Fotos, die **Ort und Jahr** haben (`api/admin.py:147`), und der Kommentar
-darüber nennt auch den Grund: „Both are needed for the map: the view filters on place and time at
-once." Das stimmt nur, **solange ein Zeitfilter aktiv ist** — und im Regelfall ist keiner aktiv.
-Steht der Schieber auf der ganzen Achse, schickt `queryTimeFilter` bewusst keinen Filter, und
-`_viewport_filters` hängt die Datumsbedingungen dann gar nicht erst an. Undatierte Fotos sind also
-auf der Karte.
-
-Gegengeprüft an der laufenden API:
-
-| Abfrage | Fotos |
-|---|---|
-| ohne Zeitfilter — der Regelfall | **854** |
-| mit Zeitfilter über die ganze Spanne | 249 |
-| was die Kachel meldet | 252 |
-
-**Warum das mehr ist als eine schiefe Zahl:** Die Kachel sagt dem Museumsteam, drei Viertel der
-Sammlung seien unsichtbar. Das stimmt nicht und lenkt die Arbeit in die falsche Richtung — sie
-würden datieren, um Fotos „auf die Karte zu bekommen", die längst darauf sind.
-
-Richtig ist, was auch am einfachsten zu lesen ist: **Gesamt minus „ohne Ort"** — also
-veröffentlicht und mit Koordinaten, ohne Bedingung an das Datum. Für den Beitragsbereich sind
-Datum und Ort ohnehin schon getrennt gezählt.
-
 ### 1 · Der Erstbestand braucht eine Durchsicht
 
 929 Fotos sind eingelesen, und der Import hat aus Dateien und Ordnernamen herausgeholt, was
 darin stand. Was er *nicht* konnte, ist jetzt Handarbeit — und weil es Ortskenntnis braucht,
 gehört sie dem Museumsteam, nicht dem Rechner:
 
-- **673 Fotos ohne Jahr.** Das ist gewollt: Es sind die historischen Scans, und ihr EXIF-Datum
+- **670 Fotos ohne Jahr.** Das ist gewollt: Es sind die historischen Scans, und ihr EXIF-Datum
   ist das des Scanlaufs. Sie sind der Vorrat für „Wann war das?" — aber die Zeitleiste zeigt
   vorerst nur 2010 bis 2024, weil ausschließlich die neuen Kameraaufnahmen datiert sind. Ein
   paar Dutzend datierte Altaufnahmen würden die Leiste erst brauchbar machen.
-- **77 Fotos ohne Ort**, davon 7 auch ohne Straße — die vier losen Dateien oben im Import-Ordner
+- **74 Fotos ohne Ort**, davon 7 auch ohne Straße — die vier losen Dateien oben im Import-Ordner
   und die aus `Deelenweg`, wo der Ortsindex zwei Straßen kennt („Deelenweg I" und „II") und
   deshalb bewusst nicht rät.
 - **60 Fotos nur straßengenau** (58 vom Kurator, 2 von Besuchern), weil die Hausnummer nicht in
@@ -137,6 +107,11 @@ gehört sie dem Museumsteam, nicht dem Rechner:
 - **18 Fotos heißen „Intel(R) JPEG Library, version [1.51.12.44]".** Das ist kein Titel, sondern
   ein EXIF-Feld, das ein Bildprogramm hinterlassen hat — und es steht heute als Überschrift in der
   Detailansicht. Von allen Befunden dieser Liste ist es der einzige, den ein Besucher sofort sieht.
+
+**Alle Zahlen hier sind vom 9. August 2026**, und sie wandern: Jeder Besucherbeitrag verschiebt
+sie, und die anderen Punkte dieser Datei tragen den Stand des Tages, an dem sie geschrieben wurden.
+Wer eine davon braucht, holt sie sich mit `python -m app.cli stats`, statt sie hier abzulesen — die
+Größenordnung stimmt, die letzte Stelle nicht.
 
 Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene Nacharbeits-Liste reicht, ist Teil
 der Frage. Was davon **ohne Ortskenntnis** zu machen ist — Titel, Zusätze, Archivkürzel —, nimmt
@@ -365,8 +340,12 @@ es eine Entscheidung des Besuchers statt einer Nebenwirkung der Schieberstellung
   ausdrücklichen Schalter braucht es diesen Umweg womöglich nicht mehr, und die Absicht stünde
   dann dort, wo der Besucher sie sieht, statt in einer Bedingung im Store.
 
-Verwandt mit [Punkt 32](#32--auf-der-karte-zu-sehen-zählt-falsch): Beide kommen daher, dass
-„undatiert" und „unsichtbar" nicht dasselbe sind, im Kopf aber leicht zusammenfallen.
+**Der verwandte Fehler ist behoben, dieser Punkt bleibt.** Punkt 32 — die Verwaltungskachel, die
+undatierte Fotos nicht als sichtbar zählte — ist am 9. August 2026 erledigt worden (siehe
+[history.md](history.md)). Beide kamen daher, dass „undatiert" und „unsichtbar" nicht dasselbe
+sind, im Kopf aber leicht zusammenfallen. Bei 32 zählte deshalb eine Zahl falsch; hier stimmt die
+Anzeige, aber der Besucher erfährt nie, was ihm beim Zusammenziehen des Schiebers abhandenkommt.
+Das ist die schwerere Hälfte, und sie ist noch offen.
 
 ### 36 · „Hilf mit" soll auch nachschärfen, nicht nur füllen
 

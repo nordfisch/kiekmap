@@ -1622,3 +1622,39 @@ der Uebersichtstabelle. Eine Liste, die man sehen kann, ist die einzige Fassung 
 sich selbst durchsetzt.
 
 Der Backlog fuehrt danach **31 Punkte**, elf Nummern sind vergriffen, die naechste freie ist 43.
+
+## Die Kachel, die drei Viertel der Sammlung verschwinden liess
+
+9. August 2026. Punkt 32 des Backlogs war der erste Fehler, den die neue Einordnung als
+*wichtig und dringend* ausgewiesen hatte, und er brauchte am Ende **eine Zeile**. Die Uebersicht
+der Verwaltung meldete fuer den Erstbestand 252 Fotos als „auf der Karte zu sehen"; zu sehen waren
+855.
+
+Die Kachel zaehlte Fotos mit Ort **und** Jahr, und der Kommentar darueber gab die Begruendung:
+„Both are needed for the map: the view filters on place and time at once." Der Satz war einmal
+richtig. Er wurde falsch, als der Kiosk anfing, bei ganz aufgezogenem Schieber **gar keinen**
+Zeitfilter zu schicken — damit haengt `_viewport_filters` die Datumsbedingungen nicht an, und
+undatierte Fotos stehen auf der Karte. Der Regelfall ist genau dieser: Ein Besucher, der nichts
+eingestellt hat, sieht alles.
+
+**Der Schaden war nicht die schiefe Zahl, sondern die Arbeit, die sie ausgeloest haette.** Bei 670
+Fotos ohne Jahr sagte die Kachel dem Museumsteam, drei Viertel der Sammlung seien unsichtbar. Die
+naheliegende Antwort darauf ist, zu datieren — und zwar Fotos, die laengst auf der Karte liegen.
+Eine falsche Zahl auf einer Startseite ist harmlos; eine falsche Zahl, die einer Handvoll
+Ehrenamtlicher sagt, womit sie ihre Zeit verbringen sollen, ist es nicht.
+
+**Derselbe Fehler steckte in `python -m app.cli stats`** — und dort noch einer dazu: Die
+CLI zaehlte geloeschte Fotos ueberall mit, waehrend die Verwaltung sie ueberall herausnimmt. Die
+Schlusszeile verglich damit zwei verschiedene Grundgesamtheiten miteinander. Beide Programme
+zaehlen jetzt nach derselben Regel, was die Abnahme erst moeglich machte: CLI und API gaben
+hinterher unabhaengig voneinander dieselbe Zahl aus.
+
+**Was der Fall ueber Kommentare sagt.** Der Kommentar hat den Fehler nicht verursacht, aber er hat
+ihn drei Monate lang gedeckt: Wer die Zeile las, fand eine Begruendung und las weiter. Ein
+Kommentar, der ein *Warum* behauptet, wird geglaubt — deshalb steht an der Stelle jetzt nicht nur
+die neue Regel, sondern auch, woran sie haengt und wo ihr Gegenstueck liegt
+(`_viewport_filters` in `api/photos.py`). Aendert sich dort etwas, ist hier die Fundstelle.
+
+Die beiden Tests dazu beschreiben den Fehlerfall, nicht den Erfolgsfall:
+`test_foto_ohne_jahr_steht_auf_der_karte` und die Gegenprobe ohne Ort. Zurueckgedreht faellt der
+erste sofort — nachgeprueft, bevor der Commit stand.

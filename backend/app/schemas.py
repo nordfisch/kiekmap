@@ -465,7 +465,8 @@ class Overview(BaseModel):
     """The numbers on the admin start page."""
 
     total: int
-    #: Photos with both a place and a date -- only those appear on the map.
+    #: Published photos with a place. A date is not required: without a time filter -- the normal
+    #: case -- undated photos are on the map too. See the comment in api/admin.overview.
     on_map: int
     without_location: int
     without_date: int

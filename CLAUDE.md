@@ -177,7 +177,7 @@ anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md).
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.
 
-**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 31 Punkte nach Verwaltung,
+**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 30 Punkte nach Verwaltung,
 Besucher-Interface, Infrastruktur und Entwicklung geordnet, jeder mit dem, was beim Aufgreifen
 sonst erst wieder herausgefunden werden müsste. Jeder trägt eine **feste Nummer**, unter der er
 zitiert wird („Punkt 15"), dazu seine Art und seine Einordnung; die Übersichtstabelle oben in der

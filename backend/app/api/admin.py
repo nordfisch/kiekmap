@@ -143,12 +143,14 @@ def overview(admin: Admin, session: Db, settings: Config) -> Overview:
 
     return Overview(
         total=count(alive),
-        # Both are needed for the map: the view filters on place and time at once.
-        on_map=count(
-            Photo.lat.is_not(None),
-            Photo.date_from.is_not(None),
-            Photo.status == PhotoStatus.PUBLISHED,
-        ),
+        # A place is enough. The date is **not** a condition, however much it looks like one:
+        # with the slider on the whole axis the kiosk sends no time filter at all, and
+        # _viewport_filters then does not append the date conditions either -- so undated photos
+        # are on the map, and that is the normal case. Counting them out told the museum team
+        # three quarters of the collection were invisible, and sent them dating photos that had
+        # been visible all along. Mirrors _viewport_filters in api/photos.py; if the map's
+        # unconditional filters change, this changes with them.
+        on_map=count(Photo.status == PhotoStatus.PUBLISHED, Photo.lat.is_not(None)),
         without_location=count(alive, Photo.lat.is_(None)),
         without_date=count(alive, Photo.date_from.is_(None)),
         deleted=count(Photo.status == PhotoStatus.DELETED),

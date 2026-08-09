@@ -90,9 +90,36 @@ class TestUebersicht:
         assert daten["total"] == 3
         assert daten["without_location"] == 1
         assert daten["without_date"] == 1
-        # Auf der Karte: mit Ort, mit Jahr und nicht geloescht.
-        assert daten["on_map"] == 1
+        # Auf der Karte: mit Ort und nicht geloescht. Das Foto ohne Jahr zaehlt mit.
+        assert daten["on_map"] == 2
         assert daten["deleted"] == 1
+
+    def test_foto_ohne_jahr_steht_auf_der_karte(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        """Undatiert ist nicht unsichtbar -- der Regelfall ist die Karte ohne Zeitfilter.
+
+        Steht der Schieber auf der ganzen Achse, schickt der Kiosk gar keinen Zeitfilter, und
+        ``_viewport_filters`` haengt die Datumsbedingungen dann nicht an. Zaehlte die Kachel das
+        Jahr trotzdem mit, meldete sie dem Museumsteam beim Erstbestand 252 sichtbare Fotos, wo
+        854 sichtbar sind -- und schickte es datieren, was laengst auf der Karte liegt.
+        """
+        make_photo(year=None, sha="f" * 64)
+        session.commit()
+
+        daten = admin_client.get("/api/admin/overview").json()
+
+        assert daten["on_map"] == 1
+        assert daten["without_date"] == 1
+
+    def test_foto_ohne_ort_steht_nicht_auf_der_karte(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        """Die Gegenprobe: Ohne Ort gibt es keinen Marker, mit Jahr oder ohne."""
+        make_photo(lat=None, lon=None, sha="g" * 64)
+        session.commit()
+
+        assert admin_client.get("/api/admin/overview").json()["on_map"] == 0
 
     def test_geloeschtes_foto_zaehlt_in_keiner_arbeitskachel(
         self, admin_client: TestClient, session, make_photo

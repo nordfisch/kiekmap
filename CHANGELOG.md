@@ -526,3 +526,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   die anfängliche Auswahl endete aber weiter auf dem jüngsten Foto. Rechts blieb ein Stück offen,
   was aussah, als sei schon etwas weggefiltert. Die Auswahl greift jetzt über die ganze Achse; ein
   Zeitfilter geht deswegen nicht ans Backend, die undatierten Fotos bleiben also auf der Karte
+
+### Behoben
+
+- **„Auf der Karte zu sehen" meldete 252 statt 855.** Die Kachel der Verwaltung zählte Fotos mit
+  Ort *und* Jahr, mit der Begründung, die Ansicht filtere auf beides zugleich. Das gilt nur,
+  solange ein Zeitfilter aktiv ist — steht der Schieber auf der ganzen Achse, schickt der Kiosk
+  bewusst keinen, und undatierte Fotos stehen auf der Karte. Beim Erstbestand mit seinen 670 Fotos
+  ohne Jahr sagte die Kachel dem Museumsteam damit, drei Viertel der Sammlung seien unsichtbar,
+  und schickte es datieren, was längst zu sehen war. Gezählt wird jetzt: veröffentlicht und mit
+  Ort. Derselbe Fehler steckte in `python -m app.cli stats`, das dabei zugleich gelöschte Fotos
+  mitzählte, wo die Verwaltung sie herausnimmt — beide Zahlen folgen jetzt derselben Regel

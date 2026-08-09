@@ -23,7 +23,7 @@ from sqlalchemy import func, select
 
 from app.config import get_settings
 from app.db import SessionLocal
-from app.models import ImportResult, Photo
+from app.models import ImportResult, Photo, PhotoStatus
 from app.services.importer import import_directory
 
 log = logging.getLogger("photomap.cli")
@@ -71,20 +71,27 @@ def _cmd_stats(_: argparse.Namespace) -> int:
     def count(*filters) -> int:
         return session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
 
+    # Deleted photos count in none of these: they are out of the exhibition. Same convention as
+    # the admin overview, so that the two never disagree in front of the same person.
+    alive = Photo.status != PhotoStatus.DELETED
+
     with SessionLocal() as session:
-        total = count()
-        without_location = count(Photo.lat.is_(None))
-        without_date = count(Photo.date_from.is_(None))
-        # Only photos with both place and time range appear on the map -- the view filters on
-        # both at once.
-        on_map = count(Photo.lat.is_not(None), Photo.date_from.is_not(None))
+        total = count(alive)
+        without_location = count(alive, Photo.lat.is_(None))
+        without_date = count(alive, Photo.date_from.is_(None))
+        # A place is enough; an undated photo is on the map as long as no time filter is set,
+        # and normally none is. Same count as the admin overview -- see api/admin.py.
+        on_map = count(Photo.status == PhotoStatus.PUBLISHED, Photo.lat.is_not(None))
+        deleted = count(Photo.status == PhotoStatus.DELETED)
 
     print(f"Fotos gesamt            {total}")
     print(f"  auf der Karte         {on_map}")
     print(f"  ohne Ort              {without_location}")
     print(f"  ohne Jahr             {without_date}")
+    if deleted:
+        print(f"  geloescht             {deleted}")
     if total:
-        print(f"\n{100 * on_map // total} % sind vollstaendig genug fuer die Karte.")
+        print(f"\n{100 * on_map // total} % haben einen Ort und stehen damit auf der Karte.")
     return 0
 
 
