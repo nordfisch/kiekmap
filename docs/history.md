@@ -1582,3 +1582,43 @@ Die Bewegung selbst hat einen eigenen Test bekommen, weil sie an einer Stelle st
 Am Rand der Achse darf der Zeitraum nicht *schrumpfen*. Begrenzt wird deshalb die Verschiebung, nie
 die Enden einzeln — am Gerät nachgefahren, von 2014–2018 bis 2021–2025 und zurück auf 2010–2014,
 die Spanne blieb bei vier Jahren.
+
+## Der Durchgang über den Backlog
+
+9. August 2026. Zwei Tage nachdem der Backlog seine Ordnung bekommen hatte, kamen zwoelf neue
+Punkte hinzu (`3679353`) — und damit war zu pruefen, ob die Liste noch stimmt. Vier Fragen an jeden
+der siebenunddreissig Eintraege: Ueberschneidet er sich mit einem anderen? Will das noch jemand?
+Stimmt seine Einordnung? Und, die ergiebigste: **widerspricht sein Text dem, was inzwischen gebaut
+ist?**
+
+Die letzte Frage hat am meisten gefunden, und das war zu erwarten: Ein Backlog beschreibt einen
+Zustand, den die Arbeit staendig verlaesst.
+
+- **Punkt 4 stand auf einer falschen Tatsache.** „Heute sucht die Fotoliste im Verwaltungsbereich
+  nur ueber den Titel" — tatsaechlich deckt das `or_(…)` in `api/admin.py` Titel, Ortsname *und*
+  Dateiname ab. Der Punkt bestand also aus einer Luecke, die es nicht gab. Was von ihm uebrig
+  blieb, ist eine Zeile in Punkt 25.
+- **Punkt 1 nannte 58 straszengenaue Fotos**, waehrend Punkt 30 auf derselben Seite 60 zaehlte.
+  Beide hatten recht, zu verschiedenen Zeitpunkten: Zwei Besucherbeitraege waren dazugekommen.
+- **Punkt 1 nannte die unsinnigen Schlagwoerter, aber nicht die achtzehn Fotos, die
+  „Intel(R) JPEG Library, version [1.51.12.44]" heiszen.** Von allen Befunden der Durchsicht ist
+  das der einzige, den ein Besucher sofort sieht — er steht als Ueberschrift in der Detailansicht.
+- **Punkt 30 verwies auf Punkt 1**, wo die Schlagwoerter aufgeraeumt wuerden. Das tat inzwischen
+  Punkt 41.
+
+**Sechs Nummern sind dabei vergriffen gegangen.** Vier gingen in einem anderen Punkt auf: 16 („Der
+praktische Teil von Punkt 15" — so begann sein Text buchstaeblich), 12 und 24 wurden zu Pruefungen
+innerhalb von Punkt 15, und 13 wurde der erste Eintrag der Sammelliste von Punkt 40. Zwei fielen
+weg: Punkt 2 zielte auf den Erstimport, der gelaufen ist, und ging als Warnung in Punkt 41 ein;
+Punkt 4 loeste sich in der oben beschriebenen Fehlannahme auf.
+
+**Und die 24 war doppelt vergeben.** Sie hiesz erst „Backlog ordnen und klassifizieren" und wurde
+am 8. August erledigt; noch am selben Tag bekam der Rest der Tastaturfrage aus Punkt 6 dieselbe
+Nummer. Das verstoeszt gegen die Regel, die drei Absaetze weiter oben in derselben Datei steht —
+und es faellt niemandem auf, solange nicht jemand beide Stellen nebeneinander liest. Die
+Vergabestelle war der Backlog, das Gedaechtnis war diese Datei, und die beiden hatten keinen
+Abgleich. Seitdem fuehrt der Backlog die vergriffenen Nummern **ausdruecklich auf**, direkt unter
+der Uebersichtstabelle. Eine Liste, die man sehen kann, ist die einzige Fassung dieser Regel, die
+sich selbst durchsetzt.
+
+Der Backlog fuehrt danach **31 Punkte**, elf Nummern sind vergriffen, die naechste freie ist 43.

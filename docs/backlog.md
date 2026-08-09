@@ -47,10 +47,8 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
 | 25 | [Vom Foto direkt in seine Bearbeitung](#25--vom-foto-direkt-in-seine-bearbeitung) | Aufgabe | wichtig |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
-| 2 | [Jahreszahl aus dem Dateinamen raten](#2--jahreszahl-aus-dem-dateinamen-raten) | Idee | — |
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
-| 4 | [Volltextsuche über SQLite FTS5](#4--volltextsuche-über-sqlite-fts5) | Idee | — |
 | | **Besucher-Interface** | | |
 | 33 | [Fotos ohne Jahr: ein Schalter statt einer Nebenwirkung](#33--fotos-ohne-jahr-ein-schalter-statt-einer-nebenwirkung) | Frage | wichtig · dringend |
 | 36 | [„Hilf mit" soll auch nachschärfen, nicht nur füllen](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) | Frage | wichtig |
@@ -65,17 +63,13 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 28 | [Die Knopfsprache der Besucheransicht](#28--die-knopfsprache-der-besucheransicht) | Aufgabe | wichtig |
 | 29 | [Der Kopfbereich: Maße, Wappen, Titel](#29--der-kopfbereich-maße-wappen-titel) | Aufgabe | wichtig |
 | 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
-| 12 | [Der 100-m-Fokus liegt über der Kachelauflösung](#12--der-100-m-fokus-liegt-über-der-kachelauflösung) | Frage | — |
-| 13 | [„Hilf mit:" hat seine Akzentfarbe verloren](#13--hilf-mit-hat-seine-akzentfarbe-verloren) | Idee | — |
 | | **Infrastruktur** | | |
 | 14 | [Bedienbarkeitstest mit der echten Zielgruppe](#14--bedienbarkeitstest-mit-der-echten-zielgruppe) | Aufgabe | wichtig · dringend |
 | 15 | [Abnahme auf dem ersten Pi](#15--abnahme-auf-dem-ersten-pi) | Aufgabe | wichtig |
-| 16 | [Die vier Prüfungen, die das Gerät brauchen](#16--die-vier-prüfungen-die-das-gerät-brauchen) | Aufgabe | wichtig |
 | 17 | [Containerbetrieb prüfen](#17--containerbetrieb-prüfen) | Aufgabe | wichtig |
 | 18 | [Wiederherstellung wirklich proben](#18--wiederherstellung-wirklich-proben) | Aufgabe | wichtig |
 | 19 | [Displayauflösung und -orientierung des Museumsgeräts](#19--displayauflösung-und--orientierung-des-museumsgeräts) | Frage | wichtig |
 | 20 | [Read-Only-Overlay-Dateisystem](#20--read-only-overlay-dateisystem) | Idee | — |
-| 24 | [Eine Tastatur für die Pflege am Gerät](#24--eine-tastatur-für-die-pflege-am-gerät) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
 | 39 | [Den Code prüfen lassen](#39--den-code-prüfen-lassen) | Aufgabe | wichtig |
@@ -84,8 +78,11 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
 **Zwei Fehler sind offen**: Punkt 32 meldet der Verwaltung 252 sichtbare Fotos, wo 854 sichtbar
-sind, und Punkt 10 zerdrückt das Foto auf einem kleinen Schirm. Ein dritter, **Punkt 5**, ist am
-8. August 2026 behoben und in die [history.md](history.md) gezogen; seine Nummer bleibt vergriffen.
+sind, und Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
+
+**Elf Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24. Sie sind erledigt,
+aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
+neue Punkt bekommt die **43**.
 
 ---
 
@@ -132,12 +129,19 @@ gehört sie dem Museumsteam, nicht dem Rechner:
 - **77 Fotos ohne Ort**, davon 7 auch ohne Straße — die vier losen Dateien oben im Import-Ordner
   und die aus `Deelenweg`, wo der Ortsindex zwei Straßen kennt („Deelenweg I" und „II") und
   deshalb bewusst nicht rät.
-- **58 Fotos nur straßengenau**, weil die Hausnummer nicht in OpenStreetMap steht.
+- **60 Fotos nur straßengenau** (58 vom Kurator, 2 von Besuchern), weil die Hausnummer nicht in
+  OpenStreetMap steht. Sie sind zugleich der Vorrat für
+  [Punkt 36](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen), der sie vorlegen will.
 - **Schlagwörter aus den Dateien**, die keine sind: „Wer hat eine bessere Vorlage?", „Or01-1",
   „Förderkreis-Cloud". Sie stammen aus der Archivarbeit und stehen jetzt im Kiosk.
+- **18 Fotos heißen „Intel(R) JPEG Library, version [1.51.12.44]".** Das ist kein Titel, sondern
+  ein EXIF-Feld, das ein Bildprogramm hinterlassen hat — und es steht heute als Überschrift in der
+  Detailansicht. Von allen Befunden dieser Liste ist es der einzige, den ein Besucher sofort sieht.
 
 Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene Nacharbeits-Liste reicht, ist Teil
-der Frage.
+der Frage. Was davon **ohne Ortskenntnis** zu machen ist — Titel, Zusätze, Archivkürzel —, nimmt
+[Punkt 41](#41--den-erstbestand-maschinell-vorbereiten) ab; hier bleibt, was nur das Museumsteam
+weiß.
 
 ### 25 · Vom Foto direkt in seine Bearbeitung
 
@@ -174,6 +178,14 @@ heute in einen Bereich springt.
 - **Findet die Verwaltungssuche den Hash-Anfang?** Wenn nicht, steht in der Detailansicht eine
   Kennung, die sich nirgends nachschlagen lässt. Es wäre eine Zeile mehr im vorhandenen `or_(…)`
   (`api/admin.py:205`) — eine Zugabe, aber sie entscheidet, ob der Hash Auskunft ist oder Zierrat.
+
+**Was von der Volltextsuche übrig bleibt.** Sie stand bis zum 9. August 2026 als eigener Punkt 4
+hier, mit der Begründung, die Fotoliste suche „nur über den Titel". Das stimmte nicht: Das `or_(…)`
+an derselben Stelle deckt Titel, **Ortsname und Dateiname** ab. Und wer über den Stift direkt vom
+Foto in dessen Bearbeitung kommt, sucht überhaupt nicht mehr. Übrig bleibt eine Zeile —
+**Beschreibung und Schlagwörter mit durchsuchen**, zwei weitere `ilike` im selben `or_(…)`. Ein
+FTS5-Index dafür wäre bei 929 Fotos Aufwand ohne Wirkung; ein `LIKE` über wenige tausend Zeilen ist
+in SQLite nicht messbar langsam. Erst bei einem Vielfachen des Bestands lohnt die Frage neu.
 
 ### 31 · Einstellungen in der Verwaltung pflegen statt in der `.env`
 
@@ -224,16 +236,6 @@ zweites Museum aufsetzt, ist die eine übergebbare Datei dann weg. Vielleicht is
 beides: Datei als Startwert, Datenbank als Übersteuerung — genau das gehört durchdacht, bevor
 etwas gebaut wird.
 
-### 2 · Jahreszahl aus dem Dateinamen raten
-
-`Kirchweih_1932_Muehle.jpg` trägt seine Datierung im Namen, und beim Erstimport von einigen
-hundert Scans ist das viel wert.
-
-**Vorsicht:** `IMG_1932.jpg` ist ein Kamerazähler, keine Jahreszahl. Das Ergebnis darf deshalb nur
-als **Vorschlag** markiert werden, nie als Tatsache — sonst entsteht genau der Fehler, den die
-EXIF-Regel aus Stufe 3 vermeidet: ein falsch datiertes Foto, das nie zur Korrektur vorgelegt wird,
-weil es als datiert gilt.
-
 ### 41 · Den Erstbestand maschinell vorbereiten
 
 [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht) sagt, die Durchsicht brauche Ortskenntnis
@@ -267,6 +269,15 @@ wird [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern) überhaupt sinnvoll.
 hat sich für Adresse statt Titel unter dem Vorschaubild entschieden — **weil die Titel heute
 Adressen sind**. Sind sie erst aufgeräumt, ist „Gasthof Timm — 1953" die bessere Beschriftung
 als „Hauptstraße 11a — 1953". Die Entscheidung von Punkt 27 ist dann neu zu treffen.
+
+**Und die Jahreszahl im Dateinamen gehört hierher.** Sie stand bis zum 9. August 2026 als eigener
+Punkt 2 im Backlog, gedacht für den Erstimport — der ist gelaufen, und geraten wurde nichts.
+`Kirchweih_1932_Muehle.jpg` trägt seine Datierung im Namen, und bei 673 Fotos ohne Jahr ist jedes
+davon einen Blick wert. **Die Warnung von damals gilt unverändert:** `IMG_1932.jpg` ist ein
+Kamerazähler, keine Jahreszahl. Ein Fund darf deshalb nur **Vorschlag** sein, nie Tatsache — sonst
+entsteht genau der Fehler, den die EXIF-Regel aus Stufe 3 vermeidet: ein falsch datiertes Foto, das
+nie zur Korrektur vorgelegt wird, weil es als datiert gilt. In diesem Punkt ist das keine
+Zusatzbedingung mehr, sondern schon die Bauform.
 
 **Vorgehen: vorlegen, nicht durchgreifen.** Jede Umstellung geht durch die Nacharbeits-Liste oder
 eine eigene Ansicht, in der jemand bestätigt. Ein Sprachmodell, das 929 Titel ohne Rückfrage
@@ -320,11 +331,6 @@ für genau diesen Fall den Kartentipp.
   Ausnahmefall im Ausnahmefall.
 
 Nicht wichtig, nicht dringend — erst zu prüfen und zu bewerten, dann zu spezifizieren.
-
-### 4 · Volltextsuche über SQLite FTS5
-
-Über Titel, Beschreibung und Schlagwörter. Heute sucht die Fotoliste im Verwaltungsbereich nur über
-den Titel.
 
 ---
 
@@ -497,7 +503,7 @@ Nachgezählt an den 929 Fotos:
 Von 308 Schlagwörtern sitzen **260 auf weniger als zehn Fotos**, und „Erntefest" — das Beispiel aus
 der Idee — gibt es nicht; es gibt „Fest" und „Feuerwehr". Ein gebauter Filter hätte also zunächst
 nichts Sinnvolles anzubieten. **Dieser Punkt hängt an
-[Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht)**, wo die Schlagwörter aus der Archivarbeit
+[Punkt 41](#41--den-erstbestand-maschinell-vorbereiten)**, wo die Schlagwörter aus der Archivarbeit
 aussortiert werden — vorher lohnt der Bau nicht.
 
 **Warum die Auswahl eingerichtet wird und sich nicht aus dem Bestand ergibt:** Die naheliegende
@@ -539,6 +545,12 @@ heranfährt.
 Zu bedenken: Die sechs längsten Straßen haben über hundert Adressen — für die bräuchte auch die
 gezielte Anzeige eine Grenze, ähnlich wie die Nummernauswahl selbst sie schon kennt.
 
+**Damit ist die Frage beantwortet und der Punkt hängt an
+[Punkt 36](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen).** Er bleibt eine Idee, aber
+keine offene mehr: Er ist die Zugabe zur Nummernauswahl, nicht die eigene Kartenebene, nach der
+gefragt war. Wer 36 baut — die zweite Frage „Genauer: welche Hausnummer?" —, entscheidet dabei
+ohnehin, ob die Nummern dazu auf der Karte stehen. Getrennt gebaut lohnt das nicht.
+
 ### 38 · Sprünge beim Gruppieren, und wie genau die Punkte überhaupt liegen
 
 Zwei Fragen an dieselbe Ansicht, beide zu prüfen, bevor daran etwas geändert wird.
@@ -549,8 +561,8 @@ stetig, die Gruppierung wechselt aber erst, wenn die gerundete Stufe kippt — u
 Marker auf einmal. Zu prüfen ist, was besser trägt: die gerundete Stufe beibehalten und den
 Wechsel **animieren** (die Marker sind DOM-Elemente, ein Ein- und Ausblenden wäre billig), oder
 feiner abfragen und dafür häufiger neu zeichnen. Das Zweite kostet auf einem Pi mehr, als es auf
-einem Entwicklungsrechner aussieht — [Punkt 16](#16--die-vier-prüfungen-die-das-gerät-brauchen)
-misst das.
+einem Entwicklungsrechner aussieht — der Touch-Test aus
+[Punkt 15](#15--abnahme-auf-dem-ersten-pi) misst das.
 
 **2. Wie genau liegen die Punkte, und wie genau sollen sie liegen?** Gemessen am Bestand liegen
 854 verortete Fotos auf nur **294 verschiedenen Punkten**:
@@ -600,6 +612,14 @@ die folgenreichste Handlung) und
   sobald es niemand mehr weiß.
 - **Sammeln statt sofort ändern.** Eine Liste, die am Stück entschieden wird, ergibt eine
   Oberfläche; zwölf einzeln entschiedene Kleinigkeiten ergeben zwölf Sonderfälle.
+
+**Der erste Eintrag dieser Liste liegt schon vor.** Er stand bis zum 9. August 2026 als eigener
+Punkt 13 hier: Beim Angleichen von „Hilf mit:" an „Bilder aus" (`45ae42d`) wurde aus dem Akzentbraun
+eine stille graue Zeile — die bewusste Folge einer bewussten Entscheidung, aber es war zugleich der
+einzige Blickfang der linken Spalte. Als eigener Punkt war das zu klein, um je an die Reihe zu
+kommen, und zu vereinzelt, um richtig entschieden zu werden: Ob der Beitragsbereich seinen Zug aufs
+Auge zurückbekommt, ist eine Frage an die Farbverteilung des ganzen Schirms, nicht an eine Zeile.
+Genau dafür ist dieser Punkt da.
 
 ### 8 · Historische Karte als umschaltbare Grundkarte
 
@@ -656,7 +676,7 @@ Argument:** Was hier gebaut wird, wird zweimal gebraucht.
 - **Bewegtbild neben der Karte.** MapLibre hält bereits einen WebGL-Kontext. Eine
   CSS-Transformation über ein bildschirmfüllendes Foto ist für sich billig, zusammen mit der Karte
   auf einem Pi aber nicht selbstverständlich. Das gehört zum Dauerlauf aus
-  [Punkt 16](#16--die-vier-prüfungen-die-das-gerät-brauchen): Ein Effekt, der stundenlang läuft,
+  [Punkt 15](#15--abnahme-auf-dem-ersten-pi): Ein Effekt, der stundenlang läuft,
   ist genau die Sorte Sache, an der ein Kiosk langsam stirbt.
 - **Die Auflösung reicht möglicherweise nicht.** Vorschaubilder liegen in 240 und 1200 px
   (`THUMBNAIL_SIZES`). Auf einem 1080p-Schirm ist ein 1200er Bild knapp — und ein Ken-Burns-Effekt
@@ -800,20 +820,6 @@ Unterstreichung**. Das tauscht die Rollen: Bisher war das Wappen die Tür.
 vorsieht. Danach gibt es zwei Türen, und keine davon ist mehr das Wappen; das gehört an einer
 Stelle entschieden und nicht zweimal nebenbei.
 
-### 12 · Der 100-m-Fokus liegt über der Kachelauflösung
-
-Nach einem Besucherbeitrag fährt die Karte auf hundert Meter heran; die Vektorkacheln reichen bis
-Zoom 15. MapLibre skaliert sauber hoch, die Beschriftungen werden dabei aber groß. Falls das im
-Museum unruhig wirkt, ist **der Radius die Stellschraube, nicht die Bauform** — zu beurteilen ist
-das erst am Gerät, also mit [Punkt 15](#15--abnahme-auf-dem-ersten-pi).
-
-### 13 · „Hilf mit:" hat seine Akzentfarbe verloren
-
-Beim Angleichen an „Bilder aus" (`45ae42d`) wurde aus dem Akzentbraun eine stille graue Zeile. Das
-war die bewusste Folge einer bewussten Entscheidung — aber es war zugleich der einzige Blickfang
-der linken Spalte. Falls der Beitragsbereich seinen Zug aufs Auge zurückbekommen soll, ist das die
-Stelle.
-
 ---
 
 ## Infrastruktur
@@ -851,9 +857,9 @@ Die erwarteten Stolpersteine, damit sie nicht erst gesucht werden müssen:
   der vier Sitzungszeilen `PAMName`, `TTYPath`, `StandardInput`, `UtmpIdentifier` in der
   systemd-Unit, oder der Benutzer ist nicht in den Gruppen `video`/`render`.
 
-### 16 · Die vier Prüfungen, die das Gerät brauchen
-
-Der praktische Teil von [Punkt 15](#15--abnahme-auf-dem-ersten-pi), und ohne Gerät nicht zu haben:
+**Die sechs Prüfungen.** Sie standen bis zum 9. August 2026 als eigener Punkt 16 hier, dessen Text
+mit „Der praktische Teil von Punkt 15" begann — zwei Nummern für eine Sache. Die letzten beiden
+kamen aus Punkt 12 und 24 dazu:
 
 - **Kaltstart.** Netzstecker ziehen und wieder einstecken. Ohne Tastatur, ohne Klick, ohne
   Fehlerseite zurück in die Karte.
@@ -863,6 +869,20 @@ Der praktische Teil von [Punkt 15](#15--abnahme-auf-dem-ersten-pi), und ohne Ger
   sterben an einem langsamen Leck im Frontend, nicht am Backend.
 - **Touch-Test am Zielgerät.** Marker, Slider-Griffe und die Schließfläche mit dem Finger bedienen,
   nicht mit der Maus. Ziel: unter 1,5 s vom Loslassen bis zu aktualisierten Markern.
+- **Der 100-m-Fokus nach einem Besucherbeitrag.** Die Karte fährt auf hundert Meter heran, die
+  Vektorkacheln reichen aber nur bis Zoom 15. MapLibre skaliert sauber hoch, die Beschriftungen
+  werden dabei groß. Wirkt das im Museum unruhig, ist **der Radius die Stellschraube, nicht die
+  Bauform** — deshalb ist es eine Prüfung und keine Aufgabe.
+- **Eine USB-Tastatur im laufenden Betrieb anstecken.** Wird sie erkannt, ohne dass jemand den Pi
+  neu startet?
+
+**Wozu die Tastatur gebraucht wird**, damit die Prüfung ihren Sinn behält: Die Besucheransicht
+braucht seit dem 8. August 2026 keine mehr (siehe [history.md](history.md)) — der
+Verwaltungsbereich dagegen hat **13 Eingabefelder in sieben Dateien**, und daran soll sich nichts
+ändern: Wer Fotos pflegt, tippt. Die Antwort steht damit fest — eine **ausleihbare** Tastatur, die
+nur zur Pflege angesteckt wird. Sie liegt dann nicht im Ausstellungsraum herum, verschmutzt nicht
+und öffnet den Besuchern keine Tastenwege in Chromium, die der Kiosk gerade zumacht (F11, Strg-W,
+Alt-Tab). Offen ist nur noch die Prüfung oben.
 
 ### 17 · Containerbetrieb prüfen
 
@@ -897,23 +917,6 @@ Frage an das Museum, keine an den Code, und sie kostet nichts als ein Telefonat.
 
 Gegen SD-Karten-Korruption bei Stromausfall. Der Pi wird im Museum nicht heruntergefahren, sondern
 ausgeschaltet — das ist auf Dauer der wahrscheinlichste Ausfallgrund.
-
-### 24 · Eine Tastatur für die Pflege am Gerät
-
-Der Rest der Tastaturfrage aus Punkt 6, und der bleibt: **Der Verwaltungsbereich hat 13
-Eingabefelder in sieben Dateien** — Titel, Beschreibung, Schlagwörter, Suche, Jahr, Ortssuche. Die
-sind ohne Tastatur nicht zu bedienen, und daran soll sich nichts ändern: Wer Fotos pflegt, tippt,
-und die PIN auf dem Zahlenfeld hilft dabei nicht.
-
-Die Besucheransicht braucht seit dem 8. August 2026 keine mehr (siehe [history.md](history.md)).
-Damit ist die Frage nicht mehr, *ob* eine Tastatur an das Gerät gehört, sondern **welche und
-wann**: eine ausleihbare, die nur zur Pflege angesteckt wird, ist die naheliegende Antwort. Sie
-liegt dann nicht im Ausstellungsraum herum, verschmutzt nicht und öffnet den Besuchern keine
-Tastenwege in Chromium, die der Kiosk gerade zumacht (F11, Strg-W, Alt-Tab).
-
-**Zu prüfen ist nur eins:** ob eine USB-Tastatur am laufenden Kiosk erkannt wird, ohne dass jemand
-den Pi neu startet. Das ist eine Frage an das Gerät, keine an den Code — sie gehört zu
-[Punkt 15](#15--abnahme-auf-dem-ersten-pi).
 
 ---
 
