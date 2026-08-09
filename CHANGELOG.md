@@ -509,3 +509,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   gleichbleibender Spanne durch die Jahrzehnte zu wandern kostete vorher zwei Griffe hintereinander,
   bei denen die Spanne zwischendurch falsch war. Am Rand der Achse bleibt die Spanne erhalten,
   statt zu schrumpfen. Die Pfeiltasten verschieben ebenfalls
+
+### Behoben
+
+- **„In welchem Abschnitt vom Hauptstraße?"** — die Frage nach Abschnitt und Hausnummer setzte
+  einen festen Artikel vor den Straßennamen und traf damit bei jeder Straße das falsche
+  Geschlecht, die nicht männlich ist. Der Name steht jetzt vorn („Hauptstraße — welche
+  Hausnummer?"), womit der Fall gar nicht erst entsteht; eine Geschlechterliste wäre genau das
+  Ortswissen, das nicht in den Code gehört. Der Fehler ist alt, fiel aber erst auf, seit die
+  Straße über Knöpfe gewählt wird und der Weg zur Hausnummer häufiger gegangen wird

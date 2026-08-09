@@ -113,10 +113,16 @@ export const t = {
      *
      * "Reicht so" is a full answer, not a dodge: not every house is in OpenStreetMap, and nobody
      * knows the house number for every photo.
+     *
+     * **The street name is put in front, never inside the sentence.** German street names come in
+     * all three genders -- der Mühlenweg, die Hauptstraße, das Feld -- so any article in front of
+     * the placeholder is wrong for two thirds of them ("vom Hauptstraße"). A table of genders
+     * would be exactly the kind of place-specific knowledge that must not enter the code, so the
+     * sentence steps around the case instead of guessing it.
      */
-    askHouseNumber: (street: string) => `Welche Hausnummer im ${street}?`,
+    askHouseNumber: (street: string) => `${street} — welche Hausnummer?`,
     /** For long streets one step before that -- like the decade before the year. */
-    askArea: (street: string) => `In welchem Abschnitt vom ${street}?`,
+    askArea: (street: string) => `${street} — welcher Abschnitt?`,
     otherArea: "Anderer Abschnitt",
     noHouseNumber: "Reicht so — die Straße genügt",
     /** The opposite of "Reicht so": keep nothing, back to the start. */
