@@ -5,7 +5,7 @@ vi.mock("../api/client", () => ({
   fetchHistogram: vi.fn(),
 }));
 
-import { fetchPhotos } from "../api/client";
+import { fetchHistogram, fetchPhotos } from "../api/client";
 import { queryTimeFilter, sameViewport, useKiosk } from "./kiosk";
 
 describe("queryTimeFilter", () => {
@@ -45,6 +45,60 @@ describe("sameViewport", () => {
   it("kommt mit fehlendem Ausschnitt zurecht", () => {
     expect(sameViewport(null, [...bbox])).toBe(false);
     expect(sameViewport(null, null)).toBe(true);
+  });
+});
+
+describe("Der Zeitraum beim ersten Laden", () => {
+  /** Der Bestand von Holm: juengste Aufnahme 2024, alles taggenau, also Jahresbalken. */
+  function histogramm(felder: Record<string, unknown> = {}) {
+    vi.mocked(fetchHistogram).mockResolvedValue({
+      bars: [{ year: 2014, count: 118 }],
+      step: 1,
+      undated: 673,
+      collection_from: 2010,
+      collection_to: 2024,
+      ...felder,
+    } as never);
+  }
+
+  beforeEach(() => {
+    vi.mocked(fetchPhotos).mockResolvedValue({ photos: [], total: 0, truncated: false });
+    histogramm();
+    useKiosk.setState({ bbox: null, fullRange: null, timeRange: null, histogram: null });
+  });
+
+  it("greift ueber die ganze Achse, nicht nur bis zum juengsten Foto", async () => {
+    /**
+     * Die Achse reicht einen Balken ueber das juengste Foto hinaus, damit dieser Balken eigene
+     * Bahn hat. Startete die Auswahl auf der Spanne des Bestands, bliebe rechts ein Stueck offen
+     * -- und das sieht aus, als waere schon etwas weggefiltert.
+     */
+    useKiosk.getState().setViewport([9.6, 53.57, 9.75, 53.67]);
+    await vi.waitFor(() => expect(useKiosk.getState().timeRange).not.toBeNull());
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 2010, to: 2025 });
+  });
+
+  it("schickt trotzdem keinen Zeitfilter", async () => {
+    /**
+     * Der Grund, warum die weitere Auswahl nichts kostet: ``queryTimeFilter`` fragt, ob die
+     * Auswahl die Spanne *ueberdeckt*, nicht ob sie ihr gleicht. Ginge ein Filter hinaus, fielen
+     * die 673 undatierten Fotos von der Karte -- die gibt es nur ohne Filter.
+     */
+    useKiosk.getState().setViewport([9.6, 53.57, 9.75, 53.67]);
+    await vi.waitFor(() => expect(useKiosk.getState().timeRange).not.toBeNull());
+
+    const { timeRange, fullRange } = useKiosk.getState();
+    expect(queryTimeFilter(timeRange, fullRange)).toBeNull();
+  });
+
+  it("laesst eine schon getroffene Auswahl in Ruhe", async () => {
+    useKiosk.setState({ timeRange: { from: 2014, to: 2016 } });
+
+    useKiosk.getState().setViewport([9.6, 53.57, 9.75, 53.67]);
+    await vi.waitFor(() => expect(useKiosk.getState().histogram).not.toBeNull());
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 2014, to: 2016 });
   });
 });
 

@@ -518,3 +518,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Hausnummer?"), womit der Fall gar nicht erst entsteht; eine Geschlechterliste wäre genau das
   Ortswissen, das nicht in den Code gehört. Der Fehler ist alt, fiel aber erst auf, seit die
   Straße über Knöpfe gewählt wird und der Weg zur Hausnummer häufiger gegangen wird
+
+### Behoben
+
+- **Der Zeitschieber stand beim Start nicht auf der ganzen Breite.** Die Achse reicht seit dem
+  9. August einen Balken über die jüngste Aufnahme hinaus, damit dieser Balken eigene Bahn hat —
+  die anfängliche Auswahl endete aber weiter auf dem jüngsten Foto. Rechts blieb ein Stück offen,
+  was aussah, als sei schon etwas weggefiltert. Die Auswahl greift jetzt über die ganze Achse; ein
+  Zeitfilter geht deswegen nicht ans Backend, die undatierten Fotos bleiben also auf der Karte

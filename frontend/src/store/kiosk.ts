@@ -164,14 +164,23 @@ export const useKiosk = create<KioskState>((set, get) => {
           ? { from: histogram.collection_from, to: histogram.collection_to }
           : null;
 
+      // The axis, not the span: it reaches one bar past the youngest photo so that the last bar
+      // has track of its own. Starting on the span would leave the trimmer short of the right
+      // end -- looking as if something were already filtered out.
+      const axis = axisBounds(span, histogram.step);
+
       set({
         histogram,
         fullRange: span,
-        // First time round, select the whole span: the visitor should see everything first and
+        // First time round, select the whole axis: the visitor should see everything first and
         // narrow down afterwards, not the other way round. A selection already made stays
-        // untouched -- and since the span belongs to the collection rather than to the viewport,
+        // untouched -- and since the axis belongs to the collection rather than to the viewport,
         // panning the map no longer moves it underneath.
-        timeRange: timeRange ?? span,
+        //
+        // Reaching past the youngest photo costs nothing: ``queryTimeFilter`` asks whether the
+        // selection *covers* the span, not whether it equals it, so no filter goes to the backend
+        // -- and the undated photos, which only show without one, stay on the map.
+        timeRange: timeRange ?? (axis ? { from: axis.min, to: axis.max } : null),
       });
     } catch {
       /* Without a histogram the slider stays empty -- the map keeps working. */
@@ -211,7 +220,11 @@ export const useKiosk = create<KioskState>((set, get) => {
     setTimeRange(timeRange) {
       // Clamped to the axis so the state cannot become invalid in the first place. The slider
       // clamps its own display once more -- see kiosk/timeAxis.ts.
-      const bounds = axisBounds(get().fullRange);
+      //
+      // With the bar width, not without: the axis is rounded to it, and clamping against a
+      // decade-wide axis while the bars are yearly would let a selection stand that the slider
+      // then draws somewhere else.
+      const bounds = axisBounds(get().fullRange, get().histogram?.step);
       const next = bounds ? clampRange(timeRange, bounds) : timeRange;
 
       const current = get().timeRange;

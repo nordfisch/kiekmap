@@ -43,10 +43,12 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 |---|---|---|---|
 | | **Verwaltung** | | |
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
+| 25 | [Vom Foto direkt in seine Bearbeitung](#25--vom-foto-direkt-in-seine-bearbeitung) | Aufgabe | wichtig |
 | 2 | [Jahreszahl aus dem Dateinamen raten](#2--jahreszahl-aus-dem-dateinamen-raten) | Idee | — |
 | 3 | [Perceptual Hash gegen zugeschnittene Dubletten](#3--perceptual-hash-gegen-zugeschnittene-dubletten) | Idee | — |
 | 4 | [Volltextsuche über SQLite FTS5](#4--volltextsuche-über-sqlite-fts5) | Idee | — |
 | | **Besucher-Interface** | | |
+| 26 | [Der Punkt auf der Karte erst nach Ansage](#26--der-punkt-auf-der-karte-erst-nach-ansage) | Aufgabe | wichtig |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Attract-Mode](#9--attract-mode) | Idee | wichtig |
 | 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
@@ -96,6 +98,42 @@ gehört sie dem Museumsteam, nicht dem Rechner:
 Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene Nacharbeits-Liste reicht, ist Teil
 der Frage.
 
+### 25 · Vom Foto direkt in seine Bearbeitung
+
+Wer am Gerät ein falsch beschriftetes Foto sieht, hat heute keinen kurzen Weg dorthin: Verwaltung
+öffnen, PIN, Fotoliste, suchen. Und Suchen heißt hier raten — wonach man sucht, ist ausgerechnet
+der Titel, der falsch ist.
+
+**Neben dem Titel der Detailansicht steht deshalb ein Stift** (oder der Titel selbst wird die
+Fläche, das ist noch offen). Ein Tipp darauf fragt die PIN ab und öffnet danach **dieses** Foto im
+Bearbeiten-Bildschirm. Kein Suchen, kein Nachschlagen — und deshalb auch keine Kennung, die sich
+jemand aufschreiben müsste.
+
+**Ganz unten, unter dem Bildnachweis, stehen die ersten acht Zeichen des SHA-256**, klein und grau.
+Sie sind die Identität des Fotos unabhängig von jeder Datenbank: Ein neu aufgebauter Bestand
+vergibt neue laufende Nummern, aber derselbe Scan behält seinen Hash. Damit lässt sich ein Foto
+benennen, ohne es zu öffnen.
+
+**Was fehlt, ist der Weg hinein.** Die PIN-Abfrage gibt es (`askPin` in `store/admin.ts`), den
+Bearbeiten-Bildschirm auch (`admin/PhotoEditor.tsx`) — aber die Fotoliste öffnet ihn über eigenen
+Zustand (`open(id)` in `admin/PhotoCare.tsx:77`). Von außen lässt sich „Verwaltung bei Foto 412
+öffnen" nicht sagen. Das ist die eigentliche Arbeit: ein Ziel, das durch `useAdmin` und `AdminApp`
+bis in die Fotoliste durchgereicht wird — verwandt mit dem `Target`, über das die Übersicht schon
+heute in einen Bereich springt.
+
+**Drei Dinge, die dabei zu bedenken sind:**
+
+- **Es ist eine zweite Tür in die Verwaltung.** [decisions.md](decisions.md), Punkt 7, hat bewusst
+  genau eine festgelegt — das Wappen —, und in Stufe 8 wurde eine unsichtbare Geste dafür
+  verworfen. Diese Tür ist sichtbar und durch dieselbe PIN gesichert, widerspricht dem also nicht;
+  aber sie ändert die Entscheidung, und das gehört dort vermerkt.
+- **Der Rückweg ist ein Neustart.** Die Verwaltung zu verlassen lädt die Seite neu (`leave()` in
+  `store/admin.ts:99`), und das aus gutem Grund: Der Bestand hat sich gerade geändert. Wer einen
+  Titel berichtigt und zurückgeht, steht also wieder in der Standardansicht, nicht bei seinem Foto.
+- **Findet die Verwaltungssuche den Hash-Anfang?** Wenn nicht, steht in der Detailansicht eine
+  Kennung, die sich nirgends nachschlagen lässt. Es wäre eine Zeile mehr im vorhandenen `or_(…)`
+  (`api/admin.py:205`) — eine Zugabe, aber sie entscheidet, ob der Hash Auskunft ist oder Zierrat.
+
 ### 2 · Jahreszahl aus dem Dateinamen raten
 
 `Kirchweih_1932_Muehle.jpg` trägt seine Datierung im Namen, und beim Erstimport von einigen
@@ -120,6 +158,34 @@ den Titel.
 ---
 
 ## Besucher-Interface
+
+### 26 · Der Punkt auf der Karte erst nach Ansage
+
+Solange die Frage „Wo ist das?" steht, ist **die ganze Karte scharf**: Jeder Tipp auf eine freie
+Fläche setzt einen Punkt (`PinLayer.tsx:28`). Wer während der Frage nur schauen will — die Karte
+verschieben, sich orientieren, ein Foto in der Nähe suchen — beantwortet sie dabei versehentlich.
+
+Das ist mehr als unsauber, es geht an die Datenqualität: Sobald ein Punkt steht, wechselt der
+Beitragsbereich auf „Stimmt die Stelle?" und bietet **„Hier war das"** an. Ein Tipp daneben und ein
+bestätigender Tipp danach — und im Bestand steht eine Verortung, die niemand gemeint hat.
+
+**Der Kartentipp soll deshalb erst nach ausdrücklicher Ansage scharf sein**, über einen Knopf im
+Beitragsbereich: „Auf der Karte zeigen" oder ein Fadenkreuz. Das passt zu dem, was seit dem
+8. August ohnehin der Hauptweg ist — die Straße wird über Knöpfe gewählt (Punkt 6, erledigt). Der
+Kartentipp ist der zweite Weg für den, der die Stelle kennt, aber den Straßennamen nicht; ihn eine
+Ansage kosten zu lassen, ist bei einem Weg für den Ausnahmefall vertretbar.
+
+**Die Falle steckt im `active`-Schalter.** Er hängt heute an drei Dingen zugleich: ob der
+Kartentipp einen Punkt setzt, ob der Punkt überhaupt gezeichnet wird, und ob er sich ziehen lässt
+(`PinLayer.tsx:19, 42, 57`). Wer nur das Erste abschalten will und das Ganze abschaltet, nimmt
+damit auch den Punkt weg, den die **Straßenwahl** gesetzt hat — und die Zusage „Der Punkt lässt
+sich auf der Karte noch verschieben" (`t.location.hintSet`) gilt nicht mehr. Zu trennen sind also
+**Scharfschaltung** und **Anzeige samt Ziehen**.
+
+Dazu gehört, dass der Zustand beim Wechsel des Fotos zurückfällt — `load()` in
+`store/contribute.ts` setzt Punkt, Etikett und Genauigkeit schon heute zurück, dort gehört er hin.
+Und `t.location.hintEmpty` sagt derzeit „Tippen Sie auf der Karte auf die Stelle — oder wählen Sie
+die Straße."; das stimmt danach nicht mehr.
 
 ### 8 · Historische Karte als umschaltbare Grundkarte
 
