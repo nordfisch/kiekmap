@@ -411,10 +411,50 @@ damit auch den Punkt weg, den die **Straßenwahl** gesetzt hat — und die Zusag
 sich auf der Karte noch verschieben" (`t.location.hintSet`) gilt nicht mehr. Zu trennen sind also
 **Scharfschaltung** und **Anzeige samt Ziehen**.
 
-Dazu gehört, dass der Zustand beim Wechsel des Fotos zurückfällt — `load()` in
-`store/contribute.ts` setzt Punkt, Etikett und Genauigkeit schon heute zurück, dort gehört er hin.
+**Solange der Kartentipp scharf ist, verschwindet die Straßenwahl.** Nicht ausgegraut, sondern
+weg: Wer „Auf der Karte zeigen" gedrückt hat, hat sich für den einen Weg entschieden, und der
+Beitragsbereich zeigt dann nur noch, was zu diesem Weg gehört. Zwei Wege gleichzeitig anzubieten
+ist genau das, was den Bereich heute unruhig macht — eine Wand aus Knöpfen rechts, eine scharfe
+Karte links, und nichts sagt, welcher der beiden gerade gilt.
+
+**Das ist kein neuer Gedanke, sondern die andere Hälfte eines vorhandenen.** Die Gegenrichtung ist
+schon gebaut: Ein Tipp auf die Karte beendet die Hausnummernauswahl (`useEffect` in
+`LocationTask.tsx`, erkannt am fehlenden Etikett). Der Kommentar dort begründet es bereits mit dem
+Fall, um den es hier geht — „sonst liefen beide nebeneinander: der Punkt verschoben, das Raster
+noch da, und der nächste Tipp auf eine Hausnummer wirft den eben gesetzten Punkt weg". Bisher
+räumt der Kartentipp die Knöpfe weg, sobald er *stattfindet*; künftig räumt die Scharfschaltung
+sie weg, bevor er stattfindet. Danach ist der vorhandene `useEffect` womöglich überflüssig — zu
+prüfen, nicht anzunehmen.
+
+**Was dabei stehen bleiben muss**, sonst ist der Weg eine Sackgasse:
+
+- **Der Bestätigungsblock** (`task__confirm` mit „Hier war das"). Er ist der Sinn der Übung; er
+  erscheint ohnehin erst, wenn ein Punkt steht.
+- **Ein Weg zurück** zur Straßenwahl, für den, der die Karte doch nicht wiedererkennt. Nach der
+  Knopfsprache aus [Punkt 28](#28--die-knopfsprache-der-besucheransicht) ist das ein Zurück, kein
+  Überspringen — es bleibt beim selben Foto.
+
+**Und daran entscheidet sich, wo der neue Zustand liegt: im Store, nicht in der Komponente.** Der
+Reflex wäre ein `useState` in `LocationTask` — dort steht schon `trail`, `street` und `numbers`.
+Das trägt fast immer, und genau das ist die Gefahr. `HelpPanel.tsx:89` rendert
+`need === "location" ? <LocationTask /> : <DateTask />`; jeder Fotowechsel führt heute über
+`load(otherNeed(need))` und damit über einen Abbau der Komponente, der ihren Zustand mitnimmt. Es
+sieht also aufgeräumt aus, ohne dass jemand aufgeräumt hätte.
+
+**Ein Weg umgeht das.** Findet die andere Frage kein Foto, fällt `load()` auf die ursprüngliche
+zurück (`contribute.ts:139-145`) — dann bleibt `need` stehen, die Komponente bleibt montiert und
+ihr Zustand auch. Heute ist das kaum zu treffen, weil beide Vorräte gut gefüllt sind (670 ohne
+Jahr, 74 ohne Ort). Genau dann kommt es aber: wenn eine der beiden Fragen leerläuft, also nach
+erfolgreicher Arbeit. Und die Folge wäre die schlimmste, die dieser Punkt kennt — eine scharfe
+Karte über einem Foto, das der Besucher noch nicht angesehen hat.
+
+Der Schalter gehört deshalb dorthin, wo `load()` schon heute Punkt, Etikett und Genauigkeit
+zurücksetzt: nach `store/contribute.ts`. Dann fällt er auf **jedem** Weg zurück und nicht nur auf
+den heute üblichen.
+
 Und `t.location.hintEmpty` sagt derzeit „Tippen Sie auf der Karte auf die Stelle — oder wählen Sie
-die Straße."; das stimmt danach nicht mehr.
+die Straße."; das stimmt danach nicht mehr, und zwar in beiden Zuständen: vorher gibt es nur die
+Straße, nachher nur die Karte. Es werden also **zwei** Texte.
 
 ### 27 · Unter dem Vorschaubild: Adresse und Jahr
 
