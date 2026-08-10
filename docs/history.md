@@ -1960,3 +1960,88 @@ ist es an der Zaehlung: 23 Zeilen in der Tabelle, 25 Ueberschriften im Text. Das
 8. August, als derselbe Griff einen Punkt geloescht hat; damals fand es die Ankerpruefung, diesmal
 der Abgleich von Tabelle und Text. Beide Male war die Ursache dieselbe Annahme — dass die
 Reihenfolge im Text der in der Tabelle folgt. Sie tut es nicht.
+
+## Nachschaerfen: der Weg vom Ort zur Hausnummer
+
+9. und 10. August 2026, Punkt 36. Geplant war eine Frage im Beitragsbereich. Gebaut wurde ein
+Schreibweg, eine dritte Bedingung und ein Nummernraster in der Detailansicht — die Frage im Bereich
+steht noch aus, und das ist kein Rueckstand, sondern das Ergebnis des Nachzaehlens.
+
+**Das Nachzaehlen hat die Antwort umgedreht.** Der Punkt stand seit Wochen mit einer Tabelle im
+Backlog: 60 Fotos liegen straszengenau, ihr `place_name` verspricht eine Hausnummer, die Koordinate
+haelt sie nicht. Der naheliegende Schluss war, genau diese 60 vorzulegen. Beim zweiten Hinsehen
+zerfielen sie in **58 und 2**. Bei den 58 steht die Hausnummer im Namen — bekannt ist sie also,
+fehlen tut die Koordinate. Auf die Rueckfrage „das kann doch gar nicht passieren, wenn die
+Hausnummer bekannt ist" kam die dritte Messung und mit ihr der Grund: **Die Haeuser sind aufgeteilt
+oder neu nummeriert worden.** Im Ortsindex steht 2a statt 2, 13a bis 13d statt 13. Bei 55 von 58
+liegt dieselbe Zahl mit anderem Zusatz im Index, bei 3 eine Nachbarnummer, bei **keinem** gar
+nichts.
+
+Damit war der groesste Teil von Punkt 36 kein Besucherfall mehr. Ein Besucher am Kiosk weiss auch
+nicht, wo die fruehere Schulstrasse 2 stand; der Ortsindex weiss es fast immer. Die 58 sind als
+Punkt 41 (a) zur maschinellen Arbeit geworden. Uebrig blieben **2** — und beide stammen von
+Besuchern, die „Reicht so — die Strasse genuegt" gedrueckt haben. Der Fall ist also echt und
+waechst, nur ist er heute klein.
+
+**Eine zweite Erkenntnis kam vom Kurator und zeigt, warum die Frage trotzdem gebaut gehoert.** Von
+72 Fotos ohne Ort tragen **64** als Titel exakt einen Strassennamen; sie stammen aus Ordnern, die
+eine Strasse ohne Hausnummer nannten, und `_locate` laesst solche Fotos bewusst unverortet. Die
+Begruendung dafuer stand im Code: Die Strassenmitte „saehe aus wie eine Antwort", und das Foto
+fiele aus „Wo ist das?" heraus. **Mit der dritten Frage faellt es nicht heraus, sondern hinein** —
+die Begruendung ist hinfaellig, und der Widerruf steht in decisions.md, nicht nur im Backlog. Das
+ergibt eine Abhaengigkeit in beide Richtungen: Ohne Punkt 41 (b) hat die Frage 2 Fotos und
+erscheint nie; ohne die Frage verschoebe (b) 64 Fotos in eine Frage, die es nicht gibt.
+
+**Die eigene Tuer.** Nachschaerfen heisst, eine vorhandene Angabe zu ersetzen — was decisions.md
+Punkt 5 verbietet, und dieser Punkt ist der Grund, warum Besucherbeitraege ueberhaupt ohne
+Moderation durchgehen duerfen. Die naheliegende Loesung waere gewesen, `_require_empty` um „ausser
+wenn genauer" zu erweitern. Sie faellt aus einem Grund aus, der erst beim Hinsehen sichtbar wird:
+`POST /location` nimmt `accuracy_m` **vom Client** entgegen. Heute ist das harmlos, weil das Feld
+ohnehin leer sein muss. Entschiede die Genauigkeit ueber das Ueberschreiben, waere sie ein
+Schluessel in der Hand dessen, der davon profitiert — ein Aufruf mit `accuracy_m: 1` ersetzte jede
+Angabe im Bestand. Also ein eigener Endpunkt, der **keine Koordinate annimmt**: Der Client schickt
+die Nummer der gewaehlten Adresse, alles Uebrige holt der Server aus dem Ortsverzeichnis.
+
+**Drei Stellen fragen dasselbe, also fragt es jetzt eine.** `needs_location` gab es zweimal — als
+`@property` auf dem Modell und als SQL-Ausdruck im Endpunkt. Zwei Formulierungen, beide fuer sich
+plausibel, und niemand haette gemerkt, wenn sie auseinandergelaufen waeren. Vor der dritten Frage
+sind sie zu `hybrid_property` und `services/needs.py` zusammengefallen. **Die Reihenfolge des
+Tupels `NEEDS` ist die Rangfolge** — „Nachschaerfen kommt zuletzt" steht damit nicht in einer
+Fallunterscheidung, sondern in der Position eines Wortes.
+
+### Vier Bedingungen, und die dritte war die stille
+
+Wer gefragt wird, entscheidet ein `and_()` aus vier Teilen. Der wichtigste ist der, den man
+weglassen wuerde: **141 der 486 Strassen haben im Ortsindex gar keine Adressen.** Ohne die
+`exists()`-Klausel stuende die Frage „welche Hausnummer?" auf dem Schirm — mit keinem einzigen Knopf
+darunter. Genau deshalb liegt die Bedingung in einem Dienst und nicht auf dem Modell: Ob der
+Ortsindex antworten kann, weiss ein Foto-Objekt ohne Sitzung nicht.
+
+Der Ziffern-Test (`place_name` ohne Ziffer) ist eine Heuristik und irrt zugunsten des Nichtfragens:
+Eine „Strasse des 17. Juni" wuerde nie vorgelegt. Das ist die harmlose Richtung, und der Test haelt
+fest, dass es Absicht ist.
+
+### Zwei Gegenproben, die zuerst nicht griffen
+
+Bei der Genauigkeitsbedingung ist mir das zweimal hintereinander passiert: Erst war das
+hausgenaue Testfoto „Am Kamp 1" — es fiel schon an der Ziffernregel heraus, nicht an der
+Genauigkeit. Dann „Gasthof Timm" — es fiel an der `exists()`-Klausel heraus. Beide Male haette
+der Test bestanden, waere die Bedingung geloescht worden. Erst „Am Kamp" mit 15 m schliesst wirklich
+nur die Genauigkeit aus. Der Grund steht seitdem im Docstring des Tests, weil die naechste Person
+sonst dieselbe Falle stellt.
+
+### Der Waechter, der nichts bewachte
+
+`_is_newest` sollte verhindern, dass eine Rueckname in falscher Reihenfolge einen laengst ersetzten
+Ort wieder auferstehen laesst. Er verglich Zeitstempel — und traf nie zu. Der Grund ist SQLite:
+`server_default=func.now()` schreibt ganze Sekunden (`14:24:37`), ein gebundenes Python-`datetime`
+schreibt Mikrosekunden (`14:24:37.000000`), verglichen wird als Text, und die kuerzere Zeichenkette
+verliert. Die Bedingung war gebaut, sah richtig aus und tat nichts. Sie vergleicht jetzt
+`Change.id`, und die Falle steht im Docstring.
+
+### Und ein selbst gemachter Verlust
+
+Nach einer Gegenprobe habe ich die Aenderung mit `git checkout --` zurueckgenommen — und damit
+nicht nur die Gegenprobe, sondern die ganze, noch nicht committete Store-Methode. Wiederhergestellt
+war sie in zwei Minuten, weil sie im Gespraech stand. Die Lehre ist trotzdem billiger zu haben als
+ein zweites Mal: Eine Gegenprobe wird aus einer Kopie zurueckgeholt, nicht aus HEAD.

@@ -27,7 +27,7 @@ import { useEffect, useMemo, useState } from "react";
 import { type Place, fetchHouseNumbers, fetchStreets } from "../api/client";
 import { useContribute } from "../store/contribute";
 import { t } from "../text/de";
-import { type NumberBlock, blocksOf, groupByBase } from "./houseNumbers";
+import { HouseNumberPicker } from "./HouseNumberPicker";
 import { BackIcon, CheckIcon, CrosshairIcon } from "./icons";
 import { type StreetGroup, groupStreets } from "./streetGroups";
 
@@ -53,11 +53,6 @@ export function LocationTask() {
   /** The street whose house numbers are on offer, or null while none is. */
   const [street, setStreet] = useState<Place | null>(null);
   const [numbers, setNumbers] = useState<Place[]>([]);
-  /** The chosen block of a long street, or null while the blocks are still on screen. */
-  const [block, setBlock] = useState<NumberBlock | null>(null);
-
-  // Grouping and splitting in one go -- both depend on the fetched list alone.
-  const blocks = useMemo(() => blocksOf(groupByBase(numbers)), [numbers]);
 
   const atHand = trail.at(-1)?.streets ?? streets;
   // A single group means everything fits on one page -- then the step falls away, exactly as it
@@ -98,9 +93,7 @@ export function LocationTask() {
     // here has still answered.
     setPin({ lat: place.lat, lon: place.lon }, { label: place.name, accuracyM: place.accuracy_m });
     setTrail([]);
-    setStreet(null);
-    setNumbers([]);
-    setBlock(null);
+    closeNumbers();
 
     if (place.kind !== "strasse") return;
 
@@ -111,7 +104,6 @@ export function LocationTask() {
         if (found.length === 0) return;
         setStreet(place);
         setNumbers(found);
-        setBlock(null);
       })
       .catch(() => {
         /* Without the numbers the street stands as the answer -- that was always allowed. */
@@ -120,16 +112,18 @@ export function LocationTask() {
 
   function chooseNumber(place: Place) {
     setPin({ lat: place.lat, lon: place.lon }, { label: place.name, accuracyM: place.accuracy_m });
-    setStreet(null);
-    setNumbers([]);
-    setBlock(null);
+    closeNumbers();
   }
 
-  /** Close the second step. What happens to the pin is the caller's decision. */
+  /**
+   * Close the second step. What happens to the pin is the caller's decision.
+   *
+   * Which block of a long street was open needs no clearing: it lives in the picker, and the
+   * picker goes with the step.
+   */
   function closeNumbers() {
     setStreet(null);
     setNumbers([]);
-    setBlock(null);
   }
 
   /** "Doch nicht": back to the start, with no point set. The opposite of "Reicht so". */
@@ -226,49 +220,19 @@ export function LocationTask() {
   // Second step: the street is set, now the number. The search steps aside meanwhile, so that
   // nothing but the numbers is on offer.
   if (street) {
-    // A long street gets a block step in front -- like the decade before the year. If everything
-    // fits on one page, `blocksOf` returns a single one and the step falls away.
-    const shown = block ? [block] : blocks;
-    const asking = !block && blocks.length > 1;
-
     return (
       <div className="task">
-        <p className="task__hint">
-          {asking ? t.location.askArea(street.name) : t.location.askHouseNumber(street.name)}
-        </p>
-
-        {mapButton}
-
-        <div className="housenumbers">
-          {asking
-            ? blocks.map((entry) => (
-                <button
-                  key={entry.label}
-                  type="button"
-                  className="button button--year"
-                  onClick={() => setBlock(entry)}
-                >
-                  {entry.label}
-                </button>
-              ))
-            : shown[0]?.numbers.map((place) => (
-                <button
-                  key={place.id}
-                  type="button"
-                  className="button button--year"
-                  onClick={() => chooseNumber(place)}
-                >
-                  {place.housenumber}
-                </button>
-              ))}
-        </div>
-
-        {block && (
-          <button type="button" className="button button--back" onClick={() => setBlock(null)}>
-            <BackIcon />
-            {t.location.otherArea}
-          </button>
-        )}
+        {/* The map route stands between the question and the buttons -- above the list because it
+            is the alternative *to* it, and inside the picker because underneath it would read as
+            the last resort after scrolling past everything. */}
+        <HouseNumberPicker
+          street={street.name}
+          numbers={numbers}
+          disabled={loading}
+          onPick={chooseNumber}
+        >
+          {mapButton}
+        </HouseNumberPicker>
 
         {/* A full answer, not an evasion: not every house is in OpenStreetMap, and whoever does
             not know the number should be able to say so without hesitating. Hence the same shape

@@ -48,7 +48,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
-| 36 | [„Hilf mit" soll auch nachschärfen, nicht nur füllen](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) | Frage | wichtig |
+| 36 | [„Hilf mit" soll auch nachschärfen, nicht nur füllen](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) | Aufgabe | wichtig |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 35 | [Hausnummern auf der Karte](#35--hausnummern-auf-der-karte) | Idee | — |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
@@ -312,41 +312,46 @@ Nicht wichtig, nicht dringend — erst zu prüfen und zu bewerten, dann zu spezi
 
 ### 36 · „Hilf mit" soll auch nachschärfen, nicht nur füllen
 
-Der Beitragsbereich fragt heute nur nach dem, was **fehlt**: `needs_location` heißt schlicht
-`lat is None`. Ein Foto, das irgendwo steht — und sei es in der Mitte einer 800-m-Straße —, gilt
-als verortet und wird nie wieder vorgelegt. Dabei ist genau das der Fall, in dem jemand, der jeden
-Tag daran vorbeigeht, die Hausnummer nennen könnte.
+**Die Frage ist entschieden, der Weg ist gebaut, im Beitragsbereich fehlt er noch.** Seit dem
+10. August 2026 lässt sich ein Foto, das nur seine Straße kennt, **in der Detailansicht** auf eine
+Hausnummer nachschärfen — Nummernraster unter der Adresse, ein Tipp, und aus „Am Kamp" wird „Am
+Kamp 5". Wie und warum das an [decisions.md](decisions.md), Punkt 5 vorbeigeht, ohne ihn
+aufzuweichen, steht dort als Punkt 32: über eine **eigene Tür**, die keine Koordinate vom Client
+annimmt.
 
-**Erkennen lassen sie sich, und zwar genau** — die Sorge, die Koordinate habe die Spur verwischt,
-trifft nicht zu. Neben jedem Punkt steht, wie genau er ist (`location_accuracy_m`):
+**Was noch aussteht, ist die dritte Frage im Bereich selbst** — „Genauer: welche Hausnummer?" neben
+„Wo ist das?" und „Wann war das?". Dazu gehört:
+
+- `Need` wird im Frontend von einem Zweier- zu einem Dreierbegriff (`client.ts`, Store, `de.ts`,
+  Tests). Mechanisch, aber breit.
+- Die Reihenfolge des Arrays ist die Rangfolge — nachrangig heißt: erst wenn „Wo ist das?" nichts
+  mehr hergibt. Im Backend steht das schon so in `services/needs.py`.
+- Eine Ausnahme von einer Zeile: Wer gerade „Reicht so — die Straße genügt" gedrückt hat, darf
+  nicht im selben Atemzug „Genauer: welche Hausnummer?" bekommen. Das liest sich, als hätte niemand
+  zugehört.
+
+**Womit gerechnet werden muss:** Die Frage hat heute **2 Fotos** und erschiene deshalb nie — 72
+unverortete stehen vor ihr. Das kippt mit
+[Punkt 41](#41--den-erstbestand-maschinell-vorbereiten), Teil (b): danach sind es 8 unverortete und
+66 nachzuschärfende, und die neue Frage wird zur Hauptfrage des Bereichs. **Die beiden gehören in
+dieser Reihenfolge, aber nicht weit auseinander** — die Begründung steht bei Punkt 41.
+
+**Der Bestand, nachgezählt vor dem Bau** (`location_accuracy_m` steht neben jedem Punkt):
 
 | Genauigkeit | Quelle | Fotos | was das heißt |
 |---|---|---|---|
 | 15 m | Kurator | 381 | das Haus |
-| **150 m** | Kurator/Besucher | **60** | die Straße — Hausnummer war bekannt, stand aber nicht in OpenStreetMap |
-| **leer** | EXIF | **413** | wo die Kamera stand, nicht wo das Haus steht |
-| — | — | 75 | ohne Ort, wird heute schon gefragt |
+| 150 m, Hausnummer steht im `place_name` | Kurator/Besucher | **58** | kein Besucherfall — siehe Punkt 41 (a) |
+| **150 m, keine Hausnummer bekannt** | Besucher | **2** | genau die, um die es hier geht |
+| **leer** | EXIF | **416** | wo die Kamera stand, nicht wo das Haus steht |
+| — | — | 75 | ohne Ort, wird längst gefragt |
 
-Die 60 sind der klare Fall: `place_name` sagt „Hauptstraße 11a", der Punkt liegt aber auf der
-Straßenmitte. **Der Name verspricht eine Genauigkeit, die die Koordinate nicht hat.**
+Die Aufteilung der 60 straßengenauen in 58 und 2 ist der eigentliche Ertrag des Planens. Bei den 58
+ist die Hausnummer **bekannt** und nur die Koordinate fehlt, weil die Häuser aufgeteilt oder neu
+nummeriert wurden. Ein Besucher weiß auch nicht, wo die frühere Schulstraße 2 stand — das ist
+maschinelle Arbeit und steht als Punkt 41 (a).
 
-**Der andere Fall aus der Frage entsteht gar nicht.** Ein Ordner ohne Hausnummer lässt das Foto
-bewusst **unverortet** — `_locate` in `services/foldermeta.py` begründet es: Die Straßenmitte
-„sähe aus wie eine Antwort", und das Foto fiele aus „Wo ist das?" heraus. Die Straße überlebt als
-Schlagwort. Diese Fotos stecken also in den 75 und werden längst gefragt.
-
-**Was zu bauen wäre:** eine zweite Art von Frage neben „Wo ist das?" — „Genauer: welche
-Hausnummer?", mit der Straße bereits gesetzt, sodass die Auswahl direkt bei den Nummern beginnt.
-Auf der Karte ändert sich nichts: Die Fotos stehen schon dort, nur ungenau.
-
-**Die Entscheidung, an der es hängt:** [decisions.md](decisions.md), Punkt 5, erlaubt Besuchern
-**nur leere Felder zu füllen** — was schon dasteht, ist unantastbar, sonst überschreibt der zweite
-Besucher den ersten. Nachschärfen heißt aber, etwas Vorhandenes zu ersetzen. Nötig wäre eine eng
-gefasste Ausnahme: **genauer darf ungenauer ersetzen, nie umgekehrt**, und niemals eine
-15-m-Angabe. Das ist zu entscheiden, bevor etwas gebaut wird — die Regel von Punkt 5 ist der
-Grund, warum Besucherbeiträge überhaupt ohne Moderation durchgehen dürfen.
-
-**Und die 413 mit EXIF-Koordinate sind eine eigene Frage.** Ihre Genauigkeit ist nicht schlecht,
+**Und die 416 mit EXIF-Koordinate bleiben eine eigene Frage.** Ihre Genauigkeit ist nicht schlecht,
 sondern **unbekannt**: Das Gerät weiß, wo der Fotograf stand — nicht, was er fotografiert hat. Wer
 von der anderen Straßenseite knipst, liegt zwanzig Meter daneben. Sie alle vorzulegen wäre viel;
 sie nie vorzulegen lässt einen stillen Fehler stehen. Diese Frage gehört getrennt beantwortet.

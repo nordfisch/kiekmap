@@ -196,6 +196,30 @@ export function postDate(
   return postJson<PhotoDetail>(`/api/contribute/${id}/date`, body);
 }
 
+/**
+ * The house numbers this photo may be sharpened to -- **empty means: do not offer it**.
+ *
+ * The whole rule sits in the backend, and the empty list is how it says no: only a street-precise
+ * photo whose street the gazetteer knows gets a list at all. Asking the caller to decide as well
+ * would put the same rule in two places, where it can disagree with itself.
+ */
+export function fetchPhotoHouseNumbers(id: number, signal?: AbortSignal): Promise<Place[]> {
+  return getJson<Place[]>(`/api/contribute/${id}/housenumbers`, signal);
+}
+
+/**
+ * Sharpen a street-precise photo to one house number.
+ *
+ * Only the id of the chosen address travels -- no coordinate, no accuracy. The server looks the
+ * place up and takes both from the gazetteer; see `api/contribute.py`.
+ */
+export function postHouseNumber(
+  id: number,
+  body: { place_id: number; session_id?: string },
+): Promise<PhotoDetail> {
+  return postJson<PhotoDetail>(`/api/contribute/${id}/housenumber`, body);
+}
+
 /** Free search over the gazetteer. Used by the admin area, which has a keyboard. */
 export function searchPlaces(query: string, signal?: AbortSignal): Promise<Place[]> {
   return getJson<Place[]>(`/api/places?q=${encodeURIComponent(query)}`, signal);

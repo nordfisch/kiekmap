@@ -4,6 +4,7 @@ vi.mock("../api/client", () => ({
   fetchTask: vi.fn(),
   postLocation: vi.fn(),
   postDate: vi.fn(),
+  postHouseNumber: vi.fn(),
   // Der Kiosk-Store haengt an derselben Schicht -- ein Beitrag laesst ihn nachladen.
   fetchPhotos: vi.fn(),
   fetchHistogram: vi.fn(),
@@ -17,6 +18,7 @@ import {
   fetchPhotos,
   fetchTask,
   postDate,
+  postHouseNumber,
   postLocation,
 } from "../api/client";
 import { t } from "../text/de";
@@ -28,6 +30,7 @@ const fotosGeholt = vi.mocked(fetchPhotos);
 const histogrammGeholt = vi.mocked(fetchHistogram);
 const ortGesendet = vi.mocked(postLocation);
 const jahrGesendet = vi.mocked(postDate);
+const nummerGesendet = vi.mocked(postHouseNumber);
 
 function aufgabe(need: Need, fotoId: number | null, offen = 3, andere = 3): Task {
   return {
@@ -57,6 +60,7 @@ beforeEach(() => {
   });
   ortGesendet.mockReset().mockResolvedValue({ id: 1 } as PhotoDetail);
   jahrGesendet.mockReset().mockResolvedValue({ id: 1, needs_date: false } as PhotoDetail);
+  nummerGesendet.mockReset().mockResolvedValue({ id: 1, place_name: "Am Kamp 12" } as PhotoDetail);
 
   useContribute.setState({
     need: "location",
@@ -493,6 +497,72 @@ describe("Datieren aus der Detailansicht", () => {
 
     await useContribute.getState().submitDateFor(99, 1930, "decade");
 
+    expect(useContribute.getState().task?.photo?.id).toBe(8);
+  });
+});
+
+describe("Nachschaerfen aus der Detailansicht", () => {
+  /**
+   * Ein Foto, das nur seine Straße kennt, liegt auf deren Mitte — mitunter 400 Meter vom Haus
+   * entfernt. Wer das Haus erkennt, erkennt es am Bild, nicht am Marker.
+   */
+  it("schaerft ein Foto, das gar nicht in der Frage steht", async () => {
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("location");
+
+    await useContribute.getState().submitHouseNumberFor(42, 555);
+
+    expect(nummerGesendet).toHaveBeenCalledWith(42, expect.objectContaining({ place_id: 555 }));
+  });
+
+  it("sendet weder Koordinate noch Genauigkeit mit", async () => {
+    /**
+     * Der Angriffsfall, und zugleich die Begründung für die eigene Tür: Bestimmte der Client die
+     * Genauigkeit, könnte ein Aufruf mit `accuracy_m: 1` jede Angabe im Bestand ersetzen. Beides
+     * holt der Server aus dem Ortsverzeichnis — hier darf es gar nicht erst mitreisen.
+     */
+    await useContribute.getState().submitHouseNumberFor(42, 555);
+
+    const [, gesendet] = nummerGesendet.mock.calls[0]!;
+    expect(gesendet).not.toHaveProperty("lat");
+    expect(gesendet).not.toHaveProperty("lon");
+    expect(gesendet).not.toHaveProperty("accuracy_m");
+  });
+
+  it("zeigt keinen Dank", async () => {
+    // Die Rückmeldung ist die Zeile über den Knöpfen: Aus „Am Kamp" wird „Am Kamp 12".
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("location");
+
+    await useContribute.getState().submitHouseNumberFor(42, 555);
+
+    expect(useContribute.getState().thanks).toBeNull();
+  });
+
+  it("aktualisiert die Karte", async () => {
+    // Der Marker rückt von der Straßenmitte an das Haus. Ohne das bliebe er liegen, bis zufällig
+    // jemand die Karte verschiebt.
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("location");
+    fotosGeholt.mockClear();
+
+    await useContribute.getState().submitHouseNumberFor(42, 555);
+
+    expect(fotosGeholt).toHaveBeenCalled();
+  });
+
+  it("laesst die laufende Frage in Ruhe", async () => {
+    /**
+     * Auch bei demselben Foto. Ein nachschärfbares Foto ist verortet, wird also von „Wo ist das?"
+     * gar nicht vorgelegt, und sein Jahr rührt der Beitrag nicht an. Ein Neuladen würfe hier nur
+     * einen halb gesetzten Pin weg.
+     */
+    bestand(aufgabe("location", 7), aufgabe("date", 8));
+    await useContribute.getState().load("date");
+
+    await useContribute.getState().submitHouseNumberFor(8, 555);
+
+    expect(useContribute.getState().need).toBe("date");
     expect(useContribute.getState().task?.photo?.id).toBe(8);
   });
 });

@@ -164,8 +164,10 @@ Fertig: Stufen 0–10 (Gerüst, Backend, Frontend, Import, Abfrage-API, Karte mi
 Zeitschieber, „Hilf mit" mit Hausnummern, Sprachregelung, Admin-Bereich mit Stapel-Upload,
 USB-Sicherung, Kiosk-Betrieb), dazu der Umbau des Verwaltungsmenüs, zwei Runden Nachbesserungen
 an Verwaltung und Besucheransicht sowie die Auswertung von Metadaten und Ordnerstruktur beim
-Import, mit der der Erstbestand von 929 Fotos eingelesen wurde. Was als Nächstes ansteht, steht im
-Backlog.
+Import, mit der der Erstbestand von 929 Fotos eingelesen wurde. Zuletzt das **Nachschärfen der
+Verortung**: ein Foto, das nur seine Straße kennt, lässt sich in der Detailansicht auf eine
+Hausnummer bringen — der Weg dafür steht, die dritte Frage im „Hilf mit"-Bereich fehlt noch
+(Punkt 36). Was als Nächstes ansteht, steht im Backlog.
 
 **Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
 ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,

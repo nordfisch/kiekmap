@@ -615,3 +615,23 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Foto. Der Besucherschirm hatte bisher gar keinen Weg zurück in den Anfangszustand
 - **Der Titel „Bilder aus Holm" führt in die Verwaltung**, weiterhin über die PIN und ohne
   Unterstreichung. Die beiden Elemente haben damit die Rollen getauscht
+
+### Hinzugefügt
+
+- **Ein Foto, das nur seine Straße kennt, lässt sich in der Detailansicht auf eine Hausnummer
+  nachschärfen.** Unter der Adresse steht dasselbe Nummernraster wie im „Hilf mit"-Bereich; ein
+  Tipp, und aus „Am Kamp" wird „Am Kamp 5" — der Marker rückt von der Straßenmitte an das Haus.
+  Solche Fotos galten bisher als verortet und wurden nie wieder vorgelegt, obwohl sie bei einer
+  800-m-Straße bis zu 400 Meter danebenliegen können. Angeboten wird es nur, wo es etwas zu wählen
+  gibt: bei straßengenauen Fotos, deren Straße im Ortsindex Adressen hat und deren Hausnummer nicht
+  ohnehin schon im Namen steht
+- **Der Beitrag geht durch eine eigene Tür** (`POST /api/contribute/{id}/housenumber`), die nur die
+  Nummer der gewählten Adresse annimmt. Koordinate und Genauigkeit holt der Server aus dem
+  Ortsverzeichnis — der Client bestimmt nichts. Die Regel „Besucher füllen nur leere Felder" bleibt
+  daneben unverändert stehen; die Begründung steht in `docs/decisions.md`, Punkt 32
+- **Zurücknehmen heißt hier zurücksetzen, nicht löschen.** Eine zurückgenommene Hausnummer legt das
+  Foto wieder auf die Straßenmitte, mit dem Straßennamen und der **alten Quelle** — eine
+  Kuratorenangabe wird also nicht stillschweigend zum Besucherbeitrag. Dafür merkt sich das
+  Änderungsprotokoll seit jetzt auch die vorherige Herkunft
+- **Ältere Ortsangaben lassen sich erst zurücknehmen, wenn die neueren zurückgenommen sind.** In
+  der falschen Reihenfolge ließe eine Rücknahme sonst einen längst ersetzten Ort wieder auferstehen

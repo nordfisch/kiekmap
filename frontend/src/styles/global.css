@@ -1051,7 +1051,8 @@ button.timeline__undated:hover {
 /* Blaetterknoepfe und Jahresauswahl teilen sich die Form -- die Ansicht kennt genau eine, und
  * `.button` selbst ist fuer die helle Spalte gemacht und waere hier hell auf dunkel. */
 .overlay__pager .button,
-.overlay__date .button {
+.overlay__date .button,
+.overlay__housenumbers .button {
   min-height: 3.5rem;
   margin: 0;
   border: 2px solid rgb(255 255 255 / 40%);
@@ -1065,7 +1066,8 @@ button.timeline__undated:hover {
 }
 
 .overlay__pager .button:disabled,
-.overlay__date .button:disabled {
+.overlay__date .button:disabled,
+.overlay__housenumbers .button:disabled {
   opacity: 0.35;
 }
 
@@ -1075,8 +1077,22 @@ button.timeline__undated:hover {
   margin: 0.5rem 0 1rem;
 }
 
-.overlay__date .task__hint {
+.overlay__date .task__hint,
+.overlay__housenumbers .task__hint {
   color: rgb(216 208 198 / 80%);
+}
+
+/* Sharpening the location, right under the address line it changes. The same place in the column
+ * as the year choice, and the same shape -- the view knows one kind of button.
+ *
+ * The grid brings a scrolling area of its own from `.housenumbers`; here it may be shorter,
+ * because in this column the picture is what should stay visible. */
+.overlay__housenumbers {
+  margin: 0.5rem 0 1rem;
+}
+
+.overlay__housenumbers .housenumbers {
+  max-height: 30vh;
 }
 
 .overlay__position {

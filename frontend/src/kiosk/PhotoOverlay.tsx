@@ -12,16 +12,28 @@
  * should not first have to close it and hope the contribution panel puts the same photo up. It is
  * the same two-step choice as there -- decade, then year, all through buttons. A number field
  * would be a control that accepts nothing without a keyboard.
+ *
+ * **And a photo that only knows its street can be sharpened here.** The same argument, and here it
+ * weighs more: whoever recognises the house does so by looking at the picture, not at a marker in
+ * the middle of a street. Whether it may be offered at all is the backend's answer -- an empty
+ * list of numbers means no; see `fetchPhotoHouseNumbers`.
  */
 
 import { useEffect, useMemo, useState } from "react";
 
-import { type PhotoDetail, type Precision, fetchPhoto } from "../api/client";
+import {
+  type PhotoDetail,
+  type Place,
+  type Precision,
+  fetchPhoto,
+  fetchPhotoHouseNumbers,
+} from "../api/client";
 import { useAdmin } from "../store/admin";
 import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
 import { DatePicker } from "./DatePicker";
+import { HouseNumberPicker } from "./HouseNumberPicker";
 import { PencilIcon } from "./icons";
 import { offeredDecades } from "./decades";
 
@@ -51,10 +63,18 @@ export function PhotoOverlay() {
    */
   const [loadedId, setLoadedId] = useState<number | null>(null);
   const [dating, setDating] = useState(false);
+  /**
+   * The house numbers this photo may be sharpened to.
+   *
+   * Empty is the ordinary case and means "do not offer it" -- the rule lives in the backend alone.
+   */
+  const [numbers, setNumbers] = useState<Place[]>([]);
+  const [sharpening, setSharpening] = useState(false);
 
   const collection = useKiosk((s) => s.fullRange);
   const askPin = useAdmin((s) => s.askPin);
   const submitDateFor = useContribute((s) => s.submitDateFor);
+  const submitHouseNumberFor = useContribute((s) => s.submitHouseNumberFor);
   const decades = useMemo(() => offeredDecades(collection), [collection]);
 
   const openPhotoId = openStack[openIndex] ?? null;
@@ -72,6 +92,28 @@ export function PhotoOverlay() {
       .catch((e: unknown) => {
         if (abort.signal.aborted) return;
         setError(e instanceof Error ? e.message : String(e));
+      });
+    return () => abort.abort();
+  }, [openPhotoId]);
+
+  /**
+   * Its own request, and one for every photo opened.
+   *
+   * Separate from the detail above so that a slow answer here never holds up the picture -- and
+   * unconditional because the condition is exactly what is being asked. Testing anything on
+   * `detail` first ("only when it is street-precise") would be the backend's rule written a second
+   * time, in a place that cannot see the gazetteer. Most answers are empty; on a local database
+   * that costs nothing worth saving.
+   */
+  useEffect(() => {
+    setNumbers([]);
+    if (openPhotoId === null) return;
+
+    const abort = new AbortController();
+    fetchPhotoHouseNumbers(openPhotoId, abort.signal)
+      .then(setNumbers)
+      .catch(() => {
+        /* Without the numbers the photo stands as it is -- there is nothing to report here. */
       });
     return () => abort.abort();
   }, [openPhotoId]);
@@ -109,6 +151,28 @@ export function PhotoOverlay() {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setDating(false);
+    }
+  }
+
+  /**
+   * A house number for the photo currently on screen.
+   *
+   * The feedback is the line above the buttons: "Am Kamp" becomes "Am Kamp 12", and the picker
+   * goes because the numbers are cleared. Same shape as `pickDate`, and for the same reason -- the
+   * change happens at exactly the spot being looked at.
+   */
+  async function pickHouseNumber(place: Place) {
+    if (!detail) return;
+    setSharpening(true);
+    setError(null);
+    try {
+      setDetail(await submitHouseNumberFor(detail.id, place.id));
+      setNumbers([]);
+    } catch (e) {
+      // Most common case: somebody else was quicker (409). The backend phrases that kindly.
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSharpening(false);
     }
   }
 
@@ -215,6 +279,19 @@ export function PhotoOverlay() {
                 </div>
               )}
               {detail.place_name && <p className="overlay__place">{detail.place_name}</p>}
+              {/* Under the address, because that is the line it changes. Whether it appears at all
+                  the backend decides -- an empty list means the photo is house-precise already,
+                  or its street has no addresses to offer. */}
+              {numbers.length > 0 && detail.place_name && (
+                <div className="overlay__housenumbers">
+                  <HouseNumberPicker
+                    street={detail.place_name}
+                    numbers={numbers}
+                    disabled={sharpening}
+                    onPick={(place) => void pickHouseNumber(place)}
+                  />
+                </div>
+              )}
               {detail.description && <p className="overlay__description">{detail.description}</p>}
               {detail.tags.length > 0 && (
                 <ul className="overlay__tags">

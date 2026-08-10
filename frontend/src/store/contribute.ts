@@ -17,6 +17,7 @@ import {
   type Task,
   fetchTask,
   postDate,
+  postHouseNumber,
   postLocation,
 } from "../api/client";
 import { t } from "../text/de";
@@ -91,6 +92,7 @@ type ContributeState = {
   submitLocation: () => Promise<void>;
   submitDate: (year: number, precision: Precision) => Promise<void>;
   submitDateFor: (photoId: number, year: number, precision: Precision) => Promise<PhotoDetail>;
+  submitHouseNumberFor: (photoId: number, placeId: number) => Promise<PhotoDetail>;
 };
 
 let abort: AbortController | null = null;
@@ -330,6 +332,30 @@ export const useContribute = create<ContributeState>((set, get) => {
       // marker. Where it is not, ``prefer`` carries the chain into this route as well.
       const { task, need } = get();
       if (need === "date" && task?.photo?.id === photoId) void load(otherNeed(need), updated);
+
+      return updated;
+    },
+
+    /**
+     * A house number for a photo that so far only knows its street.
+     *
+     * Same route as ``submitDateFor`` and for the same reasons -- no thank-you, no map focus, the
+     * error stays with the caller. What the visitor gets to see is the line above the picker: "Am
+     * Kamp" becomes "Am Kamp 12" and the buttons are gone.
+     *
+     * Only the id of the address travels. Coordinate and accuracy come from the gazetteer, on the
+     * server -- see ``api/contribute.py``; the client determines nothing here.
+     *
+     * **The running question is left alone on purpose.** A photo that can be sharpened is already
+     * located, so "Wo ist das?" is not asking about it, and its year is untouched. Once the panel
+     * asks for house numbers itself, this is where the reload belongs -- like the one above.
+     */
+    async submitHouseNumberFor(photoId, placeId) {
+      const updated = await postHouseNumber(photoId, { place_id: placeId, session_id: SESSION_ID });
+
+      // The marker moves from the middle of the street to the house. Without this it stays where
+      // it was until somebody happens to pan the map.
+      useKiosk.getState().refresh();
 
       return updated;
     },

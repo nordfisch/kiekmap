@@ -1126,3 +1126,59 @@ wuerde — und der Zeitraum kaeme schmaler zurueck, als er hineinging. Genau das
 
 **Kein Auge, kein Ersatzsymbol.** Der Griff war die Antwort auf ein Problem, das es nicht mehr
 gibt; ein anderes Zeichen an derselben Stelle waere die Antwort auf gar keins.
+
+## 32. Nachschärfen geht durch eine eigene Tür, nicht durch eine gelockerte Prüfung
+
+*Entschieden und gebaut am 10. August 2026* — Punkt 36, erste Lieferung. Diese Entscheidung ist die
+erste Ausnahme zu [Punkt 5](#5-besucherbeiträge-werden-direkt-übernommen--mit-vollständigem-protokoll),
+und sie ist so gebaut, dass sie den Satz dort **nicht anfasst**.
+
+**Der Fall.** Ein Foto, das nur seine Straße kennt, liegt auf deren Mitte — bei einer 800-m-Straße
+bis zu 400 Meter vom Haus entfernt. Es gilt als verortet und wurde deshalb nie wieder vorgelegt.
+Wer das Haus erkennt, erkennt es am Bild; nachschärfen heißt aber, eine vorhandene Angabe zu
+ersetzen, und genau das verbietet Punkt 5.
+
+**Entscheidung.** Nicht `_require_empty` lockern, sondern ein eigener Endpunkt, der **keine
+Koordinate annimmt**:
+
+```
+POST /api/contribute/{photo_id}/housenumber   { place_id, session_id }
+```
+
+Der Server schlägt `place_id` im Ortsverzeichnis nach, prüft `kind == "adresse"` und dass die
+Adresse zur Straße des Fotos gehört, und schreibt Koordinate, `place_name` und Genauigkeit **aus
+der Ortsindex-Zeile**. Der Besucher wählt aus einer Menge, die der Server aufgestellt hat.
+
+**Warum das der Punkt ist, an dem alles hängt.** `POST /location` nimmt `accuracy_m` vom Client
+entgegen. Heute ist das eine harmlose Behauptung, *weil* das Feld ohnehin leer sein muss. Würde die
+Genauigkeit darüber entscheiden, ob überschrieben werden darf, wäre sie ein Schlüssel — und den
+hielte der Client: Ein Aufruf mit `accuracy_m: 1` dürfte dann jede Angabe im Bestand ersetzen. Die
+Regel „genauer darf ungenauer ersetzen, nie umgekehrt" ist richtig; sie ist nur nichts, was man
+demjenigen zu bewerten geben darf, der davon profitiert.
+
+**Wer gefragt wird**, entscheidet `services/needs.py` aus vier Bedingungen: straßengenau (150 m),
+ein `place_name` **ohne Ziffer** — steht die Nummer schon im Namen, fehlt nur die Koordinate, und
+das ist maschinelle Arbeit (Punkt 41) —, und der Ortsindex muss für diese Straße überhaupt Adressen
+haben. 141 der 486 Straßen haben keine; ohne diese Bedingung stünde die Frage ohne einen einzigen
+Knopf darunter auf dem Schirm.
+
+**Kuratorenangaben sind ausdrücklich einbezogen.** Damit überschreibt Besucherarbeit
+Kuratorenarbeit — das, was Punkt 5 sonst ausschließt. Getragen wird das von der Rücknahme: `Change`
+hat seit heute eine Spalte `old_source`, und „zurücknehmen" heißt hier **zurücksetzen auf die
+Straßenmitte** samt der alten Quelle, nicht löschen. Ohne diese Spalte machte eine Rücknahme aus
+Kuratorenwissen stillschweigend einen Besucherbeitrag.
+
+**Was diese Begründung aushöhlen würde**, ohne dass eine einzelne Änderung falsch aussähe:
+Koordinaten vom Client anzunehmen; weitere Genauigkeitsstufen einzuführen und die Regel darauf zu
+verallgemeinern; die Prüfung `place.street == photo.place_name` zu lockern. Jedes für sich wäre eine
+Bequemlichkeit, zusammen wären sie das Ende von Punkt 5.
+
+**Ein Widerruf gehört dazu.** `_locate` in `services/foldermeta.py` lässt Fotos aus Ordnern mit
+einem Straßennamen ohne Hausnummer **bewusst unverortet**, mit der Begründung: Die Straßenmitte
+„sähe aus wie eine Antwort", und das Foto fiele aus „Wo ist das?" heraus. Das war richtig, solange
+es zwei Fragen gab. Mit der dritten fallen diese Fotos nicht heraus, sondern **in die genauere
+Frage hinein** — die Begründung ist damit hinfällig, und die Regel gehört umgekehrt. Betroffen sind
+64 der 72 Fotos ohne Ort; ausgeführt wird es unter
+[Punkt 41](backlog.md#41--den-erstbestand-maschinell-vorbereiten), weil es auch den Bestand
+umschreibt. Bis dahin steht die alte Regel noch im Code — sie steht dort ohne Begründung, und das
+ist der Grund, warum der Widerruf hier steht und nicht erst dann.
