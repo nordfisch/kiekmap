@@ -70,6 +70,41 @@ export function shiftRange(range: TimeRange, delta: number, bounds: Bounds): Tim
   return { from: range.from + possible, to: range.to + possible };
 }
 
+/**
+ * The narrowest period the visitor can set, in years.
+ *
+ * A decade -- and the reason is physical, not statistical. The selected range **is** the surface
+ * one grabs to walk the period along the axis; squeezed onto a single bar it has no surface left.
+ * A drawn grip in the middle used to answer that case, which meant carrying a mark on screen for
+ * a state nobody wants to be in. A floor under the width answers it without one.
+ */
+export const MIN_SPAN_YEARS = 10;
+
+/** The floor on this axis: a decade, but never narrower than a single bar. */
+export function minSpan(step: number): number {
+  return Math.max(MIN_SPAN_YEARS, step);
+}
+
+/**
+ * Move one end of the period, keeping it at least ``minSpan`` wide.
+ *
+ * The moving end stops; the other one is never pushed. Being pushed would let a drag at the left
+ * carry the right end past the end of the axis, where it would then be clamped -- and the period
+ * would come back narrower than it went. Stopping is also what a floor should feel like.
+ *
+ * Both ends are inclusive, so a decade is ``to - from === 9``.
+ */
+export function resizeRange(
+  range: TimeRange,
+  grip: "start" | "end",
+  year: number,
+  step: number,
+): TimeRange {
+  const span = minSpan(step);
+  if (grip === "start") return { from: Math.min(year, range.to - span + 1), to: range.to };
+  return { from: range.from, to: Math.max(year, range.from + span - 1) };
+}
+
 /** Where a year sits on the axis: 0 at the left end, 1 at the right. Never outside. */
 export function fraction(year: number, bounds: Bounds): number {
   const raw = (year - bounds.min) / (bounds.max - bounds.min);

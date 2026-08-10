@@ -32,6 +32,13 @@ export const t = {
      * screen.
      */
     titleLead: "Bilder aus",
+    /**
+     * The arms, which since 9 August 2026 reload instead of opening the admin area.
+     *
+     * Says what happens, not what it is: whoever hovers over a coat of arms and reads "Wappen"
+     * learns nothing they could not see.
+     */
+    resetHint: "Von vorn beginnen",
     loadingMap: "Karte wird geladen …",
   },
 
@@ -85,7 +92,7 @@ export const t = {
     undated: (count: number) => `${count} ${count === 1 ? "Foto" : "Fotos"} ohne Jahr anzeigen`,
     startHandle: "Anfangsjahr",
     endHandle: "Endjahr",
-    /** The middle grip: it moves the whole period, it does not change its length. */
+    /** The selected bar itself: it moves the whole period, it does not change its length. */
     rangeHandle: "Zeitraum verschieben",
   },
 
@@ -196,6 +203,7 @@ export const t = {
    */
   admin: {
     logoLabel: (place: string) => `Wappen von ${place}`,
+    /** On the title, which is the door since 9 August 2026 -- see decisions.md, point 26. */
     cornerHint: "Verwaltung öffnen",
 
     pin: {

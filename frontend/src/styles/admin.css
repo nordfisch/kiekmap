@@ -8,34 +8,6 @@
 
 /* --- the way in ---------------------------------------------------------- */
 
-/* The village arms in the title bar, next to the name of the place. Deliberately visible -- the
- * PIN is the lock, not the hiding place.
- *
- * No background and no shadow here, unlike when it lay on the map: in the title bar it is a
- * coat of arms, not a button, and it should not look like one until it is pressed. */
-.admin-gate {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  /* So hoch wie der Zeitschieber nebenan und wie der Titel daneben -- siehe global.css. */
-  width: var(--crest, 6.2rem);
-  height: var(--crest, 6.2rem);
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: none;
-}
-
-.admin-gate:active {
-  transform: translateY(1px);
-}
-
-.admin-gate__logo {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
 /* --- number pad ---------------------------------------------------------- */
 
 .pinpad {

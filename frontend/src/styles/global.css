@@ -107,11 +107,17 @@ button {
 /* --- title bar ----------------------------------------------------------- */
 
 /* Ohne Rahmenlinien zu den Nachbarfeldern. Die einzige Kante, die eine Aufgabe hat, ist der
- * Papierton gegen die Karte -- alles andere machte aus einer Ausstellung ein Formular. */
+ * Papierton gegen die Karte -- alles andere machte aus einer Ausstellung ein Formular.
+ *
+ * Senkrecht mittig, und zwar in der Hoehe, die das hoechste Element der Zeile vorgibt. Vorher
+ * standen Wappen, Titel und Schieber oben buendig und endeten fast fuenfzig Pixel auseinander --
+ * ein Kommentar hier rechnete vor, dass Titel und Wappen genau so hoch stuenden wie der Schieber,
+ * und das galt nur fuer eine Schirmbreite und nur bis der Schieber wuchs. Drei Rechnungen, die
+ * auseinanderlaufen konnten, sind durch eine Ausrichtung ersetzt, die sich selbst traegt. */
 .app__title {
   grid-area: title;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.8rem;
   min-width: 0;
   padding: 0.75rem 1.25rem var(--gap);
@@ -121,6 +127,27 @@ button {
   min-width: 0;
   margin: 0;
   line-height: 1.15;
+}
+
+/* Die Tuer in die Verwaltung, und sie soll nicht danach aussehen: keine Unterstreichung, keine
+ * Farbe, kein Rahmen. Ein Besucher liest eine Ueberschrift; wer hinein will, weiss, wo er tippt.
+ * Das Schloss ist und bleibt die PIN (decisions.md, Punkt 26).
+ *
+ * Die Ausrichtung nach links kommt vom Knopf, nicht vom Text darin -- `button` zentriert von
+ * Haus aus, und der Titel stuende sonst mittig ueber einer linksbuendigen Spalte. */
+.app__heading-door {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.app__heading-door:active {
+  transform: translateY(1px);
 }
 
 /* Two lines: a small lead-in over the name of the village. The name is the thing people look for,
@@ -134,8 +161,9 @@ button {
   display: block;
 }
 
-/* Die beiden Faktoren ergeben mit der Zeilenhoehe 1,15 zusammen genau `--crest` -- die
- * Hoehengleichheit mit Wappen und Zeitschieber gilt damit in jeder Stufe, nicht nur in einer. */
+/* Die beiden Faktoren binden den Titel an die Hoehe des Wappens. Dass er damit auch so hoch
+ * stuende wie der Schieber, gilt nicht mehr und muss auch nicht mehr gelten -- das erledigt seit
+ * dem 9. August 2026 die senkrechte Zentrierung oben. */
 .app__heading-lead {
   font-size: calc(var(--crest) * 0.323);
   font-weight: 400;
@@ -178,6 +206,34 @@ button {
 .map__canvas {
   position: absolute;
   inset: 0;
+}
+
+/* Das Wappen in der Kopfzeile, neben dem Ortsnamen. Es lag bis zum 9. August 2026 in admin.css,
+ * weil es die Tuer in die Verwaltung war; das ist jetzt der Titel daneben (decisions.md, Punkt
+ * 26). Ein Tipp darauf laedt neu und setzt damit alles zurueck.
+ *
+ * Ohne Flaeche und ohne Schatten: In der Kopfzeile ist es ein Wappen und kein Knopf, und es soll
+ * erst beim Druecken wie einer aussehen. */
+.crest {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--crest, 6.2rem);
+  height: var(--crest, 6.2rem);
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+}
+
+.crest:active {
+  transform: translateY(1px);
+}
+
+.crest__logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 /* --- "Hilf mit" panel ---------------------------------------------------- */
@@ -609,7 +665,10 @@ button {
   grid-area: timeline;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  /* Das Gegenstueck zur Zentrierung im Titelfeld: Beide Zellen der Zeile sind gleich hoch, und
+   * beide legen ihren Inhalt in die Mitte. Damit steht die ganze Zeile mittig, ohne dass eine
+   * Seite die Hoehe der anderen kennen muesste. */
+  justify-content: center;
   gap: 0.35rem;
   min-width: 0;
   padding: 0.75rem 2.5rem var(--gap);
@@ -750,20 +809,6 @@ button.timeline__undated:hover {
 .timeline__selected:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
-}
-
-/* Three lines in the middle, the way a grip is drawn everywhere. Always present: a period
- * narrowed to a single year leaves no surface, and then this is all there is. */
-.timeline__gripper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 1.1rem;
-  height: 1.1rem;
-  transform: translate(-50%, -50%);
-  border-left: 3px solid var(--accent);
-  border-right: 3px solid var(--accent);
-  box-sizing: border-box;
 }
 
 /* Finger-sized: the visible disc is 1.6 rem, the grab zone around it considerably larger --

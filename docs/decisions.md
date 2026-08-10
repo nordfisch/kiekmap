@@ -851,9 +851,9 @@ Achse liegt.
 
 ## 26. Zwei Türen in die Verwaltung, und keine davon ist mehr das Wappen
 
-*Entschieden am 9. August 2026.* **Die zweite Tür — der Stift — ist am selben Tag gebaut worden**
-(Punkt 25); der Titel und das neu ladende Wappen stehen als Punkt 29 im [backlog.md](backlog.md). Diese Entscheidung schreibt [Punkt 7](#7-admin-aufs-wappen-tippen-dann-pin)
-fort, der genau **eine** Tür festgelegt hatte.
+*Entschieden und gebaut am 9. August 2026* — der Stift als Punkt 25, der Titel und das neu
+ladende Wappen als Punkt 29. Diese Entscheidung schreibt
+[Punkt 7](#7-admin-aufs-wappen-tippen-dann-pin) fort, der genau **eine** Tür festgelegt hatte.
 
 **Entscheidung.** Es gibt künftig zwei Wege in den Verwaltungsbereich, beide sichtbar, beide durch
 dieselbe PIN gesichert:
@@ -1087,3 +1087,42 @@ Verwaltungstuer herausfuehrt und zu keiner Besucherfrage gehoert.
 Was daran haengt: [backlog.md](backlog.md), Punkt 10. Der Schliessen-Knopf der Detailansicht war
 an die Blaetterknoepfe gebunden, damit die Ansicht *eine* Knopfform kennt. Jetzt gibt es vier
 benannte Rollen, und keine heisst „schliessen" — welche er bekommt, ist dort zu entscheiden.
+
+---
+
+## 31. Der Kopfbereich steht auf einer Mittellinie, der Zeitraum auf einem Boden
+
+Zwei Aenderungen an derselben Zeile, beide am 9. August 2026, und beide ersetzen eine Rechnung
+durch eine Regel, die sich selbst traegt.
+
+**Wappen, Titel und Zeitschieber richten sich senkrecht mittig aus.** Sie standen oben buendig und
+endeten fast fuenfzig Pixel auseinander. Das CSS behauptete an der Stelle das Gegenteil: Ein
+Kommentar rechnete vor, dass beide Titelzeilen zusammen genau `--crest` ergeben und „damit genau so
+hoch wie der Schieber nebenan" stehen. Das galt einmal — fuer eine Schirmbreite, und bis der
+Schieber wuchs. `--crest` schrumpft auf schmalen Schirmen per Media Query, der Schieber nicht.
+
+Drei Rechnungen, die auseinanderlaufen koennen, sind durch eine gemeinsame Mittellinie ersetzt:
+`align-items: center` im Titelfeld, `justify-content: center` im Schieberfeld. Beide Zellen der
+Gitterzeile sind ohnehin gleich hoch, also steht die ganze Zeile mittig, ohne dass eine Seite die
+Hoehe der anderen kennen muesste. Nachgemessen liegen alle drei Mittellinien auf demselben Pixel.
+
+**Und das hat einen Punkt nebenbei aufgeloest:** Die Layoutmasze der Kopfzeile haengen seitdem
+nicht mehr an der Displayaufloesung des Museumsgeraets. Wo eine Abhaengigkeit von einer offenen
+Frage verschwindet, sobald man die Stelle richtig baut, war die Abhaengigkeit vielleicht nie
+die Frage.
+
+**Der Zeitraum laesst sich nicht unter ein Jahrzehnt zusammenschieben.** Der ausgewaehlte Bereich
+ist zugleich die Flaeche, an der man ihn ueber die Achse zieht; auf einen Balken zusammengeschoben
+bliebe nichts zum Anfassen. Dafuer trug er bisher einen gezeichneten Griff in der Mitte — eine
+Marke auf dem Schirm fuer einen Zustand, in den niemand geraten will. Der Griff ist weg, der Boden
+ist da: `minSpan()` in `kiosk/timeAxis.ts`, ein Jahrzehnt, aber nie schmaler als ein Balken (bei
+25-Jahres-Buendeln waere ein Jahrzehnt schmaler als ein einziger). Gemessen bleiben so 65 px
+Greifflaeche statt eines Stummels.
+
+**Das bewegte Ende stoppt, das andere wird nie mitgeschoben.** Mitzuschieben klingt geschmeidiger
+und ist die Falle: Ein Zug am linken Ende truege das rechte ueber das Achsenende, wo es geklemmt
+wuerde — und der Zeitraum kaeme schmaler zurueck, als er hineinging. Genau das Schrumpfen, das
+`shiftRange` an anderer Stelle schon einmal verhindern musste.
+
+**Kein Auge, kein Ersatzsymbol.** Der Griff war die Antwort auf ein Problem, das es nicht mehr
+gibt; ein anderes Zeichen an derselben Stelle waere die Antwort auf gar keins.

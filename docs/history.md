@@ -1910,3 +1910,53 @@ Schritt.
 
 Nachgemessen am laufenden Kiosk: fuenf Rollen im Einsatz (die vier plus das Jahresraster),
 Mindesthoehe 54 px, und kein Knopf ausserhalb der Raster ohne Symbol.
+
+## Die Kopfzeile findet ihre Mitte
+
+9. August 2026. Punkt 29, vier Aenderungen an derselben Zeile — und zwei davon haben eine Rechnung
+durch eine Regel ersetzt.
+
+**Die Hoehen.** Wappen, Titel und Zeitschieber standen oben buendig und endeten fast fuenfzig
+Pixel auseinander. Das CSS behauptete an genau dieser Stelle das Gegenteil: Ein Kommentar rechnete
+vor, dass beide Titelzeilen zusammen `--crest` ergeben und „damit genau so hoch wie der Schieber
+nebenan" stehen. Das stimmte einmal — fuer eine Schirmbreite, und bis der Schieber am 9. August
+von 3 auf 3,5 rem wuchs. Drei Rechnungen, die auseinanderlaufen konnten, sind jetzt eine
+gemeinsame Mittellinie: `align-items: center` im Titelfeld, `justify-content: center` im
+Schieberfeld. Nachgemessen liegen alle drei Mitten auf demselben Pixel — 84.
+
+**Und damit hat sich [Punkt 19](backlog.md#19--displayauflösung-und--orientierung-des-museumsgeräts)
+zur Haelfte erledigt**, ohne dass jemand die Frage beantwortet haette. Er stand als Blocker fuer
+den Kopfbereich, weil dort `--crest` schrumpfte und der Schieber nicht. Eine Mittellinie gilt in
+jeder Breite. Wo eine Abhaengigkeit von einer offenen Frage verschwindet, sobald man die Stelle
+richtig baut, war die Abhaengigkeit vielleicht nie die Frage.
+
+**Der Griff und sein Boden.** Der Auftrag war knapp: „slider mindestbreite 1 jahrzehnt. kein auge
+symbol." Beides zusammen ist die Antwort auf die Frage, die der Backlog offengelassen hatte — der
+gezeichnete Griff in der Mitte war das, was uebrig blieb, wenn der Zeitraum auf einen Balken
+zusammengeschoben war, und ein Ersatzsymbol waere die Antwort auf ein Problem gewesen, das der
+Boden gerade abschafft.
+
+Beim Bauen kam eine Entscheidung dazu, die der Auftrag nicht traf: **Was passiert am Boden mit dem
+anderen Ende?** Es mitzuschieben klingt geschmeidiger und ist die Falle — ein Zug am linken Ende
+truege das rechte ueber das Achsenende, wo es geklemmt wuerde, und der Zeitraum kaeme schmaler
+zurueck, als er hineinging. Genau das Schrumpfen, das `shiftRange` an anderer Stelle schon einmal
+verhindern musste. Das bewegte Ende stoppt also, das andere bleibt.
+
+Am Geraet nachgefahren: 1950 bis 1959, zehn Jahre einschliesslich beider Enden, 65 px
+Greifflaeche. Vom anderen Ende her ruehrt sich nichts mehr.
+
+**Der Rollentausch.** Das Wappen laedt neu und setzt damit alles zurueck; der Titel „Bilder aus
+Holm" ist die Tuer in die Verwaltung. `AdminGate` heisst deshalb jetzt `Crest` und liegt unter
+`kiosk/` — eine Komponente namens „Verwaltungstuer", die eine Seite neu laedt, waere genau die
+Sorte Name, die spaeter jemanden in die Irre fuehrt. Die CSS-Klasse ist mitgezogen und von
+`admin.css` nach `global.css` gewandert.
+
+### Der Fehler beim Aufraeumen der Dokumentation
+
+Beim Herausschneiden des erledigten Punktes aus dem Backlog habe ich zwischen zwei Ueberschriften
+geschnitten, ohne zu pruefen, welche von beiden weiter vorn steht — Punkt 10 lag vor Punkt 29, und
+`t[:start] + t[end:]` hat den Abschnitt dazwischen **verdoppelt** statt ihn zu entfernen. Aufgefallen
+ist es an der Zaehlung: 23 Zeilen in der Tabelle, 25 Ueberschriften im Text. Dasselbe Muster wie am
+8. August, als derselbe Griff einen Punkt geloescht hat; damals fand es die Ankerpruefung, diesmal
+der Abgleich von Tabelle und Text. Beide Male war die Ursache dieselbe Annahme — dass die
+Reihenfolge im Text der in der Tabelle folgt. Sie tut es nicht.

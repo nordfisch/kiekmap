@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { AdminApp } from "./admin/AdminApp";
-import { AdminGate } from "./admin/AdminGate";
 import { PinPad } from "./admin/PinPad";
+import { Crest } from "./kiosk/Crest";
 import { HelpPanel } from "./kiosk/HelpPanel";
 import { MapView } from "./kiosk/MapView";
 import { PhotoOverlay } from "./kiosk/PhotoOverlay";
@@ -32,6 +32,7 @@ export function App() {
   const complete = useContribute((s) => s.task !== null && s.task.photo === null && !s.thanks);
   const [error, setError] = useState<string | null>(null);
   const view = useAdmin((s) => s.view);
+  const askPin = useAdmin((s) => s.askPin);
   const restore = useAdmin((s) => s.restore);
 
   useEffect(() => {
@@ -70,10 +71,21 @@ export function App() {
        * rather than covering the map. The grid itself is in styles/global.css. */}
       <div className={complete ? "app app--complete" : "app"}>
         <header className="app__title">
-          <AdminGate regionName={region.name} />
+          <Crest regionName={region.name} />
+          {/* The title is the door into the admin area -- deliberately without an underline: it
+              is the heading of this device, and it should not read as a link to a visitor. The
+              PIN is the lock, the same as it always was; only the surface has changed hands with
+              the arms beside it. See decisions.md, point 26. */}
           <h1 className="app__heading">
-            <span className="app__heading-lead">{t.app.titleLead}</span>
-            <span className="app__heading-place">{region.name}</span>
+            <button
+              type="button"
+              className="app__heading-door"
+              title={t.admin.cornerHint}
+              onClick={() => askPin()}
+            >
+              <span className="app__heading-lead">{t.app.titleLead}</span>
+              <span className="app__heading-place">{region.name}</span>
+            </button>
           </h1>
         </header>
 

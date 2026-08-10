@@ -55,7 +55,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 38 | [Sprünge beim Gruppieren, und wie genau die Punkte überhaupt liegen](#38--sprünge-beim-gruppieren-und-wie-genau-die-punkte-überhaupt-liegen) | Frage | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
-| 29 | [Der Kopfbereich: Maße, Wappen, Titel](#29--der-kopfbereich-maße-wappen-titel) | Aufgabe | wichtig |
 | 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
 | | **Infrastruktur** | | |
 | 14 | [Bedienbarkeitstest mit der echten Zielgruppe](#14--bedienbarkeitstest-mit-der-echten-zielgruppe) | Aufgabe | wichtig · dringend |
@@ -72,8 +71,8 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Achtzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
-32, 33, 37. Sie sind erledigt,
+**Neunzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
+29, 32, 33, 37. Sie sind erledigt,
 aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
 neue Punkt bekommt die **43**.
 
@@ -427,8 +426,8 @@ und es dann in einem Zug umsetzen statt in zwölf Einzelentscheidungen.
 
 **Drei Befunde standen schon als eigene Punkte** und waren damit die erste Ernte dieses
 Durchgangs, nicht sein Ersatz: [Punkt 10](#10--detailansicht-maße-aufräumen) (Maße der
-Detailansicht), [Punkt 29](#29--der-kopfbereich-maße-wappen-titel) (drei Elemente, fast fünfzig
-Pixel Höhenspanne) — und Punkt 28, die Knopfsprache, seit dem 9. August 2026 erledigt. Dass ein
+Detailansicht) — und Punkt 28 (die Knopfsprache) sowie Punkt 29 (der Kopfbereich), beide am
+9. August 2026 erledigt. Dass ein
 Befund einzeln lösbar war, spricht nicht gegen diesen Punkt: Die Knopfsprache stand als eigener
 Punkt da, *weil* jemand sie am Stück angesehen hatte. Genau das soll hier für den Rest passieren.
 
@@ -517,8 +516,10 @@ Argument:** Was hier gebaut wird, wird zweimal gebraucht.
 
 **Was der Attract-Mode nicht darf:** die Arbeit von jemandem wegwerfen, der gerade etwas
 beigetragen hat. Der Leerlauf lädt heute neu, gerade *weil* das der sichere Zustand ist — derselbe
-Zielkonflikt steht in [Punkt 29](#29--der-kopfbereich-maße-wappen-titel) beim Wappen, das neu
-laden soll.
+Zielkonflikt ist beim Wappen schon einmal entschieden worden, das seit dem 9. August 2026 neu
+lädt (Punkt 29, erledigt): Dort war die Antwort, dass der Verlust hinnehmbar ist, weil es sonst
+gar keinen Weg zurück gibt. **Beim Attract-Mode gilt das nicht** — er startet von selbst, und was
+er wegwirft, hat niemand weggeworfen.
 
 ### 10 · Detailansicht: Maße aufräumen
 
@@ -569,62 +570,6 @@ benannte Rollen, und keine davon ist „Schließen". **Damit ist die Frage nicht
 Raster darf, sondern welche Rolle er bekommt** — er schließt eine Ansicht, ohne etwas zu
 beantworten oder zurückzugehen. Das ist entweder eine fünfte Rolle oder ein Sonderfall, den die
 Detailansicht für sich behält. **Diese Entscheidung gehört an den Anfang dieses Punktes.**
-
-### 29 · Der Kopfbereich: Maße, Wappen, Titel
-
-Die obere Zeile trägt drei Dinge nebeneinander — Wappen, Titel und Zeitschieber —, und sie sind
-weder gleich hoch noch gleich gemeint. Vier Änderungen, die zusammengehören, weil sie dieselbe
-Fläche betreffen.
-
-**1. Die drei stehen oben bündig und enden weit auseinander.** Nachgemessen bei 18 px
-Wurzelschrift:
-
-| | Oberkante | Unterkante | Höhe |
-|---|---|---|---|
-| Titelblock | 13,5 px | 85,0 px | 71,5 px |
-| Wappen | 13,5 px | **98,0 px** | 84,5 px |
-| Zeitschieber, erste Zeile bis Jahresskala | 13,5 px | **133,6 px** | 120,1 px |
-
-**Die Zahlen sind vom 9. August 2026 vormittags und schon überholt:** Seit dem Schalter „507 Fotos
-ohne Jahr anzeigen" ([decisions.md](decisions.md), Punkt 28) trägt die Kopfzeile des Schiebers einen
-50 px hohen Knopf statt eines Wortes und ist entsprechend gewachsen. Die Größenordnung des
-Problems ändert das nicht — sie vergrößert es. **Nachmessen gehört zum ersten Schritt dieses
-Punktes**, nicht das Übernehmen der Tabelle.
-
-Fast fünfzig Pixel Unterschied an den Unterkanten. Das CSS behauptet an dieser Stelle das
-Gegenteil: Ein Kommentar bei `.app__heading-lead` rechnet vor, dass beide Titelzeilen zusammen
-genau `--crest` ergeben und „damit genau so hoch wie der Schieber nebenan" stehen. Das galt einmal
-für den breiten Schirm; `--crest` schrumpft auf schmalen Schirmen per Media Query, der Schieber
-nicht, und seine Bahn ist am 9. August von 3 auf 3,5 rem gewachsen. **Gewollt ist stattdessen:
-vertikal mittig im Höhenbereich des höchsten beteiligten Elements** — dann trägt die Aussage sich
-selbst, statt von drei Rechnungen abzuhängen, die auseinanderlaufen können.
-
-**2. Der Griff in der Mitte des Zeitschiebers**, die zwei Striche, kommt vorerst weg oder wird
-durch ein schlichtes Auge-Symbol ersetzt. **Zu bedenken:** Der Griff ist heute das, was übrig
-bleibt, wenn der Zeitraum auf einen einzigen Balken zusammengeschoben ist — dann hat der Bereich
-keine Fläche mehr zum Anfassen. Fällt der Griff ersatzlos weg, braucht dieser Fall eine andere
-Antwort, etwa eine Mindestbreite des Bereichs.
-
-**3. Das Wappen lädt neu und setzt die Filter zurück.** Damit ist die alte Frage nach einem
-Reload-Knopf beantwortet — sie stand bis heute als eigener Punkt 11 hier:
-
-> Auf dem Besucherschirm gibt es keinen Weg, die Anzeige zurückzusetzen. Es gibt drei Umwege: fünf
-> Minuten warten, die PIN eingeben und die Verwaltung wieder verlassen, oder den Netzstecker. Für
-> einen Besucher, der sich verhakt hat, ist keiner davon eine Antwort.
-
-Der Einwand von damals gilt weiter und gehört beim Bauen bedacht: **Ein Knopf, den fast niemand
-braucht, wird trotzdem gedrückt — von Kindern zuerst**, und er wirft die Arbeit weg, die gerade
-jemand angefangen hat. Ein halb gesetzter Punkt, ein gewähltes Jahrzehnt, ein offener Stapel: alles
-fort. Das Wappen kostet immerhin keine zusätzliche Fläche, und die Bauform ist keine unsichtbare
-Geste — die wurde in Stufe 8 aus gutem Grund verworfen (siehe [history.md](history.md)).
-
-**4. Der Titel „Bilder aus Holm" führt in die Verwaltung**, weiterhin über die PIN und **ohne
-Unterstreichung**. Das tauscht die Rollen: Bisher war das Wappen die Tür. Die zweite Tür — der
-Stift in der Detailansicht — steht seit dem 9. August 2026 (Punkt 25, erledigt); mit dieser hier
-gibt es zwei, und keine davon ist mehr das Wappen. **Entschieden ist das bereits**, in
-[decisions.md](decisions.md), Punkt 26, an einer Stelle statt zweimal nebenbei. Hier bleibt die
-Arbeit — und mit ihr der Rest: Solange das Wappen die einzige Tür ist, kann es noch nicht neu
-laden.
 
 ---
 
@@ -713,8 +658,10 @@ umgestellt:
 - [Punkt 10](#10--detailansicht-maße-aufräumen), die Maße der Detailansicht. Auf 1920 × 1080 ist
   nichts zu tun, auf einem 1024er Panel viel — und steht das Gerät **hochkant**, dreht sich die
   Rechnung um: Dann hat das querformatige Bild Breite im Überfluss und der Text darunter Platz.
-- [Punkt 29](#29--der-kopfbereich-maße-wappen-titel), der Kopfbereich. Auf schmalen Schirmen
-  schrumpft `--crest`, der Zeitschieber nicht — die Höhen laufen dort schon heute auseinander.
+- Der Kopfbereich hat sich davon inzwischen gelöst (Punkt 29, erledigt): Die drei Elemente
+  richten sich an einer gemeinsamen Mittellinie aus statt an drei Rechnungen, und das gilt in
+  jeder Breite. **Die Auflösung entscheidet dort nichts mehr** — ein Hinweis darauf, dass eine
+  Abhängigkeit von dieser Frage auch eine schlecht gebaute Stelle sein kann.
 
 **Die Frage ist also kleiner, als sie aussieht, und sollte früh gestellt werden**: Es ist eine
 Frage an das Museum, keine an den Code, und sie kostet nichts als ein Telefonat.

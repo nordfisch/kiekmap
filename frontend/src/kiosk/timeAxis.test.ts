@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { axisBounds, barHeight, clampRange, fraction, shiftRange } from "./timeAxis";
+import {
+  axisBounds,
+  barHeight,
+  clampRange,
+  fraction,
+  minSpan,
+  resizeRange,
+  shiftRange,
+} from "./timeAxis";
 
 describe("Achse", () => {
   it("rundet auf volle Jahrzehnte auf", () => {
@@ -113,5 +121,55 @@ describe("Auswahl ausserhalb der Achse bleibt im Bild", () => {
 
   it("dreht eine verkehrt herum liegende Auswahl nicht um", () => {
     expect(clampRange({ from: 1958, to: 1952 }, achse)).toEqual({ from: 1952, to: 1958 });
+  });
+});
+
+describe("Die Mindestbreite des Zeitraums", () => {
+  /**
+   * Der ausgewaehlte Bereich ist zugleich die Flaeche, an der man ihn ueber die Achse zieht. Auf
+   * einen Balken zusammengeschoben bliebe nichts zum Anfassen — dafuer gab es frueher einen
+   * gezeichneten Griff in der Mitte. Ein Boden unter der Breite beantwortet denselben Fall ohne
+   * eine Marke auf dem Schirm.
+   */
+
+  it("laesst den Anfang nicht naeher als ein Jahrzehnt an das Ende", () => {
+    // Gezogen wird bis 1955, stehen bleibt 1946: zehn Jahre einschliesslich beider Enden.
+    expect(resizeRange({ from: 1920, to: 1955 }, "start", 1990, 1)).toEqual({
+      from: 1946,
+      to: 1955,
+    });
+  });
+
+  it("laesst das Ende nicht naeher an den Anfang", () => {
+    expect(resizeRange({ from: 1920, to: 1990 }, "end", 1922, 1)).toEqual({
+      from: 1920,
+      to: 1929,
+    });
+  });
+
+  it("laesst den Bereich sonst in Ruhe", () => {
+    expect(resizeRange({ from: 1920, to: 1990 }, "start", 1950, 1)).toEqual({
+      from: 1950,
+      to: 1990,
+    });
+  });
+
+  it("schiebt das andere Ende nie mit", () => {
+    /**
+     * Der stille Fehler, waere es anders: Wer den Anfang nach rechts zieht und dabei das Ende
+     * ueber das Achsenende schoebe, bekaeme es dort eingeklemmt — und der Zeitraum kaeme schmaler
+     * zurueck, als er hineinging. Genau die Sorte Schrumpfen, die ``shiftRange`` schon einmal
+     * verhindern musste.
+     */
+    const eng = resizeRange({ from: 1920, to: 1929 }, "start", 1990, 1);
+
+    expect(eng.to).toBe(1929);
+  });
+
+  it("weicht einem Balken, der breiter ist als ein Jahrzehnt", () => {
+    // Bei 25-Jahres-Buendeln waere ein Boden von zehn Jahren schmaler als ein einziger Balken.
+    expect(minSpan(25)).toBe(25);
+    expect(minSpan(1)).toBe(10);
+    expect(minSpan(10)).toBe(10);
   });
 });

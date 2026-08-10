@@ -600,3 +600,18 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Antwort und sieht seitdem aus wie „Hier war das". Vier Handlungen tragen ein Symbol **neben** der
   Beschriftung — Haken, Pfeil links, Pfeil rechts, Fadenkreuz —, gezeichnet im Quelltext, weil das
   Gerät offline läuft
+
+### Geändert
+
+- **Der Kopfbereich richtet sich an einer Mittellinie aus.** Wappen, Titel und Zeitschieber
+  standen oben bündig und endeten fast fünfzig Pixel auseinander — das CSS behauptete an der
+  Stelle, sie seien gleich hoch, und das galt nur für eine Schirmbreite. Drei Rechnungen sind
+  durch eine gemeinsame Mitte ersetzt
+- **Der Zeitraum lässt sich nicht mehr unter ein Jahrzehnt zusammenschieben.** Damit fällt der
+  gezeichnete Griff in der Mitte des Schiebers weg: Er war die Antwort darauf, dass ein auf einen
+  Balken zusammengeschobener Bereich keine Fläche mehr zum Anfassen hat, und diesen Zustand gibt
+  es nun nicht mehr
+- **Das Wappen lädt neu und setzt damit alles zurück** — Karte, Zeitraum, Beitragsbereich, offenes
+  Foto. Der Besucherschirm hatte bisher gar keinen Weg zurück in den Anfangszustand
+- **Der Titel „Bilder aus Holm" führt in die Verwaltung**, weiterhin über die PIN und ohne
+  Unterstreichung. Die beiden Elemente haben damit die Rollen getauscht

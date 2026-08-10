@@ -1,10 +1,15 @@
 /**
  * Time range slider, built like the trim control of a video editor.
  *
- * A continuous bar for the chosen period, a handle at each end to widen or narrow it, and a grip
- * in the middle to move the whole period through time. The last one is the movement visitors
- * actually want -- walking a fixed span through the decades -- and it used to cost two drags with
- * a wrong span in between.
+ * A continuous bar for the chosen period, a handle at each end to widen or narrow it, and the bar
+ * itself to move the whole period through time. That last movement is the one visitors actually
+ * want -- walking a fixed span through the decades -- and it used to cost two drags with a wrong
+ * span in between.
+ *
+ * The bar carried a drawn grip in its middle for a while, for the case where the period is
+ * squeezed onto a single bar and has no surface left to grab. It does not need one any more: the
+ * period cannot be narrowed below a decade (``minSpan`` in timeAxis.ts), so there is always
+ * something to take hold of. A mark on screen for a state nobody can reach is a mark too many.
  *
  * Hand-built rather than a library, for three reasons, any one of which would suffice:
  *
@@ -26,7 +31,7 @@ import {
 
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
-import { axisBounds, barHeight, fraction, shiftRange } from "./timeAxis";
+import { axisBounds, barHeight, fraction, resizeRange, shiftRange } from "./timeAxis";
 
 type Grip = "start" | "end" | "range";
 
@@ -88,13 +93,11 @@ export function TimeSlider() {
         // soon as the shift hits a limit.
         grabbedAt.current += moved.from - timeRange.from;
         setTimeRange(moved);
-      } else if (grip === "start") {
-        setTimeRange({ from: Math.min(year, timeRange.to), to: timeRange.to });
       } else {
-        setTimeRange({ from: timeRange.from, to: Math.max(year, timeRange.from) });
+        setTimeRange(resizeRange(timeRange, grip, year, step));
       }
     },
-    [timeRange, bounds, positionToYear, setTimeRange],
+    [timeRange, bounds, step, positionToYear, setTimeRange],
   );
 
   function onGripDown(grip: Grip) {
@@ -141,18 +144,10 @@ export function TimeSlider() {
 
       if (grip === "range") {
         setTimeRange(shiftRange(timeRange, direction, bounds));
-      } else if (grip === "start") {
-        const next = timeRange.from + direction;
-        setTimeRange({
-          from: Math.max(bounds.min, Math.min(next, timeRange.to)),
-          to: timeRange.to,
-        });
       } else {
-        const next = timeRange.to + direction;
-        setTimeRange({
-          from: timeRange.from,
-          to: Math.min(bounds.max, Math.max(next, timeRange.from)),
-        });
+        // Same floor as dragging -- the arrow keys must not reach a period the finger cannot.
+        const end = grip === "start" ? timeRange.from : timeRange.to;
+        setTimeRange(resizeRange(timeRange, grip, end + direction, step));
       }
     };
   }
@@ -254,11 +249,7 @@ export function TimeSlider() {
           aria-valuenow={timeRange.from}
           aria-valuetext={`${timeRange.from} ${t.timeline.to} ${timeRange.to}`}
           onKeyDown={onGripKey("range")}
-        >
-          {/* Drawn in the middle and always there -- a period narrowed to one year leaves no
-              surface to grab, and then this is what is left. */}
-          <span className="timeline__gripper" aria-hidden="true" />
-        </div>
+        />
 
         {(["start", "end"] as const).map((grip) => (
           <div
