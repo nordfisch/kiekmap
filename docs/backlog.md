@@ -208,6 +208,51 @@ entsteht genau der Fehler, den die EXIF-Regel aus Stufe 3 vermeidet: ein falsch 
 nie zur Korrektur vorgelegt wird, weil es als datiert gilt. In diesem Punkt ist das keine
 Zusatzbedingung mehr, sondern schon die Bauform.
 
+**Zwei Verortungsfehler gehören ebenfalls hierher.** Beide sind am 9. August 2026 beim Planen von
+[Punkt 36](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) gefunden worden, beide sind
+maschinell zu beheben, und beide brauchen kein Ortswissen — nur den Ortsindex.
+
+**(a) Hausnummern, die es nicht mehr gibt.** 58 Fotos tragen ihre Hausnummer im `place_name`
+(„Schulstraße 2", „Hörnstraße 13"), liegen aber trotzdem nur auf der Straßenmitte. Der Grund ist
+nicht ein fehlender Eintrag, sondern Ortsgeschichte: **Die Häuser sind aufgeteilt oder neu
+nummeriert worden.** Im Ortsindex steht 2a statt 2, 13a bis 13d statt 13.
+
+| Befund | Fotos |
+|---|---|
+| dieselbe Zahl mit anderem Zusatz im Index („2" → „2a") | **55** |
+| Nachbarnummer im Abstand von höchstens zwei | 3 |
+| gar kein Anhalt in der Straße | **0** |
+
+Die Koordinate ist also **fast immer ableitbar** — über die Nachbarnummer. Und sie ist es nur
+maschinell: Ein Besucher am Kiosk weiß auch nicht, wo die frühere Schulstraße 2 stand. Zu bauen
+wäre eine Nachbarnummer-Regel in `services/places.py`, angewandt in `_locate`
+(`services/foldermeta.py`) für künftige Importe und über eine Vorlage-Liste für den Bestand.
+
+**(b) Straßenordner wurden als unverortet eingelesen.** Von den 72 Fotos ohne Ort tragen **64** als
+Titel exakt einen Straßennamen — Hauptstraße 21, Hetlinger Straße 7, Niederstraße 7, Am Felde 6,
+Lehmweg 6, dazu elf weitere Straßen. Sie stammen aus Ordnern, die eine Straße ohne Hausnummer
+nannten; `_locate` lässt solche Fotos **bewusst** unverortet. Übrig blieben 8, davon fünf ohne
+Titel.
+
+Das Ergebnis soll dasselbe sein wie bei „Reicht so — die Straße genügt": Straßenpunkt,
+`place_name` = Straßenname, `location_accuracy_m = 150`, **Quelle Kurator** — die Angabe kommt aus
+dem Archivordner, ist also Museumswissen. Ein Neuimport ist dafür nicht nötig: Die Fotos sind
+daran erkennbar, dass ihr **Titel im Straßenverzeichnis steht**.
+
+**Die Begründung der alten Regel ist dabei ausdrücklich zu widerrufen**, nicht stillschweigend zu
+übergehen. Sie lautete: Die Straßenmitte „sähe aus wie eine Antwort", und das Foto fiele aus „Wo
+ist das?" heraus. Das war richtig, solange es nur zwei Fragen gab. Mit der Nachschärf-Frage aus
+Punkt 36 fallen diese Fotos nicht heraus, sondern **in die genauere Frage hinein**. Der Widerruf
+gehört nach [decisions.md](decisions.md).
+
+**Reihenfolge beachten:** (b) und die Nachschärf-Frage bedingen einander. Ohne (b) hat die Frage
+zwei Fotos und erscheint nie; ohne die Frage verschiebt (b) 64 Fotos aus „Wo ist das?" in eine
+Frage, die es nicht gibt — dann sind sie ungenau verortet und niemand wird je danach gefragt. Nach
+beidem stehen 8 Fotos ohne Ort und 66 zum Nachschärfen.
+
+Nebenbei: Nach (b) ist der Titel dieser 64 Fotos identisch mit ihrem `place_name` — genau der Fall,
+den dieser Punkt für 796 Fotos ohnehin aufräumen will.
+
 **Vorgehen: vorlegen, nicht durchgreifen.** Jede Umstellung geht durch die Nacharbeits-Liste oder
 eine eigene Ansicht, in der jemand bestätigt. Ein Sprachmodell, das 929 Titel ohne Rückfrage
 umschreibt, macht aus einem sortierten Archiv ein unsortiertes — und die Herkunft der Angaben

@@ -147,6 +147,8 @@ def make_photo(session: Session):
         precision=None,
         title: str = "Testfoto",
         place_name: str | None = None,
+        accuracy: int | None = None,
+        location_source: str | None = None,
         status: str = PhotoStatus.PUBLISHED,
         sha: str | None = None,
     ) -> Photo:
@@ -168,8 +170,9 @@ def make_photo(session: Session):
             date_from=start,
             date_to=end,
             date_precision=resolved,
+            location_accuracy_m=accuracy,
             date_source=Source.CURATOR if start else None,
-            location_source=Source.CURATOR if lat is not None else None,
+            location_source=(location_source or (Source.CURATOR if lat is not None else None)),
             status=status,
         )
         session.add(photo)

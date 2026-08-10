@@ -24,6 +24,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -145,13 +146,29 @@ class Photo(Base):
         Index("ix_photos_status", "status"),
     )
 
-    @property
+    # Hybrid, not plain properties: read on an instance they answer for that photo, read on the
+    # class they are a SQL condition. That is what lets the query for the next open task and the
+    # flag in the API payload come from **one** sentence.
+    #
+    # They used to be plain properties, and ``api/contribute.py`` carried a second, parallel
+    # formulation for the query. Two definitions of "what is missing" that look right on their own
+    # are the kind of pair that drifts without anyone noticing -- see the test that holds them
+    # together.
+    @hybrid_property
     def needs_location(self) -> bool:
         return self.lat is None
 
-    @property
+    @needs_location.expression  # type: ignore[no-redef]
+    def needs_location(cls):
+        return cls.lat.is_(None)
+
+    @hybrid_property
     def needs_date(self) -> bool:
         return self.date_from is None
+
+    @needs_date.expression  # type: ignore[no-redef]
+    def needs_date(cls):
+        return cls.date_from.is_(None)
 
 
 class Tag(Base):
@@ -188,6 +205,12 @@ class Change(Base):
     )
     field: Mapped[str] = mapped_column(String(40), nullable=False)
     old_value: Mapped[str | None] = mapped_column(Text)
+    #: Where the replaced value came from, for the routes that replace rather than fill.
+    #:
+    #: Null for everything else, and that is not an omission: a contribution that only fills an
+    #: empty field has no previous source, and reverting it means clearing. Only sharpening a
+    #: location overwrites -- and a curator's statement has to come back as the curator's.
+    old_source: Mapped[str | None] = mapped_column(String(10))
     new_value: Mapped[str | None] = mapped_column(Text)
     source: Mapped[str] = mapped_column(String(10), nullable=False)
     #: Distinguishes visitors at the same device without identifying them.

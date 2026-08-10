@@ -3,47 +3,15 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
 from app.db import get_session
 from app.models import Place
+from app.schemas import PlaceOut
 from app.services import places as place_service
 
 router = APIRouter(prefix="/places", tags=["orte"])
-
-
-class PlaceOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    name: str
-    lat: float
-    lon: float
-    kind: str
-    #: Only for kind="adresse": the number on its own, for a button that says "12" rather than
-    #: "Mühlenweg 12".
-    housenumber: str | None = None
-    #: How precise this point is, in metres. Travels along with a visitor's contribution.
-    accuracy_m: int | None = None
-
-
-def _out(place: Place) -> PlaceOut:
-    accuracy = (
-        place_service.ACCURACY_ADDRESS_M
-        if place.kind == "adresse"
-        else place_service.ACCURACY_STREET_M
-    )
-    return PlaceOut(
-        id=place.id,
-        name=place.name,
-        lat=place.lat,
-        lon=place.lon,
-        kind=place.kind,
-        housenumber=place.housenumber,
-        accuracy_m=accuracy,
-    )
 
 
 @router.get("", response_model=list[PlaceOut], summary="Search the gazetteer")
@@ -56,7 +24,7 @@ def search_places(
     Below two characters nothing is returned -- a single letter would match half of Holm.
     Addresses only take part once the input holds a digit; see the service for why.
     """
-    return [_out(place) for place in place_service.search(session, q)]
+    return [PlaceOut.from_place(place) for place in place_service.search(session, q)]
 
 
 @router.get("/streets", response_model=list[PlaceOut], summary="Streets offered as buttons")
@@ -70,7 +38,7 @@ def streets(
     before the ``/{place_id}`` route below, otherwise "streets" would be read as an id.
     """
     return [
-        _out(place)
+        PlaceOut.from_place(place)
         for place in place_service.nearby_streets(
             session, settings.region_center(), settings.street_choice()
         )
@@ -97,4 +65,4 @@ def housenumbers(
     street = session.get(Place, place_id)
     if street is None:
         raise HTTPException(404, f"Kein Ort mit der Nummer {place_id}")
-    return [_out(place) for place in place_service.housenumbers(session, street)]
+    return [PlaceOut.from_place(place) for place in place_service.housenumbers(session, street)]

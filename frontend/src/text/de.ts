@@ -389,6 +389,8 @@ export const t = {
       showReverted: "Zurückgenommene mit anzeigen",
       fieldLocation: "Ort",
       fieldDate: "Jahr",
+      /** Sharpened: the street centre became a house. Reverting sets it back to the street. */
+      fieldHouseNumber: "Hausnummer",
       revert: "Zurücknehmen",
       reverted: "Zurückgenommen",
       locked: "Von Hand bearbeitet",

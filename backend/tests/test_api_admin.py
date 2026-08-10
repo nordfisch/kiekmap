@@ -10,10 +10,21 @@ Zwei Zusagen tragen diesen Bereich, und beide brechen still, wenn sie brechen:
 
 from datetime import UTC, datetime
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from app.models import Change, DatePrecision, ImportLog, ImportResult, Photo, PhotoStatus, Source
+from app.models import (
+    Change,
+    DatePrecision,
+    ImportLog,
+    ImportResult,
+    Photo,
+    PhotoStatus,
+    Place,
+    Source,
+)
+from app.services.places import normalize
 
 HOLM = {"lat": 53.6205, "lon": 9.676}
 
@@ -803,3 +814,147 @@ class TestSucheUeberDenHash:
         session.commit()
 
         assert client.get(f"/api/photos/{foto.id}").json()["sha256"].startswith("abc12345")
+
+
+@pytest.fixture
+def am_kamp(session):
+    """Eine Strasse mit drei Hausnummern -- der Ortsindex, den das Nachschaerfen braucht."""
+
+    def anlegen(name, kind, street=None, housenumber=None, lat=53.62, lon=9.676):
+        session.add(
+            Place(
+                name=name,
+                name_normalized=normalize(name),
+                lat=lat,
+                lon=lon,
+                kind=kind,
+                street=street,
+                housenumber=housenumber,
+            )
+        )
+
+    anlegen("Am Kamp", "strasse", lat=53.6200, lon=9.6760)
+    for nummer, lat in (("1", 53.6201), ("2", 53.6202), ("3", 53.6203)):
+        anlegen(f"Am Kamp {nummer}", "adresse", street="Am Kamp", housenumber=nummer, lat=lat)
+    session.commit()
+    return session
+
+
+class TestNachschaerfungZurueckhehmen:
+    """Zuruecknehmen heisst hier **zuruecksetzen**, nicht loeschen.
+
+    Bei „Ort" und „Jahr" war der vorherige Wert immer nichts -- Besucher fuellen dort nur Leeres,
+    also *ist* Loeschen das Wiederherstellen. Die Hausnummer ersetzt. Wuerde sie beim Zuruecknehmen
+    geloescht, verloere das Foto seinen Ort ganz: eine Strafe fuer einen Beitrag, der lediglich zu
+    genau war.
+    """
+
+    def _schaerfen(self, client: TestClient, session, foto, nummer="2") -> int:
+        adresse = session.scalar(
+            select(Place).where(Place.kind == "adresse", Place.housenumber == nummer)
+        )
+        client.post(f"/api/contribute/{foto.id}/housenumber", json={"place_id": adresse.id})
+        return client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+    def _foto(self, make_photo, **felder):
+        return make_photo(place_name="Am Kamp", accuracy=150, lat=53.62, lon=9.676, **felder)
+
+    def test_zuruecknehmen_setzt_auf_die_strassenmitte_zurueck(
+        self, admin_client: TestClient, am_kamp, make_photo
+    ):
+        foto = self._foto(make_photo)
+        am_kamp.commit()
+        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+
+        daten = admin_client.post(f"/api/admin/changes/{beitrag}/revert").json()
+
+        assert daten["lat"] is not None, "das Foto behaelt seinen Ort"
+        assert daten["place_name"] == "Am Kamp"
+        assert daten["location_accuracy_m"] == 150
+
+    def test_zuruecknehmen_stellt_die_kuratorenquelle_wieder_her(
+        self, admin_client: TestClient, am_kamp, make_photo
+    ):
+        """Sonst wuerde aus Kuratorenwissen stillschweigend ein Besucherbeitrag.
+
+        Und der naechste Besucher duerfte es erneut nachschaerfen, weil die Quelle es erlaubte.
+        """
+        foto = self._foto(make_photo, location_source=Source.CURATOR)
+        am_kamp.commit()
+        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+
+        admin_client.post(f"/api/admin/changes/{beitrag}/revert")
+        am_kamp.refresh(foto)
+
+        assert foto.location_source == Source.CURATOR
+
+    def test_foto_wird_danach_wieder_nach_der_hausnummer_gefragt(
+        self, admin_client: TestClient, am_kamp, make_photo
+    ):
+        foto = self._foto(make_photo, location_source=Source.VISITOR)
+        am_kamp.commit()
+        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+
+        admin_client.post(f"/api/admin/changes/{beitrag}/revert")
+
+        aufgabe = admin_client.get("/api/contribute/next", params={"need": "housenumber"}).json()
+        assert aufgabe["photo"]["id"] == foto.id
+
+    def test_aeltere_ortsangabe_erst_nach_der_neueren_zuruecknehmen(
+        self, admin_client: TestClient, am_kamp, make_photo
+    ):
+        """Der Zustand, den man sonst leise erzeugen kann.
+
+        Erst verortet ein Besucher das Foto, dann schaerft einer nach. Nimmt der Kurator die
+        *erste* Angabe zurueck, wird der Ort geleert -- und die zweite Ruecknahme stellt danach
+        eine Strasse wieder her, die niemand beigetragen hat. Von oben nach unten ist die einzige
+        Reihenfolge, die aufgeht.
+        """
+        foto = make_photo(lat=None, lon=None, place_name=None, accuracy=None, sha="z" * 64)
+        am_kamp.commit()
+        admin_client.post(
+            f"/api/contribute/{foto.id}/location",
+            json={"lat": 53.62, "lon": 9.676, "place_name": "Am Kamp", "accuracy_m": 150},
+        )
+        aeltere = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+        self._schaerfen(admin_client, am_kamp, foto)
+
+        antwort = admin_client.post(f"/api/admin/changes/{aeltere}/revert")
+
+        assert antwort.status_code == 409
+        eintraege = admin_client.get("/api/admin/changes").json()["changes"]
+        aelterer = next(e for e in eintraege if e["id"] == aeltere)
+        assert aelterer["revertable"] is False, "kein Knopf, der nur 409 liefert"
+
+    def test_ohne_die_strasse_im_ortsverzeichnis_wird_nicht_zurueckgenommen(
+        self, admin_client: TestClient, am_kamp, make_photo
+    ):
+        """Lieber verweigern als dem Foto den Ort ganz nehmen.
+
+        Ein neu gebauter Ortsindex kann eine Strasse umbenannt haben; ``place_name`` ist eine
+        Zeichenkette und kein Fremdschluessel.
+        """
+        foto = self._foto(make_photo)
+        am_kamp.commit()
+        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+        strasse = am_kamp.scalar(select(Place).where(Place.name == "Am Kamp"))
+        am_kamp.delete(strasse)
+        am_kamp.commit()
+
+        antwort = admin_client.post(f"/api/admin/changes/{beitrag}/revert")
+
+        assert antwort.status_code == 409
+        am_kamp.refresh(foto)
+        assert foto.place_name == "Am Kamp 2", "die Angabe bleibt stehen"
+
+    def test_von_hand_bearbeitete_hausnummer_bleibt_stehen(
+        self, admin_client: TestClient, am_kamp, make_photo
+    ):
+        foto = self._foto(make_photo)
+        am_kamp.commit()
+        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+        admin_client.patch(
+            f"/api/admin/photos/{foto.id}", json={"location": {"lat": 53.63, "lon": 9.68}}
+        )
+
+        assert admin_client.post(f"/api/admin/changes/{beitrag}/revert").status_code == 409

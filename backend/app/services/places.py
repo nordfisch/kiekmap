@@ -184,12 +184,28 @@ def sort_key(housenumber: str) -> tuple[int, str]:
 
 
 def housenumbers(session: Session, street: Place) -> list[Place]:
-    """The house numbers of one street, in walking order.
+    """The house numbers of one street, in walking order."""
+    return housenumbers_of(session, street.name)
 
-    Empty for a street OpenStreetMap has no addresses for -- which is common enough that the
-    panel has to cope with it rather than showing an empty step.
+
+def housenumbers_of(session: Session, street_name: str) -> list[Place]:
+    """The same by name, for a caller that holds a photo rather than a gazetteer row.
+
+    Empty for a street OpenStreetMap has no addresses for -- 141 of Holm's 486. Common enough that
+    every caller has to cope with it rather than showing an empty step.
     """
     found = session.scalars(
-        select(Place).where(Place.kind == "adresse", Place.street == street.name)
+        select(Place).where(Place.kind == "adresse", Place.street == street_name)
     ).all()
     return sorted(found, key=lambda place: sort_key(place.housenumber or ""))
+
+
+def street_named(session: Session, name: str) -> Place | None:
+    """The street under exactly this name -- no normalising, no fuzziness.
+
+    ``normalize()`` exists for what somebody types; this looks up a value that was **copied out of
+    the gazetteer** into ``photo.place_name``. A second, looser yardstick here would let a photo
+    match a street it was never linked to, and it is the same string that a reverted contribution
+    has to find its way back through. One spelling, one row.
+    """
+    return session.scalar(select(Place).where(Place.kind == "strasse", Place.name == name))

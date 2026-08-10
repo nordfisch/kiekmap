@@ -240,3 +240,26 @@ class TestLaden:
         assert anzahl == 2
         adresse = place_service.search(session, "muehlenweg 12")[0]
         assert (adresse.street, adresse.housenumber) == ("Muehlenweg", "12")
+
+
+class TestStrasseUnterIhremNamen:
+    """``street_named`` schlaegt exakt nach, ohne zu normalisieren.
+
+    ``normalize()`` ist fuer das gedacht, was jemand tippt. Hier wird ein Wert nachgeschlagen, der
+    aus dem Ortsindex in ``photo.place_name`` **kopiert** wurde -- und derselbe String ist der Weg,
+    auf dem eine zurueckgenommene Nachschaerfung ihre Strassenmitte wiederfindet.
+    """
+
+    def test_findet_die_strasse_unter_ihrem_gespeicherten_namen(self, ortsindex):
+        gefunden = place_service.street_named(ortsindex, "Muehlenweg")
+
+        assert gefunden is not None
+        assert gefunden.kind == "strasse"
+
+    def test_findet_keine_adresse(self, ortsindex):
+        # Sonst liefe eine Ruecknahme auf einer Hausnummer statt auf der Strassenmitte auf.
+        assert place_service.street_named(ortsindex, "Muehlenweg 12") is None
+
+    def test_normalisiert_nicht(self, ortsindex):
+        """Eine andere Schreibweise ist eine andere Strasse -- lieber nichts als das Falsche."""
+        assert place_service.street_named(ortsindex, "muehlenweg") is None

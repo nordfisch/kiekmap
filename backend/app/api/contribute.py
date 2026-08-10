@@ -13,7 +13,7 @@ Three things catch the abuse case without slowing down the normal one:
 """
 
 import logging
-from typing import Annotated, Literal
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
@@ -21,18 +21,22 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
 from app.db import get_session
-from app.models import Change, DatePrecision, Photo, PhotoStatus, Source
-from app.schemas import DateContribution, LocationContribution, PhotoDetail, TaskResponse
+from app.models import Change, DatePrecision, Photo, PhotoStatus, Place, Source
+from app.schemas import (
+    DateContribution,
+    HouseNumberContribution,
+    LocationContribution,
+    PhotoDetail,
+    PlaceOut,
+    TaskResponse,
+)
+from app.services import places
 from app.services.dates import date_range, format_label
+from app.services.needs import NEEDS, Need, open_filter
+from app.services.places import ACCURACY_ADDRESS_M
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/contribute", tags=["hilf mit"])
-
-Need = Literal["location", "date"]
-
-
-def _missing_filter(need: Need):
-    return Photo.lat.is_(None) if need == "location" else Photo.date_from.is_(None)
 
 
 @router.get("/next", response_model=TaskResponse, summary="A photo that is missing something")
@@ -48,19 +52,23 @@ def next_task(
     """
     skipped = {int(part) for part in exclude.split(",") if part.strip().isdigit()}
 
-    filters = [Photo.status == PhotoStatus.PUBLISHED, _missing_filter(need)]
+    filters = [Photo.status == PhotoStatus.PUBLISHED, open_filter(need)]
     open_count = session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
 
-    # Count the other question too: from it the screen decides whether "Weiss ich nicht" still
-    # leads anywhere at all. With nothing else open the same photo would come back.
-    other: Need = "date" if need == "location" else "location"
-    open_other = (
+    # What the *other* questions still hold: from it the screen decides whether "Weiss ich nicht"
+    # still leads anywhere at all. With nothing else open the same photo would come back.
+    #
+    # A sum over all of them rather than the count of one -- with three questions a single count
+    # would answer a narrower question than the panel is asking.
+    open_other = sum(
         session.scalar(
             select(func.count())
             .select_from(Photo)
-            .where(Photo.status == PhotoStatus.PUBLISHED, _missing_filter(other))
+            .where(Photo.status == PhotoStatus.PUBLISHED, open_filter(other))
         )
         or 0
+        for other in NEEDS
+        if other != need
     )
 
     query = select(Photo).where(*filters)
@@ -80,6 +88,62 @@ def next_task(
         open_other=open_other,
         photo=PhotoDetail.from_photo(photo) if photo else None,
     )
+
+
+def _refinable(session: Session, photo: Photo) -> bool:
+    """Is this exactly the photo the sharpening question is for?
+
+    Asked of one photo rather than of the collection, so the same sentence decides who gets the
+    question in the panel and who gets the buttons in the detail view. One rule, two readers.
+    """
+    return (
+        session.scalar(
+            select(func.count())
+            .select_from(Photo)
+            .where(Photo.id == photo.id, open_filter("housenumber"))
+        )
+        or 0
+    ) > 0
+
+
+@router.get(
+    "/{photo_id}/housenumbers",
+    response_model=list[PlaceOut],
+    summary="House numbers a visitor may sharpen this photo to",
+)
+def photo_housenumbers(
+    photo_id: int, session: Annotated[Session, Depends(get_session)]
+) -> list[PlaceOut]:
+    """The numbers of this photo's street -- **empty unless the photo may be sharpened at all**.
+
+    That emptiness is the gate, and it is deliberately the only one: the detail view offers the
+    picker when this list is not empty and needs no second rule of its own. A rule that lives in
+    two places is a rule that will disagree with itself.
+    """
+    photo = session.get(Photo, photo_id)
+    if photo is None:
+        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+    if not _refinable(session, photo):
+        return []
+    return [
+        PlaceOut.from_place(place)
+        for place in places.housenumbers_of(session, photo.place_name or "")
+    ]
+
+
+def _require_in_region(settings: Settings, lat: float, lon: float) -> None:
+    """The pin can only be dropped on the map, and the map only shows the region -- check anyway.
+
+    The API is reachable, and a photo in the Pacific would have vanished from the view without
+    anyone noticing why. Pulled out rather than copied: the sharpening route takes its coordinate
+    from the gazetteer, so it cannot really fail here -- but one rule with two callers stays one
+    rule.
+    """
+    if (bbox := settings.region_bbox()) is None:
+        return
+    min_lon, min_lat, max_lon, max_lat = bbox
+    if not (min_lat <= lat <= max_lat and min_lon <= lon <= max_lon):
+        raise HTTPException(422, "Dieser Ort liegt ausserhalb der Karte.")
 
 
 def _require_empty(photo: Photo, field: str) -> None:
@@ -111,12 +175,22 @@ def _log_change(
     old: str | None,
     new: str,
     session_key: str | None,
+    old_source: str | None = None,
 ) -> None:
+    """Record the contribution for moderation.
+
+    ``old`` is None for the two routes that only fill what is empty -- there is nothing to restore,
+    and taking such a contribution back means clearing the field. The sharpening route is the one
+    that overwrites, so it passes both the previous value and where it came from; without them a
+    revert would drop the photo's location entirely and turn a curator's statement into a
+    visitor's.
+    """
     session.add(
         Change(
             photo_id=photo.id,
             field=field,
             old_value=old,
+            old_source=old_source,
             new_value=new,
             source=Source.VISITOR,
             session_id=session_key,
@@ -132,14 +206,7 @@ def add_location(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> PhotoDetail:
     photo = _get_open_photo(session, photo_id, "location")
-
-    # The pin can only be dropped on the map, and the map only shows the region -- check anyway:
-    # the API is reachable, and a photo in the Pacific would have vanished from the view without
-    # anyone noticing why.
-    if (bbox := settings.region_bbox()) is not None:
-        min_lon, min_lat, max_lon, max_lat = bbox
-        if not (min_lat <= contribution.lat <= max_lat and min_lon <= contribution.lon <= max_lon):
-            raise HTTPException(422, "Dieser Ort liegt ausserhalb der Karte.")
+    _require_in_region(settings, contribution.lat, contribution.lon)
 
     photo.lat = contribution.lat
     photo.lon = contribution.lon
@@ -162,6 +229,71 @@ def add_location(
     session.refresh(photo)
 
     log.info("Visitor contribution: photo %s located", photo.id)
+    return PhotoDetail.from_photo(photo)
+
+
+@router.post(
+    "/{photo_id}/housenumber",
+    response_model=PhotoDetail,
+    summary="Sharpen a street-precise photo to one house",
+)
+def add_housenumber(
+    photo_id: int,
+    contribution: HouseNumberContribution,
+    session: Annotated[Session, Depends(get_session)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> PhotoDetail:
+    """Move a photo from the middle of its street to one of its houses.
+
+    **The exception to "visitors only fill what is empty"** (decisions.md, point 5) -- and it goes
+    through its own door rather than loosening that check. ``_require_empty`` still reads exactly
+    as it did; what stands beside it is a narrower rule: only street-precise, only to an address
+    of that same street, and never the other way round.
+
+    Curator statements may be sharpened too. That is a real widening, and it is why the change log
+    carries the previous source: taking the contribution back has to give a curator's statement
+    back to the curator.
+    """
+    photo = session.get(Photo, photo_id)
+    if photo is None:
+        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+    if not _refinable(session, photo):
+        raise HTTPException(
+            409,
+            "Dieses Foto hat inzwischen schon eine genauere Angabe bekommen. Vielen Dank trotzdem!",
+        )
+
+    address = session.get(Place, contribution.place_id)
+    if address is None or address.kind != "adresse":
+        raise HTTPException(404, "Diese Hausnummer steht nicht im Ortsverzeichnis.")
+    if address.street != photo.place_name:
+        raise HTTPException(422, "Diese Hausnummer gehoert nicht zu dieser Strasse.")
+
+    _require_in_region(settings, address.lat, address.lon)
+
+    street = photo.place_name
+    previous_source = photo.location_source
+
+    # Everything from the gazetteer row, nothing from the request.
+    photo.lat = address.lat
+    photo.lon = address.lon
+    photo.place_name = address.name
+    photo.location_accuracy_m = ACCURACY_ADDRESS_M
+    photo.location_source = Source.VISITOR
+
+    _log_change(
+        session,
+        photo,
+        "housenumber",
+        street,
+        address.name,
+        contribution.session_id,
+        old_source=previous_source,
+    )
+    session.commit()
+    session.refresh(photo)
+
+    log.info("Visitor contribution: photo %s sharpened to %s", photo.id, address.name)
     return PhotoDetail.from_photo(photo)
 
 

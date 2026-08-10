@@ -48,10 +48,11 @@ from app.schemas import (
     UploadItem,
     UploadResult,
 )
-from app.services import auth, dates
+from app.services import auth, dates, places
 from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
 from app.services.importer import apply_batch_defaults, import_upload, upload_name
+from app.services.places import ACCURACY_STREET_M
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -365,19 +366,55 @@ def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) 
 # join in. This is the counterweight: the curator sees what happened and can take it back.
 
 
+#: The fields that all write the same place on a photo. Two names, one target.
+LOCATION_FIELDS = frozenset({"location", "housenumber"})
+
+
 def _still_from_visitor(photo: Photo, field: str) -> bool:
     """Does the field still carry what the visitor put there?
 
     If a curator has edited it since, the source says ``curator`` and reverting would throw that
     work away. The contribution then stays in the log as history, but without a button.
     """
-    match field:
-        case "location":
-            return photo.location_source == Source.VISITOR
-        case "date":
-            return photo.date_source == Source.VISITOR
-        case _:
-            return False
+    if field in LOCATION_FIELDS:
+        return photo.location_source == Source.VISITOR
+    if field == "date":
+        return photo.date_source == Source.VISITOR
+    return False
+
+
+def _is_newest(session: Session, change: Change) -> bool:
+    """Is this the last word on that field, or has something been written over it since?
+
+    Only matters since a photo's location can be written twice: a visitor locates it, another
+    sharpens it to a house number. Taken back in the wrong order the older revert clears the
+    location, and the newer one then **restores** the street the first contribution had put
+    there -- a location nobody contributed, quietly resurrected.
+
+    Reverting from the top is the only order that composes.
+
+    **Newer means a higher id, not a later timestamp**, and that is not laziness. ``created_at``
+    carries a SQLite server default, which writes whole seconds ("14:24:37"); a bound Python
+    datetime renders with microseconds ("14:24:37.000000"). SQLite compares those as text and the
+    shorter string loses -- so ``created_at >= created_at`` matched **nothing at all**, not even
+    its own row. The guard was silently doing nothing. A log is only ever appended to, so the id
+    says "newer" with no format to get wrong.
+    """
+    fields = LOCATION_FIELDS if change.field in LOCATION_FIELDS else {change.field}
+    newer = (
+        session.scalar(
+            select(func.count())
+            .select_from(Change)
+            .where(
+                Change.photo_id == change.photo_id,
+                Change.field.in_(fields),
+                Change.reverted_at.is_(None),
+                Change.id > change.id,
+            )
+        )
+        or 0
+    )
+    return newer == 0
 
 
 @router.get("/changes", response_model=ChangeList, summary="Visitor contributions")
@@ -417,7 +454,11 @@ def list_changes(
             source=change.source,
             created_at=change.created_at,
             reverted_at=change.reverted_at,
-            revertable=change.reverted_at is None and _still_from_visitor(photo, change.field),
+            revertable=(
+                change.reverted_at is None
+                and _still_from_visitor(photo, change.field)
+                and _is_newest(session, change)
+            ),
         )
         for change, photo in session.execute(query).all()
     ]
@@ -430,11 +471,16 @@ def list_changes(
     summary="Take back a visitor contribution",
 )
 def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail:
-    """Clear the field the visitor filled.
+    """Undo what the visitor wrote -- which usually means clearing, but not always.
 
-    Clearing, not restoring: a visitor may only ever fill what was empty (see api/contribute.py),
-    so the previous value is always "nothing". The photo goes back into the "Hilf mit" panel and
-    can be answered again -- which is usually the point.
+    For ``location`` and ``date`` the previous value really is "nothing": those routes may only
+    fill what was empty (see api/contribute.py), so clearing is restoring. This docstring used to
+    say exactly that, and it stopped being the whole truth when sharpening arrived.
+
+    ``housenumber`` **replaces**. Its log entry therefore carries the street it displaced and where
+    that came from, and taking it back puts the photo back on the middle of that street. Clearing
+    it instead would take the photo's location away entirely -- a punishment for a contribution
+    that was merely too precise.
     """
     change = session.get(Change, change_id)
     if change is None:
@@ -451,7 +497,28 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail
             "Die Angabe ist inzwischen von Hand bearbeitet worden und bleibt daher stehen.",
         )
 
-    if change.field == "location":
+    if not _is_newest(session, change):
+        raise HTTPException(
+            409,
+            "Zu diesem Foto gibt es eine neuere Angabe. Bitte diese zuerst zuruecknehmen.",
+        )
+
+    if change.field == "housenumber":
+        street = places.street_named(session, change.old_value or "")
+        if street is None:
+            raise HTTPException(
+                409,
+                "Die Strasse aus dieser Angabe steht nicht mehr im Ortsverzeichnis. "
+                "Der Ort bleibt daher stehen.",
+            )
+        photo.lat = street.lat
+        photo.lon = street.lon
+        photo.place_name = street.name
+        photo.location_accuracy_m = ACCURACY_STREET_M
+        # Back to whoever it belonged to. Without this a curator's statement would come back as a
+        # visitor's -- and the next visitor could sharpen it again.
+        photo.location_source = change.old_source
+    elif change.field == "location":
         photo.lat = photo.lon = None
         photo.place_name = None
         photo.location_accuracy_m = None

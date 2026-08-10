@@ -5,8 +5,9 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models import DatePrecision, ImportLog, Photo, PhotoStatus
+from app.models import DatePrecision, ImportLog, Photo, PhotoStatus, Place
 from app.services.dates import format_label, format_short
+from app.services.places import ACCURACY_ADDRESS_M, ACCURACY_STREET_M
 
 
 class PhotoMarker(BaseModel):
@@ -191,6 +192,38 @@ class Histogram(BaseModel):
     collection_to: int | None
 
 
+class PlaceOut(BaseModel):
+    """One row of the gazetteer, as the panel needs it."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    lat: float
+    lon: float
+    kind: str
+    #: Only for kind="adresse": the number on its own, for a button that says "12" rather than
+    #: "Mühlenweg 12".
+    housenumber: str | None = None
+    #: How precise this point is, in metres. Travels along with a visitor's contribution.
+    accuracy_m: int | None = None
+
+    @classmethod
+    def from_place(cls, place: Place) -> "PlaceOut":
+        # Derived from the kind rather than stored: a row either names a house or a street, and
+        # the distinction is what the kind already says.
+        accuracy = ACCURACY_ADDRESS_M if place.kind == "adresse" else ACCURACY_STREET_M
+        return cls(
+            id=place.id,
+            name=place.name,
+            lat=place.lat,
+            lon=place.lon,
+            kind=place.kind,
+            housenumber=place.housenumber,
+            accuracy_m=accuracy,
+        )
+
+
 class DateInput(BaseModel):
     """What a visitor or curator may state as a date."""
 
@@ -211,6 +244,21 @@ class LocationContribution(BaseModel):
     place_name: str | None = Field(default=None, max_length=300)
     #: Mark a rough statement ("somewhere by the village pond").
     accuracy_m: int | None = Field(default=None, ge=0, le=100_000)
+    #: Distinguishes visitors at the same device without identifying them.
+    session_id: str | None = Field(default=None, max_length=64)
+
+
+class HouseNumberContribution(BaseModel):
+    """A visitor sharpens a street-precise photo to one house.
+
+    **No coordinate, no accuracy -- deliberately.** ``LocationContribution`` takes both from the
+    client, and that is harmless there only because the field it writes to has to be empty. The
+    moment accuracy decided what may be overwritten, it would become a key the client holds: a
+    call claiming one metre could replace anything. So the visitor names a row of the gazetteer
+    and the server reads the coordinate off it.
+    """
+
+    place_id: int
     #: Distinguishes visitors at the same device without identifying them.
     session_id: str | None = Field(default=None, max_length=64)
 

@@ -21,6 +21,7 @@ import { useLoaded } from "./useLoaded";
 const FIELD_NAMES: Record<string, string> = {
   location: t.admin.changes.fieldLocation,
   date: t.admin.changes.fieldDate,
+  housenumber: t.admin.changes.fieldHouseNumber,
 };
 
 function when(iso: string): string {
