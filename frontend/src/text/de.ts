@@ -9,6 +9,11 @@
  * server. Making the kiosk bilingual would mean moving that formatting to the client.
  */
 
+// The only import here, and type-only: it is what makes the compiler insist that every question
+// of the contribution panel has its heading, its thank-you and its counter. A repeated union
+// would let a fourth question be added with two of the three quietly missing.
+import type { Need } from "../api/client";
+
 /**
  * The caption under a status tile of the overview.
  *
@@ -99,25 +104,45 @@ export const t = {
   help: {
     /** With a colon: the title leads into the question below it rather than standing alone. */
     title: "Hilf mit:",
-    askLocation: "Wo ist das?",
-    askDate: "Wann war das?",
+    /** One heading per question, and each is the question itself -- see `NEEDS` in `client.ts`. */
+    ask: {
+      location: "Wo ist das?",
+      date: "Wann war das?",
+      /** Not "Wo genau?": the photo has a place, and the question is which house it belongs to. */
+      housenumber: "Welche Hausnummer?",
+    } satisfies Record<Need, string>,
     photoAlt: "Foto, dem eine Angabe fehlt",
     enlarge: "Foto groß anzeigen",
     allComplete: "Zurzeit ist alles vollständig. Vielen Dank an alle, die geholfen haben!",
     next: "Weiß ich nicht — nächstes Foto",
-    stillOpen: (count: number, need: "location" | "date") =>
-      `Noch ${count} Fotos ohne ${need === "location" ? "Ort" : "Jahr"}`,
     /**
-     * Four thank-yous, because two of them are promises the view has to keep.
+     * How much is still open.
+     *
+     * The third one names no gap: those photos *have* a place, it is only the street rather than
+     * the house. "Ohne Hausnummer" would report them as incomplete, which they are not.
+     */
+    stillOpen: (count: number, need: Need) =>
+      need === "housenumber"
+        ? `Noch ${count} Fotos, bei denen nur die Straße bekannt ist`
+        : `Noch ${count} Fotos ohne ${need === "location" ? "Ort" : "Jahr"}`,
+    /**
+     * The thank-you notes, and half of them are promises the view has to keep.
      *
      * "Das Foto ist jetzt auf der Karte" is only true where the map actually travels to it -- and
      * it does not for a photo without a place. Where something is still missing, the thank-you
-     * therefore asks the other question instead of claiming anything.
+     * therefore asks the question that really follows instead of claiming anything.
      */
-    thanksLocation: "Danke! Das Foto ist jetzt auf der Karte.",
-    thanksDate: "Danke! Das Foto ist jetzt auf der Zeitleiste.",
-    thanksLocationAskDate: "Danke! Und wissen Sie auch, wann das war?",
-    thanksDateAskLocation: "Danke! Und wissen Sie auch, wo das war?",
+    thanks: {
+      location: "Danke! Das Foto ist jetzt auf der Karte.",
+      date: "Danke! Das Foto ist jetzt auf der Zeitleiste.",
+      /** Kept, and visibly: the marker moves from the middle of the street to the house. */
+      housenumber: "Danke! Das Foto liegt jetzt am richtigen Haus.",
+    } satisfies Record<Need, string>,
+    thanksAsk: {
+      location: "Danke! Und wissen Sie auch, wo das war?",
+      date: "Danke! Und wissen Sie auch, wann das war?",
+      housenumber: "Danke! Und wissen Sie auch, welche Hausnummer das ist?",
+    } satisfies Record<Need, string>,
   },
 
   location: {

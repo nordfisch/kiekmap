@@ -538,6 +538,49 @@ button {
   cursor: grab;
 }
 
+/* The regrouping when the zoom level tips over.
+ *
+ * Only the arrival is animated, and only on that one frame -- see `clusterStep.ts`. Without it all
+ * markers jump at once, which reads as a glitch rather than as a change of scale. Fading the old
+ * ones out instead would mean keeping removed elements alive on a timer, which is the kind of
+ * state `draw()` deliberately has none of. */
+@keyframes marker-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+}
+
+.marker--enter {
+  animation: marker-enter 180ms ease-out;
+}
+
+/* Anyone who has asked for less motion gets the jump -- it was the state of things until today,
+ * and it is the honest fallback. */
+@media (prefers-reduced-motion: reduce) {
+  .marker--enter {
+    animation: none;
+  }
+}
+
+/* The house numbers of one street, shown only while they are being asked about.
+ *
+ * Small and quiet on purpose: they help someone find a house, they do not compete with the
+ * photographs. `pointer-events: none` is the rule, not the decoration -- underneath them lie the
+ * photo markers, and a tap belongs to those. */
+.housenumber-label {
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.5rem;
+  background: rgb(255 255 255 / 85%);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+  pointer-events: none;
+}
+
 /* --- markers on the map -------------------------------------------------- */
 
 /* A photo at its place, like a pinned print. The lower edge sits on the coordinate. */

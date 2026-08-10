@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../api/client", () => ({
+// `importOriginal` statt einer vollständigen Attrappe, und zwar wegen genau einer Zeile: `NEEDS`
+// ist die Rangfolge der drei Fragen. Als abgeschriebene Liste im Test wäre sie eine zweite
+// Wahrheit — die Reihenfolge in `client.ts` ließe sich vertauschen, ohne dass ein Test es merkt.
+// Nachgeprüft: mit einer Kopie fiel bei vertauschter Reihenfolge keiner.
+vi.mock("../api/client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../api/client")>()),
   fetchTask: vi.fn(),
   postLocation: vi.fn(),
   postDate: vi.fn(),
@@ -41,10 +46,16 @@ function aufgabe(need: Need, fotoId: number | null, offen = 3, andere = 3): Task
   };
 }
 
-/** Antwortet je nach gefragter Art -- so wie der Bestand im Museum es tut. */
-function bestand(nachOrt: Task, nachJahr: Task) {
+/**
+ * Antwortet je nach gefragter Art -- so wie der Bestand im Museum es tut.
+ *
+ * Die Nachschärf-Frage ist standardmäßig leer, weil sie es im Museum lange sein wird: Erst wenn
+ * Punkt 41 (b) gelaufen ist, hat sie mehr als zwei Fotos. Wer sie prüfen will, gibt sie ausdrücklich
+ * an — sonst prüfte jeder Test nebenbei eine Frage, um die es ihm gar nicht geht.
+ */
+function bestand(nachOrt: Task, nachJahr: Task, nachNummer = aufgabe("housenumber", null)) {
   geholt.mockImplementation((need: Need) =>
-    Promise.resolve(need === "location" ? nachOrt : nachJahr),
+    Promise.resolve(need === "location" ? nachOrt : need === "date" ? nachJahr : nachNummer),
   );
 }
 
@@ -125,8 +136,9 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
     expect(useContribute.getState().need).toBe("location");
   });
 
-  it("meldet erst Vollständigkeit, wenn beide Seiten leer sind", async () => {
-    bestand(aufgabe("location", null), aufgabe("date", null));
+  it("meldet erst Vollständigkeit, wenn alle drei Fragen leer sind", async () => {
+    // Der stille Fehler wäre, „alles vollständig" zu melden, während noch nachzuschärfen ist.
+    bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", null));
     useContribute.setState({ need: "location", task: aufgabe("location", 1) });
 
     useContribute.getState().skip();
@@ -143,6 +155,57 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
 
     expect(useContribute.getState().need).toBe("date");
     expect(useContribute.getState().task?.photo?.id).toBe(9);
+  });
+});
+
+describe("Die Rangfolge der drei Fragen", () => {
+  it("kommt zum Nachschaerfen erst, wenn Ort und Jahr nichts mehr hergeben", async () => {
+    /**
+     * Der Kern der Nachrangigkeit. Ein Foto irgendwohin zu setzen ist mehr wert, als eines von der
+     * Straßenmitte an sein Haus zu rücken — und diese Rangfolge steckt allein in der Reihenfolge
+     * von `NEEDS`, nicht in einer Fallunterscheidung.
+     */
+    bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", 12));
+
+    await useContribute.getState().load("location");
+
+    expect(useContribute.getState().need).toBe("housenumber");
+    expect(useContribute.getState().task?.photo?.id).toBe(12);
+  });
+
+  it("nimmt das Jahr vor der Hausnummer, wenn beide etwas haetten", async () => {
+    /**
+     * Der Test, der die Reihenfolge in `NEEDS` wirklich prüft: Beide Fragen könnten liefern, und
+     * nur die Position im Tupel entscheidet. Ohne ihn ließe sich „date" und „housenumber"
+     * vertauschen, ohne dass ein Test es merkte — nachgeprüft, es fiel keiner.
+     */
+    bestand(aufgabe("location", null), aufgabe("date", 8), aufgabe("housenumber", 12));
+
+    await useContribute.getState().load("location");
+
+    expect(useContribute.getState().need).toBe("date");
+    expect(useContribute.getState().task?.photo?.id).toBe(8);
+  });
+
+  it("laesst das Nachschaerfen liegen, solange ein Foto ohne Ort dasteht", async () => {
+    // Die Gegenrichtung: Es genügt *ein* unverortetes Foto, damit die feinere Frage wartet.
+    bestand(aufgabe("location", 3), aufgabe("date", null), aufgabe("housenumber", 12));
+
+    await useContribute.getState().load("location");
+
+    expect(useContribute.getState().need).toBe("location");
+  });
+
+  it("erreicht das Nachschaerfen von der Jahresfrage aus", async () => {
+    // Die Ausnahme gilt nur für die Frage, die nachgeschärft wird — von „Wann war das?" aus ist
+    // der Weg offen, sonst wäre die dritte Frage aus dem Bereich heraus nie erreichbar.
+    bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", 12));
+    useContribute.setState({ need: "date", task: aufgabe("date", 8) });
+
+    useContribute.getState().skip();
+    await vi.waitFor(() => expect(useContribute.getState().need).toBe("housenumber"));
+
+    expect(useContribute.getState().task?.photo?.id).toBe(12);
   });
 });
 
@@ -306,7 +369,7 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
     await useContribute.getState().submitDate(1930, "decade");
 
     expect(useContribute.getState().thanks).not.toContain("Zeitleiste");
-    expect(useContribute.getState().thanks).toBe(t.help.thanksDateAskLocation);
+    expect(useContribute.getState().thanks).toBe(t.help.thanksAsk.location);
   });
 
   it("legt dasselbe Foto zur Ortsfrage vor, wenn es datiert wurde", async () => {
@@ -332,7 +395,7 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
     ortGesendet.mockResolvedValue(verortetOhneJahr);
 
     await useContribute.getState().submitLocation();
-    expect(useContribute.getState().thanks).toBe(t.help.thanksLocationAskDate);
+    expect(useContribute.getState().thanks).toBe(t.help.thanksAsk.date);
 
     await vi.advanceTimersByTimeAsync(2200);
 
@@ -351,7 +414,33 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
 
     await useContribute.getState().submitLocation();
 
-    expect(useContribute.getState().thanks).toBe(t.help.thanksLocation);
+    expect(useContribute.getState().thanks).toBe(t.help.thanks.location);
+  });
+
+  it("fragt nach „Reicht so“ nicht sofort nach der Hausnummer", async () => {
+    /**
+     * Die eine echte Ausnahme von der reinen Rangfolge, und sie haengt am *Beantworten*. Wer
+     * gerade „Reicht so — die Straße genügt" gedrückt und den Ort bestätigt hat, hat die Frage
+     * nach dem genauen Haus schon beantwortet; sie im selben Atemzug noch einmal zu stellen liest
+     * sich, als hätte niemand zugehört.
+     *
+     * Ohne die `refines`-Zeile führte die Kette hier zu „housenumber", weil nach dem Ort und dem
+     * Jahr nichts mehr offen ist.
+     */
+    bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", 12));
+    useContribute.setState({
+      need: "location",
+      task: aufgabe("location", 12),
+      pin: { lat: 53.62, lon: 9.676 },
+      pinLabel: "Am Kamp",
+      pinAccuracy: 150,
+    });
+    ortGesendet.mockResolvedValue(vollstaendig);
+
+    await useContribute.getState().submitLocation();
+    await vi.advanceTimersByTimeAsync(2200);
+
+    expect(useContribute.getState().need).not.toBe("housenumber");
   });
 
   it("geht zum naechsten Foto, wenn nichts mehr fehlt", async () => {

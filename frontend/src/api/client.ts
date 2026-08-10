@@ -84,13 +84,23 @@ export type Bbox = [number, number, number, number];
 
 export type TimeRange = { from: number; to: number };
 
-export type Need = "location" | "date";
+/**
+ * What the panel can ask about, **in rank order** -- mirrors `services/needs.py`.
+ *
+ * The order is the ranking: a question is only reached once everything ahead of it has run dry.
+ * Sharpening comes last, and that fact lives in the position of a word rather than in a case
+ * distinction. An array rather than a bare union so that nothing can be added to the type without
+ * being given a place in the order.
+ */
+export const NEEDS = ["location", "date", "housenumber"] as const;
+
+export type Need = (typeof NEEDS)[number];
 
 export type Task = {
   need: Need;
   /** How many photos of this kind are still open. It motivates. */
   open_count: number;
-  /** Open tasks of the other question -- says whether "Weiß ich nicht" still leads anywhere. */
+  /** Open tasks of the *other* questions -- says whether "Weiß ich nicht" still leads anywhere. */
   open_other: number;
   /** null means nothing is missing any more. A pleasant state. */
   photo: PhotoDetail | null;

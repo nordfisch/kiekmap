@@ -14,24 +14,36 @@
  * to leave it as it is.
  */
 
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import type { Place } from "../api/client";
 import { t } from "../text/de";
 import { type NumberBlock, blocksOf, groupByBase } from "./houseNumbers";
 import { BackIcon } from "./icons";
 
+/** One shared empty list, so that "nothing on offer" keeps the same identity between renders. */
+const NONE: Place[] = [];
+
 export function HouseNumberPicker({
   street,
   numbers,
   disabled,
   onPick,
+  onOffer,
   children,
 }: {
   street: string;
   numbers: Place[];
   disabled: boolean;
   onPick: (place: Place) => void;
+  /**
+   * What is on the buttons right now -- for whoever wants to show it elsewhere, empty while the
+   * blocks are on screen. The map layer reads it; see `HouseNumberLayer`.
+   *
+   * Has to be stable across renders (a store setter is), otherwise the effect below runs on every
+   * one of them.
+   */
+  onOffer?: (numbers: Place[]) => void;
   /** Stands between the question and the buttons -- see the note in `LocationTask`. */
   children?: ReactNode;
 }) {
@@ -45,6 +57,18 @@ export function HouseNumberPicker({
   // fits on one page, `blocksOf` returns a single one and the step falls away.
   const shown = block ? [block] : blocks;
   const asking = !block && blocks.length > 1;
+
+  /**
+   * Nothing is offered during the block step, and that is deliberate: "1–19" written onto a
+   * single house would claim something about that house.
+   *
+   * Cleared on the way out, so that nothing survives the step that put it there.
+   */
+  const offered = asking ? NONE : (shown[0]?.numbers ?? NONE);
+  useEffect(() => {
+    onOffer?.(offered);
+    return () => onOffer?.(NONE);
+  }, [onOffer, offered]);
 
   return (
     <>

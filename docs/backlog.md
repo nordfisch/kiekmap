@@ -48,11 +48,8 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
-| 36 | [„Hilf mit" soll auch nachschärfen, nicht nur füllen](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) | Aufgabe | wichtig |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
-| 35 | [Hausnummern auf der Karte](#35--hausnummern-auf-der-karte) | Idee | — |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
-| 38 | [Sprünge beim Gruppieren, und wie genau die Punkte überhaupt liegen](#38--sprünge-beim-gruppieren-und-wie-genau-die-punkte-überhaupt-liegen) | Frage | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
 | 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
@@ -71,10 +68,9 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
-**Neunzehn Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
-29, 32, 33, 37. Sie sind erledigt,
-aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
-neue Punkt bekommt die **43**.
+**Zweiundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
+29, 32, 33, 35, 36, 37, 38. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde,
+steht in [history.md](history.md). Der nächste neue Punkt bekommt die **43**.
 
 ---
 
@@ -94,8 +90,8 @@ gehört sie dem Museumsteam, nicht dem Rechner:
   und die aus `Deelenweg`, wo der Ortsindex zwei Straßen kennt („Deelenweg I" und „II") und
   deshalb bewusst nicht rät.
 - **60 Fotos nur straßengenau** (58 vom Kurator, 2 von Besuchern), weil die Hausnummer nicht in
-  OpenStreetMap steht. Sie sind zugleich der Vorrat für
-  [Punkt 36](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen), der sie vorlegen will.
+  OpenStreetMap steht. Die 2 legt der Beitragsbereich seit dem 10. August 2026 zum Nachschärfen
+  vor; die 58 kennen ihre Nummer bereits und gehören zu Punkt 41 (a) weiter unten.
 - **Schlagwörter aus den Dateien**, die keine sind: „Wer hat eine bessere Vorlage?", „Or01-1",
   „Förderkreis-Cloud". Sie stammen aus der Archivarbeit und stehen jetzt im Kiosk.
 - **18 Fotos heißen „Intel(R) JPEG Library, version [1.51.12.44]".** Das ist kein Titel, sondern
@@ -208,9 +204,9 @@ entsteht genau der Fehler, den die EXIF-Regel aus Stufe 3 vermeidet: ein falsch 
 nie zur Korrektur vorgelegt wird, weil es als datiert gilt. In diesem Punkt ist das keine
 Zusatzbedingung mehr, sondern schon die Bauform.
 
-**Zwei Verortungsfehler gehören ebenfalls hierher.** Beide sind am 9. August 2026 beim Planen von
-[Punkt 36](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) gefunden worden, beide sind
-maschinell zu beheben, und beide brauchen kein Ortswissen — nur den Ortsindex.
+**Zwei Verortungsfehler gehören ebenfalls hierher.** Beide sind am 9. August 2026 beim Planen des
+Nachschärfens gefunden worden (Punkt 36, seither erledigt — siehe [history.md](history.md)), beide
+sind maschinell zu beheben, und beide brauchen kein Ortswissen — nur den Ortsindex.
 
 **(a) Hausnummern, die es nicht mehr gibt.** 58 Fotos tragen ihre Hausnummer im `place_name`
 („Schulstraße 2", „Hörnstraße 13"), liegen aber trotzdem nur auf der Straßenmitte. Der Grund ist
@@ -239,16 +235,16 @@ Das Ergebnis soll dasselbe sein wie bei „Reicht so — die Straße genügt": S
 dem Archivordner, ist also Museumswissen. Ein Neuimport ist dafür nicht nötig: Die Fotos sind
 daran erkennbar, dass ihr **Titel im Straßenverzeichnis steht**.
 
-**Die Begründung der alten Regel ist dabei ausdrücklich zu widerrufen**, nicht stillschweigend zu
-übergehen. Sie lautete: Die Straßenmitte „sähe aus wie eine Antwort", und das Foto fiele aus „Wo
-ist das?" heraus. Das war richtig, solange es nur zwei Fragen gab. Mit der Nachschärf-Frage aus
-Punkt 36 fallen diese Fotos nicht heraus, sondern **in die genauere Frage hinein**. Der Widerruf
-gehört nach [decisions.md](decisions.md).
+**Die Begründung der alten Regel ist dabei ausdrücklich widerrufen** — nachzulesen in
+[decisions.md](decisions.md), Punkt 32. Sie lautete: Die Straßenmitte „sähe aus wie eine Antwort",
+und das Foto fiele aus „Wo ist das?" heraus. Das war richtig, solange es nur zwei Fragen gab. Seit
+dem 10. August 2026 gibt es die dritte, und damit fallen diese Fotos nicht heraus, sondern **in die
+genauere Frage hinein**. Im Code steht die alte Regel noch; sie umzukehren ist Teil dieser Aufgabe.
 
-**Reihenfolge beachten:** (b) und die Nachschärf-Frage bedingen einander. Ohne (b) hat die Frage
-zwei Fotos und erscheint nie; ohne die Frage verschiebt (b) 64 Fotos aus „Wo ist das?" in eine
-Frage, die es nicht gibt — dann sind sie ungenau verortet und niemand wird je danach gefragt. Nach
-beidem stehen 8 Fotos ohne Ort und 66 zum Nachschärfen.
+**Das hier ist jetzt die Bremse.** Die Nachschärf-Frage steht im Beitragsbereich, hat aber nur
+**zwei** Fotos — und 74 unverortete stehen im Rang vor ihr, also erscheint sie dort praktisch nie.
+Mit (b) werden aus 74 unverorteten 8 und aus 2 nachzuschärfenden 66: Erst dann ist die neue Frage
+die Hauptfrage des Bereichs. Nutzbar ist sie bis dahin nur in der Detailansicht.
 
 Nebenbei: Nach (b) ist der Titel dieser 64 Fotos identisch mit ihrem `place_name` — genau der Fall,
 den dieser Punkt für 796 Fotos ohnehin aufräumen will.
@@ -310,52 +306,6 @@ Nicht wichtig, nicht dringend — erst zu prüfen und zu bewerten, dann zu spezi
 
 ## Besucher-Interface
 
-### 36 · „Hilf mit" soll auch nachschärfen, nicht nur füllen
-
-**Die Frage ist entschieden, der Weg ist gebaut, im Beitragsbereich fehlt er noch.** Seit dem
-10. August 2026 lässt sich ein Foto, das nur seine Straße kennt, **in der Detailansicht** auf eine
-Hausnummer nachschärfen — Nummernraster unter der Adresse, ein Tipp, und aus „Am Kamp" wird „Am
-Kamp 5". Wie und warum das an [decisions.md](decisions.md), Punkt 5 vorbeigeht, ohne ihn
-aufzuweichen, steht dort als Punkt 32: über eine **eigene Tür**, die keine Koordinate vom Client
-annimmt.
-
-**Was noch aussteht, ist die dritte Frage im Bereich selbst** — „Genauer: welche Hausnummer?" neben
-„Wo ist das?" und „Wann war das?". Dazu gehört:
-
-- `Need` wird im Frontend von einem Zweier- zu einem Dreierbegriff (`client.ts`, Store, `de.ts`,
-  Tests). Mechanisch, aber breit.
-- Die Reihenfolge des Arrays ist die Rangfolge — nachrangig heißt: erst wenn „Wo ist das?" nichts
-  mehr hergibt. Im Backend steht das schon so in `services/needs.py`.
-- Eine Ausnahme von einer Zeile: Wer gerade „Reicht so — die Straße genügt" gedrückt hat, darf
-  nicht im selben Atemzug „Genauer: welche Hausnummer?" bekommen. Das liest sich, als hätte niemand
-  zugehört.
-
-**Womit gerechnet werden muss:** Die Frage hat heute **2 Fotos** und erschiene deshalb nie — 72
-unverortete stehen vor ihr. Das kippt mit
-[Punkt 41](#41--den-erstbestand-maschinell-vorbereiten), Teil (b): danach sind es 8 unverortete und
-66 nachzuschärfende, und die neue Frage wird zur Hauptfrage des Bereichs. **Die beiden gehören in
-dieser Reihenfolge, aber nicht weit auseinander** — die Begründung steht bei Punkt 41.
-
-**Der Bestand, nachgezählt vor dem Bau** (`location_accuracy_m` steht neben jedem Punkt):
-
-| Genauigkeit | Quelle | Fotos | was das heißt |
-|---|---|---|---|
-| 15 m | Kurator | 381 | das Haus |
-| 150 m, Hausnummer steht im `place_name` | Kurator/Besucher | **58** | kein Besucherfall — siehe Punkt 41 (a) |
-| **150 m, keine Hausnummer bekannt** | Besucher | **2** | genau die, um die es hier geht |
-| **leer** | EXIF | **416** | wo die Kamera stand, nicht wo das Haus steht |
-| — | — | 75 | ohne Ort, wird längst gefragt |
-
-Die Aufteilung der 60 straßengenauen in 58 und 2 ist der eigentliche Ertrag des Planens. Bei den 58
-ist die Hausnummer **bekannt** und nur die Koordinate fehlt, weil die Häuser aufgeteilt oder neu
-nummeriert wurden. Ein Besucher weiß auch nicht, wo die frühere Schulstraße 2 stand — das ist
-maschinelle Arbeit und steht als Punkt 41 (a).
-
-**Und die 416 mit EXIF-Koordinate bleiben eine eigene Frage.** Ihre Genauigkeit ist nicht schlecht,
-sondern **unbekannt**: Das Gerät weiß, wo der Fotograf stand — nicht, was er fotografiert hat. Wer
-von der anderen Straßenseite knipst, liegt zwanzig Meter daneben. Sie alle vorzulegen wäre viel;
-sie nie vorzulegen lässt einen stillen Fehler stehen. Diese Frage gehört getrennt beantwortet.
-
 ### 30 · Die Karte nach Schlagwörtern filtern
 
 Die Karte filtert heute nach **Zeit** (Schieber) und **Ort** (Ausschnitt). Ein drittes Sieb kommt
@@ -398,75 +348,6 @@ gerade **nicht** in `region.json`.
 `/photos/tags/alle` gibt es schon. Dazu ein Zustand im Kiosk-Store neben `timeRange` und `bbox`,
 der bei jeder Abfrage mitgeht — und die Abstimmung mit dem Fokus nach einem Beitrag, der Ort und
 Zeit heute schon verstellt und zurücknimmt.
-
-### 35 · Hausnummern auf der Karte
-
-Die Frage war, ob Hausnummern die Orientierung erleichtern. **Die Daten liegen bereit** — der
-Ortsindex hält 7323 Adressen mit Koordinaten, es bräuchte also keine neuen Kacheln und keinen
-Download, nur eine eigene Ebene. Die Menge spricht trotzdem dagegen, jedenfalls flächendeckend:
-
-| Ausschnitt | Adressen darin |
-|---|---|
-| Standardansicht, 5 × 3 km | **1223** |
-| einmal hineingezoomt, 2 × 1,2 km | 1031 |
-| eng, 1 × 0,6 km | 551 |
-| ganz nah, 0,5 × 0,3 km | 152 |
-
-Selbst im engsten brauchbaren Ausschnitt stünden **152 Zahlen** auf dem Schirm — neben den
-Vorschaubildern, um die es auf dieser Karte eigentlich geht. Als Dauerebene wäre das keine
-Orientierung, sondern Rauschen.
-
-**Wo es dagegen Sinn ergibt, ist der Moment, in dem jemand eine Hausnummer sucht.** Steht im
-„Hilf mit"-Bereich die Nummernauswahl einer Straße, ließen sich genau **deren** Nummern auf der
-Karte zeigen — der Median liegt bei 13 je Straße, 149 der 345 Straßen haben zwischen 5 und 19.
-Das ist eine Handvoll Punkte statt einer Wand, und sie beantworten genau die Frage, die gerade
-auf dem Schirm steht. Dasselbe gilt für den Fokus nach einem Beitrag, der auf hundert Meter
-heranfährt.
-
-Zu bedenken: Die sechs längsten Straßen haben über hundert Adressen — für die bräuchte auch die
-gezielte Anzeige eine Grenze, ähnlich wie die Nummernauswahl selbst sie schon kennt.
-
-**Damit ist die Frage beantwortet und der Punkt hängt an
-[Punkt 36](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen).** Er bleibt eine Idee, aber
-keine offene mehr: Er ist die Zugabe zur Nummernauswahl, nicht die eigene Kartenebene, nach der
-gefragt war. Wer 36 baut — die zweite Frage „Genauer: welche Hausnummer?" —, entscheidet dabei
-ohnehin, ob die Nummern dazu auf der Karte stehen. Getrennt gebaut lohnt das nicht.
-
-### 38 · Sprünge beim Gruppieren, und wie genau die Punkte überhaupt liegen
-
-Zwei Fragen an dieselbe Ansicht, beide zu prüfen, bevor daran etwas geändert wird.
-
-**1. Die Marker springen beim Zoomen.** Die Ursache steht in einer Zeile: `draw()` in
-`PhotoLayer.tsx` fragt den Index mit `Math.round(map.getZoom())` ab. Der Zoom läuft beim Wischen
-stetig, die Gruppierung wechselt aber erst, wenn die gerundete Stufe kippt — und dann alle
-Marker auf einmal. Zu prüfen ist, was besser trägt: die gerundete Stufe beibehalten und den
-Wechsel **animieren** (die Marker sind DOM-Elemente, ein Ein- und Ausblenden wäre billig), oder
-feiner abfragen und dafür häufiger neu zeichnen. Das Zweite kostet auf einem Pi mehr, als es auf
-einem Entwicklungsrechner aussieht — der Touch-Test aus
-[Punkt 15](#15--abnahme-auf-dem-ersten-pi) misst das.
-
-**2. Wie genau liegen die Punkte, und wie genau sollen sie liegen?** Gemessen am Bestand liegen
-854 verortete Fotos auf nur **294 verschiedenen Punkten**:
-
-| Fotos auf einem Punkt | Punkte | Fotos |
-|---|---|---|
-| einzeln | 160 | 160 |
-| 2 bis 4 | 92 | 248 |
-| 5 bis 9 | 26 | 162 |
-| 10 bis 19 | 11 | 134 |
-| **20 und mehr** | **5** | **150** |
-
-Der größte Stapel hat **51 Fotos** auf einer Koordinate (Schulstraße 2). Das ist kein Zufall,
-sondern gewollt: Fotos derselben Adresse bekommen dieselbe Koordinate, und `stacks.ts` fasst alles
-im Umkreis von etwa einem Meter **vor** dem Gruppieren zu einem Marker zusammen — sonst lägen
-einundfünfzig Marker exakt übereinander, von denen nur der oberste erreichbar wäre.
-
-Zu prüfen ist, ob das die richtige Balance ist. Ein Stapel von 51 ist ein Blätterwerk, durch das
-niemand blättert. Denkbar wäre, Fotos derselben Adresse **leicht zu streuen**, sobald weit genug
-hineingezoomt ist — dann würden aus einem Marker fünfzig, die man einzeln sieht. Dagegen spricht,
-dass eine gestreute Position eine Genauigkeit vortäuscht, die es nicht gibt; und
-[Punkt 36](#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen) will diese Ungenauigkeit gerade
-sichtbar halten, um sie beheben zu lassen. Erst prüfen, dann entscheiden.
 
 ### 40 · Ein Durchgang über die ganze Oberfläche
 

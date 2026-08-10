@@ -39,6 +39,7 @@ export function LocationTask() {
   const loading = useContribute((s) => s.loading);
   const picking = useContribute((s) => s.pickingOnMap);
   const setPicking = useContribute((s) => s.setPickingOnMap);
+  const setOfferedNumbers = useContribute((s) => s.setOfferedNumbers);
   const photoId = useContribute((s) => s.task?.photo?.id ?? null);
 
   /** All streets on offer. Fetched once -- a village fits in a few kilobytes. */
@@ -230,6 +231,7 @@ export function LocationTask() {
           numbers={numbers}
           disabled={loading}
           onPick={chooseNumber}
+          onOffer={setOfferedNumbers}
         >
           {mapButton}
         </HouseNumberPicker>

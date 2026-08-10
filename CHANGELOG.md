@@ -635,3 +635,32 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Änderungsprotokoll seit jetzt auch die vorherige Herkunft
 - **Ältere Ortsangaben lassen sich erst zurücknehmen, wenn die neueren zurückgenommen sind.** In
   der falschen Reihenfolge ließe eine Rücknahme sonst einen längst ersetzten Ort wieder auferstehen
+
+### Hinzugefügt
+
+- **„Welche Hausnummer?" ist die dritte Frage im „Hilf mit"-Bereich** — nach „Wo ist das?" und
+  „Wann war das?", und ausdrücklich **nachrangig**: Sie kommt erst, wenn keine der beiden anderen
+  noch etwas zu fragen hat. Ein Foto irgendwohin zu setzen ist mehr wert, als eines von der
+  Straßenmitte an sein Haus zu rücken
+- **Wer „Reicht so — die Straße genügt" gedrückt hat, wird nicht im selben Atemzug nach der
+  Hausnummer gefragt.** Das ist die eine Ausnahme von der Rangfolge: Die Frage wäre schon
+  beantwortet, und sie noch einmal zu stellen liest sich, als hätte niemand zugehört
+- **Die Hausnummern einer Straße stehen auf der Karte, solange nach ihnen gefragt wird** — und nur
+  so lange. Als Dauerebene wären es im engsten brauchbaren Ausschnitt 152 Zahlen neben den
+  Vorschaubildern; im Moment der Frage sind es eine Handvoll, und sie beantworten genau das, was auf
+  dem Schirm steht. Während der Abschnittswahl („1–19") steht nichts auf der Karte, und antippbar
+  sind die Zahlen nicht — die Tipps gehören den Fotos
+- **Die Karte fährt zur Straße, wenn die Nachschärf-Frage kommt.** Ohne das läge die Antwort
+  regelmäßig außerhalb des Ausschnitts
+
+### Geändert
+
+- **Die Marker blenden ein, wenn die Gruppierung beim Zoomen kippt**, statt alle auf einmal zu
+  springen. Beim Verschieben auf gleicher Stufe passiert nichts — eine Karte, die bei jeder
+  Wischbewegung flackert, wäre schlimmer als der Sprung. Wer im Betriebssystem weniger Bewegung
+  eingestellt hat, bekommt weiterhin den Sprung
+- **Die Karte zeichnet ihre Marker deutlich seltener neu.** Sie hingen an zwei Ereignissen, die
+  gemeinsam feuern — gemessen 31 und 30 bei einem einzigen Zoomschritt —, und wurden dabei rund
+  sechzigmal komplett neu gebaut. Jetzt wird gezeichnet, wenn die Kamera zur Ruhe kommt, und auch
+  dann nur, wenn sich die Menge der sichtbaren Gruppen wirklich geändert hat. Auf dem Pi ist das
+  der Unterschied zwischen ruckeln und nicht ruckeln

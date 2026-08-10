@@ -2045,3 +2045,69 @@ Nach einer Gegenprobe habe ich die Aenderung mit `git checkout --` zurueckgenomm
 nicht nur die Gegenprobe, sondern die ganze, noch nicht committete Store-Methode. Wiederhergestellt
 war sie in zwei Minuten, weil sie im Gespraech stand. Die Lehre ist trotzdem billiger zu haben als
 ein zweites Mal: Eine Gegenprobe wird aus einer Kopie zurueckgeholt, nicht aus HEAD.
+
+## Die dritte Frage, die Zahlen auf der Karte und ein Waechter zu viel
+
+10. August 2026, zweite Lieferung zum Nachschaerfen: die Frage im Beitragsbereich (Punkt 36), die
+Hausnummern auf der Karte (Punkt 35) und der Stufenwechsel beim Zoomen (Punkt 38). Damit sind alle
+drei Punkte erledigt.
+
+**Die Rangfolge ist ein Array.** Aus dem Hin und Her zwischen zwei Fragen ist eine Liste geworden:
+`NEEDS = ["location", "date", "housenumber"]`, und die Reihenfolge *ist* die Rangfolge. „Nachschaerfen
+kommt zuletzt" steht damit in der Position eines Wortes und nicht in einer Fallunterscheidung.
+Dieselbe Reihenfolge steht im Backend in `services/needs.py`; sie zweimal zu haben ist der Preis
+dafuer, dass Frontend und Backend nicht dieselbe Datei lesen koennen.
+
+**Eine Unterscheidung, die beim Bauen erst entstand:** *leergelaufen* und *beantwortet* sind nicht
+dasselbe. Laeuft eine Frage leer, ist jede andere fair; nur eine Antwort kann eine weitere Frage
+ueberfluessig machen. Daraus wurden zwei Funktionen — `nextNeeds` und `nextAfterAnswer` —, und die
+Ausnahme („wer gerade `Reicht so` gedrueckt hat, wird nicht nach der Hausnummer gefragt") haengt
+allein an der zweiten.
+
+Der erste Anlauf hatte die Ausnahme in `nextNeeds` und damit an der falschen Stelle: Der
+Nachschaerf-Frage war dadurch von der Ortsfrage aus gar nicht mehr beizukommen. Der zweite Anlauf
+setzte sie richtig, und der Test fiel trotzdem — weil `load` sich seinen Rueckfall selbst
+ausrechnete und die eben beantwortete Frage dabei wieder hereinholte. `load` nimmt jetzt die ganze
+Reihenfolge entgegen, statt sie sich zu denken. **Wer laedt, weiss warum; die Ladefunktion nicht.**
+
+### Eine Gegenprobe, die nichts bewachte
+
+Beim Absichern der Rangfolge ist mir derselbe Fehler in neuer Gestalt begegnet. Die Attrappe der
+API-Schicht im Test enthielt `NEEDS` als **abgeschriebene Liste** — mit dem ausdruecklichen
+Kommentar, das sei „der echte Wert". Die Gegenprobe zeigte das Gegenteil: „date" und „housenumber"
+in `client.ts` zu vertauschen liess **keinen einzigen Test** fallen. Zwei Fehler auf einmal, und
+beide ohne Symptom:
+
+1. Die Attrappe war eine zweite Wahrheit. Sie liest jetzt ueber `importOriginal` den echten Wert.
+2. Kein Test unterschied die Reihenfolge. Alle pruefbaren Faelle hatten hoechstens eine Frage mit
+   Vorrat — da entscheidet die Reihenfolge nichts. Erst ein Fall, in dem **beide** liefern koennten,
+   prueft sie wirklich.
+
+### Was die Animation zweimal verschluckt hat
+
+Punkt 38 sah nach einer CSS-Regel aus und war eine Messung. Der Wechsel wurde markiert, war aber
+nie zu sehen — zweimal aus verschiedenen Gruenden, und beide fand erst der Blick auf die laufende
+Seite:
+
+**Erstens** hing `draw()` an `move` *und* `zoom`. Gemessen: ein Tipp auf „+" ergab 31 `move`- und 30
+`zoom`-Ereignisse, es wurde also alles rund sechzigmal je Zoomstufe neu gebaut. Der als einblendend
+markierte Marker war einen Frame spaeter weg. Noetig war nichts davon: MapLibre haelt Marker selbst
+auf ihren Koordinaten, gezeichnet werden muss nur eine geaenderte *Menge*. Jetzt haengt es an
+`moveend`, und ein Vergleich der gezeichneten Gruppen laesst selbst dann die Arbeit ausfallen, wenn
+sich nichts geaendert hat.
+
+**Zweitens** ist eine Umgruppierung nicht ein Zeichnen. Direkt nach dem Zoom werden die Fotos des
+neuen Ausschnitts geholt, und wenn sie ankommen, entstehen alle Marker noch einmal — dieser zweite
+Aufbau ist kein Stufenwechsel und nahm die Einblendung wieder mit. Wer waehrend einer laufenden
+Einblendung entsteht, gehoert seitdem dazu (`stillEntering`).
+
+Beides ist erst am Geraet aufgefallen, nicht im Test. Ein Zaehler in der Konsole hat je zwei
+Minuten gekostet und beide Male die Ursache genannt — was hier den Ausschlag gab, war nicht mehr
+Nachdenken, sondern die Bereitschaft, nachzusehen.
+
+### Und derselbe Griff daneben, ein zweites Mal
+
+`git checkout --` auf eine Datei, um eine Gegenprobe zurueckzunehmen — und damit auch die noch
+nicht committete Arbeit darin. Am selben Tag zum zweiten Mal, diesmal `client.ts` und `NEEDS`.
+Wiederhergestellt in zwei Minuten; die Lehre bleibt dieselbe wie am Vormittag und ist zweimal
+teurer bezahlt als noetig: **Eine Gegenprobe wird aus einer Kopie zurueckgeholt, nie aus HEAD.**

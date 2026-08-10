@@ -165,9 +165,13 @@ Zeitschieber, „Hilf mit" mit Hausnummern, Sprachregelung, Admin-Bereich mit St
 USB-Sicherung, Kiosk-Betrieb), dazu der Umbau des Verwaltungsmenüs, zwei Runden Nachbesserungen
 an Verwaltung und Besucheransicht sowie die Auswertung von Metadaten und Ordnerstruktur beim
 Import, mit der der Erstbestand von 929 Fotos eingelesen wurde. Zuletzt das **Nachschärfen der
-Verortung**: ein Foto, das nur seine Straße kennt, lässt sich in der Detailansicht auf eine
-Hausnummer bringen — der Weg dafür steht, die dritte Frage im „Hilf mit"-Bereich fehlt noch
-(Punkt 36). Was als Nächstes ansteht, steht im Backlog.
+Verortung**: Ein Foto, das nur seine Straße kennt, lässt sich in der Detailansicht und im
+„Hilf mit"-Bereich auf eine Hausnummer bringen — dort als dritte, nachrangige Frage, mit den
+Nummern der Straße auf der Karte. Was als Nächstes ansteht, steht im Backlog.
+
+**Dass die dritte Frage im Bereich fast nie erscheint, ist kein Fehler**, sondern der Bestand: Ihr
+stehen zwei Fotos zur Verfügung und 74 unverortete im Rang vor ihr. Das kippt mit Punkt 41 (b) —
+dann sind es 66 gegen 8.
 
 **Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
 ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,
@@ -179,7 +183,7 @@ anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md).
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.
 
-**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 23 Punkte nach Verwaltung,
+**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 20 Punkte nach Verwaltung,
 Besucher-Interface, Infrastruktur und Entwicklung geordnet, jeder mit dem, was beim Aufgreifen
 sonst erst wieder herausgefunden werden müsste. Jeder trägt eine **feste Nummer**, unter der er
 zitiert wird („Punkt 15"), dazu seine Art und seine Einordnung; die Übersichtstabelle oben in der

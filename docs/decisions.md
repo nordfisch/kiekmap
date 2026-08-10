@@ -1182,3 +1182,33 @@ Frage hinein** — die Begründung ist damit hinfällig, und die Regel gehört u
 [Punkt 41](backlog.md#41--den-erstbestand-maschinell-vorbereiten), weil es auch den Bestand
 umschreibt. Bis dahin steht die alte Regel noch im Code — sie steht dort ohne Begründung, und das
 ist der Grund, warum der Widerruf hier steht und nicht erst dann.
+
+## 33. Stapel werden nicht gestreut, Stufenwechsel werden animiert
+
+*Entschieden und gebaut am 10. August 2026* — Punkt 38, beide Teile. Zwei Fragen an dieselbe
+Ansicht, und die eine beantwortet sich aus der anderen.
+
+**Die Marker blenden ein, wenn die Gruppierung kippt.** `draw()` fragt supercluster auf der
+**gerundeten** Zoomstufe ab; beim Wischen läuft der Zoom stetig, die Gruppierung wechselt aber erst,
+wenn die Rundung umspringt — und dann alle Marker auf einmal. Das las sich wie ein Fehler, nicht wie
+ein Maßstabswechsel. Animiert wird deshalb der Wechsel, nicht feiner abgefragt: Feiner abzufragen
+hieße häufiger zeichnen, und das kostet auf dem Pi mehr, als es auf dem Mac aussieht.
+
+**Was daran der eigentliche Fund war:** `draw()` hing an `move` *und* `zoom`. Beide feuern
+zusammen — gemessen 31 zu 30 bei einem einzigen Tipp auf „+" —, es wurde also rund sechzigmal je
+Zoomstufe alles neu gebaut. Nötig war nichts davon: MapLibre hält die Marker selbst auf ihren
+Koordinaten. Gezeichnet wird jetzt auf `moveend`, und nur, wenn sich die Menge der Gruppen
+tatsächlich geändert hat. Ohne das ist die Animation gar nicht möglich — ein als einblendend
+markierter Marker wurde einen Frame später weggeworfen.
+
+**Und Stapel werden nicht gestreut.** 854 verortete Fotos liegen auf 294 Punkten, der größte Stapel
+trägt 51 Fotos auf einer Koordinate. Sie leicht auseinanderzuziehen, sobald weit genug
+hineingezoomt ist, wäre die naheliegende Abhilfe — und sie ist die falsche: **Eine gestreute
+Position täuscht eine Genauigkeit vor, die es nicht gibt.** Fünfzig Fotos der Schulstraße 2 liegen
+auf einem Punkt, weil sie alle nur die Adresse kennen; auseinandergezogen sähen sie aus wie fünfzig
+verschiedene Stellen.
+
+Streuen und Nachschärfen sind zwei Antworten auf dieselbe Frage — und nur eine erzeugt Daten. Das
+Nachschärfen (Punkt 32) will die Ungenauigkeit **sichtbar halten**, damit jemand sie behebt; das
+Streuen versteckt sie hinter einem hübscheren Bild. Wenn ein Stapel von 51 unhandlich ist, ist das
+ein Argument für eine bessere Stapelansicht, nicht für erfundene Koordinaten.

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Bbox } from "../api/client";
 import type { Region } from "../region";
 import { useKiosk } from "../store/kiosk";
+import { HouseNumberLayer } from "./HouseNumberLayer";
 import { PhotoLayer } from "./PhotoLayer";
 import { PinLayer } from "./PinLayer";
 import { IDLE_MS, watchForIdle } from "./idle";
@@ -132,6 +133,7 @@ export function MapView({ region }: { region: Region }) {
       <div ref={container} className="map__canvas" />
       {map && <PhotoLayer map={map} />}
       {map && <PinLayer map={map} />}
+      {map && <HouseNumberLayer map={map} />}
     </div>
   );
 }

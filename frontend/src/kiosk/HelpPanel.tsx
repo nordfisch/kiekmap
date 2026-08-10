@@ -12,6 +12,7 @@ import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
 import { DateTask } from "./DateTask";
+import { HouseNumberTask } from "./HouseNumberTask";
 import { LocationTask } from "./LocationTask";
 import { SkipIcon } from "./icons";
 
@@ -56,9 +57,7 @@ export function HelpPanel() {
         </p>
       ) : (
         <>
-          <p className="help-panel__question">
-            {need === "location" ? t.help.askLocation : t.help.askDate}
-          </p>
+          <p className="help-panel__question">{t.help.ask[need]}</p>
 
           {/* Looking closer is what somebody does before saying where it was -- on a
               160 px wide picture a farmstead is barely recognisable. The same route as tapping a
@@ -83,11 +82,16 @@ export function HelpPanel() {
                 considerably. */}
             {need === "location" && !photo.needs_date && <span>{photo.date_label}</span>}
             {need === "date" && photo.place_name && <span>{photo.place_name}</span>}
+            {/* The street belongs above the numbers, not here: `HouseNumberPicker` puts it into
+                the question itself ("Am Kamp — welche Hausnummer?"). Twice would be twice. */}
+            {need === "housenumber" && !photo.needs_date && <span>{photo.date_label}</span>}
           </div>
 
           {error && <p className="help-panel__error">{error}</p>}
 
-          {need === "location" ? <LocationTask /> : <DateTask />}
+          {need === "location" && <LocationTask />}
+          {need === "date" && <DateTask />}
+          {need === "housenumber" && <HouseNumberTask />}
 
           {/* Set apart from everything above it, by a rule and by its arrow: this is the one
               button here that puts the photo away instead of staying with it. It used to look

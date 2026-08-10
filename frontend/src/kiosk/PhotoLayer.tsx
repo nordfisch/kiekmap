@@ -15,6 +15,7 @@ import Supercluster from "supercluster";
 import type { PhotoMarker } from "../api/client";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
+import { clusterZoom, isStepChange, stillEntering } from "./clusterStep";
 import { type Stack, groupByLocation } from "./stacks";
 
 /** Radius in pixels within which photos are merged. About a thumb's width. */
@@ -39,6 +40,18 @@ type Group = Supercluster.PointFeature<PhotoProps | ClusterProps>;
 
 function isCluster(group: Group): group is Supercluster.PointFeature<ClusterProps> {
   return "cluster" in group.properties && group.properties.cluster;
+}
+
+/**
+ * What identifies a group between two draws.
+ *
+ * A cluster by its id and its count -- the id alone would let a circle that has grown from 8 to 9
+ * photos keep its old number. A stack by its first photo, which is what its marker shows.
+ */
+function groupKey(group: Group): string {
+  if (isCluster(group)) return `c${group.properties.cluster_id}:${group.properties.photos}`;
+  const { stack } = group.properties as PhotoProps;
+  return `p${stack.photos[0]!.id}:${stack.photos.length}`;
 }
 
 export function buildIndex(photos: PhotoMarker[]): Supercluster<PhotoProps, ClusterProps> {
@@ -145,23 +158,59 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
   const markers = useRef<Marker[]>([]);
 
   const index = useMemo(() => buildIndex(photos), [photos]);
+  /**
+   * The grouping level of the last draw -- null until the first one.
+   *
+   * A ref rather than state: it must not trigger a render, and it has to survive the effect being
+   * set up again when new photos arrive. Surviving is the point -- a fresh set of photos at an
+   * unchanged zoom is not a regrouping and must not flash.
+   */
+  const drawnStep = useRef<number | null>(null);
+  /**
+   * What was last drawn -- the level and the groups on it.
+   *
+   * The markers themselves need no redrawing while the map moves: MapLibre keeps them on their
+   * coordinates. Only a changed *set* does. Comparing this is what makes the entry animation
+   * possible at all: ``draw`` used to run on every one of the roughly thirty ``move`` events of a
+   * single zoom, so a marker marked as entering was thrown away one frame later and the animation
+   * never got to play. Beside that it saves the Pi the same work thirty times over.
+   */
+  const drawn = useRef<string | null>(null);
+  /** When the running entrance began -- null while none is. See ``stillEntering``. */
+  const enteredAt = useRef<number | null>(null);
 
   useEffect(() => {
     function draw() {
-      // Markers are rebuilt wholesale rather than diffed. With at most a few dozen visible
-      // elements that is cheaper than reconciling -- and far less code for a state bug to hide in.
-      for (const old of markers.current) old.remove();
-      markers.current = [];
-
       const bounds = map.getBounds();
-      const zoom = Math.round(map.getZoom());
+      const zoom = clusterZoom(map.getZoom());
       const groups = index.getClusters(
         [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
         zoom,
       );
 
+      const key = `${zoom}|${groups.map(groupKey).join(",")}`;
+      if (key === drawn.current) return;
+      drawn.current = key;
+
+      // Only where the grouping actually tips over. Panning changes the set just as often, and
+      // animating there would leave the map twitching under the finger.
+      if (isStepChange(drawnStep.current, zoom)) enteredAt.current = performance.now();
+      drawnStep.current = zoom;
+      const entering = stillEntering(enteredAt.current, performance.now());
+
+      // Markers are rebuilt wholesale rather than diffed. With at most a few dozen visible
+      // elements that is cheaper than reconciling -- and far less code for a state bug to hide in.
+      for (const old of markers.current) old.remove();
+      markers.current = [];
+
       for (const group of groups) {
         const [lon, lat] = group.geometry.coordinates as [number, number];
+        // Only fading in, never out: fading out would mean keeping removed elements alive on a
+        // timer -- exactly the kind of state the wholesale rebuild above avoids.
+        const enter = (element: HTMLElement) => {
+          if (entering) element.classList.add("marker--enter");
+          return element;
+        };
 
         if (isCluster(group)) {
           const { cluster_id: clusterId, photos: count } = group.properties;
@@ -173,7 +222,9 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
               duration: 500,
             });
           });
-          markers.current.push(new Marker({ element }).setLngLat([lon, lat]).addTo(map));
+          markers.current.push(
+            new Marker({ element: enter(element) }).setLngLat([lon, lat]).addTo(map),
+          );
         } else {
           const stack = group.properties.stack;
           const element = photoElement(stack, () =>
@@ -181,20 +232,36 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
           );
           markers.current.push(
             // The marker sits with its lower edge on the location, like a pin.
-            new Marker({ element, anchor: "bottom" }).setLngLat([lon, lat]).addTo(map),
+            new Marker({ element: enter(element), anchor: "bottom" })
+              .setLngLat([lon, lat])
+              .addTo(map),
           );
         }
       }
     }
 
     draw();
-    map.on("move", draw);
-    map.on("zoom", draw);
+    /**
+     * Once the camera has come to rest -- not on every frame while it moves.
+     *
+     * It hung on ``move`` *and* ``zoom``, and both fire together: measured on 10 August 2026, one
+     * tap on "+" produced 31 ``move`` and 30 ``zoom`` events, so everything was drawn some sixty
+     * times for a single zoom step. Nothing is gained by any of it. MapLibre keeps the markers on
+     * their coordinates by itself, so they follow the movement without being rebuilt; only a
+     * changed *set* needs drawing, and that is settled when the camera stops.
+     *
+     * The photos of a newly revealed area arrive on ``moveend`` anyway -- the store fetches then.
+     * And it is what makes the entry animation possible: rebuilt on every frame, a marker marked
+     * as entering was thrown away one frame later, and the animation never got to play.
+     */
+    map.on("moveend", draw);
     return () => {
-      map.off("move", draw);
-      map.off("zoom", draw);
+      map.off("moveend", draw);
       for (const old of markers.current) old.remove();
       markers.current = [];
+      // Whatever was drawn is off the map now, so the next ``draw`` must not recognise its own key
+      // and skip the work. Without this line an unchanged collection would leave an empty map.
+      drawn.current = null;
     };
   }, [map, index, openStackAt]);
 
