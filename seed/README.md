@@ -64,9 +64,21 @@ nichts vorzulegen:
 |---|---|
 | ohne Jahr | 3 |
 | ohne Ort | 2 — davon **eines ohne beides** |
+| nur straßengenau | 2 — für die Nachschärf-Frage |
 | gelöscht | 2, für die Liste, die es dafür gibt |
 | Besucherbeiträge | 8, davon **2 zurückgenommen** |
 | ohne Bildnachweis | 1 |
+
+**Warum es bei den straßengenauen zwei sind und nicht eines:** Die Nummernauswahl hat zwei Wege,
+und ein einziges Foto prüfte immer nur einen davon. „Gasthof Petersen mit Kastanie" liegt an der
+Hauptstraße (76 Adressen, 39 Knöpfe nach dem Zusammenfassen) — dort kommt der Abschnittsschritt
+davor. „Schulstraße, heutiger Zustand" liegt an der Schulstraße (26 Adressen, 11 Knöpfe) — dort
+fällt er weg und die Nummern stehen sofort da.
+
+Die beiden unterscheiden sich auch in der **Quelle**: das eine kommt von einem Besucher, der
+„Reicht so — die Straße genügt" gedrückt hat, das andere vom Kurator. Dass auch eine
+Kuratorenangabe nachgeschärft werden darf, ist die Aufweichung aus
+[decisions.md](../docs/decisions.md), Punkt 32 — sie gehört im Bestand sichtbar.
 
 Dazu unterschiedlich lange Beschreibungen, Hoch- und Querformate und ein paar unaufgeräumte
 Dateinamen. `build_seed.py` zählt diese Lücken nach jedem Lauf und **bricht ab, wenn eine fehlt.**

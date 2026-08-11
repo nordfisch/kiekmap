@@ -154,9 +154,11 @@ Sprache kosten würde und ab wann sich Modularisierung lohnt.
 - **Dateinamen der Fotos** sind der SHA-256 ihres Inhalts. Daran hängen Dublettenerkennung,
   Cache-Header und die inkrementelle Sicherung.
 - **`frontend/public/tiles/`** und **`frontend/public/basemaps/`** — erzeugt von `make tiles`.
-- **Die Lücken im Beispielbestand** (`seed/`) — Fotos ohne Jahr, ohne Ort, ein zurückgenommener
-  Besucherbeitrag. Sie sind Absicht: Ohne sie hat der „Hilf mit"-Bereich nichts vorzulegen und
-  ein Drittel des Programms wird nie geprüft.
+- **Die Lücken im Beispielbestand** (`seed/`) — Fotos ohne Jahr, ohne Ort, zwei nur straßengenaue,
+  ein zurückgenommener Besucherbeitrag. Sie sind Absicht: Ohne sie hat der „Hilf mit"-Bereich
+  nichts vorzulegen und ein Drittel des Programms wird nie geprüft. `tools/build_seed.py` zählt
+  sie nach jedem Lauf und **bricht ab, wenn eine fehlt** — wer eine neue Frage baut, gibt ihr
+  dort ihren Vorrat.
 
 ## Stand
 

@@ -33,9 +33,12 @@ SEED_DIR = ROOT / "seed"
 IMAGE_DIR = SEED_DIR / "fotos"
 
 # The backend rounds a decade down; a seed that disagreed with it would contradict itself the
-# moment somebody opened the editor. So the same function decides here.
+# moment somebody opened the editor. So the same function decides here -- and the same constant:
+# a street accuracy that drifted apart would be quiet, the seed would simply stop feeding the
+# sharpening question.
 sys.path.insert(0, str(ROOT / "backend"))
 from app.services.dates import date_range  # noqa: E402
+from app.services.places import ACCURACY_STREET_M  # noqa: E402
 
 #: One fixed start value: the same command always produces the same collection, byte for byte.
 RANDOM_SEED = 20260805
@@ -57,6 +60,20 @@ ADDRESSES = {
     "Im Sande 2": (53.619103, 9.675636),
     "Hetlinger Straße 6": (53.6212174, 9.6688548),
     "Lehmweg 7": (53.623149, 9.6744835),
+}
+
+#: Street points from the same gazetteer -- where a photo lands that knows only its street.
+#:
+#: These two carry the fourth gap: without a street-precise photo the sharpening question has
+#: nothing to put up, in the panel or in the detail view. The pair is chosen so that both routes
+#: through the number picker are covered -- and the counts come from the gazetteer, so they are
+#: what the buttons will really show:
+#:
+#:   * Hauptstraße, 76 addresses, 39 after merging the letter suffixes -- **with** the block step
+#:   * Schulstraße, 26 addresses, 11 after merging -- **without** it, straight to the numbers
+STREETS = {
+    "Hauptstraße": (53.6202952, 9.6733128),
+    "Schulstraße": (53.6220973, 9.6745015),
 }
 
 SEPIA = ((60, 42, 28), (232, 220, 198))
@@ -180,6 +197,13 @@ class Photo(NamedTuple):
     year: int | None = None
     precision: str = "year"
     address: str | None = None
+    #: Only the street is known: the photo sits on the street point at 150 m, and the sharpening
+    #: question may put it up. Set instead of ``address``, never alongside it.
+    street: str | None = None
+    #: Who stated the place. "visitor" is the ordinary way a photo becomes street-precise --
+    #: somebody pressed "Reicht so — die Straße genügt"; a curator may state it too, and that one
+    #: is sharpenable as well (decisions.md, point 32).
+    location_source: str = "curator"
     credit: str | None = "Sammlung Heimatmuseum"
     provenance: str | None = None
     description: str | None = None
@@ -216,12 +240,15 @@ COLLECTION = [
     ),
     # Without a year, and with a contribution that was taken back.
     Photo("056.jpg", "Gasthof Petersen, Hofseite", address="Hauptstraße 14", tags=GASTHOF),
+    # Street-precise from a visitor: somebody pressed "Reicht so -- die Straße genügt". The long
+    # route through the number picker, because Hauptstraße has too many numbers for one page.
     Photo(
         "118.jpg",
         "Gasthof Petersen mit Kastanie",
         1950,
         "decade",
-        "Hauptstraße 14",
+        street="Hauptstraße",
+        location_source="visitor",
         credit="Foto: A. Brahms",
         tags=GASTHOF,
         portrait=True,
@@ -329,11 +356,13 @@ COLLECTION = [
     ),
     # Neither year nor place nor credit -- the photo both questions hang on.
     Photo("pic_012.jpg", "Schule und Kindergarten", credit=None),
+    # Street-precise from the curator, and sharpenable all the same -- the exception to
+    # decisions.md point 5. The short route: Schulstraße fits on one page of numbers.
     Photo(
         "Bild_2024-03-11.jpg",
-        "Schulstraße 5, heutiger Zustand",
+        "Schulstraße, heutiger Zustand",
         2019,
-        address="Schulstraße 5",
+        street="Schulstraße",
         credit="Foto: A. Brahms",
     ),
 ]
@@ -355,6 +384,9 @@ LUECKEN = {
     "ohne Jahr": 3,
     "ohne Ort": 2,
     "ohne beides": 1,
+    # The fourth gap, added on 10 August 2026. Two, because the number picker has two routes and
+    # a single photo would only ever exercise one of them -- see ``STREETS``.
+    "nur strassengenau": 2,
     "geloescht": 2,
     "Beitraege": 8,
     "zurueckgenommen": 2,
@@ -402,7 +434,16 @@ def main() -> int:
                 "lon": lon,
                 "place_name": foto.address,
                 "location_accuracy_m": 15,
-                "location_source": "curator",
+                "location_source": foto.location_source,
+            }
+        elif foto.street is not None:
+            lat, lon = STREETS[foto.street]
+            entry |= {
+                "lat": lat,
+                "lon": lon,
+                "place_name": foto.street,
+                "location_accuracy_m": ACCURACY_STREET_M,
+                "location_source": foto.location_source,
             }
 
         contributions = [c for c in CONTRIBUTIONS if c[0] == foto.file]
@@ -442,6 +483,9 @@ def _report(photos: list[dict]) -> int:
         "ohne Jahr": sum(1 for p in photos if "date_from" not in p),
         "ohne Ort": sum(1 for p in photos if "lat" not in p),
         "ohne beides": sum(1 for p in photos if "date_from" not in p and "lat" not in p),
+        "nur strassengenau": sum(
+            1 for p in photos if p.get("location_accuracy_m") == ACCURACY_STREET_M
+        ),
         "geloescht": sum(1 for p in photos if p["status"] != "published"),
         "Beitraege": sum(len(p.get("changes", [])) for p in photos),
         "zurueckgenommen": sum(1 for p in photos for c in p.get("changes", []) if c["reverted"]),

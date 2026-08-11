@@ -117,11 +117,11 @@
    "date_to": "1959-12-31",
    "date_precision": "decade",
    "date_source": "curator",
-   "lat": 53.619244,
-   "lon": 9.6747475,
-   "place_name": "Hauptstraße 14",
-   "location_accuracy_m": 15,
-   "location_source": "curator"
+   "lat": 53.6202952,
+   "lon": 9.6733128,
+   "place_name": "Hauptstraße",
+   "location_accuracy_m": 150,
+   "location_source": "visitor"
   },
   {
    "file": "P1304935a (1024x683).jpg",
@@ -447,7 +447,7 @@
   {
    "file": "Bild_2024-03-11.jpg",
    "sha256": "c7177a57057fd4e728814fe129366145b565474b0f354250315a3e557fa6f8de",
-   "title": "Schulstraße 5, heutiger Zustand",
+   "title": "Schulstraße, heutiger Zustand",
    "title_source": "curator",
    "description": null,
    "credit": "Foto: A. Brahms",
@@ -460,10 +460,10 @@
    "date_to": "2019-12-31",
    "date_precision": "year",
    "date_source": "curator",
-   "lat": 53.6220941,
-   "lon": 9.6745468,
-   "place_name": "Schulstraße 5",
-   "location_accuracy_m": 15,
+   "lat": 53.6220973,
+   "lon": 9.6745015,
+   "place_name": "Schulstraße",
+   "location_accuracy_m": 150,
    "location_source": "curator"
   }
  ]
