@@ -205,9 +205,10 @@ entsteht genau der Fehler, den die EXIF-Regel aus Stufe 3 vermeidet: ein falsch 
 nie zur Korrektur vorgelegt wird, weil es als datiert gilt. In diesem Punkt ist das keine
 Zusatzbedingung mehr, sondern schon die Bauform.
 
-**Zwei Verortungsfehler gehören ebenfalls hierher.** Beide sind am 9. August 2026 beim Planen des
-Nachschärfens gefunden worden (Punkt 36, seither erledigt — siehe [history.md](history.md)), beide
-sind maschinell zu beheben, und beide brauchen kein Ortswissen — nur den Ortsindex.
+**Drei Nachbesserungen am Eingelesenen gehören ebenfalls hierher.** Die ersten beiden sind am
+9. August 2026 beim Planen des Nachschärfens gefunden worden (Punkt 36, seither erledigt — siehe
+[history.md](history.md)), die dritte am 11. August. Alle sind maschinell zu beheben, und keine
+braucht Ortswissen — nur den Ortsindex und das Importprotokoll.
 
 **(a) Hausnummern, die es nicht mehr gibt.** 58 Fotos tragen ihre Hausnummer im `place_name`
 („Schulstraße 2", „Hörnstraße 13"), liegen aber trotzdem nur auf der Straßenmitte. Der Grund ist
@@ -249,6 +250,17 @@ die Hauptfrage des Bereichs. Nutzbar ist sie bis dahin nur in der Detailansicht.
 
 Nebenbei: Nach (b) ist der Titel dieser 64 Fotos identisch mit ihrem `place_name` — genau der Fall,
 den dieser Punkt für 796 Fotos ohnehin aufräumen will.
+
+**(c) Fotos ohne Herkunftspfad.** Die Herkunftsangabe (`provenance`) trägt normalerweise den Pfad,
+unter dem das Foto im Archiv lag — bei drei Fotos steht dort nichts. Beispiel `pic_175-3.jpg`, das
+aus `Deelenweg/10 Deelenhof` stammt. **Sie sind zu bereinigen**, damit die Herkunft wieder auf den
+Archivordner zeigt.
+
+Ob die Ursache am nicht auflösbaren Straßennamen hängt, ist noch offen — bei den drei betroffenen
+Fotos fehlt auch der Titel, die Lücke ist also breiter als nur die Verortung. **Die
+Ursachenforschung steht noch aus** und gehört an den Anfang dieses Teilpunktes: Erst wenn klar ist,
+was sie beim Import verloren haben, lässt sich sagen, ob das Nachtragen aus dem Importprotokoll
+reicht oder ob `apply_folder_meta` selbst nachgebessert werden muss.
 
 **Vorgehen: vorlegen, nicht durchgreifen.** Jede Umstellung geht durch die Nacharbeits-Liste oder
 eine eigene Ansicht, in der jemand bestätigt. Ein Sprachmodell, das 929 Titel ohne Rückfrage
