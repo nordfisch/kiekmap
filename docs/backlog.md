@@ -50,6 +50,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | | **Besucher-Interface** | | |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
+| 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
 | 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
@@ -70,7 +71,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Zweiundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
 29, 32, 33, 35, 36, 37, 38. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde,
-steht in [history.md](history.md). Der nächste neue Punkt bekommt die **43**.
+steht in [history.md](history.md). Der nächste neue Punkt bekommt die **44**.
 
 ---
 
@@ -501,6 +502,46 @@ benannte Rollen, und keine davon ist „Schließen". **Damit ist die Frage nicht
 Raster darf, sondern welche Rolle er bekommt** — er schließt eine Ansicht, ohne etwas zu
 beantworten oder zurückzugehen. Das ist entweder eine fünfte Rolle oder ein Sonderfall, den die
 Detailansicht für sich behält. **Diese Entscheidung gehört an den Anfang dieses Punktes.**
+
+### 43 · Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau
+
+Die Balken hinter dem Zeitschieber zeigen heute nicht immer Jahre. `bar_width()` in
+`backend/app/services/dates.py` weitet die Balken auf **zehn Jahre**, sobald irgendwo im Bestand
+auch nur ein einziges Foto als „1920er" statt als Jahr datiert ist — und das betrifft praktisch die
+ganze Sammlung: 673 der 929 Fotos tragen gar kein Jahr, aber ein gutes Stück des Rests trägt nur ein
+Jahrzehnt. Die Folge: Ein Jahrzehnt bekommt einen einzigen Balken, auch wenn darunter drei
+jahrgenau datierte Fotos in 1932 liegen und keines in den übrigen neun Jahren — die Verteilung
+*innerhalb* der Dekade verschwindet vollständig.
+
+**Gewünscht:** Die Achse zählt immer in Jahren. Ein auf ein Jahrzehnt datiertes Foto trägt zu
+**jedem** der zehn Jahre ein Zehntel bei, statt seine ganze Zählung auf ein einziges Jahr (oder,
+wie heute, auf einen zehn Jahre breiten Balken) zu häufen — dieselbe Überlegung wie beim
+Überlappungs-Filter (`services/dates.py`, siehe CLAUDE.md): eine grobe Angabe verschwindet nicht,
+sie verteilt sich ehrlich.
+
+**Was das an der Berechnung ändert:**
+
+- `bar_width()` entfiele in der heutigen Form oder würde auf `1` festgenagelt — die Funktion
+  existiert nur, um Balken zu verbreitern, wenn feine Angaben fehlen; genau das soll nicht mehr
+  passieren.
+- Die SQL-Abfrage in `histogram()` (`api/photos.py`) gruppiert heute nach `bar_start`
+  (`date_from` gekappt auf die Balkenbreite) und zählt Fotos. Eine gewichtete Zählung über einen
+  Jahresbereich ist damit nicht mehr eine `GROUP BY`-Abfrage über eine Spalte, sondern eine Summe
+  über die Jahre zwischen `date_from` und `date_to` — SQLite kennt kein `generate_series`, das
+  bräuchte entweder eine Hilfstabelle mit Jahreszahlen oder das Aufsummieren in Python.
+- `Bar.count` (`schemas.py`, `frontend/src/api/client.ts`) ist heute ein `int`. Zehntelwerte machen
+  daraus einen Bruch — zu klären, ob roh als Fließkommazahl ausgeliefert oder für die Anzeige
+  gerundet wird. Die Balkenhöhe (`TimeSlider.tsx`, `barHeight()`) ist bereits relativ zum höchsten
+  Balken und käme mit Fließkommazahlen ohne Änderung aus; die Beschriftung `title={...}: ${count}`
+  müsste einen Nachkommawert vertretbar formatieren.
+- **Was unverändert bleibt:** Der Zeit*filter* selbst fragt weiterhin auf Überlappung ab
+  (`date_from <= bis AND date_to >= von`) und zeigt ein jahrzehntdatiertes Foto bei jeder Auswahl,
+  die die Dekade berührt — das hier betrifft nur die **Visualisierung** hinter dem Schieber, nicht,
+  welche Fotos eine Auswahl zurückgibt.
+
+**Zu prüfen vor dem Bauen:** Ob `MAX_BARS` (heute 30, zur Verbreiterung großer Zeitspannen) in
+einer Welt ohne Balkenverbreiterung noch dieselbe Rolle spielt — bei jahrgenauer Zählung über einen
+Bestand von hundert Jahren stünden sonst hundert schmale Balken, wo heute zehn breite stehen.
 
 ---
 
