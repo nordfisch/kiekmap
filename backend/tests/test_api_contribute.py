@@ -112,6 +112,84 @@ class TestEineDefinitionJeFrage:
             assert gemeldet["open_count"] == erwartet, frage
 
 
+class TestGewuenschtesFoto:
+    """``photo_id`` legt ein benanntes Foto vor -- der Weg aus der Detailansicht in den Bereich.
+
+    Ein Wunsch, keine Anweisung: Geprueft wird er gegen dieselbe Bedingung wie jedes andere Foto,
+    und wo er nicht traegt, laeuft die gewoehnliche Zufallswahl.
+    """
+
+    def test_legt_das_gewuenschte_foto_vor(self, client: TestClient, session, make_photo):
+        gewuenscht = make_photo(year=None, title="Das hier", sha="a" * 64)
+        for buchstabe in "bcdefghij":
+            make_photo(year=None, title="Irgendeins", sha=buchstabe * 64)
+        session.commit()
+
+        daten = client.get(
+            "/api/contribute/next", params={"need": "date", "photo_id": gewuenscht.id}
+        ).json()
+
+        assert daten["photo"]["title"] == "Das hier"
+
+    def test_faellt_zurueck_wenn_das_foto_nichts_mehr_braucht(
+        self, client: TestClient, session, make_photo
+    ):
+        """Der stille Fehler, den diese Pruefung verhindert.
+
+        Zwischen dem Tippen in der Detailansicht und dieser Anfrage kann jemand anders geantwortet
+        haben. Ohne die Pruefung stuende eine Frage auf dem Schirm, die schon beantwortet ist --
+        und der Schreibweg wiese die Antwort mit 409 ab, was klingt, als sei der Besucher zu
+        langsam gewesen.
+        """
+        datiert = make_photo(year=1932, title="Schon datiert", sha="a" * 64)
+        make_photo(year=None, title="Braucht noch", sha="b" * 64)
+        session.commit()
+
+        daten = client.get(
+            "/api/contribute/next", params={"need": "date", "photo_id": datiert.id}
+        ).json()
+
+        assert daten["photo"]["title"] == "Braucht noch"
+
+    def test_uebergeht_die_ausschlussliste(self, client: TestClient, session, make_photo):
+        """Wer ein Foto ausdruecklich aufruft, hat es womoeglich vorher weggewischt."""
+        gewuenscht = make_photo(year=None, title="Doch nochmal", sha="a" * 64)
+        make_photo(year=None, title="Anderes", sha="b" * 64)
+        session.commit()
+
+        daten = client.get(
+            "/api/contribute/next",
+            params={"need": "date", "photo_id": gewuenscht.id, "exclude": str(gewuenscht.id)},
+        ).json()
+
+        assert daten["photo"]["title"] == "Doch nochmal"
+
+    def test_zaehlt_weiterhin_alle_offenen(self, client: TestClient, session, make_photo):
+        """Die Zahl im Bereich meint den Bestand, nicht das eine Foto -- sonst stuende dort 1."""
+        gewuenscht = make_photo(year=None, sha="a" * 64)
+        make_photo(year=None, sha="b" * 64)
+        make_photo(year=None, sha="c" * 64)
+        session.commit()
+
+        daten = client.get(
+            "/api/contribute/next", params={"need": "date", "photo_id": gewuenscht.id}
+        ).json()
+
+        assert daten["open_count"] == 3
+
+    def test_ein_unbekanntes_foto_liefert_trotzdem_eine_aufgabe(
+        self, client: TestClient, session, make_photo
+    ):
+        make_photo(year=None, title="Da", sha="a" * 64)
+        session.commit()
+
+        daten = client.get(
+            "/api/contribute/next", params={"need": "date", "photo_id": 999999}
+        ).json()
+
+        assert daten["photo"]["title"] == "Da"
+
+
 class TestRangfolge:
     """Die Reihenfolge in ``NEEDS`` ist der Rang, und sie ist nur hier festgehalten.
 

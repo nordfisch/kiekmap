@@ -8,23 +8,22 @@
  * It closes everywhere: tapping beside it, the button, Escape. Whoever is stuck taps somewhere,
  * and that has to lead back.
  *
- * **An undated photo can be dated right here.** Whoever looks at it large and knows when it was
- * should not first have to close it and hope the contribution panel puts the same photo up. It is
- * the same two-step choice as there -- decade, then year, all through buttons. A number field
- * would be a control that accepts nothing without a keyboard.
+ * **What is missing is answered next door, not here.** Up to three buttons stand beside the lines
+ * they would change -- "Wo ist das?", "Welche Hausnummer?", "Wann war das?". A tap closes this
+ * view and puts *this* photo up in the "Hilf mit" panel for *that* question.
  *
- * **And a photo that only knows its street can be sharpened here.** The same argument, and here it
- * weighs more: whoever recognises the house does so by looking at the picture, not at a marker in
- * the middle of a street. Whether it may be offered at all is the backend's answer -- an empty
- * list of numbers means no; see `fetchPhotoHouseNumbers`.
+ * Until August 2026 the pickers sat here, embedded. Two reasons ended that, and the second is the
+ * heavier one: the text column carried up to 37 buttons under the description -- fifteen decades
+ * alone, since the timeline reaches from 1880 to 2030 -- and **the place question could not be
+ * asked here at all**, because it needs the map and the map lies underneath. See decisions.md.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
+  type Need,
   type PhotoDetail,
   type Place,
-  type Precision,
   fetchPhoto,
   fetchPhotoHouseNumbers,
 } from "../api/client";
@@ -32,10 +31,7 @@ import { useAdmin } from "../store/admin";
 import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
-import { DatePicker } from "./DatePicker";
-import { HouseNumberPicker } from "./HouseNumberPicker";
 import { PencilIcon } from "./icons";
-import { offeredDecades } from "./decades";
 
 /**
  * How much of the hash is shown.
@@ -62,20 +58,16 @@ export function PhotoOverlay() {
    * stays reserved regardless, otherwise the view jumps.
    */
   const [loadedId, setLoadedId] = useState<number | null>(null);
-  const [dating, setDating] = useState(false);
   /**
    * The house numbers this photo may be sharpened to.
    *
-   * Empty is the ordinary case and means "do not offer it" -- the rule lives in the backend alone.
+   * Only their **count** is used here, and only to decide whether the button appears: empty means
+   * "do not offer it", and that rule lives in the backend alone. The picker itself is in the panel.
    */
   const [numbers, setNumbers] = useState<Place[]>([]);
-  const [sharpening, setSharpening] = useState(false);
 
-  const collection = useKiosk((s) => s.fullRange);
   const askPin = useAdmin((s) => s.askPin);
-  const submitDateFor = useContribute((s) => s.submitDateFor);
-  const submitHouseNumberFor = useContribute((s) => s.submitHouseNumberFor);
-  const decades = useMemo(() => offeredDecades(collection), [collection]);
+  const askAbout = useContribute((s) => s.askAbout);
 
   const openPhotoId = openStack[openIndex] ?? null;
 
@@ -134,46 +126,25 @@ export function PhotoOverlay() {
   const close = () => openPhoto(null);
 
   /**
-   * A year for the photo currently on screen.
+   * Hand this photo and this question over to the panel, and get out of the way.
    *
-   * The backend's answer replaces the local state -- so the year stands where "Jahr unbekannt"
-   * stood a moment ago, and the buttons are gone because `needs_date` no longer holds. No more
-   * feedback is needed: the change happens at exactly the spot being looked at.
+   * Closing is not a side effect but half the point: "Wo ist das?" is answered on the map, and the
+   * map lies under this view. The other two would work without closing -- doing it differently per
+   * question would be a rule nobody can see.
    */
-  async function pickDate(year: number, precision: Precision) {
+  function branch(need: Need) {
     if (!detail) return;
-    setDating(true);
-    setError(null);
-    try {
-      setDetail(await submitDateFor(detail.id, year, precision));
-    } catch (e) {
-      // Most common case: somebody else was quicker (409). The backend phrases that kindly.
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setDating(false);
-    }
+    void askAbout(detail.id, need);
+    close();
   }
 
-  /**
-   * A house number for the photo currently on screen.
-   *
-   * The feedback is the line above the buttons: "Am Kamp" becomes "Am Kamp 12", and the picker
-   * goes because the numbers are cleared. Same shape as `pickDate`, and for the same reason -- the
-   * change happens at exactly the spot being looked at.
-   */
-  async function pickHouseNumber(place: Place) {
-    if (!detail) return;
-    setSharpening(true);
-    setError(null);
-    try {
-      setDetail(await submitHouseNumberFor(detail.id, place.id));
-      setNumbers([]);
-    } catch (e) {
-      // Most common case: somebody else was quicker (409). The backend phrases that kindly.
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSharpening(false);
-    }
+  /** A question this photo still owes, as a button. */
+  function question(need: Need) {
+    return (
+      <button type="button" className="button overlay__ask" onClick={() => branch(need)}>
+        {t.help.ask[need]}
+      </button>
+    );
   }
 
   return (
@@ -266,32 +237,18 @@ export function PhotoOverlay() {
                   <PencilIcon className="overlay__edit-icon" />
                 </button>
               </div>
+              {/* Each button beside the line it would change -- that is what makes it readable
+                  without a caption. Only where something is actually missing: a visitor must not
+                  overwrite a curated or already contributed statement, and the backend refuses it
+                  anyway. */}
               <p className="overlay__year">{detail.date_label}</p>
-              {/* Only when nothing stands there: a visitor must not overwrite a curated or
-                  already contributed date -- the backend refuses it anyway. */}
-              {detail.needs_date && (
-                <div className="overlay__date">
-                  <DatePicker
-                    decades={decades}
-                    disabled={dating}
-                    onPick={(y, p) => void pickDate(y, p)}
-                  />
-                </div>
-              )}
+              {detail.needs_date && question("date")}
+
               {detail.place_name && <p className="overlay__place">{detail.place_name}</p>}
-              {/* Under the address, because that is the line it changes. Whether it appears at all
-                  the backend decides -- an empty list means the photo is house-precise already,
-                  or its street has no addresses to offer. */}
-              {numbers.length > 0 && detail.place_name && (
-                <div className="overlay__housenumbers">
-                  <HouseNumberPicker
-                    street={detail.place_name}
-                    numbers={numbers}
-                    disabled={sharpening}
-                    onPick={(place) => void pickHouseNumber(place)}
-                  />
-                </div>
-              )}
+              {detail.needs_location && question("location")}
+              {/* Whether sharpening may be offered the backend decides -- an empty list means the
+                  photo is house-precise already, or its street has no addresses to offer. */}
+              {numbers.length > 0 && question("housenumber")}
               {detail.description && <p className="overlay__description">{detail.description}</p>}
               {detail.tags.length > 0 && (
                 <ul className="overlay__tags">

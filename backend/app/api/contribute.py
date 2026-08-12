@@ -44,11 +44,27 @@ def next_task(
     session: Annotated[Session, Depends(get_session)],
     need: Annotated[Need, Query(description="Which field should be missing")] = "location",
     exclude: Annotated[str, Query(description="Ids already shown, comma-separated")] = "",
+    photo_id: Annotated[
+        int | None, Query(description="Put up this photo, if it still owes this answer")
+    ] = None,
 ) -> TaskResponse:
     """Return a random photo that is missing exactly this field.
 
     ``exclude`` holds the photos the visitor has just dismissed. Without that list the same image
     could reappear immediately, which feels broken.
+
+    ``photo_id`` is a **wish, not an instruction**, and it comes from the detail view: whoever
+    looks at one photograph full screen and taps "Wann war das?" means that one. Two rules keep the
+    wish honest:
+
+    * **It is checked against the same filter as any other photo.** A photo that no longer owes
+      this answer -- because somebody else was quicker between the tap and this request -- would
+      otherwise put a question on the screen that the write path then rejects with 409.
+    * **Where it does not hold, the ordinary random pick runs.** Better a different photo than a
+      dead end.
+
+    ``exclude`` does *not* apply to it. Whoever asks for a photo by name may well have waved it
+    away earlier and has now thought better of it.
     """
     skipped = {int(part) for part in exclude.split(",") if part.strip().isdigit()}
 
@@ -71,11 +87,16 @@ def next_task(
         if other != need
     )
 
-    query = select(Photo).where(*filters)
-    if skipped:
-        query = query.where(Photo.id.notin_(skipped))
+    photo = None
+    if photo_id is not None:
+        photo = session.scalar(select(Photo).where(*filters, Photo.id == photo_id))
 
-    photo = session.scalar(query.order_by(func.random()).limit(1))
+    if photo is None:
+        query = select(Photo).where(*filters)
+        if skipped:
+            query = query.where(Photo.id.notin_(skipped))
+
+        photo = session.scalar(query.order_by(func.random()).limit(1))
 
     # Everything seen: start over rather than reporting "nothing left", as long as anything is
     # still open at all.

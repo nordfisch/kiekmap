@@ -94,6 +94,8 @@ type ContributeState = {
   setOfferedNumbers: (numbers: Place[]) => void;
 
   load: (need?: Need) => Promise<void>;
+  /** Put one named photo up for one question -- the way out of the detail view. */
+  askAbout: (photoId: number, need: Need) => Promise<void>;
   skip: () => void;
   setPickingOnMap: (on: boolean) => void;
   setPin: (
@@ -103,8 +105,6 @@ type ContributeState = {
   submitLocation: () => Promise<void>;
   submitDate: (year: number, precision: Precision) => Promise<void>;
   submitHouseNumber: (placeId: number) => Promise<void>;
-  submitDateFor: (photoId: number, year: number, precision: Precision) => Promise<PhotoDetail>;
-  submitHouseNumberFor: (photoId: number, placeId: number) => Promise<PhotoDetail>;
 };
 
 let abort: AbortController | null = null;
@@ -185,8 +185,13 @@ export const useContribute = create<ContributeState>((set, get) => {
    * ``prefer`` carries a photo that has just been contributed to. If it still owes an answer to
    * the first question, it is put up instead of the random one -- see the chain in
    * ``contribute()``.
+   *
+   * ``wanted`` is the other direction: an id somebody asked for, out of the detail view. It goes
+   * to the server, which checks it and falls back where it no longer holds -- **only for the first
+   * question**, because the wish was for that one. Where the fallback questions run, it is a
+   * wish about a photo that has nothing left to say on them.
    */
-  async function load(order: Need[], prefer?: PhotoDetail | null) {
+  async function load(order: Need[], prefer?: PhotoDetail | null, wanted?: number | null) {
     abort?.abort();
     abort = new AbortController();
     const signal = abort.signal;
@@ -207,7 +212,7 @@ export const useContribute = create<ContributeState>((set, get) => {
     });
     try {
       const need = order[0]!;
-      const task = await fetchTask(need, get().skipped, signal);
+      const task = await fetchTask(need, get().skipped, wanted, signal);
 
       // The counts come from the fetch, only the photo is swapped -- so the panel keeps saying
       // truthfully how much is still open. Deliberately ignores ``skipped``: whoever waved a
@@ -220,7 +225,7 @@ export const useContribute = create<ContributeState>((set, get) => {
 
       if (!task.photo) {
         for (const other of order.slice(1)) {
-          const fallback = await fetchTask(other, get().skipped, signal);
+          const fallback = await fetchTask(other, get().skipped, null, signal);
           if (fallback.photo) {
             set({ task: fallback, need: other, loading: false });
             return;
@@ -315,6 +320,23 @@ export const useContribute = create<ContributeState>((set, get) => {
     },
 
     /**
+     * "Wann war das?" on the photo somebody is looking at.
+     *
+     * The detail view no longer answers anything itself; it branches here (see decisions.md). What
+     * arrives is an ordinary task, and **everything after it is the ordinary flow** -- thank-you,
+     * the chain to whatever this photo still lacks, then a new photo. That there is no special
+     * case for the return trip is the design, not an omission: whoever answers out of a photo has
+     * landed in the panel, and that is where the next question belongs.
+     *
+     * The ranking stays the fallback. Should the photo no longer owe this answer -- somebody else
+     * was quicker -- the server hands over a different one, and the panel carries on rather than
+     * standing there with a question that has already been settled.
+     */
+    askAbout(photoId, need) {
+      return load([need, ...nextNeeds(need)], null, photoId);
+    },
+
+    /**
      * "Weiß ich nicht -- nächstes Foto" changes the question, not just the picture.
      *
      * Whoever cannot place a photo may well know the decade, and the other way round. Asking the
@@ -378,73 +400,6 @@ export const useContribute = create<ContributeState>((set, get) => {
       await contribute((photo) =>
         postHouseNumber(photo.id, { place_id: placeId, session_id: SESSION_ID }),
       );
-    },
-
-    /**
-     * A year for a photo that is **not** the one the running question is about.
-     *
-     * The case is the detail view: whoever looks at an undated photo full screen and knows when
-     * it was should be able to say so right there. Which is why this route deliberately does
-     * **not** go through ``contribute()``:
-     *
-     *   * **No thank-you.** The feedback is the view itself -- "Jahr unbekannt" becomes "1932"
-     *     and the buttons disappear, exactly where the visitor is looking. A sentence saying so
-     *     again, and hiding the contribution panel for 2.2 seconds while it does, would only be
-     *     in the way here.
-     *   * **No map focus.** The map lies underneath the detail view; moving it anywhere would be
-     *     seen by nobody.
-     *
-     * Errors stay with the caller: the detail view shows them where its messages always stand.
-     */
-    async submitDateFor(photoId, year, precision) {
-      const updated = await postDate(photoId, { year, precision, session_id: SESSION_ID });
-
-      // Map and timeline have to show it: the photo moves out of "ohne Jahr" into a decade bar,
-      // and with a narrowed time range possibly out of view altogether.
-      useKiosk.getState().refresh();
-
-      // Was the contribution panel asking about *this* photo's year, it has to move on. Otherwise
-      // it puts it up again, the visitor answers a second time -- and gets "Dieses Foto hat
-      // inzwischen schon eine Angabe bekommen", a message that sounds as though somebody else had
-      // been quicker. About the *place* it may keep asking for the same photo: that one is still
-      // needed.
-      // The place is usually already known here -- a photo reaches the detail view by way of its
-      // marker. Where it is not, ``prefer`` carries the chain into this route as well.
-      const { task, need } = get();
-      if (need === "date" && task?.photo?.id === photoId) {
-        void load([...nextAfterAnswer(need), need], updated);
-      }
-
-      return updated;
-    },
-
-    /**
-     * A house number for a photo that so far only knows its street.
-     *
-     * Same route as ``submitDateFor`` and for the same reasons -- no thank-you, no map focus, the
-     * error stays with the caller. What the visitor gets to see is the line above the picker: "Am
-     * Kamp" becomes "Am Kamp 12" and the buttons are gone.
-     *
-     * Only the id of the address travels. Coordinate and accuracy come from the gazetteer, on the
-     * server -- see ``api/contribute.py``; the client determines nothing here.
-     *
-     * Errors stay with the caller: the detail view shows them where its messages always stand.
-     */
-    async submitHouseNumberFor(photoId, placeId) {
-      const updated = await postHouseNumber(photoId, { place_id: placeId, session_id: SESSION_ID });
-
-      // The marker moves from the middle of the street to the house. Without this it stays where
-      // it was until somebody happens to pan the map.
-      useKiosk.getState().refresh();
-
-      // Only where the panel was asking *this* photo for its number. About its place it never
-      // asks -- a photo that can be sharpened is located -- and its year is untouched here.
-      const { task, need } = get();
-      if (need === "housenumber" && task?.photo?.id === photoId) {
-        void load([...nextAfterAnswer(need), need]);
-      }
-
-      return updated;
     },
   };
 });

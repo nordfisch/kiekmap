@@ -181,9 +181,22 @@ export function fetchPhoto(id: number, signal?: AbortSignal): Promise<PhotoDetai
   return getJson<PhotoDetail>(`/api/photos/${id}`, signal);
 }
 
-export function fetchTask(need: Need, skipped: number[], signal?: AbortSignal): Promise<Task> {
+/**
+ * The next photo to ask about.
+ *
+ * `photoId` names one -- the way out of the detail view into the panel. It is a wish: the server
+ * checks it against the same condition as any other photo and falls back to its random pick where
+ * it no longer holds. That rule lives there alone; see `api/contribute.py`.
+ */
+export function fetchTask(
+  need: Need,
+  skipped: number[],
+  photoId?: number | null,
+  signal?: AbortSignal,
+): Promise<Task> {
   const params = new URLSearchParams({ need });
   if (skipped.length) params.set("exclude", skipped.join(","));
+  if (photoId != null) params.set("photo_id", String(photoId));
   return getJson<Task>(`/api/contribute/next?${params}`, signal);
 }
 
