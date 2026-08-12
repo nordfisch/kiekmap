@@ -51,18 +51,27 @@ export const t = {
     noPhotos: "Hier gibt es noch keine Fotos im gewählten Zeitraum.",
     tooMany: (count: number) =>
       `${count} Fotos in diesem Ausschnitt — für mehr Übersicht näher heranzoomen`,
-    markerLabel: (title: string, date: string) => `${title}, ${date} — groß anzeigen`,
     /**
-     * What stands under a thumbnail on the map: address and year.
+     * The pieces the marker caption is built from -- assembled in `kiosk/mapCaption.ts`.
      *
-     * Both parts may be missing, and neither absence gets a placeholder. A photo located from
-     * EXIF alone has no address and shows the year; two thirds of this collection have no date
-     * and show the address. Where both are missing the caption falls away entirely -- an empty
-     * line under a picture asks nothing of the visitor, "Jahr unbekannt" seven hundred times over
-     * does, and answers nothing.
+     * **One line serves the eye and the screen reader**, which is why the wording lives here and
+     * the chain lives there: two formulations of the same thing drift apart, and this one did for
+     * months without anybody noticing.
+     *
+     * Nothing gets a placeholder. Where neither title nor address is known the caption falls away
+     * entirely -- an empty line under a picture asks nothing of the visitor, "Jahr unbekannt"
+     * seven hundred times over does, and answers nothing.
      */
-    markerCaption: (place: string | null, date: string) =>
-      place && date ? `${place} — ${date}` : (place ?? date),
+    markerLabel: (caption: string) => `${caption} — groß anzeigen`,
+    withDate: (what: string, date: string) => `${what} — ${date}`,
+    /**
+     * "Hauptstraße Nr. ?" -- the street is known, the house number is not.
+     *
+     * The question mark is deliberate and stands in line with decisions.md, Punkt 33: sharpening
+     * wants the imprecision **visible** rather than hidden behind a tidier picture. This is
+     * exactly the gap the "Welche Hausnummer?" question asks about.
+     */
+    addressWithoutNumber: (street: string) => `${street} Nr. ?`,
     clusterLabel: (count: number) => `${count} Fotos — hineinzoomen`,
     /** Several photos at the same spot: zooming in does not help here, paging does. */
     stackLabel: (count: number) => `${count} Fotos von dieser Stelle — ansehen`,

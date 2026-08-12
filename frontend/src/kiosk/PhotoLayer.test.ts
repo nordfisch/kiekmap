@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import type { PhotoMarker } from "../api/client";
-import { t } from "../text/de";
 import { buildIndex } from "./PhotoLayer";
 
 let id = 0;
@@ -39,27 +38,5 @@ describe("Was auf einem Kreis steht", () => {
 
     expect(gruppen).toHaveLength(2);
     expect(gruppen.every((g) => !("cluster" in g.properties))).toBe(true);
-  });
-});
-
-describe("Was unter einem Vorschaubild steht", () => {
-  it("setzt Adresse und Jahr zusammen", () => {
-    expect(t.map.markerCaption("Lehmweg 17b", "1953")).toBe("Lehmweg 17b — 1953");
-  });
-
-  it("laesst das Jahr weg, wo keines bekannt ist", () => {
-    // Zwei Drittel des Bestands. Vorher stand hier siebenhundertmal „Jahr unbekannt" -- eine
-    // Zeile, die ueber siebenhundert Bilder nichts sagt.
-    expect(t.map.markerCaption("Im Sande 18", "")).toBe("Im Sande 18");
-  });
-
-  it("kommt auch ohne Adresse aus", () => {
-    // Ein Foto, das nur ueber EXIF verortet ist, hat keine. Dann traegt das Jahr die Zeile allein.
-    expect(t.map.markerCaption(null, "2014")).toBe("2014");
-  });
-
-  it("bleibt leer, wenn beides fehlt", () => {
-    // Und nicht etwa ein Gedankenstrich oder eine Fehlanzeige: Die Zeile faellt dann ganz weg.
-    expect(t.map.markerCaption(null, "")).toBe("");
   });
 });
