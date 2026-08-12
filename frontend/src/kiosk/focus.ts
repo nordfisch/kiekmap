@@ -58,3 +58,27 @@ export function boundsAround(
     [lon + dLon, lat + dLat],
   ];
 }
+
+/**
+ * The rectangle that holds all of these points -- for the house numbers currently on offer.
+ *
+ * **Never smaller than `boundsAround`**, and that is the whole reason this is not two lines. The
+ * numbers of one block sit along one side of one street: their own rectangle is a few metres wide
+ * and, for a single number, has no width at all. `fitBounds` on that puts the map at a zoom level
+ * where nothing is recognisable -- or divides by zero. Every point therefore gets the same
+ * breathing space a single one would.
+ *
+ * Empty list: nothing to fit, and the caller decides what to do instead.
+ */
+export function boundsOf(
+  points: { lat: number; lon: number }[],
+  radiusM = FOCUS_RADIUS_M,
+): [[number, number], [number, number]] | null {
+  if (points.length === 0) return null;
+
+  const corners = points.map((point) => boundsAround(point.lat, point.lon, radiusM));
+  return [
+    [Math.min(...corners.map((c) => c[0][0])), Math.min(...corners.map((c) => c[0][1]))],
+    [Math.max(...corners.map((c) => c[1][0])), Math.max(...corners.map((c) => c[1][1]))],
+  ];
+}

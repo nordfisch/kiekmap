@@ -49,9 +49,8 @@ function aufgabe(need: Need, fotoId: number | null, offen = 3, andere = 3): Task
 /**
  * Antwortet je nach gefragter Art -- so wie der Bestand im Museum es tut.
  *
- * Die Nachschärf-Frage ist standardmäßig leer, weil sie es im Museum lange sein wird: Erst wenn
- * Punkt 41 (b) gelaufen ist, hat sie mehr als zwei Fotos. Wer sie prüfen will, gibt sie ausdrücklich
- * an — sonst prüfte jeder Test nebenbei eine Frage, um die es ihm gar nicht geht.
+ * Die Nachschärf-Frage ist standardmäßig leer. Wer sie prüfen will, gibt sie ausdrücklich an —
+ * sonst prüfte jeder Test nebenbei eine Frage, um die es ihm gar nicht geht.
  */
 function bestand(nachOrt: Task, nachJahr: Task, nachNummer = aufgabe("housenumber", null)) {
   geholt.mockImplementation((need: Need) =>
@@ -116,9 +115,13 @@ describe("„Weiß ich nicht“", () => {
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().need).toBe("date"));
 
-    // Die Liste gilt für beide Fragearten: einmal weggetippt ist weggetippt.
+    // Die Liste gilt für alle Fragearten: einmal weggetippt ist weggetippt. Geprüft über *jeden*
+    // Aufruf statt über einen benannten — welche Frage als nächste drankommt, sagt die Rangfolge,
+    // und die ist hier nicht das Thema.
     expect(useContribute.getState().skipped).toEqual([7]);
-    expect(geholt).toHaveBeenCalledWith("date", [7], expect.anything());
+    for (const [, uebersprungen] of geholt.mock.calls) {
+      expect(uebersprungen).toEqual([7]);
+    }
   });
 });
 
@@ -474,8 +477,13 @@ describe("Die Karte beim Verorten", () => {
     // Der Besucher hat den Punkt nicht selbst gesetzt -- er will sehen, wo er gelandet ist.
     useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
 
-    expect(useKiosk.getState().focus).not.toBeNull();
-    expect(useKiosk.getState().focus?.lat).toBe(53.62);
+    // Der Ausschnitt legt sich um den Punkt -- eine eigene Koordinate traegt der Focus nicht,
+    // die Karte liest allein `bounds`.
+    const [[west, sued], [ost, nord]] = useKiosk.getState().focus!.bounds;
+    expect(53.62).toBeGreaterThan(sued);
+    expect(53.62).toBeLessThan(nord);
+    expect(9.676).toBeGreaterThan(west);
+    expect(9.676).toBeLessThan(ost);
   });
 
   it("laesst sie bei einem auf die Karte getippten Punkt stehen", () => {
@@ -514,149 +522,71 @@ describe("Die Karte beim Verorten", () => {
   });
 });
 
-describe("Datieren aus der Detailansicht", () => {
+describe("Aus einem Foto heraus fragen", () => {
   /**
-   * Wer ein undatiertes Foto groß ansieht, soll es dort datieren können — auch wenn der
-   * Beitragsbereich gerade nach etwas ganz anderem fragt.
+   * Der Weg aus der Detailansicht: Wer ein Foto groß ansieht und dort „Wann war das?" tippt, meint
+   * genau dieses Foto. Der Wunsch geht an den Server, der ihn gegen dieselbe Bedingung prüft wie
+   * jedes andere Foto — siehe `api/contribute.py`.
    */
-  it("datiert ein Foto, das gar nicht in der Frage steht", async () => {
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("location");
+  function bestandMitWunsch(nachOrt: Task, nachJahr: Task, gewuenscht?: Task) {
+    geholt.mockImplementation((need: Need, _uebersprungen: number[], fotoId?: number | null) => {
+      if (fotoId != null && gewuenscht && gewuenscht.need === need) {
+        return Promise.resolve(gewuenscht);
+      }
+      return Promise.resolve(need === "location" ? nachOrt : nachJahr);
+    });
+  }
 
-    await useContribute.getState().submitDateFor(42, 1930, "decade");
+  it("stellt das gewuenschte Foto zur gewuenschten Frage", async () => {
+    bestandMitWunsch(aufgabe("location", 3), aufgabe("date", 8), aufgabe("date", 42));
 
-    expect(jahrGesendet).toHaveBeenCalledWith(
-      42,
-      expect.objectContaining({ year: 1930, precision: "decade" }),
-    );
+    await useContribute.getState().askAbout(42, "date");
+
+    expect(useContribute.getState().need).toBe("date");
+    expect(useContribute.getState().task?.photo?.id).toBe(42);
   });
 
-  it("zeigt keinen Dank", async () => {
-    // Die Rückmeldung ist die Ansicht selbst: Aus „Jahr unbekannt" wird die Jahreszahl, und die
-    // Knöpfe verschwinden. Ein Satz darüber blendete nur 2,2 Sekunden den Beitragsbereich aus.
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("location");
+  it("reicht die Foto-Nummer nur bei der gewuenschten Frage weiter", async () => {
+    // Der Rückfall gilt einer *anderen* Frage. Ein Wunsch, der dort mitliefe, hiesse: „lege mir
+    // dieses Foto zu einer Frage vor, zu der es nichts zu sagen hat."
+    bestandMitWunsch(aufgabe("location", 3), aufgabe("date", 8), aufgabe("date", 42));
 
-    await useContribute.getState().submitDateFor(42, 1930, "decade");
+    await useContribute.getState().askAbout(42, "date");
 
-    expect(useContribute.getState().thanks).toBeNull();
+    expect(geholt).toHaveBeenCalledWith("date", [], 42, expect.anything());
   });
 
-  it("aktualisiert Karte und Zeitleiste", async () => {
-    // Das Foto wandert aus „ohne Jahr" in einen Jahrzehnt-Balken. Ohne das sähe man es erst,
-    // wenn zufällig jemand die Karte verschiebt.
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("location");
-    fotosGeholt.mockClear();
-    histogrammGeholt.mockClear();
-
-    await useContribute.getState().submitDateFor(42, 1930, "decade");
-
-    expect(fotosGeholt).toHaveBeenCalled();
-    expect(histogrammGeholt).toHaveBeenCalled();
-  });
-
-  it("laedt die Frage neu, wenn sie dasselbe Foto nach dem Jahr fragte", async () => {
+  it("faellt auf die Rangfolge zurueck, wenn das Foto nichts mehr braucht", async () => {
     /**
-     * Der wichtigste Fall. Ohne ihn legt der Beitragsbereich gleich noch einmal dasselbe Foto vor,
-     * der Besucher antwortet ein zweites Mal — und bekommt „Dieses Foto hat inzwischen schon eine
-     * Angabe bekommen". Eine Meldung, die klingt, als sei jemand anders schneller gewesen, obwohl
-     * er selbst es war.
+     * Zwischen dem Tippen und dem Laden kann jemand anders geantwortet haben. Der Server legt dann
+     * ein anderes Foto vor — und der Bereich macht weiter, statt mit einer beantworteten Frage
+     * dazustehen.
      */
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("date");
-    expect(useContribute.getState().task?.photo?.id).toBe(8);
+    bestandMitWunsch(aufgabe("location", 3), aufgabe("date", 8));
 
-    await useContribute.getState().submitDateFor(8, 1930, "decade");
-
-    expect(useContribute.getState().need).toBe("location");
-    expect(useContribute.getState().task?.photo?.id).toBe(7);
-  });
-
-  it("laesst die Ortsfrage stehen, auch bei demselben Foto", async () => {
-    // Das Foto braucht den Ort unverändert — datiert ist es jetzt, verortet nicht.
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("location");
-
-    await useContribute.getState().submitDateFor(7, 1930, "decade");
-
-    expect(useContribute.getState().need).toBe("location");
-    expect(useContribute.getState().task?.photo?.id).toBe(7);
-  });
-
-  it("laesst eine Frage zu einem anderen Foto in Ruhe", async () => {
-    // Sonst würfe ein Beitrag aus der Detailansicht einen halb gesetzten Pin weg.
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("date");
-
-    await useContribute.getState().submitDateFor(99, 1930, "decade");
-
-    expect(useContribute.getState().task?.photo?.id).toBe(8);
-  });
-});
-
-describe("Nachschaerfen aus der Detailansicht", () => {
-  /**
-   * Ein Foto, das nur seine Straße kennt, liegt auf deren Mitte — mitunter 400 Meter vom Haus
-   * entfernt. Wer das Haus erkennt, erkennt es am Bild, nicht am Marker.
-   */
-  it("schaerft ein Foto, das gar nicht in der Frage steht", async () => {
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("location");
-
-    await useContribute.getState().submitHouseNumberFor(42, 555);
-
-    expect(nummerGesendet).toHaveBeenCalledWith(42, expect.objectContaining({ place_id: 555 }));
-  });
-
-  it("sendet weder Koordinate noch Genauigkeit mit", async () => {
-    /**
-     * Der Angriffsfall, und zugleich die Begründung für die eigene Tür: Bestimmte der Client die
-     * Genauigkeit, könnte ein Aufruf mit `accuracy_m: 1` jede Angabe im Bestand ersetzen. Beides
-     * holt der Server aus dem Ortsverzeichnis — hier darf es gar nicht erst mitreisen.
-     */
-    await useContribute.getState().submitHouseNumberFor(42, 555);
-
-    const [, gesendet] = nummerGesendet.mock.calls[0]!;
-    expect(gesendet).not.toHaveProperty("lat");
-    expect(gesendet).not.toHaveProperty("lon");
-    expect(gesendet).not.toHaveProperty("accuracy_m");
-  });
-
-  it("zeigt keinen Dank", async () => {
-    // Die Rückmeldung ist die Zeile über den Knöpfen: Aus „Am Kamp" wird „Am Kamp 12".
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("location");
-
-    await useContribute.getState().submitHouseNumberFor(42, 555);
-
-    expect(useContribute.getState().thanks).toBeNull();
-  });
-
-  it("aktualisiert die Karte", async () => {
-    // Der Marker rückt von der Straßenmitte an das Haus. Ohne das bliebe er liegen, bis zufällig
-    // jemand die Karte verschiebt.
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("location");
-    fotosGeholt.mockClear();
-
-    await useContribute.getState().submitHouseNumberFor(42, 555);
-
-    expect(fotosGeholt).toHaveBeenCalled();
-  });
-
-  it("laesst die laufende Frage in Ruhe", async () => {
-    /**
-     * Auch bei demselben Foto. Ein nachschärfbares Foto ist verortet, wird also von „Wo ist das?"
-     * gar nicht vorgelegt, und sein Jahr rührt der Beitrag nicht an. Ein Neuladen würfe hier nur
-     * einen halb gesetzten Pin weg.
-     */
-    bestand(aufgabe("location", 7), aufgabe("date", 8));
-    await useContribute.getState().load("date");
-
-    await useContribute.getState().submitHouseNumberFor(8, 555);
+    await useContribute.getState().askAbout(42, "date");
 
     expect(useContribute.getState().need).toBe("date");
     expect(useContribute.getState().task?.photo?.id).toBe(8);
+  });
+
+  it("geht danach den gewohnten Weg", async () => {
+    /**
+     * Der Test, der festhält, dass hier **keine** Sonderregel gebaut wurde: Nach der Antwort
+     * kommen Dank und Kette wie nach jedem anderen Beitrag. Wer aus einem Foto heraus antwortet,
+     * ist im Beitragsbereich gelandet, und dort gehört die nächste Frage hin.
+     */
+    bestandMitWunsch(aufgabe("location", 3), aufgabe("date", 8), aufgabe("date", 42));
+    jahrGesendet.mockResolvedValue({
+      id: 42,
+      needs_date: false,
+      needs_location: true,
+    } as PhotoDetail);
+
+    await useContribute.getState().askAbout(42, "date");
+    await useContribute.getState().submitDate(1932, "year");
+
+    // Der Dank fragt nach dem, was diesem Foto noch fehlt -- und das ist der Ort.
+    expect(useContribute.getState().thanks).toBe(t.help.thanksAsk.location);
   });
 });

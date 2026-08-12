@@ -83,8 +83,6 @@ type KioskState = {
    * with the reset after idling. `seq` makes sure the same place twice fires twice.
    */
   focus: {
-    lat: number;
-    lon: number;
     bounds: [[number, number], [number, number]];
     seq: number;
   } | null;
@@ -106,6 +104,14 @@ type KioskState = {
    * visitor where their point landed.
    */
   showLocation: (lat: number, lon: number) => void;
+  /**
+   * Move the map onto a rectangle -- for the house numbers currently on offer.
+   *
+   * The counterpart to ``showLocation`` for a set of points rather than one: whoever is asked for
+   * a house number has to see the numbers, and on a street of 132 addresses one point in its
+   * middle shows none of them. Built with ``boundsOf``.
+   */
+  showArea: (bounds: [[number, number], [number, number]]) => void;
   /** After a contribution: set map and time range so that this photo is visible. */
   showPhoto: (photo: PhotoDetail) => void;
   /** Take both back together -- at the end of the thank-you. */
@@ -290,9 +296,11 @@ export const useKiosk = create<KioskState>((set, get) => {
     },
 
     showLocation(lat, lon) {
-      set((state) => ({
-        focus: { lat, lon, bounds: boundsAround(lat, lon), seq: (state.focus?.seq ?? 0) + 1 },
-      }));
+      get().showArea(boundsAround(lat, lon));
+    },
+
+    showArea(bounds) {
+      set((state) => ({ focus: { bounds, seq: (state.focus?.seq ?? 0) + 1 } }));
     },
 
     /**
@@ -308,8 +316,6 @@ export const useKiosk = create<KioskState>((set, get) => {
 
       set((state) => ({
         focus: {
-          lat: photo.lat as number,
-          lon: photo.lon as number,
           bounds: boundsAround(photo.lat as number, photo.lon as number),
           seq: (state.focus?.seq ?? 0) + 1,
         },
