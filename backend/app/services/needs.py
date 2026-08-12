@@ -6,9 +6,16 @@ move on to. Spread across three formulations they drift apart, and each of them 
 own.
 
 **The order of ``NEEDS`` is the rank.** A question is only reached from another one when
-everything ahead of it has run dry. That is where "sharpening comes last" lives: not in a case
-distinction, but in the position of a word in a tuple. Locating a photo that has no place at all
-is worth more than moving one from the middle of a street to its house number.
+everything ahead of it has run dry -- not in a case distinction, but in the position of a word in
+a tuple. Locating a photo that has no place at all comes first: it is the only question whose
+photograph is on no map at all.
+
+**Sharpening ranks above dating, and the reason is arithmetic.** Both orders are defensible from
+the armchair -- a year is worth more than a house number. But on the Holm stock the dating question
+holds 673 photographs and the sharpening question 71, and a question is only reached once the ones
+ahead of it are *empty*. Put dating first and sharpening is never reached at all; the panel would
+carry a third question that nobody is ever asked. Rank it above and it runs dry after 71 answers,
+after which dating gets the panel to itself for as long as it takes.
 """
 
 from typing import Literal, get_args
@@ -19,7 +26,7 @@ from app.models import Photo, Place
 from app.services.places import ACCURACY_STREET_M
 
 #: In rank order -- see the module docstring.
-Need = Literal["location", "date", "housenumber"]
+Need = Literal["location", "housenumber", "date"]
 NEEDS: tuple[Need, ...] = get_args(Need)
 
 

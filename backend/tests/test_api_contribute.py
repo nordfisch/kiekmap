@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.models import Change, Photo, PhotoStatus, Place, Source
+from app.services.needs import NEEDS
 from app.services.places import normalize
 
 # Holm
@@ -109,6 +110,29 @@ class TestEineDefinitionJeFrage:
             gemeldet = client.get("/api/contribute/next", params={"need": frage}).json()
             erwartet = sum(1 for foto in fotos if getattr(foto, eigenschaft))
             assert gemeldet["open_count"] == erwartet, frage
+
+
+class TestRangfolge:
+    """Die Reihenfolge in ``NEEDS`` ist der Rang, und sie ist nur hier festgehalten.
+
+    Ohne diesen Test liess sich die Reihenfolge vertauschen, ohne dass im Backend ein Test fiel --
+    nachgeprueft am 11. August 2026, als sie tatsaechlich vertauscht wurde. Gemerkt hat es allein
+    ein Test im Frontend, wo dieselbe Liste ein zweites Mal steht.
+    """
+
+    def test_der_ort_steht_vor_allem_anderen(self):
+        """Ein Foto, das auf keiner Karte steht, ist die teuerste Luecke."""
+        assert NEEDS[0] == "location"
+
+    def test_die_hausnummer_steht_vor_dem_jahr(self):
+        """Aus einer Zahl entschieden, nicht aus dem Gefuehl.
+
+        Ein Jahr ist mehr wert als eine Hausnummer -- danach gefragt wird trotzdem spaeter. Eine
+        Frage wird erst erreicht, wenn die vor ihr **leer** ist, und im Erstbestand stehen 673
+        undatierte Fotos gegen 71 nachzuschaerfende. Hinter dem Jahr waere die dritte Frage nie
+        erreicht worden: Der Bereich truege eine Frage, die niemand je gestellt bekommt.
+        """
+        assert NEEDS.index("housenumber") < NEEDS.index("date")
 
 
 @pytest.fixture

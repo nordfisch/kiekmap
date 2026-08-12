@@ -159,11 +159,11 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
 });
 
 describe("Die Rangfolge der drei Fragen", () => {
-  it("kommt zum Nachschaerfen erst, wenn Ort und Jahr nichts mehr hergeben", async () => {
+  it("kommt zum Nachschaerfen, wenn nach dem Ort nichts mehr offen ist", async () => {
     /**
-     * Der Kern der Nachrangigkeit. Ein Foto irgendwohin zu setzen ist mehr wert, als eines von der
-     * Straßenmitte an sein Haus zu rücken — und diese Rangfolge steckt allein in der Reihenfolge
-     * von `NEEDS`, nicht in einer Fallunterscheidung.
+     * Ein Foto irgendwohin zu setzen ist mehr wert, als eines von der Straßenmitte an sein Haus zu
+     * rücken — und diese Rangfolge steckt allein in der Reihenfolge von `NEEDS`, nicht in einer
+     * Fallunterscheidung.
      */
     bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", 12));
 
@@ -173,18 +173,23 @@ describe("Die Rangfolge der drei Fragen", () => {
     expect(useContribute.getState().task?.photo?.id).toBe(12);
   });
 
-  it("nimmt das Jahr vor der Hausnummer, wenn beide etwas haetten", async () => {
+  it("nimmt die Hausnummer vor dem Jahr, wenn beide etwas haetten", async () => {
     /**
      * Der Test, der die Reihenfolge in `NEEDS` wirklich prüft: Beide Fragen könnten liefern, und
-     * nur die Position im Tupel entscheidet. Ohne ihn ließe sich „date" und „housenumber"
+     * nur die Position im Tupel entscheidet. Ohne ihn ließe sich „housenumber" und „date"
      * vertauschen, ohne dass ein Test es merkte — nachgeprüft, es fiel keiner.
+     *
+     * Dass die Hausnummer vorn steht, ist am 11. August 2026 aus einer Zahl entschieden worden
+     * und nicht aus dem Gefühl: Ein Jahr ist mehr wert als eine Hausnummer, aber im Bestand
+     * stehen 673 undatierte Fotos gegen 71 nachzuschärfende. Hinter dem Jahr wäre die dritte
+     * Frage nie erreicht worden — siehe `services/needs.py`.
      */
     bestand(aufgabe("location", null), aufgabe("date", 8), aufgabe("housenumber", 12));
 
     await useContribute.getState().load("location");
 
-    expect(useContribute.getState().need).toBe("date");
-    expect(useContribute.getState().task?.photo?.id).toBe(8);
+    expect(useContribute.getState().need).toBe("housenumber");
+    expect(useContribute.getState().task?.photo?.id).toBe(12);
   });
 
   it("laesst das Nachschaerfen liegen, solange ein Foto ohne Ort dasteht", async () => {

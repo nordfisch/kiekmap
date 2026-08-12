@@ -87,12 +87,13 @@ export type TimeRange = { from: number; to: number };
 /**
  * What the panel can ask about, **in rank order** -- mirrors `services/needs.py`.
  *
- * The order is the ranking: a question is only reached once everything ahead of it has run dry.
- * Sharpening comes last, and that fact lives in the position of a word rather than in a case
- * distinction. An array rather than a bare union so that nothing can be added to the type without
- * being given a place in the order.
+ * The order is the ranking: a question is only reached once everything ahead of it has run dry,
+ * and that fact lives in the position of a word rather than in a case distinction. Why sharpening
+ * ranks above dating even though a year is worth more than a house number is a matter of counts --
+ * see the module docstring of `services/needs.py`. An array rather than a bare union so that
+ * nothing can be added to the type without being given a place in the order.
  */
-export const NEEDS = ["location", "date", "housenumber"] as const;
+export const NEEDS = ["location", "housenumber", "date"] as const;
 
 export type Need = (typeof NEEDS)[number];
 
