@@ -2241,3 +2241,15 @@ den falschen Feldern.
 
 Nebenbei gefunden und mitgenommen: 59 Beschreibungen trugen Wagenrueckaeufe aus
 Windows-Zeilenenden.
+
+### Punkt 41 ist damit aus dem Backlog gezogen
+
+Die maschinelle Vorbereitung des Erstbestands ist abgeschlossen: Was sich aus Dateien, Ordnernamen
+und den vorhandenen Textfeldern ableiten liess, ist abgeleitet. **Die Nummer 41 bleibt vergriffen**
+und wird nie neu vergeben — wer sie in einer alten Notiz findet, findet sie hier.
+
+Was noch von Hand zu tun ist, hat [backlog.md](backlog.md) unter
+[Punkt 1](backlog.md#1--der-erstbestand-braucht-eine-durchsicht) aufgenommen, und es ist genau das,
+was Ortskenntnis braucht: 669 fehlende Beschreibungen, 621 undatierte Fotos ohne Anhalt im Text,
+rund 100 Titel, die eher Notiz als Titel sind, und 5 Fotos ohne Ort. Zwei Fehler, die erst durch
+das Aufraeumen sichtbar wurden, stehen als Punkt 44 und 45 daneben.

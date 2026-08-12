@@ -43,7 +43,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 |---|---|---|---|
 | | **Verwaltung** | | |
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
-| 41 | [Den Erstbestand maschinell vorbereiten](#41--den-erstbestand-maschinell-vorbereiten) | Aufgabe | — |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
@@ -81,35 +80,39 @@ steht in [history.md](history.md). Der nächste neue Punkt bekommt die **44**.
 
 ### 1 · Der Erstbestand braucht eine Durchsicht
 
-929 Fotos sind eingelesen, und der Import hat aus Dateien und Ordnernamen herausgeholt, was
-darin stand. Was er *nicht* konnte, ist jetzt Handarbeit — und weil es Ortskenntnis braucht,
-gehört sie dem Museumsteam, nicht dem Rechner:
+929 Fotos sind eingelesen, und am 11. und 12. August 2026 hat eine maschinelle Runde alles
+herausgeholt, was sich aus Dateien, Ordnernamen und den vorhandenen Textfeldern ableiten ließ —
+Verortung, Titel, Beschreibungen, Datierungen, Schlagwörter. Sie ist abgeschlossen und in der
+[history.md](history.md) beschrieben; sie lief unter der Nummer 41, die damit vergriffen ist.
 
-- **670 Fotos ohne Jahr.** Das ist gewollt: Es sind die historischen Scans, und ihr EXIF-Datum
-  ist das des Scanlaufs. Sie sind der Vorrat für „Wann war das?" — aber die Zeitleiste zeigt
-  vorerst nur 2010 bis 2024, weil ausschließlich die neuen Kameraaufnahmen datiert sind. Ein
-  paar Dutzend datierte Altaufnahmen würden die Leiste erst brauchbar machen.
-- **74 Fotos ohne Ort**, davon 7 auch ohne Straße — die vier losen Dateien oben im Import-Ordner
-  und die aus `Deelenweg`, wo der Ortsindex zwei Straßen kennt („Deelenweg I" und „II") und
-  deshalb bewusst nicht rät.
-- **60 Fotos nur straßengenau** (58 vom Kurator, 2 von Besuchern), weil die Hausnummer nicht in
-  OpenStreetMap steht. Die 2 legt der Beitragsbereich seit dem 10. August 2026 zum Nachschärfen
-  vor; die 58 kennen ihre Nummer bereits und gehören zu Punkt 41 (a) weiter unten.
-- **Schlagwörter aus den Dateien**, die keine sind: „Wer hat eine bessere Vorlage?", „Or01-1",
-  „Förderkreis-Cloud". Sie stammen aus der Archivarbeit und stehen jetzt im Kiosk.
-- **18 Fotos heißen „Intel(R) JPEG Library, version [1.51.12.44]".** Das ist kein Titel, sondern
-  ein EXIF-Feld, das ein Bildprogramm hinterlassen hat — und es steht heute als Überschrift in der
-  Detailansicht. Von allen Befunden dieser Liste ist es der einzige, den ein Besucher sofort sieht.
+**Was jetzt hier steht, ist der Rest — und der braucht Ortskenntnis.** Er gehört dem Museumsteam,
+nicht dem Rechner:
 
-**Alle Zahlen hier sind vom 9. August 2026**, und sie wandern: Jeder Besucherbeitrag verschiebt
-sie, und die anderen Punkte dieser Datei tragen den Stand des Tages, an dem sie geschrieben wurden.
-Wer eine davon braucht, holt sie sich mit `python -m app.cli stats`, statt sie hier abzulesen — die
-Größenordnung stimmt, die letzte Stelle nicht.
+- **669 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist
+  genau das, was sich aus keinem vorhandenen Feld ableiten lässt. Wer das Bild ansieht und den Ort
+  kennt, schreibt in einer Minute, was keine Regel je finden wird.
+- **621 Fotos ohne Jahr.** Die 83, die eine Jahreszahl im Text trugen, sind durchgesehen; 52 sind
+  datiert, 17 Vorschläge wurden verworfen, weil das Jahr das Gebäude datierte und nicht die
+  Aufnahme ([decisions.md](decisions.md), Punkt 37). Der Rest trägt keinen Anhalt. **Ein Teil
+  davon löst sich von selbst:** Es ist der Vorrat für „Wann war das?", und der Beitragsbereich
+  legt ihn Besuchern vor. Die Zeitleiste reicht seit der Datierung von 1880 bis 2030 und ist damit
+  brauchbar — jedes weitere Jahr macht sie dichter, keines mehr macht sie überhaupt erst möglich.
+- **Rund 100 eigenständige Titel**, unter denen einzelne eher Notiz als Titel sind: „Vermutung:
+  hinter der Zahnarztpraxis oder hinter der ‚Börse'". Ob so etwas ein Titel bleibt, in die
+  Beschreibung wandert oder verschwindet, entscheidet nur, wer weiß, was auf dem Bild ist.
+- **5 Fotos ohne Ort.** Vier lagen lose oben im Import-Ordner, eines kommt aus `Deelenweg`, wo der
+  Ortsindex zwei Straßen kennt („Deelenweg I" und „II") und deshalb bewusst nicht rät. Für alle
+  fünf gilt: Ein Blick auf das Bild beantwortet es, eine Regel nicht.
+- **253 Schlagwörter**, jetzt alle wirklich Stichwörter — die Archivkürzel und die abgeschriebenen
+  Rückseiten sind heraus. Ob die verbliebenen taugen, entscheidet sich erst mit
+  [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern), wenn daraus ein Filter wird.
 
-Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene Nacharbeits-Liste reicht, ist Teil
-der Frage. Was davon **ohne Ortskenntnis** zu machen ist — Titel, Zusätze, Archivkürzel —, nimmt
-[Punkt 41](#41--den-erstbestand-maschinell-vorbereiten) ab; hier bleibt, was nur das Museumsteam
-weiß.
+**Die Zahlen sind vom 12. August 2026** und wandern: Jeder Besucherbeitrag verschiebt sie. Wer eine
+davon braucht, holt sie sich mit `python -m app.cli stats`, statt sie hier abzulesen.
+
+**Offen ist auch das Wie.** Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene
+Nacharbeits-Liste reicht, ist Teil der Frage — und sie stellt sich jetzt anders als vorher, weil
+es nur noch um Fälle geht, bei denen ohnehin ein Mensch das Bild ansieht.
 
 ### 31 · Einstellungen in der Verwaltung pflegen statt in der `.env`
 
@@ -159,56 +162,6 @@ daraus „starten und durch die Verwaltung gehen". Für Ehrenamtliche besser; f�
 zweites Museum aufsetzt, ist die eine übergebbare Datei dann weg. Vielleicht ist die Antwort
 beides: Datei als Startwert, Datenbank als Übersteuerung — genau das gehört durchdacht, bevor
 etwas gebaut wird.
-
-### 41 · Den Erstbestand maschinell vorbereiten
-
-[Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht) sagt, die Durchsicht brauche Ortskenntnis
-und gehöre deshalb dem Museumsteam. Das stimmt für das Datieren — **für den größten Teil der
-übrigen Arbeit stimmte es nicht**, und genau dafür war dieser Punkt da.
-
-**Er ist am 11. und 12. August 2026 abgearbeitet worden**, in zwei Runden und ohne das
-Sprachmodell, das hier ursprünglich vorgesehen war. Das Nachmessen sagte jedes Mal etwas anderes
-als die Planung: Fast alles war exakt entscheidbar, und wo es das nicht war, ging es um Listen von
-neun bis fünfzig Zeilen, die ein Mensch in einer Viertelstunde durchsieht. Wie es lief, steht in
-[history.md](history.md); die vier Regeln, die sich dabei ergeben haben, in
-[decisions.md](decisions.md), Punkt 34 bis 37.
-
-| | vorher | nachher |
-|---|---|---|
-| ohne Ort | 77 | **5** |
-| hausgenau (15 m) | 381 | **787** |
-| auf einer eingetragenen EXIF-Koordinate | 413 | 64 |
-| auf der Karte | 852 | **924 von 929** |
-| ohne Herkunftsangabe | 3 | **0** |
-| Titel, der die Adresse daneben wiederholt | 815 | **0** |
-| **mit Beschreibung** | 209 | **260** |
-| **ohne Jahr** | 673 | **621** |
-| Schlagwörter | 308 | **253** |
-
-**Was bleibt, gehört dem Museumsteam** und damit
-[Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht):
-
-- **669 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen — eine Beschreibung ist
-  genau das, was sich aus keinem vorhandenen Feld ableiten lässt.
-- **621 ohne Jahr.** Die 83 Fotos mit einer Jahreszahl im Text sind durchgesehen; 52 sind datiert,
-  17 Vorschläge wurden verworfen, weil das Jahr das Gebäude datierte und nicht die Aufnahme
-  ([decisions.md](decisions.md), Punkt 37). Der Rest trägt keinen Anhalt und wird über den
-  „Hilf mit"-Bereich beantwortet — dafür ist er gebaut.
-- **Rund 100 eigenständige Titel**, unter denen einzelne eher Notiz als Titel sind. Sie zu
-  beurteilen heißt zu wissen, was auf dem Bild ist.
-- **253 Schlagwörter**, jetzt alle wirklich Stichwörter. Ob sie taugen, entscheidet
-  [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern), wenn daraus ein Filter wird — das ist
-  der Anfang der nächsten Aufgabe, nicht der Rest dieser.
-
-**Ersatzlos entfallen ist die Jahreszahl im Dateinamen.** Sie stand bis zum 9. August 2026 als
-eigener Punkt 2 im Backlog, gedacht für `Kirchweih_1932_Muehle.jpg`. Nachgezählt: **kein einziges**
-undatiertes Foto trägt eine im Namen.
-
-**Und die Folge, die eingetreten ist:** Unter dem Vorschaubild steht die **Adresse** und nicht der
-Titel (Punkt 27, erledigt; [decisions.md](decisions.md), Punkt 29) — **und zwar weil die Titel
-damals Adressen waren.** Das sind sie nicht mehr. Die Entscheidung gehört neu getroffen; sie hängt
-mit [Punkt 44](#44--marker-beschriftung-und-vorlesetext-sagen-verschiedenes) zusammen, wo derselbe
-Widerspruch als Fehler steht.
 
 ### 42 · Dubletten finden, die beste behalten, den Rest zusammenführen
 
@@ -287,11 +240,12 @@ Nachgezählt an den 929 Fotos:
 | ArchivHolm | 114 | Archivkürzel |
 | Winter | 53 | das erste, das etwas über das Bild sagt |
 
-Von 308 Schlagwörtern sitzen **260 auf weniger als zehn Fotos**, und „Erntefest" — das Beispiel aus
-der Idee — gibt es nicht; es gibt „Fest" und „Feuerwehr". Ein gebauter Filter hätte also zunächst
-nichts Sinnvolles anzubieten. **Dieser Punkt hängt an
-[Punkt 41](#41--den-erstbestand-maschinell-vorbereiten)**, wo die Schlagwörter aus der Archivarbeit
-aussortiert werden — vorher lohnt der Bau nicht.
+Von 308 Schlagwörtern saßen **260 auf weniger als zehn Fotos**, und „Erntefest" — das Beispiel aus
+der Idee — gibt es nicht; es gibt „Fest" und „Feuerwehr". **Die Archivkürzel und die abgeschriebenen
+Fotorückseiten sind inzwischen heraus** ([history.md](history.md), 12. August 2026); von 308
+Schlagwörtern sind 253 geblieben, und die sind alle wirklich Stichwörter. Ob sie für einen Filter
+taugen, ist damit erst jetzt zu beurteilen — und die Zahlen in diesem Punkt sind vom 9. August und
+entsprechend zu erneuern.
 
 **Warum die Auswahl eingerichtet wird und sich nicht aus dem Bestand ergibt:** Die naheliegende
 Regel wäre „die häufigsten", wie sie die angebotenen Jahrzehnte aus der Sammlung ableitet
@@ -500,19 +454,25 @@ Bestand von hundert Jahren stünden sonst hundert schmale Balken, wo heute zehn 
 
 ### 44 · Marker-Beschriftung und Vorlesetext sagen Verschiedenes
 
-**Ein Fehler, der erst durch [Punkt 41](#41--den-erstbestand-maschinell-vorbereiten) sichtbar
-wurde.** Unter dem Vorschaubild steht die Adresse (`t.map.markerCaption`, gespeist aus
-`place_name`), im `aria-label` desselben Knopfes steht der Titel (`t.map.markerLabel`, gespeist aus
-`title`) — siehe `kiosk/PhotoLayer.tsx`. Wer sieht, liest „Hauenweg 7"; wer vorlesen lässt, hört
-„Hermann Berg".
+**Ein Fehler, der erst durch das Aufräumen des Erstbestands sichtbar wurde**
+([history.md](history.md), 11. und 12. August 2026). Unter dem Vorschaubild steht die Adresse
+(`t.map.markerCaption`, gespeist aus `place_name`), im `aria-label` desselben Knopfes steht der
+Titel (`t.map.markerLabel`, gespeist aus `title`) — siehe `kiosk/PhotoLayer.tsx`. Wer sieht, liest
+„Hauenweg 7"; wer vorlesen lässt, hört „Hermann Berg".
 
-Das stand schon immer so im Code und fiel nie auf, **weil Titel und Adresse bis zum 11. August 2026
-dasselbe waren.** Seit die Titel aufgeräumt sind, gehen sie auseinander.
+Das stand schon immer so im Code und fiel nie auf, **weil Titel und Adresse bis dahin dasselbe
+waren.** Seit die Titel aufgeräumt sind, gehen sie auseinander.
 
-Zu entscheiden ist beides zusammen, und die Frage ist dieselbe wie in Punkt 41: Was gehört unter
-ein Vorschaubild? Ein Titel sagt mehr, passt aber nicht immer und fehlt bei **198** Fotos ganz;
-eine Adresse passt immer und sagt weniger. Ein Vorschlag wäre Titel mit Rückfall auf die Adresse —
-dann trüge der Vorlesetext dieselbe Regel und beide sagten wieder dasselbe.
+**Und damit steht zugleich eine ältere Entscheidung neu zur Wahl.** Unter dem Vorschaubild steht
+die Adresse und nicht der Titel, seit dem 9. August 2026 und mit Begründung
+([decisions.md](decisions.md), Punkt 29) — **und zwar weil die Titel damals Adressen waren.** Das
+sind sie nicht mehr: „Gasthof Timm — 1953" ist jetzt die bessere Beschriftung als
+„Hauptstraße 11a — 1953". Die Änderung selbst ist eine Zeile in `t.map.markerCaption`.
+
+**Was sie nicht billig macht, ist die Frage dahinter:** Ein Titel sagt mehr, passt aber nicht immer
+unter ein Vorschaubild und **fehlt bei 227 Fotos ganz**; eine Adresse passt immer und sagt weniger.
+Ein Vorschlag wäre Titel mit Rückfall auf die Adresse — dann trüge der Vorlesetext dieselbe Regel,
+und beide sagten wieder dasselbe.
 
 ### 45 · Bei langen Straßen liegen die Hausnummern außerhalb des Ausschnitts
 
@@ -529,7 +489,8 @@ dafür liegen bereits vor (`offeredNumbers` im Beitrags-Store, gesetzt über `on
 Aufruf, der eine `bbox` daraus bildet und die Karte darauf setzt, statt `showLocation` einmal beim
 Laden.
 
-Aufgefallen am 11. August 2026, unmittelbar nachdem die Frage durch Punkt 41 überhaupt Fotos bekam.
+Aufgefallen am 11. August 2026, unmittelbar nachdem die Frage durch das Aufräumen des Erstbestands
+überhaupt Fotos bekam ([history.md](history.md)).
 Vorher stand sie auf zwei Fotos an kurzen Straßen und der Fall trat nie ein.
 
 ---

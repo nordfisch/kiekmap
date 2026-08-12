@@ -1033,9 +1033,12 @@ alles andere gilt die Regel weiter.
 nicht, und wer sich die Karte vorlesen laesst, hat den Marker nicht im Blick. Deshalb liefert der
 Marker beide Formen.
 
-Ist der Erstbestand erst aufgeraeumt ([backlog.md](backlog.md), Punkt 41), waere „Gasthof Timm
-— 1953" die bessere Beschriftung. Der Marker traegt den Titel schon mit; die Entscheidung ist dann
-neu zu treffen und kostet eine Zeile.
+**Der Erstbestand ist inzwischen aufgeraeumt** (11. und 12. August 2026, siehe
+[history.md](history.md)), und damit ist die Voraussetzung dieser Entscheidung entfallen: Die Titel
+sind keine Adressen mehr. „Gasthof Timm — 1953" waere jetzt die bessere Beschriftung; der
+Marker traegt den Titel ohnehin mit, die Aenderung kostet eine Zeile. Die Entscheidung ist neu zu
+treffen und steht als [backlog.md](backlog.md), Punkt 44 an — zusammen mit dem Fehler, dass
+Beschriftung und Vorlesetext seitdem Verschiedenes sagen.
 
 ---
 
@@ -1158,7 +1161,8 @@ demjenigen zu bewerten geben darf, der davon profitiert.
 
 **Wer gefragt wird**, entscheidet `services/needs.py` aus vier Bedingungen: straßengenau (150 m),
 ein `place_name` **ohne Ziffer** — steht die Nummer schon im Namen, fehlt nur die Koordinate, und
-das ist maschinelle Arbeit (Punkt 41) —, und der Ortsindex muss für diese Straße überhaupt Adressen
+das ist maschinelle Arbeit (am 11. August 2026 erledigt, siehe Punkt 34) —, und der Ortsindex muss
+für diese Straße überhaupt Adressen
 haben. 141 der 486 Straßen haben keine; ohne diese Bedingung stünde die Frage ohne einen einzigen
 Knopf darunter auf dem Schirm.
 
@@ -1178,10 +1182,9 @@ einem Straßennamen ohne Hausnummer **bewusst unverortet**, mit der Begründung:
 „sähe aus wie eine Antwort", und das Foto fiele aus „Wo ist das?" heraus. Das war richtig, solange
 es zwei Fragen gab. Mit der dritten fallen diese Fotos nicht heraus, sondern **in die genauere
 Frage hinein** — die Begründung ist damit hinfällig, und die Regel gehört umgekehrt. Betroffen sind
-64 der 72 Fotos ohne Ort; ausgeführt wird es unter
-[Punkt 41](backlog.md#41--den-erstbestand-maschinell-vorbereiten), weil es auch den Bestand
-umschreibt. Bis dahin steht die alte Regel noch im Code — sie steht dort ohne Begründung, und das
-ist der Grund, warum der Widerruf hier steht und nicht erst dann.
+64 der 72 Fotos ohne Ort. **Ausgeführt am 11. August 2026** — die Regel in `_locate` ist umgekehrt,
+und dieselben Fotos sind im Bestand nachgezogen worden; siehe [history.md](history.md) und Punkt 34
+weiter unten.
 
 ## 33. Stapel werden nicht gestreut, Stufenwechsel werden animiert
 
