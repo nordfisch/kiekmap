@@ -50,8 +50,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
 | 44 | [Marker-Beschriftung und Vorlesetext sagen Verschiedenes](#44--marker-beschriftung-und-vorlesetext-sagen-verschiedenes) | **Fehler** | wichtig |
-| 45 | [Bei langen Straßen liegen die Hausnummern außerhalb des Ausschnitts](#45--bei-langen-straßen-liegen-die-hausnummern-außerhalb-des-ausschnitts) | **Fehler** | wichtig |
-| 46 | [Aus der Detailansicht in den „Hilf mit"-Bereich verzweigen](#46--aus-der-detailansicht-in-den-hilf-mit-bereich-verzweigen) | Aufgabe | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
@@ -62,6 +60,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 17 | [Containerbetrieb prüfen](#17--containerbetrieb-prüfen) | Aufgabe | wichtig |
 | 18 | [Wiederherstellung wirklich proben](#18--wiederherstellung-wirklich-proben) | Aufgabe | wichtig |
 | 19 | [Displayauflösung und -orientierung des Museumsgeräts](#19--displayauflösung-und--orientierung-des-museumsgeräts) | Frage | wichtig |
+| 47 | [Der Entwicklungsbestand wandert nicht mit den Migrationen](#47--der-entwicklungsbestand-wandert-nicht-mit-den-migrationen) | **Fehler** | wichtig · dringend |
 | 20 | [Read-Only-Overlay-Dateisystem](#20--read-only-overlay-dateisystem) | Idee | — |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
@@ -69,12 +68,13 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Drei Fehler sind offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm; 44 und 45 sind am
-12. August 2026 dazugekommen, als das Aufräumen des Erstbestands sie sichtbar machte.
+**Drei Fehler sind offen**: Punkt 47 lässt jeden Besucherbeitrag am Entwicklungsbestand
+scheitern; Punkt 44 verwechselt Marker-Beschriftung und Vorlesetext; Punkt 10 zerdrückt das Foto
+auf einem kleinen Schirm.
 
-**Dreiundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
-29, 32, 33, 35, 36, 37, 38, 41. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde,
-steht in [history.md](history.md). Der nächste neue Punkt bekommt die **47**.
+**Fünfundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
+29, 32, 33, 35, 36, 37, 38, 41, 45, 46. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder
+wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt die **48**.
 
 ---
 
@@ -476,84 +476,45 @@ unter ein Vorschaubild und **fehlt bei 227 Fotos ganz**; eine Adresse passt imme
 Ein Vorschlag wäre Titel mit Rückfall auf die Adresse — dann trüge der Vorlesetext dieselbe Regel,
 und beide sagten wieder dasselbe.
 
-### 45 · Bei langen Straßen liegen die Hausnummern außerhalb des Ausschnitts
-
-Wird im „Hilf mit"-Bereich nach der Hausnummer gefragt, fährt die Karte zum **Straßenpunkt** und
-zeigt die angebotenen Nummern als Beschriftung (Punkt 35, erledigt). Bei einer kurzen Straße
-stimmt das. Beim Lehmweg mit 132 Adressen nicht: Der Straßenpunkt liegt in der Mitte, der
-angebotene Abschnitt „1–13" liegt an einem Ende — **nachgemessen lag genau eine von elf
-Beschriftungen im Ausschnitt.**
-
-Das ist kein Fehler in der Ebene selbst; die Beschriftungen entstehen alle, sie sind nur nicht zu
-sehen. Zu ändern ist, **wohin die Karte fährt**: nicht zum Straßenpunkt, sondern auf den Ausschnitt,
-der die gerade angebotenen Nummern umfasst — also beim Wechsel des Abschnitts erneut. Die Daten
-dafür liegen bereits vor (`offeredNumbers` im Beitrags-Store, gesetzt über `onOffer`); es fehlt der
-Aufruf, der eine `bbox` daraus bildet und die Karte darauf setzt, statt `showLocation` einmal beim
-Laden.
-
-Aufgefallen am 11. August 2026, unmittelbar nachdem die Frage durch das Aufräumen des Erstbestands
-überhaupt Fotos bekam ([history.md](history.md)).
-Vorher stand sie auf zwei Fotos an kurzen Straßen und der Fall trat nie ein.
-
-### 46 · Aus der Detailansicht in den „Hilf mit"-Bereich verzweigen
-
-Wer ein Foto groß ansieht und merkt, dass etwas fehlt, soll von dort aus antworten können — heute
-geht das nur halb, und der Weg dorthin füllt die Ansicht mit Knöpfen.
-
-**Was die Detailansicht heute anbietet** (`kiosk/PhotoOverlay.tsx`):
-
-| Frage | in der Detailansicht |
-|---|---|
-| Wann war das? | `DatePicker` eingebettet — erst die Jahrzehnte, dann die zehn Jahre |
-| Welche Hausnummer? | `HouseNumberPicker` eingebettet — bis zu `MAX_BUTTONS` (12), davor der Abschnittsschritt |
-| **Wo ist das?** | **gar nicht** |
-
-**Zwei Probleme, und das zweite ist das größere.** Die Textspalte trägt bei einem Foto, dem Jahr
-und Hausnummer fehlen, bis zu 37 Schaltflächen unter der Beschreibung — seit die Zeitleiste von
-1880 bis 2030 reicht, sind allein die Jahrzehnte fünfzehn Stück. Und die Ortsfrage fehlt ganz:
-Sie braucht die Straßenliste **und** die Karte, und die Karte liegt unter dem Overlay.
-
-**Der Vorschlag:** Statt der eingebetteten Raster stehen dort bis zu drei Schaltflächen — „Wo ist
-das?", „Welche Hausnummer?", „Wann war das?" —, je nachdem, was dem Foto fehlt. Ein Tipp schließt
-die Detailansicht und stellt **dieses** Foto im Beitragsbereich zu **dieser** Frage. Damit hat der
-Kiosk einen Antwortweg statt zwei, und die Karte ist wieder frei — was die Ortsfrage erst möglich
-macht.
-
-**Was dafür fehlt, ist eine Zeile Fachlogik und ihre Folge.** Der Store lädt Aufgaben über
-`fetchTask(need, skipped)`, und **der Server sucht das Foto aus**. Ein benanntes Foto vorzulegen
-gibt es nicht: `load(order, prefer)` kennt zwar ein `prefer`, aber nur für ein Foto, zu dem gerade
-beigetragen wurde, und nur, wenn ohnehin schon eine Aufgabe steht. Zu entscheiden ist, ob der
-Server das lernt (`GET /api/contribute/next?need=…&photo_id=…`) oder der Store die Aufgabe selbst
-zusammensetzt. **Für den Server spricht `open_count` und `open_other`** — beide kommen heute aus
-derselben Antwort, und ein selbstgebauter Task müsste sie erfinden oder weglassen.
-
-**Welche Knöpfe erscheinen, weiß die Detailansicht nicht allein.** `needs_location` und
-`needs_date` stehen am Foto; ob nachgeschärft werden darf, entscheidet der Ortsindex und nicht das
-Foto (`stillNeeds` in `store/contribute.ts` gibt für `housenumber` immer `false` zurück, mit
-Begründung). Die Ansicht holt sich die Nummern ohnehin schon — eine nicht leere Liste ist die
-Antwort, und eine zweite Regel im Frontend darf daraus nicht werden.
-
-**Und der Rückweg gehört mitgedacht.** Wer aus einem Foto heraus verzweigt und antwortet, wird
-heute in die Kette der nächsten Fragen weitergereicht (`nextAfterAnswer`). Ob das hier richtig ist
-oder ob man zum Foto zurückkehren soll, ist die eigentliche Entwurfsfrage dieses Punktes — beides
-ist vertretbar, und nur eines fühlt sich an, als hätte das Gerät zugehört.
-
-**Dieser Punkt nimmt zurück, was am 10. August 2026 gebaut wurde**, und das ist Absicht. Damals war
-die Detailansicht der **einzige** Ort, an dem das Nachschärfen erreichbar war — im Bereich stand es
-hinter 74 unverorteten Fotos und erschien nie ([history.md](history.md)). Seit der Bestand
-bereinigt und die Rangfolge gedreht ist, ist es dort die zweite Frage. Der eingebettete Picker hat
-seinen Zweck erfüllt: Er hat den Schreibweg im Backend erprobt, und der bleibt unverändert. Was
-entfällt, sind `submitDateFor` und `submitHouseNumberFor` im Store samt ihrer Tests — sowie die
-beiden Picker-Einbettungen in `PhotoOverlay.tsx`.
-
-Zusammen mit [Punkt 45](#45--bei-langen-straßen-liegen-die-hausnummern-außerhalb-des-ausschnitts)
-zu bauen: Wird die Hausnummernfrage aus einem Foto heraus gestellt, fährt die Karte zu dessen
-Straße — und genau dort liegt der Fehler, dass die angebotenen Nummern außerhalb des Ausschnitts
-landen.
-
 ---
 
 ## Infrastruktur
+
+### 47 · Der Entwicklungsbestand wandert nicht mit den Migrationen
+
+**Ein Fehler, der zwei Tage unbemerkt lief.** Am 10. August 2026 kam die Spalte `old_source` in die
+Tabelle `changes` — mit Alembic-Revision, wie es sich gehört. Am 12. August fiel beim Prüfen am
+laufenden Kiosk auf, dass **jeder Besucherbeitrag mit 500 endet**:
+
+```
+sqlite3.OperationalError: table changes has no column named old_source
+```
+
+`data/photomap.db` stand noch auf `1cf9ccd28cd7`; die Migration `53bf4d2a4872` war nie gelaufen.
+Behoben mit `make migrate`.
+
+**Warum es niemandem auffiel, und das ist der eigentliche Punkt:**
+
+- **Die Tests bauen ihr Schema aus den Modellen** (`Base.metadata.create_all`), nicht aus den
+  Migrationen. Sie können eine fehlende Migration also grundsätzlich nicht bemerken — 393 grüne
+  Tests standen neben einer Datenbank, an der nichts mehr zu schreiben war.
+- **`make dev` migriert nicht.** Im Container tut es der Start, auf dem Entwicklungsrechner niemand.
+- **Alles Prüfen der letzten Tage war lesend.** Die Bereinigung des Erstbestands schrieb an der API
+  vorbei, und im Kiosk wurde nachgesehen, ob Fragen *erscheinen* — nicht, ob eine Antwort ankommt.
+
+**Zwei Abhilfen, und sie schließen verschiedene Lücken:**
+
+1. **`make dev` bringt das Schema zuerst auf Stand.** Eine Zeile, und dieser Fall wäre nie
+   entstanden.
+2. **Ein Test, der Migrationen gegen Modelle hält.** Schema einmal über `alembic upgrade head`
+   erzeugen, einmal über `create_all`, und die Tabellen samt Spalten vergleichen. Das fängt auch
+   den umgekehrten Fall: eine Modelländerung ohne Migration. Zu klären ist, wie streng verglichen
+   wird — Typen und Indizes unterscheiden sich zwischen den beiden Wegen in Kleinigkeiten.
+
+**Und eine Frage dahinter:** Ein 500 im Beitragsbereich sieht der Besucher als „Das hat leider nicht
+geklappt" — richtig, aber es sagt niemandem, dass das Gerät seit Tagen nichts mehr annimmt. Ob die
+Verwaltung so etwas anzeigen sollte, gehört zu [Punkt 18](#18--wiederherstellung-wirklich-proben)
+und der Frage, was auf dem Pi überhaupt auffällt.
 
 ### 14 · Bedienbarkeitstest mit der echten Zielgruppe
 

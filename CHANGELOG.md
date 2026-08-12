@@ -295,12 +295,22 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   dem Museum beim Verwalten hilft (Regalnummern wie „P 11"), steht in `provenance` und erscheint
   damit nachweislich nie im Kiosk; eine Angabe über das Bild steht in der Beschreibung. Der Präfix
   „Notiz:" bleibt dort stehen — er sagt, dass der Satz von der Rückseite des Abzugs stammt
+- **Die Detailansicht fragt nicht mehr selbst, sondern verzweigt in den „Hilf mit"-Bereich.** Statt
+  eingebetteter Auswahlraster stehen dort bis zu drei Schaltflächen — „Wo ist das?", „Welche
+  Hausnummer?", „Wann war das?" —, je nachdem, was dem Foto fehlt; ein Tipp stellt dieses Foto im
+  Bereich zu dieser Frage. Das spart bis zu 37 Knöpfe in der Textspalte und macht die **Ortsfrage
+  überhaupt erst erreichbar**: Sie braucht die Karte, und die lag unter der Ansicht
 - **Eine Jahreszahl im Text datiert das Foto nur, wenn ein Datumswort davorsteht** („um 1910",
   „im Jahre 1934", „Herbst 1970"). Zweistellige Kurzformen werden nicht ausgewertet: „78" ist von
   einer Regalnummer und einer Hausnummer nicht zu unterscheiden
 
 ### Behoben
 
+- **Beim Nachschärfen fährt die Karte auf die angebotenen Hausnummern**, nicht mehr auf den
+  Straßenpunkt. Bei einer Straße mit 132 Adressen lag genau eine von elf Beschriftungen im
+  Ausschnitt; jetzt sind es alle, und die Karte fährt beim Wechsel des Abschnitts mit
+- **Der Entwicklungsbestand hatte eine fehlende Migration**, wodurch jeder Besucherbeitrag mit 500
+  endete — zwei Tage lang unbemerkt, weil die Tests ihr Schema aus den Modellen bauen
 - **Wagenrückläufe in 59 Beschreibungen**, Reste von Windows-Zeilenenden
 - **Fotos ohne Herkunftsangabe.** Wurde im Pfad keine Straße erkannt, stieg das Auswerten der
   Ordnerstruktur aus, bevor es die Herkunft vermerkte — obwohl die nur am Pfad hängt und gar nicht

@@ -2253,3 +2253,61 @@ Was noch von Hand zu tun ist, hat [backlog.md](backlog.md) unter
 was Ortskenntnis braucht: 669 fehlende Beschreibungen, 621 undatierte Fotos ohne Anhalt im Text,
 rund 100 Titel, die eher Notiz als Titel sind, und 5 Fotos ohne Ort. Zwei Fehler, die erst durch
 das Aufraeumen sichtbar wurden, stehen als Punkt 44 und 45 daneben.
+
+## Ein Antwortweg statt zweier -- und ein Fehler, der zwei Tage lief
+
+*12. August 2026.* Zwei Punkte, die am selben Tag entstanden waren, als der bereinigte Erstbestand
+sichtbar machte, was der lueckenhafte verdeckt hatte.
+
+### Die Karte folgt jetzt den Nummern, nicht der Strasse
+
+Punkt 45 war in zwanzig Minuten erledigt und ist trotzdem lehrreich. Die Karte fuhr beim
+Nachschaerfen zum **Strassenpunkt** -- richtig gedacht, und auf einer Strasse mit 132 Adressen
+falsch: Der Punkt liegt in der Mitte, die angebotenen Nummern liegen an einem Ende. Nachgemessen
+lag genau **eine von elf** Beschriftungen im Ausschnitt.
+
+Die Nummern standen laengst im Store (`offeredNumbers`); die Karte sah sie nur nicht an. Jetzt
+haengt der Effekt an ihnen statt am Foto, und damit faehrt die Karte auch beim Wechsel des
+Abschnitts mit -- vorher blieb sie stehen. Am Lehmweg nachgezaehlt: **elf von elf.**
+
+Nebenbei stellte sich heraus, dass `focus` ein `lat` und ein `lon` trug, die **nirgends gelesen**
+wurden; `MapView` benutzt allein `bounds`. Beide sind weg, und `showArea(bounds)` steht neben
+`showLocation(lat, lon)`.
+
+### Die Detailansicht fragt nicht mehr selbst
+
+Punkt 46 nimmt zurueck, was am 10. August gebaut wurde, und die Begruendung von damals ist dabei
+nicht falsch geworden -- sie ist ueberholt. Die eingebetteten Auswahlraster gab es, **weil der
+Bereich das Nachschaerfen nicht vorlegen konnte**; inzwischen ist es dort die zweite Frage.
+
+Was den Ausschlag gab, waren zwei Zahlen: bis zu **37 Schaltflaechen** in der Textspalte, davon
+fuenfzehn Jahrzehnte -- die Datierung des Erstbestands hatte das Problem selbst vergroessert. Und
+**null** von drei Fragen zum Ort, weil der die Karte braucht und die unter dem Overlay liegt.
+
+Jetzt stehen dort bis zu drei Knoepfe, und ein Tipp gibt Foto und Frage an den Bereich weiter. Der
+Server lernte dafuer einen `photo_id`-Parameter -- **einen Wunsch, keine Anweisung**: Er prueft ihn
+gegen dieselbe Bedingung wie jedes andere Foto und faellt sonst auf die Zufallswahl zurueck. Alles
+danach ist der gewoehnliche Ablauf; `contribute()` blieb unangetastet. Siehe
+[decisions.md](decisions.md), Punkt 38.
+
+### Der Fund beim Abnehmen: seit zwei Tagen ging kein Beitrag mehr durch
+
+Beim Pruefen am laufenden Kiosk antwortete `POST /contribute/67/date` mit **500**:
+
+```
+sqlite3.OperationalError: table changes has no column named old_source
+```
+
+Die Alembic-Revision vom 10. August war auf `data/photomap.db` nie gelaufen. **Zwei Tage lang
+scheiterte damit jeder Besucherbeitrag am Entwicklungsbestand** -- und 393 gruene Tests standen
+daneben, weil sie ihr Schema aus den Modellen bauen und eine fehlende Migration grundsaetzlich
+nicht bemerken koennen.
+
+Dass es niemandem auffiel, hat einen zweiten Grund, und der ist der unangenehmere: **Alles Pruefen
+der letzten Tage war lesend.** Die Bereinigung des Erstbestands schrieb an der API vorbei; im Kiosk
+wurde nachgesehen, ob Fragen *erscheinen*. Ob eine Antwort ankommt, hat zwei Tage niemand versucht.
+Aufgenommen als [Punkt 47](backlog.md#47--der-entwicklungsbestand-wandert-nicht-mit-den-migrationen).
+
+**Die Lehre ist aelter als dieser Fehler und hier wieder bezahlt worden:** Ein Durchgang, der nur
+schaut, prueft die Haelfte. Der erste Klick, der etwas *schreibt*, hat gefunden, was zwei Tage
+Nachdenken und dreihundert Tests nicht fanden.

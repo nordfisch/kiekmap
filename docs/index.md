@@ -19,7 +19,7 @@ wenn etwas unerklärlich aussieht. Meist steht dort, warum.
 | Datei | Frage | Für wen |
 |---|---|---|
 | [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler |
-| [backlog.md](backlog.md) | Was fehlt noch? — 23 Punkte nach Bereich, jeder mit Nummer, Art und Einordnung | wer etwas aufgreifen will |
+| [backlog.md](backlog.md) | Was fehlt noch? — 22 Punkte nach Bereich, jeder mit Nummer, Art und Einordnung | wer etwas aufgreifen will |
 | [adaption.md](adaption.md) | Wie richte ich das für **einen anderen Ort** ein? | ein zweites Museum |
 
 Für Coding-Agents kommt [../CLAUDE.md](../CLAUDE.md) dazu — dieselben Regeln, auf das Nötigste

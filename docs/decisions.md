@@ -1333,3 +1333,47 @@ weiter „Wann war das?" dazu gefragt, wo jemand aus Holm es richtig beantworten
 angenommener falscher Vorschlag dagegen macht das Foto **datiert**: Es fällt aus der Frage heraus,
 liegt auf der Zeitleiste an der falschen Stelle, und niemand sieht es je wieder an. Das ist
 dieselbe Asymmetrie, die schon die EXIF-Regel aus Stufe 3 trägt.
+
+## 38. Die Detailansicht fragt nicht selbst, sie verzweigt in den Beitragsbereich
+
+*Entschieden und umgesetzt am 12. August 2026* — Punkt 46, und damit die Ruecknahme dessen, was am
+10. August gebaut wurde.
+
+Damals bekam die Detailansicht ihre eigenen Auswahlraster: Wer ein undatiertes Foto gross ansah,
+sollte es dort datieren koennen, ohne zu schliessen und zu hoffen, dass der Bereich dasselbe Foto
+vorlegt. Das war richtig, **weil der Bereich es damals nicht vorlegen konnte** — das Nachschaerfen
+stand dort hinter 74 unverorteten Fotos und erschien nie.
+
+Zwei Dinge haben sich seither geaendert, und beide sprechen dagegen:
+
+**Die Textspalte lief voll.** Ein Foto ohne Jahr und ohne Hausnummer trug bis zu 37 Schaltflaechen
+unter der Beschreibung. Allein die Jahrzehnte sind fuenfzehn, seit die Zeitleiste von 1880 bis 2030
+reicht statt von 2010 bis 2025 — die Datierung des Erstbestands hat das Problem selbst vergroessert.
+
+**Die Ortsfrage war dort nie zu stellen.** Sie braucht die Karte, und die Karte liegt unter dem
+Overlay. Von den drei Fragen konnte die Detailansicht also nur zwei, und ausgerechnet die
+wertvollste nicht.
+
+**Jetzt stehen dort bis zu drei Knoepfe** — je an der Zeile, die sie aendern —, und ein Tipp
+schliesst die Ansicht und stellt dieses Foto im Bereich zu dieser Frage. Der Kiosk hat damit
+**einen Antwortweg statt zwei**.
+
+**Das Schliessen ist nicht Nebenwirkung, sondern die halbe Absicht.** Bei „Wo ist das?" muss die
+Karte frei werden. Es je Frage anders zu machen waere eine Regel, die niemand sehen kann.
+
+**Und danach passiert nichts Besonderes**, was die eigentliche Entscheidung ist: Dank, dann die
+naechste offene Frage zu diesem Foto, dann ein neues — der gewoehnliche Ablauf. Ein Rueckweg in die
+Detailansicht waere naeher am Ausgangspunkt, braeuchte aber eine Sonderregel im Store und liesse
+die Kette wegfallen. Wer aus einem Foto heraus antwortet, ist im Beitragsbereich gelandet, und dort
+gehoert die naechste Frage hin.
+
+**Was das kostet:** Das Datieren ist zwei Tipps laenger geworden, und die Ansicht schliesst sich
+dabei. Der Gewinn ist strukturell und beim ersten Antippen nicht zu sehen. Wenn sich das am Geraet
+schlechter anfuehlt, ist die Rueckfallebene, den `DatePicker` eingebettet zu lassen und nur Ort und
+Hausnummer zu verzweigen — dann waeren es aber wieder zwei Wege.
+
+**Der Wunsch ist eine Bitte, keine Anweisung.** `GET /contribute/next?photo_id=…` prueft das Foto
+gegen dieselbe Bedingung wie jedes andere und faellt auf die Zufallswahl zurueck, wo sie nicht mehr
+gilt. Sonst stuende eine Frage auf dem Schirm, die zwischen Tippen und Laden schon von jemand
+anderem beantwortet wurde — und der Schreibweg wiese die Antwort mit 409 ab, was klingt, als sei
+der Besucher zu langsam gewesen.
