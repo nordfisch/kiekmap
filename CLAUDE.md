@@ -177,13 +177,21 @@ Verortung**: Ein Foto, das nur seine Straße kennt, lässt sich in der Detailans
 „Hilf mit"-Bereich auf eine Hausnummer bringen — dort als dritte, nachrangige Frage, mit den
 Nummern der Straße auf der Karte. Was als Nächstes ansteht, steht im Backlog.
 
-Am **11. August 2026** ist der **Erstbestand bereinigt** worden (Punkt 41, zum größten Teil
-erledigt): 72 Fotos aus Straßenordnern verortet, 57 verschwundene Hausnummern über die
+Am **11. und 12. August 2026** ist der **Erstbestand bereinigt** worden — Punkt 41, in zwei Runden
+und ohne das Sprachmodell, das dafür vorgesehen war.
+
+*Verortung:* 72 Fotos aus Straßenordnern verortet, 57 verschwundene Hausnummern über die
 Nachbarnummer nachgeschärft, 349 von einer eingetragenen EXIF-Koordinate auf ihre Archivadresse
-gesetzt, 815 Titel vom Adressabklatsch befreit. **924 von 929 Fotos stehen jetzt auf der Karte**,
-vorher 852. Dabei haben sich zwei Regeln umgedreht — der Archivordner schlägt die EXIF-Koordinate,
-und im Beitragsbereich wird die Hausnummer vor dem Jahr gefragt (`docs/decisions.md`, Punkt 34
-und 35).
+gesetzt. **924 von 929 Fotos stehen auf der Karte**, vorher 852.
+
+*Textfelder:* 815 Titel vom Adressabklatsch befreit, 62 Beschreibungen aus Titeln und
+Fotorückseiten gehoben, 23 Archivsignaturen an die Herkunft, 52 Fotos aus ihrem eigenen Text
+datiert. **Der Zeitschieber läuft jetzt von 1880 bis 2030** statt von 2010 bis 2025.
+
+Dabei haben sich vier Regeln ergeben (`docs/decisions.md`, Punkt 34 bis 37): der Archivordner
+schlägt die EXIF-Koordinate; die Hausnummer wird vor dem Jahr gefragt; Archivinterna gehören in die
+Herkunft und nicht in die Beschreibung; und eine Jahreszahl im Text datiert nur dann das Foto, wenn
+ein Datumswort davorsteht.
 
 **Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
 ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,

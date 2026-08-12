@@ -291,9 +291,17 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Im „Hilf mit"-Bereich wird die Hausnummer vor dem Jahr gefragt.** Eine Frage wird erst erreicht,
   wenn die vor ihr leer ist — und mit 673 undatierten Fotos wäre die Nachschärf-Frage nie gestellt
   worden
+- **Archivinterna gehören in die Herkunft, Fotorückseiten in die Beschreibung.** Eine Angabe, die
+  dem Museum beim Verwalten hilft (Regalnummern wie „P 11"), steht in `provenance` und erscheint
+  damit nachweislich nie im Kiosk; eine Angabe über das Bild steht in der Beschreibung. Der Präfix
+  „Notiz:" bleibt dort stehen — er sagt, dass der Satz von der Rückseite des Abzugs stammt
+- **Eine Jahreszahl im Text datiert das Foto nur, wenn ein Datumswort davorsteht** („um 1910",
+  „im Jahre 1934", „Herbst 1970"). Zweistellige Kurzformen werden nicht ausgewertet: „78" ist von
+  einer Regalnummer und einer Hausnummer nicht zu unterscheiden
 
 ### Behoben
 
+- **Wagenrückläufe in 59 Beschreibungen**, Reste von Windows-Zeilenenden
 - **Fotos ohne Herkunftsangabe.** Wurde im Pfad keine Straße erkannt, stieg das Auswerten der
   Ordnerstruktur aus, bevor es die Herkunft vermerkte — obwohl die nur am Pfad hängt und gar nicht
   an der Straße. Drei Fotos des Erstbestands traf es: zwei, die lose in der Importwurzel lagen, und

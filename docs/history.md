@@ -2186,3 +2186,58 @@ Marker-Beschriftung zeigt die Adresse, waehrend der Vorlesetext den Titel nennt 
 solange beide dasselbe waren (Punkt 44). Und bei einer Strasse mit 132 Adressen liegen die
 angebotenen Hausnummern ausserhalb des Kartenausschnitts, weil die Karte zur Strassenmitte faehrt
 (Punkt 45). Beide sind erst aufgefallen, als der bereinigte Bestand sie sichtbar machte.
+
+## Der Rest von Punkt 41: Text stand in den falschen Feldern
+
+*12. August 2026.* Nach der Verortung blieben drei Teilpunkte, die im Backlog nach drei Aufgaben
+aussahen — Titel durchsehen, Schlagwoerter sichten, Beschreibungen ergaenzen. **Nachgemessen war es
+eine:** Beschreibungen standen als Titel, abgeschriebene Fotorueckseiten standen als Schlagwort,
+Archiv-Regalnummern standen als Schlagwort. Und das Feld, in das all das gehoert, war bei 720 von
+929 Fotos leer.
+
+Umgeraeumt wurde in vier Zuegen: 23 lange Titel und 39 Notizen in die Beschreibung, 6 Reste einer
+Dateibenennung (`dav`, `dig`) geleert, 23 Regalnummern an die Herkunft. Danach hatten 260 Fotos
+eine Beschreibung statt 209, und von 308 Schlagwoertern blieben 253 — alle davon wirklich
+Stichwoerter.
+
+### Die Regalnummer wollte in die Beschreibung, und das war die falsche Tuer
+
+Die Ansage lautete zuerst, die Signaturen („P 11", „O 40") an die Beschreibung zu haengen, damit
+sie erhalten bleiben. Erhalten bleiben sollten sie — nur steht die Beschreibung im Kiosk unter dem
+Bild. Unter einem Hof des 19. Jahrhunderts haette dann „P 35" gestanden.
+
+`provenance` ist das Feld dafuer, und der Grund steht seit Stufe 8 im Docstring von `PhotoDetail`:
+Das oeffentliche Schema hat kein Feld dafuer, *damit* die Angabe nicht auf den Schirm im
+Ausstellungsraum geraet. Nachgeprueft nach dem Umraeumen: `/api/photos/247` liefert 28 Felder, und
+keines davon enthaelt das Wort „Signatur". Siehe [decisions.md](decisions.md), Punkt 36.
+
+### Zwei Anlaeufe, das Datieren zu automatisieren, und beide waren falsch
+
+83 undatierte Fotos trugen eine Jahreszahl im Text. Der erste Anlauf las jede vierstellige Zahl und
+mied eine Liste von Warnwoertern — *vor*, *erbaut*, *abgerissen*. Vorgelegt sah man sofort, was die
+Liste nicht kannte: **bebaut**, **abgebrannt**, **Baujahr**. Jedes davon haette ein Foto auf das
+Baujahr des Hauses datiert statt auf die Aufnahme.
+
+Der zweite Anlauf drehte die Richtung um: nicht „ein Jahr ohne Warnwort", sondern **„ein Jahr, dem
+*um*, *ca.*, *im Jahre*, *Herbst*, *Dezember* oder *aus den* vorausgeht"**. Eine Warnwortliste ist
+nie fertig; ein positives Muster ist es. Aus 83 wurden 23 klare Faelle und 46 zweifelhafte — und
+die 46 waren als Liste mit Fundstelle und Begruendung in fuenf Minuten durchzusehen.
+
+Ausserdem verworfen: **zweistellige Kurzformen**. „78" fuer 1978 ist im Bestand ueblich und von
+Regalnummern („P 37" -> 1937) und Hausnummern („Friedhofsweg 30" -> 1930) nicht zu unterscheiden.
+62 Fotos hingen daran und bleiben undatiert.
+
+Am Ende: **52 datiert, 17 Vorschlaege verworfen.** Und das Verworfene ist die teurere Haelfte der
+Entscheidung — ein verworfener Vorschlag kostet nichts, das Foto bleibt in „Wann war das?". Ein
+angenommener falscher macht das Foto datiert, nimmt es aus der Frage und legt es an die falsche
+Stelle der Zeitleiste, wo es niemand mehr ansieht. Siehe [decisions.md](decisions.md), Punkt 37.
+
+### Was man am Ende sehen konnte
+
+Der Zeitschieber lief vorher von **2010 bis 2025** — die einzigen datierten Fotos waren die
+Neuaufnahmen. Jetzt laeuft er von **1880 bis 2030**, mit Balken ueber die ganze Spanne. Das
+Museum hat zum ersten Mal eine Zeitleiste, und sie war die ganze Zeit im Bestand vorhanden, nur in
+den falschen Feldern.
+
+Nebenbei gefunden und mitgenommen: 59 Beschreibungen trugen Wagenrueckaeufe aus
+Windows-Zeilenenden.

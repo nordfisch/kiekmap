@@ -1264,3 +1264,69 @@ Aufgefallen ist es erst am laufenden Kiosk: Überspringen der Jahresfrage führt
 das?", und die dritte Frage kam nie. Kein Test im Backend fiel, als die Reihenfolge vertauscht
 wurde — gemerkt hat es allein einer im Frontend, wo dieselbe Liste ein zweites Mal steht. Diese
 Lücke ist mit `TestRangfolge` geschlossen.
+
+## 36. Archivinterna gehören in die Herkunft, Fotorückseiten in die Beschreibung
+
+*Entschieden und umgesetzt am 12. August 2026* — beim Aufräumen der Textfelder (Punkt 41).
+
+Der Erstbestand brachte 52 Schlagwörter mit, die mit „Notiz" beginnen: abgeschriebene Rückseiten
+von Abzügen und Archivkarten. Sie zerfallen in zwei Arten, und die eine gehört vor Besucheraugen,
+die andere nicht.
+
+**Inhalt geht in die Beschreibung.** „Notiz: Grundsteinlegung der Turnhalle ca. 1968" ist eine
+Aussage über das Bild. Als Schlagwort taugt sie nichts — sie hängt an genau einem Foto und stünde
+in einer Schlagwortliste ([Punkt 30](backlog.md)) nur im Weg. **Der Präfix „Notiz:" bleibt stehen**:
+Er ist keine Verzierung, sondern die Quellenangabe. Der Satz stammt von der Rückseite, nicht von
+einem Kurator, der das Bild betrachtet hat.
+
+**Regalnummern gehen an die Herkunft.** „Notiz: P 11", „Notiz: O 40", „Notiz: 3" sind Signaturen
+des Archivs. Sie sollen erhalten bleiben — wer ein Foto im Regal wiederfinden will, braucht sie —
+aber sie gehören **nicht in die Beschreibung**, denn die steht im Kiosk unter dem Bild
+(`overlay__description`). Unter einem Hof des 19. Jahrhunderts stünde dann „P 35".
+
+`provenance` ist das Feld dafür, und zwar nicht aus Bequemlichkeit: `PhotoDetail` in `schemas.py`
+hat kein Feld dafür, und der Docstring nennt das den Zweck der Klasse — „der sicherste Weg, sie von
+diesem Schirm fernzuhalten, ist ein öffentliches Schema, das kein Feld dafür hat". Die Signatur
+schließt an den Archivpfad an, der dort ohnehin steht.
+
+**Die Regel, die daraus folgt und die beim nächsten Bestand wieder gebraucht wird:** Eine Angabe,
+die dem Museum beim *Verwalten* hilft, gehört in die Herkunft. Eine Angabe, die etwas über das
+*Bild* sagt, gehört in die Beschreibung. Wer sie zusammenwirft, spart einen Gedanken und nimmt
+dafür in Kauf, dass Archivinterna in der Ausstellung erscheinen.
+
+## 37. Ein Jahr im Text datiert nicht das Foto, sondern manchmal nur das Haus
+
+*Entschieden und umgesetzt am 12. August 2026* — Punkt 41, letzter Teil.
+
+83 undatierte Fotos trugen eine Jahreszahl in Titel, Beschreibung oder Schlagwort, bei 673
+undatierten. Die naheliegende Auswertung wäre eine Regel gewesen. **Sie wäre falsch gewesen, und
+das Nachmessen zeigt genau, woran:**
+
+| im Text steht | eine Regel liest | es ist aber |
+|---|---|---|
+| `Notiz: P 37` | 1937 | eine Regalnummer |
+| `Friedhofsweg 30` | 1930 | eine Hausnummer |
+| „erbaut 1972, verkauft 2000" | 1972 | keins von beidem |
+| „**vor** 1978" | 1978 | eine Obergrenze |
+| „in den 70er Jahren **abgerissen**" | 1970er | das Foto ist **davor** |
+
+Daraus zwei Festlegungen:
+
+**Zweistellige Kurzformen werden nicht ausgewertet.** „78" für 1978 ist im Bestand üblich — und
+nicht von Regalnummern und Hausnummern zu unterscheiden. 62 Fotos hingen an solchen
+Zweideutigkeiten und bleiben undatiert.
+
+**Gesucht wird das positive Muster, nicht das negative.** Nicht „ein Jahr ohne Warnwort", sondern
+„ein Jahr, dem *um*, *ca.*, *im Jahre*, *Herbst*, *Dezember* oder *aus den* vorausgeht". Eine
+Warnwortliste ist nie fertig — beim ersten Versuch fehlten *bebaut*, *abgebrannt* und *Baujahr*,
+und jedes davon hätte ein Foto falsch datiert.
+
+Am Ende sind es 52 Fotos geworden, **einzeln durchgesehen und als Liste im Skript festgehalten,
+nicht als Regel.** 17 Vorschläge wurden verworfen.
+
+**Und warum das Verwerfen die teurere Hälfte der Entscheidung ist:** Ein verworfener Vorschlag
+kostet nichts — das Foto bleibt undatiert, der Text bleibt lesbar, und im „Hilf mit"-Bereich wird
+weiter „Wann war das?" dazu gefragt, wo jemand aus Holm es richtig beantworten kann. Ein
+angenommener falscher Vorschlag dagegen macht das Foto **datiert**: Es fällt aus der Frage heraus,
+liegt auf der Zeitleiste an der falschen Stelle, und niemand sieht es je wieder an. Das ist
+dieselbe Asymmetrie, die schon die EXIF-Regel aus Stufe 3 trägt.

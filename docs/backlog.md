@@ -164,60 +164,51 @@ etwas gebaut wird.
 
 [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht) sagt, die Durchsicht brauche Ortskenntnis
 und gehöre deshalb dem Museumsteam. Das stimmt für das Datieren — **für den größten Teil der
-übrigen Arbeit stimmt es nicht.** Genau dafür ist dieser Punkt da.
+übrigen Arbeit stimmte es nicht**, und genau dafür war dieser Punkt da.
 
-**Der größte Teil davon ist am 11. August 2026 erledigt worden**, und zwar ohne das Sprachmodell,
-das hier ursprünglich vorgesehen war. Das Nachmessen am Bestand sagte etwas anderes als die
-Planung: Fast alles war exakt entscheidbar, der Rest waren neun Adressen. Was dabei herauskam,
-steht in [history.md](history.md); die beiden Regeln, die sich dabei umgedreht haben, in
-[decisions.md](decisions.md), Punkt 34 und 35.
+**Er ist am 11. und 12. August 2026 abgearbeitet worden**, in zwei Runden und ohne das
+Sprachmodell, das hier ursprünglich vorgesehen war. Das Nachmessen sagte jedes Mal etwas anderes
+als die Planung: Fast alles war exakt entscheidbar, und wo es das nicht war, ging es um Listen von
+neun bis fünfzig Zeilen, die ein Mensch in einer Viertelstunde durchsieht. Wie es lief, steht in
+[history.md](history.md); die vier Regeln, die sich dabei ergeben haben, in
+[decisions.md](decisions.md), Punkt 34 bis 37.
 
 | | vorher | nachher |
 |---|---|---|
 | ohne Ort | 77 | **5** |
 | hausgenau (15 m) | 381 | **787** |
-| straßengenau (150 m) | 58 | 73 |
 | auf einer eingetragenen EXIF-Koordinate | 413 | 64 |
+| auf der Karte | 852 | **924 von 929** |
 | ohne Herkunftsangabe | 3 | **0** |
 | Titel, der die Adresse daneben wiederholt | 815 | **0** |
-| auf der Karte | 852 | **924 von 929** |
+| **mit Beschreibung** | 209 | **260** |
+| **ohne Jahr** | 673 | **621** |
+| Schlagwörter | 308 | **253** |
 
-**Was davon offen bleibt** — und es ist wenig:
+**Was bleibt, gehört dem Museumsteam** und damit
+[Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht):
 
-**(d) Die 107 eigenständigen Titel durchsehen.** Nach dem Kürzen tragen 731 Fotos einen Titel, der
-kein Adressabklatsch mehr ist. Unter den 107, die schon vorher eigenständig waren, sind aber
-Notizen statt Titeln: „Vermutung: hinter der Zahnarztpraxis oder hinter der ‚Börse'", „dav",
-„dig". Sie gehören in die Beschreibung oder gelöscht — **und das braucht Ortskenntnis**, ist also
-eher [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht) als dieser hier.
+- **669 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen — eine Beschreibung ist
+  genau das, was sich aus keinem vorhandenen Feld ableiten lässt.
+- **621 ohne Jahr.** Die 83 Fotos mit einer Jahreszahl im Text sind durchgesehen; 52 sind datiert,
+  17 Vorschläge wurden verworfen, weil das Jahr das Gebäude datierte und nicht die Aufnahme
+  ([decisions.md](decisions.md), Punkt 37). Der Rest trägt keinen Anhalt und wird über den
+  „Hilf mit"-Bereich beantwortet — dafür ist er gebaut.
+- **Rund 100 eigenständige Titel**, unter denen einzelne eher Notiz als Titel sind. Sie zu
+  beurteilen heißt zu wissen, was auf dem Bild ist.
+- **253 Schlagwörter**, jetzt alle wirklich Stichwörter. Ob sie taugen, entscheidet
+  [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern), wenn daraus ein Filter wird — das ist
+  der Anfang der nächsten Aufgabe, nicht der Rest dieser.
 
-**(e) 207 Schlagwörter mit höchstens drei Fotos.** Von 305 verbliebenen. Darunter „Notiz: 1978",
-„Notiz: Haus von Harder 1971", „Notiz: Schule 78" — **die tragen Jahreszahlen**, und 673 Fotos
-sind undatiert. Ob daraus Datierungsvorschläge werden können, ist die eine Frage, die hier noch
-etwas hergibt. Die Warnung von Punkt 2 gilt dabei unverändert: nur **Vorschlag**, nie Tatsache,
-sonst gilt ein falsch datiertes Foto als datiert und wird nie mehr vorgelegt.
+**Ersatzlos entfallen ist die Jahreszahl im Dateinamen.** Sie stand bis zum 9. August 2026 als
+eigener Punkt 2 im Backlog, gedacht für `Kirchweih_1932_Muehle.jpg`. Nachgezählt: **kein einziges**
+undatiertes Foto trägt eine im Namen.
 
-**(f) Beschreibungen fehlen bei 720 Fotos.** Daran hat sich nichts geändert, und daran kann
-maschinell auch nichts geändert werden — eine Beschreibung ist genau das, was niemand aus den
-vorhandenen Feldern ableiten kann.
-
-**Was ersatzlos entfällt:** die Jahreszahl im Dateinamen. Sie stand bis zum 9. August 2026 als
-eigener Punkt 2 im Backlog und wanderte hierher, gedacht für `Kirchweih_1932_Muehle.jpg`.
-Nachgezählt: **kein einziges** undatiertes Foto trägt eine Jahreszahl im Namen. Der Teilpunkt ist
-gegenstandslos, samt der `IMG_1932.jpg`-Warnung, die ihn begleitete.
-
-**Und die Folge, die eingetreten ist:** Unter dem Vorschaubild auf der Karte steht die **Adresse**
-und nicht der Titel (Punkt 27, erledigt; Begründung in [decisions.md](decisions.md), Punkt 29) —
-**und zwar weil die Titel damals Adressen waren.** Das sind sie nicht mehr. „Gasthof Timm —
-1953" ist jetzt die bessere Beschriftung als „Hauptstraße 11a — 1953", und die Entscheidung gehört
-neu getroffen. Sie ist billig: eine Zeile in `t.map.markerCaption`. Was sie *nicht* billig macht,
-ist die Frage dahinter — ein Titel passt nicht immer unter ein Vorschaubild, eine Adresse immer,
-und 198 Fotos haben jetzt gar keinen Titel mehr. Siehe
-[Punkt 44](#44--marker-beschriftung-und-vorlesetext-sagen-verschiedenes).
-
-**Vorgehen für den Rest: vorlegen, nicht durchgreifen.** Was noch aussteht, ist genau das, was
-Urteil braucht — bei (d) und (e) entscheidet ein Mensch, oder die Herkunft der Angaben
-(`title_source`) sagt danach nicht mehr die Wahrheit.
-
+**Und die Folge, die eingetreten ist:** Unter dem Vorschaubild steht die **Adresse** und nicht der
+Titel (Punkt 27, erledigt; [decisions.md](decisions.md), Punkt 29) — **und zwar weil die Titel
+damals Adressen waren.** Das sind sie nicht mehr. Die Entscheidung gehört neu getroffen; sie hängt
+mit [Punkt 44](#44--marker-beschriftung-und-vorlesetext-sagen-verschiedenes) zusammen, wo derselbe
+Widerspruch als Fehler steht.
 
 ### 42 · Dubletten finden, die beste behalten, den Rest zusammenführen
 
