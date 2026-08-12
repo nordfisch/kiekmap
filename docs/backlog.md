@@ -42,14 +42,16 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | # | Punkt | Art | Einordnung |
 |---|---|---|---|
 | | **Verwaltung** | | |
-| 41 | [Den Erstbestand maschinell vorbereiten](#41--den-erstbestand-maschinell-vorbereiten) | Aufgabe | wichtig · dringend |
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
+| 41 | [Den Erstbestand maschinell vorbereiten](#41--den-erstbestand-maschinell-vorbereiten) | Aufgabe | — |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
+| 44 | [Marker-Beschriftung und Vorlesetext sagen Verschiedenes](#44--marker-beschriftung-und-vorlesetext-sagen-verschiedenes) | **Fehler** | wichtig |
+| 45 | [Bei langen Straßen liegen die Hausnummern außerhalb des Ausschnitts](#45--bei-langen-straßen-liegen-die-hausnummern-außerhalb-des-ausschnitts) | **Fehler** | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
@@ -161,111 +163,61 @@ etwas gebaut wird.
 ### 41 · Den Erstbestand maschinell vorbereiten
 
 [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht) sagt, die Durchsicht brauche Ortskenntnis
-und gehöre deshalb dem Museumsteam. Das stimmt für das Datieren und Verorten — **für den
-größten Teil der übrigen Arbeit stimmt es nicht.** Titel umzustellen, Zusätze in die Beschreibung
-zu heben und Archivkürzel auszusortieren braucht kein Ortswissen, sondern Ausdauer. Genau dafür
-lässt sich ein Sprachmodell einspannen — mit Vorlage zur Bestätigung, nicht blind.
+und gehöre deshalb dem Museumsteam. Das stimmt für das Datieren — **für den größten Teil der
+übrigen Arbeit stimmt es nicht.** Genau dafür ist dieser Punkt da.
 
-**Was der Bestand hergibt, nachgezählt an den 929 Fotos:**
+**Der größte Teil davon ist am 11. August 2026 erledigt worden**, und zwar ohne das Sprachmodell,
+das hier ursprünglich vorgesehen war. Das Nachmessen am Bestand sagte etwas anderes als die
+Planung: Fast alles war exakt entscheidbar, der Rest waren neun Adressen. Was dabei herauskam,
+steht in [history.md](history.md); die beiden Regeln, die sich dabei umgedreht haben, in
+[decisions.md](decisions.md), Punkt 34 und 35.
 
-| Befund | Fotos |
-|---|---|
-| Titel beginnt mit dem `place_name`, wiederholt also die Adresse daneben | **796** |
-| davon mit einem Zusatz hinter dem Komma — „Hauptstraße 11a, **Gasthof Timm**" | **632** |
-| ohne jede Beschreibung | **720** |
-| Titel, die nur die Adresse sind | 163 |
-| Titel aus dem EXIF-Schrott: „Intel(R) JPEG Library, version […]" | 18 |
-| ohne Bildnachweis | 0 |
-| ohne Herkunftsangabe | 3 |
+| | vorher | nachher |
+|---|---|---|
+| ohne Ort | 77 | **5** |
+| hausgenau (15 m) | 381 | **787** |
+| straßengenau (150 m) | 58 | 73 |
+| auf einer eingetragenen EXIF-Koordinate | 413 | 64 |
+| ohne Herkunftsangabe | 3 | **0** |
+| Titel, der die Adresse daneben wiederholt | 815 | **0** |
+| auf der Karte | 852 | **924 von 929** |
 
-Die Arbeit ist damit erstaunlich gut umrissen: **Der Zusatz hinter dem Komma ist der eigentliche
-Titel**, die Adresse davor steht schon im `place_name`. Aus „Hauptstraße 11a, Gasthof Timm"
-wird „Gasthof Timm" — und wo der Zusatz eher Anmerkung als Titel ist, gehört er in die
-Beschreibung, die bei 720 Fotos leer ist.
+**Was davon offen bleibt** — und es ist wenig:
 
-**Dazu die Schlagwörter.** „Gebäude" liegt auf allen 929 und trägt damit nichts bei; Straßennamen
-verdoppeln den Ort; „Förderkreis-Cloud", „ArchivHolm" und „Or01-1" sind Archivarbeit. Erst danach
-wird [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern) überhaupt sinnvoll.
+**(d) Die 107 eigenständigen Titel durchsehen.** Nach dem Kürzen tragen 731 Fotos einen Titel, der
+kein Adressabklatsch mehr ist. Unter den 107, die schon vorher eigenständig waren, sind aber
+Notizen statt Titeln: „Vermutung: hinter der Zahnarztpraxis oder hinter der ‚Börse'", „dav",
+„dig". Sie gehören in die Beschreibung oder gelöscht — **und das braucht Ortskenntnis**, ist also
+eher [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht) als dieser hier.
 
-**Und eine Folge, die nicht übersehen werden darf:** Unter dem Vorschaubild auf der Karte steht
-seit dem 9. August 2026 die **Adresse** und nicht der Titel (Punkt 27, erledigt; Begründung in
-[decisions.md](decisions.md), Punkt 29) — **und zwar weil die Titel heute Adressen sind**. Sind sie
-erst aufgeräumt, ist „Gasthof Timm — 1953" die bessere Beschriftung als
-„Hauptstraße 11a — 1953". **Diese Entscheidung gehört dann neu getroffen**, und sie ist billig
-geworden: `PhotoMarker` trägt Titel und Adresse längst beide, die Änderung wäre eine Zeile in
-`t.map.markerCaption`. Was sie *nicht* billig macht, ist die Frage dahinter — ein Titel passt
-nicht immer unter ein Vorschaubild, eine Adresse immer.
+**(e) 207 Schlagwörter mit höchstens drei Fotos.** Von 305 verbliebenen. Darunter „Notiz: 1978",
+„Notiz: Haus von Harder 1971", „Notiz: Schule 78" — **die tragen Jahreszahlen**, und 673 Fotos
+sind undatiert. Ob daraus Datierungsvorschläge werden können, ist die eine Frage, die hier noch
+etwas hergibt. Die Warnung von Punkt 2 gilt dabei unverändert: nur **Vorschlag**, nie Tatsache,
+sonst gilt ein falsch datiertes Foto als datiert und wird nie mehr vorgelegt.
 
-**Und die Jahreszahl im Dateinamen gehört hierher.** Sie stand bis zum 9. August 2026 als eigener
-Punkt 2 im Backlog, gedacht für den Erstimport — der ist gelaufen, und geraten wurde nichts.
-`Kirchweih_1932_Muehle.jpg` trägt seine Datierung im Namen, und bei 673 Fotos ohne Jahr ist jedes
-davon einen Blick wert. **Die Warnung von damals gilt unverändert:** `IMG_1932.jpg` ist ein
-Kamerazähler, keine Jahreszahl. Ein Fund darf deshalb nur **Vorschlag** sein, nie Tatsache — sonst
-entsteht genau der Fehler, den die EXIF-Regel aus Stufe 3 vermeidet: ein falsch datiertes Foto, das
-nie zur Korrektur vorgelegt wird, weil es als datiert gilt. In diesem Punkt ist das keine
-Zusatzbedingung mehr, sondern schon die Bauform.
+**(f) Beschreibungen fehlen bei 720 Fotos.** Daran hat sich nichts geändert, und daran kann
+maschinell auch nichts geändert werden — eine Beschreibung ist genau das, was niemand aus den
+vorhandenen Feldern ableiten kann.
 
-**Drei Nachbesserungen am Eingelesenen gehören ebenfalls hierher.** Die ersten beiden sind am
-9. August 2026 beim Planen des Nachschärfens gefunden worden (Punkt 36, seither erledigt — siehe
-[history.md](history.md)), die dritte am 11. August. Alle sind maschinell zu beheben, und keine
-braucht Ortswissen — nur den Ortsindex und das Importprotokoll.
+**Was ersatzlos entfällt:** die Jahreszahl im Dateinamen. Sie stand bis zum 9. August 2026 als
+eigener Punkt 2 im Backlog und wanderte hierher, gedacht für `Kirchweih_1932_Muehle.jpg`.
+Nachgezählt: **kein einziges** undatiertes Foto trägt eine Jahreszahl im Namen. Der Teilpunkt ist
+gegenstandslos, samt der `IMG_1932.jpg`-Warnung, die ihn begleitete.
 
-**(a) Hausnummern, die es nicht mehr gibt.** 58 Fotos tragen ihre Hausnummer im `place_name`
-(„Schulstraße 2", „Hörnstraße 13"), liegen aber trotzdem nur auf der Straßenmitte. Der Grund ist
-nicht ein fehlender Eintrag, sondern Ortsgeschichte: **Die Häuser sind aufgeteilt oder neu
-nummeriert worden.** Im Ortsindex steht 2a statt 2, 13a bis 13d statt 13.
+**Und die Folge, die eingetreten ist:** Unter dem Vorschaubild auf der Karte steht die **Adresse**
+und nicht der Titel (Punkt 27, erledigt; Begründung in [decisions.md](decisions.md), Punkt 29) —
+**und zwar weil die Titel damals Adressen waren.** Das sind sie nicht mehr. „Gasthof Timm —
+1953" ist jetzt die bessere Beschriftung als „Hauptstraße 11a — 1953", und die Entscheidung gehört
+neu getroffen. Sie ist billig: eine Zeile in `t.map.markerCaption`. Was sie *nicht* billig macht,
+ist die Frage dahinter — ein Titel passt nicht immer unter ein Vorschaubild, eine Adresse immer,
+und 198 Fotos haben jetzt gar keinen Titel mehr. Siehe
+[Punkt 44](#44--marker-beschriftung-und-vorlesetext-sagen-verschiedenes).
 
-| Befund | Fotos |
-|---|---|
-| dieselbe Zahl mit anderem Zusatz im Index („2" → „2a") | **55** |
-| Nachbarnummer im Abstand von höchstens zwei | 3 |
-| gar kein Anhalt in der Straße | **0** |
-
-Die Koordinate ist also **fast immer ableitbar** — über die Nachbarnummer. Und sie ist es nur
-maschinell: Ein Besucher am Kiosk weiß auch nicht, wo die frühere Schulstraße 2 stand. Zu bauen
-wäre eine Nachbarnummer-Regel in `services/places.py`, angewandt in `_locate`
-(`services/foldermeta.py`) für künftige Importe und über eine Vorlage-Liste für den Bestand.
-
-**(b) Straßenordner wurden als unverortet eingelesen.** Von den 72 Fotos ohne Ort tragen **64** als
-Titel exakt einen Straßennamen — Hauptstraße 21, Hetlinger Straße 7, Niederstraße 7, Am Felde 6,
-Lehmweg 6, dazu elf weitere Straßen. Sie stammen aus Ordnern, die eine Straße ohne Hausnummer
-nannten; `_locate` lässt solche Fotos **bewusst** unverortet. Übrig blieben 8, davon fünf ohne
-Titel.
-
-Das Ergebnis soll dasselbe sein wie bei „Reicht so — die Straße genügt": Straßenpunkt,
-`place_name` = Straßenname, `location_accuracy_m = 150`, **Quelle Kurator** — die Angabe kommt aus
-dem Archivordner, ist also Museumswissen. Ein Neuimport ist dafür nicht nötig: Die Fotos sind
-daran erkennbar, dass ihr **Titel im Straßenverzeichnis steht**.
-
-**Die Begründung der alten Regel ist dabei ausdrücklich widerrufen** — nachzulesen in
-[decisions.md](decisions.md), Punkt 32. Sie lautete: Die Straßenmitte „sähe aus wie eine Antwort",
-und das Foto fiele aus „Wo ist das?" heraus. Das war richtig, solange es nur zwei Fragen gab. Seit
-dem 10. August 2026 gibt es die dritte, und damit fallen diese Fotos nicht heraus, sondern **in die
-genauere Frage hinein**. Im Code steht die alte Regel noch; sie umzukehren ist Teil dieser Aufgabe.
-
-**Das hier ist jetzt die Bremse.** Die Nachschärf-Frage steht im Beitragsbereich, hat aber nur
-**zwei** Fotos — und 74 unverortete stehen im Rang vor ihr, also erscheint sie dort praktisch nie.
-Mit (b) werden aus 74 unverorteten 8 und aus 2 nachzuschärfenden 66: Erst dann ist die neue Frage
-die Hauptfrage des Bereichs. Nutzbar ist sie bis dahin nur in der Detailansicht.
-
-Nebenbei: Nach (b) ist der Titel dieser 64 Fotos identisch mit ihrem `place_name` — genau der Fall,
-den dieser Punkt für 796 Fotos ohnehin aufräumen will.
-
-**(c) Fotos ohne Herkunftspfad.** Die Herkunftsangabe (`provenance`) trägt normalerweise den Pfad,
-unter dem das Foto im Archiv lag — bei drei Fotos steht dort nichts. Beispiel `pic_175-3.jpg`, das
-aus `Deelenweg/10 Deelenhof` stammt. **Sie sind zu bereinigen**, damit die Herkunft wieder auf den
-Archivordner zeigt.
-
-Ob die Ursache am nicht auflösbaren Straßennamen hängt, ist noch offen — bei den drei betroffenen
-Fotos fehlt auch der Titel, die Lücke ist also breiter als nur die Verortung. **Die
-Ursachenforschung steht noch aus** und gehört an den Anfang dieses Teilpunktes: Erst wenn klar ist,
-was sie beim Import verloren haben, lässt sich sagen, ob das Nachtragen aus dem Importprotokoll
-reicht oder ob `apply_folder_meta` selbst nachgebessert werden muss.
-
-**Vorgehen: vorlegen, nicht durchgreifen.** Jede Umstellung geht durch die Nacharbeits-Liste oder
-eine eigene Ansicht, in der jemand bestätigt. Ein Sprachmodell, das 929 Titel ohne Rückfrage
-umschreibt, macht aus einem sortierten Archiv ein unsortiertes — und die Herkunft der Angaben
+**Vorgehen für den Rest: vorlegen, nicht durchgreifen.** Was noch aussteht, ist genau das, was
+Urteil braucht — bei (d) und (e) entscheidet ein Mensch, oder die Herkunft der Angaben
 (`title_source`) sagt danach nicht mehr die Wahrheit.
+
 
 ### 42 · Dubletten finden, die beste behalten, den Rest zusammenführen
 
@@ -554,6 +506,40 @@ sie verteilt sich ehrlich.
 **Zu prüfen vor dem Bauen:** Ob `MAX_BARS` (heute 30, zur Verbreiterung großer Zeitspannen) in
 einer Welt ohne Balkenverbreiterung noch dieselbe Rolle spielt — bei jahrgenauer Zählung über einen
 Bestand von hundert Jahren stünden sonst hundert schmale Balken, wo heute zehn breite stehen.
+
+### 44 · Marker-Beschriftung und Vorlesetext sagen Verschiedenes
+
+**Ein Fehler, der erst durch [Punkt 41](#41--den-erstbestand-maschinell-vorbereiten) sichtbar
+wurde.** Unter dem Vorschaubild steht die Adresse (`t.map.markerCaption`, gespeist aus
+`place_name`), im `aria-label` desselben Knopfes steht der Titel (`t.map.markerLabel`, gespeist aus
+`title`) — siehe `kiosk/PhotoLayer.tsx`. Wer sieht, liest „Hauenweg 7"; wer vorlesen lässt, hört
+„Hermann Berg".
+
+Das stand schon immer so im Code und fiel nie auf, **weil Titel und Adresse bis zum 11. August 2026
+dasselbe waren.** Seit die Titel aufgeräumt sind, gehen sie auseinander.
+
+Zu entscheiden ist beides zusammen, und die Frage ist dieselbe wie in Punkt 41: Was gehört unter
+ein Vorschaubild? Ein Titel sagt mehr, passt aber nicht immer und fehlt bei **198** Fotos ganz;
+eine Adresse passt immer und sagt weniger. Ein Vorschlag wäre Titel mit Rückfall auf die Adresse —
+dann trüge der Vorlesetext dieselbe Regel und beide sagten wieder dasselbe.
+
+### 45 · Bei langen Straßen liegen die Hausnummern außerhalb des Ausschnitts
+
+Wird im „Hilf mit"-Bereich nach der Hausnummer gefragt, fährt die Karte zum **Straßenpunkt** und
+zeigt die angebotenen Nummern als Beschriftung (Punkt 35, erledigt). Bei einer kurzen Straße
+stimmt das. Beim Lehmweg mit 132 Adressen nicht: Der Straßenpunkt liegt in der Mitte, der
+angebotene Abschnitt „1–13" liegt an einem Ende — **nachgemessen lag genau eine von elf
+Beschriftungen im Ausschnitt.**
+
+Das ist kein Fehler in der Ebene selbst; die Beschriftungen entstehen alle, sie sind nur nicht zu
+sehen. Zu ändern ist, **wohin die Karte fährt**: nicht zum Straßenpunkt, sondern auf den Ausschnitt,
+der die gerade angebotenen Nummern umfasst — also beim Wechsel des Abschnitts erneut. Die Daten
+dafür liegen bereits vor (`offeredNumbers` im Beitrags-Store, gesetzt über `onOffer`); es fehlt der
+Aufruf, der eine `bbox` daraus bildet und die Karte darauf setzt, statt `showLocation` einmal beim
+Laden.
+
+Aufgefallen am 11. August 2026, unmittelbar nachdem die Frage durch Punkt 41 überhaupt Fotos bekam.
+Vorher stand sie auf zwei Fotos an kurzen Straßen und der Fall trat nie ein.
 
 ---
 

@@ -13,10 +13,16 @@ beantwortet, steht in [docs/index.md](docs/index.md).
 
 Wer diese drei nicht kennt, baut etwas, das erst im Museum auffällt:
 
-1. **Historische Fotos sind Scans.** Ihr EXIF trägt das Datum des Scans, nicht der Aufnahme, und
-   nie GPS. Ein EXIF-Datum ab `exif_date_max_year` (1990) darf ein Foto deshalb **nicht** datieren
-   — sonst läge es auf der Zeitleiste bei 2019 und gälte als datiert, würde also nie zur Korrektur
-   vorgelegt. Siehe `backend/app/services/exif.py`.
+1. **Historische Fotos sind Scans.** Ihr EXIF trägt das Datum des Scans, nicht der Aufnahme. Ein
+   EXIF-Datum ab `exif_date_max_year` (1990) darf ein Foto deshalb **nicht** datieren — sonst läge
+   es auf der Zeitleiste bei 2019 und gälte als datiert, würde also nie zur Korrektur vorgelegt.
+   Siehe `backend/app/services/exif.py`.
+
+   **Eine EXIF-Koordinate ist deshalb aber nicht automatisch falsch — und nicht automatisch
+   gemessen.** 413 Fotos des Erstbestands trugen eine, und 278 davon teilten sie sich mit einem
+   anderen Foto: eingetragene Werte, keine Messungen. Wer eine Koordinate aus einer Datei gegen
+   eine andere Quelle abwägen will, zählt erst nach, ob sie sich wiederholt. Siehe
+   `docs/decisions.md`, Punkt 34.
 
 2. **Datierungen sind Intervalle, keine Zeitpunkte.** „1920er" ist der Normalfall. Der Zeitfilter
    fragt auf **Überlappung** ab (`date_from <= bis AND date_to >= von`), nicht auf Enthaltensein.
@@ -171,9 +177,13 @@ Verortung**: Ein Foto, das nur seine Straße kennt, lässt sich in der Detailans
 „Hilf mit"-Bereich auf eine Hausnummer bringen — dort als dritte, nachrangige Frage, mit den
 Nummern der Straße auf der Karte. Was als Nächstes ansteht, steht im Backlog.
 
-**Dass die dritte Frage im Bereich fast nie erscheint, ist kein Fehler**, sondern der Bestand: Ihr
-stehen zwei Fotos zur Verfügung und 74 unverortete im Rang vor ihr. Das kippt mit Punkt 41 (b) —
-dann sind es 66 gegen 8.
+Am **11. August 2026** ist der **Erstbestand bereinigt** worden (Punkt 41, zum größten Teil
+erledigt): 72 Fotos aus Straßenordnern verortet, 57 verschwundene Hausnummern über die
+Nachbarnummer nachgeschärft, 349 von einer eingetragenen EXIF-Koordinate auf ihre Archivadresse
+gesetzt, 815 Titel vom Adressabklatsch befreit. **924 von 929 Fotos stehen jetzt auf der Karte**,
+vorher 852. Dabei haben sich zwei Regeln umgedreht — der Archivordner schlägt die EXIF-Koordinate,
+und im Beitragsbereich wird die Hausnummer vor dem Jahr gefragt (`docs/decisions.md`, Punkt 34
+und 35).
 
 **Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
 ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,
@@ -185,7 +195,7 @@ anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md).
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.
 
-**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 21 Punkte nach Verwaltung,
+**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 23 Punkte nach Verwaltung,
 Besucher-Interface, Infrastruktur und Entwicklung geordnet, jeder mit dem, was beim Aufgreifen
 sonst erst wieder herausgefunden werden müsste. Jeder trägt eine **feste Nummer**, unter der er
 zitiert wird („Punkt 15"), dazu seine Art und seine Einordnung; die Übersichtstabelle oben in der

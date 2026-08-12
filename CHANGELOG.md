@@ -280,8 +280,28 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Gespeicherte Zeitstempel sind durchgängig UTC — auch die der Sicherungsdatei und der Kopfdaten
   auf dem Stick, die bisher Ortszeit schrieben. „Wie lange her" zählt **Kalendertage** entlang der
   deutschen Tagesgrenze: eine Sicherung von gestern Abend ist „1 Tag", nicht „Heute"
+- **Der Archivordner schlägt die EXIF-Koordinate, sobald er eine Hausnummer nennt** — bisher galt
+  das Umgekehrte. Die Umkehrung steht auf einer Messung: Im Erstbestand teilten sich 278 von 413
+  EXIF-verorteten Fotos ihre Koordinate mit einem anderen, an einem Punkt hingen 20 Fotos von vier
+  verschiedenen Tagen. Solche Werte sind eingetragen, nicht gemessen. **Die Straßenmitte gewinnt
+  weiterhin nicht** — sie wäre mit 150 m gröber als der Punkt, den sie ersetzte
+- **Ein Ordner ohne Hausnummer verortet das Foto jetzt auf der Straße**, statt es unverortet zu
+  lassen. Die alte Regel wollte verhindern, dass das Foto aus „Wo ist das?" fällt; seit es die
+  dritte Frage gibt, fällt es nicht heraus, sondern in die genauere Frage hinein
+- **Im „Hilf mit"-Bereich wird die Hausnummer vor dem Jahr gefragt.** Eine Frage wird erst erreicht,
+  wenn die vor ihr leer ist — und mit 673 undatierten Fotos wäre die Nachschärf-Frage nie gestellt
+  worden
 
 ### Behoben
+
+- **Fotos ohne Herkunftsangabe.** Wurde im Pfad keine Straße erkannt, stieg das Auswerten der
+  Ordnerstruktur aus, bevor es die Herkunft vermerkte — obwohl die nur am Pfad hängt und gar nicht
+  an der Straße. Drei Fotos des Erstbestands traf es: zwei, die lose in der Importwurzel lagen, und
+  eines unter einem mehrdeutigen Straßennamen
+- **Eine Hausnummer, die es unter dieser Schreibweise nicht mehr gibt**, findet jetzt ihr Haus über
+  die Nachbarnummer mit derselben führenden Zahl („Schulstraße 2" → „2a"). Häuser werden aufgeteilt
+  und neu nummeriert; im Erstbestand betraf das 57 Fotos an acht Adressen. Wo die führende Zahl gar
+  nicht vorkommt, bleibt das Foto ehrlich straßengenau
 
 - Marker verschwanden gelegentlich von der Karte: der `load`-Rückruf konnte eine bereits entfernte
   Karteninstanz an die Ebenen weiterreichen. Die Vorschaubilder wurden dann sogar geladen, waren

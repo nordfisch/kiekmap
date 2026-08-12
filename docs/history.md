@@ -2111,3 +2111,78 @@ Nachdenken, sondern die Bereitschaft, nachzusehen.
 nicht committete Arbeit darin. Am selben Tag zum zweiten Mal, diesmal `client.ts` und `NEEDS`.
 Wiederhergestellt in zwei Minuten; die Lehre bleibt dieselbe wie am Vormittag und ist zweimal
 teurer bezahlt als noetig: **Eine Gegenprobe wird aus einer Kopie zurueckgeholt, nie aus HEAD.**
+
+## Der Erstbestand wird bereinigt — und zwei Regeln drehen sich um
+
+*11. August 2026.* Punkt 41 stand als der grosse Posten im Backlog: 929 Fotos, deren Titel die
+Adresse daneben wiederholten, 77 ohne Ort, 58 mit einer Hausnummer, die es im Ortsindex nicht mehr
+gibt. Vorgesehen war ein Sprachmodell mit einer Vorlage-Ansicht, in der jemand jede Umstellung
+bestaetigt.
+
+**Gebaut wurde nichts davon.** Eine halbe Stunde Nachzaehlen am Bestand sagte etwas anderes als
+die Planung:
+
+- Die 58 „Faelle" waren **neun Adressen**. 38 Fotos hingen an „Schulstrasse 2" allein. Eine
+  Nachbarnummer-Regel mit Vorlage-Liste zu bauen waere Maschinerie fuer neun Zeilen gewesen.
+- Die 632 Komma-Titel („Hauptstrasse 11a, Gasthof Timm") liessen sich **mechanisch** trennen,
+  und der Zusatz stand ohnehin schon als Schlagwort am Foto — nachgezaehlt bei allen 632, ohne eine
+  einzige Ausnahme. Ein Sprachmodell haette nichts gewusst, was nicht schon dastand.
+- Die Jahreszahl im Dateinamen, seit Monaten als eigener Teilpunkt gefuehrt, betraf **null** Fotos.
+
+Die Arbeit lief als Einmalaktion an `data/photomap.db`, nicht als Werkzeug: Trockenlauf vorlegen,
+schreiben, nachzaehlen. Die Rueckfahrkarte war eine Dateikopie. Was an Code dabei entstand, sind
+drei Regeln in `services/foldermeta.py` und eine Funktion in `services/places.py` — damit der
+naechste Import die Luecken nicht neu erzeugt.
+
+### Die Ursache, die eine Zeile weit weg lag
+
+Drei Fotos hatten keine Herkunftsangabe, und die Vermutung im Backlog lautete, es haenge am nicht
+aufloesbaren Strassennamen. Es hing an einer Zeile: `apply_folder_meta` stieg aus, sobald keine
+Strasse erkannt war — und die Herkunft, die nur am Pfad haengt und gar nicht an der Strasse, wurde
+erst danach gesetzt. Zwei der drei Fotos lagen lose in der Importwurzel, das dritte unter
+„Deelenweg", das zwischen „Deelenweg I" und „Deelenweg II" nicht zu entscheiden ist. Dort arbeitet
+die Eindeutigkeitspruefung genau richtig; sie nahm die Herkunft nur als Nebenschaden mit.
+
+### Was das Nachmessen ueber die EXIF-Koordinaten ergab
+
+Der groesste Posten stand nicht im Backlog. 413 Fotos lagen auf einer EXIF-Koordinate, und
+`_locate` liess sie dort: „EXIF schlaegt den Ordner immer", mit der Begruendung, die Kamera habe
+tatsaechlich dort gestanden. Beim Vorlegen fiel auf, dass 349 dieser Fotos eine im Ortsindex
+auffindbare Archivadresse hatten — bis zu 689 m entfernt vom Punkt, auf dem sie lagen.
+
+Die Frage war, welche Seite irrt. Beantwortet hat sie eine Abfrage von drei Zeilen: **278 der 413
+teilen ihre Koordinate mit einem anderen Foto**, an einem Punkt haengen 20 Fotos von vier
+verschiedenen Tagen. Sechs gleiche Nachkommastellen an vier Tagen liefert kein Empfaenger. Die
+Werte sind eingetragen worden, nicht gemessen — es stand also nie Messung gegen Ablage, sondern
+eine Ablage gegen eine andere. Siehe [decisions.md](decisions.md), Punkt 34.
+
+**Das ist beim Vorlegen aufgefallen, nicht beim Planen.** Der Plan hatte die Zahl 331 und den Satz
+„die GPS-Angabe ist echt"; beides war falsch, und beides stand schon im Plan, bevor jemand
+nachgesehen hatte. Der Trockenlauf vor jedem Schritt hat sich hier ein einziges Mal bezahlt
+gemacht und damit fuer die ganze Aktion.
+
+### Die Rangfolge war aus dem Gefuehl gebaut
+
+Nach dem Bereinigen sollte die Nachschaerf-Frage endlich Fotos haben — 71 statt keinem. Am
+laufenden Kiosk kam sie trotzdem nicht: Ueberspringen der Jahresfrage fuehrte zurueck zu „Wo ist
+das?".
+
+Der Grund stand in `NEEDS`: `location, date, housenumber`. Eine Frage wird erst erreicht, wenn die
+vor ihr **leer** ist — und 673 undatierte Fotos laufen nie leer. Die dritte Frage waere nie
+gestellt worden, und der ganze Aufwand von Punkt 36 haette brachgelegen. Die Reihenfolge ist
+umgedreht; die Begruendung steht in [decisions.md](decisions.md), Punkt 35.
+
+**Und die Reihenfolge liess sich vertauschen, ohne dass im Backend ein Test fiel.** Gemerkt hat es
+allein einer im Frontend, wo dieselbe Liste ein zweites Mal steht — genau die Doppelung, die sonst
+als Schwaeche gilt. Die Luecke ist mit `TestRangfolge` geschlossen, und die Lehre ist dieselbe wie
+beim Mock, der im Juli seine eigene Kopie von `NEEDS` hielt: **Eine Reihenfolge braucht einen Test,
+der genau sie prueft, nicht nur ihre Wirkung im Normalfall.**
+
+### Was am Ende dastand
+
+924 von 929 Fotos auf der Karte statt 852. Kein Titel mehr, der die Adresse daneben wiederholt.
+Und zwei Fehler, die vorher nicht zu sehen waren, weil der Bestand sie verdeckt hatte: Die
+Marker-Beschriftung zeigt die Adresse, waehrend der Vorlesetext den Titel nennt — identisch,
+solange beide dasselbe waren (Punkt 44). Und bei einer Strasse mit 132 Adressen liegen die
+angebotenen Hausnummern ausserhalb des Kartenausschnitts, weil die Karte zur Strassenmitte faehrt
+(Punkt 45). Beide sind erst aufgefallen, als der bereinigte Bestand sie sichtbar machte.

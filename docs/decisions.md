@@ -1212,3 +1212,55 @@ Streuen und Nachschärfen sind zwei Antworten auf dieselbe Frage — und nur ein
 Nachschärfen (Punkt 32) will die Ungenauigkeit **sichtbar halten**, damit jemand sie behebt; das
 Streuen versteckt sie hinter einem hübscheren Bild. Wenn ein Stapel von 51 unhandlich ist, ist das
 ein Argument für eine bessere Stapelansicht, nicht für erfundene Koordinaten.
+
+## 34. Der Archivordner schlägt die EXIF-Koordinate — sobald er eine Hausnummer nennt
+
+*Entschieden und umgesetzt am 11. August 2026* — beim Bereinigen des Erstbestands (Punkt 41).
+
+Bis dahin galt: **eine Koordinate aus der Datei schlägt den Ordner immer.** Die Begründung stand im
+Modulkopf von `services/foldermeta.py` und klang zwingend — die Kamera stand tatsächlich dort, der
+Ordner ist die Ablage von jemandem. Sie las sich als *Messung gegen Meinung*.
+
+**Am Bestand nachgemessen ist sie keine.** Von 413 EXIF-verorteten Fotos teilen sich 278 ihre
+Koordinate mit einem anderen; die Fotos verteilen sich auf 196 Punkte. An einem davon hängen 20
+Fotos, die an **vier verschiedenen Tagen** aufgenommen wurden. Kein Empfänger liefert an vier Tagen
+sechs gleiche Nachkommastellen — diese Werte sind eingetragen worden, von Hand oder von einem
+Verwaltungsprogramm. Es steht also eine Ablage gegen eine andere, und nur eine davon macht sich am
+Ortsindex fest.
+
+**Deshalb gewinnt die Ordneradresse — aber nur die Adresse.** Die Straßenmitte gewinnt nicht: Sie
+ist mit 150 m gröber als der Punkt, den sie ersetzen würde. Ein Foto, dessen Ordner keine
+Hausnummer nennt, behält seinen EXIF-Punkt; im Erstbestand waren das 64. Diese Grenze ist die
+eigentliche Regel, und sie hat ihren eigenen Test.
+
+Wie weit die Fotos gewandert sind: 171 unter 15 m, 99 bis 50 m, 52 bis 150 m, 27 darüber, eines um
+689 m. **Bei den Ausreißern liegt der EXIF-Punkt fast immer präzise auf einem anderen Haus** —
+„Hauptstraße 11" lag 2 m neben Hauenweg 1. Welche Seite dort irrt, ist nicht zu entscheiden; die
+Entscheidung fällt zugunsten der Angabe, die das Museum selbst über das Bild gemacht hat.
+
+**Was diese Entscheidung aushöhlen würde:** eine spätere Quelle, die Koordinaten liefert, ohne dass
+nachgesehen wird, ob sie gemessen oder eingetragen sind. Die Begründung hier hängt an einer
+Messung, nicht an einer Rangordnung der Quellen — wer sie zitiert, ohne nachzuzählen, zitiert sie
+falsch.
+
+## 35. Die Hausnummer wird vor dem Jahr gefragt, und das ist Arithmetik
+
+*Entschieden und umgesetzt am 11. August 2026* — nach dem Bereinigen, am laufenden Kiosk gesehen.
+
+Die Reihenfolge in `NEEDS` (`services/needs.py`) ist der Rang, und eine Frage wird erst erreicht,
+wenn die vor ihr **leer** ist. Sie lautete `location, date, housenumber` — aus dem Gefühl heraus
+richtig, denn ein Jahr ist mehr wert als eine Hausnummer.
+
+**Am Bestand ist das Gefühl falsch.** Nach der Bereinigung stehen 5 Fotos ohne Ort, **673 ohne
+Jahr** und 71 zum Nachschärfen. Die Jahresfrage läuft nie leer — die dritte Frage wäre also nie
+erreicht worden. Der Bereich trüge eine Frage, die niemandem je gestellt wird, und der ganze Aufwand
+von Punkt 36 läge brach.
+
+Umgekehrt läuft das Nachschärfen nach 71 Antworten trocken, und danach hat die Jahresfrage den
+Bereich für sich, so lange es dauert. **Die Nachrangigkeit einer Frage bemisst sich nicht an ihrem
+Wert, sondern daran, ob die vor ihr je zu Ende geht.**
+
+Aufgefallen ist es erst am laufenden Kiosk: Überspringen der Jahresfrage führte zurück zu „Wo ist
+das?", und die dritte Frage kam nie. Kein Test im Backend fiel, als die Reihenfolge vertauscht
+wurde — gemerkt hat es allein einer im Frontend, wo dieselbe Liste ein zweites Mal steht. Diese
+Lücke ist mit `TestRangfolge` geschlossen.
