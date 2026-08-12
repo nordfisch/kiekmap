@@ -169,6 +169,26 @@ Was vorher auf dem Gerät war, wird **nicht gelöscht**, sondern in einen Ordner
 Datum beiseitegelegt. Wer also versehentlich die falsche Sicherung einspielt, hat nichts verloren
 — sagen Sie in dem Fall jemandem Bescheid, der an das Gerät kann.
 
+### Danach einmal neu starten
+
+**Ist das Gerät seit der Sicherung aktualisiert worden, starten Sie es hinterher neu** — Gerät
+ausschalten, zehn Sekunden warten, wieder einschalten.
+
+Der Grund in einem Satz: Eine Sicherung enthält die Angaben in der Form, die das Programm **damals**
+hatte. Ist das Programm seither erneuert worden, muss es die zurückgespielten Angaben erst auf
+seine heutige Form bringen, und das tut es beim Start.
+
+**Woran Sie merken, dass der Neustart gefehlt hat:** Die Ausstellung sieht richtig aus — Fotos,
+Karte, Zeitleiste, alles da —, aber **Besucherbeiträge lassen sich nicht mehr speichern**. Wer im
+„Hilf mit"-Bereich etwas beantwortet, bekommt eine Fehlermeldung statt eines Dankeschöns. Auch das
+Bearbeiten in der Verwaltung schlägt dann fehl.
+
+Der Neustart behebt das, und es geht dabei nichts verloren. Hilft er nicht, hilft nur jemand mit
+Zugang zum Gerät weiter — was er tun muss, steht in
+[operations.md](operations.md#eine-zurückgespielte-sicherung-passt-nicht-zum-programm).
+
+**Im Zweifel einfach neu starten.** Ein Neustart zu viel schadet nie und dauert zwanzig Sekunden.
+
 ## Was tun, wenn der Bildschirm schwarz bleibt
 
 Zuerst: Steckt der Stecker, ist der Bildschirm an? Wenn ja, hilft meist ein Neustart — Gerät

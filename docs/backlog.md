@@ -60,7 +60,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 17 | [Containerbetrieb prüfen](#17--containerbetrieb-prüfen) | Aufgabe | wichtig |
 | 18 | [Wiederherstellung wirklich proben](#18--wiederherstellung-wirklich-proben) | Aufgabe | wichtig |
 | 19 | [Displayauflösung und -orientierung des Museumsgeräts](#19--displayauflösung-und--orientierung-des-museumsgeräts) | Frage | wichtig |
-| 47 | [Der Entwicklungsbestand wandert nicht mit den Migrationen](#47--der-entwicklungsbestand-wandert-nicht-mit-den-migrationen) | **Fehler** | wichtig · dringend |
+| 47 | [Eine zurückgespielte Sicherung hebt ihr Schema nicht an](#47--eine-zurückgespielte-sicherung-hebt-ihr-schema-nicht-an) | **Fehler** | wichtig · dringend |
 | 20 | [Read-Only-Overlay-Dateisystem](#20--read-only-overlay-dateisystem) | Idee | — |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
@@ -68,9 +68,9 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Drei Fehler sind offen**: Punkt 47 lässt jeden Besucherbeitrag am Entwicklungsbestand
-scheitern; Punkt 44 verwechselt Marker-Beschriftung und Vorlesetext; Punkt 10 zerdrückt das Foto
-auf einem kleinen Schirm.
+**Drei Fehler sind offen**: Punkt 47 lässt nach einer zurückgespielten Sicherung jeden
+Besucherbeitrag scheitern, bis jemand neu startet; Punkt 44 verwechselt Marker-Beschriftung und
+Vorlesetext; Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
 
 **Fünfundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
 29, 32, 33, 35, 36, 37, 38, 41, 45, 46. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder
@@ -480,7 +480,7 @@ und beide sagten wieder dasselbe.
 
 ## Infrastruktur
 
-### 47 · Der Entwicklungsbestand wandert nicht mit den Migrationen
+### 47 · Eine zurückgespielte Sicherung hebt ihr Schema nicht an
 
 **Ein Fehler, der zwei Tage unbemerkt lief.** Am 10. August 2026 kam die Spalte `old_source` in die
 Tabelle `changes` — mit Alembic-Revision, wie es sich gehört. Am 12. August fiel beim Prüfen am
@@ -493,23 +493,40 @@ sqlite3.OperationalError: table changes has no column named old_source
 `data/photomap.db` stand noch auf `1cf9ccd28cd7`; die Migration `53bf4d2a4872` war nie gelaufen.
 Behoben mit `make migrate`.
 
-**Warum es niemandem auffiel, und das ist der eigentliche Punkt:**
+**Die Ursache ist eine Wiederherstellung, und damit betrifft der Fehler das Museum genauso.** In
+`data/` lagen zwei `vorher-…`-Ordner; der jüngste vom 11. August, mit demselben Zeitstempel wie die
+Datenbank. Eingespielt wurde eine Sicherung vom 5. August — die Migration entstand am 10. **Eine
+Sicherung bringt ihr Schema mit**, `_swap_in` tauscht die Datei im Ganzen aus, und `_reopen_database`
+hängt das laufende Programm nur neu an sie. Migrationen laufen dabei nicht; sie laufen beim *Start*
+(`docker-entrypoint.sh`), und eine Wiederherstellung ist kein Start.
+
+**Ein Neustart behebt es.** Das steht seit dem 12. August im
+[Benutzerhandbuch](usermanual.md#danach-einmal-neu-starten) und ausführlich in
+[operations.md](operations.md#eine-zurückgespielte-sicherung-passt-nicht-zum-programm) — samt dem
+umgekehrten, schlimmeren Fall: eine Sicherung, die **neuer** ist als das Programm, lässt das Gerät
+gar nicht erst hochkommen.
+
+**Warum es zwei Tage niemandem auffiel, und das ist der eigentliche Punkt:**
 
 - **Die Tests bauen ihr Schema aus den Modellen** (`Base.metadata.create_all`), nicht aus den
   Migrationen. Sie können eine fehlende Migration also grundsätzlich nicht bemerken — 393 grüne
   Tests standen neben einer Datenbank, an der nichts mehr zu schreiben war.
-- **`make dev` migriert nicht.** Im Container tut es der Start, auf dem Entwicklungsrechner niemand.
-- **Alles Prüfen der letzten Tage war lesend.** Die Bereinigung des Erstbestands schrieb an der API
+- **Alles Prüfen der Tage davor war lesend.** Die Bereinigung des Erstbestands schrieb an der API
   vorbei, und im Kiosk wurde nachgesehen, ob Fragen *erscheinen* — nicht, ob eine Antwort ankommt.
 
-**Zwei Abhilfen, und sie schließen verschiedene Lücken:**
+**Was zu bauen bleibt** — die Dokumentation deckt den Betrieb ab, nicht die Ursache:
 
-1. **`make dev` bringt das Schema zuerst auf Stand.** Eine Zeile, und dieser Fall wäre nie
-   entstanden.
+1. **Die Wiederherstellung bringt das Schema selbst auf Stand.** Sie weiß, dass sie eine fremde
+   Datenbank eingesetzt hat; ein `alembic upgrade head` direkt vor `_reopen_database` wäre der Ort.
+   Dann braucht es den Neustart gar nicht, und die Einschränkung im Handbuch entfällt. **Zu klären
+   ist der umgekehrte Fall:** Ist die Sicherung neuer als das Programm, darf nicht migriert, sondern
+   muss abgebrochen werden — mit einer Meldung, die sagt, was zu tun ist.
 2. **Ein Test, der Migrationen gegen Modelle hält.** Schema einmal über `alembic upgrade head`
    erzeugen, einmal über `create_all`, und die Tabellen samt Spalten vergleichen. Das fängt auch
    den umgekehrten Fall: eine Modelländerung ohne Migration. Zu klären ist, wie streng verglichen
    wird — Typen und Indizes unterscheiden sich zwischen den beiden Wegen in Kleinigkeiten.
+3. **`make dev` bringt das Schema zuerst auf Stand.** Eine Zeile; deckt den Entwicklungsrechner ab,
+   wo niemand migriert.
 
 **Und eine Frage dahinter:** Ein 500 im Beitragsbereich sieht der Besucher als „Das hat leider nicht
 geklappt" — richtig, aber es sagt niemandem, dass das Gerät seit Tagen nichts mehr annimmt. Ob die

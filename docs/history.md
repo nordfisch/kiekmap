@@ -2299,14 +2299,24 @@ sqlite3.OperationalError: table changes has no column named old_source
 ```
 
 Die Alembic-Revision vom 10. August war auf `data/photomap.db` nie gelaufen. **Zwei Tage lang
-scheiterte damit jeder Besucherbeitrag am Entwicklungsbestand** -- und 393 gruene Tests standen
-daneben, weil sie ihr Schema aus den Modellen bauen und eine fehlende Migration grundsaetzlich
-nicht bemerken koennen.
+scheiterte damit jeder Besucherbeitrag** -- und 393 gruene Tests standen daneben, weil sie ihr Schema
+aus den Modellen bauen und eine fehlende Migration grundsaetzlich nicht bemerken koennen.
+
+**Die Ursache war eine Wiederherstellung, und damit trifft der Fehler das Museum genauso.** In
+`data/` lagen zwei `vorher-…`-Ordner -- die Spur, die eine Wiederherstellung hinterlaesst --, der
+juengste vom 11. August mit demselben Zeitstempel wie die Datenbank. Eingespielt worden war eine
+Sicherung vom 5. August, also von vor der Migration. **Eine Sicherung bringt ihr Schema mit:**
+`_swap_in` tauscht `photomap.db` im Ganzen aus, `_reopen_database` haengt das laufende Programm nur
+neu an sie. Migrationen laufen beim *Start*, und eine Wiederherstellung ist kein Start.
+
+Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](usermanual.md) als Einschraenkung und
+in [operations.md](operations.md) mit Diagnose und Abhilfe -- samt dem umgekehrten, schlimmeren
+Fall: Eine Sicherung, die *neuer* ist als das Programm, laesst das Geraet gar nicht erst hochkommen.
 
 Dass es niemandem auffiel, hat einen zweiten Grund, und der ist der unangenehmere: **Alles Pruefen
 der letzten Tage war lesend.** Die Bereinigung des Erstbestands schrieb an der API vorbei; im Kiosk
 wurde nachgesehen, ob Fragen *erscheinen*. Ob eine Antwort ankommt, hat zwei Tage niemand versucht.
-Aufgenommen als [Punkt 47](backlog.md#47--der-entwicklungsbestand-wandert-nicht-mit-den-migrationen).
+Aufgenommen als [Punkt 47](backlog.md#47--eine-zurückgespielte-sicherung-hebt-ihr-schema-nicht-an).
 
 **Die Lehre ist aelter als dieser Fehler und hier wieder bezahlt worden:** Ein Durchgang, der nur
 schaut, prueft die Haelfte. Der erste Klick, der etwas *schreibt*, hat gefunden, was zwei Tage
