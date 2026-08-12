@@ -7,10 +7,13 @@ Drei Fehler passieren dabei still, und jeder hat hier seinen Test:
 
   1. Aus "10 H Brahms" wird die Hausnummer 10h. Die gibt es nicht -- das Foto landet auf der
      Strasse statt am Haus, und niemand sieht, dass etwas schiefging.
-  2. Der Ordner ueberschreibt eine Koordinate, die in der Datei stand. Die Kamera stand
-     tatsaechlich dort; der Ordner ist die Ablage von jemandem.
-  3. Eine Strasse ohne Hausnummer wird trotzdem verortet. Dann faellt das Foto aus "Wo ist das?"
-     heraus -- und liegt bis zu 400 m falsch.
+  2. Die **Strassenmitte** ueberschreibt eine Koordinate aus der Datei. Sie ist mit 150 m groeber
+     als der Punkt, den sie ersetzt: Das Foto wird ungenauer, und es sieht nach Praezisierung aus.
+  3. Eine Angabe von Menschen wird ueberschrieben. Nur das EXIF gibt nach -- und das erst, seit
+     nachgemessen ist, dass diese Koordinaten eingetragen und nicht gemessen wurden.
+
+Die Regel unter 2 und 3 lief bis August 2026 andersherum: Das EXIF schlug den Ordner immer. Warum
+sie gedreht wurde, steht im Modul-Docstring von ``services/foldermeta.py``.
 """
 
 import pytest
@@ -191,25 +194,31 @@ class TestWasAmFotoLandet:
         assert foto.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
         assert foto.title == "Hauptstrasse 14, Museum"
 
-    def test_strasse_ohne_hausnummer_bleibt_unverortet(
+    def test_ordner_ohne_hausnummer_setzt_das_foto_auf_die_strasse(
         self, session, settings, sample_image, ortsindex
     ):
-        """Sonst liefe "Wo ist das?" leer -- bei 124 Fotos des Erstbestands.
+        """Bis August 2026 blieb so ein Foto unverortet -- 72 Stueck im Erstbestand.
 
-        Der Strassenpunkt saehe aus wie eine Antwort. Er ist bis zu 400 m daneben, und das Foto
-        gilt danach als verortet, kommt also nie mehr jemandem vor die Augen, der das Haus kennt.
-        Als Schlagwort bleibt die Strasse trotzdem stehen.
+        Die Begruendung dafuer war, dass der Strassenpunkt wie eine Antwort aussieht und das Foto
+        damit aus "Wo ist das?" fiele. Das galt, solange es zwei Fragen gab. Seit es die dritte
+        gibt, faellt es nicht heraus, sondern in die genauere Frage hinein: Genau ein
+        strassengenaues Foto ohne Hausnummer ist es, wonach das Nachschaerfen sucht.
+
+        Die 150 m sagen weiterhin, was der Punkt wert ist. Als Schlagwort bleibt die Strasse
+        ebenfalls stehen.
         """
         foto = self._importiere(session, settings, sample_image, "Hauptstrasse/119.jpg")
 
-        assert foto.needs_location
-        assert foto.lat is None and foto.location_accuracy_m is None
+        assert not foto.needs_location
+        assert (foto.lat, foto.lon) == (53.6200, 9.6760)
+        assert foto.location_accuracy_m == place_service.ACCURACY_STREET_M
+        assert foto.location_source == "curator"
         assert "Hauptstrasse" in {schlagwort.name for schlagwort in foto.tags}
 
     def test_unbekannte_hausnummer_faellt_auf_die_strasse_zurueck(
         self, session, settings, sample_image, ortsindex
     ):
-        """Die Nummer steht nicht in OpenStreetMap -- 12 Faelle im Erstbestand.
+        """Die Nummer steht nicht in OpenStreetMap, und auch keine mit derselben fuehrenden Zahl.
 
         Dann zaehlt der Strassenpunkt, und die 150 m sagen, was er wert ist. Der Name behaelt die
         Adresse, die uns genannt wurde: Die Beschriftung ist genauer als der Punkt.
@@ -220,33 +229,94 @@ class TestWasAmFotoLandet:
         assert foto.place_name == "Hauptstrasse 77"
         assert foto.location_accuracy_m == place_service.ACCURACY_STREET_M
 
-    def test_koordinate_aus_der_datei_schlaegt_den_ordner(
+    def test_umnummerierte_hausnummer_landet_beim_nachbarn(
         self, session, settings, sample_image, ortsindex
     ):
-        """Die Kamera stand dort. Der Ordner ist die Ablage von jemandem."""
+        """Das Archiv sagt "9", der Ortsindex kennt nur "9a" -- dasselbe Haus, aufgeteilt.
+
+        Ohne diese Ruecknahme laegen 57 Fotos des Erstbestands auf der Strassenmitte, darunter 38
+        an einer einzigen Adresse. Der Name behaelt die Nummer, die uns genannt wurde; nur der
+        Punkt kommt vom Nachbarn.
+        """
+        foto = self._importiere(session, settings, sample_image, "Hauptstrasse/9 Meyer/a.jpg")
+
+        assert (foto.lat, foto.lon) == (53.6205, 9.6765)
+        assert foto.place_name == "Hauptstrasse 9"
+        assert foto.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
+
+    def _mit_gps(self, session, settings, sample_image, unterpfad: str):
         wurzel = settings.data_dir / "archiv"
-        ziel = wurzel / "Hauptstrasse" / "14 Museum" / "a.jpg"
+        ziel = wurzel / unterpfad
         ziel.parent.mkdir(parents=True, exist_ok=True)
         ziel.write_bytes(sample_image("foto_mit_gps.jpg").read_bytes())
 
         outcome = import_file(session, ziel, settings)
+        assert outcome.photo is not None
         apply_folder_meta(session, outcome.photo, ziel, wurzel, settings)
+        return outcome.photo
 
-        assert outcome.photo.lat == pytest.approx(53.62053)
-        assert outcome.photo.lon == pytest.approx(9.67601)
-        # Der Ordner darf trotzdem betiteln, benennen und beschlagworten -- nur nicht verorten.
-        assert outcome.photo.title == "Hauptstrasse 14, Museum"
-        assert outcome.photo.place_name == "Hauptstrasse 14"
-        assert outcome.photo.location_accuracy_m is None
-
-    def test_die_strasse_steht_beim_foto_auch_ohne_punkt(
+    def test_ordneradresse_schlaegt_die_exif_koordinate(
         self, session, settings, sample_image, ortsindex
     ):
-        """Wer im Kiosk gefragt wird "wo ist das?", soll wenigstens die Strasse dabei lesen."""
+        """Umgekehrt als bis August 2026 -- und der Grund ist nachgemessen.
+
+        Die alte Regel las sich als Messung gegen Ablage. Im Holmer Bestand ist sie das nicht:
+        278 der 413 EXIF-verorteten Fotos teilen ihre Koordinate mit einem anderen, und an einem
+        Punkt haengen 20 Fotos von **vier verschiedenen Tagen**. Sechs gleiche Nachkommastellen an
+        vier Tagen liefert kein Empfaenger -- das ist eingetragen, nicht gemessen. Also steht eine
+        Ablage gegen die andere, und nur eine davon macht sich am Ortsindex fest. 349 Fotos sassen
+        so da, bis zu 700 m von der Adresse entfernt, die ihr eigener Ordner nannte.
+        """
+        foto = self._mit_gps(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
+
+        assert (foto.lat, foto.lon) == (53.6205, 9.6765)
+        assert foto.place_name == "Hauptstrasse 14"
+        assert foto.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
+        assert foto.location_source == "curator"
+
+    def test_strassenmitte_schlaegt_die_exif_koordinate_nicht(
+        self, session, settings, sample_image, ortsindex
+    ):
+        """Der Fehlerfall, wenn die Regel zu weit ginge.
+
+        Ohne Hausnummer bleibt nur der Strassenpunkt, und der ist mit 150 m **groeber** als die
+        Messung, die er ersetzen wuerde. Im Erstbestand traefe das 82 Fotos: Sie wuerden ungenauer,
+        und niemand saehe es.
+        """
+        foto = self._mit_gps(session, settings, sample_image, "Hauptstrasse/a.jpg")
+
+        assert foto.lat == pytest.approx(53.62053)
+        assert foto.lon == pytest.approx(9.67601)
+        assert foto.location_accuracy_m is None
+        # Betiteln, benennen und beschlagworten darf der Ordner trotzdem.
+        assert foto.place_name == "Hauptstrasse"
+
+    def test_eine_menschliche_angabe_wird_nicht_ueberschrieben(
+        self, session, settings, sample_image, ortsindex
+    ):
+        """Nur das EXIF gibt nach. Was ein Kurator oder ein Besucher gesagt hat, bleibt stehen."""
+        wurzel = settings.data_dir / "archiv"
+        ziel = wurzel / "Hauptstrasse" / "14 Museum" / "a.jpg"
+        ziel.parent.mkdir(parents=True, exist_ok=True)
+        ziel.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
+
+        outcome = import_file(session, ziel, settings)
+        outcome.photo.lat, outcome.photo.lon = 53.5, 9.5
+        outcome.photo.location_source = "visitor"
+        apply_folder_meta(session, outcome.photo, ziel, wurzel, settings)
+
+        assert (outcome.photo.lat, outcome.photo.lon) == (53.5, 9.5)
+
+    def test_die_strasse_steht_beim_foto_als_name(self, session, settings, sample_image, ortsindex):
+        """Der Name traegt die Strasse ohne Nummer -- daran erkennt das Nachschaerfen sein Foto.
+
+        Eine Ziffer im Namen hiesse, die Hausnummer sei bekannt, und die Frage entfiele. Siehe
+        ``open_filter("housenumber")`` in ``services/needs.py``.
+        """
         foto = self._importiere(session, settings, sample_image, "Hauptstrasse/119.jpg")
 
         assert foto.place_name == "Hauptstrasse"
-        assert foto.needs_location
+        assert not any(zeichen.isdigit() for zeichen in foto.place_name)
 
     def test_die_herkunft_zeigt_auf_das_archiv(
         self, session, settings, sample_image, ortsindex, monkeypatch
@@ -264,3 +334,20 @@ class TestWasAmFotoLandet:
         foto = self._importiere(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
 
         assert foto.provenance is None
+
+    def test_herkunft_wird_auch_ohne_erkannte_strasse_vermerkt(
+        self, session, settings, sample_image, ortsindex, monkeypatch
+    ):
+        """Drei Fotos des Erstbestands hatten gar keine Herkunft -- und keinen Fehler dabei.
+
+        Die Herkunft haengt am Pfad, nicht an der Strasse. Wurde keine erkannt, stieg
+        ``apply_folder_meta`` aber schon vorher aus und nahm sie mit: zwei Fotos lagen lose in der
+        Importwurzel, eines unter einem mehrdeutigen Strassennamen. Gerade dort ist der Pfad das
+        Einzige, was von der Ablage uebrig bleibt.
+        """
+        monkeypatch.setattr(settings, "import_provenance", "Archiv, Verzeichnis 01 Orte/")
+
+        foto = self._importiere(session, settings, sample_image, "Irgendwas/lose.jpg")
+
+        assert foto.place_name is None, "ohne Strasse wird weiterhin nicht verortet"
+        assert foto.provenance == "Archiv, Verzeichnis 01 Orte/Irgendwas/lose.jpg"

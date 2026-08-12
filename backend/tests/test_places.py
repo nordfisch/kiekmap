@@ -263,3 +263,38 @@ class TestStrasseUnterIhremNamen:
     def test_normalisiert_nicht(self, ortsindex):
         """Eine andere Schreibweise ist eine andere Strasse -- lieber nichts als das Falsche."""
         assert place_service.street_named(ortsindex, "muehlenweg") is None
+
+
+class TestVerschwundeneHausnummer:
+    """``address_near`` findet das Haus, dessen Nummer sich seit der Aufnahme geaendert hat.
+
+    Neun Adressen des Erstbestands stehen so da: Das Archiv kennt "Schulstrasse 2", der Ortsindex
+    nur noch "2a", weil das Haus aufgeteilt wurde. Das ist Maschinenarbeit und keine Frage fuer den
+    Kiosk -- wo die frueher Schulstrasse 2 stand, weiss ein Besucher so wenig wie der Ortsindex.
+    """
+
+    def test_findet_die_nummer_mit_anderem_zusatz(self, ortsindex):
+        gefunden = place_service.address_near(ortsindex, "Muehlenweg", "1")
+
+        assert gefunden is not None
+        assert gefunden.housenumber == "1"
+
+    def test_nimmt_den_zusatz_wenn_die_blanke_zahl_fehlt(self, ortsindex):
+        """Der eigentliche Fall: gesucht "1b", im Index stehen nur "1" und "1a"."""
+        gefunden = place_service.address_near(ortsindex, "Muehlenweg", "1b")
+
+        assert gefunden is not None
+        # In Gehrichtung die erste mit fuehrender 1 -- "1" vor "1a", siehe sort_key.
+        assert gefunden.housenumber == "1"
+
+    def test_findet_nichts_wenn_die_zahl_gar_nicht_vorkommt(self, ortsindex):
+        """Der stille Fehler, wenn diese Grenze fehlte.
+
+        Schmidt-Isserstedt-Weg 4 liegt im Ortsindex zwischen 2 und 8. Wuerde hier irgendein
+        Nachbar genommen, saesse das Foto auf einem fremden Haus -- und behauptete danach 15 m
+        Genauigkeit, waere also nicht einmal mehr als ungenau erkennbar.
+        """
+        assert place_service.address_near(ortsindex, "Muehlenweg", "7") is None
+
+    def test_eine_strasse_ohne_adressen_liefert_nichts(self, ortsindex):
+        assert place_service.address_near(ortsindex, "Alte Muehlenstrasse", "1") is None

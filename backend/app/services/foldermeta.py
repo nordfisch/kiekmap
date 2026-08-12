@@ -14,8 +14,14 @@ as a street when ``places`` knows one by that name. So this works on a USB stick
 on a folder in a different language, and in a village that never had a "Straßen" folder -- and no
 place name ends up in the code (see CLAUDE.md, "Nichts Ortsspezifisches gehört in den Code").
 
-Everything here only fills fields the file itself left empty. A coordinate out of the EXIF beats
-the folder every time: the camera stood somewhere, the folder is somebody's filing.
+Everything here only fills fields the file itself left empty -- with one exception, and it used to
+read the other way round. **A house number from the folder beats a coordinate out of the EXIF.**
+The old rule said the camera stood somewhere while the folder is somebody's filing, and that
+sounded like measurement against opinion. On Holm's stock it is not: 278 of the 413 EXIF-located
+photographs share their coordinate with another, and one point carries 20 photographs taken on
+four different days. No receiver produces the same six decimal places on four days -- those
+coordinates were typed, not measured. So both sides are somebody's filing, and only one of them
+snaps to the gazetteer. A street centre still gives way to the EXIF -- see ``_locate``.
 """
 
 import logging
@@ -229,6 +235,13 @@ def apply_folder_meta(
     Returns what was read, so a caller can report on it. Only empty fields are touched -- what the
     file said about itself stands.
     """
+    # The provenance note goes first, because it is the one field that does *not* depend on a
+    # street: it records where the file lay, and that is worth keeping even when the folder said
+    # nothing we could read. Three photos of the first import lost it to the early return below --
+    # two that lay loose in the import root, and one under an ambiguous street name.
+    if not photo.provenance and settings.import_provenance:
+        photo.provenance = settings.import_provenance + str(relative_to_root(path, root))
+
     meta = parse_path(path.parts[:-1], street_names(session))
     if not meta.street:
         return meta
@@ -246,9 +259,6 @@ def apply_folder_meta(
         photo.title = meta.title
         photo.title_source = Source.CURATOR
 
-    if not photo.provenance and settings.import_provenance:
-        photo.provenance = settings.import_provenance + str(relative_to_root(path, root))
-
     # The street goes on *every* photo below it, house number or not. For the ones without a
     # number it is the only trace left; for the rest it makes the whole street findable at once.
     add_tags(session, photo, [meta.street, *([meta.name] if meta.name else [])])
@@ -259,22 +269,44 @@ def apply_folder_meta(
 def _locate(session: Session, photo: Photo, meta: FolderMeta) -> None:
     """Put the photo on the map, as precisely as the folder allows.
 
-    **A folder without a house number leaves the photo unlocated**, even though the street is
-    known. Setting it to the middle of the street would look like an answer, and the photo would
-    drop out of "Wo ist das?" -- where somebody who walks past that house every day could have
-    said which one it is. The street survives as a keyword, which is the honest version of the
-    same statement.
-    """
-    if not photo.needs_location or not meta.housenumber:
-        return
+    **A folder without a house number puts the photo on the street**, at 150 m. Until August 2026
+    it left the photo unlocated instead, and the reasoning was sound at the time: the street point
+    would look like an answer, and the photo would drop out of "Wo ist das?" -- away from the one
+    person who walks past that house every day.
 
+    That reasoning rested on there being two questions. **There are three now.** A street-precise
+    photo without a house number is exactly what the sharpening question asks about, so such a
+    photo no longer falls out of the panel -- it falls into the more precise question, where the
+    same person answers something narrower. See decisions.md, Punkt 32.
+
+    **The folder's address also beats a coordinate out of the EXIF**, which is the other way round
+    from what this module did until August 2026. The reversal rests on a measurement, not on a
+    preference: on Holm's stock those coordinates repeat across photographs taken on different
+    days, so they were entered by somebody rather than read off a receiver (see the module
+    docstring). They are a second filing, not evidence -- and 349 photos of the first import sat on
+    one, up to 700 m from the address their own folder named.
+
+    **The street centre does not get that privilege.** At 150 m it is coarser than the point it
+    would replace, so a photo whose folder names no house number keeps its EXIF point.
+    """
     place = _address_place(session, meta)
     accuracy = place_service.ACCURACY_ADDRESS_M
+    if place is None and meta.housenumber:
+        # Not under that spelling -- but the houses get split and renumbered, and the neighbour
+        # under the same leading number is the same building. See places.address_near.
+        place = place_service.address_near(session, meta.street or "", meta.housenumber)
+
     if place is None:
-        # The number is not in OpenStreetMap. The street still is, and 150 m says how much that
-        # is worth -- while ``place_name`` keeps the address we were actually told.
+        # Nothing to go on but the street. 150 m says how much that is worth -- while
+        # ``place_name`` keeps the address we were actually told.
+        if not photo.needs_location:
+            return
         place = _street_place(session, meta)
         accuracy = place_service.ACCURACY_STREET_M
+    elif not photo.needs_location and photo.location_source != Source.EXIF:
+        # A curator or a visitor said something about this photo already. Only the EXIF gives way.
+        return
+
     if place is None:
         return
 

@@ -200,6 +200,32 @@ def housenumbers_of(session: Session, street_name: str) -> list[Place]:
     return sorted(found, key=lambda place: sort_key(place.housenumber or ""))
 
 
+def address_near(session: Session, street_name: str, housenumber: str) -> Place | None:
+    """The gazetteer row for a house number that no longer exists under that exact spelling.
+
+    Holm's archive knows addresses OpenStreetMap does not: the houses have been split up or
+    renumbered since the photograph was taken. Nine addresses of the first import are like this,
+    and eight of them differ only in a suffix -- "Schulstraße 2" is "2a" today, "Hörnstraße 13" is
+    "13a" through "13f", "Wedeler Straße 8a" is plain "8".
+
+    So the rule is **the same leading number, any suffix**, and the first one in walking order
+    wins. It also catches the gazetteer's own ranges: "99-105" leads with 99.
+
+    **Nothing is guessed beyond that.** Where the leading number does not occur at all, this
+    returns nothing and the caller falls back to the street -- Schmidt-Isserstedt-Weg 4 sits
+    between 2 and 8, and putting the photo on either would be inventing an address. A visitor
+    cannot do better here than the gazetteer: nobody remembers where the former Schulstraße 2
+    stood, which is why this is machine work and not a question for the panel.
+    """
+    wanted, _ = sort_key(housenumber)
+    if not wanted:
+        return None
+    for place in housenumbers_of(session, street_name):
+        if sort_key(place.housenumber or "")[0] == wanted:
+            return place
+    return None
+
+
 def street_named(session: Session, name: str) -> Place | None:
     """The street under exactly this name -- no normalising, no fuzziness.
 
