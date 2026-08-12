@@ -295,6 +295,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   dem Museum beim Verwalten hilft (Regalnummern wie „P 11"), steht in `provenance` und erscheint
   damit nachweislich nie im Kiosk; eine Angabe über das Bild steht in der Beschreibung. Der Präfix
   „Notiz:" bleibt dort stehen — er sagt, dass der Satz von der Rückseite des Abzugs stammt
+- **Unter dem Vorschaubild steht der Titel**, und die Adresse nur, wo keiner da ist — umgekehrt als
+  bisher. Fehlt die Hausnummer, sagt die Zeile das: „Hauptstraße Nr. ?". **Sichtbare Beschriftung
+  und Vorlesetext kommen jetzt aus derselben Funktion**; vorher waren es zwei, die dasselbe sagen
+  sollten und es seit dem Aufräumen der Titel nicht mehr taten
+- **75 Fotos haben einen Titel aus ihrer Beschreibung bekommen** — zusammengefasst, nicht
+  abgeschnitten: aus „Errichtung des Funkmastes" wurde „Funkmast". Ohne Titel sind noch 152; für
+  die steht die Adresse unter dem Bild, ohne dass sie in die Daten geschrieben würde
 - **Die Detailansicht fragt nicht mehr selbst, sondern verzweigt in den „Hilf mit"-Bereich.** Statt
   eingebetteter Auswahlraster stehen dort bis zu drei Schaltflächen — „Wo ist das?", „Welche
   Hausnummer?", „Wann war das?" —, je nachdem, was dem Foto fehlt; ein Tipp stellt dieses Foto im

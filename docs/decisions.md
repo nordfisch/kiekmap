@@ -1002,6 +1002,13 @@ allein.
 Fotos ohne Datierung stand „Jahr unbekannt", siebenhundertmal dieselbe Zeile: eine Fehlanzeige, die
 ueber siebenhundert Bilder nichts sagt.
 
+> **Nachtrag vom 12. August 2026 — dieser Punkt ist abgeloest.** Die Beschriftung nimmt jetzt
+> **den Titel** und faellt auf die Adresse zurueck; siehe Punkt 39 unten. Die Begruendung darunter
+> ist nicht falsch geworden, sondern gegenstandslos: Sie stand auf einem Bestand, in dem 815 Titel
+> die Adresse daneben wiederholten und achtzehn „Intel(R) JPEG Library" hiessen. Das ist
+> aufgeraeumt. Was hier ueber **Stapel** und ueber die **wegfallende Zeile** steht, gilt
+> unveraendert weiter.
+
 **Warum die Adresse und nicht der Titel**, obwohl der naheliegender klingt: Der Bestand hat es
 entschieden. Alle 922 vorhandenen `place_name` bleiben unter dreissig Zeichen — die laengste ist
 „Uetersener Straße 12". 105 Titel sind laenger als vierzig Zeichen, und achtzehn lauten
@@ -1035,10 +1042,8 @@ Marker beide Formen.
 
 **Der Erstbestand ist inzwischen aufgeraeumt** (11. und 12. August 2026, siehe
 [history.md](history.md)), und damit ist die Voraussetzung dieser Entscheidung entfallen: Die Titel
-sind keine Adressen mehr. „Gasthof Timm — 1953" waere jetzt die bessere Beschriftung; der
-Marker traegt den Titel ohnehin mit, die Aenderung kostet eine Zeile. Die Entscheidung ist neu zu
-treffen und steht als [backlog.md](backlog.md), Punkt 44 an — zusammen mit dem Fehler, dass
-Beschriftung und Vorlesetext seitdem Verschiedenes sagen.
+sind keine Adressen mehr. **Am 12. August ist sie deshalb neu getroffen worden** — die Beschriftung
+nimmt jetzt den Titel und faellt auf die Adresse zurueck; siehe Punkt 39 unten.
 
 ---
 
@@ -1377,3 +1382,43 @@ gegen dieselbe Bedingung wie jedes andere und faellt auf die Zufallswahl zurueck
 gilt. Sonst stuende eine Frage auf dem Schirm, die zwischen Tippen und Laden schon von jemand
 anderem beantwortet wurde — und der Schreibweg wiese die Antwort mit 409 ab, was klingt, als sei
 der Besucher zu langsam gewesen.
+
+## 39. Eine Beschriftung fuer das Auge und fuer das Vorlesewerkzeug
+
+*Entschieden und umgesetzt am 12. August 2026* — Punkt 44, und die Abloesung von Punkt 29.
+
+Unter dem Vorschaubild stand die **Adresse**, im `aria-label` desselben Knopfes der **Titel**. Zwei
+Formulierungen derselben Sache, an zwei Stellen im Code. **Monatelang fiel es niemandem auf, weil
+beide dasselbe sagten** — 815 Titel wiederholten die Adresse daneben. Als der Erstbestand
+aufgeraeumt war, las das Auge „Hauenweg 7" und das Ohr „Hermann Berg".
+
+**Der Fehler war nicht die falsche Zeile, sondern dass es zwei gab.** Beide zu berichtigen haette
+ihn vertagt: Zwei Formulierungen laufen wieder auseinander, sobald jemand eine davon anfasst. Es
+gibt jetzt eine (`kiosk/mapCaption.ts`), und beide Sinne lesen sie.
+
+**Die Kette ist Titel, dann Adresse, dann nichts**, mit dem Jahr wo bekannt. Dass der Titel
+vorangeht, ist die Umkehrung von Punkt 29 — und die Voraussetzung jener Entscheidung ist entfallen:
+Titel waren damals Adressen und oft vierzig Zeichen lang. Heute sind es Titel.
+
+**„Hauptstraße Nr. ?" statt nur „Hauptstraße"**, wo die Hausnummer fehlt. Das ist kein Notbehelf,
+sondern dieselbe Haltung wie beim Nichtstreuen der Stapel (Punkt 33): Die Ungenauigkeit soll
+**sichtbar** bleiben, damit jemand sie behebt, statt hinter einem hübscheren Bild zu verschwinden.
+Es ist genau die Luecke, nach der der Beitragsbereich unter „Welche Hausnummer?" fragt — auf 82
+Markern steht sie jetzt.
+
+**Fuer Stapel gilt die Regel aus Punkt 29 unveraendert, jetzt auch fuer den Titel:** Gezeigt wird
+nur, worin **alle** Fotos uebereinstimmen. Und sie greift beim Titel oefter, denn eine Adresse
+teilen Fotos leicht, einen Titel selten — ein Stapel faellt damit meist auf die Adresse zurueck.
+Den obersten Titel zu nehmen hiesse „Gasthof Timm" ueber fuenfzig Bilder zu schreiben, die
+etwas anderes zeigen.
+
+**Dazu haben 75 Fotos einen Titel aus ihrer Beschreibung bekommen** — zusammengefasst, nicht
+abgeschnitten: „Errichtung des Funkmastes" wurde „Funkmast", „Otto Petersen, Inhaber der Baeckerei"
+wurde „Baeckerei Petersen". 14 weitere Beschreibungen taugten nicht, weil sie ueber Besitzer,
+Rueckseiten oder Ortsvermutungen sprechen statt ueber das Motiv.
+
+**Was ausdruecklich *nicht* geschrieben wurde:** ein Titel fuer die 152 Fotos, deren Titel nur ihre
+Adresse waere. Der stuende dann zum zweiten Mal in derselben Zeile — genau das, was einen Tag
+zuvor fuer 815 Fotos entfernt worden ist —, er veraltete beim ersten Nachschaerfen, und er naehme
+[Punkt 1](backlog.md) die Arbeitsgrundlage: Danach haetten alle 929 Fotos einen Titel, und welche
+einen **echten** brauchen, waere nicht mehr zu erkennen. Abgeleitet steht auf der Karte dasselbe.

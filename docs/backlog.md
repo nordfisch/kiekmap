@@ -49,7 +49,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | | **Besucher-Interface** | | |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
-| 44 | [Marker-Beschriftung und Vorlesetext sagen Verschiedenes](#44--marker-beschriftung-und-vorlesetext-sagen-verschiedenes) | **Fehler** | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
@@ -68,13 +67,13 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Drei Fehler sind offen**: Punkt 47 lässt nach einer zurückgespielten Sicherung jeden
-Besucherbeitrag scheitern, bis jemand neu startet; Punkt 44 verwechselt Marker-Beschriftung und
-Vorlesetext; Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
+**Zwei Fehler sind offen**: Punkt 47 lässt nach einer zurückgespielten Sicherung jeden
+Besucherbeitrag scheitern, bis jemand neu startet; Punkt 10 zerdrückt das Foto auf einem kleinen
+Schirm.
 
-**Fünfundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
-29, 32, 33, 35, 36, 37, 38, 41, 45, 46. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder
-wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt die **48**.
+**Sechsundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
+29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46. Sie sind erledigt, aufgelöst oder gestrichen; was aus
+jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt die **48**.
 
 ---
 
@@ -453,28 +452,6 @@ sie verteilt sich ehrlich.
 **Zu prüfen vor dem Bauen:** Ob `MAX_BARS` (heute 30, zur Verbreiterung großer Zeitspannen) in
 einer Welt ohne Balkenverbreiterung noch dieselbe Rolle spielt — bei jahrgenauer Zählung über einen
 Bestand von hundert Jahren stünden sonst hundert schmale Balken, wo heute zehn breite stehen.
-
-### 44 · Marker-Beschriftung und Vorlesetext sagen Verschiedenes
-
-**Ein Fehler, der erst durch das Aufräumen des Erstbestands sichtbar wurde**
-([history.md](history.md), 11. und 12. August 2026). Unter dem Vorschaubild steht die Adresse
-(`t.map.markerCaption`, gespeist aus `place_name`), im `aria-label` desselben Knopfes steht der
-Titel (`t.map.markerLabel`, gespeist aus `title`) — siehe `kiosk/PhotoLayer.tsx`. Wer sieht, liest
-„Hauenweg 7"; wer vorlesen lässt, hört „Hermann Berg".
-
-Das stand schon immer so im Code und fiel nie auf, **weil Titel und Adresse bis dahin dasselbe
-waren.** Seit die Titel aufgeräumt sind, gehen sie auseinander.
-
-**Und damit steht zugleich eine ältere Entscheidung neu zur Wahl.** Unter dem Vorschaubild steht
-die Adresse und nicht der Titel, seit dem 9. August 2026 und mit Begründung
-([decisions.md](decisions.md), Punkt 29) — **und zwar weil die Titel damals Adressen waren.** Das
-sind sie nicht mehr: „Gasthof Timm — 1953" ist jetzt die bessere Beschriftung als
-„Hauptstraße 11a — 1953". Die Änderung selbst ist eine Zeile in `t.map.markerCaption`.
-
-**Was sie nicht billig macht, ist die Frage dahinter:** Ein Titel sagt mehr, passt aber nicht immer
-unter ein Vorschaubild und **fehlt bei 227 Fotos ganz**; eine Adresse passt immer und sagt weniger.
-Ein Vorschlag wäre Titel mit Rückfall auf die Adresse — dann trüge der Vorlesetext dieselbe Regel,
-und beide sagten wieder dasselbe.
 
 ---
 

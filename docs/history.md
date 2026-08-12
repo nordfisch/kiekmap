@@ -2321,3 +2321,53 @@ Aufgenommen als [Punkt 47](backlog.md#47--eine-zurückgespielte-sicherung-hebt-i
 **Die Lehre ist aelter als dieser Fehler und hier wieder bezahlt worden:** Ein Durchgang, der nur
 schaut, prueft die Haelfte. Der erste Klick, der etwas *schreibt*, hat gefunden, was zwei Tage
 Nachdenken und dreihundert Tests nicht fanden.
+
+## Der Titel kommt auf die Karte, und die Beschriftung bekommt einen Mund
+
+*12. August 2026.* Punkt 44 sah nach einer Zeile aus und war eine Entscheidung ueber den Bestand.
+
+Unter dem Vorschaubild stand die Adresse, im `aria-label` desselben Knopfes der Titel. **Der Fehler
+war nicht die falsche Zeile, sondern dass es zwei gab** -- zwei Formulierungen derselben Sache, an
+zwei Stellen. Beide zu berichtigen haette ihn nur vertagt. Es gibt jetzt eine
+(`kiosk/mapCaption.ts`), und beide Sinne lesen sie.
+
+### Die Frage, die vorher zu klaeren war
+
+227 Fotos hatten keinen Titel. Der Vorschlag lautete, fuer alle einen zu erzeugen und **in die
+Daten zu schreiben**: aus der Beschreibung, sonst aus Adresse und Jahr. Nachgezaehlt hiess das
+89 aus Beschreibungen und 138 aus Adressen -- und die Adresstitel wiederholten sich stark:
+zwanzigmal „Hauptstraße Nr. ?", vierzehnmal „Hörnstraße 9".
+
+**Damit stuende in `title` wieder woertlich das, was in `place_name` daneben steht** -- genau das,
+was einen Tag zuvor fuer 815 Fotos entfernt worden war. Dazu zwei Folgen, die erst beim Aufschreiben
+sichtbar wurden: Ein kopierter Titel veraltet, sobald ein Besucher die Hausnummer nachschaerft. Und
+die Unterscheidung „hat einen Titel" verschwaende -- danach haetten alle 929 einen, und
+[Punkt 1](backlog.md) haette seine Arbeitsgrundlage verloren.
+
+Gebaut wurde deshalb die Haelfte, die Zugewinn ist: **75 Titel aus Beschreibungen geschrieben**,
+zusammengefasst statt abgeschnitten -- „Errichtung des Funkmastes" wurde „Funkmast". Die 152
+Adressfaelle werden **abgeleitet**; auf der Karte steht dasselbe, nur veraltet nichts und `title`
+bleibt ehrlich leer.
+
+14 Beschreibungen taugten nicht: Sie sprechen ueber Besitzer, Rueckseiten oder Ortsvermutungen
+(„2018 Besitzer Dennis Knop", „Text auf der Rückseite: 12.4.63 Holm"), nicht ueber das Motiv.
+
+### „Hauptstraße Nr. ?"
+
+Fehlt die Hausnummer, steht sie als Fragezeichen da. Das ist dieselbe Haltung wie beim Nichtstreuen
+der Stapel (decisions.md, Punkt 33): Die Ungenauigkeit soll **sichtbar** bleiben, damit jemand sie
+behebt. Auf 82 Markern steht jetzt genau die Luecke, nach der der Beitragsbereich fragt.
+
+### Was der Plan nicht wusste
+
+**Es sind 75 Titel, nicht 60.** Beim Vorlegen hatte ich die *verschiedenen* Titel gezaehlt (53) und
+daraus eine Fotozahl gemacht. Aufgefallen ist es erst, als das Skript die Zuordnung gegen den
+Bestand prueft -- 75 zugeordnet, 14 offen, zusammen die 89. Dieselbe Pruefung haette auch eine
+falsche id gefunden; sie stand aus einem anderen Grund darin und hat einen anderen Fehler
+gefangen.
+
+**Und die Abschnittsueberschrift ist zum zweiten Mal an derselben Stelle verschwunden.** Wer einen
+Backlog-Punkt entfernt, sucht „bis zum naechsten `###`" -- steht der Punkt als letzter in seinem
+Bereich, liegt zwischen ihm und dem naechsten `###` die Trennlinie und ein `##`. Beim ersten Mal
+(Punkt 45/46) fiel es durch die Anker-Pruefung auf, beim zweiten Mal beim Nachzaehlen der
+Abschnitte. **Das Suchmuster muss bei `##` genauso halten wie bei `###`.**
