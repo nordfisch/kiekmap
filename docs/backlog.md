@@ -51,6 +51,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
 | 44 | [Marker-Beschriftung und Vorlesetext sagen Verschiedenes](#44--marker-beschriftung-und-vorlesetext-sagen-verschiedenes) | **Fehler** | wichtig |
 | 45 | [Bei langen Straßen liegen die Hausnummern außerhalb des Ausschnitts](#45--bei-langen-straßen-liegen-die-hausnummern-außerhalb-des-ausschnitts) | **Fehler** | wichtig |
+| 46 | [Aus der Detailansicht in den „Hilf mit"-Bereich verzweigen](#46--aus-der-detailansicht-in-den-hilf-mit-bereich-verzweigen) | Aufgabe | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
@@ -68,11 +69,12 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Ein Fehler ist offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
+**Drei Fehler sind offen**: Punkt 10 zerdrückt das Foto auf einem kleinen Schirm; 44 und 45 sind am
+12. August 2026 dazugekommen, als das Aufräumen des Erstbestands sie sichtbar machte.
 
-**Zweiundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
-29, 32, 33, 35, 36, 37, 38. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde,
-steht in [history.md](history.md). Der nächste neue Punkt bekommt die **44**.
+**Dreiundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
+29, 32, 33, 35, 36, 37, 38, 41. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde,
+steht in [history.md](history.md). Der nächste neue Punkt bekommt die **47**.
 
 ---
 
@@ -492,6 +494,62 @@ Laden.
 Aufgefallen am 11. August 2026, unmittelbar nachdem die Frage durch das Aufräumen des Erstbestands
 überhaupt Fotos bekam ([history.md](history.md)).
 Vorher stand sie auf zwei Fotos an kurzen Straßen und der Fall trat nie ein.
+
+### 46 · Aus der Detailansicht in den „Hilf mit"-Bereich verzweigen
+
+Wer ein Foto groß ansieht und merkt, dass etwas fehlt, soll von dort aus antworten können — heute
+geht das nur halb, und der Weg dorthin füllt die Ansicht mit Knöpfen.
+
+**Was die Detailansicht heute anbietet** (`kiosk/PhotoOverlay.tsx`):
+
+| Frage | in der Detailansicht |
+|---|---|
+| Wann war das? | `DatePicker` eingebettet — erst die Jahrzehnte, dann die zehn Jahre |
+| Welche Hausnummer? | `HouseNumberPicker` eingebettet — bis zu `MAX_BUTTONS` (12), davor der Abschnittsschritt |
+| **Wo ist das?** | **gar nicht** |
+
+**Zwei Probleme, und das zweite ist das größere.** Die Textspalte trägt bei einem Foto, dem Jahr
+und Hausnummer fehlen, bis zu 37 Schaltflächen unter der Beschreibung — seit die Zeitleiste von
+1880 bis 2030 reicht, sind allein die Jahrzehnte fünfzehn Stück. Und die Ortsfrage fehlt ganz:
+Sie braucht die Straßenliste **und** die Karte, und die Karte liegt unter dem Overlay.
+
+**Der Vorschlag:** Statt der eingebetteten Raster stehen dort bis zu drei Schaltflächen — „Wo ist
+das?", „Welche Hausnummer?", „Wann war das?" —, je nachdem, was dem Foto fehlt. Ein Tipp schließt
+die Detailansicht und stellt **dieses** Foto im Beitragsbereich zu **dieser** Frage. Damit hat der
+Kiosk einen Antwortweg statt zwei, und die Karte ist wieder frei — was die Ortsfrage erst möglich
+macht.
+
+**Was dafür fehlt, ist eine Zeile Fachlogik und ihre Folge.** Der Store lädt Aufgaben über
+`fetchTask(need, skipped)`, und **der Server sucht das Foto aus**. Ein benanntes Foto vorzulegen
+gibt es nicht: `load(order, prefer)` kennt zwar ein `prefer`, aber nur für ein Foto, zu dem gerade
+beigetragen wurde, und nur, wenn ohnehin schon eine Aufgabe steht. Zu entscheiden ist, ob der
+Server das lernt (`GET /api/contribute/next?need=…&photo_id=…`) oder der Store die Aufgabe selbst
+zusammensetzt. **Für den Server spricht `open_count` und `open_other`** — beide kommen heute aus
+derselben Antwort, und ein selbstgebauter Task müsste sie erfinden oder weglassen.
+
+**Welche Knöpfe erscheinen, weiß die Detailansicht nicht allein.** `needs_location` und
+`needs_date` stehen am Foto; ob nachgeschärft werden darf, entscheidet der Ortsindex und nicht das
+Foto (`stillNeeds` in `store/contribute.ts` gibt für `housenumber` immer `false` zurück, mit
+Begründung). Die Ansicht holt sich die Nummern ohnehin schon — eine nicht leere Liste ist die
+Antwort, und eine zweite Regel im Frontend darf daraus nicht werden.
+
+**Und der Rückweg gehört mitgedacht.** Wer aus einem Foto heraus verzweigt und antwortet, wird
+heute in die Kette der nächsten Fragen weitergereicht (`nextAfterAnswer`). Ob das hier richtig ist
+oder ob man zum Foto zurückkehren soll, ist die eigentliche Entwurfsfrage dieses Punktes — beides
+ist vertretbar, und nur eines fühlt sich an, als hätte das Gerät zugehört.
+
+**Dieser Punkt nimmt zurück, was am 10. August 2026 gebaut wurde**, und das ist Absicht. Damals war
+die Detailansicht der **einzige** Ort, an dem das Nachschärfen erreichbar war — im Bereich stand es
+hinter 74 unverorteten Fotos und erschien nie ([history.md](history.md)). Seit der Bestand
+bereinigt und die Rangfolge gedreht ist, ist es dort die zweite Frage. Der eingebettete Picker hat
+seinen Zweck erfüllt: Er hat den Schreibweg im Backend erprobt, und der bleibt unverändert. Was
+entfällt, sind `submitDateFor` und `submitHouseNumberFor` im Store samt ihrer Tests — sowie die
+beiden Picker-Einbettungen in `PhotoOverlay.tsx`.
+
+Zusammen mit [Punkt 45](#45--bei-langen-straßen-liegen-die-hausnummern-außerhalb-des-ausschnitts)
+zu bauen: Wird die Hausnummernfrage aus einem Foto heraus gestellt, fährt die Karte zu dessen
+Straße — und genau dort liegt der Fehler, dass die angebotenen Nummern außerhalb des Ausschnitts
+landen.
 
 ---
 
