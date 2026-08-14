@@ -2478,3 +2478,30 @@ nicht unter „geloescht".
 
 **Bequemlichkeit sucht sich den Weg, der ohne fremde Hilfe geht** -- und genau der war der
 falsche. Wer eine Pruefung allein fahren kann, prueft womoeglich nicht das, worauf es ankommt.
+
+### Ein Waechter fuer die Einstellungen
+
+Auf die Frage, ob die drei Funde denn nun behoben seien, kam beim Nachmessen heraus: zwei ja, und
+einer war nie ein Fehler im Programm gewesen -- der Upload-Weg war nur ungeprueft. **Aber die
+Behebung des ersten war ungeschuetzt.** Wer `env_file: ../.env` aus der Compose-Datei loescht,
+bekommt weiterhin 394 gruene Backend-Tests: Eine Compose-Datei wird von keinem Test angefasst, und
+genau das hatte den Fehler beim ersten Mal so lange am Leben gehalten.
+
+`tools/check_settings.py` schliesst das, als drittes Werkzeug neben `language_check.py` und
+`check_anchors.py` -- Skript und nicht Test, weil es Dateien liest, die die Tests nicht kennen. Es
+holt die Feldnamen mit `ast` aus `config.py` (kein Import, also kein venv noetig) und liest die
+Compose-Datei mit einem gezielten Leser statt mit PyYAML, das im System-Python fehlt.
+
+Drei Fragen, und die zweite und dritte sind so viel wert wie die erste: Erreicht jede Einstellung
+den Container? Steht in `environment:` nur, was es auch gibt? Und dasselbe fuer `.env.example`,
+samt der auskommentierten Zeilen -- es ist die Vorlage, mit der jede neue Einrichtung anfaengt, ein
+Tippfehler darin reist also mit.
+
+Drei Gegenproben, jede einzeln gefahren, jede mit eigener Meldung: `env_file` entfernt,
+`PHOTOMAP_CORS_ORIGIN` statt `_ORIGINS`, `PHOTOMAP_DATADIR` statt `_DATA_DIR`.
+
+**Und die erste Gegenprobe nannte vier Einstellungen, nicht drei.** Neben Schlagwort, Bildnachweis
+und Herkunft war auch `PHOTOMAP_EXIF_DATE_MAX_YEAR` unerreichbar -- die Zahl, ab der ein
+EXIF-Datum als Scandatum gilt und ein Foto **nicht** datieren darf. Sie steht in `CLAUDE.md` als
+einer der drei Dinge, die man hier falsch machen kann; im Betrieb war sie schlicht nicht
+einstellbar. Aufgefallen ist das nicht mir, sondern dem Werkzeug, beim ersten Lauf.

@@ -129,6 +129,11 @@ nur den Erfolgsfall. Die wertvollsten Tests hier heißen `test_jahrzehnt_erschei
 mittendrin` und `test_scandatum_datiert_das_foto_nicht` — beide decken Fehler ab, die still
 passieren würden. Vor jedem Commit `make lint && make test`.
 
+**Drei Prüfungen laufen daneben**, weil sie Dateien lesen, die kein Test je sieht:
+`tools/language_check.py` (Sprachregelung), `tools/check_anchors.py` (Verweise in `docs/`) und
+`tools/check_settings.py` (erreicht jede Einstellung den Container?). Alle drei mit `python3`,
+ohne venv. Näheres in [docs/development.md](docs/development.md).
+
 **Kommentare** erklären das *Warum*, nicht das *Was*. Ein Kommentar, der nur wiederholt, was der
 Code sagt, wird gelöscht. Ein Kommentar, der einen Fallstrick benennt, ist Gold — davon gibt es
 hier einige (`rshared`-Mount, Sprite-URL muss absolut sein, SQLite `+` ist Addition).

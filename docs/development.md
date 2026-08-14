@@ -98,6 +98,21 @@ make test-frontend # Typecheck und vitest
 make lint          # ruff
 ```
 
+**Drei Prüfungen laufen daneben, von Hand, weil sie Dateien lesen, die kein Test je sieht:**
+
+```bash
+python3 tools/language_check.py   # hält sich der Quelltext an die Sprachregelung?
+python3 tools/check_anchors.py    # zeigen die Verweise in docs/ noch irgendwohin?
+python3 tools/check_settings.py   # erreicht jede Einstellung den Container?
+```
+
+Die dritte gibt es seit dem 14. August 2026, und sie hat einen Anlass: Die Compose-Datei reichte
+nur vier von acht Einstellungen durch, die übrigen fielen im Container still auf ihre Vorgabe
+zurück. Ein Import verlor dadurch Schlagwort, Bildnachweis und Herkunft — **ohne Fehlermeldung,
+und mit 393 grünen Tests daneben**, denn eine Compose-Datei wird von keinem Test angefasst. Sie
+prüft auch die Gegenrichtung: ein Name in `docker-compose.yml` oder `deploy/.env.example`, den es
+in `config.py` nicht gibt, wirkt folgenlos und fällt sonst niemandem auf.
+
 **Was getestet wird.** Nicht Abdeckung um der Zahl willen, sondern die Stellen, an denen ein Fehler
 *still* passiert. Die drei wichtigsten Testklassen im Projekt:
 

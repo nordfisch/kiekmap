@@ -729,3 +729,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - `deploy/docker-compose.mac.yml` und `make prod-mac`: der Containerbetrieb lässt sich auf einem
   Mac fahren, wo es weder `/media` noch die Mount-Propagierung `rshared` gibt. Dieselben Abbilder,
   dieselbe nginx-Konfiguration — nur zwei Einhängungen anders
+
+### Hinzugefügt
+
+- `tools/check_settings.py`: prüft, ob jede Einstellung aus `config.py` den Container erreicht —
+  und ob in `docker-compose.yml` und `deploy/.env.example` nur Namen stehen, die es wirklich gibt.
+  Ein Tippfehler dort wirkt sonst folgenlos, und eine gelöschte `env_file`-Zeile ließe vier
+  Einstellungen still auf ihre Vorgabe zurückfallen, ohne dass ein Test rot würde
