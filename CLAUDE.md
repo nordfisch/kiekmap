@@ -195,9 +195,11 @@ ein Datumswort davorsteht.
 
 Am **14. August 2026** ist der **Containerbetrieb geprüft** worden — Punkt 17, auf dem Mac. Beide
 Abbilder bauen, nginx liefert die Karte kachelweise aus, die Seite fragt null fremde Herkünfte an,
-der Schemastand wird beim Start nachgezogen. Dabei kam heraus, dass die `.env` den Container nur
-zur Hälfte erreichte: Ein Import verlor still Schlagwort, Bildnachweis und Herkunft. Behoben mit
-`env_file` statt einer Aufzählung.
+der Schemastand wird beim Start nachgezogen. **Zwei Fehler kamen dabei heraus, beide still:** Die
+`.env` erreichte den Container nur zur Hälfte, weshalb ein Import Schlagwort, Bildnachweis und
+Herkunft verlor (behoben mit `env_file` statt einer Aufzählung). Und ein Symlink unter `/media`
+galt als Datenträger, weshalb die Sicherung in das Verzeichnis lief, das sie sichert —
+`docs/decisions.md`, Punkt 40.
 
 **Alles unter `deploy/pi/` ist weiterhin ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt,
 gelaufen ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst

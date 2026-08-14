@@ -718,6 +718,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   ohne Herkunftsangabe — ohne Fehlermeldung und ohne Eintrag im Protokoll. Die vier Werte, die den
   Container beschreiben und nicht den Ort, gewinnen weiterhin über die Datei
 
+- **Ein Symlink unter `/media` wird nicht mehr als Datenträger angeboten.** `os.path.ismount`
+  antwortet für einen Symlink grundsätzlich mit Nein, womit er wie ein gewöhnlicher Ordner aussah
+  und die Suche ihm bis dorthin folgte, wohin er zeigt. Auf dem Entwicklungsmac führte das dazu,
+  dass die Sicherung in das Verzeichnis lief, das sie sichert — vollständig und mit Handzettel,
+  also aussehend wie eine richtige. Genau davor soll die Prüfung auf Einhängepunkte schützen
+
 ### Hinzugefügt
 
 - `deploy/docker-compose.mac.yml` und `make prod-mac`: der Containerbetrieb lässt sich auf einem

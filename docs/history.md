@@ -2429,3 +2429,28 @@ anzubieten, und die Karte stand auf einem Ausschnitt von 150 Metern. Beides sah 
 Container-Fehler aus und war keiner. **Die Sicherung des Programms nimmt `region.json` und
 `places.json` von sich aus mit** (`LOOSE_FILES` in `services/backup.py`) -- von Hand kopieren tut
 das niemand.
+
+### Nachtrag: ein Symlink liess die Sicherung ins eigene Verzeichnis laufen
+
+Noch am selben Abend, und gefunden, weil Kalle die eine Zeile der Pruefliste nachholte, die ich
+nicht selbst machen konnte: die Sicherung. Sie lief durch -- **auf einen Datentraeger, der keiner
+war.**
+
+Die Ueberlagerung haengt `/Volumes` als `/media` ein, und dort liegt ein `Danger -> /`. Weil
+`os.path.ismount` fuer einen Symlink grundsaetzlich `False` sagt, galt er als gewoehnlicher Ordner;
+die Suche stieg eine Ebene hinab -- die Ebene, die es fuer `/media/<benutzer>/<bezeichnung>`
+braucht -- und folgte ihm bis in die Wurzel. Angeboten wurden zwei „Laufwerke" namens `data` und
+`media`. **931 Fotos und 1,45 GB landeten in dem Ordner, den sie sichern**, mit Handzettel, also
+aussehend wie eine richtige Sicherung.
+
+Der Docstring von `find_drives` benannte diesen Fall bereits als den, den die Einhaengepruefung
+verhindern soll. Der Symlink war das Loch darin. Behoben in zwei Zeilen, festgehalten als
+[Punkt 40](decisions.md).
+
+**Zwei Dinge daran sind das Aufschreiben wert.** Erstens: Der Fund kam aus dem Rest, den ich als
+ungeprueft stehengelassen hatte. Eine ehrlich benannte Luecke ist mehr wert als eine, die man
+uebersieht. Zweitens: **Die erste Gegenprobe schlug nicht aus.** Die im Test eingesetzte
+`_is_mounted` vergleicht Pfade woertlich, und woertlich ist `media/Danger/data` nicht
+`anderswo/data` -- der Test war auch ohne die Absicherung gruen und haette nichts bewacht. Er
+vergleicht jetzt aufgeloest, und dann faellt genau einer. Eine Gegenprobe ohne Ausschlag ist ein
+Ergebnis.

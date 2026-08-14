@@ -105,6 +105,34 @@ class TestDatentraegerErkennen:
 
         assert [drive.name for drive in gefunden] == ["USB-STICK"]
 
+    def test_ein_symlink_ist_kein_datentraeger(
+        self, settings, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ):
+        """Der Fall, der am 14. August 2026 wirklich passiert ist.
+
+        Ein Symlink unter /media sieht wie ein gewoehnlicher Ordner aus, denn ``os.path.ismount``
+        sagt fuer einen Symlink grundsaetzlich nein. Damit steigt die Suche eine Ebene hinab --
+        die Ebene, die es fuer ``/media/<benutzer>/<bezeichnung>`` braucht -- und folgt ihm
+        dabei ueberallhin. Auf dem Entwicklungsmac zeigte ein ``/Volumes/Danger`` auf die Wurzel,
+        und der Verwaltungsbereich bot das Datenverzeichnis selbst als Sicherungsziel an. Die
+        Sicherung landete im Ordner, den sie sichert -- mit Handzettel, also aussehend wie eine
+        richtige.
+        """
+        media = tmp_path / "media"
+        media.mkdir()
+        anderswo = tmp_path / "anderswo"
+        eingehaengt = anderswo / "data"
+        eingehaengt.mkdir(parents=True)
+        (media / "Danger").symlink_to(anderswo)
+        settings.media_dir = media
+        # Aufgeloest verglichen, nicht woertlich: Sonst bildet die eingesetzte Pruefung den
+        # Symlink gar nicht ab, und der Test waere auch ohne die Absicherung gruen.
+        monkeypatch.setattr(
+            backup, "_is_mounted", lambda path: path.resolve() == eingehaengt.resolve()
+        )
+
+        assert backup.find_drives(media) == []
+
     def test_schreibgeschuetzter_datentraeger_wird_nicht_angeboten(
         self, settings, stick: Path, monkeypatch: pytest.MonkeyPatch
     ):

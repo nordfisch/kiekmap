@@ -1422,3 +1422,35 @@ Adresse waere. Der stuende dann zum zweiten Mal in derselben Zeile — genau das
 zuvor fuer 815 Fotos entfernt worden ist —, er veraltete beim ersten Nachschaerfen, und er naehme
 [Punkt 1](backlog.md) die Arbeitsgrundlage: Danach haetten alle 929 Fotos einen Titel, und welche
 einen **echten** brauchen, waere nicht mehr zu erkennen. Abgeleitet steht auf der Karte dasselbe.
+
+## 40. Ein Symlink ist nie ein Datentraeger
+
+Die Suche nach Sicherungszielen (`services/backup.py`, `find_drives`) **ueberspringt Symlinks**,
+auf beiden Ebenen, die sie durchsucht.
+
+Der Grund ist eine Eigenheit von `os.path.ismount`: Es antwortet fuer einen Symlink
+**grundsaetzlich `False`** — „ein Symlink kann nie ein Einhaengepunkt sein". Damit sieht ein
+Symlink unter `/media` wie ein gewoehnlicher Ordner aus, und die Suche steigt eine Ebene hinab.
+Dieser Abstieg ist gewollt, denn Raspberry Pi OS haengt unter `/media/<benutzer>/<bezeichnung>`
+ein — nur folgt `iterdir()` dabei dem Symlink, und was dahinter liegt, wird als Sicherungsziel
+angeboten.
+
+**Gemessen am 14. August 2026**, bei der Pruefung des Containerbetriebs: Auf dem Entwicklungsmac
+zeigt ein `/Volumes/Danger` auf die Wurzel. Der Verwaltungsbereich bot daraufhin zwei „Laufwerke"
+namens `data` und `media` an — das erste war das Datenverzeichnis selbst. Die Sicherung lief
+durch, vollstaendig, mit Handzettel: **931 Fotos, 1,45 GB, abgelegt in dem Ordner, den sie
+sichert.**
+
+Genau davor soll die Einhaengepruefung schuetzen, und ihr Docstring sagte das auch schon: „sonst
+landete die Sicherung auf derselben SD-Karte, gegen deren Ausfall sie schuetzen soll — und niemand
+saehe es". Der Symlink war das Loch darin. `find_drive` fing es nicht auf, denn es prueft den
+Pfad aus dem Browser nur gegen das, was `find_drives` gefunden hat.
+
+Auf einem Pi ist der Fall unwahrscheinlich — ein Symlink in `/media` legt nur root an. Die Folge
+waere aber die schlimmste im System: eine Sicherung, die aussieht wie eine, und die mit dem
+Datentraeger stirbt, vor dem sie schuetzen sollte. Zwei Zeilen sind dafuer ein guenstiger Preis.
+
+**Fuer den Test war dieselbe Falle noch einmal aufgestellt.** Die eingesetzte `_is_mounted`
+vergleicht Pfade, und woertlich verglichen ist `media/Danger/data` nicht `anderswo/data` — der
+Test war deshalb im ersten Anlauf auch ohne die Absicherung gruen. Er vergleicht jetzt
+aufgeloest. **Eine Gegenprobe, die nicht ausschlaegt, ist ein Ergebnis und keine Formalie.**

@@ -219,6 +219,14 @@ def find_drives(media_dir: Path) -> list[Drive]:
     leftover folder under /media would be offered as a target -- and the backup would land on the
     same SD card it is supposed to protect against. The second sorts out system mounts and
     write-protected media, which would otherwise fail only after the button had been pressed.
+
+    **A symlink is never a drive**, and that is not a detail: ``os.path.ismount`` answers False
+    for one on principle ("a symlink can never be a mount point"). A symlink under /media would
+    therefore look like an ordinary folder, the descent one level down would follow it, and
+    whatever mounts lie behind it would be offered as backup targets. Measured on 14 August 2026
+    against a ``/Volumes/Danger -> /`` on the development Mac: the panel offered the data
+    directory itself, and the backup landed inside the very folder it was backing up -- exactly
+    the failure the mount check above exists to prevent, with a manifest that made it look real.
     """
     if not media_dir.is_dir():
         return []
@@ -230,14 +238,16 @@ def find_drives(media_dir: Path) -> list[Drive]:
         return []
 
     for entry in entries:
-        if not entry.is_dir() or entry.name.startswith("."):
+        if entry.is_symlink() or not entry.is_dir() or entry.name.startswith("."):
             continue
         if _is_mounted(entry):
             mounted.append(entry)
             continue
         try:
             mounted.extend(
-                sub for sub in sorted(entry.iterdir()) if sub.is_dir() and _is_mounted(sub)
+                sub
+                for sub in sorted(entry.iterdir())
+                if not sub.is_symlink() and sub.is_dir() and _is_mounted(sub)
             )
         except OSError:
             continue
