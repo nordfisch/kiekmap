@@ -2453,8 +2453,28 @@ verhindern soll. Der Symlink war das Loch darin. Behoben in zwei Zeilen, festgeh
 
 **Zwei Dinge daran sind das Aufschreiben wert.** Erstens: Der Fund kam aus dem Rest, den ich als
 ungeprueft stehengelassen hatte. Eine ehrlich benannte Luecke ist mehr wert als eine, die man
-uebersieht. Zweitens: **Die erste Gegenprobe schlug nicht aus.** Die im Test eingesetzte
+uebersieht -- und dasselbe galt gleich noch einmal, siehe unten. Zweitens: **Die erste Gegenprobe schlug nicht aus.** Die im Test eingesetzte
 `_is_mounted` vergleicht Pfade woertlich, und woertlich ist `media/Danger/data` nicht
 `anderswo/data` -- der Test war auch ohne die Absicherung gruen und haette nichts bewacht. Er
 vergleicht jetzt aufgeloest, und dann faellt genau einer. Eine Gegenprobe ohne Ausschlag ist ein
 Ergebnis.
+
+
+### Nachtrag zum Nachtrag: der Weg, den ich umgangen hatte
+
+Beim Aufschreiben der Pruefliste fiel mir auf, dass ich den Import **ueber den Eingangsordner**
+geprueft hatte -- weil der ohne Anmeldung arbeitet und ich also allein damit durchkam. Der geht
+aber gar nicht durch nginx. Durch den Proxy waren bis dahin lauter GETs gelaufen und **zwei POSTs
+von je ein paar Byte**, beides Anmeldungen. Der Stapel-Upload, also die einzige Stelle, an der
+grosse Datenmengen in die andere Richtung fliessen, war damit ungeprueft -- und mit ihm die Zeile
+`client_max_body_size 128m`, ohne die nginx bei **einem Megabyte** mit 413 abbricht, bevor das
+Backend die Datei ueberhaupt sieht.
+
+Zwei Fotos mit 3,2 und 3,6 MB gingen durch. Die Zeile greift, und der Bildnachweis stand dran --
+womit die `env_file`-Behebung auch auf dem HTTP-Weg belegt ist und nicht nur beim Eingangsordner.
+Danach wurden beide wieder entfernt, hart: `photos`, `photo_tags`, `changes`, `import_log` und die
+sechs Dateien. Nicht auf `status='deleted'` gesetzt, denn sie sollen nirgends auftauchen, auch
+nicht unter „geloescht".
+
+**Bequemlichkeit sucht sich den Weg, der ohne fremde Hilfe geht** -- und genau der war der
+falsche. Wer eine Pruefung allein fahren kann, prueft womoeglich nicht das, worauf es ankommt.

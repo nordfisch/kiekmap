@@ -194,7 +194,8 @@ Entwicklungsmacs stört den Betrieb deshalb nicht.
 durch. Die übrigen fielen im Container still auf ihre Vorgaben zurück, und das traf ausgerechnet
 den Import: Fotos kamen an, aber ohne Schlagwort, ohne Bildnachweis und ohne Herkunftsangabe.
 Nichts schlug fehl, nichts stand im Protokoll. Wer heute eine neue Einstellung einführt, muss
-nichts weiter tun — sie kommt von selbst durch.
+nichts weiter tun — sie kommt von selbst durch; geprüft ist das sowohl über den Eingangsordner als
+auch über den Stapel-Upload der Verwaltung.
 
 ---
 
