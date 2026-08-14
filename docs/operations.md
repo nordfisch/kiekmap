@@ -236,6 +236,12 @@ entsteht mit
 hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil attach teststick.dmg
 ```
 
+> **In `/Volumes` liegt immer ein Symlink auf `/`**, benannt nach dem internen Volume — das legt
+> macOS selbst an. Bis zum 14. August 2026 galt er als Datenträger, und die Sicherung landete
+> dahinter, im laufenden Datenverzeichnis. Seither werden Symlinks übersprungen
+> ([decisions.md](decisions.md), Punkt 40); die Liste ist auf einem Mac ohne angestecktes
+> Laufwerk jetzt leer, und genau das ist richtig.
+
 ---
 
 ## Eine zurückgespielte Sicherung passt nicht zum Programm

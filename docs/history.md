@@ -2436,7 +2436,11 @@ Noch am selben Abend, und gefunden, weil Kalle die eine Zeile der Pruefliste nac
 nicht selbst machen konnte: die Sicherung. Sie lief durch -- **auf einen Datentraeger, der keiner
 war.**
 
-Die Ueberlagerung haengt `/Volumes` als `/media` ein, und dort liegt ein `Danger -> /`. Weil
+Die Ueberlagerung haengt `/Volumes` als `/media` ein, und dort liegt auf **jedem** Mac ein
+Symlink auf `/`, benannt nach dem internen Volume -- das war spaeter die wichtigste Berichtigung an
+diesem Eintrag: kein Zufall dieser Maschine, sondern der Normalfall fuer alle, die der
+`operations.md` folgen und zum Entwickeln `PHOTOMAP_MEDIA_DIR=/Volumes` setzen. Aufgefallen war es
+nur nie, weil niemand den Sicherungsknopf auf einem Mac gedrueckt hatte. Weil
 `os.path.ismount` fuer einen Symlink grundsaetzlich `False` sagt, galt er als gewoehnlicher Ordner;
 die Suche stieg eine Ebene hinab -- die Ebene, die es fuer `/media/<benutzer>/<bezeichnung>`
 braucht -- und folgte ihm bis in die Wurzel. Angeboten wurden zwei „Laufwerke" namens `data` und

@@ -1435,20 +1435,25 @@ Dieser Abstieg ist gewollt, denn Raspberry Pi OS haengt unter `/media/<benutzer>
 ein — nur folgt `iterdir()` dabei dem Symlink, und was dahinter liegt, wird als Sicherungsziel
 angeboten.
 
-**Gemessen am 14. August 2026**, bei der Pruefung des Containerbetriebs: Auf dem Entwicklungsmac
-zeigt ein `/Volumes/Danger` auf die Wurzel. Der Verwaltungsbereich bot daraufhin zwei „Laufwerke"
-namens `data` und `media` an — das erste war das Datenverzeichnis selbst. Die Sicherung lief
-durch, vollstaendig, mit Handzettel: **931 Fotos, 1,45 GB, abgelegt in dem Ordner, den sie
-sichert.**
+**Gemessen am 14. August 2026**, bei der Pruefung des Containerbetriebs: Der Verwaltungsbereich bot
+zwei „Laufwerke" namens `data` und `media` an — das erste war das Datenverzeichnis selbst. Die
+Sicherung lief durch, vollstaendig, mit Handzettel: **931 Fotos, 1,45 GB, abgelegt in dem Ordner,
+den sie sichert.**
 
 Genau davor soll die Einhaengepruefung schuetzen, und ihr Docstring sagte das auch schon: „sonst
 landete die Sicherung auf derselben SD-Karte, gegen deren Ausfall sie schuetzen soll — und niemand
 saehe es". Der Symlink war das Loch darin. `find_drive` fing es nicht auf, denn es prueft den
 Pfad aus dem Browser nur gegen das, was `find_drives` gefunden hat.
 
-Auf einem Pi ist der Fall unwahrscheinlich — ein Symlink in `/media` legt nur root an. Die Folge
-waere aber die schlimmste im System: eine Sicherung, die aussieht wie eine, und die mit dem
-Datentraeger stirbt, vor dem sie schuetzen sollte. Zwei Zeilen sind dafuer ein guenstiger Preis.
+**Auf jedem Mac war das der Normalfall, nicht ein Zufall.** macOS legt in `/Volumes` stets einen
+Symlink auf `/` an, benannt nach dem internen Volume. Wer also der `operations.md` folgt und zum
+Entwickeln `PHOTOMAP_MEDIA_DIR=/Volumes` setzt, bekam diesen Fehler zuverlaessig — er war nur
+nie jemandem aufgefallen, weil niemand den Sicherungsknopf auf einem Mac gedrueckt hatte.
+
+Auf einem Pi ist der Fall dagegen unwahrscheinlich: In `/media` legt einen Symlink nur root an.
+Die Folge waere aber die schlimmste im System — eine Sicherung, die aussieht wie eine, und die mit
+dem Datentraeger stirbt, vor dem sie schuetzen sollte. Zwei Zeilen sind dafuer ein guenstiger
+Preis, und fuer die Entwicklung sind sie keine Vorsorge, sondern eine Behebung.
 
 **Fuer den Test war dieselbe Falle noch einmal aufgestellt.** Die eingesetzte `_is_mounted`
 vergleicht Pfade, und woertlich verglichen ist `media/Danger/data` nicht `anderswo/data` — der

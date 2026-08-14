@@ -223,10 +223,12 @@ def find_drives(media_dir: Path) -> list[Drive]:
     **A symlink is never a drive**, and that is not a detail: ``os.path.ismount`` answers False
     for one on principle ("a symlink can never be a mount point"). A symlink under /media would
     therefore look like an ordinary folder, the descent one level down would follow it, and
-    whatever mounts lie behind it would be offered as backup targets. Measured on 14 August 2026
-    against a ``/Volumes/Danger -> /`` on the development Mac: the panel offered the data
-    directory itself, and the backup landed inside the very folder it was backing up -- exactly
-    the failure the mount check above exists to prevent, with a manifest that made it look real.
+    whatever mounts lie behind it would be offered as backup targets.
+
+    **On macOS that was the rule, not an accident:** /Volumes always holds a symlink to ``/``
+    named after the internal volume. Measured on 14 August 2026 -- the panel offered the data
+    directory itself, and the backup landed inside the very folder it was backing up, with a
+    manifest that made it look real. Exactly the failure the mount check above exists to prevent.
     """
     if not media_dir.is_dir():
         return []
