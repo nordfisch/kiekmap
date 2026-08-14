@@ -37,6 +37,8 @@ Bedienung, `operations.md` die Technik dahinter.
 
 > **Was darin steht, ist auf keinem Pi erprobt.** Alles unter `deploy/pi/` wurde ohne Gerät
 > gebaut. Der erste echte Aufbau ist zugleich die Abnahme — siehe [backlog.md](backlog.md).
+> Die **Container** sind seit dem 14. August 2026 geprüft, wenn auch auf einem Mac: Was dort nicht
+> zu prüfen war, sind der USB-Weg der Sicherung und das Verhalten nach einem Stromausfall.
 
 ## Ausserhalb von `docs/`
 

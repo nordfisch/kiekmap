@@ -1,0 +1,28 @@
+# Ueberlagerung fuer den Entwicklungsmac. Nur zusammen mit docker-compose.yml zu benutzen,
+# am einfachsten ueber `make prod-mac`.
+#
+# Sie aendert genau zwei Einhaengungen und sonst nichts: dieselben Abbilder, dieselbe
+# nginx-Konfiguration, derselbe Entrypoint. Alles, was der Containerbetrieb ausmacht, wird also
+# wirklich geprueft und nicht umgangen.
+#
+# Warum ueberhaupt: /media gibt es unter macOS nicht -- eingehaengte Datentraeger liegen unter
+# /Volumes. Und `rshared` ist eine Mount-Propagierung des Linux-Kerns, die ueber die
+# Dateifreigabe von Docker Desktop nicht durchgeht. Beides ist auf dem Pi richtig, hier aber
+# nicht herstellbar.
+#
+# DARAUS FOLGT: Der USB-Weg der Sicherung ist auf dem Mac NICHT geprueft. Ein erst nach dem
+# Start eingesteckter Stick bleibt hier unsichtbar, und das ist genau der Fall, den `rshared`
+# auf dem Pi loesen soll. Das gehoert auf ein Geraet -- siehe Backlog, Punkt 18 und Punkt 15.
+
+services:
+  backend:
+    volumes:
+      # Compose fuehrt Volumes ueber den Zielpfad zusammen, diese beiden ersetzen also die
+      # gleichnamigen aus docker-compose.yml und treten nicht daneben.
+      #
+      # Der Vorgabewert ist derselbe Bestand wie im Betrieb. Wer gegen eine Kopie pruefen will --
+      # empfohlen, denn der Entrypoint zieht bei jedem Start den Schemastand nach --, setzt den
+      # Pfad relativ zu diesem Verzeichnis:
+      #   PHOTOMAP_PROD_DATA=../../photomap-prodtest/data make prod-mac
+      - ${PHOTOMAP_PROD_DATA:-../data}:/data
+      - /Volumes:/media

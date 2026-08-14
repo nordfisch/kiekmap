@@ -11,7 +11,18 @@ services:
       context: ../backend
     image: photomap-backend:${PHOTOMAP_VERSION:-dev}
     restart: unless-stopped
+    # Die ganze .env, nicht eine Auswahl daraus.
+    #
+    # Sie liegt bewusst nicht im Abbild -- das Abbild ist die Software, die .env ist der Ort.
+    # Frueher standen nur einzelne Werte unter `environment:`, und die uebrigen fielen im Betrieb
+    # still auf ihre Vorgaben zurueck: Ein Import im Container verlor Schlagwort, Bildnachweis
+    # und Herkunftspraefix, ohne dass etwas fehlschlug. Gemessen am 14. August 2026.
+    #
+    # Wer hier eintraegt, aendert also den Betrieb -- das ist der Sinn: ein zweites Museum
+    # braucht eine eigene .env und keinen Fork. Siehe docs/adaption.md.
+    env_file: ../.env
     environment:
+      # Diese vier gewinnen ueber die .env: sie beschreiben den Container, nicht den Ort.
       PHOTOMAP_DATA_DIR: /data
       PHOTOMAP_MEDIA_DIR: /media
       PHOTOMAP_ADMIN_PIN_HASH: ${PHOTOMAP_ADMIN_PIN_HASH:-}

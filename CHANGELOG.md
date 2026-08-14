@@ -709,3 +709,17 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   sechzigmal komplett neu gebaut. Jetzt wird gezeichnet, wenn die Kamera zur Ruhe kommt, und auch
   dann nur, wenn sich die Menge der sichtbaren Gruppen wirklich geändert hat. Auf dem Pi ist das
   der Unterschied zwischen ruckeln und nicht ruckeln
+
+### Behoben
+
+- **Die Einstellungen der `.env` erreichen im Containerbetrieb wieder alle das Backend.** Die
+  Compose-Datei reichte nur einzelne Werte durch; die übrigen fielen still auf ihre Vorgaben
+  zurück. Getroffen hat es den Import: Fotos kamen an, aber ohne Schlagwort, ohne Bildnachweis und
+  ohne Herkunftsangabe — ohne Fehlermeldung und ohne Eintrag im Protokoll. Die vier Werte, die den
+  Container beschreiben und nicht den Ort, gewinnen weiterhin über die Datei
+
+### Hinzugefügt
+
+- `deploy/docker-compose.mac.yml` und `make prod-mac`: der Containerbetrieb lässt sich auf einem
+  Mac fahren, wo es weder `/media` noch die Mount-Propagierung `rshared` gibt. Dieselben Abbilder,
+  dieselbe nginx-Konfiguration — nur zwei Einhängungen anders

@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
-        migrate revision seed seed-save empty lint tiles places build prod prod-down clean
+        migrate revision seed seed-save empty lint tiles places build prod prod-mac prod-down clean
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
@@ -124,6 +124,12 @@ build: frontend/node_modules  ## Frontend-Bundle bauen (Ergebnis in frontend/dis
 
 prod: .env  ## Alles in Containern, so wie es auf dem Pi laeuft
 	$(COMPOSE) up --build
+
+# Auf dem Mac fehlen /media und die Mount-Propagierung rshared. Warum, steht in der Datei.
+# PHOTOMAP_PROD_DATA zeigt wahlweise auf eine Kopie des Bestands -- empfohlen, weil der
+# Entrypoint bei jedem Start den Schemastand nachzieht.
+prod-mac: .env  ## Wie prod, aber mit den Pfaden des Entwicklungsmacs
+	$(COMPOSE) -f deploy/docker-compose.mac.yml up --build
 
 prod-down: .env
 	$(COMPOSE) down

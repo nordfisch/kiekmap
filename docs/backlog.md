@@ -56,7 +56,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | | **Infrastruktur** | | |
 | 14 | [Bedienbarkeitstest mit der echten Zielgruppe](#14--bedienbarkeitstest-mit-der-echten-zielgruppe) | Aufgabe | wichtig · dringend |
 | 15 | [Abnahme auf dem ersten Pi](#15--abnahme-auf-dem-ersten-pi) | Aufgabe | wichtig |
-| 17 | [Containerbetrieb prüfen](#17--containerbetrieb-prüfen) | Aufgabe | wichtig |
 | 18 | [Wiederherstellung wirklich proben](#18--wiederherstellung-wirklich-proben) | Aufgabe | wichtig |
 | 19 | [Displayauflösung und -orientierung des Museumsgeräts](#19--displayauflösung-und--orientierung-des-museumsgeräts) | Frage | wichtig |
 | 47 | [Eine zurückgespielte Sicherung hebt ihr Schema nicht an](#47--eine-zurückgespielte-sicherung-hebt-ihr-schema-nicht-an) | **Fehler** | wichtig · dringend |
@@ -71,9 +70,9 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 Besucherbeitrag scheitern, bis jemand neu startet; Punkt 10 zerdrückt das Foto auf einem kleinen
 Schirm.
 
-**Sechsundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 24, 25, 26, 27, 28,
-29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46. Sie sind erledigt, aufgelöst oder gestrichen; was aus
-jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt die **48**.
+**Siebenundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26,
+27, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46. Sie sind erledigt, aufgelöst oder gestrichen;
+was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt die **48**.
 
 ---
 
@@ -529,6 +528,13 @@ Alles unter `deploy/pi/` ist **ungeprüft**; beim Bauen gab es keins. Die Shell-
 gelaufen ist nichts. Betroffen sind `setup-pi.sh`, `photomap-kiosk`, `photomap-kiosk.service`,
 `update.sh`, `99-photomap-usb.rules` und `photomap-usb-mount`.
 
+**Die Container selbst sind es nicht mehr** (Punkt 17, erledigt am 14. August 2026): Beide Abbilder
+bauen, nginx liefert die Karte kachelweise aus, die Seite fragt nichts Fremdes an, und der
+Schemastand wird beim Start nachgezogen. Geprüft wurde auf einem Mac, und das lässt genau zwei
+Dinge offen, die hierher gehören: **der USB-Weg** (siehe Punkt 18) und **das Verhalten nach einem
+Neustart oder Stromausfall** — `restart: unless-stopped` ist eine Zusage, die nur ein Gerät
+einlösen kann.
+
 **Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10.** Was zuerst hakt, gehört nach
 [operations.md](operations.md).
 
@@ -570,17 +576,17 @@ nur zur Pflege angesteckt wird. Sie liegt dann nicht im Ausstellungsraum herum, 
 und öffnet den Besuchern keine Tastenwege in Chromium, die der Kiosk gerade zumacht (F11, Strg-W,
 Alt-Tab). Offen ist nur noch die Prüfung oben.
 
-### 17 · Containerbetrieb prüfen
-
-`make prod` ist ungeprüft, weil beim Bauen kein Docker lief. Auf dem Pi ist das der einzige
-Betriebsmodus — und für
-[Punkt 21](#21--deployment-auf-einem-webserver-evaluieren) ist es der Weg, auf dem das System
-überhaupt irgendwo hinkommt.
-
 ### 18 · Wiederherstellung wirklich proben
 
 Auf ein zweites, leeres Gerät zurückspielen. **Ein ungetestetes Backup ist kein Backup.** Erprobt
 ist bisher nur der Weg gegen ein `hdiutil`-Prüfvolumen auf dem Mac.
+
+**Der USB-Weg im Container ist weiterhin ungeprüft**, und zwar als Einziges aus dem erledigten
+Punkt 17: Die Prüfung des Containerbetriebs am 14. August 2026 lief auf einem Mac, wo es weder
+`/media` noch die Mount-Propagierung `rshared` gibt (siehe
+[`deploy/docker-compose.mac.yml`](../deploy/docker-compose.mac.yml)). Genau `rshared` soll aber den
+Fall lösen, dass ein Stick **nach** dem Start des Containers eingesteckt wird — der Fall, der im
+Museum der Normalfall ist. Er braucht Blech und gehört in denselben Durchgang wie diese Probe.
 
 ### 19 · Displayauflösung und -orientierung des Museumsgeräts
 
@@ -625,8 +631,9 @@ eine verlorene Woche Datenbankaufbau. Ausserdem hängt
 [Punkt 14](#14--bedienbarkeitstest-mit-der-echten-zielgruppe) daran — der Bedienbarkeitstest wird
 so möglich, bevor Hardware beschafft ist.
 
-Technisch ist der Weg kurz: Es läuft schon in Containern (`make prod`), das Frontend ist statisch,
-nginx steht davor, und die Datenbank ist eine Datei. Die Fragen liegen woanders:
+Technisch ist der Weg kurz, und seit dem 14. August 2026 ist das keine Annahme mehr, sondern
+gemessen (Punkt 17): Es läuft in Containern (`make prod`), das Frontend ist statisch, nginx steht
+davor, und die Datenbank ist eine Datei. Die Fragen liegen woanders:
 
 - **Zugriffsschutz.** Die PIN ist für einen Touchscreen in einem Museumsraum gebaut — vier Ziffern,
   gesichert durch eine Sperre nach fünf Fehlversuchen. Im offenen Netz ist das zu wenig, und vor

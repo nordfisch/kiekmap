@@ -154,6 +154,7 @@ In dieser Reihenfolge:
 | **Anzeige normal, aber nichts lässt sich speichern** | **Schema veraltet — meist nach einer zurückgespielten Sicherung. Neu starten, [siehe unten](#eine-zurückgespielte-sicherung-passt-nicht-zum-programm)** |
 | USB-Stick erscheint nicht | udev-Regel oder `:rshared` — siehe unten |
 | Anmeldung lehnt jede PIN ab | `PHOTOMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
+| Importierte Fotos ohne Schlagwort oder Bildnachweis | Eine Einstellung erreicht den Container nicht — [siehe unten](#einstellungen-im-containerbetrieb) |
 
 ---
 
@@ -169,6 +170,31 @@ selbst wird nirgends gespeichert; vergessen heißt neu setzen. Danach den Dienst
 Ist keine PIN eingerichtet, sagt das Zahlenfeld genau das — es lehnt nicht stumm jede Eingabe ab.
 Nach fünf Fehlversuchen sperrt es für eine Minute. Die Sitzung endet nach 30 Minuten ohne
 Bedienung; jede Aktion schiebt sie hinaus, und ein Neustart des Dienstes beendet jede Sitzung.
+
+---
+
+## Einstellungen im Containerbetrieb
+
+Die `.env` im Projektverzeichnis ist auch im Betrieb die Stelle, an der Einstellungen stehen. Sie
+liegt bewusst **nicht** im Abbild — das Abbild ist die Software, die `.env` ist der Ort — und wird
+in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml) als `env_file` eingelesen. Wer dort
+etwas ändert, startet danach die Container neu:
+
+```bash
+cd /opt/photomap && docker compose up -d
+```
+
+**Vier Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
+`PHOTOMAP_DATA_DIR`, `PHOTOMAP_MEDIA_DIR`, `PHOTOMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
+beschreiben den Container, nicht den Ort — innen heißen die Verzeichnisse immer `/data` und
+`/media`, gleichgültig wo sie aussen liegen. Ein `PHOTOMAP_MEDIA_DIR=/Volumes` in der `.env` des
+Entwicklungsmacs stört den Betrieb deshalb nicht.
+
+**Warum das hier steht:** Bis zum 14. August 2026 reichte die Compose-Datei nur einzelne Werte
+durch. Die übrigen fielen im Container still auf ihre Vorgaben zurück, und das traf ausgerechnet
+den Import: Fotos kamen an, aber ohne Schlagwort, ohne Bildnachweis und ohne Herkunftsangabe.
+Nichts schlug fehl, nichts stand im Protokoll. Wer heute eine neue Einstellung einführt, muss
+nichts weiter tun — sie kommt von selbst durch.
 
 ---
 

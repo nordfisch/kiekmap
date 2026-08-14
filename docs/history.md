@@ -2371,3 +2371,61 @@ Backlog-Punkt entfernt, sucht „bis zum naechsten `###`" -- steht der Punkt als
 Bereich, liegt zwischen ihm und dem naechsten `###` die Trennlinie und ein `##`. Beim ersten Mal
 (Punkt 45/46) fiel es durch die Anker-Pruefung auf, beim zweiten Mal beim Nachzaehlen der
 Abschnitte. **Das Suchmuster muss bei `##` genauso halten wie bei `###`.**
+
+---
+
+## Der Containerbetrieb ist keine Zusage mehr, sondern gemessen
+
+*14. August 2026.* Punkt 17. `make prod` war nie gelaufen -- beim Bauen stand kein Docker zur
+Verfuegung. Auf dem Pi ist das der einzige Betriebsmodus, und
+[Punkt 21](backlog.md) begruendete sich ausdruecklich mit „es laeuft schon in Containern": genau
+der Satz, den niemand geprueft hatte.
+
+Der Entwicklungsmac taugte dafuer besser als erwartet. Docker Server 27.4 auf `linux/arm64` ist
+dieselbe Architektur wie ein 64-Bit-Pi, die Abbilder bauen also nativ. **Beide bauten auf Anhieb**
+-- `npm ci` und `pip install` zum ersten Mal gegen eine reine Umgebung, was der eigentliche Zweck
+dieser Pruefung war. nginx liefert die Kartendatei mit **206 Partial Content** und ohne gzip aus,
+die Schriften kommen aus dem Abbild, ein tiefer Link auf `/admin` landet bei der Einzelseite, und
+die Seite fragt **null fremde Herkuenfte** an. Der Entrypoint zieht den Schemastand nach.
+
+### Der Fund: die `.env` erreichte den Container nur zur Haelfte
+
+Der `environment:`-Block nannte vier Variablen. Die uebrigen fielen im Container still auf ihre
+Vorgaben zurueck, und das traf den Import: **kein Schlagwort, kein Bildnachweis, keine Herkunft.**
+Nichts schlug fehl, nichts stand im Protokoll -- die Fotos kamen an, nur ohne ihre Zuschreibung.
+
+Behoben mit `env_file: ../.env` statt einer Aufzaehlung. Die vier Container-Wahrheiten
+(`DATA_DIR`, `MEDIA_DIR`, `CORS_ORIGINS`, der PIN-Hash) stehen weiter unter `environment:` und
+gewinnen dort -- die Gegenprobe steht in den Daten: Die `.env` des Macs sagt
+`PHOTOMAP_MEDIA_DIR=/Volumes`, im Container steht `/media`. Wer kuenftig eine Einstellung
+einfuehrt, muss nichts weiter tun.
+
+### Beinahe haette die Messung gelogen
+
+Die erste Probe war ein Foto aus dem Bestand mit geaendertem Hash. Es kam mit dem Schlagwort
+„Gebäude" an -- **und das sah wie ein Beweis aus, dass die Einstellung ankommt.** Sie kam aus den
+Metadaten der Datei selbst. Erst der Blick in `docker exec … env` zeigte, dass
+`import_tags` im Container leer war; der saubere Zeuge war die Herkunft, die schlicht `None` blieb.
+**Ein Fund, der aus zwei Quellen stammen kann, ist kein Fund, bevor man die Quellen getrennt hat.**
+
+### Was auf dem Mac nicht zu pruefen war
+
+`/media` gibt es unter macOS nicht, und `rshared` ist eine Mount-Propagierung des Linux-Kerns, die
+ueber die Dateifreigabe von Docker Desktop nicht durchgeht. Dafuer gibt es jetzt
+`deploy/docker-compose.mac.yml`, das genau diese beiden Einhaengungen ersetzt und sonst nichts.
+**Der USB-Weg der Sicherung bleibt damit ungeprueft** -- gerade der Fall, den `rshared` loesen
+soll, naemlich ein erst nach dem Start eingesteckter Stick. Er ist nach
+[Punkt 18](backlog.md) gewandert, das Verhalten nach Stromausfall und Neustart nach
+[Punkt 15](backlog.md). Wer spaeter „Container sind geprueft" zitiert, soll die zwei Luecken
+mitlesen.
+
+### Und ein Fehler von mir, der lehrreicher war als das Ergebnis
+
+Fuer den Durchgang habe ich den Bestand kopiert -- Datenbank, Fotos, Vorschaubilder. Zweimal
+danebengegriffen. Erst fehlte die **WAL-Datei**: Ohne sie lag die Kopie beim Stand vom 12. August,
+die 75 Titel waren nicht dabei. Dann fehlte **`region.json`**, und das legte den halben Kiosk
+lahm -- `nearby_streets` gab eine leere Liste zurueck, der Beitragsbereich hatte keine Strassen
+anzubieten, und die Karte stand auf einem Ausschnitt von 150 Metern. Beides sah nach einem
+Container-Fehler aus und war keiner. **Die Sicherung des Programms nimmt `region.json` und
+`places.json` von sich aus mit** (`LOOSE_FILES` in `services/backup.py`) -- von Hand kopieren tut
+das niemand.

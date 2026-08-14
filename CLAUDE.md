@@ -193,17 +193,26 @@ schlägt die EXIF-Koordinate; die Hausnummer wird vor dem Jahr gefragt; Archivin
 Herkunft und nicht in die Beschreibung; und eine Jahreszahl im Text datiert nur dann das Foto, wenn
 ein Datumswort davorsteht.
 
-**Alles unter `deploy/pi/` ist ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt, gelaufen
-ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst hakt,
-gehört nach [docs/operations.md](docs/operations.md).
+Am **14. August 2026** ist der **Containerbetrieb geprüft** worden — Punkt 17, auf dem Mac. Beide
+Abbilder bauen, nginx liefert die Karte kachelweise aus, die Seite fragt null fremde Herkünfte an,
+der Schemastand wird beim Start nachgezogen. Dabei kam heraus, dass die `.env` den Container nur
+zur Hälfte erreichte: Ein Import verlor still Schlagwort, Bildnachweis und Herkunft. Behoben mit
+`env_file` statt einer Aufzählung.
+
+**Alles unter `deploy/pi/` ist weiterhin ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt,
+gelaufen ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst
+hakt, gehört nach [docs/operations.md](docs/operations.md). Ungeprüft bleiben auch die zwei Dinge,
+die auf einem Mac nicht zu prüfen sind: der **USB-Weg der Sicherung** (`rshared`, Punkt 18) und das
+Verhalten nach **Neustart und Stromausfall** (Punkt 15).
 
 Zum Entwickeln auf dem Mac `PHOTOMAP_MEDIA_DIR=/Volumes` setzen und ein Prüfvolumen mit `hdiutil`
-anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md).
+anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md). Den Containerbetrieb dort fährt
+`make prod-mac`.
 
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.
 
-**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 21 Punkte nach Verwaltung,
+**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 20 Punkte nach Verwaltung,
 Besucher-Interface, Infrastruktur und Entwicklung geordnet, jeder mit dem, was beim Aufgreifen
 sonst erst wieder herausgefunden werden müsste. Jeder trägt eine **feste Nummer**, unter der er
 zitiert wird („Punkt 15"), dazu seine Art und seine Einordnung; die Übersichtstabelle oben in der
