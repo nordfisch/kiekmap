@@ -1482,3 +1482,46 @@ mitgezogen werden muessen.
 `is_restorable` und `looks_like_archive` suchen den Namen im Ordner bzw. im Dateinamen des Archivs
 — eine Vertraeglichkeitsregel dafuer waere Ballast fuer einen Fall, der genau einmal eintritt und
 sich mit einem Klick loesen laesst: neu sichern.
+
+## 42. Die Wiederherstellung bringt das Schema selbst auf Stand
+
+Eine zurueckgespielte Sicherung wird migriert, und zwar von der Wiederherstellung selbst
+(`services/schema.py`, aufgerufen in `backup._swap_in`). Ein Neustart ist dafuer nicht mehr noetig.
+
+**Der Anlass ist ein Fehler, der zwei Tage lang unbemerkt lief.** Eine Sicherung bringt ihr Schema
+mit; getauscht wird die Datei im Ganzen, und das laufende Programm haengt sich nur neu an sie.
+Migrationen liefen dabei nicht — sie laufen beim *Start*, und eine Wiederherstellung ist kein
+Start. Das Geraet sah danach voellig normal aus und **nahm nichts mehr an**: Jeder Besucherbeitrag,
+jede Bearbeitung, jeder Upload endete mit HTTP 500.
+
+Die Abhilfe stand seit dem 12. August 2026 in beiden Handbuechern: einmal neu starten. **Eine
+Anweisung an Menschen ist aber die schwaechste Stelle, die eine Zusage haben kann** — sie muss
+gelesen, erinnert und befolgt werden, und zwar von jemandem, der ein- bis zweimal im Jahr an dieses
+Geraet geht. Wer sie vergisst, merkt nichts, denn der Fehler zeigt sich erst beim naechsten
+Besucher, der etwas beitragen will.
+
+**Die Reihenfolge ist der ganze Punkt**, und sie hat zwei Haelften auf beiden Seiten des Tauschs:
+
+1. **Abgelehnt wird vorher.** Traegt die Sicherung eine Revision, die dieses Programm nicht kennt,
+   bricht die Wiederherstellung ab, **bevor** irgendetwas ersetzt ist. Der Bestand auf dem Geraet
+   bleibt unangetastet. Migrieren waere hier keine Option: Die zugehoerigen Migrationen gibt es in
+   diesem Programm gar nicht.
+2. **Migriert wird nachher.** Erst nach dem Tausch ist die zurueckgespielte Datei die am
+   konfigurierten Pfad.
+
+**Formuliert als „kennen wir diese Revision?", nicht als „ist sie neuer?".** Eine Revision, die
+sich nicht einordnen laesst, ist eine, die man nicht anfassen darf — gleich ob sie aus einem
+neueren Programm stammt, aus einem anderen Zweig oder aus einer Datei, die gar nicht unsere ist.
+
+**Ein Sonderfall bleibt bewusst offen:** Eine Datenbank ohne `alembic_version` wird nicht migriert,
+sondern in Ruhe gelassen. Ohne Stempel ist nicht zu sagen, was die Datei ist, und Alembic finge bei
+der ersten Migration gegen Tabellen an, die es schon gibt. Im Museum kann das nicht vorkommen —
+dort entsteht jede Datenbank durch Migrationen. Es kommt in der Testumgebung vor, wo das Schema
+direkt aus den Modellen entsteht, und genau dort waere Migrieren falsch.
+
+**Dazu zwei Dinge, die den Fehler haetten finden koennen und es nicht taten**, jetzt nachgeholt:
+`test_migrationen_und_modelle_beschreiben_dasselbe_schema` baut das Schema einmal ueber Alembic und
+einmal ueber `create_all` und vergleicht Tabellen und Spaltennamen — die uebrigen Tests bauen es
+aus den Modellen und koennen eine fehlende Migration deshalb grundsaetzlich nicht bemerken. Und
+`make dev` zieht den Schemastand jetzt vorweg nach, denn im Container tut das der Entrypoint, auf
+dem Entwicklungsrechner aber niemand.

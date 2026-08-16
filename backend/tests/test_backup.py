@@ -8,17 +8,24 @@ Drei Zusagen tragen diese Stufe, und alle drei brechen still:
      Sekunden -- und wird nicht mehr gemacht.
   3. Wiederherstellen legt den bisherigen Bestand beiseite, statt ihn zu loeschen. Wer die
      falsche Sicherung einspielt, soll nicht alles verloren haben.
+  4. Eine zurueckgespielte Sicherung bringt ihr Schema mit, und das Programm zieht es nach.
+     Ohne das sieht das Geraet normal aus und nimmt trotzdem nichts mehr an.
 """
 
 import io
+import sqlite3
 import zipfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
 
-from app.services import backup
+from app.services import backup, schema
 from app.services.storage import THUMBNAIL_SIZES, original_path, thumbnail_path
+
+#: Das Anfangsschema -- der Stand, auf dem eine Sicherung von vor der ersten Migration steht.
+#: Namentlich, weil genau diese Revision der Fall vom 12. August 2026 war.
+ANFANGSSCHEMA = "1cf9ccd28cd7"
 
 
 @pytest.fixture
@@ -302,6 +309,86 @@ class TestWiederherstellung:
 
         backup.run_restore(settings, _drive(settings), _nichts_melden)
 
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+
+class TestSchemastandBeimZurueckspielen:
+    """Der Fehler, der am 12. August 2026 zwei Tage lang unbemerkt lief.
+
+    Eine Sicherung bringt ihr Schema mit. Zurueckgespielt wird die Datei im Ganzen, und das
+    laufende Programm haengt sich nur neu an sie -- Migrationen laufen dabei nicht, denn die
+    laufen beim *Start*. Fehlt dem Schema danach eine Spalte, die das heutige Programm schreiben
+    will, sieht die Ausstellung voellig normal aus, und **jeder Besucherbeitrag endet mit 500**.
+    """
+
+    def _sicherung_mit_schemastand(
+        self, session, settings, stick, collection, revision: str, spalte_entfernen: bool = False
+    ):
+        """Eine Sicherung, deren Datenbank auf einem bestimmten Stand steht.
+
+        ``spalte_entfernen`` macht daraus eine Sicherung von **vor** der Migration, und ohne das
+        waere die Nachbildung ein Widerspruch: Die Testdatenbank entsteht aus den Modellen und
+        traegt ``old_source`` laengst. Nur den Stempel zurueckzudrehen ergaebe einen Stand, den es
+        nie gab -- und die Migration scheiterte an einer Spalte, die schon da ist.
+        """
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _nichts_melden)
+
+        gesichert = stick / backup.BACKUP_DIR_NAME / "kiekmap.db"
+        verbindung = sqlite3.connect(gesichert)
+        if spalte_entfernen:
+            verbindung.execute("alter table changes drop column old_source")
+        verbindung.execute("create table if not exists alembic_version (version_num varchar(32))")
+        verbindung.execute("delete from alembic_version")
+        verbindung.execute("insert into alembic_version values (?)", (revision,))
+        verbindung.commit()
+        verbindung.close()
+
+    def test_alte_sicherung_wird_angehoben(self, session, settings, stick, collection):
+        """Der eigentliche Fall: eingespielt wird ein Stand von vor der Migration."""
+        self._sicherung_mit_schemastand(
+            session, settings, stick, collection, ANFANGSSCHEMA, spalte_entfernen=True
+        )
+
+        backup.run_restore(settings, _drive(settings), _nichts_melden)
+
+        assert schema.revision_of(settings.db_path) == schema.head_revision()
+        # Und zwar wirklich: die Spalte, an der es damals scheiterte, ist da.
+        verbindung = sqlite3.connect(settings.db_path)
+        spalten = {zeile[1] for zeile in verbindung.execute("pragma table_info(changes)")}
+        verbindung.close()
+        assert "old_source" in spalten
+
+    def test_neuere_sicherung_wird_abgelehnt(self, session, settings, stick, collection):
+        """Der umgekehrte Fall, und er ist der unangenehmere.
+
+        Ein Schemastand, den dieses Programm nicht kennt, laesst sich nicht anheben -- die
+        zugehoerigen Migrationen gibt es hier gar nicht. Also gar nicht erst anfassen.
+        """
+        self._sicherung_mit_schemastand(session, settings, stick, collection, "aus der zukunft")
+
+        with pytest.raises(backup.BackupError) as fehler:
+            backup.run_restore(settings, _drive(settings), _nichts_melden)
+
+        assert "neueren Programmversion" in str(fehler.value)
+
+    def test_bei_ablehnung_bleibt_das_geraet_unberuehrt(self, session, settings, stick, collection):
+        """Die Zusage, an der die Reihenfolge im Code haengt.
+
+        Abgelehnt wird, **bevor** irgendetwas getauscht ist -- sonst stuende das Museum mit einer
+        halb ersetzten Sammlung da, und zwar wegen einer Sicherung, die gar nicht lesbar war.
+        """
+        self._sicherung_mit_schemastand(session, settings, stick, collection, "aus der zukunft")
+        spaeter = "f" * 64
+        pfad = original_path(settings.photos_dir, spaeter, ".jpg")
+        pfad.parent.mkdir(parents=True, exist_ok=True)
+        pfad.write_bytes(b"nach der sicherung entstanden")
+
+        with pytest.raises(backup.BackupError):
+            backup.run_restore(settings, _drive(settings), _nichts_melden)
+
+        assert pfad.is_file(), "der Bestand haette nicht angefasst werden duerfen"
+        assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
 
 

@@ -211,6 +211,11 @@ Punkt 48. Klein im Code und in Pfaden, `KIEKMAP_` als Präfix der Einstellungen,
 unsichtbar. Warum der Name keinen Ort nennt, steht in `docs/decisions.md`, Punkt 41. **Sicherungen
 von davor werden nicht mehr erkannt**, weil der Name im Ordner und im Archivnamen steht.
 
+Ebenfalls am **15. August 2026**: Eine **zurückgespielte Sicherung bringt ihr Schema jetzt selbst
+auf Stand** — Punkt 47, der Fehler, der zwei Tage lang jeden Besucherbeitrag scheitern ließ. Der
+Neustart im Handbuch entfällt; eine Sicherung von einer neueren Programmversion wird abgelehnt,
+bevor etwas ersetzt ist. `docs/decisions.md`, Punkt 42.
+
 **Alles unter `deploy/pi/` ist weiterhin ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt,
 gelaufen ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst
 hakt, gehört nach [docs/operations.md](docs/operations.md). Ungeprüft bleiben auch die zwei Dinge,
@@ -224,7 +229,7 @@ anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md). Den Contai
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.
 
-**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 20 Punkte nach Verwaltung,
+**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 19 Punkte nach Verwaltung,
 Besucher-Interface, Infrastruktur und Entwicklung geordnet, jeder mit dem, was beim Aufgreifen
 sonst erst wieder herausgefunden werden müsste. Jeder trägt eine **feste Nummer**, unter der er
 zitiert wird („Punkt 15"), dazu seine Art und seine Einordnung; die Übersichtstabelle oben in der

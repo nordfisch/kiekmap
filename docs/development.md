@@ -103,6 +103,7 @@ make lint          # ruff
 ```bash
 python3 tools/language_check.py   # hält sich der Quelltext an die Sprachregelung?
 python3 tools/check_anchors.py    # zeigen die Verweise in docs/ noch irgendwohin?
+                                  #   (auch zwischen Dateien, seit dem 15. August 2026)
 python3 tools/check_settings.py   # erreicht jede Einstellung den Container?
 ```
 

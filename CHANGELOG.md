@@ -746,3 +746,18 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - `tools/check_settings.py` liest jetzt auch die echte `.env` — die einzige Datei im Projekt, die
   niemand durchsieht, weil sie nicht versioniert ist. Sie meldet Einstellungen unter einem Präfix,
   das es nicht mehr gibt, und Tippfehler unter dem richtigen
+
+### Behoben
+
+- **Eine zurückgespielte Sicherung bringt ihr Schema jetzt selbst auf Stand.** Bisher musste man das
+  Gerät danach von Hand neu starten; ohne den Neustart sah die Ausstellung völlig richtig aus und
+  **nahm trotzdem nichts mehr an** — jeder Besucherbeitrag, jede Bearbeitung, jeder Upload endete
+  mit einem Fehler. Der Hinweis im Handbuch entfällt damit
+- **Eine Sicherung von einer neueren Programmversion wird abgelehnt, bevor etwas ersetzt ist**, mit
+  einer Meldung, die sagt, was zu tun ist. Der Bestand auf dem Gerät bleibt unangetastet
+- `make dev` und `make dev-backend` ziehen den Schemastand vorweg nach — im Container tut das der
+  Entrypoint, auf dem Entwicklungsrechner bisher niemand
+- `tools/check_anchors.py` prüft jetzt auch `operations.md`, `usermanual.md` und
+  `development.md` — und **Verweise zwischen Dateien**, die bisher gar nicht geprüft wurden. Genau
+  die brechen still: Wer einen Abschnitt umschreibt, liest seine eigene Datei, nicht die, die
+  hineinverweisen

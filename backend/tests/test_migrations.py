@@ -98,3 +98,55 @@ def test_anfangsschema_laeuft_gegen_eine_leere_datenbank(settings):
 
     assert {"photos", "tags", "photo_tags", "changes", "places", "import_log"} <= tabellen
     assert {"credit", "provenance"} <= spalten
+
+
+def test_migrationen_und_modelle_beschreiben_dasselbe_schema(settings, tmp_path: Path):
+    """Der Test, der am 12. August 2026 gefehlt hat.
+
+    Die uebrigen Tests bauen ihr Schema aus den Modellen (``create_all``), nicht aus den
+    Migrationen. Sie koennen eine fehlende Migration deshalb **grundsaetzlich** nicht bemerken:
+    393 gruene Tests standen neben einer Datenbank, an der nichts mehr zu schreiben war.
+
+    Also einmal beide Wege gehen und vergleichen. Das faengt beide Richtungen -- eine
+    Modelaenderung ohne Migration ebenso wie eine Migration, die an den Modellen vorbeigeht.
+
+    **Verglichen werden Tabellen und Spaltennamen, nicht Typen und Indizes.** Die beiden Wege
+    unterscheiden sich dort in Kleinigkeiten, die nichts bedeuten -- SQLite kennt ohnehin nur
+    wenige Typen, und ein Test, der an solchen Unterschieden haengenbleibt, wird abgeschaltet
+    statt gelesen. Ein fehlender Spaltenname ist dagegen genau der Fehler, um den es geht.
+    """
+    from app.db import Base
+    from app.models import Photo  # noqa: F401 -- meldet jede Tabelle an Base an
+
+    # Weg eins: die Migrationen, gegen die Datenbank der settings-Fixture.
+    config = Config(str(BACKEND / "alembic.ini"))
+    config.set_main_option("script_location", str(BACKEND / "alembic"))
+    command.upgrade(config, "head")
+    aus_migrationen = _schema_von(Path(settings.db_url.removeprefix("sqlite:///")))
+
+    # Weg zwei: die Modelle, gegen eine leere Datei daneben.
+    from sqlalchemy import create_engine
+
+    zweite = tmp_path / "aus-modellen.db"
+    engine = create_engine(f"sqlite:///{zweite}")
+    Base.metadata.create_all(engine)
+    engine.dispose()
+    aus_modellen = _schema_von(zweite)
+
+    assert aus_migrationen == aus_modellen
+
+
+def _schema_von(datenbank: Path) -> dict[str, set[str]]:
+    """Tabellen und ihre Spaltennamen -- ohne die Buchhaltung von Alembic und SQLite."""
+    verbindung = sqlite3.connect(datenbank)
+    tabellen = {
+        name
+        for (name,) in verbindung.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        if name not in {"alembic_version"} and not name.startswith("sqlite_")
+    }
+    schema = {
+        name: {zeile[1] for zeile in verbindung.execute(f"PRAGMA table_info({name})")}
+        for name in tabellen
+    }
+    verbindung.close()
+    return schema

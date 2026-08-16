@@ -33,7 +33,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.config import Settings
-from app.services import dates, places
+from app.services import dates, places, schema
 
 log = logging.getLogger(__name__)
 
@@ -679,7 +679,24 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
     Shared by both routes -- the stick and the archive -- because this is the part that must not
     differ. Everything before it only fills the working folder; from here on the collection on the
     device changes, and it changes the same way whatever the backup came in as.
+
+    **The schema is dealt with here, and the two halves sit on either side of the swap.** The
+    refusal has to come first, while the collection is still untouched -- a backup this program
+    cannot read must leave the device exactly as it was. The upgrade has to come last, because
+    only then is the restored database the one at the configured path. See ``services/schema.py``
+    for why any of this is needed.
     """
+    if ahead := schema.is_ahead(work / "kiekmap.db"):
+        # The working folder holds a whole collection; refusing is no reason to leave it lying
+        # around. The archive it came from stays in the inbox, so nothing is lost.
+        shutil.rmtree(work, ignore_errors=True)
+        # Not a word about "newer": we know it is unknown, and that is a different statement.
+        raise BackupError(
+            "Diese Sicherung gehoert zu einer neueren Programmversion "
+            f"(Schemastand {ahead}). Bitte erst das Programm aktualisieren, dann die Sicherung "
+            "einspielen. Auf dem Geraet wurde nichts veraendert."
+        )
+
     report(total, total, "Der bisherige Stand wird beiseitegelegt")
     set_aside = _set_aside(settings)
 
@@ -688,6 +705,10 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
         if moved.exists():
             moved.replace(settings.data_dir / name)
     shutil.rmtree(work, ignore_errors=True)
+
+    # Now, and not a step earlier: the file at the configured path is the restored one.
+    report(total, total, "Der Schemastand wird nachgezogen")
+    schema.bring_up_to_date(settings.db_path)
 
     # The collection is a different one now -- what was measured before says nothing any more.
     global _size_cache

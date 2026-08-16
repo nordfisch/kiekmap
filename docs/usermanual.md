@@ -169,25 +169,27 @@ Was vorher auf dem Gerät war, wird **nicht gelöscht**, sondern in einen Ordner
 Datum beiseitegelegt. Wer also versehentlich die falsche Sicherung einspielt, hat nichts verloren
 — sagen Sie in dem Fall jemandem Bescheid, der an das Gerät kann.
 
-### Danach einmal neu starten
+### Wenn die Sicherung älter ist als das Programm
 
-**Ist das Gerät seit der Sicherung aktualisiert worden, starten Sie es hinterher neu** — Gerät
-ausschalten, zehn Sekunden warten, wieder einschalten.
+Das ist der Normalfall, und **Sie müssen dafür nichts tun**. Eine Sicherung enthält die Angaben in
+der Form, die das Programm damals hatte; ist das Programm seither erneuert worden, bringt es die
+zurückgespielten Angaben beim Einspielen selbst auf seine heutige Form. Auf dem Fortschrittsbalken
+steht dann kurz „Der Schemastand wird nachgezogen".
 
-Der Grund in einem Satz: Eine Sicherung enthält die Angaben in der Form, die das Programm **damals**
-hatte. Ist das Programm seither erneuert worden, muss es die zurückgespielten Angaben erst auf
-seine heutige Form bringen, und das tut es beim Start.
+*Bis August 2026 musste man das Gerät hinterher von Hand neu starten. Ohne den Neustart sah die
+Ausstellung richtig aus, nahm aber nichts mehr an. Das ist behoben.*
 
-**Woran Sie merken, dass der Neustart gefehlt hat:** Die Ausstellung sieht richtig aus — Fotos,
-Karte, Zeitleiste, alles da —, aber **Besucherbeiträge lassen sich nicht mehr speichern**. Wer im
-„Hilf mit"-Bereich etwas beantwortet, bekommt eine Fehlermeldung statt eines Dankeschöns. Auch das
-Bearbeiten in der Verwaltung schlägt dann fehl.
+### Wenn die Sicherung neuer ist als das Programm
 
-Der Neustart behebt das, und es geht dabei nichts verloren. Hilft er nicht, hilft nur jemand mit
-Zugang zum Gerät weiter — was er tun muss, steht in
-[operations.md](operations.md#eine-zurückgespielte-sicherung-passt-nicht-zum-programm).
+Der umgekehrte Fall — etwa eine Sicherung von einem frisch aktualisierten Gerät auf einem, das noch
+nicht aktualisiert wurde. Dann **bricht das Zurückspielen ab** und sagt Ihnen das:
 
-**Im Zweifel einfach neu starten.** Ein Neustart zu viel schadet nie und dauert zwanzig Sekunden.
+> Diese Sicherung gehört zu einer neueren Programmversion. Bitte erst das Programm aktualisieren,
+> dann die Sicherung einspielen. Auf dem Gerät wurde nichts verändert.
+
+**Der Bestand auf dem Gerät bleibt dabei unangetastet** — es wird nichts halb ersetzt. Sagen Sie
+jemandem Bescheid, der das Programm aktualisieren kann; danach lässt sich dieselbe Sicherung
+einspielen.
 
 ## Was tun, wenn der Bildschirm schwarz bleibt
 

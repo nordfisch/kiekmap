@@ -151,7 +151,7 @@ In dieser Reihenfolge:
 | Karte grau, keine Kacheln | `frontend/public/tiles/map.pmtiles` fehlt oder ist halb kopiert |
 | Ortssuche findet nichts | `data/places.json` fehlt, oder `python -m app.cli places` lief nicht |
 | „Hilf mit" meldet stumm Fehler | Regionsprüfung ohne `data/region.json` — `make tiles` legt sie mit ab |
-| **Anzeige normal, aber nichts lässt sich speichern** | **Schema veraltet — meist nach einer zurückgespielten Sicherung. Neu starten, [siehe unten](#eine-zurückgespielte-sicherung-passt-nicht-zum-programm)** |
+| **Anzeige normal, aber nichts lässt sich speichern** | **Schema veraltet. Seit August 2026 zieht die Wiederherstellung es selbst nach — [siehe unten](#der-schemastand-einer-zurückgespielten-sicherung)** |
 | USB-Stick erscheint nicht | udev-Regel oder `:rshared` — siehe unten |
 | Anmeldung lehnt jede PIN ab | `KIEKMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
 | Importierte Fotos ohne Schlagwort oder Bildnachweis | Eine Einstellung erreicht den Container nicht — [siehe unten](#einstellungen-im-containerbetrieb) |
@@ -245,71 +245,60 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 
 ---
 
-## Eine zurückgespielte Sicherung passt nicht zum Programm
+## Der Schemastand einer zurückgespielten Sicherung
 
-**Der Fall:** Eine Sicherung wurde eingespielt, die **älter ist als die letzte Programmaktualisierung**.
-Die Ausstellung sieht danach völlig normal aus — Fotos, Karte, Zeitleiste —, aber **jeder Schreibzugriff
-scheitert**: Besucherbeiträge, Bearbeitungen in der Verwaltung, Uploads. Der Besucher liest eine
-Fehlermeldung statt eines Dankeschöns.
+**Seit dem 15. August 2026 regelt das die Wiederherstellung selbst** — dieser Abschnitt beschreibt,
+*wie*, und was zu tun ist, wenn doch etwas hakt. Für das Museumsteam steht der kurze Weg im
+[Benutzerhandbuch](usermanual.md#wenn-die-sicherung-älter-ist-als-das-programm).
 
-**Der Grund.** Die Sicherung enthält `kiekmap.db` genau so, wie die Datei damals aussah — mitsamt
-ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird die Datei **im Ganzen**
-ausgetauscht (`_swap_in` in `services/backup.py`); danach hängt sich das laufende Programm nur neu
-an sie (`_reopen_database`). **Migrationen laufen dabei nicht.** Sie laufen beim *Start*
-(`backend/docker-entrypoint.sh`: `alembic upgrade head`), und eine Wiederherstellung ist kein Start.
+**Warum es überhaupt eine Frage ist.** Eine Sicherung enthält `kiekmap.db` genau so, wie die Datei
+damals aussah — mitsamt ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird
+die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup.py`); danach hängt sich das
+laufende Programm nur neu an sie (`_reopen_database`). Migrationen laufen dabei nicht von selbst:
+Sie laufen beim *Start* (`backend/docker-entrypoint.sh`), und eine Wiederherstellung ist kein Start.
 
-Fehlt dem Schema also eine Spalte, die das heutige Programm schreiben will, endet jeder Schreibversuch
-mit einem HTTP 500 und im Protokoll steht:
+**Was jetzt passiert**, und die Reihenfolge ist der ganze Punkt (`services/schema.py`):
 
-```
-sqlite3.OperationalError: table changes has no column named old_source
-```
+| Die Sicherung ist … | … und dann |
+|---|---|
+| **älter** als das Programm | wird nach dem Tausch `alembic upgrade head` gefahren. Auf dem Balken steht „Der Schemastand wird nachgezogen" |
+| **auf dem gleichen Stand** | passiert nichts, der Aufruf ist folgenlos |
+| **neuer** als das Programm | **bricht ab, bevor irgendetwas getauscht ist** — der Bestand auf dem Gerät bleibt unangetastet |
 
-### Die Abhilfe: neu starten
+Die Ablehnung kommt **vor** dem Tausch, und das ist keine Feinheit: Eine Sicherung, die dieses
+Programm nicht lesen kann, darf das Gerät nicht halb ersetzt zurücklassen. Nach der Ablehnung liegt
+das Archiv weiterhin im Eingangsordner, der Arbeitsordner ist aufgeräumt.
 
-```bash
-cd /opt/kiekmap && docker compose restart backend
-```
+**Bei einer zu neuen Sicherung: erst das Programm aktualisieren, dann einspielen.** Siehe
+[Update ohne Internet](#update-ohne-internet).
 
-Oder schlicht das Gerät aus- und einschalten. Der Start bringt das Schema auf Stand; der Bestand
-bleibt unberührt. **Das ist der Normalfall und reicht fast immer** — deshalb steht im
-[Benutzerhandbuch](usermanual.md#danach-einmal-neu-starten) nur dieser eine Satz.
-
-### Nachsehen, ob es daran lag
+### Nachsehen, wo etwas steht
 
 ```bash
 docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
 docker compose exec backend alembic heads
 ```
 
-Stimmen die beiden Werte nicht überein, war es das. Auf dem Entwicklungsrechner dasselbe ohne
-Container:
+Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand — bei Schreibfehlern im
+Betrieb der erste Blick. Auf dem Entwicklungsrechner dasselbe ohne Container:
 
 ```bash
 sqlite3 data/kiekmap.db "select * from alembic_version;"
 cd backend && .venv/bin/alembic heads
 ```
 
-Und die Reparatur von Hand, falls der Neustart nicht greift:
+Und die Reparatur von Hand:
 
 ```bash
 make migrate
 ```
 
-### Wenn die Sicherung **neuer** ist als das Programm
-
-Der umgekehrte Fall, und er ist der unangenehmere: Eine Sicherung von einem aktuelleren Gerät auf
-ein älteres zurückzuspielen bringt ein Schema mit, das dieses Programm nicht kennt. `alembic` weiß
-dann mit der eingetragenen Revision nichts anzufangen und **bricht beim Start ab** — das Gerät kommt
-nicht hoch.
-
-**Abhilfe: erst das Programm aktualisieren, dann die Sicherung einspielen.** Siehe
-[Update ohne Internet](#update-ohne-internet). Der bisherige Stand liegt derweil unter
-`data/vorher-<Datum>/` und lässt sich zurückholen, indem man `kiekmap.db`, `photos/` und `thumbs/`
-von dort wieder nach `data/` schiebt.
-
-**Die Regel dahinter, für beide Richtungen:** *Erst das Programm auf den Stand bringen, den die
-Sicherung braucht — dann einspielen — dann neu starten.*
+**Was der alte Fehler war**, weil er in Protokollen von vor dem 15. August 2026 auftaucht: Fehlte
+dem Schema eine Spalte, die das heutige Programm schreiben will, sah die Ausstellung völlig normal
+aus — Fotos, Karte, Zeitleiste —, aber **jeder Schreibzugriff** scheiterte mit HTTP 500 und im
+Protokoll stand `sqlite3.OperationalError: table changes has no column named old_source`. Ein
+Neustart behob es. Dass ein solcher Zustand überhaupt entstehen konnte, war
+[Punkt 47](backlog.md).
 
 ## Wo die Sicherung liegt
 

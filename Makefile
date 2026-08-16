@@ -41,13 +41,16 @@ deps: $(VENV) frontend/node_modules  ## Alle Abhaengigkeiten installieren
 
 # --- Entwicklung ------------------------------------------------------------
 
-dev: deps  ## Backend und Frontend mit Hot Reload
+# Der Schemastand zuerst: Im Container zieht ihn der Entrypoint nach, auf dem Entwicklungsrechner
+# niemand. Am 12. August 2026 lief deshalb zwei Tage lang eine Datenbank, an der nichts mehr zu
+# schreiben war -- siehe docs/decisions.md, Punkt 42.
+dev: deps migrate  ## Backend und Frontend mit Hot Reload
 	@trap 'kill 0' EXIT INT TERM; \
 	( cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000 ) & \
 	( cd frontend && npm run dev ) & \
 	wait
 
-dev-backend: $(VENV)  ## Nur das Backend, Port 8000, Doku unter /api/docs
+dev-backend: migrate  ## Nur das Backend, Port 8000, Doku unter /api/docs
 	cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000
 
 dev-frontend: frontend/node_modules  ## Nur das Frontend, Port 5173

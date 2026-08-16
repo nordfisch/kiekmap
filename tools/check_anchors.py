@@ -19,13 +19,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-#: Files whose in-page links are checked. Anchors only ever point inside their own file here.
+#: Files whose links are checked -- and whose headings other files may point at.
+#:
+#: The two manuals joined the list on 15 August 2026, after a rewritten section left a link in
+#: ``operations.md`` pointing nowhere and nothing noticed. They are the files the museum team and
+#: whoever keeps the device running actually read; a link that goes nowhere there costs more than
+#: one in the backlog.
 DOCUMENTS = (
     "docs/backlog.md",
     "docs/decisions.md",
     "docs/history.md",
     "docs/index.md",
     "docs/adaption.md",
+    "docs/development.md",
+    "docs/operations.md",
+    "docs/usermanual.md",
 )
 
 
@@ -40,21 +48,38 @@ def slug(heading: str) -> str:
     return kept.replace(" ", "-")
 
 
-def check(path: Path) -> list[str]:
-    """The dead anchors of one file, empty when all of them resolve."""
+def headings_of(path: Path) -> set[str]:
+    """The anchors a file offers."""
     text = path.read_text(encoding="utf-8")
-    headings = {slug(match.group(1)) for match in re.finditer(r"^#{2,6} (.+)$", text, re.M)}
-    links = re.findall(r"\]\(#([^)]+)\)", text)
-    return [link for link in links if link not in headings]
+    return {slug(match.group(1)) for match in re.finditer(r"^#{2,6} (.+)$", text, re.M)}
+
+
+def check(path: Path, headings: dict[str, set[str]]) -> list[str]:
+    """The dead anchors of one file, empty when all of them resolve.
+
+    **Both kinds count.** ``](#anchor)`` points inside the file; ``](other.md#anchor)`` points
+    into a neighbour, and that is the kind that breaks unnoticed -- whoever rewrites a section
+    reads their own file, not the three that link into it. A link to a file outside the list is
+    left alone: we do not know its headings, and guessing would be noise.
+    """
+    text = path.read_text(encoding="utf-8")
+    dead = [link for link in re.findall(r"\]\(#([^)]+)\)", text) if link not in headings[path.name]]
+
+    for target, anchor in re.findall(r"\]\(([\w./-]+\.md)#([^)]+)\)", text):
+        name = Path(target).name
+        if name in headings and anchor not in headings[name]:
+            dead.append(f"{name}#{anchor}")
+    return dead
 
 
 def main() -> int:
+    paths = [ROOT / name for name in DOCUMENTS if (ROOT / name).is_file()]
+    headings = {path.name: headings_of(path) for path in paths}
+
     broken = 0
-    for name in DOCUMENTS:
-        path = ROOT / name
-        if not path.is_file():
-            continue
-        dead = check(path)
+    for path in paths:
+        name = str(path.relative_to(ROOT))
+        dead = check(path, headings)
         broken += len(dead)
         print(f"  {name:20} {len(dead):2} tot {dead if dead else ''}")
 

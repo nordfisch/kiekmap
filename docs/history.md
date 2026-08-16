@@ -1684,7 +1684,7 @@ Zusage „Der Punkt laesst sich auf der Karte noch verschieben" haette nicht meh
 Strassenwahl und nur dort. Er gehoert **darueber** — er ist die Alternative *zu* der Liste, nicht
 der letzte Ausweg dahinter — und er gehoert **auch in den Hausnummernschritt**, wo er am meisten
 einbringt: Wer die Strasse kennt, die Nummer aber nicht, zeigt auf das Haus, statt „Reicht so" zu
-druecken. Das ist derselbe Fall, den [Punkt 36](backlog.md#36--hilf-mit-soll-auch-nachschärfen-nicht-nur-füllen)
+druecken. Das ist derselbe Fall, den Punkt 36
 fuer den Bestand loesen will — hier faellt er nebenbei mit ab.
 
 ### Was die Gegenprobe ueber die eigenen Tests sagte
@@ -2316,7 +2316,7 @@ Fall: Eine Sicherung, die *neuer* ist als das Programm, laesst das Geraet gar ni
 Dass es niemandem auffiel, hat einen zweiten Grund, und der ist der unangenehmere: **Alles Pruefen
 der letzten Tage war lesend.** Die Bereinigung des Erstbestands schrieb an der API vorbei; im Kiosk
 wurde nachgesehen, ob Fragen *erscheinen*. Ob eine Antwort ankommt, hat zwei Tage niemand versucht.
-Aufgenommen als [Punkt 47](backlog.md#47--eine-zurückgespielte-sicherung-hebt-ihr-schema-nicht-an).
+Aufgenommen als Punkt 47 — behoben am 15. August 2026, siehe unten.
 
 **Die Lehre ist aelter als dieser Fehler und hier wieder bezahlt worden:** Ein Durchgang, der nur
 schaut, prueft die Haelfte. Der erste Klick, der etwas *schreibt*, hat gefunden, was zwei Tage
@@ -2559,3 +2559,59 @@ sonst haette sie bei der naechsten Fehlersuche verwirrt.
 Abbilder neu gebaut, „Kiekmap: Schemastand pruefen ..." im Startprotokoll, `kiekmap.db` im
 Datenverzeichnis, 929 Fotos, 811 davon im ersten Ausschnitt, **null fremde Herkuenfte**, PIN-Hash
 und Import-Einstellungen im Container angekommen.
+
+---
+
+## Der Neustart entfaellt: die Wiederherstellung migriert selbst
+
+*15. August 2026.* Punkt 47, der zweite der beiden offenen Fehler.
+
+Seit dem 12. August stand in beiden Handbuechern, dass man das Geraet nach einer zurueckgespielten
+Sicherung einmal neu starten muss. Das war richtig und hat den Betrieb abgedeckt — **aber eine
+Anweisung an Menschen ist die schwaechste Stelle, die eine Zusage haben kann.** Befolgen muss sie
+jemand, der ein- bis zweimal im Jahr an dieses Geraet geht; wer sie vergisst, merkt nichts, denn
+der Fehler zeigt sich erst beim naechsten Besucher, der etwas beitragen will.
+
+Jetzt tut es das Programm. `services/schema.py` ist die eine Stelle, an der von aussen mit Alembic
+gesprochen wird, und `backup._swap_in` ruft sie — dort, weil beide Wege (Stick und Archiv) durch
+diese Funktion gehen und ihr Docstring ohnehin sagt, dass hier nichts auseinanderlaufen darf.
+
+**Die Reihenfolge ist der ganze Punkt.** Die Ablehnung einer zu neuen Sicherung kommt **vor** dem
+Tausch, das Migrieren **danach**. Beides ist mit einem eigenen Test belegt, und der dritte prueft
+die Zusage dazwischen: Nach einer Ablehnung liegt kein `vorher-`Ordner da, kein Arbeitsordner, und
+die Fotos von heute sind noch da. Eine Sicherung, die dieses Programm nicht lesen kann, darf das
+Geraet nicht halb ersetzt zuruecklassen.
+
+### Der Test, der gefehlt hat
+
+`test_migrationen_und_modelle_beschreiben_dasselbe_schema` baut das Schema einmal ueber
+`alembic upgrade head` und einmal ueber `create_all` und vergleicht Tabellen und Spaltennamen.
+
+**Das ist der Test, dessen Fehlen den Fehler zwei Tage lang unsichtbar hielt:** Alle uebrigen Tests
+bauen ihr Schema aus den Modellen und koennen eine fehlende Migration deshalb grundsaetzlich nicht
+bemerken — 393 gruene Tests standen neben einer Datenbank, an der nichts mehr zu schreiben war.
+
+Verglichen werden Namen, nicht Typen und Indizes: Die beiden Wege unterscheiden sich dort in
+Kleinigkeiten, die nichts bedeuten, und ein Test, der daran haengenbleibt, wird abgeschaltet statt
+gelesen. Die Gegenprobe: eine Spalte an ein Modell gehaengt, ohne Migration — genau ein Test faellt.
+
+### Zwei Funde am Rand, beide aus derselben Ecke
+
+**Der Testaufbau war im ersten Anlauf ein Widerspruch.** Um eine Sicherung von vor der Migration
+nachzubilden, hatte ich nur den Stempel zurueckgedreht — die Testdatenbank entsteht aber aus den
+Modellen und traegt die Spalte laengst. Die Migration lief dann gegen eine Spalte, die schon da war.
+Eine Nachbildung, die nur die Haelfte nachbildet, prueft nichts.
+
+**Und `check_anchors.py` sah zwei Drittel der Dokumentation nicht.** `operations.md` und
+`usermanual.md` standen nicht in seiner Liste, und **dateiuebergreifende** Anker
+(`usermanual.md#…`) prueft es bis heute gar nicht — dabei sind genau die es, die still brechen: Wer
+einen Abschnitt umschreibt, liest seine eigene Datei, nicht die drei, die hineinverweisen. Beides
+nachgezogen; der erste Lauf fand sofort drei tote Verweise, einen davon aus einer aelteren Runde.
+
+### Was danach gemessen wurde
+
+398 Backend-Tests, dazu der ganze Weg im Container gegen ein temporaeres Datenverzeichnis: eine
+Sicherung auf dem Anfangsschema eingespielt, `old_source` danach wieder da, Stempel auf dem Kopf.
+Und der umgekehrte Fall abgelehnt, mit unveraendertem Bestand. **Der Container war dabei der
+eigentliche Pruefpunkt**, denn dort laeuft uvicorn in `/srv` und nicht in `backend/` — die
+`alembic.ini` nennt ihren Skriptordner relativ, weshalb `schema._config()` ihn absolut setzt.
