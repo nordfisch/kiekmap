@@ -100,6 +100,28 @@ nicht dem Rechner:
   davon löst sich von selbst:** Es ist der Vorrat für „Wann war das?", und der Beitragsbereich
   legt ihn Besuchern vor. Die Zeitleiste reicht seit der Datierung von 1880 bis 2030 und ist damit
   brauchbar — jedes weitere Jahr macht sie dichter, keines mehr macht sie überhaupt erst möglich.
+
+  **Noch nicht durchsucht sind die Schlagwörter**, und das ist der eine Anhalt, den die Runde vom
+  11./12. August ausgelassen hat: Sie sah Titel und Beschreibung an, nicht die Stichwörter. Der
+  Vorschlag ist, alle Fotos ohne Jahr, aber mit Beschreibung oder Schlagwörtern nach einer
+  Jahreszahl zu durchsuchen, das Ergebnis **aufzulisten und erst nach Bestätigung zu übernehmen**.
+
+  **Nachgezählt am 16. August 2026, und die Ausbeute ist klein:** Von 612 Fotos ohne Jahr tragen
+  **5** ein Schlagwort mit vierstelliger Zahl und **32** eine Beschreibung mit einer — wobei die
+  Beschreibungen weitgehend die schon verworfenen sein dürften; die Überschneidung ist beim
+  Aufgreifen zuerst zu prüfen, sonst wird 17 Fotos zum zweiten Mal dieselbe Frage gestellt.
+
+  **Wichtiger als die fünf Fotos ist, was dabei zum Vorschein kommt.** Vier der fünf Schlagwörter
+  sind gar keine Stichwörter, sondern Sätze — „Hof Wilhelm Petersen, Seitenansicht, abgerissen
+  1971", „Bauernhaus von Paul Stein, im Jahre 1987. Abriss 18.1.1988", „Fotokalender 2014". Sie
+  stammen aus der Kommazerlegung von Punkt 41 und gehören in die Beschreibung, nicht in die
+  Schlagwortliste. **Und sie zeigen Punkt 37 im Kleinen:** „abgerissen 1971" und „Abriss 18.1.1988"
+  datieren den Abriss des Hauses, nicht die Aufnahme; „Fotokalender 2014" datiert den Kalender.
+  Nur „ca 1943 1944" trägt ein Datumswort und käme durch.
+
+  Der Weg — auflisten, bestätigen, übernehmen — ist derselbe, den „Offen ist auch das Wie" unten
+  meint: Er lohnt nur, wenn er auch für die anderen Fragen dieses Punktes taugt, nicht als
+  Einwegskript für fünf Fotos.
 - **Rund 100 eigenständige Titel**, unter denen einzelne eher Notiz als Titel sind: „Vermutung:
   hinter der Zahnarztpraxis oder hinter der ‚Börse'". Ob so etwas ein Titel bleibt, in die
   Beschreibung wandert oder verschwindet, entscheidet nur, wer weiß, was auf dem Bild ist.
