@@ -1902,7 +1902,7 @@ das darf er, weil er nicht dem Besucher gehoert.
 
 ### Was sich dabei nebenbei geloest hat
 
-[Punkt 10](backlog.md#10--detailansicht-maße-aufräumen) wartete auf diesen hier: Sein
+Punkt 10 wartete auf diesen hier: Sein
 Schliessen-Knopf ist an die Blaetterknoepfe gebunden, damit die Detailansicht *eine* Knopfform
 kennt. Jetzt gibt es vier benannte Rollen — und keine heisst „schliessen". Aus „darf er aus dem
 Raster?" ist damit „welche Rolle bekommt er?" geworden, und das steht dort jetzt als erster
@@ -2664,3 +2664,61 @@ meldete brav „1". Dann verglich ich die Textbreite mit der Breite ihres Kasten
 „-1 % Luft"; der Kasten ist ein Flex-Element ohne `flex: 1`, seine Breite **ist** die der
 breitesten Zeile. Erst die dritte Messung — natuerliche Textbreite gegen den wirklich freien Platz
 — sagte etwas ueber die Sache. **Eine Messung, die immer dasselbe antwortet, misst nichts.**
+
+---
+
+## Die Detailansicht: das Bild bekommt Platz, die Knoepfe bekommen einen Ort
+
+*16. August 2026.* Punkt 10, der letzte der beiden Masz-Fehler in der Besucheransicht.
+
+### Der Knopf, der davonlief
+
+Die Blaetterknoepfe standen unmittelbar unter dem Bild und wanderten mit dessen Hoehe.
+Nachgemessen auf 1024 x 768, indem das Seitenverhaeltnis der Reihe nach durchgestellt wurde:
+zwischen 3:2 quer und 2:3 hoch lagen **103 px**. Wer durch einen Stapel blaettert, dessen Fotos
+verschiedene Formate haben, jagt den Knopf ueber den Schirm -- und greift im schlimmsten Fall ins
+Bild, wo eben noch „Naechstes" stand.
+
+Jetzt sind sie senkrecht verankert und stehen waagerecht weiter mittig **unter dem Bild**. Nach dem
+Umbau: **0 px Sprung** bei jedem geprueften Format, und die Mitte der Knopfzeile liegt auf die
+Pixel genau auf der Bildmitte. Als [Punkt 44](decisions.md) festgehalten, samt der Regel dahinter:
+Was der Besucher trifft, steht still; was er ansieht, darf sich bewegen.
+
+Dass Bild und Text weiter **in einer Flucht** anfangen, ist dabei erhalten geblieben -- das war
+eine eigene Entscheidung vom 9. August und hatte keinen Grund zu fallen. Der Block aus Bild und
+Text ruecht jetzt als Ganzes nach unten, wenn das Bild niedrig ist; die Knopfzeile bleibt, wo sie
+ist.
+
+### Die Textspalte, die das Bild zerdrueckte
+
+`--overlay-aside` stand fest auf 24 rem, also 432 px. Auf einem 1024er Panel blieben dem
+querformatigen Scan damit 466 px -- weniger als die Haelfte des Schirms fuer das, was die Ansicht
+zeigen soll. Jetzt waechst die Spalte mit (`clamp(16rem, 28vw, 24rem)`):
+
+| Schirm | vorher | nachher | |
+|---|---|---|---|
+| 1024 px | 466 px | **610 px** | +31 % |
+| 1280 px | 722 px | 796 px | +10 % |
+| 1366 px | 808 px | 858 px | +6 % |
+| 1920 px | 1362 px | 1362 px | ±0 |
+
+**Genau die Verteilung, die der Backlog-Eintrag vorhergesagt hat:** „Auf 1920 x 1080 ist nichts zu
+tun, auf einem 1024er Panel schon." Die Behebung greift dort, wo der Fehler war, und ruehrt nicht
+an, was schon stimmte.
+
+**Der zweite Weg aus dem Eintrag -- das Layout dem Bildformat folgen lassen -- ist nicht gebaut**,
+und das war Absicht: Er stellt bei 884 von 929 Fotos die Ansicht um und will auf einem echten
+Geraet beurteilt werden, nicht im Browser. Er bleibt der naechste Schritt, wenn
+[Punkt 19](backlog.md) die Aufloesung geklaert hat.
+
+### Der Schliessen-Knopf und die Rollenfrage
+
+Der Eintrag verlangte, vor der Arbeit zu entscheiden, welche Rolle der Knopf bekommt -- fuenfte
+Rolle oder Sonderfall. **Sonderfall.** Die vier Rollen aus Punkt 30 sind die Sprache des
+Beitragsbereichs, wo ein Besucher Fragen beantwortet und die Form sagen muss, was ein Knopf tut;
+Schliessen ist keine davon, und Punkt 30 sagt ausdruecklich „mehr sollen es nicht werden". Dass die
+Detailansicht auf ihrem dunklen Grund ohnehin eine eigene Knopffamilie fuehrt, macht es zur
+einfachsten Antwort statt zur Ausnahme.
+
+Er steht jetzt in der Ecke des Schirms -- 45 px von oben und rechts, unabhaengig davon, wie breit
+der Inhalt gerade ist.

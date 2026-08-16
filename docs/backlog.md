@@ -54,9 +54,9 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
+| 54 | [Das Layout der Detailansicht dem Bildformat folgen lassen](#54--das-layout-der-detailansicht-dem-bildformat-folgen-lassen) | Idee | — |
 | 8 | [Historische Karte als umschaltbare Grundkarte](#8--historische-karte-als-umschaltbare-grundkarte) | Idee | wichtig |
 | 9 | [Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](#9--bilder-in-bewegung-diashow-ken-burns-effekt-attract-mode) | Idee | wichtig |
-| 10 | [Detailansicht: Maße aufräumen](#10--detailansicht-maße-aufräumen) | **Fehler** | — |
 | | **Infrastruktur** | | |
 | 14 | [Bedienbarkeitstest mit der echten Zielgruppe](#14--bedienbarkeitstest-mit-der-echten-zielgruppe) | Aufgabe | wichtig · dringend |
 | 15 | [Abnahme auf dem ersten Pi](#15--abnahme-auf-dem-ersten-pi) | Aufgabe | wichtig |
@@ -69,15 +69,12 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Zwei Fehler sind offen, beide in der Besucheransicht.** Punkt 10 zerdrückt das Foto auf einem
-kleinen Schirm und wartet damit auf dieselbe Antwort wie
-[Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts). Punkt 53 nimmt einer ganzen
-Klasse von Fotos den Weg zum Nachschärfen.
+**Ein Fehler ist offen**: Punkt 53 nimmt einer ganzen Klasse von Fotos den Weg zum Nachschärfen.
 
-**Dreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
-28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48, 49. Sie sind erledigt, aufgelöst oder
+**Einunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
+10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48, 49. Sie sind erledigt, aufgelöst oder
 gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt
-die **54**.
+die **55**.
 
 ---
 
@@ -396,9 +393,8 @@ der Blick auf das Ganze: Rückmeldungen einholen, auf Einheitlichkeit prüfen, s
 und es dann in einem Zug umsetzen statt in zwölf Einzelentscheidungen.
 
 **Drei Befunde standen schon als eigene Punkte** und waren damit die erste Ernte dieses
-Durchgangs, nicht sein Ersatz: [Punkt 10](#10--detailansicht-maße-aufräumen) (Maße der
-Detailansicht) — und Punkt 28 (die Knopfsprache) sowie Punkt 29 (der Kopfbereich), beide am
-9. August 2026 erledigt. Dass ein
+Durchgangs, nicht sein Ersatz: Punkt 10 (Maße der Detailansicht) — und Punkt 28 (die
+Knopfsprache) sowie Punkt 29 (der Kopfbereich). Alle drei sind inzwischen erledigt. Dass ein
 Befund einzeln lösbar war, spricht nicht gegen diesen Punkt: Die Knopfsprache stand als eigener
 Punkt da, *weil* jemand sie am Stück angesehen hatte. Genau das soll hier für den Rest passieren.
 
@@ -492,55 +488,29 @@ lädt (Punkt 29, erledigt): Dort war die Antwort, dass der Verlust hinnehmbar is
 gar keinen Weg zurück gibt. **Beim Attract-Mode gilt das nicht** — er startet von selbst, und was
 er wegwirft, hat niemand weggeworfen.
 
-### 10 · Detailansicht: Maße aufräumen
+### 54 · Das Layout der Detailansicht dem Bildformat folgen lassen
 
-Zwei Kleinigkeiten an derselben Ansicht — die zweite zieht allerdings deutlich mehr nach sich als
-die erste.
+**Der Rest von Punkt 10**, der am 16. August 2026 bewusst liegen geblieben ist. Behoben sind dort
+die drei pragmatischen Teile: Die Textspalte wächst mit statt fest zu stehen (auf 1024 px bekommt
+das Bild 610 statt 466 px), die Blätterknöpfe stehen fest am unteren Rand, und der Schließen-Knopf
+sitzt in der Ecke des Schirms. Siehe [history.md](history.md) und
+[decisions.md](decisions.md), Punkt 44.
 
-**1. Die Textspalte drängt das Bild auf schmalen Schirmen zu klein.** `--overlay-aside` ist fest
-auf 24 rem gesetzt, bei 18 px Wurzelschrift also 432 px. Zusammen mit Rand und Abstand
-(90 + 36 px) bleiben dem Bild auf 1280 px Breite 722 px, auf **1024 px nur noch 466 px** — bei
-einem querformatigen Scan gut ein Drittel des Schirms. Der `minmax(16rem, …)` in
-`grid-template-columns` federt das nicht ab: Er gibt nur eine Untergrenze an, die Spalte bleibt bei
-ihrer Wunschbreite, solange sie passt.
+**Was offen bleibt, ist der Weg an die Ursache:** Ein Querformat braucht Breite und hat Höhe übrig
+— der Text gehörte dann **darunter**. Ein Hochformat braucht Höhe und hat Breite übrig — dort ist
+der Text **daneben** richtig, so wie heute. Die Ansicht weiß, was sie zeigt: Das Bild trägt sein
+Seitenverhältnis als `aspect-ratio` (`PhotoOverlay.tsx`), und `.overlay__content` ist ein Raster
+mit zwei Spalten, das sich auf eine umstellen ließe.
 
-Das ist der Grund, warum dieser Punkt als Fehler geführt wird und nicht als Ausbau: Eine Ansicht,
-die bei kleinerer Auflösung ihr Hauptobjekt zerdrückt, tut nicht, was sie zusagt.
+**Der Bestand sagt, dass es sich lohnt: 884 Querformate gegen 44 Hochformate.** Genau deshalb ist
+es aber nichts, was man nebenbei macht — die Umstellung trifft fast jedes Foto der Sammlung, und
+ob sie besser aussieht, entscheidet sich auf einem Gerät in einem Raum und nicht in einem
+Browserfenster.
 
-**Zwei Wege, und der zweite geht an die Ursache:**
-
-1. **Die Spalte mitwachsen lassen** statt sie zu setzen — `clamp(16rem, 28vw, 24rem)`. Billig, aber
-   nur eine Milderung: Auch eine schmalere Seitenspalte nimmt dem querformatigen Bild Breite. Zu
-   klären wäre, ob der Text dann noch ohne unruhige Umbrüche steht.
-2. **Das Layout dem Bild folgen lassen.** Ein Querformat braucht Breite und hat Höhe übrig — der
-   Text gehört **darunter**. Ein Hochformat braucht Höhe und hat Breite übrig — dort ist der Text
-   **daneben** richtig, so wie heute. Die Ansicht weiß, was sie zeigt: Das Bild trägt sein
-   Seitenverhältnis schon als `aspect-ratio` (`PhotoOverlay.tsx`), und `.overlay__content` ist ein
-   Raster mit zwei Spalten, das sich auf eine umstellen ließe.
-
-**Der Bestand sagt, welcher Fall zählt: 884 Querformate gegen 44 Hochformate.** Der Weg über die
-Ausrichtung hilft also fast immer und kostet in den 44 Fällen nichts — die Spalte bleibt dort, wo
-sie heute steht.
-
-**Wie dringend das ist, hängt an
-[Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts)**, und zwar in beide
-Richtungen: Auf 1920 × 1080 ist nichts zu tun, auf einem 1024er Panel schon — und steht das Gerät
-am Ende **hochkant**, dreht sich die Rechnung ganz um. Solange die Auflösung nicht feststeht, ist
-jede Zahl hier eine Annahme.
-
-**2. Der Schließen-Knopf soll ganz oben rechts stehen, nicht am rechten Rand des Inhalts.** Heute
-sitzt er bündig mit der rechten Kante der Textspalte. Bei einem breiten Foto ist das dasselbe wie
-„oben rechts im Schirm"; bei einem schmalen rückt der ganze Inhalt zusammen und der Knopf mit ihm
-nach innen. Er soll stattdessen **immer** in der Ecke stehen, mit einem vernünftigen Abstand zum
-Rand.
-
-**Der zweite Teil wartete auf die Knopfsprache, und die steht seit dem 9. August 2026** (Punkt 28,
-erledigt; siehe [decisions.md](decisions.md), Punkt 30). Der Schließen-Knopf war absichtlich so
-hoch wie die Blätterknöpfe, damit die Ansicht genau eine Knopfform kennt; jetzt gibt es vier
-benannte Rollen, und keine davon ist „Schließen". **Damit ist die Frage nicht mehr, ob er aus dem
-Raster darf, sondern welche Rolle er bekommt** — er schließt eine Ansicht, ohne etwas zu
-beantworten oder zurückzugehen. Das ist entweder eine fünfte Rolle oder ein Sonderfall, den die
-Detailansicht für sich behält. **Diese Entscheidung gehört an den Anfang dieses Punktes.**
+**Deshalb wartet dieser Punkt auf
+[Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts)**, und zwar wirklich: Steht
+das Gerät am Ende **hochkant**, dreht sich die Rechnung um und die Umstellung müsste in die andere
+Richtung gehen. Solange die Auflösung nicht feststeht, wäre jede Zahl hier eine Annahme.
 
 ### 43 · Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau
 
@@ -673,9 +643,9 @@ nachgemessen; die Variable `--crest` hat für schmale Schirme bereits eine Media
 **Zwei Punkte warten auf diese Antwort**, und beide werden von ihr nicht nur abgestuft, sondern
 umgestellt:
 
-- [Punkt 10](#10--detailansicht-maße-aufräumen), die Maße der Detailansicht. Auf 1920 × 1080 ist
-  nichts zu tun, auf einem 1024er Panel viel — und steht das Gerät **hochkant**, dreht sich die
-  Rechnung um: Dann hat das querformatige Bild Breite im Überfluss und der Text darunter Platz.
+- [Punkt 54](#54--das-layout-der-detailansicht-dem-bildformat-folgen-lassen), das Layout der
+  Detailansicht. Steht das Gerät **hochkant**, dreht sich die Rechnung um: Dann hat das
+  querformatige Bild Breite im Überfluss und der Text darunter Platz.
 - Der Kopfbereich hat sich davon inzwischen gelöst (Punkt 29, erledigt): Die drei Elemente
   richten sich an einer gemeinsamen Mittellinie aus statt an drei Rechnungen, und das gilt in
   jeder Breite. **Die Auflösung entscheidet dort nichts mehr** — ein Hinweis darauf, dass eine

@@ -773,3 +773,18 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   bis zwölf Zeichen auf jedem Schirm, bis sechzehn auf einem breiten. Vorher brach schon
   „Hetlingen" um. Darunter greift ein Boden: Der Ortsname wird nie kleiner als die Zeile über ihm,
   und ein Umbruch ist ab da die bewusste Rückfallebene
+
+### Geändert
+
+- **Die Blätterknöpfe der Detailansicht stehen fest am unteren Rand**, waagerecht weiter mittig
+  unter dem Bild. Vorher klebten sie am Bild und wanderten mit dessen Höhe — zwischen einem
+  querformatigen und einem hochformatigen Foto lagen 103 px, sodass ein Stapel mit gemischten
+  Formaten den Knopf beim Blättern unter dem Finger wegzog
+- **Der Schließen-Knopf steht immer in der Ecke des Bildschirms**, nicht mehr am rechten Rand des
+  Inhalts — bei einem schmalen Foto rückte er sonst mit dem Inhalt nach innen
+
+### Behoben
+
+- **Die Textspalte der Detailansicht drückt das Bild nicht mehr zusammen.** Sie stand fest auf
+  24 rem und ließ dem querformatigen Scan auf einem 1024er Panel nur 466 px; jetzt wächst sie mit,
+  und es sind 610 px. Auf 1920 × 1080 ändert sich nichts — dort war auch nichts zu ändern

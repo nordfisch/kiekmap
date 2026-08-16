@@ -1554,3 +1554,29 @@ Kopf. Wo dieser Boden greift, bricht der Name um; das ist die bessere der beiden
 Antworten und war auch vorher schon die gewaehlte. Bis zwoelf Zeichen geht es auf jedem Schirm gut,
 bis sechzehn auf einem breiten — nachgemessen und in `docs/adaption.md` aufgeschrieben, weil es
 die naechste Gemeinde betrifft und nicht diese.
+
+## 44. Die Blaetterknoepfe stehen fest, das Bild bewegt sich
+
+In der Detailansicht sind die Blaetterknoepfe **senkrecht am unteren Rand verankert** und stehen
+**waagerecht mittig unter dem Bild**. Das Bild sitzt darueber und aendert seine Hoehe, die Knoepfe
+nicht.
+
+**Vorher klebten sie am Bild und wanderten mit ihm.** Zwischen einem 3:2-Querformat und einem
+2:3-Hochformat lagen **103 px** -- gemessen am 16. August 2026 auf einem 1024er Schirm. Wer durch
+einen Stapel blaettert, dessen Fotos nicht alle dasselbe Format haben, jagt damit den Knopf ueber
+den Schirm; im schlimmsten Fall liegt beim naechsten Tippen das Bild dort, wo eben noch
+„Naechstes" stand. Auf einem Touchscreen ist das kein Schoenheitsfehler, sondern ein Fehlgriff.
+
+**Waagerecht bleiben sie beim Bild**, und das ist die Gegenrichtung derselben Frage: Sie gehoeren
+zu dem, was sie aendern. Mittig im Schirm stuenden sie bei einem Hochformat weit neben dem Bild,
+und der Bezug ginge verloren. Die linke Spalte ist deshalb weiterhin genau so breit wie das Bild.
+
+**Die Regel dahinter:** Was der Besucher *trifft*, steht still; was er *ansieht*, darf sich
+bewegen. Ein Bedienelement, dessen Ort vom Inhalt abhaengt, ist auf einem Beruehrungsschirm eine
+Falle -- besonders fuer die Zielgruppe, die hier vor dem Geraet steht.
+
+**Der Schliessen-Knopf folgt derselben Regel** und steht seit demselben Tag in der Ecke des
+Schirms statt am rechten Rand des Inhalts. Er bekommt dabei **keine** der vier Rollen aus Punkt 30:
+Die sind die Sprache des Beitragsbereichs -- auswaehlen, uebernehmen, zurueck, ueberspringen --,
+und Schliessen ist keine davon. Die Detailansicht fuehrt auf ihrem dunklen Grund ohnehin eine
+eigene Knopffamilie; sie behaelt ihn als Sonderfall.

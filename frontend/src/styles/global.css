@@ -964,13 +964,28 @@ button.timeline__undated:hover {
   --pager-room: 0rem;
   --overlay-pad: 2.5rem;
   --overlay-gap: 2rem;
-  --overlay-aside: 24rem;
+
+  /* Die Textspalte waechst mit, statt gesetzt zu sein.
+   *
+   * Fest auf 24rem waren das bei 18px Wurzelschrift 432px -- auf einem 1024er Panel blieben dem
+   * querformatigen Scan damit **466px**, also weniger als die Haelfte des Schirms fuer das, was
+   * die Ansicht zeigen soll. Der `minmax(16rem, ...)` in `grid-template-columns` federte das nicht
+   * ab: Er nennt eine Untergrenze, und die Spalte bleibt bei ihrer Wunschbreite, solange sie
+   * passt.
+   *
+   * 16rem ist die Grenze nach unten, weil darunter die Schlagwoerter unruhig umbrechen; 24rem die
+   * nach oben, weil eine breitere Textspalte nur laengere Zeilen macht und keine besseren. */
+  --overlay-aside: clamp(16rem, 28vw, 24rem);
 
   position: fixed;
   inset: 0;
   z-index: 10;
   display: grid;
-  place-items: center;
+  /* Waagerecht mittig, senkrecht auf volle Hoehe gezogen. Das Ziehen ist der Grund, warum die
+   * Blaetterknoepfe unten stehen bleiben koennen -- ohne eine feste Hoehe haette der Inhalt nur
+   * die seines Bildes, und "unten" waere jedes Mal woanders. */
+  justify-items: center;
+  align-items: stretch;
   padding: var(--overlay-pad);
   background: rgb(20 17 14 / 92%);
 }
@@ -992,20 +1007,31 @@ button.timeline__undated:hover {
   max-height: 100%;
 }
 
-/* Die Kopfzeile geht über beide Spalten, damit der Schließen-Knopf am rechten Rand der ganzen
- * Ansicht sitzt und nicht am rechten Rand der Textspalte. */
+/* Die Kopfzeile haelt nur noch den Platz frei -- der Knopf selbst steht seit dem 16. August 2026
+ * ausserhalb des Rasters, siehe `.overlay__close`. Ohne diese Zeile ruecke der Inhalt nach oben
+ * und der Knopf laege darueber. */
 .overlay__head {
   grid-column: 1 / -1;
-  display: flex;
-  justify-content: flex-end;
+  min-height: 3.5rem;
 }
 
+/* Bild oben, Blaetterknoepfe unten -- und dazwischen so viel Luft, wie das Bild uebriglaesst.
+ *
+ * Vorher standen die Knoepfe unmittelbar unter dem Bild und wanderten mit dessen Hoehe: zwischen
+ * einem 3:2-Querformat und einem 2:3-Hochformat lagen **103 px**, gemessen am 16. August 2026.
+ * Wer durch einen Stapel blaettert, dessen Fotos nicht alle dasselbe Format haben, jagt den
+ * Knopf ueber den Schirm -- und trifft im schlimmsten Fall das Bild statt "Naechstes".
+ *
+ * Waagerecht bleiben sie mittig **unter dem Bild**, nicht mittig im Schirm: Die linke Spalte ist
+ * so breit wie das Bild, und `justify-items: center` mittet darin. */
 .overlay__figure {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  justify-items: center;
   gap: 1rem;
   min-width: 0;
+  /* Volle Hoehe der Zeile -- sonst haette das Raster oben nichts, woran es "unten" messen kann. */
+  align-self: stretch;
 }
 
 .overlay__image {
@@ -1141,6 +1167,8 @@ button.timeline__undated:hover {
   display: flex;
   align-items: center;
   gap: 1rem;
+  /* Ans untere Ende der zweiten Rasterzeile -- siehe .overlay__figure. */
+  align-self: end;
 }
 
 /* Blaetterknoepfe und Frageknoepfe teilen sich die Form -- die Ansicht kennt genau eine, und
@@ -1181,8 +1209,23 @@ button.timeline__undated:hover {
 }
 
 /* Gleiche Form, gleicher Rahmen, gleiche Höhe wie die Blätterknöpfe -- die Ansicht kennt damit
- * genau eine Knopfform. Die Stelle macht die Kopfzeile: oben rechts, wo man ihn sucht. */
+ * genau eine Knopfform.
+ *
+ * **Immer in der Ecke des Schirms, nicht am rechten Rand des Inhalts.** Vorher sass er buendig mit
+ * der Textspalte: Bei einem breiten Foto war das dasselbe wie "oben rechts", bei einem schmalen
+ * rueckte der ganze Inhalt zusammen und der Knopf mit ihm nach innen -- er stand dann irgendwo im
+ * Bild statt dort, wo man ihn sucht.
+ *
+ * Aus dem Raster genommen und an `.overlay` geheftet, das als einziger Vorfahr positioniert ist.
+ * Den Platz haelt weiterhin `.overlay__head` frei.
+ *
+ * **Und er bekommt keine der vier Rollen** aus decisions.md, Punkt 30: Die sind die Sprache des
+ * Beitragsbereichs -- auswaehlen, uebernehmen, zurueck, ueberspringen -- und Schliessen ist keine
+ * davon. Die Detailansicht fuehrt auf ihrem dunklen Grund ohnehin eine eigene Knopffamilie. */
 .overlay__close {
+  position: absolute;
+  top: var(--overlay-pad);
+  right: var(--overlay-pad);
   display: flex;
   align-items: center;
   gap: 0.5rem;
