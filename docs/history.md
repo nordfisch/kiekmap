@@ -2722,3 +2722,61 @@ einfachsten Antwort statt zur Ausnahme.
 
 Er steht jetzt in der Ecke des Schirms -- 45 px von oben und rechts, unabhaengig davon, wie breit
 der Inhalt gerade ist.
+
+---
+
+## Der Knopf, der angeblich am Jahr hing
+
+*16. August 2026.* Punkt 53, gemeldet als: In der Detailansicht fehle der Weg zur Hausnummer,
+sobald das Jahr bekannt sei.
+
+**Die Beobachtung stimmte, die Erklaerung nicht.** Weder das Backend noch das Frontend fragen an
+dieser Stelle nach dem Jahr -- die Detailansicht holt die Hausnummern fuer *jedes* geoeffnete Foto
+und zeigt den Knopf, wenn die Liste nicht leer ist. Das Nachzaehlen ergab etwas anderes:
+
+| Fotos mit blossem Strassennamen | Anzahl | davon mit Jahr | Knopf? |
+|---|---|---|---|
+| strassengenau, vom Kurator | 71 | 13 | ja |
+| **ohne Genauigkeit, aus dem EXIF** | **53** | **35** | **nein** |
+
+Wer sich durchklickt, sieht damit eine saubere Korrelation -- die mit Jahr sind ueberwiegend gerade
+die ohne Knopf -- und schliesst auf die falsche Ursache. **Eine gemeldete Beobachtung ist ein
+Befund, ihre Erklaerung eine Vermutung.**
+
+### Die eigentliche Ursache war eine Annahme, die niemand nachgezogen hat
+
+`_needs_housenumber` verlangte ausdruecklich 150 m Genauigkeit und begruendete das so: „Das Geraet
+weiss, wo der Fotograf stand, nicht was er fotografiert hat." **Dieser Satz war am 12. August
+widerlegt worden** -- 278 von 413 EXIF-Koordinaten des Erstbestands teilten sich zwei Fotos, es
+sind eingetragene Werte und keine Messungen. Es steht seitdem in `CLAUDE.md` unter den drei Dingen,
+die man hier falsch machen kann; in `needs.py` stand weiter die alte Begruendung.
+
+Nachgemessen fuer diese 53: **30 von ihnen teilen ihren Punkt mit einem anderen Foto, sechs haengen
+an einem einzigen.** Eine eingetragene Koordinate an einer benannten Strasse ist genau der Fall,
+fuer den die Frage gebaut wurde.
+
+Die Bedingung nennt jetzt, was sie meint -- auf der Karte, nicht schon hausgenau, Strassenname ohne
+Ziffer, Adressen im Ortsindex. **Die Frage waechst von 70 auf 116 Fotos, 46 kommen dazu, 30 davon
+mit bekanntem Jahr, keines faellt weg.** Als [Punkt 45](decisions.md) festgehalten.
+
+### Der Test, der seinen eigenen Namen nicht hielt
+
+Es gab einen `test_foto_aus_dem_exif_wird_nicht_vorgelegt`. Er war gruen, und er prueft --
+nichts dergleichen: Sein Foto hatte **gar keinen Strassennamen** und fiel schon an dieser Bedingung
+heraus. Der EXIF-Fall stand zwei Wochen ungeprueft da, waehrend ein Test mit genau diesem Namen
+danebenstand und Sicherheit vortaeuschte.
+
+**Ein Test, dessen Name etwas anderes sagt als sein Aufbau, deckt eine Luecke zu, statt sie zu
+schliessen** -- er ist schlimmer als gar keiner, weil er die Frage als beantwortet ausweist. Er
+heisst jetzt nach dem, was er misst, und der EXIF-Fall hat seinen eigenen daneben. Dazu ein dritter
+fuer die neue Bedingung „muss ueberhaupt auf der Karte sein": Ohne sie stuenden in der
+Detailansicht „Wo ist das?" und „Welche Hausnummer?" nebeneinander und baeten darum, dasselbe Foto
+zweimal zu verorten.
+
+### Und ein Messfehler von mir, im selben Atemzug
+
+Die Gegenrechnung „was kommt dazu" meldete erst **0**, obwohl die Zahlen von 70 auf 116 stiegen.
+`NOT (accuracy == 150)` ist in SQL nicht wahr, wenn `accuracy` NULL ist, sondern NULL -- und genau
+die Fotos ohne Genauigkeit waren die gesuchten. Ueber Mengen gezaehlt statt ueber SQL-Negation kam
+die richtige Antwort. **Zwei Zahlen, die einander widersprechen, sind ein Geschenk**; hier haette
+das Ergebnis sonst „keine Aenderung" gelautet, mitten in einer Aenderung.

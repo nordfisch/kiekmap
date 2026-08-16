@@ -788,3 +788,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Die Textspalte der Detailansicht drückt das Bild nicht mehr zusammen.** Sie stand fest auf
   24 rem und ließ dem querformatigen Scan auf einem 1024er Panel nur 466 px; jetzt wächst sie mit,
   und es sind 610 px. Auf 1920 × 1080 ändert sich nichts — dort war auch nichts zu ändern
+
+### Behoben
+
+- **Fotos mit einem Straßennamen und einer Koordinate aus dem EXIF lassen sich jetzt ebenfalls auf
+  eine Hausnummer nachschärfen.** Die Bedingung verlangte eine Genauigkeit, die nur ein Kurator
+  setzt, und schloss damit 46 Fotos aus — begründet mit einer Annahme über EXIF-Koordinaten, die
+  vier Tage vorher widerlegt worden war. Gemeldet worden war es als „der Knopf fehlt, sobald das
+  Jahr bekannt ist"; das Jahr hatte damit nichts zu tun, es war nur bei den betroffenen Fotos
+  häufiger bekannt. Die Frage wächst von 70 auf 116 Fotos

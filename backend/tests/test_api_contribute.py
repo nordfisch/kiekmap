@@ -305,14 +305,58 @@ class TestNachschaerfen:
             == 0
         )
 
-    def test_foto_aus_dem_exif_wird_nicht_vorgelegt(self, client: TestClient, strassen, make_photo):
-        """Seine Ungenauigkeit ist nicht schlecht, sondern *unbekannt* -- und von anderer Art.
+    def test_foto_ohne_strassennamen_wird_nicht_vorgelegt(
+        self, client: TestClient, strassen, make_photo
+    ):
+        """Ohne Strasse gaebe es gar keine Nummern anzubieten.
 
-        Das Geraet weiss, wo der Fotograf stand, nicht was er fotografiert hat. Dazu fehlt die
-        Strasse, es gaebe also gar keine Nummern anzubieten. Eine eigene Frage, getrennt zu
-        beantworten.
+        Dieser Test hiess bis zum 16. August 2026 ``..._aus_dem_exif_...`` und behauptete, den
+        EXIF-Fall abzudecken -- sein Foto hatte aber gar keinen Strassennamen und fiel schon an
+        dieser Bedingung heraus. **Ein Test, dessen Name etwas anderes sagt als sein Aufbau, deckt
+        eine Luecke zu, statt sie zu schliessen:** Der EXIF-Fall stand zwei Wochen ungeprueft da,
+        und Backlog-Punkt 53 kam daraus. Er hat jetzt seinen eigenen Test, gleich darunter.
         """
         make_photo(place_name=None, accuracy=None, sha="d" * 64)
+        strassen.commit()
+
+        assert (
+            client.get("/api/contribute/next", params={"need": "housenumber"}).json()["open_count"]
+            == 0
+        )
+
+    def test_foto_mit_strasse_und_exif_koordinate_wird_vorgelegt(
+        self, client: TestClient, strassen, make_photo
+    ):
+        """Der Fall, der zu Punkt 53 gefuehrt hat -- 53 Fotos des Erstbestands.
+
+        Sie tragen einen Strassennamen aus dem Archivordner und eine Koordinate aus ihrem EXIF,
+        also **gar keine** Genauigkeit. Bis zum 16. August 2026 verlangte die Bedingung
+        ausdruecklich 150 m und liess sie damit draussen. Begruendet war das mit „das Geraet weiss,
+        wo der Fotograf stand" -- eine Annahme, die vier Tage zuvor widerlegt worden war: 278 von
+        413 EXIF-Koordinaten des Erstbestands teilten sich zwei Fotos, es sind eingetragene Werte
+        und keine Messungen (decisions.md, Punkt 34).
+
+        Aufgefallen ist es als etwas anderes: In der Detailansicht schien der Knopf zu fehlen,
+        sobald das Jahr bekannt war. Das war eine Verwechslung von Ursache und Begleitung -- unter
+        den Fotos mit blossem Strassennamen sind die mit Jahr ueberwiegend gerade die aus dem EXIF.
+        """
+        make_photo(place_name="Am Kamp", accuracy=None, location_source=Source.EXIF, sha="f" * 64)
+        strassen.commit()
+
+        daten = client.get("/api/contribute/next", params={"need": "housenumber"}).json()
+
+        assert daten["open_count"] == 1
+
+    def test_foto_ohne_koordinate_wird_nicht_vorgelegt(
+        self, client: TestClient, strassen, make_photo
+    ):
+        """Ein Foto ohne Ort schuldet seine Antwort der **ersten** Frage, nicht dieser.
+
+        In der Detailansicht stehen alle drei Knoepfe nebeneinander; ohne diese Bedingung stuenden
+        dort „Wo ist das?" und „Welche Hausnummer?" zugleich und baeten darum, dasselbe Foto zweimal
+        zu verorten.
+        """
+        make_photo(place_name="Am Kamp", lat=None, lon=None, accuracy=None, sha="g" * 64)
         strassen.commit()
 
         assert (

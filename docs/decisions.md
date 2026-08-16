@@ -1580,3 +1580,35 @@ Schirms statt am rechten Rand des Inhalts. Er bekommt dabei **keine** der vier R
 Die sind die Sprache des Beitragsbereichs -- auswaehlen, uebernehmen, zurueck, ueberspringen --,
 und Schliessen ist keine davon. Die Detailansicht fuehrt auf ihrem dunklen Grund ohnehin eine
 eigene Knopffamilie; sie behaelt ihn als Sonderfall.
+
+## 45. Woher eine Koordinate kommt, sagt nichts darueber, wie genau sie ist
+
+Ob ein Foto zum Nachschaerfen vorgelegt wird, entscheidet, **was ueber das Haus bekannt ist** --
+nicht, aus welcher Quelle seine Koordinate stammt (`services/needs.py`, `_needs_housenumber`).
+
+**Bis zum 16. August 2026 stand dort das Gegenteil.** Die Bedingung verlangte ausdruecklich
+`location_accuracy_m == ACCURACY_STREET_M`, liess also nur zu, was ein Kurator auf eine Strasse
+gesetzt hatte. Begruendet war das mit einem Satz, der plausibel klingt: „Das Geraet weiss, wo der
+Fotograf stand, nicht was er fotografiert hat."
+
+**Der Satz war vier Tage vorher widerlegt worden.** Am 12. August ergab das Nachzaehlen, dass von
+413 EXIF-Koordinaten des Erstbestands **278 sich zwei Fotos teilten** -- eingetragene Werte, keine
+Messungen (Punkt 34, und es steht seitdem in `CLAUDE.md` unter den drei Dingen, die man hier falsch
+machen kann). Niemand ist danach zu `needs.py` zurueckgegangen. 53 Fotos mit einem Strassennamen
+aus dem Archivordner und einer eingetragenen Koordinate blieben aus der Frage draussen, obwohl sie
+genau ihr Fall sind.
+
+**Aufgefallen ist es als etwas anderes**, und das ist der Teil, der das Aufschreiben lohnt: Gemeldet
+wurde, in der Detailansicht fehle der Knopf, *sobald das Jahr bekannt ist*. Die Beobachtung stimmte,
+die Erklaerung nicht. Unter den Fotos mit blossem Strassennamen sind die mit Jahr ueberwiegend
+gerade die aus dem EXIF -- 35 von 53, gegen 13 von 71 bei den strassengenauen. Wer sich durchklickt,
+sieht eine saubere Korrelation und schliesst auf die falsche Ursache. **Eine gemeldete Beobachtung
+ist ein Befund, ihre Erklaerung eine Vermutung**, und die beiden gehoeren getrennt geprueft.
+
+**Die Bedingung nennt jetzt, was sie meint:** auf der Karte, nicht schon hausgenau, ein
+Strassenname ohne Ziffer, und der Ortsindex kennt Adressen dazu. Die Frage waechst damit von 70 auf
+116 Fotos; keines faellt weg.
+
+**Was daraus fuer aehnliche Regeln folgt:** Eine Bedingung, die ueber die *Herkunft* eines Wertes
+statt ueber seinen *Inhalt* entscheidet, traegt eine Annahme mit sich, die veralten kann, ohne dass
+die Regel es merkt. Wo es geht, wird gefragt, was bekannt ist -- nicht, wer es eingetragen hat.
