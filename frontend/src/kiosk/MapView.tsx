@@ -86,7 +86,7 @@ export function MapView({ region }: { region: Region }) {
    *
    * After five minutes without a touch the page is **reloaded**, not merely reset. The kiosk has
    * no browser controls -- no reload button, no address bar, no keyboard (`--kiosk` under cage,
-   * see deploy/pi/photomap-kiosk). A stuck state would otherwise stand there until somebody
+   * see deploy/pi/kiekmap-kiosk). A stuck state would otherwise stand there until somebody
    * pulled the plug. This way the device heals itself and nobody has to know about it.
    *
    * It costs nothing: the tiles are cached, and with no visitor around the reload disturbs

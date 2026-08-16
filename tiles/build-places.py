@@ -43,7 +43,7 @@ OVERPASS = "https://overpass-api.de/api/interpreter"
 
 #: Overpass rejects requests without a meaningful user agent with "406 Not Acceptable".
 #: The identifier should show who is asking -- the terms of use ask for that.
-USER_AGENT = "photomap-museum/0.1 (Ortsindex fuer einen Museums-Kiosk, einmaliger Aufruf)"
+USER_AGENT = "kiekmap-museum/0.1 (Ortsindex fuer einen Museums-Kiosk, einmaliger Aufruf)"
 
 #: Streets come back with their full course, addresses as single points.
 #:

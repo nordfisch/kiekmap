@@ -262,7 +262,7 @@ drängen, kein Hintergrundbild blitzt beim Booten auf, keine Update-Hinweise, ke
 Bildschirmschoner.
 
 Ablauf nach dem Einschalten (~20 s): Docker startet, die Container laufen von selbst hoch;
-`photomap-kiosk.service` wartet auf `/api/health` — sonst begrüßt das Museum seine Besucher für
+`kiekmap-kiosk.service` wartet auf `/api/health` — sonst begrüßt das Museum seine Besucher für
 ein paar Sekunden mit einer Fehlerseite; dann `cage -- chromium --kiosk`. Stürzt Chromium ab,
 startet systemd ihn neu.
 
@@ -1252,7 +1252,7 @@ kollidiert wäre; als `pagination.ts` kollidiert nichts mehr.
 ### Das Prüfskript meldete einen Verstoß, der keiner war
 
 `tools/language_check.py` zählt deutsche und englische Kommentare je Datei. Es fand `config.py`
-schuldig — wegen ``PHOTOMAP_IMPORT_PROVENANCE="Online-Archiv des Museums, Verzeichnis 01 Orte/"``,
+schuldig — wegen ``KIEKMAP_IMPORT_PROVENANCE="Online-Archiv des Museums, Verzeichnis 01 Orte/"``,
 einem Einstellungswert. Zu „beheben" wäre das nur durch Fälschen des Beispiels gewesen. Das Skript
 streicht Zitiertes deshalb, bevor es zählt; die Regel oben ist dieselbe Einsicht in Worten.
 
@@ -2129,7 +2129,7 @@ die Planung:
   einzige Ausnahme. Ein Sprachmodell haette nichts gewusst, was nicht schon dastand.
 - Die Jahreszahl im Dateinamen, seit Monaten als eigener Teilpunkt gefuehrt, betraf **null** Fotos.
 
-Die Arbeit lief als Einmalaktion an `data/photomap.db`, nicht als Werkzeug: Trockenlauf vorlegen,
+Die Arbeit lief als Einmalaktion an `data/kiekmap.db`, nicht als Werkzeug: Trockenlauf vorlegen,
 schreiben, nachzaehlen. Die Rueckfahrkarte war eine Dateikopie. Was an Code dabei entstand, sind
 drei Regeln in `services/foldermeta.py` und eine Funktion in `services/places.py` — damit der
 naechste Import die Luecken nicht neu erzeugt.
@@ -2298,7 +2298,7 @@ Beim Pruefen am laufenden Kiosk antwortete `POST /contribute/67/date` mit **500*
 sqlite3.OperationalError: table changes has no column named old_source
 ```
 
-Die Alembic-Revision vom 10. August war auf `data/photomap.db` nie gelaufen. **Zwei Tage lang
+Die Alembic-Revision vom 10. August war auf `data/kiekmap.db` nie gelaufen. **Zwei Tage lang
 scheiterte damit jeder Besucherbeitrag** -- und 393 gruene Tests standen daneben, weil sie ihr Schema
 aus den Modellen bauen und eine fehlende Migration grundsaetzlich nicht bemerken koennen.
 
@@ -2306,7 +2306,7 @@ aus den Modellen bauen und eine fehlende Migration grundsaetzlich nicht bemerken
 `data/` lagen zwei `vorher-…`-Ordner -- die Spur, die eine Wiederherstellung hinterlaesst --, der
 juengste vom 11. August mit demselben Zeitstempel wie die Datenbank. Eingespielt worden war eine
 Sicherung vom 5. August, also von vor der Migration. **Eine Sicherung bringt ihr Schema mit:**
-`_swap_in` tauscht `photomap.db` im Ganzen aus, `_reopen_database` haengt das laufende Programm nur
+`_swap_in` tauscht `kiekmap.db` im Ganzen aus, `_reopen_database` haengt das laufende Programm nur
 neu an sie. Migrationen laufen beim *Start*, und eine Wiederherstellung ist kein Start.
 
 Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](usermanual.md) als Einschraenkung und
@@ -2397,7 +2397,7 @@ Nichts schlug fehl, nichts stand im Protokoll -- die Fotos kamen an, nur ohne ih
 Behoben mit `env_file: ../.env` statt einer Aufzaehlung. Die vier Container-Wahrheiten
 (`DATA_DIR`, `MEDIA_DIR`, `CORS_ORIGINS`, der PIN-Hash) stehen weiter unter `environment:` und
 gewinnen dort -- die Gegenprobe steht in den Daten: Die `.env` des Macs sagt
-`PHOTOMAP_MEDIA_DIR=/Volumes`, im Container steht `/media`. Wer kuenftig eine Einstellung
+`KIEKMAP_MEDIA_DIR=/Volumes`, im Container steht `/media`. Wer kuenftig eine Einstellung
 einfuehrt, muss nichts weiter tun.
 
 ### Beinahe haette die Messung gelogen
@@ -2439,7 +2439,7 @@ war.**
 Die Ueberlagerung haengt `/Volumes` als `/media` ein, und dort liegt auf **jedem** Mac ein
 Symlink auf `/`, benannt nach dem internen Volume -- das war spaeter die wichtigste Berichtigung an
 diesem Eintrag: kein Zufall dieser Maschine, sondern der Normalfall fuer alle, die der
-`operations.md` folgen und zum Entwickeln `PHOTOMAP_MEDIA_DIR=/Volumes` setzen. Aufgefallen war es
+`operations.md` folgen und zum Entwickeln `KIEKMAP_MEDIA_DIR=/Volumes` setzen. Aufgefallen war es
 nur nie, weil niemand den Sicherungsknopf auf einem Mac gedrueckt hatte. Weil
 `os.path.ismount` fuer einen Symlink grundsaetzlich `False` sagt, galt er als gewoehnlicher Ordner;
 die Suche stieg eine Ebene hinab -- die Ebene, die es fuer `/media/<benutzer>/<bezeichnung>`
@@ -2498,10 +2498,64 @@ samt der auskommentierten Zeilen -- es ist die Vorlage, mit der jede neue Einric
 Tippfehler darin reist also mit.
 
 Drei Gegenproben, jede einzeln gefahren, jede mit eigener Meldung: `env_file` entfernt,
-`PHOTOMAP_CORS_ORIGIN` statt `_ORIGINS`, `PHOTOMAP_DATADIR` statt `_DATA_DIR`.
+`KIEKMAP_CORS_ORIGIN` statt `_ORIGINS`, `KIEKMAP_DATADIR` statt `_DATA_DIR`.
 
 **Und die erste Gegenprobe nannte vier Einstellungen, nicht drei.** Neben Schlagwort, Bildnachweis
-und Herkunft war auch `PHOTOMAP_EXIF_DATE_MAX_YEAR` unerreichbar -- die Zahl, ab der ein
+und Herkunft war auch `KIEKMAP_EXIF_DATE_MAX_YEAR` unerreichbar -- die Zahl, ab der ein
 EXIF-Datum als Scandatum gilt und ein Foto **nicht** datieren darf. Sie steht in `CLAUDE.md` als
 einer der drei Dinge, die man hier falsch machen kann; im Betrieb war sie schlicht nicht
 einstellbar. Aufgefallen ist das nicht mir, sondern dem Werkzeug, beim ersten Lauf.
+
+---
+
+## Aus dem Arbeitsnamen wird Kiekmap
+
+*15. August 2026.* Punkt 48. Der bisherige Name beschrieb, was das Programm tut; **Kiekmap** —
+plattdeutsch *kieken* — sagt, was es ist, und nennt dabei keinen Ort. Warum das keine Geschmacks-,
+sondern eine Bauentscheidung ist, steht als [Punkt 41](decisions.md) daneben: Das zweite Museum
+soll eine eigene `region.json` brauchen und keinen Fork, und ein Ortsname im Paket haette dieser
+Zusage widersprochen, lange bevor jemand sie technisch verletzt.
+
+**213 Ersetzungen in 38 versionierten Dateien**, dazu vier umbenannte Dateien unter `deploy/pi/`,
+die Datenbankdatei, die nicht versionierte `.env` und die editierbare Installation im venv. Fuer
+Besucher aendert sich nichts — der Name stand nie in der Oberflaeche, die Seite heisst „Bilder aus
+unserem Ort".
+
+**Der Zeitpunkt war der letzte guenstige.** Kein Pi im Feld, kein Git-Remote, der einzige Bestand
+auf dem Entwicklungsrechner. Einen Tag spaeter im Betrieb haette dasselbe Geraete, Sticks und
+fremde Arbeitskopien betroffen.
+
+### Die Falle, die diese Umbenennung selbst gestellt hat
+
+Mit dem Praefix aendert sich der Name **jeder** Einstellung. Eine `.env`, die niemand anfasst,
+wird danach gelesen wie Luft: Pydantic kennt die alten Schluessel nicht mehr, ignoriert sie
+stillschweigend, und die ganze Konfiguration steht auf ihren Vorgaben. Schlagwort, Bildnachweis,
+Herkunft und der PIN-Hash weg — **derselbe Fehler wie am Vortag, nur aus einer anderen Richtung.**
+
+Der Waechter von gestern haette ihn nicht gefangen: Er las die Compose-Datei und die
+`.env.example`, nicht die echte `.env`. Genau die ist aber die einzige Datei im Projekt, die
+niemand je durchsieht, weil sie nicht versioniert ist. `tools/check_settings.py` liest sie jetzt
+mit und stellt zwei Fragen an sie: Steht hier eine Einstellung unter einem Praefix, den es nicht
+mehr gibt? Und traegt ein Schluessel mit richtigem Praefix einen Namen, den es nicht gibt?
+
+Die Suche nach dem falschen Praefix ist bewusst eng: Sie schlaegt nur an, wenn der Teil **hinter**
+dem Praefix eine Einstellung benennt, die es wirklich gibt. Eine `.env` darf halten, was ihr
+Besitzer sonst noch hineinschreibt; `…_IMPORT_TAGS` unter fremdem Praefix ist dagegen keine fremde
+Variable, sondern unsere, verschrieben.
+
+Beide Gegenproben gefahren: einmal die ganze `.env` auf den alten Praefix zurueckgedreht (sechs
+Meldungen), einmal ein Buchstabe an einem Schluessel entfernt (eine).
+
+### Nebenbei ausgeraeumt
+
+`backend/*.egg-info/` lag im Repo, obwohl es ein Bauartefakt der editierbaren Installation ist.
+Statt es umzubenennen, ist es herausgeflogen und steht jetzt in der `.gitignore`. Und im venv
+lagen nach dem Neuinstallieren **beide** Verteilungen nebeneinander — die alte ist deinstalliert,
+sonst haette sie bei der naechsten Fehlersuche verwirrt.
+
+### Was danach gemessen wurde
+
+394 Backend- und 173 Frontend-Tests, alle drei Werkzeuge, und der Containerbetrieb von vorn: Beide
+Abbilder neu gebaut, „Kiekmap: Schemastand pruefen ..." im Startprotokoll, `kiekmap.db` im
+Datenverzeichnis, 929 Fotos, 811 davon im ersten Ausschnitt, **null fremde Herkuenfte**, PIN-Hash
+und Import-Einstellungen im Container angekommen.

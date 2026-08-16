@@ -10,7 +10,7 @@
 # liegt: die Platte selbst (/dev/sda) und leere Partitionstabellen bleiben aussen vor.
 
 ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{ID_FS_USAGE}=="filesystem", \
-    RUN+="/usr/local/sbin/photomap-usb-mount einhaengen %E{DEVNAME} %E{ID_FS_LABEL} %E{ID_FS_TYPE}"
+    RUN+="/usr/local/sbin/kiekmap-usb-mount einhaengen %E{DEVNAME} %E{ID_FS_LABEL} %E{ID_FS_TYPE}"
 
 ACTION=="remove", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", \
-    RUN+="/usr/local/sbin/photomap-usb-mount aushaengen %E{DEVNAME}"
+    RUN+="/usr/local/sbin/kiekmap-usb-mount aushaengen %E{DEVNAME}"

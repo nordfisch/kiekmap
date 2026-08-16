@@ -130,7 +130,7 @@ dazugekommen ist. Steht am Ende „Neue Bilder gab es nicht", ist das kein Fehle
 Es war schon alles auf dem Stick.
 
 Denselben Stick können Sie immer wieder verwenden. Auf ihm liegt ein Ordner
-`photomap-sicherung` — den können Sie an jedem Rechner öffnen, die Bilder liegen dort als ganz
+`kiekmap-sicherung` — den können Sie an jedem Rechner öffnen, die Bilder liegen dort als ganz
 normale Dateien.
 
 > **Wenn kein Stick erscheint:** Steckt er richtig? Manche sehr alten Sticks werden nicht erkannt.
@@ -153,7 +153,7 @@ nehmen Sie den Stick.
 > **Wie kommt so eine Datei wieder ins Gerät?** Auf zwei Wegen. Am Rechner: die ZIP-Datei in den
 > Ordner `incoming` legen. Das Gerät erkennt sie von allein und fragt im Sicherungsbereich nach,
 > ob sie eingespielt werden soll — **von selbst passiert nichts.** Oder über den Stick: die Datei
-> so entpacken, dass dort der Ordner `photomap-sicherung` liegt, Stick einstecken, und dann wie
+> so entpacken, dass dort der Ordner `kiekmap-sicherung` liegt, Stick einstecken, und dann wie
 > im nächsten Abschnitt vorgehen.
 
 ## Eine Sicherung zurückspielen

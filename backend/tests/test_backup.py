@@ -158,7 +158,7 @@ class TestSicherung:
         backup.run_backup(session, settings, _drive(settings), _nichts_melden)
 
         ziel = stick / backup.BACKUP_DIR_NAME
-        assert (ziel / "photomap.db").is_file()
+        assert (ziel / "kiekmap.db").is_file()
         for sha in shas:
             assert (ziel / "photos" / sha[0:2] / sha[2:4] / f"{sha}.jpg").is_file()
 
@@ -289,13 +289,13 @@ class TestWiederherstellung:
         Bliebe es neben der zurueckgespielten Datei liegen, versuchte SQLite es anzuwenden.
         """
         self._sicherung_anlegen(session, settings, stick, collection, anzahl=1)
-        (settings.data_dir / "photomap.db-wal").write_bytes(b"altes journal")
+        (settings.data_dir / "kiekmap.db-wal").write_bytes(b"altes journal")
 
         backup.run_restore(settings, _drive(settings), _nichts_melden)
 
-        assert not (settings.data_dir / "photomap.db-wal").exists()
+        assert not (settings.data_dir / "kiekmap.db-wal").exists()
         beiseite = next(iter(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")))
-        assert (beiseite / "photomap.db-wal").is_file()
+        assert (beiseite / "kiekmap.db-wal").is_file()
 
     def test_arbeitsordner_bleibt_nicht_liegen(self, session, settings, stick, collection):
         self._sicherung_anlegen(session, settings, stick, collection, anzahl=1)
@@ -442,7 +442,7 @@ class TestUeberDieApi:
         zustand = self._bis_fertig(admin_client)
         assert zustand["phase"] == "done"
         assert "2 Fotos" in zustand["message"]
-        assert (stick / backup.BACKUP_DIR_NAME / "photomap.db").is_file()
+        assert (stick / backup.BACKUP_DIR_NAME / "kiekmap.db").is_file()
 
     def test_erinnerung_steht_danach_in_der_uebersicht(
         self, admin_client, settings, stick, collection
@@ -521,7 +521,7 @@ class TestArchiv:
             namen = archiv.namelist()
 
         assert {name.split("/")[0] for name in namen} == {backup.BACKUP_DIR_NAME}
-        assert f"{backup.BACKUP_DIR_NAME}/photomap.db" in namen
+        assert f"{backup.BACKUP_DIR_NAME}/kiekmap.db" in namen
         assert f"{backup.BACKUP_DIR_NAME}/{backup.MANIFEST_NAME}" in namen
         assert any(name.startswith(f"{backup.BACKUP_DIR_NAME}/photos/") for name in namen)
         assert any(name.startswith(f"{backup.BACKUP_DIR_NAME}/thumbs/") for name in namen)
@@ -569,7 +569,7 @@ class TestArchiv:
 
         name = backup.archive_name(settings)
 
-        assert name.startswith("photomap-sicherung-holm-")
+        assert name.startswith("kiekmap-sicherung-holm-")
         assert name.endswith(".zip")
         assert name.isascii(), "der Name steht in einem HTTP-Kopf"
 
@@ -630,7 +630,7 @@ class TestSicherungAusDemEingang:
     sie im Verwaltungsbereich.
     """
 
-    def _ablegen(self, session, settings, name: str = "photomap-sicherung-holm-2026-08-03.zip"):
+    def _ablegen(self, session, settings, name: str = "kiekmap-sicherung-holm-2026-08-03.zip"):
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         ziel = settings.incoming_dir / name
         with ziel.open("wb") as datei:
@@ -685,7 +685,7 @@ class TestSicherungAusDemEingang:
     def test_fremde_zip_wird_ignoriert(self, settings):
         """Passender Name, kein Manifest -- der Name entscheidet nur, ob hineingesehen wird."""
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
-        fremd = settings.incoming_dir / "photomap-sicherung-fremd.zip"
+        fremd = settings.incoming_dir / "kiekmap-sicherung-fremd.zip"
         with zipfile.ZipFile(fremd, "w") as archiv:
             archiv.writestr("irgendwas.txt", "kein Bestand")
 
@@ -746,7 +746,7 @@ class TestSicherungAusDemEingang:
 
     def test_unvollstaendige_datei_wird_abgelehnt(self, settings):
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
-        keine = settings.incoming_dir / "photomap-sicherung-kaputt.zip"
+        keine = settings.incoming_dir / "kiekmap-sicherung-kaputt.zip"
         keine.write_bytes(b"kein zip")
 
         with pytest.raises(backup.BackupError) as fehler:
@@ -769,7 +769,7 @@ class TestEingangUeberDieApi:
 
     def _ablegen(self, session, settings) -> str:
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
-        name = "photomap-sicherung-holm-2026-08-03.zip"
+        name = "kiekmap-sicherung-holm-2026-08-03.zip"
         with (settings.incoming_dir / name).open("wb") as datei:
             for teil in backup.stream_archive(session, settings):
                 datei.write(teil)
@@ -815,7 +815,7 @@ class TestEingangUeberDieApi:
     def test_pfad_aus_dem_ordner_heraus_wird_abgewiesen(self, admin_client, settings):
         """Der Name kommt aus dem Browser -- ohne die Pruefung waere jede Datei einspielbar."""
         antwort = admin_client.post(
-            "/api/admin/backup/incoming/restore", json={"file": "../photomap.db"}
+            "/api/admin/backup/incoming/restore", json={"file": "../kiekmap.db"}
         )
 
         assert antwort.status_code == 404

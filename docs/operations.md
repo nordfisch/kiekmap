@@ -14,11 +14,11 @@ Museumsteam steht in der [Kuratoren-Anleitung](usermanual.md); hier steht die Te
 Raspberry Pi OS **Lite** (64 Bit), kein Desktop. Dann:
 
 ```bash
-sudo git clone <repo> /opt/photomap
-sudo sh /opt/photomap/deploy/pi/setup-pi.sh
+sudo git clone <repo> /opt/kiekmap
+sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh
 ```
 
-Das Skript installiert cage, Chromium und Docker, legt den Benutzer `photomap` an, richtet den
+Das Skript installiert cage, Chromium und Docker, legt den Benutzer `kiekmap` an, richtet den
 Kiosk-Dienst und die USB-Regel ein und schaltet die Bildschirmabschaltung ab. Danach nennt es die
 vier Schritte, die es nicht selbst tun kann: `.env` anlegen, PIN setzen, Kartendaten kopieren,
 Container starten.
@@ -27,8 +27,8 @@ Container starten.
 brauchen Internet und Rechenzeit; auf den Pi gehören nur die Ergebnisse:
 
 ```bash
-rsync -a frontend/public/tiles/ pi:/opt/photomap/frontend/public/tiles/
-rsync -a data/places.json       pi:/opt/photomap/data/places.json
+rsync -a frontend/public/tiles/ pi:/opt/kiekmap/frontend/public/tiles/
+rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
 ```
 
 **Das Wappen kommt denselben Weg.** Im Repo liegt nur ein Platzhalter — ein Gemeindewappen darf
@@ -36,7 +36,7 @@ dort nicht liegen, siehe [decisions.md](decisions.md), Punkt 21. Auf dem Gerät 
 hin:
 
 ```bash
-rsync -a wappen.png pi:/opt/photomap/frontend/public/logo.png
+rsync -a wappen.png pi:/opt/kiekmap/frontend/public/logo.png
 ```
 
 Danach das Frontend neu bauen (`make prod` baut die Images ohnehin neu) — die Datei wird beim Bau
@@ -52,7 +52,7 @@ Etwa 20 Sekunden, in dieser Reihenfolge:
 
 1. **Docker startet.** Die Container laufen mit `restart: unless-stopped` von selbst hoch. Beim
    ersten Start nach einem Update laufen die Alembic-Migrationen — deshalb kann er länger dauern.
-2. **`photomap-kiosk.service` wartet auf `/api/health`.** Ohne das Warten sähen die ersten
+2. **`kiekmap-kiosk.service` wartet auf `/api/health`.** Ohne das Warten sähen die ersten
    Besucher ein paar Sekunden lang eine Fehlerseite — und die bliebe stehen, weil Chromium nicht
    von allein neu lädt. Nach fünf Minuten startet der Dienst trotzdem: eine Fehlerseite, die
    jemand sieht und meldet, ist besser als ein schwarzer Bildschirm.
@@ -63,9 +63,9 @@ Etwa 20 Sekunden, in dieser Reihenfolge:
 Woran man erkennt, dass etwas hakt:
 
 ```bash
-systemctl status photomap-kiosk       # läuft der Kiosk?
-journalctl -u photomap-kiosk -n 50    # warum nicht?
-cd /opt/photomap/deploy && docker compose ps
+systemctl status kiekmap-kiosk       # läuft der Kiosk?
+journalctl -u kiekmap-kiosk -n 50    # warum nicht?
+cd /opt/kiekmap/deploy && docker compose ps
 curl -sf http://localhost/api/health && echo " API antwortet"
 ```
 
@@ -77,8 +77,8 @@ Der Kiosk kennt keine Tastenkombination zum Beenden — das ist Absicht, ein Bes
 versehentlich herausfallen. Der Weg hinaus geht über SSH:
 
 ```bash
-sudo systemctl stop photomap-kiosk     # Bildschirm wird schwarz, Dienste laufen weiter
-sudo systemctl start photomap-kiosk    # zurück in die Karte
+sudo systemctl stop kiekmap-kiosk     # Bildschirm wird schwarz, Dienste laufen weiter
+sudo systemctl start kiekmap-kiosk    # zurück in die Karte
 ```
 
 Für Arbeiten am Gerät selbst genügt meist der Admin-Bereich über das Wappen — Fotos pflegen,
@@ -91,16 +91,16 @@ hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
 Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
 
 ```bash
-docker save photomap-backend:v1.2 photomap-frontend:v1.2 -o /Volumes/STICK/photomap-update/abbilder.tar
-echo v1.2 > /Volumes/STICK/photomap-update/version
+docker save kiekmap-backend:v1.2 kiekmap-frontend:v1.2 -o /Volumes/STICK/kiekmap-update/abbilder.tar
+echo v1.2 > /Volumes/STICK/kiekmap-update/version
 # nur falls sich die Region geändert hat:
-cp -r frontend/public/tiles data/places.json /Volumes/STICK/photomap-update/
+cp -r frontend/public/tiles data/places.json /Volumes/STICK/kiekmap-update/
 ```
 
 Am Pi:
 
 ```bash
-sudo sh /opt/photomap/deploy/pi/update.sh /media/STICK/photomap-update
+sudo sh /opt/kiekmap/deploy/pi/update.sh /media/STICK/kiekmap-update
 ```
 
 Das Skript liest die Abbilder ein, trägt die Version in die `.env`, tauscht Kartendaten und
@@ -132,8 +132,8 @@ den Bestand. Der Klon sichert das eingerichtete Gerät.
 
 In dieser Reihenfolge:
 
-1. `systemctl status photomap-kiosk` — läuft der Dienst?
-2. `journalctl -u photomap-kiosk -n 50` — meldet cage etwas? *„unable to open primary DRM device"*
+1. `systemctl status kiekmap-kiosk` — läuft der Dienst?
+2. `journalctl -u kiekmap-kiosk -n 50` — meldet cage etwas? *„unable to open primary DRM device"*
    heißt: Die Sitzung hat kein Ausgabegerät. Dann fehlt eine der vier Zeilen `PAMName`,
    `TTYPath`, `StandardInput`, `UtmpIdentifier` in der Unit, oder der Benutzer ist nicht in den
    Gruppen `video` und `render`.
@@ -153,7 +153,7 @@ In dieser Reihenfolge:
 | „Hilf mit" meldet stumm Fehler | Regionsprüfung ohne `data/region.json` — `make tiles` legt sie mit ab |
 | **Anzeige normal, aber nichts lässt sich speichern** | **Schema veraltet — meist nach einer zurückgespielten Sicherung. Neu starten, [siehe unten](#eine-zurückgespielte-sicherung-passt-nicht-zum-programm)** |
 | USB-Stick erscheint nicht | udev-Regel oder `:rshared` — siehe unten |
-| Anmeldung lehnt jede PIN ab | `PHOTOMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
+| Anmeldung lehnt jede PIN ab | `KIEKMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
 | Importierte Fotos ohne Schlagwort oder Bildnachweis | Eine Einstellung erreicht den Container nicht — [siehe unten](#einstellungen-im-containerbetrieb) |
 
 ---
@@ -181,13 +181,13 @@ in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml) als `env_file` ei
 etwas ändert, startet danach die Container neu:
 
 ```bash
-cd /opt/photomap && docker compose up -d
+cd /opt/kiekmap && docker compose up -d
 ```
 
 **Vier Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
-`PHOTOMAP_DATA_DIR`, `PHOTOMAP_MEDIA_DIR`, `PHOTOMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
+`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
 beschreiben den Container, nicht den Ort — innen heißen die Verzeichnisse immer `/data` und
-`/media`, gleichgültig wo sie aussen liegen. Ein `PHOTOMAP_MEDIA_DIR=/Volumes` in der `.env` des
+`/media`, gleichgültig wo sie aussen liegen. Ein `KIEKMAP_MEDIA_DIR=/Volumes` in der `.env` des
 Entwicklungsmacs stört den Betrieb deshalb nicht.
 
 **Warum das hier steht:** Bis zum 14. August 2026 reichte die Compose-Datei nur einzelne Werte
@@ -206,8 +206,8 @@ taucht von allein nirgends auf. Der Admin-Bereich sähe nie einen und meldete ew
 einstecken".
 
 ```bash
-sudo install -m 755 deploy/pi/photomap-usb-mount /usr/local/sbin/
-sudo install -m 644 deploy/pi/99-photomap-usb.rules /etc/udev/rules.d/
+sudo install -m 755 deploy/pi/kiekmap-usb-mount /usr/local/sbin/
+sudo install -m 644 deploy/pi/99-kiekmap-usb.rules /etc/udev/rules.d/
 sudo udevadm control --reload
 ```
 
@@ -230,7 +230,7 @@ des Containers zur richtigen Zeit.
 `backend/Dockerfile`) darf nicht schreiben. Das Skript setzt die Option — der Admin-Bereich
 blendet solche Laufwerke aber ohnehin aus, statt einen Knopf anzubieten, der später scheitert.
 
-**Auf dem Mac zum Entwickeln:** `PHOTOMAP_MEDIA_DIR=/Volumes` in die `.env`. Ein Prüfvolumen
+**Auf dem Mac zum Entwickeln:** `KIEKMAP_MEDIA_DIR=/Volumes` in die `.env`. Ein Prüfvolumen
 entsteht mit
 
 ```bash
@@ -252,7 +252,7 @@ Die Ausstellung sieht danach völlig normal aus — Fotos, Karte, Zeitleiste —
 scheitert**: Besucherbeiträge, Bearbeitungen in der Verwaltung, Uploads. Der Besucher liest eine
 Fehlermeldung statt eines Dankeschöns.
 
-**Der Grund.** Die Sicherung enthält `photomap.db` genau so, wie die Datei damals aussah — mitsamt
+**Der Grund.** Die Sicherung enthält `kiekmap.db` genau so, wie die Datei damals aussah — mitsamt
 ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird die Datei **im Ganzen**
 ausgetauscht (`_swap_in` in `services/backup.py`); danach hängt sich das laufende Programm nur neu
 an sie (`_reopen_database`). **Migrationen laufen dabei nicht.** Sie laufen beim *Start*
@@ -268,7 +268,7 @@ sqlite3.OperationalError: table changes has no column named old_source
 ### Die Abhilfe: neu starten
 
 ```bash
-cd /opt/photomap && docker compose restart backend
+cd /opt/kiekmap && docker compose restart backend
 ```
 
 Oder schlicht das Gerät aus- und einschalten. Der Start bringt das Schema auf Stand; der Bestand
@@ -278,7 +278,7 @@ bleibt unberührt. **Das ist der Normalfall und reicht fast immer** — deshalb 
 ### Nachsehen, ob es daran lag
 
 ```bash
-docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/data/photomap.db').execute('select * from alembic_version').fetchone())"
+docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
 docker compose exec backend alembic heads
 ```
 
@@ -286,7 +286,7 @@ Stimmen die beiden Werte nicht überein, war es das. Auf dem Entwicklungsrechner
 Container:
 
 ```bash
-sqlite3 data/photomap.db "select * from alembic_version;"
+sqlite3 data/kiekmap.db "select * from alembic_version;"
 cd backend && .venv/bin/alembic heads
 ```
 
@@ -305,7 +305,7 @@ nicht hoch.
 
 **Abhilfe: erst das Programm aktualisieren, dann die Sicherung einspielen.** Siehe
 [Update ohne Internet](#update-ohne-internet). Der bisherige Stand liegt derweil unter
-`data/vorher-<Datum>/` und lässt sich zurückholen, indem man `photomap.db`, `photos/` und `thumbs/`
+`data/vorher-<Datum>/` und lässt sich zurückholen, indem man `kiekmap.db`, `photos/` und `thumbs/`
 von dort wieder nach `data/` schiebt.
 
 **Die Regel dahinter, für beide Richtungen:** *Erst das Programm auf den Stand bringen, den die
@@ -313,12 +313,12 @@ Sicherung braucht — dann einspielen — dann neu starten.*
 
 ## Wo die Sicherung liegt
 
-Auf dem Stick im Ordner `photomap-sicherung/`:
+Auf dem Stick im Ordner `kiekmap-sicherung/`:
 
 ```
-photomap-sicherung/
+kiekmap-sicherung/
   sicherung.json     Datum, Anzahl, Ortsname
-  photomap.db        die Angaben, mit VACUUM INTO konsistent herausgeschrieben
+  kiekmap.db        die Angaben, mit VACUUM INTO konsistent herausgeschrieben
   photos/            die Originale, nach ihrem Hash abgelegt
   thumbs/            die Vorschaubilder
   region.json        Kartenausschnitt

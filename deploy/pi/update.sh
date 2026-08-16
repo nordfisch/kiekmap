@@ -1,15 +1,15 @@
 #!/bin/sh
 # Update ohne Internet -- vom USB-Stick.
 #
-#     sudo sh /opt/photomap/deploy/pi/update.sh /media/STICK/photomap-update
+#     sudo sh /opt/kiekmap/deploy/pi/update.sh /media/STICK/kiekmap-update
 #
 # Der Pi im Museum haengt an keinem Netz. Ein Update kommt deshalb als Ordner auf einem Stick:
 # die Abbilder als Tar-Datei, dazu die neuen Kartendaten, falls sich die Region geaendert hat.
 #
 # Erzeugt wird so ein Ordner auf dem Entwicklungsrechner mit:
 #
-#     docker save photomap-backend:v1.2 photomap-frontend:v1.2 -o abbilder.tar
-#     cp -r frontend/public/tiles data/places.json <Stick>/photomap-update/
+#     docker save kiekmap-backend:v1.2 kiekmap-frontend:v1.2 -o abbilder.tar
+#     cp -r frontend/public/tiles data/places.json <Stick>/kiekmap-update/
 #
 # Der Bestand wird dabei nicht angefasst. Wer Fotos zurueckholen will, nimmt die Sicherung im
 # Admin-Bereich -- das hier tauscht nur die Software.
@@ -17,11 +17,11 @@
 set -eu
 
 QUELLE="${1:-}"
-WURZEL="${PHOTOMAP_ROOT:-/opt/photomap}"
+WURZEL="${KIEKMAP_ROOT:-/opt/kiekmap}"
 
 [ "$(id -u)" -eq 0 ] || { echo "Bitte mit sudo starten." >&2; exit 1; }
 [ -n "$QUELLE" ] && [ -d "$QUELLE" ] || {
-    echo "Aufruf: $0 /media/STICK/photomap-update" >&2
+    echo "Aufruf: $0 /media/STICK/kiekmap-update" >&2
     exit 1
 }
 
@@ -36,10 +36,10 @@ docker load -i "$ABBILDER"
 if [ -f "$QUELLE/version" ]; then
     VERSION="$(cat "$QUELLE/version")"
     echo "== Version $VERSION eintragen"
-    if grep -q '^PHOTOMAP_VERSION=' "$WURZEL/.env" 2>/dev/null; then
-        sed -i "s/^PHOTOMAP_VERSION=.*/PHOTOMAP_VERSION=$VERSION/" "$WURZEL/.env"
+    if grep -q '^KIEKMAP_VERSION=' "$WURZEL/.env" 2>/dev/null; then
+        sed -i "s/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=$VERSION/" "$WURZEL/.env"
     else
-        echo "PHOTOMAP_VERSION=$VERSION" >>"$WURZEL/.env"
+        echo "KIEKMAP_VERSION=$VERSION" >>"$WURZEL/.env"
     fi
 fi
 
@@ -80,7 +80,7 @@ if [ -f "$QUELLE/places.json" ]; then
 fi
 
 echo "== Kiosk neu starten"
-systemctl restart photomap-kiosk
+systemctl restart kiekmap-kiosk
 
 echo
 echo "Fertig. Der Stick kann abgezogen werden."

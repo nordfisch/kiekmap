@@ -1,7 +1,7 @@
 """Initial schema
 
 The whole schema in one step, and deliberately so: the three revisions before it were folded
-into this one on 2026-08-03. At that point no device had ever run Photomap, so no database
+into this one on 2026-08-03. At that point no device had ever run Kiekmap, so no database
 existed that a migration path could have led anywhere from -- a history that nothing can replay
 is not a history, it is ballast.
 

@@ -1,13 +1,13 @@
 # Die Besucheransicht als Dienst.
 #
-# Nach /etc/systemd/system/ kopieren, dann:  sudo systemctl enable --now photomap-kiosk
+# Nach /etc/systemd/system/ kopieren, dann:  sudo systemctl enable --now kiekmap-kiosk
 #
 # Warum ein Dienst und kein Autostart: systemd startet Chromium neu, wenn er abstuerzt, und das
 # Geraet kommt nach einem gezogenen Netzstecker in denselben Zustand zurueck. Ein Autostart im
 # Benutzerprofil kann beides nicht.
 
 [Unit]
-Description=Photomap-Kiosk (cage + Chromium)
+Description=Kiekmap-Kiosk (cage + Chromium)
 # Erst wenn Docker laeuft -- sonst wartet das Startskript unnoetig auf eine API, die noch gar
 # nicht gestartet wurde.
 After=docker.service systemd-user-sessions.service
@@ -15,8 +15,8 @@ Wants=docker.service
 
 [Service]
 Type=simple
-User=photomap
-ExecStart=/usr/local/bin/photomap-kiosk
+User=kiekmap
+ExecStart=/usr/local/bin/kiekmap-kiosk
 
 # cage braucht eine echte Sitzung an einer Konsole, sonst findet es kein Ausgabegeraet. Die vier
 # Zeilen zusammen sind das, was aus einem Systemdienst eine sitzungsfaehige Anmeldung macht --

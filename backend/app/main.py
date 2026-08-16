@@ -15,7 +15,7 @@ from app.services.places import load_if_empty as load_places_if_empty
 from app.services.watcher import IncomingWatcher
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s %(name)s: %(message)s")
-log = logging.getLogger("photomap")
+log = logging.getLogger("kiekmap")
 
 
 @asynccontextmanager
@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="Photomap",
+    title="Kiekmap",
     description="Photo database for historical village photographs in a local museum",
     version=__version__,
     lifespan=lifespan,

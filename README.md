@@ -1,4 +1,4 @@
-# Photomap
+# Kiekmap
 
 Interaktive Bilddatenbank für ein Heimatmuseum: historische Ortsfotos, räumlich und zeitlich
 erkundbar an einem Touchscreen — und ein Weg, das Wissen der Besucher einzusammeln.

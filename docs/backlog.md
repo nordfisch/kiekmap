@@ -70,9 +70,9 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 Besucherbeitrag scheitern, bis jemand neu startet; Punkt 10 zerdrückt das Foto auf einem kleinen
 Schirm.
 
-**Siebenundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26,
-27, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46. Sie sind erledigt, aufgelöst oder gestrichen;
-was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt die **48**.
+**Achtundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26,
+27, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 48. Sie sind erledigt, aufgelöst oder gestrichen;
+was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt die **49**.
 
 ---
 
@@ -466,7 +466,7 @@ laufenden Kiosk auf, dass **jeder Besucherbeitrag mit 500 endet**:
 sqlite3.OperationalError: table changes has no column named old_source
 ```
 
-`data/photomap.db` stand noch auf `1cf9ccd28cd7`; die Migration `53bf4d2a4872` war nie gelaufen.
+`data/kiekmap.db` stand noch auf `1cf9ccd28cd7`; die Migration `53bf4d2a4872` war nie gelaufen.
 Behoben mit `make migrate`.
 
 **Die Ursache ist eine Wiederherstellung, und damit betrifft der Fehler das Museum genauso.** In
@@ -525,8 +525,8 @@ erst nach der Beschaffung. Was er zutage fördert, ändert womöglich Dinge, die
 
 **Der gewichtigste offene Punkt des Projekts** — dringend ist er nur nicht, weil das Gerät fehlt.
 Alles unter `deploy/pi/` ist **ungeprüft**; beim Bauen gab es keins. Die Shell-Syntax stimmt,
-gelaufen ist nichts. Betroffen sind `setup-pi.sh`, `photomap-kiosk`, `photomap-kiosk.service`,
-`update.sh`, `99-photomap-usb.rules` und `photomap-usb-mount`.
+gelaufen ist nichts. Betroffen sind `setup-pi.sh`, `kiekmap-kiosk`, `kiekmap-kiosk.service`,
+`update.sh`, `99-kiekmap-usb.rules` und `kiekmap-usb-mount`.
 
 **Die Container selbst sind es nicht mehr** (Punkt 17, erledigt am 14. August 2026): Beide Abbilder
 bauen, nginx liefert die Karte kachelweise aus, die Seite fragt nichts Fremdes an, und der
@@ -635,12 +635,6 @@ Technisch ist der Weg kurz, und seit dem 14. August 2026 ist das keine Annahme m
 gemessen (Punkt 17): Es läuft in Containern (`make prod`), das Frontend ist statisch, nginx steht
 davor, und die Datenbank ist eine Datei. Die Fragen liegen woanders:
 
-- **Zugriffsschutz.** Die PIN ist für einen Touchscreen in einem Museumsraum gebaut — vier Ziffern,
-  gesichert durch eine Sperre nach fünf Fehlversuchen. Im offenen Netz ist das zu wenig, und vor
-  allem schützt sie nur die Verwaltung: Der „Hilf mit"-Bereich nimmt **Beiträge ohne jede
-  Anmeldung** an. Online wäre das eine offene Tür. Naheliegend ist ein Schutz **vor** der ganzen
-  Anwendung (HTTP-Basisauthentifizierung im nginx oder ein Zugang über VPN), nicht ein zweiter
-  Schutz in der Anwendung.
 - **Was aus dem Offline-Versprechen wird.** Die Regel „null Anfragen an eine fremde Herkunft" bleibt
   erfüllt, sie kostet online nur nichts mehr. Umgekehrt gilt: Kartendatei und Ortsindex sind auf
   einen Rechner im Ausstellungsraum zugeschnitten — 4,6 MB Kacheln und 1,5 MB Ortsindex über eine
@@ -649,6 +643,51 @@ davor, und die Datenbank ist eine Datei. Die Fragen liegen woanders:
   Werkzeug bereits: Sicherung und Wiederherstellung. Zu prüfen ist, ob der Weg auch als
   Übertragungsweg taugt — dann wäre der Umzug vom Webserver ins Museum ein bekannter Vorgang und
   kein Sonderfall.
+
+#### Der Entwurf steht — am 15. August 2026 entschieden
+
+Die Frage nach dem Zugriffsschutz ist beantwortet, damit sie beim Aufgreifen nicht noch einmal
+gestellt werden muss.
+
+**Eine Tür vor der ganzen Anwendung, nichts in ihr.** Das löst die offene Beitragstür und die
+fehlende Ratenbegrenzung in einem Zug — beides ist hinter einer Anmeldung kein Problem mehr. Der
+umgekehrte Weg, den Schutz *in* die Anwendung zu bauen, verbögte die Besucheransicht dauerhaft für
+einen Betrieb, der Wochen dauert.
+
+```
+Internet ──HTTPS──► Caddy ──HTTP──► nginx (frontend) ──► uvicorn (backend)
+                      │                unveraendert        unveraendert
+                 Let's Encrypt
+                 basic_auth
+```
+
+**Traefik und Keycloak sind geprüft und verworfen.** Frontend und Backend liegen **schon** auf
+einem Ursprung und einem Port — nginx liefert die Seite und leitet `/api/` weiter, das Backend ist
+nach aussen gar nicht veröffentlicht. Traefik brächte Routing für Dienste, die es nicht gibt.
+Keycloak wäre ein zweites System mit eigener Datenbank für zwei bis fünf Ehrenamtliche, und weil
+das Programm kein OIDC spricht, säße es hinter einem Auth-Proxy, der die eigentliche Arbeit tut.
+Caddy dagegen ist vier Zeilen: automatisches Let's Encrypt, `basic_auth` eingebaut.
+
+**Entschieden:** ein kleiner VPS in Deutschland (arm64, dieselbe Architektur wie Pi und Mac), ein
+gemeinsames Passwort für Team und einzelne Testleser, und `deploy/docker-compose.web.yml` als
+dritte Überlagerung neben der des Pi und der des Macs — die Pi-Datei bleibt unangetastet.
+
+**Vier Dinge, die beim Bauen sonst erst wieder auffallen:**
+
+1. **`ports: !reset []` beim `frontend`** ist die sicherheitskritische Zeile: Ohne sie umginge
+   `http://<ip>/` den Türsteher. Compose führt `ports` sonst zusammen, statt zu ersetzen.
+2. **Auch die API muss ohne Passwort 401 sagen**, nicht nur die Seite. Das ist die Prüfung, für die
+   der ganze Entwurf existiert.
+3. **Auf einem VPS gibt es keine USB-Sticks.** `find_drives` liefert eine leere Liste, der
+   Sicherungsknopf hat kein Ziel — die Sicherung der Online-Instanz ist der **ZIP-Download**, und
+   jemand muss ihn regelmässig ziehen. Die Instanz wird für Wochen der massgebliche Bestand sein.
+4. **Die Admin-PIN wird länger.** `app.cli pin` nimmt bis zu zwölf Ziffern; vier sind im offenen
+   Netz zu wenig, falls das gemeinsame Passwort weitergereicht wird. Kein Codeeingriff.
+
+**Was der Entwurf nicht löst:** Eine Anmeldemaske vor dem Kiosk verfälscht
+[Punkt 14](#14--bedienbarkeitstest-mit-der-echten-zielgruppe). Für Testleser, denen man das
+Passwort nennt, ist das hinnehmbar; ein echter Bedienbarkeitstest mit unvorbereiteten Besuchern
+gehört vor Ort auf ein Gerät.
 
 ### 39 · Den Code prüfen lassen
 
@@ -676,7 +715,7 @@ Annahmen sieht, die dem, der sie getroffen hat, unsichtbar sind.
 **Stand:** `development.md` kündigt SemVer-Tags und Conventional Commits an, beides zusammen
 versioniert. Tatsächlich gibt es nach 99 Commits **keinen einzigen Tag**; `package.json` und
 `pyproject.toml` stehen beide auf `0.1.0`, und `deploy/docker-compose.yml` baut Images mit
-`${PHOTOMAP_VERSION:-dev}`. Es fehlt also nicht die Entscheidung, sondern ihre Umsetzung: Was löst
+`${KIEKMAP_VERSION:-dev}`. Es fehlt also nicht die Entscheidung, sondern ihre Umsetzung: Was löst
 eine Version aus, wer setzt den Tag, und wie kommt die Nummer in die beiden Dateien und in das
 Image?
 
@@ -702,7 +741,7 @@ Veröffentlichung ebenfalls beantwortet sein muss.
 Noch festzulegen, und **Voraussetzung für [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)**.
 Zwei getrennte Fragen, die oft verwechselt werden:
 
-- **Unter welcher Lizenz steht Photomap selbst?** Für ein Projekt, das ausdrücklich für ein zweites
+- **Unter welcher Lizenz steht Kiekmap selbst?** Für ein Projekt, das ausdrücklich für ein zweites
   Museum nachnutzbar sein soll, ist das keine Formalie — ohne Lizenz ist Nachnutzung rechtlich
   nicht erlaubt, auch wenn der Code offen daliegt.
 - **Was verlangen die verwendeten Komponenten?** Bisher steht im README nur der Satz „Alle
@@ -710,7 +749,7 @@ Zwei getrennte Fragen, die oft verwechselt werden:
   mindestens MapLibre GL (BSD-3), PMTiles, `@protomaps/basemaps` samt der mitgelieferten
   **Schriften und Symbole** unter `frontend/public/basemaps/`, die OpenStreetMap-Daten in Kacheln
   und Ortsindex (ODbL — verlangt Namensnennung, die auf der Karte steht) und die
-  Python-Abhängigkeiten. Die Kombination entscheidet, welche Lizenz für Photomap überhaupt möglich
+  Python-Abhängigkeiten. Die Kombination entscheidet, welche Lizenz für Kiekmap überhaupt möglich
   ist.
 
 Gehört anschließend in eine `LICENSE`-Datei und in den Lizenzabschnitt des README.

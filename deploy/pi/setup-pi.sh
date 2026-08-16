@@ -4,15 +4,15 @@
 #     sudo sh deploy/pi/setup-pi.sh
 #
 # Erwartet Raspberry Pi OS **Lite** (64 Bit) und ein bereits ausgechecktes Projekt unter
-# /opt/photomap. Laeuft einmal; ein zweiter Aufruf schadet nicht.
+# /opt/kiekmap. Laeuft einmal; ein zweiter Aufruf schadet nicht.
 #
 # Was danach anders ist: Der Pi bootet ohne Tastatur in die Karte, haengt USB-Sticks unter /media
 # ein, und der Bildschirm bleibt an.
 
 set -eu
 
-WURZEL="${PHOTOMAP_ROOT:-/opt/photomap}"
-BENUTZER="${PHOTOMAP_USER:-photomap}"
+WURZEL="${KIEKMAP_ROOT:-/opt/kiekmap}"
+BENUTZER="${KIEKMAP_USER:-kiekmap}"
 
 [ "$(id -u)" -eq 0 ] || { echo "Bitte mit sudo starten." >&2; exit 1; }
 [ -d "$WURZEL" ] || { echo "$WURZEL gibt es nicht -- Projekt zuerst dorthin klonen." >&2; exit 1; }
@@ -39,12 +39,12 @@ usermod -aG docker,video,input,render,tty "$BENUTZER"
 chown -R "$BENUTZER":"$BENUTZER" "$WURZEL/data" 2>/dev/null || true
 
 echo "== Kiosk-Dienst"
-install -m 755 "$WURZEL/deploy/pi/photomap-kiosk" /usr/local/bin/
-install -m 644 "$WURZEL/deploy/pi/photomap-kiosk.service" /etc/systemd/system/
+install -m 755 "$WURZEL/deploy/pi/kiekmap-kiosk" /usr/local/bin/
+install -m 644 "$WURZEL/deploy/pi/kiekmap-kiosk.service" /etc/systemd/system/
 
 echo "== USB-Sticks (fuer die Sicherung)"
-install -m 755 "$WURZEL/deploy/pi/photomap-usb-mount" /usr/local/sbin/
-install -m 644 "$WURZEL/deploy/pi/99-photomap-usb.rules" /etc/udev/rules.d/
+install -m 755 "$WURZEL/deploy/pi/kiekmap-usb-mount" /usr/local/sbin/
+install -m 644 "$WURZEL/deploy/pi/99-kiekmap-usb.rules" /etc/udev/rules.d/
 udevadm control --reload
 
 echo "== Bildschirm bleibt an"
@@ -60,19 +60,19 @@ fi
 
 echo "== Dienste einschalten"
 systemctl daemon-reload
-systemctl enable photomap-kiosk
+systemctl enable kiekmap-kiosk
 
 cat <<'ENDE'
 
 Fertig. Was jetzt noch fehlt:
 
   1. .env anlegen (PIN, Version):
-       cd /opt/photomap && cp deploy/.env.example .env
+       cd /opt/kiekmap && cp deploy/.env.example .env
        cd backend && python3 -m app.cli pin      # Zeile in die .env eintragen
   2. Kartendaten und Ortsindex vom Entwicklungsrechner herueberkopieren:
        frontend/public/tiles/  und  data/places.json
   3. Container starten:
-       cd /opt/photomap/deploy && docker compose up -d
+       cd /opt/kiekmap/deploy && docker compose up -d
   4. Neu starten und zusehen:
        sudo reboot
 

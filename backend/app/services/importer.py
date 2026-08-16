@@ -305,7 +305,7 @@ IMAGE_SUFFIXES = {suffix for _, suffix in ALLOWED_FORMATS.values()} | {".jpeg", 
 
 #: Folders never worth offering: our own backup, and what the operating systems leave behind.
 SKIPPED_FOLDERS = {
-    "photomap-sicherung",
+    "kiekmap-sicherung",
     "System Volume Information",
     ".Spotlight-V100",
     ".Trashes",

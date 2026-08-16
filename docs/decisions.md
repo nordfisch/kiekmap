@@ -472,7 +472,7 @@ Status, keine zweite Bedeutung für diesen.
 ## 17. Der Migrationsverlauf wurde einmal zusammengefasst — und das war die letzte Gelegenheit
 
 Am 3. August 2026 wurden die drei vorhandenen Alembic-Revisionen zu einem Anfangsschema
-zusammengelegt. Der Grund ist schlicht: Es hatte nie ein Gerät Photomap ausgeführt. Es gab also
+zusammengelegt. Der Grund ist schlicht: Es hatte nie ein Gerät Kiekmap ausgeführt. Es gab also
 keine Datenbank, von der ein Migrationsweg irgendwohin hätte führen können — ein Verlauf, den
 nichts nachspielen kann, ist kein Verlauf, sondern Ballast. Mit ihm verschwand nebenbei die
 Migration, die einen Datenverlust verursacht hatte.
@@ -1447,7 +1447,7 @@ Pfad aus dem Browser nur gegen das, was `find_drives` gefunden hat.
 
 **Auf jedem Mac war das der Normalfall, nicht ein Zufall.** macOS legt in `/Volumes` stets einen
 Symlink auf `/` an, benannt nach dem internen Volume. Wer also der `operations.md` folgt und zum
-Entwickeln `PHOTOMAP_MEDIA_DIR=/Volumes` setzt, bekam diesen Fehler zuverlaessig — er war nur
+Entwickeln `KIEKMAP_MEDIA_DIR=/Volumes` setzt, bekam diesen Fehler zuverlaessig — er war nur
 nie jemandem aufgefallen, weil niemand den Sicherungsknopf auf einem Mac gedrueckt hatte.
 
 Auf einem Pi ist der Fall dagegen unwahrscheinlich: In `/media` legt einen Symlink nur root an.
@@ -1459,3 +1459,26 @@ Preis, und fuer die Entwicklung sind sie keine Vorsorge, sondern eine Behebung.
 vergleicht Pfade, und woertlich verglichen ist `media/Danger/data` nicht `anderswo/data` — der
 Test war deshalb im ersten Anlauf auch ohne die Absicherung gruen. Er vergleicht jetzt
 aufgeloest. **Eine Gegenprobe, die nicht ausschlaegt, ist ein Ergebnis und keine Formalie.**
+
+## 41. Der Name nennt die Sache, nicht den Ort
+
+Das Projekt heisst **Kiekmap** — plattdeutsch *kieken*, gucken. Nach aussen mit grossem K, im
+Quelltext, in Pfaden und Verzeichnisnamen klein, als Praefix der Einstellungen `KIEKMAP_`.
+
+Der bisherige Arbeitsname beschrieb, was das Programm tut. **Ein Name fuer den ersten Ort waere
+der schlechtere gewesen**, und zwar aus demselben Grund, aus dem `CLAUDE.md` verlangt, dass nichts
+Ortsspezifisches in den Code gehoert: Das zweite Museum soll eine eigene `region.json` und eine
+eigene `.env` brauchen, keinen Fork. Ein „holm" im Paketnamen haette dieser Zusage widersprochen,
+lange bevor jemand sie technisch verletzt haette.
+
+**Umbenannt wurde am 15. August 2026**, an 213 Stellen in 38 versionierten Dateien. Fuer Besucher
+war der Name nie sichtbar — die Seite heisst „Bilder aus unserem Ort".
+
+Der Zeitpunkt war der letzte guenstige: kein Pi im Feld, kein Git-Remote, der einzige Bestand auf
+dem Entwicklungsrechner. Danach haetten Geraete, Sicherungen auf Sticks und fremde Arbeitskopien
+mitgezogen werden muessen.
+
+**Was dabei bricht, und zwar bewusst:** Sicherungen aus der Zeit davor werden nicht mehr erkannt.
+`is_restorable` und `looks_like_archive` suchen den Namen im Ordner bzw. im Dateinamen des Archivs
+— eine Vertraeglichkeitsregel dafuer waere Ballast fuer einen Fall, der genau einmal eintritt und
+sich mit einem Klick loesen laesst: neu sichern.

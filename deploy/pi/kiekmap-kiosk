@@ -10,16 +10,16 @@
 #      Programm im Vollbild zeigt. Nichts kann sich davorschieben, kein Hintergrundbild blitzt
 #      auf, keine Update-Hinweise, kein Bildschirmschoner.
 #
-# Wird von photomap-kiosk.service gerufen, nicht von Hand.
+# Wird von kiekmap-kiosk.service gerufen, nicht von Hand.
 
 set -eu
 
-ADRESSE="${PHOTOMAP_URL:-http://localhost/}"
+ADRESSE="${KIEKMAP_URL:-http://localhost/}"
 GESUNDHEIT="${ADRESSE%/}/api/health"
 
 # Frisches Browserprofil bei jedem Start. Damit ist nach einem Absturz oder Stromausfall nichts
 # von gestern uebrig -- kein halb geladener Zustand, kein Cache, der das Update verschluckt.
-PROFIL="$(mktemp -d /tmp/photomap-chromium.XXXXXX)"
+PROFIL="$(mktemp -d /tmp/kiekmap-chromium.XXXXXX)"
 trap 'rm -rf "$PROFIL"' EXIT
 
 echo "Warte auf $GESUNDHEIT ..."

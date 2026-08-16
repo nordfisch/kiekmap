@@ -26,7 +26,7 @@ from app.db import SessionLocal
 from app.models import ImportResult, Photo, PhotoStatus
 from app.services.importer import import_directory
 
-log = logging.getLogger("photomap.cli")
+log = logging.getLogger("kiekmap.cli")
 
 
 def _cmd_import(args: argparse.Namespace) -> int:
@@ -218,7 +218,7 @@ def _cmd_pin(_: argparse.Namespace) -> int:
         return 1
 
     print("\nDiese Zeile in die Datei .env eintragen (vorhandene ersetzen):\n")
-    print(f"PHOTOMAP_ADMIN_PIN_HASH={hash_pin(pin)}\n")
+    print(f"KIEKMAP_ADMIN_PIN_HASH={hash_pin(pin)}\n")
     print("Danach den Dienst neu starten. Die PIN selbst wird nirgends gespeichert.")
     return 0
 

@@ -1,15 +1,15 @@
 # Betriebsaufbau fuer den Museums-Pi.
 #
 # Zwei Dienste. Chromium ist bewusst KEIN Container -- er laeuft als gewoehnliches Programm auf dem
-# Pi (siehe deploy/pi/photomap-kiosk.service) und zeigt nur an, was diese beiden ausliefern.
+# Pi (siehe deploy/pi/kiekmap-kiosk.service) und zeigt nur an, was diese beiden ausliefern.
 
-name: photomap
+name: kiekmap
 
 services:
   backend:
     build:
       context: ../backend
-    image: photomap-backend:${PHOTOMAP_VERSION:-dev}
+    image: kiekmap-backend:${KIEKMAP_VERSION:-dev}
     restart: unless-stopped
     # Die ganze .env, nicht eine Auswahl daraus.
     #
@@ -23,11 +23,11 @@ services:
     env_file: ../.env
     environment:
       # Diese vier gewinnen ueber die .env: sie beschreiben den Container, nicht den Ort.
-      PHOTOMAP_DATA_DIR: /data
-      PHOTOMAP_MEDIA_DIR: /media
-      PHOTOMAP_ADMIN_PIN_HASH: ${PHOTOMAP_ADMIN_PIN_HASH:-}
+      KIEKMAP_DATA_DIR: /data
+      KIEKMAP_MEDIA_DIR: /media
+      KIEKMAP_ADMIN_PIN_HASH: ${KIEKMAP_ADMIN_PIN_HASH:-}
       # Gleiche Herkunft im Betrieb, also keine CORS-Ausnahmen noetig.
-      PHOTOMAP_CORS_ORIGINS: "[]"
+      KIEKMAP_CORS_ORIGINS: "[]"
     volumes:
       - ../data:/data
       # USB-Sticks fuer die Sicherung (Stufe 9). rshared ist noetig, damit ein erst spaeter
@@ -41,7 +41,7 @@ services:
   frontend:
     build:
       context: ../frontend
-    image: photomap-frontend:${PHOTOMAP_VERSION:-dev}
+    image: kiekmap-frontend:${KIEKMAP_VERSION:-dev}
     restart: unless-stopped
     depends_on:
       backend:

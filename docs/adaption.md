@@ -1,4 +1,4 @@
-# Photomap für einen anderen Ort oder eine andere Sprache
+# Kiekmap für einen anderen Ort oder eine andere Sprache
 
 Die kurze Antwort vorweg:
 
@@ -203,13 +203,13 @@ Deshalb liegt in diesem Repo ein Platzhalter, und das Wappen bleibt eine lokale 
 In der `.env`:
 
 ```bash
-PHOTOMAP_EXIF_DATE_MAX_YEAR=1990   # ab wann ein EXIF-Datum als Scandatum gilt
-PHOTOMAP_ADMIN_PIN_HASH=...        # PIN für den Admin-Bereich
+KIEKMAP_EXIF_DATE_MAX_YEAR=1990   # ab wann ein EXIF-Datum als Scandatum gilt
+KIEKMAP_ADMIN_PIN_HASH=...        # PIN für den Admin-Bereich
 
 # Angaben, die beim Import für jedes Foto gelten. Alle drei sind leer voreingestellt.
-PHOTOMAP_IMPORT_TAGS=["Gebäude"]                 # Schlagwörter für jedes importierte Foto
-PHOTOMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # Bildnachweis, wo die Datei niemanden nennt
-PHOTOMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
+KIEKMAP_IMPORT_TAGS=["Gebäude"]                 # Schlagwörter für jedes importierte Foto
+KIEKMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # Bildnachweis, wo die Datei niemanden nennt
+KIEKMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
 ```
 
 `exif_date_max_year` hochsetzen, falls die Sammlung auch echte Digitalfotos enthält — sonst
@@ -218,8 +218,8 @@ die Datei ihr Gerät nennt, entscheidet ohnehin das: Ein Scanner datiert nie, ei
 Der Wert greift nur für Dateien ohne Geräteangabe.
 
 Die drei `IMPORT_`-Werte sind der Ort für das, was eine *Sammlung* ausmacht.
-`PHOTOMAP_IMPORT_TAGS` ist eine JSON-Liste; in Holm besteht der Bestand aus Gebäuden, anderswo
-aus Trachten oder Schiffen. `PHOTOMAP_IMPORT_PROVENANCE` wird wörtlich vor den Dateipfad im
+`KIEKMAP_IMPORT_TAGS` ist eine JSON-Liste; in Holm besteht der Bestand aus Gebäuden, anderswo
+aus Trachten oder Schiffen. `KIEKMAP_IMPORT_PROVENANCE` wird wörtlich vor den Dateipfad im
 Import-Ordner gesetzt und trägt darum sein eigenes Trennzeichen am Ende — so führt die
 Herkunftsangabe eines Fotos zurück auf die Datei im eigenen Archiv.
 
@@ -233,7 +233,7 @@ Den PIN-Hash erzeugt:
 cd backend && .venv/bin/python -m app.cli pin
 ```
 
-Die PIN selbst wird nirgends gespeichert. Ist `PHOTOMAP_ADMIN_PIN_HASH` leer, sagt der
+Die PIN selbst wird nirgends gespeichert. Ist `KIEKMAP_ADMIN_PIN_HASH` leer, sagt der
 Admin-Bereich das im Klartext, statt jede Eingabe abzulehnen.
 
 ### 6. Alles zusammen prüfen

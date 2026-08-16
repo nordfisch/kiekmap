@@ -25,17 +25,17 @@ def fixtures_dir() -> Path:
 
 @pytest.fixture
 def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Path]:
-    monkeypatch.setenv("PHOTOMAP_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("KIEKMAP_DATA_DIR", str(tmp_path / "data"))
 
     from app.config import Settings, get_settings
 
     # Die ``.env`` des Entwicklers bleibt draussen. Sonst haengt das Ergebnis eines Tests davon
-    # ab, was auf *diesem* Rechner eingestellt ist -- und ein Eintrag wie PHOTOMAP_IMPORT_CREDIT
+    # ab, was auf *diesem* Rechner eingestellt ist -- und ein Eintrag wie KIEKMAP_IMPORT_CREDIT
     # laesst Tests fehlschlagen, die mit den Voreinstellungen rechnen.
     monkeypatch.setitem(Settings.model_config, "env_file", None)
 
     get_settings.cache_clear()
-    yield Path(os.environ["PHOTOMAP_DATA_DIR"])
+    yield Path(os.environ["KIEKMAP_DATA_DIR"])
     get_settings.cache_clear()
 
 

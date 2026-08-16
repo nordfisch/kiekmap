@@ -70,7 +70,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Wiederherstellen kopiert erst daneben und schaltet zuletzt um; der bisherige Stand wird nach
   `data/vorher-<Datum>/` beiseitegelegt, mitsamt Write-Ahead-Log, und nie gelöscht
 - Erinnerung „Letzte Sicherung vor 34 Tagen" auf der Startseite der Verwaltung, ab 30 Tagen rot
-- `deploy/pi/99-photomap-usb.rules` und `photomap-usb-mount` hängen Sticks auf Pi OS Lite ein —
+- `deploy/pi/99-kiekmap-usb.rules` und `kiekmap-usb-mount` hängen Sticks auf Pi OS Lite ein —
   dort gibt es keinen Automounter
 - „Weiß ich nicht — nächstes Foto" wechselt jetzt die Frage zwischen Ort und Jahr. Wer einen Ort
   nicht erkennt, weiß vielleicht trotzdem das Jahrzehnt; dieselbe Frage noch einmal ist der Grund,
@@ -84,7 +84,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Nach dem Lesen führt ein Knopf in die „Unvollständig"-Liste statt in eine Tabelle: bei
   zweihundert Bildern aus einem Ordner ist sie der bessere Ort zum Nacharbeiten
 - Kiosk-Betrieb auf dem Pi: `deploy/pi/setup-pi.sh` richtet einen frischen Raspberry Pi ein,
-  `photomap-kiosk.service` startet cage mit Chromium im Vollbild, sobald `/api/health` antwortet.
+  `kiekmap-kiosk.service` startet cage mit Chromium im Vollbild, sobald `/api/health` antwortet.
   Frisches Browserprofil bei jedem Start; systemd startet nach einem Absturz neu
 - `deploy/pi/update.sh` spielt ein Update vom USB-Stick ein, ohne den Bestand anzufassen —
   Kartendaten werden erst danebengelegt und dann umbenannt, der Ortsindex ausdrücklich neu geladen
@@ -438,14 +438,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Skripte gibt es `python -m app.cli empty --yes`. Ortsverzeichnis, Karte und Einstellungen
   bleiben stehen
 - Drei neue Einstellungen für den Import, alle leer voreingestellt, damit nichts Ortsspezifisches
-  im Code steht: `PHOTOMAP_IMPORT_TAGS` (Schlagwörter für jedes Foto — in Holm „Gebäude"),
-  `PHOTOMAP_IMPORT_CREDIT` (Bildnachweis, wo die Datei niemanden nennt) und
-  `PHOTOMAP_IMPORT_PROVENANCE` (Vorspann der Herkunftsangabe aus dem Dateipfad)
+  im Code steht: `KIEKMAP_IMPORT_TAGS` (Schlagwörter für jedes Foto — in Holm „Gebäude"),
+  `KIEKMAP_IMPORT_CREDIT` (Bildnachweis, wo die Datei niemanden nennt) und
+  `KIEKMAP_IMPORT_PROVENANCE` (Vorspann der Herkunftsangabe aus dem Dateipfad)
 
 ### Behoben
 
 - **Tests lasen die `.env` des Entwicklers mit.** Damit hing das Ergebnis davon ab, was auf
-  *diesem* Rechner eingestellt ist — ein Eintrag wie `PHOTOMAP_IMPORT_CREDIT` ließ Tests
+  *diesem* Rechner eingestellt ist — ein Eintrag wie `KIEKMAP_IMPORT_CREDIT` ließ Tests
   fehlschlagen, die mit den Voreinstellungen rechnen. Die Testumgebung liest die Datei nicht mehr
 - **Der Eingangsordner hat die Ordnernamen nicht ausgewertet** — ausgerechnet er, den CLAUDE.md
   „den üblichen Weg für das Museumsteam" nennt. Der Erstbestand kam so herein: 929 Fotos, deren
@@ -736,3 +736,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   und ob in `docker-compose.yml` und `deploy/.env.example` nur Namen stehen, die es wirklich gibt.
   Ein Tippfehler dort wirkt sonst folgenlos, und eine gelöschte `env_file`-Zeile ließe vier
   Einstellungen still auf ihre Vorgabe zurückfallen, ohne dass ein Test rot würde
+
+### Geändert
+
+- **Das Projekt heißt Kiekmap.** Nach aussen mit grossem K, im Quelltext und in Pfaden klein,
+  `KIEKMAP_` als Präfix der Einstellungen. Für Besucher ändert sich nichts — der Name stand nie in
+  der Oberfläche. **Sicherungen aus der Zeit davor werden nicht mehr erkannt**, weil der Name im
+  Ordner und im Dateinamen des Archivs steht; einmal neu sichern genügt
+- `tools/check_settings.py` liest jetzt auch die echte `.env` — die einzige Datei im Projekt, die
+  niemand durchsieht, weil sie nicht versioniert ist. Sie meldet Einstellungen unter einem Präfix,
+  das es nicht mehr gibt, und Tippfehler unter dem richtigen

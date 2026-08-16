@@ -43,7 +43,7 @@ listet `development.md` auf; hier stehen die Zusammenhänge.
                                                            │         │
                                                            │         ▼
                                                            │   data/  (auf der SD-Karte)
-                                                           │   ├── photomap.db   SQLite
+                                                           │   ├── kiekmap.db   SQLite
                                                            │   ├── photos/       Originale
                                                            │   ├── thumbs/       Vorschauen
                                                            │   └── places.json ──┘ einmal eingelesen
@@ -104,7 +104,7 @@ aber keine Beschriftung.
 ### Kiosk-Schicht auf dem Pi
 
 Alles unter `deploy/pi/`, und alles davon **ungeprüft** (siehe [backlog.md](backlog.md)):
-`setup-pi.sh` richtet ein frisches Gerät ein, `photomap-kiosk.service` wartet auf `/api/health`
+`setup-pi.sh` richtet ein frisches Gerät ein, `kiekmap-kiosk.service` wartet auf `/api/health`
 und startet dann `cage` mit Chromium im Vollbild, `update.sh` spielt ein Update vom Stick ein, und
 eine udev-Regel hängt USB-Sticks ein — auf Pi OS Lite gibt es keinen Automounter.
 
@@ -133,7 +133,7 @@ Vorgehen steht in [adaption.md](adaption.md).
 
 An drei Stellen, jede mit einer eigenen Aufgabe:
 
-**SQLite** (`data/photomap.db`) hält alle Angaben — Fotos, Datierungen, Orte, Schlagwörter, das
+**SQLite** (`data/kiekmap.db`) hält alle Angaben — Fotos, Datierungen, Orte, Schlagwörter, das
 Änderungsprotokoll, das Import-Protokoll und den Ortsindex. Im WAL-Modus, damit ein Stromausfall
 höchstens die letzte Transaktion kostet. Schemaänderungen laufen über Alembic und werden beim
 Containerstart angewendet.

@@ -23,6 +23,6 @@ services:
       # Der Vorgabewert ist derselbe Bestand wie im Betrieb. Wer gegen eine Kopie pruefen will --
       # empfohlen, denn der Entrypoint zieht bei jedem Start den Schemastand nach --, setzt den
       # Pfad relativ zu diesem Verzeichnis:
-      #   PHOTOMAP_PROD_DATA=../../photomap-prodtest/data make prod-mac
-      - ${PHOTOMAP_PROD_DATA:-../data}:/data
+      #   KIEKMAP_PROD_DATA=../../kiekmap-prodtest/data make prod-mac
+      - ${KIEKMAP_PROD_DATA:-../data}:/data
       - /Volumes:/media

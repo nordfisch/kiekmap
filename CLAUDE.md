@@ -1,6 +1,6 @@
 # Hinweise für Coding-Agents
 
-Photomap ist ein Touchscreen-Kiosk für ein Heimatmuseum in **Holm** (Kreis Pinneberg): historische
+Kiekmap ist ein Touchscreen-Kiosk für ein Heimatmuseum in **Holm** (Kreis Pinneberg): historische
 Ortsfotos auf einer Karte, filterbar über einen Zeitraum-Schieber, plus ein „Hilf mit"-Bereich, in
 dem Besucher fehlende Angaben ergänzen. Das Gerät läuft **offline** auf einem Raspberry Pi.
 
@@ -206,13 +206,18 @@ Herkunft verlor (behoben mit `env_file` statt einer Aufzählung). Und ein Symlin
 galt als Datenträger, weshalb die Sicherung in das Verzeichnis lief, das sie sichert —
 `docs/decisions.md`, Punkt 40.
 
+Am **15. August 2026** ist das Projekt von seinem Arbeitsnamen auf **Kiekmap** umbenannt worden —
+Punkt 48. Klein im Code und in Pfaden, `KIEKMAP_` als Präfix der Einstellungen, für Besucher
+unsichtbar. Warum der Name keinen Ort nennt, steht in `docs/decisions.md`, Punkt 41. **Sicherungen
+von davor werden nicht mehr erkannt**, weil der Name im Ordner und im Archivnamen steht.
+
 **Alles unter `deploy/pi/` ist weiterhin ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt,
 gelaufen ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst
 hakt, gehört nach [docs/operations.md](docs/operations.md). Ungeprüft bleiben auch die zwei Dinge,
 die auf einem Mac nicht zu prüfen sind: der **USB-Weg der Sicherung** (`rshared`, Punkt 18) und das
 Verhalten nach **Neustart und Stromausfall** (Punkt 15).
 
-Zum Entwickeln auf dem Mac `PHOTOMAP_MEDIA_DIR=/Volumes` setzen und ein Prüfvolumen mit `hdiutil`
+Zum Entwickeln auf dem Mac `KIEKMAP_MEDIA_DIR=/Volumes` setzen und ein Prüfvolumen mit `hdiutil`
 anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md). Den Containerbetrieb dort fährt
 `make prod-mac`.
 

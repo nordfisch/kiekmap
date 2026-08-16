@@ -4,7 +4,7 @@ FROM python:3.12-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PHOTOMAP_DATA_DIR=/data
+    KIEKMAP_DATA_DIR=/data
 
 WORKDIR /srv
 
@@ -22,8 +22,8 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Nicht als root laufen. Die UID muss zu den Dateirechten von ./data auf dem Host passen --
 # auf Raspberry Pi OS ist der erste Benutzer 1000, deshalb genau diese Nummer.
-RUN useradd --uid 1000 --create-home photomap
-USER photomap
+RUN useradd --uid 1000 --create-home kiekmap
+USER kiekmap
 
 VOLUME ["/data"]
 EXPOSE 8000

@@ -1,5 +1,5 @@
 [project]
-name = "photomap-backend"
+name = "kiekmap-backend"
 version = "0.1.0"
 description = "Bilddatenbank fuer historische Ortsfotos im Heimatmuseum"
 requires-python = ">=3.12"

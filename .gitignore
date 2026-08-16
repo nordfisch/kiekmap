@@ -24,6 +24,8 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+# Bauartefakt der editierbaren Installation -- lag bis zum 15. August 2026 versehentlich im Repo.
+*.egg-info/
 
 # Node
 node_modules/

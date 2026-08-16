@@ -16,7 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="PHOTOMAP_",
+        env_prefix="KIEKMAP_",
         env_file=(PROJECT_ROOT / ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     #: A collection usually *is* about something -- in Holm the stock is buildings, and tagging
     #: them by hand afterwards would be a thousand clicks. It is a setting rather than a constant
     #: because the next museum collects something else; see docs/adaption.md.
-    #: In the ``.env``: ``PHOTOMAP_IMPORT_TAGS=["Gebäude"]``.
+    #: In the ``.env``: ``KIEKMAP_IMPORT_TAGS=["Gebäude"]``.
     import_tags: list[str] = []
 
     #: Credit line for photos whose file names nobody -- "Sammlung Heimatmuseum Holm".
@@ -62,12 +62,12 @@ class Settings(BaseSettings):
     #: The folder tree is where a photo came from, and the museum's own archive is filed the same
     #: way -- so the path leads straight back to the file somebody would want to look at. Used
     #: verbatim, so it carries its own separator:
-    #: ``PHOTOMAP_IMPORT_PROVENANCE="Online-Archiv des Museums, Verzeichnis 01 Orte/"``.
+    #: ``KIEKMAP_IMPORT_PROVENANCE="Online-Archiv des Museums, Verzeichnis 01 Orte/"``.
     import_provenance: str = ""
 
     @property
     def db_path(self) -> Path:
-        return self.data_dir / "photomap.db"
+        return self.data_dir / "kiekmap.db"
 
     @property
     def db_url(self) -> str:

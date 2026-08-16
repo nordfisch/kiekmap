@@ -23,7 +23,7 @@ import {
   signOut as postSignOut,
 } from "../api/admin";
 
-const STORAGE_KEY = "photomap.admin.token";
+const STORAGE_KEY = "kiekmap.admin.token";
 
 type View = "kiosk" | "pin" | "admin";
 

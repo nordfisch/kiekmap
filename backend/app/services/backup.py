@@ -38,7 +38,7 @@ from app.services import dates, places
 log = logging.getLogger(__name__)
 
 # German names: the museum team sees these in a file manager on any computer.
-BACKUP_DIR_NAME = "photomap-sicherung"
+BACKUP_DIR_NAME = "kiekmap-sicherung"
 MANIFEST_NAME = "sicherung.json"
 SET_ASIDE_PREFIX = "vorher-"
 RESTORE_WORK_DIR = "wiederherstellung"
@@ -118,7 +118,7 @@ def read_manifest(folder: Path) -> BackupInfo | None:
 
 def is_restorable(folder: Path) -> bool:
     """A backup is only worth restoring when the database is in it too."""
-    return read_manifest(folder) is not None and (folder / "photomap.db").is_file()
+    return read_manifest(folder) is not None and (folder / "kiekmap.db").is_file()
 
 
 # --- an archive waiting in the inbox ----------------------------------------
@@ -152,7 +152,7 @@ def read_archive_manifest(path: Path) -> BackupInfo | None:
                 return None
             info = _parse_manifest(archive.read(entry))
             # Only worth offering when the database is in there too.
-            if info is None or f"{BACKUP_DIR_NAME}/photomap.db" not in archive.namelist():
+            if info is None or f"{BACKUP_DIR_NAME}/kiekmap.db" not in archive.namelist():
                 return None
             return info
     except (zipfile.BadZipFile, OSError):
@@ -213,7 +213,7 @@ def find_drives(media_dir: Path) -> list[Drive]:
 
     Two levels deep, because the naming differs: Raspberry Pi OS mounts under
     ``/media/<user>/<label>``, other systems directly under ``/media/<label>``. On a Mac during
-    development ``PHOTOMAP_MEDIA_DIR=/Volumes`` does the same job.
+    development ``KIEKMAP_MEDIA_DIR=/Volumes`` does the same job.
 
     Only actual mount points count, and only writable ones. Without the first check an ordinary
     leftover folder under /media would be offered as a target -- and the backup would land on the
@@ -429,9 +429,9 @@ def _backup_database(session: Session, settings: Settings, target: Path) -> None
     An interrupted backup must not leave half a database on the stick, because that is exactly
     what someone would restore from a year later.
     """
-    fresh = target / "photomap.db.neu"
+    fresh = target / "kiekmap.db.neu"
     _vacuum_into(session, fresh)
-    fresh.replace(target / "photomap.db")
+    fresh.replace(target / "kiekmap.db")
 
 
 def _place(settings: Settings) -> str:
@@ -543,7 +543,7 @@ def _add_to_archive(
 
 
 def archive_name(settings: Settings) -> str:
-    """``photomap-sicherung-holm-2026-08-03.zip``.
+    """``kiekmap-sicherung-holm-2026-08-03.zip``.
 
     Plain ASCII: it travels in an HTTP header and lands as a file name on somebody's computer.
     """
@@ -570,11 +570,11 @@ def stream_archive(session: Session, settings: Settings) -> Iterator[bytes]:
     # written out consistently first. Only the database, though -- the photographs, which are the
     # gigabytes, never touch the card a second time.
     with tempfile.TemporaryDirectory(dir=settings.data_dir, prefix="archiv-") as tmp:
-        database = Path(tmp) / "photomap.db"
+        database = Path(tmp) / "kiekmap.db"
         _vacuum_into(session, database)
 
         with zipfile.ZipFile(stream, "w", zipfile.ZIP_STORED, allowZip64=True) as archive:
-            yield from _add_to_archive(archive, stream, database, f"{BACKUP_DIR_NAME}/photomap.db")
+            yield from _add_to_archive(archive, stream, database, f"{BACKUP_DIR_NAME}/kiekmap.db")
 
             for source in sorted(settings.photos_dir.rglob("*")):
                 if not source.is_file():
@@ -637,7 +637,7 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
 
     total = sum(1 for path in (source / "photos").rglob("*") if path.is_file())
     report(0, total, "Zuerst kommen die Angaben")
-    shutil.copy2(source / "photomap.db", work / "photomap.db")
+    shutil.copy2(source / "kiekmap.db", work / "kiekmap.db")
 
     done = 0
     for path in sorted((source / "photos").rglob("*")):
@@ -683,7 +683,7 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
     report(total, total, "Der bisherige Stand wird beiseitegelegt")
     set_aside = _set_aside(settings)
 
-    for name in ("photos", "thumbs", "photomap.db", *LOOSE_FILES):
+    for name in ("photos", "thumbs", "kiekmap.db", *LOOSE_FILES):
         moved = work / name
         if moved.exists():
             moved.replace(settings.data_dir / name)
@@ -754,13 +754,13 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
 def _set_aside(settings: Settings) -> Path:
     """Move the current state out of the way -- never delete it.
 
-    Also takes the write-ahead log with it. A leftover ``photomap.db-wal`` next to a restored
+    Also takes the write-ahead log with it. A leftover ``kiekmap.db-wal`` next to a restored
     database would belong to a different database, and SQLite would try to apply it.
     """
     folder = settings.data_dir / f"{SET_ASIDE_PREFIX}{datetime.now():%Y-%m-%d-%H%M}"
     folder.mkdir(parents=True, exist_ok=True)
 
-    for name in ("photos", "thumbs", "photomap.db", "photomap.db-wal", "photomap.db-shm"):
+    for name in ("photos", "thumbs", "kiekmap.db", "kiekmap.db-wal", "kiekmap.db-shm"):
         current = settings.data_dir / name
         if current.exists():
             current.replace(folder / name)
@@ -882,7 +882,7 @@ class Job:
                 log.exception("%s failed", kind)
                 self._fail(f"Es ist etwas schiefgegangen: {error}")
 
-        self._thread = threading.Thread(target=run, name=f"photomap-{kind}", daemon=True)
+        self._thread = threading.Thread(target=run, name=f"kiekmap-{kind}", daemon=True)
         self._thread.start()
         return True
 

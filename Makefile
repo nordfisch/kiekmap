@@ -126,7 +126,7 @@ prod: .env  ## Alles in Containern, so wie es auf dem Pi laeuft
 	$(COMPOSE) up --build
 
 # Auf dem Mac fehlen /media und die Mount-Propagierung rshared. Warum, steht in der Datei.
-# PHOTOMAP_PROD_DATA zeigt wahlweise auf eine Kopie des Bestands -- empfohlen, weil der
+# KIEKMAP_PROD_DATA zeigt wahlweise auf eine Kopie des Bestands -- empfohlen, weil der
 # Entrypoint bei jedem Start den Schemastand nachzieht.
 prod-mac: .env  ## Wie prod, aber mit den Pfaden des Entwicklungsmacs
 	$(COMPOSE) -f deploy/docker-compose.mac.yml up --build

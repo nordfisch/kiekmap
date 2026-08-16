@@ -3,7 +3,7 @@
 #
 # Raspberry Pi OS Lite hat keinen Desktop und damit auch keinen Automounter -- ein eingesteckter
 # Stick taucht dort schlicht nicht auf. Dieses Skript wird von der udev-Regel
-# 99-photomap-usb.rules gerufen und schliesst genau diese Luecke.
+# 99-kiekmap-usb.rules gerufen und schliesst genau diese Luecke.
 #
 # Zwei Dinge sind hier leicht falsch zu machen:
 #
@@ -14,8 +14,8 @@
 #      Dienst im Container (UID 1000) darf nicht darauf schreiben. Die Sicherung wuerde dann
 #      erst scheitern, nachdem jemand den Knopf gedrueckt hat.
 #
-# Aufruf:  photomap-usb-mount einhaengen  /dev/sda1 [Bezeichnung] [Dateisystem]
-#          photomap-usb-mount aushaengen  /dev/sda1
+# Aufruf:  kiekmap-usb-mount einhaengen  /dev/sda1 [Bezeichnung] [Dateisystem]
+#          kiekmap-usb-mount aushaengen  /dev/sda1
 
 set -eu
 

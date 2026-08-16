@@ -1,6 +1,6 @@
 # Entwicklung
 
-Für Menschen, die an Photomap arbeiten. Warum die Dinge so sind, steht in
+Für Menschen, die an Kiekmap arbeiten. Warum die Dinge so sind, steht in
 [decisions.md](decisions.md); woraus es besteht, in [architecture.md](architecture.md); wie es
 dazu gekommen ist, in [history.md](history.md); was noch kommt, im [backlog.md](backlog.md); wie
 man hier arbeitet, hier.
@@ -11,7 +11,7 @@ Voraussetzungen: Python 3.12+, Node 18+ (empfohlen 22), Git. Optional Docker fü
 Realitätscheck, `pmtiles` (via Homebrew) für den Kartenbau.
 
 ```bash
-git clone <repo> && cd photomap
+git clone <repo> && cd kiekmap
 make dev
 ```
 
@@ -43,7 +43,7 @@ eine „Community"-Ausgabe gibt es nicht. Was in der Community-Variante fehlt un
 
 | fehlt | Ersatz |
 |---|---|
-| Database-Tool | DB Browser for SQLite, oder `sqlite3 data/photomap.db` |
+| Database-Tool | DB Browser for SQLite, oder `sqlite3 data/kiekmap.db` |
 | HTTP-Client | `/api/docs` — interaktiv und immer aktuell, weil aus dem Code erzeugt |
 | Docker | `make prod` |
 
@@ -225,7 +225,7 @@ Erfahrungen aus den letzten Umbauten, damit sie nicht zweimal gemacht werden mü
   ```bash
   hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil attach teststick.dmg
   ```
-  Dazu `PHOTOMAP_MEDIA_DIR=/Volumes` in `backend/.env` — steht dort schon.
+  Dazu `KIEKMAP_MEDIA_DIR=/Volumes` in `backend/.env` — steht dort schon.
 
 Wer die Ansicht über einen Browser fernsteuert (Coding-Agents tun das):
 

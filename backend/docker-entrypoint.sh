@@ -5,7 +5,7 @@
 # und niemand vor Ort soll daran denken muessen, danach noch eine Migration von Hand anzustossen.
 set -eu
 
-echo "Photomap: Schemastand pruefen ..."
+echo "Kiekmap: Schemastand pruefen ..."
 alembic upgrade head
 
 exec "$@"
