@@ -61,7 +61,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 15 | [Abnahme auf dem ersten Pi](#15--abnahme-auf-dem-ersten-pi) | Aufgabe | wichtig |
 | 18 | [Wiederherstellung wirklich proben](#18--wiederherstellung-wirklich-proben) | Aufgabe | wichtig |
 | 19 | [Displayauflösung und -orientierung des Museumsgeräts](#19--displayauflösung-und--orientierung-des-museumsgeräts) | Frage | wichtig |
-| 20 | [Read-Only-Overlay-Dateisystem](#20--read-only-overlay-dateisystem) | Idee | — |
+| 20 | [Das Gerät muss einen Stromausfall überstehen](#20--das-gerät-muss-einen-stromausfall-überstehen) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
 | 39 | [Den Code prüfen lassen](#39--den-code-prüfen-lassen) | Aufgabe | wichtig |
@@ -643,10 +643,27 @@ umgestellt:
 **Die Frage ist also kleiner, als sie aussieht, und sollte früh gestellt werden**: Es ist eine
 Frage an das Museum, keine an den Code, und sie kostet nichts als ein Telefonat.
 
-### 20 · Read-Only-Overlay-Dateisystem
+### 20 · Das Gerät muss einen Stromausfall überstehen
 
 Gegen SD-Karten-Korruption bei Stromausfall. Der Pi wird im Museum nicht heruntergefahren, sondern
 ausgeschaltet — das ist auf Dauer der wahrscheinlichste Ausfallgrund.
+
+**Das Ziel steht, der Weg nicht.** Zu verhindern ist, dass ein Verlust der Stromversorgung mit
+hoher Wahrscheinlichkeit dazu führt, dass das Gerät **nicht mehr unterbrechungsfrei startet**. Ein
+Read-Only-Overlay ist dafür ein Mittel, nicht die Aufgabe — der Punkt hieß bis zum 16. August 2026
+nach dem Mittel und ist deshalb umbenannt.
+
+**Erst abzuwägen ist das Risiko**, bevor irgendetwas gebaut wird: Wie wahrscheinlich sind
+Datenverlust und ein beschädigtes Dateisystem beim Ziehen des Steckers überhaupt? SQLite läuft im
+WAL-Modus mit `synchronous=NORMAL`, was für die Datenbank selbst schon einiges abdeckt; die Frage
+gilt der SD-Karte und dem Betriebssystem darauf.
+
+**Eine leichtere Möglichkeit steht im Raum:** in der Verwaltung statt „Anzeige neu laden"
+(`t.admin.…reload`) einen **Herunterfahren-Knopf**. Dann gäbe es einen geordneten Weg, das Gerät
+auszuschalten, und ein Read-Only-Overlay wäre womöglich gar nicht nötig. Zu klären wäre, wer diesen
+Knopf drückt und was passiert, wenn es niemand tut — die Abwägung gehört vor die Entscheidung.
+
+*Aufgenommen am 16. August 2026, ausdrücklich noch ohne Analyse.*
 
 ---
 
