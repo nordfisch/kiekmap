@@ -51,6 +51,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
 | 49 | [„Bilder aus" und der Ortsname brechen um](#49--bilder-aus-und-der-ortsname-brechen-um) | **Fehler** | wichtig |
+| 53 | [Aus der Detailansicht fehlt der Weg zur Hausnummer](#53--aus-der-detailansicht-fehlt-der-weg-zur-hausnummer-sobald-das-jahr-bekannt-ist) | **Fehler** | wichtig |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
@@ -69,14 +70,15 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Zwei Fehler sind offen**, beide in der Besucheransicht und beide von der Bildschirmgröße
-abhängig: Punkt 49 bricht den Kopfbereich um, Punkt 10 zerdrückt das Foto auf einem kleinen Schirm.
-Beide warten damit auf dieselbe Antwort wie [Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts).
+**Drei Fehler sind offen, alle in der Besucheransicht.** Punkt 49 bricht den Kopfbereich um und
+Punkt 10 zerdrückt das Foto auf einem kleinen Schirm — beide warten auf dieselbe Antwort wie
+[Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts). Punkt 53 nimmt einer ganzen
+Klasse von Fotos den Weg zum Nachschärfen.
 
 **Neunundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48. Sie sind erledigt, aufgelöst oder
 gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt
-die **53**.
+die **54**.
 
 ---
 
@@ -365,6 +367,27 @@ den man einmal „bei einer Breite" behebt.
 Hängt mit [Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts) zusammen: Solange
 die Auflösung des Museumsgeräts nicht feststeht, ist nicht auszuschließen, dass es genau in dieses
 Fenster fällt.
+
+### 53 · Aus der Detailansicht fehlt der Weg zur Hausnummer, sobald das Jahr bekannt ist
+
+**Beobachtet, noch nicht nachgeprüft.** Ein Foto, das eine Straße, aber keine Hausnummer hat,
+bekommt in der Detailansicht anscheinend **keinen Knopf zum Nachtragen der Hausnummer**, wenn sein
+Jahr bereits bekannt ist. Fehlt das Jahr ebenfalls, erscheint er.
+
+Damit wäre eine ganze Klasse von Fotos aus der Detailansicht heraus nicht nachzuschärfen — und
+zwar ausgerechnet die gut gepflegten, bei denen nur noch die Hausnummer fehlt.
+
+**Wo es zu suchen anfängt** (als Wegweiser, nicht als Befund — die Ursache ist noch nicht
+angesehen):
+
+- Die drei Knöpfe der Detailansicht kamen mit Punkt 46 (`kiosk/PhotoOverlay.tsx`, `question(need)`).
+- Welche Frage ein Foto überhaupt offen hat, entscheidet `services/needs.py`; die Hausnummer ist
+  dort **nachrangig** eingeordnet, sie kommt erst, wenn Ort und Jahr nichts mehr zu fragen haben
+  ([decisions.md](decisions.md), Punkt 35). Diese Rangfolge ist für den „Hilf mit"-Bereich gedacht,
+  der **eine** Frage nach der anderen vorlegt. Ob sie auch die Knöpfe der Detailansicht steuern
+  soll, wo alle drei nebeneinanderstehen, ist die erste Frage.
+
+*Aufgenommen am 16. August 2026, ausdrücklich ohne Prüfung.*
 
 ### 30 · Die Karte nach Schlagwörtern filtern
 
