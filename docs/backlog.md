@@ -46,6 +46,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 50 | [Ein Schlagwort für den ganzen Stapel beim Import](#50--ein-schlagwort-für-den-ganzen-stapel-beim-import) | Aufgabe | wichtig |
 | 51 | [Der Abbruch am PIN-Feld heißt „Abbrechen und zurück"](#51--der-abbruch-am-pin-feld-heißt-abbrechen-und-zurück) | Aufgabe | — |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
+| 52 | [Den neueren Archivstand abgleichen und nachziehen](#52--den-neueren-archivstand-abgleichen-und-nachziehen) | Aufgabe | wichtig · dringend |
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
@@ -75,7 +76,7 @@ Beide warten damit auf dieselbe Antwort wie [Punkt 19](#19--displayauflösung-un
 **Neunundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48. Sie sind erledigt, aufgelöst oder
 gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt
-die **52**.
+die **53**.
 
 ---
 
@@ -231,7 +232,46 @@ zweites Museum aufsetzt, ist die eine übergebbare Datei dann weg. Vielleicht is
 beides: Datei als Startwert, Datenbank als Übersteuerung — genau das gehört durchdacht, bevor
 etwas gebaut wird.
 
+### 52 · Den neueren Archivstand abgleichen und nachziehen
+
+Vom Museum ist ein **aktuellerer Datenbestand** eingetroffen. Er ist gegen den Stand abzugleichen,
+aus dem der Erstbestand aufgebaut wurde, und alle hinzugekommenen Fotos aus dem Bereich **„Straßen"**
+sind ebenfalls aufzunehmen.
+
+**Der Abgleich erledigt sich zum großen Teil von selbst**, und das ist der Grund, warum dieser
+Punkt klein anfangen kann: Der Import hasht jede Datei zuerst, und der SHA-256 entscheidet über
+Dublette oder nicht. Ein zweiter Durchlauf über den ganzen neuen Ordner legt also **nur an, was
+neu ist**; alles Bekannte landet als `duplicate` im Import-Protokoll und rührt den vorhandenen
+Bestand nicht an. Die Arbeit von [Punkt 41](history.md) — 815 bereinigte Titel, 349 neu verortete
+Fotos, 75 geschriebene Titel — bleibt damit unangetastet.
+
+**Woran zu denken ist:**
+
+- **Die Ordnerstruktur trägt die Verortung.** 758 der 929 Fotos kamen aus
+  `01 Orte/Straßen/<Straße>/<Hausnummer>/`; genau daraus liest `services/foldermeta.py` Straße und
+  Hausnummer. Kommt der neue Stand anders geschnitten, ist das **vor** dem Import zu klären — die
+  171 übrigen Fotos liegen lose in `01 Orte/` und sind der Grund, warum fünf bis heute keinen Ort
+  haben.
+- **`KIEKMAP_IMPORT_PROVENANCE`** setzt das Präfix der Herkunft
+  (`Online-Archiv des Museums, Verzeichnis 01 Orte/`). Steht der neue Stand woanders, gehört die
+  Einstellung angepasst, sonst zeigt die Herkunft der neuen Fotos ins Leere.
+- **Was inzwischen an den vorhandenen Fotos geändert wurde, darf nicht zurückfallen.** Der Import
+  legt nur an und ändert nichts Bestehendes — das ist zu bestätigen, nicht zu glauben.
+
+**Die Reihenfolge steht fest**, und sie ist der eigentliche Inhalt dieses Punktes:
+
+1. **Dieser Punkt zuerst** — die neuen Fotos in den Bestand.
+2. Dann [Punkt 42](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen), die Dubletten.
+   Vorher wäre die Arbeit zweimal zu machen, denn der neue Stand bringt neue Fassungen derselben
+   Scans mit — und die erkennt der SHA-256 gerade **nicht**.
+3. Und [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht) gilt für die neuen Fotos genauso: Was
+   dort an Durchsicht aussteht, wächst mit ihnen.
+
 ### 42 · Dubletten finden, die beste behalten, den Rest zusammenführen
+
+**Erst nach [Punkt 52](#52--den-neueren-archivstand-abgleichen-und-nachziehen)**, dem Nachziehen
+des neueren Archivstands: Der bringt neue Fassungen derselben Scans mit, und wer vorher aufräumt,
+macht die Arbeit zweimal.
 
 Derselbe Scan liegt mehrfach im Bestand — in unterschiedlicher Scanqualität, mit anderer
 Farbkorrektur, mal mit und mal ohne den Text darunter. **Der SHA-256 sieht davon nichts:** Er
