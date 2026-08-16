@@ -46,6 +46,22 @@ Auswahl stellt, stand hier einmal mit — das gehört aber zur Sammlung und ergi
 ihr: angeboten wird, was der Bestand umspannt, mindestens jedoch 1920er bis 2010er. Ein Museum, das
 später ein Foto von 1890 datiert, bekommt den 1890er-Knopf von selbst dazu.
 
+**Zur Länge des `name`.** Er steht als Überschrift im Kopfbereich, und dort passt er sich der Spalte
+an: Je länger er ist, desto kleiner wird er gesetzt, damit er **auf einer Zeile bleibt**. Das geht
+nicht unbegrenzt — kleiner als die Zeile „Bilder aus" darüber wird er nicht, und darunter bricht er
+um. Nachgemessen am 16. August 2026:
+
+| Länge des Namens | Auf einem 1024er Schirm | Auf einem 1920er |
+|---|---|---|
+| bis 12 Zeichen | einzeilig | einzeilig |
+| 13 bis 16 Zeichen | bricht um | einzeilig |
+| darüber | bricht um | bricht um |
+
+„Holm" hat vier, „Klein Nordende" hat vierzehn. **Ein Umbruch ist kein Fehler**, sondern die
+bewusste Rückfallebene — ein abgeschnittener Ortsname wäre schlimmer. Wer ihn vermeiden will, kürzt
+den `name` („Klein Nordende" statt „Klein Nordende-Lieth"); der volle Name gehört ohnehin eher in
+den Begrüßungstext als in die Überschrift.
+
 **Bounding Box ausrechnen.** Aus Mittelpunkt und gewünschtem Umkreis:
 
 ```bash

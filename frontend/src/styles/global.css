@@ -26,10 +26,10 @@
    * sind. */
   --gap: 1.25rem;
 
-  /* Hoehe des Wappens -- und zugleich die des Titels daneben, der sich daraus ableitet. Sie ist so
-   * bemessen, dass beide zusammen genau so hoch stehen wie der Zeitschieber von seiner ersten
-   * Zeile bis zur Jahresskala. Auf schmalen Schirmen eine Stufe kleiner: Sonst braeche der
-   * Ortsname um, und der Titelbereich liefe aus seiner Zeile. */
+  /* Hoehe des Wappens -- und zugleich die des Titels daneben, der sich daraus ableitet.
+   *
+   * Nur der Rueckfallwert. Den wirklichen Wert setzt `.app__title` aus seiner eigenen Breite;
+   * hier steht er, damit `.crest` auch ausserhalb der Kopfzeile eine Groesse hat. */
   --crest: 6.2rem;
 
   --paper: #faf8f4;
@@ -41,12 +41,6 @@
 
   /* At a large display the visitor stands rather than sits -- everything a notch larger. */
   font-size: 18px;
-}
-
-@media (max-width: 85rem) {
-  :root {
-    --crest: 4rem;
-  }
 }
 
 * {
@@ -121,6 +115,30 @@ button {
   gap: 0.8rem;
   min-width: 0;
   padding: 0.75rem 1.25rem var(--gap);
+
+  /* Wappen und Titel messen sich an dieser Zelle, nicht am Ansichtsfenster. `cqi` ist ein Prozent
+   * ihrer Breite; `container-type` ist der Bezug dafuer und hier gefahrlos, weil die Breite aus
+   * dem Raster kommt und nicht aus dem Inhalt.
+   *
+   * Vorher schaltete `--crest` bei `@media (max-width: 85rem)` von 6,2rem auf 4rem, und das ging
+   * aus zwei Gruenden schief. Erstens: **In einer Medienabfrage ist `rem` immer 16px**, die
+   * Groesse des Wurzelelements *bevor* `:root` sie auf 18px setzt -- die Umschaltung griff also
+   * bei 1360px statt bei den 1530px, mit denen die Regel rechnete. Zweitens, und schwerer: Selbst
+   * oberhalb davon blieben **0,3 px** zwischen dem, was "Bilder aus" braucht, und dem, was die
+   * Spalte hergibt. Der Entwurf war auf den Millimeter gerechnet; jede andere Schrift, jeder
+   * laengere Ortsname und jeder andere Browser kippten ihn. Bei 1470 x 956 brach Safari um und
+   * Chromium nicht.
+   *
+   * Jetzt gibt es keine Schwelle mehr, an der etwas kippen koennte: Wappen und Schrift wachsen
+   * und schrumpfen mit dem Platz, den sie wirklich haben. Die Grenzen des `clamp` halten das
+   * Wappen in den Maszen, die vorher die beiden Stufen hatten.
+   *
+   * **Die 34 sind gerechnet, nicht geraten.** Die engste Zeile ist der Ortsname, nicht "Bilder
+   * aus": vier fette Zeichen auf 0,54 des Wappens sind breiter als zehn magere auf 0,28. Bei 34
+   * bleiben ueber den ganzen Bereich rund 25 % Luft; bei 38 waeren es 11, und bei genau diesen
+   * 11 % faengt das Zittern an, das diesen Fehler ausgemacht hat. */
+  container-type: inline-size;
+  --crest: clamp(4rem, 34cqi, 6.2rem);
 }
 
 .app__heading {
@@ -163,18 +181,52 @@ button {
 
 /* Die beiden Faktoren binden den Titel an die Hoehe des Wappens. Dass er damit auch so hoch
  * stuende wie der Schieber, gilt nicht mehr und muss auch nicht mehr gelten -- das erledigt seit
- * dem 9. August 2026 die senkrechte Zentrierung oben. */
+ * dem 9. August 2026 die senkrechte Zentrierung oben.
+ *
+ * Der Faktor der Vorzeile war 0,323 und liesz 0,3 px Luft. Er ist auf 0,28 herunter, damit
+ * zwischen dem laengeren der beiden Woerter und dem Spaltenrand ein Finger breit Platz bleibt --
+ * eine Zeile, die erst beim Nachmessen passt, passt nicht. */
 .app__heading-lead {
-  font-size: calc(var(--crest) * 0.323);
+  font-size: calc(var(--crest) * 0.28);
   font-weight: 400;
   color: var(--muted);
+  /* "Bilder aus" steht fest in de.ts und ist keine Frage der Sammlung: Es darf nie umbrechen,
+   * und mit der Groesse oben muss es das auch nie. */
+  white-space: nowrap;
 }
 
+/* Der Ortsname ist die engste Zeile im Kopf, nicht "Bilder aus": vier fette Zeichen auf 0,54 des
+ * Wappens sind breiter als zehn magere auf 0,28. Und seine Laenge steht nicht fest -- sie kommt
+ * aus `region.json`, und "Holm" ist mit vier Zeichen der guenstigste Fall, den es gibt.
+ *
+ * **Deshalb entscheidet hier nicht die Wappenhoehe allein, sondern auch der Name.** Der kleinere
+ * der beiden Werte gewinnt:
+ *
+ *   1. `--crest * 0.54` -- die gewachsene Proportion, solange der Name kurz ist.
+ *   2. Der Platz neben dem Wappen, geteilt durch die Zeichenzahl. `100cqi` ist die ganze Zelle,
+ *      davon gehen das Wappen (34cqi) und der Abstand ab. Der Faktor 0,61 ist die mittlere Breite
+ *      eines fetten Zeichens in Bruchteilen der Schriftgroesse -- gemessen an "Holm": 147 px bei
+ *      60,3 px Schrift, also 2,44 fuer vier Zeichen.
+ *
+ * `--name-length` setzt `App.tsx`, weil CSS Text nicht messen kann. Ohne diese eine Zahl braeche
+ * schon "Hetlingen" um -- gemessen am 16. August 2026, bevor diese Regel entstand.
+ *
+ * **Nach unten ist Schluss bei der Groesse der Vorzeile**, und das ist der Punkt, an dem die
+ * Zusage endet. Ein Ortsname kleiner als das "Bilder aus" darueber stellt die Rangfolge auf den
+ * Kopf; ohne diesen Boden landete "Klein Nordende-Lieth" bei zwoelf Pixeln. Wo der Boden greift,
+ * bricht der Name um -- und das ist die bessere der beiden schlechten Antworten, es war auch
+ * schon vorher die gewaehlte. Bis zu welcher Laenge es gutgeht, steht in `docs/adaption.md`.
+ */
 .app__heading-place {
-  font-size: calc(var(--crest) * 0.54);
+  font-size: max(
+    calc(var(--crest) * 0.28),
+    min(calc(var(--crest) * 0.54), calc((100cqi - 34cqi - 0.8rem) / (var(--name-length, 4) * 0.61)))
+  );
   font-weight: 700;
   color: var(--accent);
-  /* Notnagel fuer sehr lange Ortsnamen: lieber im Wort umbrechen als aus der Spalte laufen. */
+  /* Notnagel fuer den Fall, dass auch das nicht reicht -- ein einzelnes sehr langes Wort, oder
+   * eine Schrift, in der 0,61 danebenliegt. Lieber im Wort umbrechen als aus der Spalte laufen.
+   * Er soll nicht mehr greifen; er steht da, damit ein Irrtum nicht zum Ueberlauf wird. */
   overflow-wrap: anywhere;
 }
 

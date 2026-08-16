@@ -761,3 +761,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   `development.md` — und **Verweise zwischen Dateien**, die bisher gar nicht geprüft wurden. Genau
   die brechen still: Wer einen Abschnitt umschreibt, liest seine eigene Datei, nicht die, die
   hineinverweisen
+
+### Behoben
+
+- **Die beiden Zeilen des Kopfbereichs brechen nicht mehr um.** „Bilder aus" und der Ortsname
+  hingen an einer Schwelle im Ansichtsfenster, die 170 px zu spät griff — und selbst oberhalb davon
+  blieben 0,3 px Luft, weshalb bei 1470 × 956 Safari umbrach und Chromium nicht. Beides misst sich
+  jetzt an der Breite der eigenen Spalte; über den ganzen Bereich von 1024 bis 2560 px bleiben 25
+  bis 56 Prozent Luft
+- **Auch längere Ortsnamen bleiben einzeilig.** Der Name wird kleiner gesetzt, je länger er ist —
+  bis zwölf Zeichen auf jedem Schirm, bis sechzehn auf einem breiten. Vorher brach schon
+  „Hetlingen" um. Darunter greift ein Boden: Der Ortsname wird nie kleiner als die Zeile über ihm,
+  und ein Umbruch ist ab da die bewusste Rückfallebene

@@ -50,7 +50,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
-| 49 | [„Bilder aus" und der Ortsname brechen um](#49--bilder-aus-und-der-ortsname-brechen-um) | **Fehler** | wichtig |
 | 53 | [Aus der Detailansicht fehlt der Weg zur Hausnummer](#53--aus-der-detailansicht-fehlt-der-weg-zur-hausnummer-sobald-das-jahr-bekannt-ist) | **Fehler** | wichtig |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
@@ -70,13 +69,13 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Drei Fehler sind offen, alle in der Besucheransicht.** Punkt 49 bricht den Kopfbereich um und
-Punkt 10 zerdrückt das Foto auf einem kleinen Schirm — beide warten auf dieselbe Antwort wie
+**Zwei Fehler sind offen, beide in der Besucheransicht.** Punkt 10 zerdrückt das Foto auf einem
+kleinen Schirm und wartet damit auf dieselbe Antwort wie
 [Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts). Punkt 53 nimmt einer ganzen
 Klasse von Fotos den Weg zum Nachschärfen.
 
-**Neunundzwanzig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
-28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48. Sie sind erledigt, aufgelöst oder
+**Dreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
+28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48, 49. Sie sind erledigt, aufgelöst oder
 gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt
 die **54**.
 
@@ -324,49 +323,6 @@ Nicht wichtig, nicht dringend — erst zu prüfen und zu bewerten, dann zu spezi
 ---
 
 ## Besucher-Interface
-
-### 49 · „Bilder aus" und der Ortsname brechen um
-
-Die beiden Zeilen des Kopfbereichs dürfen **nie** umbrechen — sie sind das Erste, was ein Besucher
-sieht. Bei 1470 × 956 stehen sie als „Bilder" / „aus" / „Holm" untereinander.
-
-**Die Ursache ist gemessen, und sie ist ein klassischer Fallstrick.** `--crest` schaltet in
-`styles/global.css` bei `@media (max-width: 85rem)` von `6.2rem` auf `4rem` herunter, und der
-Kommentar daneben nennt genau diesen Fehlerfall: *„Auf schmalen Schirmen eine Stufe kleiner: Sonst
-bräche der Ortsname um."* Nur greift die Umschaltung 170 px zu spät:
-
-> **In einer Medienabfrage ist `rem` immer 16 px** — die Schriftgröße des Wurzelelements, *bevor*
-> `:root { font-size: 18px }` sie ändert. `85rem` meint also **1360 px**, nicht die 1530 px, mit
-> denen die Regel offensichtlich gerechnet wurde.
-
-Dazwischen liegt das Loch. Nachgemessen am laufenden Kiosk:
-
-| Breite | `--crest` | Titelspalte | Umbruch |
-|---|---|---|---|
-| 1355 px | 4rem | 98 px | nein |
-| 1420 px | 6.2rem | 141 px | **ja, beide Zeilen** |
-| 1470 px | 6.2rem | 151 px | Kippe — „Bilder aus" braucht 152 px |
-| 1530 px | 6.2rem | 151 px | nein |
-
-**Dass es genau auf der Kippe steht, erklärt den Rest:** Bei 1470 px bricht Safari um und Chromium
-nicht. Ein Pixel Unterschied in der Schriftberechnung entscheidet, und deshalb ist es kein Fehler,
-den man einmal „bei einer Breite" behebt.
-
-**Was beim Beheben zu bedenken ist:**
-
-- `.app__heading-place` hat `overflow-wrap: anywhere` — ein bewusster Notnagel für sehr lange
-  Ortsnamen, damit sie lieber im Wort brechen als aus der Spalte laufen. Der soll bleiben; er ist
-  die Rückfallebene für „Klein Nordende-Lieth", nicht die Ursache hier.
-- Eine Grenze in `px` statt `rem` wäre die kleinste Berichtigung, löst aber nur diesen einen Ort.
-  Robuster wäre, die Titelgröße an die **verfügbare Breite** zu binden statt an `--crest` — dann
-  gibt es kein Fenster mehr, in dem die Rechnung nicht aufgeht.
-- **Der Ortsname ist der Prüfstein, nicht „Bilder aus".** „Holm" ist vier Zeichen; jedes zweite
-  Museum bringt einen längeren mit, und dann ist das Fenster breiter als hier gemessen. Siehe
-  [adaption.md](adaption.md).
-
-Hängt mit [Punkt 19](#19--displayauflösung-und--orientierung-des-museumsgeräts) zusammen: Solange
-die Auflösung des Museumsgeräts nicht feststeht, ist nicht auszuschließen, dass es genau in dieses
-Fenster fällt.
 
 ### 53 · Aus der Detailansicht fehlt der Weg zur Hausnummer, sobald das Jahr bekannt ist
 

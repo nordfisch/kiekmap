@@ -1525,3 +1525,32 @@ einmal ueber `create_all` und vergleicht Tabellen und Spaltennamen — die uebri
 aus den Modellen und koennen eine fehlende Migration deshalb grundsaetzlich nicht bemerken. Und
 `make dev` zieht den Schemastand jetzt vorweg nach, denn im Container tut das der Entrypoint, auf
 dem Entwicklungsrechner aber niemand.
+
+## 43. Der Kopfbereich misst sich an seiner Spalte, nicht am Ansichtsfenster
+
+Wappen und Titel bekommen ihre Groesse aus der Breite der Zelle, in der sie stehen
+(`container-type: inline-size` und `cqi` in `styles/global.css`), nicht aus einer Medienabfrage.
+Der Ortsname bekommt zusaetzlich seine **Laenge** mitgeteilt, weil CSS Text nicht messen kann.
+
+**Der Anlass war ein Fehler mit zwei Ursachen, und die zweite war die schwerere.**
+
+Die erste ist ein Fallstrick, den man einmal kennen muss: **In einer Medienabfrage ist `rem` immer
+16 px.** Es ist die Schriftgroesse des Wurzelelements, *bevor* eine eigene Regel sie aendert —
+`:root { font-size: 18px }` gilt darin nicht. `@media (max-width: 85rem)` meinte also 1360 px, wo
+1530 px gedacht waren, und dazwischen stand ein zu grosses Wappen neben einer zu schmalen Spalte.
+
+Die zweite: **Der Entwurf hatte 0,3 px Luft.** Auch oberhalb der Schwelle passte „Bilder aus" nur
+knapp; bei 1470 x 956 brach Safari um und Chromium nicht. Die Grenze zu berichtigen haette den
+Fehler also nur verschoben. **Eine Zeile, die erst beim Nachmessen passt, passt nicht.**
+
+**Daraus die Regel:** Wer im Kopfbereich eine Groesse setzt, bezieht sie auf den Platz, der da ist,
+und laesst Luft. Eine Schwelle im Ansichtsfenster ist immer eine Stelle, an der zwei Rechnungen
+auseinanderlaufen koennen — dasselbe Muster, das am 9. August 2026 schon die drei Hoehenrechnungen
+von Wappen, Titel und Schieber durch eine gemeinsame Ausrichtung ersetzt hat.
+
+**Und die Zusage ist begrenzt, mit Absicht.** Der Ortsname wird kleiner gesetzt, je laenger er ist,
+aber **nie kleiner als die Zeile „Bilder aus" darueber** — sonst stuende die Rangfolge auf dem
+Kopf. Wo dieser Boden greift, bricht der Name um; das ist die bessere der beiden schlechten
+Antworten und war auch vorher schon die gewaehlte. Bis zwoelf Zeichen geht es auf jedem Schirm gut,
+bis sechzehn auf einem breiten — nachgemessen und in `docs/adaption.md` aufgeschrieben, weil es
+die naechste Gemeinde betrifft und nicht diese.

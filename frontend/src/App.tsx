@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 
 import { AdminApp } from "./admin/AdminApp";
 import { PinPad } from "./admin/PinPad";
@@ -84,7 +84,16 @@ export function App() {
               onClick={() => askPin()}
             >
               <span className="app__heading-lead">{t.app.titleLead}</span>
-              <span className="app__heading-place">{region.name}</span>
+              {/* The length of the name goes into the CSS as a number, because CSS cannot measure
+                  text. That one figure is what lets the header keep its promise -- no line ever
+                  wraps -- for "Klein Nordende-Lieth" and not only for "Holm". The arithmetic is
+                  in styles/global.css at .app__heading-place. */}
+              <span
+                className="app__heading-place"
+                style={{ "--name-length": region.name.length } as CSSProperties}
+              >
+                {region.name}
+              </span>
             </button>
           </h1>
         </header>

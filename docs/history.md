@@ -2615,3 +2615,52 @@ Sicherung auf dem Anfangsschema eingespielt, `old_source` danach wieder da, Stem
 Und der umgekehrte Fall abgelehnt, mit unveraendertem Bestand. **Der Container war dabei der
 eigentliche Pruefpunkt**, denn dort laeuft uvicorn in `/srv` und nicht in `backend/` — die
 `alembic.ini` nennt ihren Skriptordner relativ, weshalb `schema._config()` ihn absolut setzt.
+
+---
+
+## Der Kopfbereich hoert auf, am Ansichtsfenster zu haengen
+
+*16. August 2026.* Punkt 49, gemeldet mit einem Bildschirmfoto bei 1470 x 956: „Bilder" / „aus" /
+„Holm", dreizeilig untereinander.
+
+**Die erste Ursache war ein Fallstrick, die zweite der eigentliche Fehler.** `--crest` schaltete
+bei `@media (max-width: 85rem)` herunter, und in einer Medienabfrage ist `rem` immer 16 px — die
+Umschaltung griff bei 1360 px statt bei den gedachten 1530. Das allein zu berichtigen waere aber
+zu kurz gesprungen gewesen: **Nachgerechnet blieben auch oberhalb der Schwelle 0,3 px** zwischen
+dem, was „Bilder aus" braucht, und dem, was die Spalte hergibt. Bei 1470 px brach Safari um und
+Chromium nicht — ein Pixel entschied.
+
+Jetzt messen sich Wappen und Titel an der Breite ihrer eigenen Zelle (`cqi`), nicht am
+Ansichtsfenster. Es gibt keine Schwelle mehr, an der etwas kippen koennte, und ueber den ganzen
+Bereich von 1024 bis 2560 px bleiben 25 bis 56 Prozent Luft. Als
+[Punkt 43](decisions.md) festgehalten.
+
+### Der Pruefstein war nicht „Bilder aus", sondern der Ortsname
+
+Der Backlog-Eintrag hatte es vorhergesagt, und die Messung bestaetigte es: Die engste Zeile ist der
+**Ortsname** — vier fette Zeichen auf 0,54 der Wappenhoehe sind breiter als zehn magere auf 0,28.
+Und seine Laenge steht nicht fest, sie kommt aus `region.json`.
+
+Nach dem ersten Umbau war „Holm" gerettet und **„Hetlingen" brach immer noch um.** Ein Kopfbereich,
+der nur mit einem vierbuchstabigen Ortsnamen haelt, ist keine Behebung, sondern dieselbe
+Zerbrechlichkeit mit etwas mehr Spielraum — und er widerspraeche der Zusage, dass ein zweites
+Museum nur seine `region.json` braucht.
+
+**CSS kann Text nicht messen**, also bekommt es die eine Zahl, die fehlt: `App.tsx` gibt die
+Zeichenzahl des Namens als `--name-length` mit, und die Schriftgroesse ist der kleinere Wert aus
+gewachsener Proportion und „Platz neben dem Wappen, geteilt durch die Zeichen". Danach stand jeder
+geprobte Name einzeilig — bis „Klein Nordende-Lieth" bei **zwoelf Pixeln** landete.
+
+**Also ein Boden**, und mit ihm endet die Zusage bewusst: nie kleiner als die Zeile darueber. Wo er
+greift, bricht der Name um. Das ist die bessere der beiden schlechten Antworten und war auch vorher
+schon die gewaehlte — nur steht jetzt in `docs/adaption.md`, wo die Grenze liegt: bis zwoelf
+Zeichen auf jedem Schirm, bis sechzehn auf einem breiten.
+
+### Was daran zu lernen war
+
+**Zweimal habe ich zu frueh gemessen und mir selbst etwas bestaetigt, das nicht stimmte.** Erst
+zaehlte ich Zeilen mit `getClientRects()` auf dem Element — das zaehlt Bloecke, nicht Zeilen, und
+meldete brav „1". Dann verglich ich die Textbreite mit der Breite ihres Kastens und bekam ueberall
+„-1 % Luft"; der Kasten ist ein Flex-Element ohne `flex: 1`, seine Breite **ist** die der
+breitesten Zeile. Erst die dritte Messung — natuerliche Textbreite gegen den wirklich freien Platz
+— sagte etwas ueber die Sache. **Eine Messung, die immer dasselbe antwortet, misst nichts.**
