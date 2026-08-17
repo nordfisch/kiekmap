@@ -145,6 +145,8 @@ export type BatchDefaults = {
   placeName?: string;
   credit?: string;
   provenance?: string;
+  /** Joins what the files bring rather than replacing it -- a keyword list is a set. */
+  tags?: string;
 };
 
 /**
@@ -354,6 +356,7 @@ export function startStickImport(path: string, defaults: BatchDefaults): Promise
       ...(defaults.placeName ? { place_name: defaults.placeName } : {}),
       ...(defaults.credit ? { credit: defaults.credit } : {}),
       ...(defaults.provenance ? { provenance: defaults.provenance } : {}),
+      ...(defaults.tags ? { tags: defaults.tags } : {}),
     }),
   });
 }
@@ -422,6 +425,7 @@ export function uploadPhoto(file: File, defaults: BatchDefaults): Promise<Upload
   if (defaults.placeName) form.append("place_name", defaults.placeName);
   if (defaults.credit) form.append("credit", defaults.credit);
   if (defaults.provenance) form.append("provenance", defaults.provenance);
+  if (defaults.tags) form.append("tags", defaults.tags);
 
   return adminFetch<UploadResult>("/upload", { method: "POST", body: form });
 }

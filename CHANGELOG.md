@@ -873,3 +873,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   11 Schlagwörter vorher auf das behaltene Foto übernommen. Der Bestand steht bei 1279 sichtbaren
   Fotos, 1275 auf der Karte. „Herausgenommen" heißt weiterhin: aus der Ausstellung, nicht von der
   Platte
+
+### Hinzugefügt
+
+- **Ein Schlagwort für den ganzen Stapel beim Import** — im Formular und beim Stick. Anders als
+  Jahr, Ort und Bildnachweis füllt es nicht nur, was leer ist: **eine Schlagwortliste ist eine
+  Menge**, das Stapelwort tritt also neben das, was die Datei mitbringt. Mehrere durch Komma
+  getrennt
+
+### Geändert
+
+- **Der Abbruch am PIN-Feld heißt „Abbrechen und zurück"** statt „Zurück zur Karte" — erst die
+  Handlung, dann das Ziel. Wer schon Ziffern getippt hat, las dort keine Abkürzung zum Verwerfen

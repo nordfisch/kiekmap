@@ -150,13 +150,62 @@ class TestAufnehmen:
             ordner,
             settings,
             defaults=lambda foto: importer.apply_batch_defaults(
-                foto, 1932, DatePrecision.YEAR, None, None, "Kirche"
+                session, foto, 1932, DatePrecision.YEAR, None, None, "Kirche"
             ),
         )
 
         fotos = session.scalars(select(Photo)).all()
         assert all(foto.date_from.year == 1932 for foto in fotos)
         assert all(foto.place_name == "Kirche" for foto in fotos)
+
+    def test_das_stapelschlagwort_tritt_neben_das_der_datei(
+        self, session, settings, stick, bilder_auf_dem_stick, monkeypatch
+    ):
+        """Der Fallstrick dieses Punktes: Schlagwoerter sind ein Feld weniger als eine Menge.
+
+        Jede andere Stapelangabe fuellt nur, *was leer ist* -- wo die Datei es besser weiss,
+        gewinnt die Datei. Ein Schlagwort verdraengt aber nichts, es kommt dazu. Wer hundert Fotos
+        aus einem Ordner "Feuerwehr" hochlaedt, will beides: was die Datei sagt **und**
+        "Feuerwehr".
+        """
+        from app.models import DatePrecision
+
+        monkeypatch.setattr(settings, "import_tags", ["Gebäude"])
+        ordner = bilder_auf_dem_stick()
+
+        importer.import_from_folder(
+            session,
+            ordner,
+            settings,
+            defaults=lambda foto: importer.apply_batch_defaults(
+                session, foto, None, DatePrecision.YEAR, None, None, None, tags="Feuerwehr, Neubau"
+            ),
+        )
+
+        for foto in session.scalars(select(Photo)).all():
+            namen = {schlagwort.name for schlagwort in foto.tags}
+            assert {"Feuerwehr", "Neubau"} <= namen
+            assert "Gebäude" in namen, "die Einstellung des Geraets bleibt daneben stehen"
+
+    def test_ohne_stapelschlagwort_aendert_sich_nichts(
+        self, session, settings, stick, bilder_auf_dem_stick, monkeypatch
+    ):
+        """Die Gegenprobe -- ein leeres Feld darf kein leeres Schlagwort anlegen."""
+        from app.models import DatePrecision, Tag
+
+        monkeypatch.setattr(settings, "import_tags", ["Gebäude"])
+        ordner = bilder_auf_dem_stick()
+
+        importer.import_from_folder(
+            session,
+            ordner,
+            settings,
+            defaults=lambda foto: importer.apply_batch_defaults(
+                session, foto, None, DatePrecision.YEAR, None, None, None, tags="  ,  "
+            ),
+        )
+
+        assert {tag.name for tag in session.scalars(select(Tag)).all()} == {"Gebäude"}
 
     def test_fortschritt_zaehlt_die_bilder(self, session, settings, stick, bilder_auf_dem_stick):
         ordner = bilder_auf_dem_stick()

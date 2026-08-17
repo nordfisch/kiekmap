@@ -245,7 +245,9 @@ export const t = {
       hint: "Für Mitarbeiterinnen und Mitarbeiter des Museums.",
       delete: "Löschen",
       submit: "Weiter",
-      cancel: "Zurück zur Karte",
+      /* The action first, the destination second. "Zurück zur Karte" said where it goes but not
+         what happens: whoever has already typed digits reads no way of discarding them there. */
+      cancel: "Abbrechen und zurück",
       wrong: "Die PIN stimmt nicht.",
     },
 
@@ -356,6 +358,10 @@ export const t = {
       chooseHint: "Bilder auf diesem Rechner auswählen",
       /** The promise stays in the tile even when the rest of the hint is gone. */
       fromStickHint: "Auf dem Stick wird nichts verändert, nur gelesen.",
+
+      /* The second sentence is the whole point of the field: every other batch statement only
+         fills what is empty, this one is added to whatever the files already say. */
+      tagsHint: "Bekommen alle Fotos dieses Stapels. Mit Komma getrennt.",
 
       dropTitle: "Bitte Bilder auswählen.",
       /** "Ablegen", not "droppen": the people in front of this are often sixty. */

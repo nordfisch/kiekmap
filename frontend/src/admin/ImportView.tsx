@@ -89,6 +89,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
   const [place, setPlace] = useState<PickedPlace | null>(null);
   const [credit, setCredit] = useState("");
   const [provenance, setProvenance] = useState("");
+  const [tags, setTags] = useState("");
 
   const [phase, setPhase] = useState<Phase>("choose");
   const [done, setDone] = useState(0);
@@ -115,6 +116,9 @@ export function ImportView({ onReview }: { onReview: () => void }) {
       // A box of scans almost always comes from one person -- so both hold for all of them.
       ...(credit.trim() ? { credit: credit.trim() } : {}),
       ...(provenance.trim() ? { provenance: provenance.trim() } : {}),
+      // Not "what is empty stays empty" like the rest: keywords are a set, so this one joins
+      // whatever the files themselves carry -- see importer.apply_batch_defaults.
+      ...(tags.trim() ? { tags: tags.trim() } : {}),
     };
   }
 
@@ -347,6 +351,17 @@ export function ImportView({ onReview }: { onReview: () => void }) {
         <fieldset className="field__group">
           <legend className="field__label">{t.admin.editor.place}</legend>
           <PlaceField value={place} onPick={setPlace} onClear={() => setPlace(null)} />
+        </fieldset>
+
+        <fieldset className="field__group">
+          <legend className="field__label">{t.admin.editor.tags}</legend>
+          <input
+            className="field__input"
+            aria-label={t.admin.editor.tags}
+            value={tags}
+            onChange={(event) => setTags(event.target.value)}
+          />
+          <p className="admin__note">{t.admin.upload.tagsHint}</p>
         </fieldset>
 
         <fieldset className="field__group">

@@ -614,6 +614,31 @@ class TestStapelUpload:
         assert foto["place_name"] == "Kirche"
         assert foto["location_source"] == "curator"
 
+    def test_schlagwort_gilt_fuer_den_ganzen_stapel(
+        self, admin_client: TestClient, session, fixtures_dir, settings, monkeypatch
+    ):
+        """Wer hundert Fotos aus einem Ordner "Feuerwehr" hochlaedt, tippt es einmal.
+
+        Und anders als jede andere Stapelangabe **verdraengt** ein Schlagwort nichts: Es tritt
+        neben das, was in der Datei steht, und neben die Einstellung des Geraets. Ein Feld haelt
+        einen Wert, eine Schlagwortliste ist eine Menge.
+        """
+        monkeypatch.setattr(settings, "import_tags", ["Gebäude"])
+
+        antwort = admin_client.post(
+            "/api/admin/upload",
+            files=[
+                ("files", ("a.jpg", _bild(fixtures_dir, "scan_ohne_exif.jpg"), "image/jpeg")),
+                ("files", ("b.jpg", _bild(fixtures_dir, "hochkant.jpg"), "image/jpeg")),
+            ],
+            data={"tags": "Feuerwehr, Neubau"},
+        )
+
+        assert antwort.json()["imported"] == 2
+        for foto in session.scalars(select(Photo)).all():
+            namen = {schlagwort.name for schlagwort in foto.tags}
+            assert {"Feuerwehr", "Neubau", "Gebäude"} <= namen
+
     def test_stapelangabe_ueberschreibt_nichts_vorhandenes(
         self, admin_client: TestClient, session, fixtures_dir
     ):

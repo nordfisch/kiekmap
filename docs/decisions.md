@@ -1864,3 +1864,30 @@ fehlt. Und „herausnehmen" heisst ``status = deleted`` -- aus der Ausstellung, 
 Abriss 18.1.1988" ist kein Stichwort, sondern ein Satz aus der Kommazerlegung von Punkt 41. Ihn
 auf das behaltene Foto zu tragen hiesse, den Fehler zu vermehren; am herausgenommenen bleibt er
 stehen, verloren geht also nichts.
+
+## 55. Ein Schlagwort ist kein Feld, sondern eine Menge
+
+*Entschieden am 16. August 2026 -- Punkt 50, das Stapelschlagwort beim Import.*
+
+Alle Stapelangaben des Importformulars folgen einer Regel: **sie fuellen nur, was leer ist.** Jahr,
+Koordinate, Ortsname, Bildnachweis, Herkunft -- wo die Datei es besser weiss, gewinnt die Datei.
+Das ist richtig, weil jedes dieser Felder genau einen Wert haelt: Fuellen hiesse entscheiden.
+
+**Fuer Schlagwoerter gilt sie nicht, und die Regel umzubiegen waere der Fehler gewesen.** Eine
+Schlagwortliste haelt keinen Wert, sondern eine Menge. Wer hundert Fotos aus einem Ordner
+„Feuerwehr" hochlaedt, will nicht *entweder* das Stapelwort *oder* das der Datei -- er will beides.
+Das Stapelschlagwort tritt also **neben** das, was die Datei mitbringt, statt ihm zu weichen.
+
+**Damit gibt es drei Quellen, und ihre Reihenfolge steht im Code**, bevor sie jemand sich
+zusammenreimt:
+
+1. ``KIEKMAP_IMPORT_TAGS`` -- gilt fuer jeden Import dieses Geraets, in Holm ``["Gebäude"]``
+2. die Stichwoerter aus der Datei selbst
+3. das Stapelwort aus dem Formular
+
+``add_tags`` ueberspringt, was das Foto schon traegt, und legt einen Namen nur einmal an. Die
+Reihenfolge kostet deshalb nichts und entscheidet nur, wer einen Namen zuerst anlegt.
+
+**Kommas trennen.** Das ist dieselbe Zerlegung, die bei Punkt 41 aus Bildunterschriften
+Schlagwoerter gemacht hat -- aber nicht derselbe Fall: Dort zerschnitt eine Maschine eine
+Beschreibung, hier tippt ein Mensch in ein Feld, das „Schlagwörter" heisst.

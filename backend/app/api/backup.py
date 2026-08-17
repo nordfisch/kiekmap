@@ -241,6 +241,7 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
                 folder,
                 settings,
                 defaults=lambda photo: importer.apply_batch_defaults(
+                    session,
                     photo,
                     request.year,
                     request.precision,
@@ -249,6 +250,7 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
                     request.place_name,
                     credit=request.credit,
                     provenance=request.provenance,
+                    tags=request.tags,
                 ),
                 report=report,
             )

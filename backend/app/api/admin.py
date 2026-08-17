@@ -576,6 +576,7 @@ def upload(
     place_name: Annotated[str | None, Form(max_length=300)] = None,
     credit: Annotated[str | None, Form(max_length=200)] = None,
     provenance: Annotated[str | None, Form()] = None,
+    tags: Annotated[str | None, Form(max_length=200)] = None,
 ) -> UploadResult:
     """Take in a batch, optionally dating and locating all of it at once.
 
@@ -584,7 +585,9 @@ def upload(
 
     They only fill what the import left empty. A scan almost never brings a usable date or GPS
     with it, so in practice they apply to everything -- but where the file does know better, the
-    file wins, and the row can still be corrected afterwards.
+    file wins, and the row can still be corrected afterwards. ``tags`` is the exception: a
+    keyword list is a set, so the batch word joins what the file brought instead of yielding to
+    it.
 
     The endpoint takes a list so a script can post a whole folder. The admin area sends one file
     per request instead, because that is what gives the person at the screen a progress count.
@@ -597,6 +600,7 @@ def upload(
 
         if outcome.succeeded and outcome.photo is not None:
             apply_batch_defaults(
+                session,
                 outcome.photo,
                 year,
                 precision,
@@ -605,6 +609,7 @@ def upload(
                 place_name,
                 credit=credit,
                 provenance=provenance,
+                tags=tags,
             )
 
         session.commit()

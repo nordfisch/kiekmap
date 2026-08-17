@@ -430,7 +430,19 @@ def find_image_folders(root: Path, max_depth: int = 4) -> list[ImportFolder]:
     return found
 
 
+def batch_tags(text: str | None) -> list[str]:
+    """The batch keyword field, split into keywords.
+
+    Commas separate, because somebody who knows the box holds "Feuerwehr, Neubau" should not need
+    a second field for it. That this is the same split that once turned whole sentences into
+    keywords (see backlog, point 1) is not the same case: there a machine cut up a caption, here
+    a person types into a field labelled "Schlagwörter".
+    """
+    return [word.strip() for word in (text or "").split(",") if word.strip()]
+
+
 def apply_batch_defaults(
+    session: Session,
     photo: Photo,
     year: int | None,
     precision: DatePrecision,
@@ -440,12 +452,20 @@ def apply_batch_defaults(
     *,
     credit: str | None = None,
     provenance: str | None = None,
+    tags: str | None = None,
 ) -> None:
     """Statements that apply to a whole batch -- from the upload form or the stick.
 
     They only fill what the import left empty. A scan almost never brings a usable date or GPS
     with it, so in practice they apply to everything -- but where the file does know better, the
     file wins.
+
+    **The keywords are the exception, and they have to be.** Every other field here holds one
+    value, so filling it means deciding between the file and the form. A keyword list is a *set*:
+    the batch word joins what the file brought rather than replacing it. Three sources end up in
+    it, and this is their order -- ``KIEKMAP_IMPORT_TAGS`` for every import on this device, then
+    what the file says about itself, then the batch word from the form. ``add_tags`` skips what
+    the photo already carries, so the order costs nothing and only decides who creates a name.
     """
     if year is not None and photo.needs_date:
         photo.date_from, photo.date_to, photo.date_precision = date_range(
@@ -467,6 +487,9 @@ def apply_batch_defaults(
 
     if provenance and not photo.provenance:
         photo.provenance = provenance
+
+    if words := batch_tags(tags):
+        add_tags(session, photo, words)
 
 
 def import_from_folder(

@@ -43,8 +43,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 |---|---|---|---|
 | | **Verwaltung** | | |
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
-| 50 | [Ein Schlagwort für den ganzen Stapel beim Import](#50--ein-schlagwort-für-den-ganzen-stapel-beim-import) | Aufgabe | wichtig |
-| 51 | [Der Abbruch am PIN-Feld heißt „Abbrechen und zurück"](#51--der-abbruch-am-pin-feld-heißt-abbrechen-und-zurück) | Aufgabe | — |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
@@ -68,10 +66,10 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur.
 
-**Fünfunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26,
-27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 42, 44, 45, 46, 47, 48, 49, 52, 53, 55. Sie sind
-erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md).
-Der nächste neue Punkt bekommt die **56**.
+**Siebenunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
+26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 55.
+Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+[history.md](history.md). Der nächste neue Punkt bekommt die **56**.
 
 ---
 
@@ -151,49 +149,6 @@ davon braucht, holt sie sich mit `python -m app.cli stats`, statt sie hier abzul
 **Offen ist auch das Wie.** Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene
 Nacharbeits-Liste reicht, ist Teil der Frage — und sie stellt sich jetzt anders als vorher, weil
 es nur noch um Fälle geht, bei denen ohnehin ein Mensch das Bild ansieht.
-
-### 50 · Ein Schlagwort für den ganzen Stapel beim Import
-
-Beim Hochladen ein Schlagwort eingeben, das **alle Fotos des Stapels** bekommen — und, wenn es sich
-anbietet, in der Liste darunter auch einzelne nachbessern. Wer hundert Fotos aus einem Ordner
-„Feuerwehr" hochlädt, weiß beim Hochladen, was sie gemeinsam haben, und niemand tippt es
-hinterher hundertmal einzeln nach.
-
-**Der Weg ist gebahnt.** `apply_batch_defaults` in `services/importer.py` nimmt schon Jahr,
-Genauigkeit, Koordinate, Ortsname, Bildnachweis und Herkunft entgegen; das Formular in
-`admin/ImportView.tsx` hat für Nachweis und Herkunft bereits Felder. Ein Schlagwortfeld daneben und
-ein Durchreichen bis `add_tags` ist der ganze Umfang.
-
-**Eine Regel gilt hier aber nicht, und das ist der Fallstrick.** Alle bisherigen Stapelangaben
-füllen nur, *was leer ist* — „wo die Datei es besser weiß, gewinnt die Datei". **Schlagwörter sind
-keine Felder, sondern eine Menge:** Sie werden ergänzt, nicht ersetzt, und ein Stapelschlagwort
-tritt neben das, was die Datei mitbringt. `add_tags` in `services/tags.py` kann das bereits — es
-überspringt, was das Foto schon trägt, und legt neue Namen nur einmal an.
-
-Damit gäbe es **drei** Quellen für Schlagwörter, und die Reihenfolge sollte im Code stehen, bevor
-jemand sie sich zusammenreimt: die Einstellung `KIEKMAP_IMPORT_TAGS` (gilt für jeden Import
-dieses Geräts, in Holm `["Gebäude"]`), die Stichwörter aus der Datei selbst, und neu das
-Stapelschlagwort.
-
-**Für die Liste darunter ist es eine Frage, keine Aufgabe.** `ReviewTable` in `ImportView.tsx`
-zeigt heute je Zeile Titel, Jahr und Ort — bewusst wenig, weil die Liste nach hundert Uploads
-sonst zur Tabellenkalkulation wird. Ein viertes Feld je Zeile ist zu erproben, nicht zu beschließen;
-für Einzelfälle gibt es den Foto-Editor, der ein Schlagwortfeld bereits hat.
-
-**Was es wert ist, entscheidet sich mit
-[Punkt 30](#30--die-karte-nach-schlagwörtern-filtern):** Solange aus Schlagwörtern kein Filter wird,
-sammelt dieser Punkt Angaben, die niemand sieht.
-
-### 51 · Der Abbruch am PIN-Feld heißt „Abbrechen und zurück"
-
-Unter dem Zahlenfeld steht heute **„Zurück zur Karte"**. Das beschreibt, wohin es geht, aber nicht,
-was passiert: Wer schon Ziffern getippt hat, liest dort keine Abkürzung zum Verwerfen. Richtig ist
-**„Abbrechen und zurück"** — erst die Handlung, dann das Ziel.
-
-Eine Zeile: `t.admin.pin.cancel` in `frontend/src/text/de.ts`. Dass sie hier steht und nicht
-nebenbei geändert wurde, hat einen Grund — sie gehört zu
-[Punkt 40](#40--ein-durchgang-über-die-ganze-oberfläche), dem Durchgang über die ganze Oberfläche,
-und dort werden mehr solche Stellen auftauchen. Einzeln ist sie in zwei Minuten erledigt.
 
 ### 31 · Einstellungen in der Verwaltung pflegen statt in der `.env`
 

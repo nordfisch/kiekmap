@@ -510,6 +510,10 @@ class ImportRequest(DriveChoice):
     #: A box of scans usually comes from one person -- so both of these belong to the whole batch.
     credit: str | None = Field(default=None, max_length=200)
     provenance: str | None = None
+    #: Keywords for the whole batch, separated by commas. Unlike the fields above they are *added*
+    #: to what the file itself brought, because a keyword list is a set -- see
+    #: ``importer.apply_batch_defaults``.
+    tags: str | None = Field(default=None, max_length=200)
 
 
 class JobState(BaseModel):

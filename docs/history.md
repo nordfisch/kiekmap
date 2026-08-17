@@ -3152,3 +3152,31 @@ gefunden".
 Aufgefallen ist es nur, weil ich den Befehl direkt nach dem Zusammenfuehren an den fuenf bewusst
 behaltenen Gruppen ausprobiert habe und die Zahl nicht stimmte. Der Test dazu heisst jetzt
 `test_beide_fotos_stehen_in_der_gruppe`.
+
+## Zwei kleine Punkte, und einer hatte einen Fallstrick
+
+*16. August 2026 -- Punkt 50 und 51.*
+
+**Punkt 51 war eine Zeile.** Unter dem Zahlenfeld stand „Zurück zur Karte" -- das sagt, wohin es
+geht, aber nicht, was passiert. Wer schon Ziffern getippt hat, liest dort keine Abkuerzung zum
+Verwerfen. Jetzt steht dort **„Abbrechen und zurück"**: erst die Handlung, dann das Ziel. Am
+laufenden Kiosk nachgesehen.
+
+**Punkt 50 sah nach zwei Feldern aus und hatte eine Entscheidung in sich.** Ein Schlagwort fuer den
+ganzen Stapel, durchgereicht bis `add_tags` -- so weit die Aufgabe. Der Fallstrick stand im Backlog
+und hat sich beim Bauen bestaetigt: **Alle anderen Stapelangaben fuellen nur, was leer ist.** Jahr,
+Ort, Bildnachweis, Herkunft geben der Datei den Vortritt, weil jedes dieser Felder einen Wert haelt
+und Fuellen also Entscheiden hiesse.
+
+Eine Schlagwortliste haelt keinen Wert, sondern eine Menge. Wer hundert Fotos aus einem Ordner
+„Feuerwehr" hochlaedt, will nicht entweder das Stapelwort oder das der Datei, sondern beides. Das
+Stapelschlagwort tritt deshalb **neben** das der Datei, statt ihm zu weichen -- und damit gibt es
+drei Quellen, deren Reihenfolge jetzt im Code steht statt in jemandes Kopf. `decisions.md`,
+Punkt 55.
+
+Beides gilt fuer den Upload **und** fuer den Stick, weil der Stick der Weg des Museumsteams ist.
+Vier Tests, zwei Gegenproben: eine gegen das Uebernehmen selbst, eine gegen die Kommazerlegung.
+
+Die Liste unter dem Import bekommt **kein** viertes Feld -- der Backlog nannte das ausdruecklich
+eine Frage und keine Aufgabe, und fuer den Einzelfall gibt es den Foto-Editor, der ein
+Schlagwortfeld laengst hat.
