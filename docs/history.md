@@ -2986,3 +2986,60 @@ uebernommen. 19 Fotos, ersetzt durch den vollen Namen.
 Bytelaenge der haeufigsten Werte eines Textfeldes zeigt so etwas sofort. Es war der einzige;
 „August" bei neun Fotos ist mit sechs Zeichen keine Feldgrenze, sondern eine unvollstaendige
 Eingabe und gehoert zu Punkt 1. `decisions.md`, Punkt 51.
+
+## Was auf dem Weg verloren ging
+
+*16. August 2026, nach vier Rueckfragen des Museums.* Die erste lautete: „Hast du bei der
+Umwandlung nach JPG die Metadaten mitgenommen?"
+
+**Nein.** Farbprofil und Aufloesung ja, EXIF, IPTC und XMP nicht -- Pillow schreibt diese Bloecke
+nur, wenn man sie ausdruecklich uebergibt. Nachgezaehlt: 12 der 89 umgewandelten Dateien trugen
+Metadaten, alle 12 sind importiert.
+
+**Der Ausfall war unsichtbar, und das ist der Kern.** Der Import setzt
+``credit=info.credit or settings.import_credit`` -- die Vorgabe aus der ``.env`` springt ein, wenn
+die Datei nichts sagt. Fuenf Fotos trugen danach „Sammlung Heimatmuseum Holm", wo „Hubert Wulf"
+haette stehen muessen. Kein leeres Feld, keine Meldung, nichts zu sehen: **wo eine Vorgabe die
+Luecke fuellt, wird aus einem Verlust eine Behauptung.** `decisions.md`, Punkt 52.
+
+Dazu verloren: eine Beschreibung („Collage von verschiedenen Häusern in der Niederstraße"), vier
+Herkunftsangaben („CD Niederstraße Holm - alte Häuser - FW -2002") und, in einer nicht importierten
+Datei, eine **GPS-Koordinate**.
+
+### Der Weg dorthin ging durch zwei falsche Annahmen
+
+Die erste: das IPTC eines TIFF liege im Photoshop-Block, Tag 34377. Bei 25 Dateien stimmt das --
+bei `Heimatmuseum Holm (1).tif` sind darin aber nur 28 Byte, und die IPTC-Felder stehen in Tag
+33723. Pillows eigener Leser holt sie von dort, und zwar **an seinem eigenen verstuemmelten Wert
+vorbei**, direkt aus den Rohbytes.
+
+Daraus wurde die Loesung: Der Block wird nicht kopiert, sondern **aus dem zurueckgeschrieben, was
+``getiptcinfo`` liefert** -- dieselbe Funktion, mit der der Import die Datei spaeter liest. Damit
+ist der Rundlauf per Konstruktion wahr und nicht per Hoffnung.
+
+Die zweite Annahme: man koenne das EXIF eines TIFF einfach uebernehmen. Kann man nicht -- dessen
+erstes Verzeichnis ist Struktur (`StripOffsets`, `RowsPerStrip`), und `tobytes()` scheitert an
+einer der Holmer Dateien. Es wird deshalb aus einer Liste neu gebaut: die neun Tags, die etwas ueber
+das Bild sagen, plus die beiden Unterverzeichnisse fuer EXIF und GPS.
+
+### Die Probe, die zaehlt
+
+Nicht „sind die Bytes mitgekommen", sondern **„liest unser eigener Leser aus der Kopie dasselbe wie
+aus der Quelle"**. Ueber alle 89 Dateien: **64 von 64 lesbaren kommen unveraendert durch**, und zwei
+Laeufe geben denselben SHA-256.
+
+Die uebrigen 25 waren nicht lesbar, und das war der zweite Fund des Tages.
+
+### Ein TIFF, das den ganzen Importlauf beendet haette
+
+`read_image_info` warf bei 25 der Archivscans einen `TypeError`: Ihr XMP-Paket liegt in einem
+Zahlen-Tag, Pillow gibt Zahlen zurueck, und jeder spaetere `getexif()` jagt einen regulaeren
+Ausdruck darueber.
+
+``import_file`` faengt `OSError` und `ValueError`. **Einen `TypeError` faengt es nicht** -- eine
+einzige solche Datei haette also nicht sich selbst, sondern den ganzen Lauf beendet. Und TIFF ist
+ein erlaubtes Format; der Ordner am Stick darf eines enthalten.
+
+Entschaerft wird es jetzt in `exif.open_image`, durch das **jeder** Leser geht: `thumbnails` lief
+ueber `ImageOps.exif_transpose` in dieselbe Falle, einen Schritt weiter. Der Test baut das TIFF
+nach, statt eine Fixture einzuchecken.

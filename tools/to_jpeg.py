@@ -22,6 +22,17 @@ second time.
     The nineteenth is ``Weidenstieg/Straßenauffahrt``, whose old JPEG carries different tables --
     somebody converted that one by hand, before the recipe existed.
 
+**What the file says about itself comes along**: EXIF, the IPTC block and the XMP packet. It did
+not until 16 August 2026, and twelve photographs paid for it -- they lost their photographer
+("Hubert Wulf"), a caption and a date, and carried the collection's default credit instead. A
+wrong attribution is worse than none: it looks like an answer.
+
+    That does move the goalposts of the promise above, and the shift is worth naming. Two runs of
+    *this* recipe over the same file still give the same SHA-256 -- but a file converted before
+    that day and the same file converted today are no longer the same bytes. Nothing needs
+    reconverting; the twelve were repaired in place. It matters for the next stand, where
+    duplicates are recognized by picture and not by byte anyway (decisions.md, point 47).
+
 What this does **not** do is notice that a converted TIFF already sits in the collection as a
 JPEG. It cannot: the two files differ in their metadata blocks, so their SHA-256 differ, and
 recognizing them means comparing pictures rather than bytes. That is backlog point 42.
@@ -33,7 +44,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from PIL import Image, ImageFile
+from PIL import Image, ImageFile, IptcImagePlugin
 
 #: Taken over unchanged -- these are already what the collection stores.
 KEPT = {".jpg", ".jpeg"}
@@ -44,9 +55,115 @@ CONVERTED = {".png", ".tif", ".tiff", ".webp"}
 #: Measured against the first stock -- see the module docstring. Do not tune.
 JPEG_OPTIONS = {"quality": 92, "subsampling": 0, "optimize": True}
 
+#: EXIF tags worth carrying from a TIFF into a JPEG -- what the picture says, not how the file is
+#: laid out.
+#:
+#: A TIFF's first directory is mostly structure: ``StripOffsets``, ``RowsPerStrip``,
+#: ``PhotometricInterpretation``. Written into a JPEG those are at best meaningless and at worst a
+#: lie about where the pixels are, and ``Exif.tobytes()`` fails outright on one of the Holm scans,
+#: whose ``IPTCNAA`` tag Pillow reads as a single mangled integer. So the block is rebuilt from a
+#: list rather than copied -- these tags plus the two sub-directories below.
+_EXIF_KEEP = frozenset(
+    {
+        0x010E,  # ImageDescription
+        0x010F,  # Make
+        0x0110,  # Model
+        0x0112,  # Orientation
+        0x0132,  # DateTime
+        0x013B,  # Artist
+        0x8298,  # Copyright
+        0x9C9B,  # XPTitle
+        0x9C9E,  # XPKeywords
+    }
+)
+_EXIF_IFD = 0x8769
+_GPS_IFD = 0x8825
+
+#: TIFF tag 700, the XMP packet.
+_TIFF_XMP = 700
+
+_APP13 = b"\xff\xed"
+_PHOTOSHOP_MARKER = b"Photoshop 3.0\x00"
+#: A JPEG segment carries a two-byte length, so this much payload at most.
+_SEGMENT_MAX = 0xFFFF - 2 - len(_PHOTOSHOP_MARKER)
+
+
+def _iptc_block(parsed: dict) -> bytes:
+    """Rebuild the IPTC block from what Pillow parsed, wrapped as a Photoshop resource.
+
+    **Rebuilt rather than copied, and that is the point.** A TIFF keeps its IPTC in either of two
+    places -- tag 34377 (the Photoshop resources) or tag 33723 (IPTC-NAA directly) -- and the Holm
+    stock uses both. Worse, Pillow reads 33723 back as a single mangled integer, so the raw bytes
+    are not available at all. What *is* available is ``getiptcinfo``, and that is the same function
+    the import reads the file with later: writing back what it returned makes the round trip true
+    by construction rather than by hope.
+
+    Sorted by record and dataset, so the same input gives the same bytes -- the collection names
+    its files after their SHA-256, and a conversion that wobbles would take every picture in twice.
+    The order also puts dataset 1:90, the character-set marker, in front of the text it applies to.
+    """
+    records = bytearray()
+    for (record, dataset), value in sorted(parsed.items()):
+        for single in value if isinstance(value, list) else [value]:
+            if not isinstance(single, bytes) or len(single) > 0x7FFF:
+                continue
+            records += bytes((0x1C, record, dataset)) + len(single).to_bytes(2, "big") + single
+    if not records:
+        return b""
+
+    # 8BIM resource 0x0404 is the IPTC-NAA record. The empty name is a Pascal string padded to an
+    # even length, and the payload is padded the same way.
+    block = b"8BIM\x04\x04\x00\x00" + len(records).to_bytes(4, "big") + bytes(records)
+    return block + b"\x00" * (len(block) % 2)
+
+
+def _carried_metadata(picture: Image.Image, raw_xmp: object) -> tuple[dict, bytes]:
+    """What of the source's metadata goes into the JPEG: save options, plus the APP13 payload."""
+    options: dict = {}
+    source_exif = picture.getexif()
+
+    clean = Image.Exif()
+    for tag in _EXIF_KEEP:
+        if tag in source_exif:
+            clean[tag] = source_exif[tag]
+    for ifd in (_EXIF_IFD, _GPS_IFD):
+        if content := dict(source_exif.get_ifd(ifd)):
+            clean[ifd] = content
+    if len(clean):
+        options["exif"] = clean.tobytes()
+
+    xmp = picture.tag_v2.get(_TIFF_XMP) if picture.format == "TIFF" else raw_xmp
+    if isinstance(xmp, str):
+        xmp = xmp.encode("utf-8")
+    if isinstance(xmp, bytes):
+        options["xmp"] = xmp
+
+    try:
+        parsed = IptcImagePlugin.getiptcinfo(picture) or {}
+    except Exception:  # noqa: BLE001 -- a broken IPTC block must not stop the conversion
+        parsed = {}
+    photoshop = _iptc_block(parsed)
+    return options, photoshop if len(photoshop) <= _SEGMENT_MAX else b""
+
+
+def _splice_app13(path: Path, payload: bytes) -> None:
+    """Insert the Photoshop block behind the segments Pillow wrote.
+
+    Behind rather than in front: the JFIF header belongs first, and a reader that only looks at
+    the very first segment must still find it. Everything after that is free -- ``APPn`` markers
+    may stand in any order, and Pillow's own IPTC reader walks all of them.
+    """
+    data = path.read_bytes()
+    position = 2  # behind the start-of-image marker
+    while data[position : position + 1] == b"\xff" and 0xE0 <= data[position + 1] <= 0xEF:
+        position += 2 + int.from_bytes(data[position + 2 : position + 4], "big")
+
+    segment = _APP13 + (len(_PHOTOSHOP_MARKER) + len(payload) + 2).to_bytes(2, "big")
+    path.write_bytes(data[:position] + segment + _PHOTOSHOP_MARKER + payload + data[position:])
+
 
 def to_jpeg(source: Path, target: Path) -> None:
-    """Write one picture as a JPEG, colour profile and resolution carried over.
+    """Write one picture as a JPEG, carrying over what the file says about itself.
 
     Straight to the file rather than through a buffer -- a 200 MB TIFF should not need its JPEG
     in memory as well, the same reason ``storage.sha256_of_file`` reads in chunks.
@@ -59,13 +176,17 @@ def to_jpeg(source: Path, target: Path) -> None:
     """
     picture = Image.open(source)
     # Pillow trips over a TIFF whose XMP field arrives as a tuple instead of text, and 25 of the
-    # Holm scans have one. The field says nothing we keep, so it goes before anything reads it.
-    picture.info.pop("xmp", None)
+    # Holm scans have one. It goes before anything reads it -- the packet itself is taken from
+    # the TIFF tag, which is not mangled.
+    raw_xmp = picture.info.pop("xmp", None)
     options = dict(JPEG_OPTIONS)
     if icc := picture.info.get("icc_profile"):
         options["icc_profile"] = icc
     if dpi := picture.info.get("dpi"):
         options["dpi"] = dpi
+
+    carried, photoshop = _carried_metadata(picture, raw_xmp)
+    options.update(carried)
 
     if picture.mode in ("RGBA", "LA", "P"):
         # JPEG has no transparency. White rather than black: these are scans of paper, and a
@@ -81,6 +202,9 @@ def to_jpeg(source: Path, target: Path) -> None:
     ImageFile.MAXBLOCK = max(ImageFile.MAXBLOCK, width * height * 4)
     with target.open("wb") as handle:
         picture.save(handle, "JPEG", **options)
+
+    if photoshop:
+        _splice_app13(target, photoshop)
 
 
 def build(source_root: Path, target_root: Path, dry_run: bool = False) -> Counter:

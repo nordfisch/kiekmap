@@ -1761,3 +1761,33 @@ Datei beschriftet hat, hat an seiner Feldgrenze aufgehoert, und wir haben es unb
 nichts nachzuzaehlen: Ein Blick auf die Byte- und Zeichenlaenge der haeufigsten Werte eines
 Textfeldes zeigt ihn sofort. Hier war es der einzige; „August" bei neun Fotos ist mit sechs
 Zeichen keine Feldgrenze, sondern eine unvollstaendige Eingabe und gehoert damit zu Punkt 1.
+
+## 52. Eine Vorgabe ist kein Befund
+
+*Gelernt am 16. August 2026, an fuenf falsch zugeschriebenen Fotos.*
+
+Die Umwandlung nach JPEG reichte lange nur Farbprofil und Aufloesung durch. Zwoelf Fotos des
+neueren Archivstands verloren dabei, was ihre Datei ueber sie sagte -- und **fuenf davon trugen
+danach den Bildnachweis "Sammlung Heimatmuseum Holm", wo "Hubert Wulf" haette stehen muessen.**
+
+Der Weg dorthin ist eine einzige Zeile im Import:
+
+    credit=info.credit or settings.import_credit or None
+
+Die Vorgabe aus der ``.env`` springt ein, wenn die Datei nichts sagt -- und das ist richtig so.
+Falsch wurde es, weil die Datei etwas sagte und wir es unterwegs verloren hatten. **Der Ausfall
+war damit nicht sichtbar**: Das Feld war gefuellt, es sah nach einer Auskunft aus, und eine falsche
+Zuschreibung ist schlimmer als eine fehlende. Bei einem Museum ist sie die unangenehmste Sorte
+Fehler ueberhaupt.
+
+**Zwei Regeln folgen daraus.**
+
+Erstens, fuer die Reparatur: Wo ein Feld genau den Vorgabewert traegt und die Datei etwas anderes
+sagt, gewinnt die Datei. Eine Vorgabe ist eine Rueckfallebene, keine Aussage, und darf deshalb
+weichen -- anders als eine Angabe, die ein Mensch gesetzt hat.
+
+Zweitens, fuer alles, was Daten von A nach B traegt: **Was auf dem Weg verloren geht, faellt nur
+dort auf, wo hinterher eine Luecke steht.** Wo eine Vorgabe die Luecke fuellt, wird aus dem Verlust
+eine Behauptung. Die Probe darauf ist billig und heisst nicht "sind die Bytes mitgekommen", sondern
+"liest unser eigener Leser aus der Kopie dasselbe wie aus der Quelle" -- so steht sie jetzt als
+Test in ``test_to_jpeg.py``.

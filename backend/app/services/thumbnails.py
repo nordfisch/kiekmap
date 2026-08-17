@@ -13,6 +13,7 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
+from app.services.exif import open_image
 from app.services.storage import THUMBNAIL_SIZES, thumbnail_path
 
 log = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ def create_thumbnails(source: Path, target_root: Path, sha256: str) -> list[Path
     """Create every size and return the paths written."""
     written: list[Path] = []
 
-    with Image.open(source) as raw:
+    with open_image(source) as raw:
         display = _for_display(raw)
 
         for size in THUMBNAIL_SIZES:

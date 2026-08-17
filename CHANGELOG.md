@@ -843,3 +843,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Der Bildnachweis ist vereinheitlicht:** Vier Schreibweisen des Förderkreises heißen jetzt alle
   „Förderkreis Kultur und Brauchtum in der Gemeinde Holm e. V."; „August" ohne Nachnamen ist bei
   9 Fotos zu „August Möller" ergänzt. 104 Felder, jedes im Änderungsprotokoll
+
+### Behoben
+
+- **Die Umwandlung nach JPEG nimmt die Metadaten mit** — EXIF, IPTC und XMP. Vorher gingen sie
+  verloren: 12 Fotos verloren dabei ihren Fotografen, eine Beschreibung und eine Datierung, und
+  fünf trugen danach den Vorgabe-Bildnachweis der Sammlung statt „Hubert Wulf". **Eine falsche
+  Zuschreibung sieht aus wie eine Auskunft** — deshalb fiel es niemandem auf. Die 12 sind
+  nachgezogen
+- **Ein TIFF mit krummem XMP-Tag beendet nicht mehr den ganzen Importlauf.** 25 Archivscans legen
+  ihr XMP in einem Zahlen-Tag ab; Pillow wirft darauf `TypeError`, und den fing der Import nicht —
+  er ist auf `OSError` und `ValueError` gefasst. TIFF ist ein erlaubtes Format, der Fall also
+  erreichbar

@@ -214,13 +214,31 @@ def _read_iptc(image: Image.Image) -> dict:
         return {}
 
 
+def open_image(path: Path) -> Image.Image:
+    """Open an image file for reading, with one Pillow trap defused.
+
+    **A TIFF may keep its XMP packet in a numeric tag, and Pillow then hands it back as a tuple of
+    integers.** Any later ``getexif()`` runs a regular expression over that value and raises
+    ``TypeError`` -- which ``import_file`` does not catch, because it is prepared for ``OSError``
+    and ``ValueError``. A single such file would therefore end the whole import run instead of
+    being rejected on its own, and TIFF is an allowed format. 25 of the Holm scans are like this.
+
+    Every reader has to pass through here, not just this module: ``ImageOps.exif_transpose`` in
+    ``thumbnails`` walks into the same trap, one step further along.
+    """
+    image = Image.open(path)
+    if not isinstance(image.info.get("xmp"), str | bytes):
+        image.info.pop("xmp", None)
+    return image
+
+
 def read_image_info(path: Path) -> ImageInfo:
     """Open the file and read what it says about itself.
 
     Raises ``OSError``/``UnidentifiedImageError`` if it is not a readable image -- the importer
     turns that into an entry in the import log.
     """
-    with Image.open(path) as image:
+    with open_image(path) as image:
         # A portrait scan carries its orientation in EXIF rather than in the pixels. For display
         # and thumbnails the dimensions after that rotation are what count.
         rotated = image.size

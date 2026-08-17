@@ -485,3 +485,28 @@ class TestWoDiePfadSchichtNichtGilt:
         assert foto.title is None
         assert foto.provenance is None
         assert foto.tags == []
+
+
+class TestSperrigeDateien:
+    """Dateien, an denen der Import selbst haengen bleibt -- nicht ihr Inhalt, ihre Form."""
+
+    def test_ein_tiff_mit_krummem_xmp_bricht_den_lauf_nicht_ab(self, session, settings, tmp_path):
+        """25 Archivscans legen ihr XMP in einem Zahlen-Tag ab, und Pillow gibt Zahlen zurueck.
+
+        Jeder spaetere ``getexif()`` jagt einen regulaeren Ausdruck darueber und wirft
+        ``TypeError`` -- den faengt ``import_file`` nicht, weil er auf ``OSError`` und
+        ``ValueError`` gefasst ist. **Eine einzige solche Datei haette damit nicht sich selbst,
+        sondern den ganzen Importlauf beendet**, und TIFF ist ein erlaubtes Format.
+        """
+        from PIL import TiffImagePlugin
+
+        ordner = TiffImagePlugin.ImageFileDirectory_v2()
+        ordner[700] = (1010792560, 1633905509)  # XMLPacket
+        ordner.tagtype[700] = 4  # LONG statt BYTE -- so liegt es in den Archivdateien
+        pfad = tmp_path / "scan.tif"
+        Image.new("RGB", (40, 30)).save(pfad, "TIFF", tiffinfo=ordner)
+
+        outcome = import_file(session, pfad, settings)
+
+        assert outcome.result == ImportResult.IMPORTED
+        assert (outcome.photo.width, outcome.photo.height) == (40, 30)
