@@ -840,3 +840,6 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Beides steht jetzt nebeneinander
 - **Ein abgeschnittener Bildnachweis** bei 19 Fotos: „Förderkreis für Kultur und Brauc" ist genau
   32 Zeichen lang — die Längengrenze des IPTC-Feldes 2:80. Ersetzt durch den vollen Namen
+- **Der Bildnachweis ist vereinheitlicht:** Vier Schreibweisen des Förderkreises heißen jetzt alle
+  „Förderkreis Kultur und Brauchtum in der Gemeinde Holm e. V."; „August" ohne Nachnamen ist bei
+  9 Fotos zu „August Möller" ergänzt. 104 Felder, jedes im Änderungsprotokoll
