@@ -239,8 +239,18 @@ def apply_folder_meta(
     # street: it records where the file lay, and that is worth keeping even when the folder said
     # nothing we could read. Three photos of the first import lost it to the early return below --
     # two that lay loose in the import root, and one under an ambiguous street name.
-    if not photo.provenance and settings.import_provenance:
-        photo.provenance = settings.import_provenance + str(relative_to_root(path, root))
+    #
+    # **It is added to whatever the file already said, not skipped.** Until 16 August 2026 this
+    # only filled an empty field, and 265 photographs whose file named a lender ("Familie Boysen")
+    # therefore never got the path -- the one trace back to the file in the museum's archive, and
+    # the one thing nobody can reconstruct from the picture. Both belong here: who lent it and
+    # where it lay are different answers to different questions.
+    if settings.import_provenance:
+        archive = settings.import_provenance + str(relative_to_root(path, root))
+        if not photo.provenance:
+            photo.provenance = archive
+        elif settings.import_provenance not in photo.provenance:
+            photo.provenance = f"{photo.provenance}, {archive}"
 
     meta = parse_path(path.parts[:-1], street_names(session))
     if not meta.street:

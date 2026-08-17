@@ -1725,3 +1725,39 @@ eine Zahl ein Datum ist. Ein Ereigniswort dahinter -- *abgerissen*, *erbaut*, *a
 die eine Richtung: **Eine Liste, die ausschliesslich ablehnt, darf unvollstaendig sein.** Sie laesst
 dann einen Fall durch, den ein Mensch danach noch sieht; eine Liste, die etwas *annimmt*, macht aus
 einer Luecke eine falsche Angabe.
+
+## 50. Wer es geliehen hat und wo es lag, sind zwei Antworten
+
+*Nachgebessert am 16. August 2026, gemeldet vom Museum.*
+
+Die Herkunft trug bei 265 Fotos den Archivpfad nicht -- genau bei denen, deren Datei selbst schon
+etwas sagte („Familie Boysen", „Sammlung Jan Wendt", „August Möller"). `apply_folder_meta`
+fuellte das Feld nur, wenn es leer war, und stand damit vor jeder Angabe, die jemand schon
+gemacht hatte.
+
+**Das ist genau umgekehrt, als es sein muesste.** Wer ein Foto geliehen hat, steht in der Datei
+und ist damit gesichert. **Wo es im Archiv lag, steht nur im Pfad** -- und der Pfad geht mit dem
+Import verloren, denn im Bestand heisst die Datei nach ihrem SHA-256. Es ist die einzige Angabe
+der beiden, die sich aus dem Bild nie wiederherstellen laesst, und sie fehlte ausgerechnet dort,
+wo ohnehin schon jemand mitgedacht hatte.
+
+Beides steht jetzt nebeneinander, durch Komma getrennt:
+
+    Familie Boysen, Online-Archiv des Museums, Verzeichnis 01 Orte/Straßen/Im Sande/…/15.jpg
+
+Das Feld bleibt, was es war: **nicht oeffentlich**. Es steht nicht in `PhotoDetail`, also auch
+nicht auf dem Schirm im Ausstellungsraum -- siehe Punkt 36.
+
+## 51. Ein Feld, das an seiner Grenze endet, ist abgeschnitten
+
+*Gemeldet am 16. August 2026.*
+
+Bei 19 Fotos lautete der Bildnachweis „Förderkreis für Kultur und Brauc". Das sieht nach einem
+Tippfehler aus und ist keiner: **Die Zeichenkette ist genau 32 Zeichen lang**, und 32 ist die
+Laengengrenze des IPTC-Feldes 2:80 (By-line). Nicht wir haben gekuerzt -- das Programm, das die
+Datei beschriftet hat, hat an seiner Feldgrenze aufgehoert, und wir haben es unbesehen uebernommen.
+
+**Eine Angabe, deren Laenge auf eine runde Zahl faellt, ist verdaechtig**, und der Fall kostet
+nichts nachzuzaehlen: Ein Blick auf die Byte- und Zeichenlaenge der haeufigsten Werte eines
+Textfeldes zeigt ihn sofort. Hier war es der einzige; „August" bei neun Fotos ist mit sechs
+Zeichen keine Feldgrenze, sondern eine unvollstaendige Eingabe und gehoert damit zu Punkt 1.

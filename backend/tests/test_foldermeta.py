@@ -363,6 +363,32 @@ class TestWasAmFotoLandet:
 
         assert foto.provenance == "Archiv, Verzeichnis 01 Orte/Hauptstrasse/14 Museum/a.jpg"
 
+    def test_der_archivpfad_kommt_zu_dem_dazu_was_die_datei_sagt(
+        self, session, settings, sample_image, ortsindex, monkeypatch
+    ):
+        """265 Fotos hatten den Pfad nie bekommen, weil ihre Datei schon eine Herkunft nannte.
+
+        Wer ein Foto geliehen hat und wo es im Archiv lag, sind zwei Antworten auf zwei Fragen.
+        Die erste steht in der Datei, die zweite nur im Pfad -- und die zweite laesst sich aus dem
+        Bild nie wieder herstellen. Bis zum 16. August 2026 fuellte diese Zeile nur ein leeres
+        Feld und liess den Pfad in genau den Faellen weg, in denen ohnehin schon jemand
+        mitgedacht hatte.
+        """
+        monkeypatch.setattr(settings, "import_provenance", "Archiv, Verzeichnis 01 Orte/")
+
+        wurzel = settings.data_dir / "archiv"
+        ziel = wurzel / "Hauptstrasse/14 Museum/a.jpg"
+        ziel.parent.mkdir(parents=True, exist_ok=True)
+        ziel.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
+        foto = import_file(session, ziel, settings).photo
+        foto.provenance = "Familie Rissler"
+
+        apply_folder_meta(session, foto, ziel, wurzel, settings)
+
+        assert foto.provenance == (
+            "Familie Rissler, Archiv, Verzeichnis 01 Orte/Hauptstrasse/14 Museum/a.jpg"
+        )
+
     def test_ohne_eingestellten_vorspann_bleibt_die_herkunft_leer(
         self, session, settings, sample_image, ortsindex
     ):

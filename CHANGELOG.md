@@ -830,3 +830,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Die 395 Fotos des neuen Archivstands sind nachbereinigt** — 423 Felder in sechs Schritten.
   Kein Titel im Bestand ist noch länger als 58 Zeichen, keiner wiederholt seine Adresse, 11 Fotos
   sind aus ihrem eigenen Text datiert
+
+### Behoben
+
+- **Die Herkunft nennt jetzt immer auch den Pfad im Archiv.** Bei 265 Fotos fehlte er — genau bei
+  denen, deren Datei selbst schon eine Herkunft nannte („Familie Boysen"): Der Import füllte das
+  Feld nur, wenn es leer war. Wer ein Foto geliehen hat, steht in der Datei; **wo es lag, steht
+  nur im Pfad** und geht beim Import verloren, weil die Datei im Bestand nach ihrem SHA-256 heißt.
+  Beides steht jetzt nebeneinander
+- **Ein abgeschnittener Bildnachweis** bei 19 Fotos: „Förderkreis für Kultur und Brauc" ist genau
+  32 Zeichen lang — die Längengrenze des IPTC-Feldes 2:80. Ersetzt durch den vollen Namen

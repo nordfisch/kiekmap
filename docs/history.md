@@ -2952,3 +2952,37 @@ Ein Schritt der Liste lief ins Leere, und die Zahl davor war falsch gemessen: �
 der Ortsindex nicht kennt" zaehlte auf exakte Uebereinstimmung und uebersah, dass der Import laengst
 `address_near` benutzt -- die Nachbarnummer-Regel aus Punkt 41. **Alle 221 Fotos mit Hausnummer
 liegen hausgenau**, es war nichts nachzuschaerfen.
+
+### Zwei Meldungen aus dem Museum, und beide zeigten auf dieselbe Zeile
+
+*Ebenfalls 16. August 2026.* „Du hast den Pfad an einigen Stellen nicht in die Herkunft
+uebernommen" -- mit einem Beispiel, `ee44c8ae`, und der Angabe, wie es lauten soll.
+
+Es waren **265 Fotos**, und sie hatten alle dasselbe gemeinsam: Ihre Datei nannte selbst eine
+Herkunft. `apply_folder_meta` schrieb den Archivpfad nur in ein *leeres* Feld und stand damit vor
+jeder Angabe, die jemand schon gemacht hatte -- „Familie Boysen", „Sammlung Jan Wendt",
+„August Möller".
+
+**Die Regel war genau falsch herum.** Wer ein Foto geliehen hat, steht in der Datei und ist
+gesichert. Wo es im Archiv lag, steht nur im Pfad -- und der geht beim Import verloren, denn im
+Bestand heisst die Datei nach ihrem SHA-256. Von den beiden Angaben fehlte die, die sich nie
+wiederherstellen laesst. `decisions.md`, Punkt 50.
+
+Zugeordnet wurden die 265 ueber genau diesen SHA-256: beide Archivordner liegen noch auf der
+Platte, jede Datei einmal gehasht, **265 von 265 gefunden**. Die Regel im Import haengt den Pfad
+jetzt an, statt zu schweigen; ein Test und seine Gegenprobe halten das fest.
+
+### Und der Bildnachweis, der an einer runden Zahl endete
+
+Die zweite Meldung: „Der Bildnachweis ist bei einigen kaputt, da steht ‚Förderkreis für Kultur und
+Brauc'."
+
+Das sieht nach einem Tippfehler aus und ist keiner. **Die Zeichenkette ist genau 32 Zeichen lang**,
+und 32 ist die Laengengrenze des IPTC-Feldes 2:80. Nicht wir haben gekuerzt -- das Programm, das
+die Datei beschriftet hat, hat an seiner Feldgrenze aufgehoert, und wir haben es unbesehen
+uebernommen. 19 Fotos, ersetzt durch den vollen Namen.
+
+**Beim Nachzaehlen fiel die Probe fuer den ganzen Fall gleich mit an:** Ein Blick auf Zeichen- und
+Bytelaenge der haeufigsten Werte eines Textfeldes zeigt so etwas sofort. Es war der einzige;
+„August" bei neun Fotos ist mit sechs Zeichen keine Feldgrenze, sondern eine unvollstaendige
+Eingabe und gehoert zu Punkt 1. `decisions.md`, Punkt 51.
