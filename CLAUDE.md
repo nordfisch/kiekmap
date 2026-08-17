@@ -180,7 +180,8 @@ an Verwaltung und Besucheransicht sowie die Auswertung von Metadaten und Ordners
 Import, mit der der Erstbestand von 929 Fotos eingelesen wurde. Zuletzt das **Nachschärfen der
 Verortung**: Ein Foto, das nur seine Straße kennt, lässt sich in der Detailansicht und im
 „Hilf mit"-Bereich auf eine Hausnummer bringen — dort als dritte, nachrangige Frage, mit den
-Nummern der Straße auf der Karte. Was als Nächstes ansteht, steht im Backlog.
+Nummern der Straße auf der Karte; danach das Nachziehen des neueren Archivstands auf **1324
+Fotos**. Was als Nächstes ansteht, steht im Backlog.
 
 Am **11. und 12. August 2026** ist der **Erstbestand bereinigt** worden — Punkt 41, in zwei Runden
 und ohne das Sprachmodell, das dafür vorgesehen war.
@@ -215,6 +216,26 @@ Ebenfalls am **15. August 2026**: Eine **zurückgespielte Sicherung bringt ihr S
 auf Stand** — Punkt 47, der Fehler, der zwei Tage lang jeden Besucherbeitrag scheitern ließ. Der
 Neustart im Handbuch entfällt; eine Sicherung von einer neueren Programmversion wird abgelehnt,
 bevor etwas ersetzt ist. `docs/decisions.md`, Punkt 42.
+
+Am **16. August 2026** ist der **neuere Archivstand nachgezogen** worden — Punkt 52. **Der Bestand
+steht bei 1324 Fotos**, 1320 davon auf der Karte; der Zeitschieber läuft von 1884 bis 2024.
+
+**Der gelieferte Diff war keiner.** Von 619 Dateien zeigten **223 ein Bild, das schon im Bestand
+stand** — das Museum hatte seinen Bestand durch ExifTool laufen lassen, wodurch sich in jeder Datei
+die Metadaten und damit der SHA-256 änderten. Wer einen so gelieferten Stand importiert, legt
+Dubletten an. Vor jedem Import eines Diffs wird deshalb über den **Bildinhalt** nachgezählt, nicht
+über Bytes: `docs/decisions.md`, Punkt 47.
+
+Der Wert des neuen Stands liegt nicht in den Dateien, sondern in den Feldern: 41 Titel und
+Beschreibungen sind auf vorhandene Fotos übernommen worden. Ein blindes Übernehmen hätte
+22-mal „Intel(R) JPEG Library" zurückgeholt, das Punkt 41 entfernt hatte — **das Archiv führt Titel
+und Beschreibung als dasselbe Feld.** Ungehoben bleibt das XMP: 251 der neuen Dateien tragen dort
+eine Ortsangabe, und `services/exif.py` liest kein XMP (Punkt 55 im Backlog).
+
+Die Umwandlung nach JPEG liegt jetzt als `tools/to_jpeg.py` im Repo, mit einer am Erstbestand
+**gemessenen** Einstellung — `docs/decisions.md`, Punkt 46. Sie ist nicht nachzujustieren: Zwei
+Läufe über dieselbe Datei müssen denselben SHA-256 ergeben, sonst kommt beim nächsten Archivstand
+jedes vorhandene Bild ein zweites Mal herein.
 
 **Alles unter `deploy/pi/` ist weiterhin ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt,
 gelaufen ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst

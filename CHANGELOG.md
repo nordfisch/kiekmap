@@ -797,3 +797,21 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   vier Tage vorher widerlegt worden war. Gemeldet worden war es als „der Knopf fehlt, sobald das
   Jahr bekannt ist"; das Jahr hatte damit nichts zu tun, es war nur bei den betroffenen Fotos
   häufiger bekannt. Die Frage wächst von 70 auf 116 Fotos
+
+### Hinzugefügt
+
+- **395 Fotos aus dem neueren Archivstand des Museums.** Der Bestand wächst von 929 auf **1324**;
+  alle 395 sind verortet, 221 hausgenau, und der Zeitschieber reicht jetzt von 1884 bis 2024
+- `tools/to_jpeg.py` stellt aus einem Archivordner eine JPEG-Kopie her. Ein Browser zeigt kein
+  TIFF an, und die Detailansicht reicht die Originaldatei heraus. Die Einstellung ist am
+  Erstbestand **gemessen** (Pillow, Qualität 92, 4:4:4, `optimize`) und steht fest: Zwei Läufe
+  über dieselbe Datei müssen denselben SHA-256 ergeben, sonst käme beim nächsten Archivstand jedes
+  vorhandene Bild ein zweites Mal herein
+- 41 Titel und Beschreibungen aus dem neueren Archivstand für Fotos, die wir schon hatten — jede
+  im Änderungsprotokoll und damit einzeln zurücknehmbar
+
+### Behoben
+
+- **Ein Ordner aus lauter Nullen ist keine Hausnummer.** `Lehmweg/00 div/` wurde zur Adresse
+  „Lehmweg 0" — die es nirgends gibt, und weil in dem Namen eine Ziffer steht, hätte der
+  „Hilf mit"-Bereich nie angeboten, sie richtigzustellen. „00" ist der Ablagekorb des Archivs

@@ -2780,3 +2780,109 @@ Die Gegenrechnung „was kommt dazu" meldete erst **0**, obwohl die Zahlen von 7
 die Fotos ohne Genauigkeit waren die gesuchten. Ueber Mengen gezaehlt statt ueber SQL-Negation kam
 die richtige Antwort. **Zwei Zahlen, die einander widersprechen, sind ein Geschenk**; hier haette
 das Ergebnis sonst „keine Aenderung" gelautet, mitten in einer Aenderung.
+
+## Der Diff, der keiner war
+
+*16. August 2026 -- Punkt 52, der neuere Archivstand.*
+
+Vom Museum kam ein Ordner mit 619 Bildern, bereits als Differenz geliefert: der heutige Bestand
+des Museums minus dem, was in unseren Erstimport ging. Dazu ein Satz: „Unsere Umwandlung von PNG
+und TIFF nach JPG ist noch nicht erfolgt, diese Dateien duerften doppelt sein -- bitte nachholen."
+
+Beides stimmte. Der zweite Satz stimmte weit mehr, als er sollte.
+
+### Erst das Rezept, und es lag im Bild selbst
+
+Der Erstbestand war schon umgewandelt angekommen; wie, hatte niemand aufgeschrieben. Im Repo stand
+nichts, im Shell-Verlauf nichts, und `sips` traf es auf Anhieb nicht.
+
+Die Antwort steht in den Dateien. Ein JPEG traegt seine **Quantisierungstabellen** mit sich, und
+die sind ein Fingerabdruck der Einstellung: Wer Pillow mit jeder Qualitaet von 60 bis 100 einmal
+laufen laesst und vergleicht, bekommt eine Zahl. Vier Referenzdateien, viermal dieselbe Antwort --
+**Qualitaet 92**, Subsampling 4:4:4. Mit `optimize=True` kam die erste Datei bitgleich heraus.
+
+Gemessen an den 19 Dateien, fuer die beide Fassungen vorliegen: **vier bitgleich, achtzehn
+pixelgleich.** Die neunzehnte, `Weidenstieg/Straszenauffahrt`, hat jemand von Hand umgewandelt,
+bevor es ein Rezept gab. Die Gegenprobe mit Qualitaet 90 trifft keine einzige.
+
+Das Rezept liegt jetzt als `tools/to_jpeg.py` im Repo, mit sieben Tests -- Punkt 46 in
+`decisions.md` sagt, warum es festgeschraubt gehoert und nicht nachjustiert wird.
+
+**Ein Fallstrick nebenbei**, gefunden vom eigenen Test: Mit `optimize` will libjpeg das ganze Bild
+in einem Block, und Pillow schaetzt diesen Block auf ein Byte je Bildpunkt. Ein Foto bei Qualitaet
+92 braucht ein Drittel davon -- die Holmer Scans haben es deshalb nie gemerkt. Ein kleines Bild
+voller feiner Struktur ueberlaeuft die Schaetzung, und das Speichern bricht ab mit „broken data
+stream when writing image file". Ein Testbild aus Pixelrauschen fiel sofort darauf herein, ein
+echtes Foto nie. Der Test heisst jetzt nach dem Fall.
+
+### Dann die Zahl, mit der niemand gerechnet hatte
+
+Der Import erkennt Dubletten am SHA-256. Eine zweite Umwandlung desselben TIFF traegt andere
+Metadatenbloecke, also greift er dort nicht -- verglichen wurde deshalb der **Bildinhalt**: erst
+pixelgenau bei gleichen Kantenlaengen, das siebt fast alles weg.
+
+Von den 89 umgewandelten Dateien waren 25 Dubletten, 23 davon mit Abweichung exakt 0,00. Nach
+Namen waere das zweimal danebengegangen: `Heimatmuseum Holm (1).tif` hat keinen Namensvetter und
+ist trotzdem eine Dublette, die 51 PNG der Museumsscheune heissen `01.png` bis `51.png` wie ein
+Dutzend Fotos anderswo und sind trotzdem alle neu.
+
+Und dann derselbe Vergleich ueber **alle 619** statt nur ueber die 89:
+
+**223 zeigten ein Bild, das schon im Bestand stand.**
+
+Der Grund liegt im XMP: `x:xmptk='Image::ExifTool 11.65'`. Das Museum hat seinen Bestand durch
+ExifTool laufen lassen und dabei die Metadaten neu geschrieben. `P4139301.JPG` liegt alt mit
+1 848 144 Bytes vor, neu mit 1 843 343 -- dieselben Bildpunkte, andere Bytes. **Ein Diff ueber
+Bytes ist kein Diff ueber Bilder** (`decisions.md`, Punkt 47), und damit war die Zusage im Backlog
+hinfaellig, der Abgleich erledige sich ueber den SHA-256 von selbst. Er haette 223 zweite
+Fassungen angelegt.
+
+Ein zweiter, grober Durchgang ueber 32x32-Graustufen fand sechs weitere, die beim Neuausspielen
+auch die Groesse geaendert hatten -- darunter eine **Sporthalle in 3052x2289, die im Bestand nur
+mit 1024x768 liegt.** Der Abstand zwischen Treffer und Nicht-Treffer war dabei kein Ermessen: 212
+Treffer bei exakt 0,00, der hoechste bei 3,01, der naechste Nicht-Treffer bei 56.
+
+### Der eigentliche Wert lag woanders
+
+Das Museum hat **katalogisiert**. Aus „Ohlsen Optik" wurde „Betriebsgebaeude der Firma
+Ohlsen-Optik"; ein Foto traegt jetzt „Hof Hinrich Petersen mit Eternitdach nach dem Bombenangriff
+1943", wo vorher nichts stand. Und `Im Ort 13` wurde zu `Im Ort 16, Hof Rissler` -- eine
+korrigierte Adresse.
+
+Ein blindes Uebernehmen haette dabei mehr zerstoert als gebracht, und die drei Gruende sind alle
+still:
+
+1. **Das Archiv fuehrt Titel und Beschreibung als dasselbe Feld.** ExifTool hat denselben langen
+   Text in beide geschrieben. Unsere Titel sind kurz und von Hand gesetzt -- 815 davon aus Punkt 41.
+2. **Geraetetexte stehen darin wie Beschreibungen.** „Intel(R) JPEG Library, version [1.51.12.44]"
+   waere **22-mal** zurueckgekommen. Genau das hatte Punkt 41 entfernt.
+3. **Die Zeilenenden unterscheiden sich** (`\r\n` gegen `\n`). Ohne Vereinheitlichung sieht
+   identischer Text verschieden aus.
+
+Von 79 vermeintlichen Treffern blieben nach diesen drei Filtern **41 Schreibvorgaenge**: 34 leere
+Beschreibungen gefuellt, 4 Titel gesetzt (nur wo Titel *und* Beschreibung leer waren und der Text
+unter 60 Zeichen blieb), 3 Beschreibungen ersetzt. Jede steht im Aenderungsprotokoll und ist
+einzeln zuruecknehmbar.
+
+**Drei Fotos blieben liegen, mit Namen und Grund** -- sie stehen jetzt in Punkt 1. Bei Foto 17
+setzt das Archiv nur die Adresse dagegen, die ohnehin am Foto steht; bei 218 sind wir genauer als
+das Archiv; bei 398 liest das Archiv den Namen anders („Kuncke" statt „Runcke") und haengt eine
+Leihgeberadresse an, die nach Punkt 36 in die Herkunft gehoert.
+
+### Was der Bestand jetzt ist
+
+395 Fotos aufgenommen, 0 abgewiesen. **1324 Fotos, 1320 auf der Karte** -- alle 395 neuen sind
+verortet, 221 hausgenau. Der Zeitschieber laeuft von 1884 bis 2024.
+
+Die Zusage, dass der Import nur anlegt und nichts Bestehendes anfasst, ist **nachgemessen und
+nicht geglaubt**: die 929 alten Zeilen aus der Sicherung Spalte fuer Spalte gegen die Datenbank
+gehalten, null Unterschiede, null verschwundene Fotos, null veraenderte Schlagwortzuordnungen.
+
+Nebenbei fiel `Lehmweg/00 div/` auf. Als Hausnummer gelesen wird daraus **„Lehmweg 0"** -- eine
+Adresse, die es nirgends gibt, und weil in dem Namen eine Ziffer steht, haette der
+„Hilf mit"-Bereich nie angeboten, sie richtigzustellen. „00" ist der Ablagekorb des Archivs;
+`split_housenumber` weiss das jetzt.
+
+**Was der Stand noch enthaelt, ist ungehoben:** 251 der 395 neuen Dateien tragen einen Ort im XMP,
+und `services/exif.py` liest kein XMP. Bei 40 der zurueckgestellten weicht er von unserem
+Ortsnamen ab, oft um eine Hausnummer, die uns fehlt. Das ist der neue Punkt 55.

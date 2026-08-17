@@ -45,8 +45,8 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
 | 50 | [Ein Schlagwort für den ganzen Stapel beim Import](#50--ein-schlagwort-für-den-ganzen-stapel-beim-import) | Aufgabe | wichtig |
 | 51 | [Der Abbruch am PIN-Feld heißt „Abbrechen und zurück"](#51--der-abbruch-am-pin-feld-heißt-abbrechen-und-zurück) | Aufgabe | — |
+| 55 | [Das XMP der Archivdateien auswerten](#55--das-xmp-der-archivdateien-auswerten) | Aufgabe | wichtig · dringend |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
-| 52 | [Den neueren Archivstand abgleichen und nachziehen](#52--den-neueren-archivstand-abgleichen-und-nachziehen) | Aufgabe | wichtig · dringend |
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
@@ -70,10 +70,10 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur.
 
-**Zweiunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
-10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48, 49, 53. Sie sind erledigt, aufgelöst oder
-gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt bekommt
-die **55**.
+**Dreiunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
+10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48, 49, 52, 53. Sie sind erledigt, aufgelöst
+oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt
+bekommt die **56**.
 
 ---
 
@@ -81,18 +81,33 @@ die **55**.
 
 ### 1 · Der Erstbestand braucht eine Durchsicht
 
-929 Fotos sind eingelesen, und am 11. und 12. August 2026 hat eine maschinelle Runde alles
+1324 Fotos sind eingelesen, und am 11. und 12. August 2026 hat eine maschinelle Runde alles
 herausgeholt, was sich aus Dateien, Ordnernamen und den vorhandenen Textfeldern ableiten ließ —
 Verortung, Titel, Beschreibungen, Datierungen, Schlagwörter. Sie ist abgeschlossen und in der
 [history.md](history.md) beschrieben; sie lief unter der Nummer 41, die damit vergriffen ist.
 
+**Sie lief über 929 Fotos.** Am 16. August 2026 sind 395 dazugekommen (Punkt 52), und für die ist
+sie nicht gelaufen — was hier steht, gilt für sie ungeprüft.
+
+**Drei Fotos sind namentlich vorgemerkt.** Beim Metadatenabgleich desselben Tages ließ sich für sie
+nicht maschinell entscheiden, und sie blieben deshalb unangetastet:
+
+- **Foto 17** trägt „vermutlich ehemals Familie Höring, Am Felde" — **denselben Satz wie elf andere
+  Fotos an vier Adressen.** Das ist die Notiz eines Ordners, keine Aussage über ein Bild. Das
+  Archiv setzt nur die Adresse dagegen, die ohnehin am Foto steht; beides ist falsch.
+- **Foto 218** ist bei uns genauer als im Archiv — ein Datum zu diesem Bild statt einer
+  allgemeinen Hausbeschreibung.
+- **Foto 398** liest den Namen anders: **„Kuncke" im Archiv, „Runcke" bei uns**, und das Archiv
+  hängt eine Leihgeberadresse an, die nach [decisions.md](decisions.md), Punkt 36, in die Herkunft
+  gehört und nicht in die Beschreibung.
+
 **Was jetzt hier steht, ist der Rest — und der braucht Ortskenntnis.** Er gehört dem Museumsteam,
 nicht dem Rechner:
 
-- **669 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist
+- **966 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist
   genau das, was sich aus keinem vorhandenen Feld ableiten lässt. Wer das Bild ansieht und den Ort
   kennt, schreibt in einer Minute, was keine Regel je finden wird.
-- **621 Fotos ohne Jahr.** Die 83, die eine Jahreszahl im Text trugen, sind durchgesehen; 52 sind
+- **847 Fotos ohne Jahr.** Die 83, die eine Jahreszahl im Text trugen, sind durchgesehen; 52 sind
   datiert, 17 Vorschläge wurden verworfen, weil das Jahr das Gebäude datierte und nicht die
   Aufnahme ([decisions.md](decisions.md), Punkt 37). Der Rest trägt keinen Anhalt. **Ein Teil
   davon löst sich von selbst:** Es ist der Vorrat für „Wann war das?", und der Beitragsbereich
@@ -123,14 +138,13 @@ nicht dem Rechner:
 - **Rund 100 eigenständige Titel**, unter denen einzelne eher Notiz als Titel sind: „Vermutung:
   hinter der Zahnarztpraxis oder hinter der ‚Börse'". Ob so etwas ein Titel bleibt, in die
   Beschreibung wandert oder verschwindet, entscheidet nur, wer weiß, was auf dem Bild ist.
-- **5 Fotos ohne Ort.** Vier lagen lose oben im Import-Ordner, eines kommt aus `Deelenweg`, wo der
-  Ortsindex zwei Straßen kennt („Deelenweg I" und „II") und deshalb bewusst nicht rät. Für alle
-  fünf gilt: Ein Blick auf das Bild beantwortet es, eine Regel nicht.
+- **4 Fotos ohne Ort.** Sie lagen lose oben im Import-Ordner. Ein Blick auf das Bild beantwortet
+  es, eine Regel nicht. Aus dem neuen Stand kam keines dazu: Alle 395 stehen auf der Karte.
 - **253 Schlagwörter**, jetzt alle wirklich Stichwörter — die Archivkürzel und die abgeschriebenen
   Rückseiten sind heraus. Ob die verbliebenen taugen, entscheidet sich erst mit
   [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern), wenn daraus ein Filter wird.
 
-**Die Zahlen sind vom 12. August 2026** und wandern: Jeder Besucherbeitrag verschiebt sie. Wer eine
+**Die Zahlen sind vom 16. August 2026** und wandern: Jeder Besucherbeitrag verschiebt sie. Wer eine
 davon braucht, holt sie sich mit `python -m app.cli stats`, statt sie hier abzulesen.
 
 **Offen ist auch das Wie.** Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene
@@ -229,46 +243,52 @@ zweites Museum aufsetzt, ist die eine übergebbare Datei dann weg. Vielleicht is
 beides: Datei als Startwert, Datenbank als Übersteuerung — genau das gehört durchdacht, bevor
 etwas gebaut wird.
 
-### 52 · Den neueren Archivstand abgleichen und nachziehen
+### 55 · Das XMP der Archivdateien auswerten
 
-Vom Museum ist ein **aktuellerer Datenbestand** eingetroffen. Er ist gegen den Stand abzugleichen,
-aus dem der Erstbestand aufgebaut wurde, und alle hinzugekommenen Fotos aus dem Bereich **„Straßen"**
-sind ebenfalls aufzunehmen.
+**Der Import liest EXIF und IPTC, aber kein XMP** — und genau dort führt das Museum seit dem
+neueren Archivstand die Ortsangabe. `services/exif.py` kennt keinen einzigen XMP-Namensraum.
 
-**Der Abgleich erledigt sich zum großen Teil von selbst**, und das ist der Grund, warum dieser
-Punkt klein anfangen kann: Der Import hasht jede Datei zuerst, und der SHA-256 entscheidet über
-Dublette oder nicht. Ein zweiter Durchlauf über den ganzen neuen Ordner legt also **nur an, was
-neu ist**; alles Bekannte landet als `duplicate` im Import-Protokoll und rührt den vorhandenen
-Bestand nicht an. Die Arbeit von [Punkt 41](history.md) — 815 bereinigte Titel, 349 neu verortete
-Fotos, 75 geschriebene Titel — bleibt damit unangetastet.
+**Nachgezählt am 16. August 2026:**
 
-**Woran zu denken ist:**
+| | |
+|---|---|
+| importierte Dateien mit `Iptc4xmpCore:Location` | **251** von 395 |
+| zurückgestellte Dubletten mit einer | 173 |
+| davon **anders als unser Ortsname** | **40** |
 
-- **Die Ordnerstruktur trägt die Verortung.** 758 der 929 Fotos kamen aus
-  `01 Orte/Straßen/<Straße>/<Hausnummer>/`; genau daraus liest `services/foldermeta.py` Straße und
-  Hausnummer. Kommt der neue Stand anders geschnitten, ist das **vor** dem Import zu klären — die
-  171 übrigen Fotos liegen lose in `01 Orte/` und sind der Grund, warum fünf bis heute keinen Ort
-  haben.
-- **`KIEKMAP_IMPORT_PROVENANCE`** setzt das Präfix der Herkunft
-  (`Online-Archiv des Museums, Verzeichnis 01 Orte/`). Steht der neue Stand woanders, gehört die
-  Einstellung angepasst, sonst zeigt die Herkunft der neuen Fotos ins Leere.
-- **Was inzwischen an den vorhandenen Fotos geändert wurde, darf nicht zurückfallen.** Der Import
-  legt nur an und ändert nichts Bestehendes — das ist zu bestätigen, nicht zu glauben.
+Und die Abweichungen sind keine Schreibvarianten, sondern Hausnummern, die wir nicht haben: Foto 18
+und 20 stehen bei uns auf „Am Felde", das Archiv sagt **„Am Felde 5"**. Andere ergänzen den Namen
+des Hofes — „Bredhornweg 86 Haartje", „Am Sportzentrum Waldkindergarten".
 
-**Die Reihenfolge steht fest**, und sie ist der eigentliche Inhalt dieses Punktes:
+**Zwei Felder widersprechen einander in derselben Datei**, und das ist beim Aufgreifen zuerst zu
+klären: ExifTool hat die Korrektur nur nach `Iptc4xmpCore:Location` geschrieben,
+`photoshop:Location` trägt weiter den alten Wert. In `P4139301.JPG` steht einmal
+„Im Ort 16  Hof Boysen" und einmal „Im Ort 13". Wer beide liest, ohne sich zu entscheiden, bekommt
+Zufall.
 
-1. **Dieser Punkt zuerst** — die neuen Fotos in den Bestand.
-2. Dann [Punkt 42](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen), die Dubletten.
-   Vorher wäre die Arbeit zweimal zu machen, denn der neue Stand bringt neue Fassungen derselben
-   Scans mit — und die erkennt der SHA-256 gerade **nicht**.
-3. Und [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht) gilt für die neuen Fotos genauso: Was
-   dort an Durchsicht aussteht, wächst mit ihnen.
+**Der Weg ist der von [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht):** auflisten,
+vorlegen, erst nach Bestätigung übernehmen. Ein Ortsname aus dem Archiv, der eine Hausnummer
+trägt, ist wertvoll — aber er überschreibt eine Angabe, die ein Mensch gesetzt haben kann, und
+das darf nicht nebenbei passieren.
 
 ### 42 · Dubletten finden, die beste behalten, den Rest zusammenführen
 
-**Erst nach [Punkt 52](#52--den-neueren-archivstand-abgleichen-und-nachziehen)**, dem Nachziehen
-des neueren Archivstands: Der bringt neue Fassungen derselben Scans mit, und wer vorher aufräumt,
-macht die Arbeit zweimal.
+**Die Sperre ist gefallen:** Punkt 52, das Nachziehen des neueren Archivstands, ist am 16. August
+2026 erledigt. Damit ist dieser Punkt an der Reihe — und er hat jetzt konkretes Material statt
+einer Vermutung.
+
+**223 Dateien des neuen Stands liegen unter `Neue Fotos zurueckgestellt/Dublette/`**, weil sie ein
+Bild zeigen, das schon im Bestand steht. Sie sind nicht gelöscht, und drei davon sind gerade das,
+was dieser Punkt sucht:
+
+- **Eine Sporthalle in 3052×2289**, die im Bestand nur mit 1024×768 liegt — dreimal so viel Bild.
+- **Neun „frei"-Fassungen** (Vignette um denselben Scan), die als eigene Fotos hereinkamen.
+- Ein `Entwurf1.jpg` **ohne** den Bildtext, den die vorhandene Fassung trägt — der Fall, für den
+  „die größere ist die bessere" gerade nicht gilt.
+
+Wie die 223 gefunden wurden, steht in [history.md](history.md); der Weg — Kantenlängen vorsieben,
+dann Pixel vergleichen, und für den Rest ein grober Vergleich über 32×32-Graustufen — ist die
+halbe Technik dieses Punktes und liegt damit schon vor.
 
 Derselbe Scan liegt mehrfach im Bestand — in unterschiedlicher Scanqualität, mit anderer
 Farbkorrektur, mal mit und mal ohne den Text darunter. **Der SHA-256 sieht davon nichts:** Er
@@ -291,7 +311,7 @@ Backlog; sie geht hier auf, weil das Erkennen allein das Problem nicht löst.
 
 **Zu entscheiden ist der Grad der Selbsttätigkeit.** Vollautomatisch verliert irgendwann das
 bessere Bild, ohne dass es jemand merkt. Halbautomatisch — die Kandidaten werden paarweise
-vorgelegt, jemand bestätigt — kostet Zeit, aber nur einmal. Bei 929 Fotos ist das tragbar; die
+vorgelegt, jemand bestätigt — kostet Zeit, aber nur einmal. Bei 1324 Fotos ist das tragbar; die
 Frage ist, ob es das bei 5000 noch wäre.
 
 ### 34 · Eine Karte in der Nachbearbeitung des Imports

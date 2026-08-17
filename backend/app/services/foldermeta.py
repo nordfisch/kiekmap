@@ -82,6 +82,11 @@ def split_housenumber(folder: str) -> tuple[str | None, str | None]:
     * ``"099-105 Weltweit"`` -> ``("99", "Weltweit")`` -- a range: the first number locates it
       well enough, and the second must not survive into the name
     * ``"Glasfaser"`` -> ``(None, "Glasfaser")`` -- not every folder is an address
+    * ``"00 div"`` -> ``(None, "div")`` -- **nothing but zeros is the filing, not a house.** The
+      archive sorts what belongs to no address into a "00" folder, and read as a number it becomes
+      house number 0, which exists nowhere. The photo would then carry an address that is not one
+      -- and because the name holds a digit, the panel would never offer to sharpen it either
+      (see services/needs.py)
     """
     text = folder.strip()
 
@@ -90,8 +95,9 @@ def split_housenumber(folder: str) -> tuple[str | None, str | None]:
         if not character.isdigit():
             break
         digits += character
-    if not digits:
-        return None, text or None
+    if not digits or not int(digits):
+        rest = text[len(digits) :].strip() if digits else text
+        return None, rest or None
 
     rest = text[len(digits) :]
 

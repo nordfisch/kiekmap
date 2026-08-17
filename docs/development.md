@@ -190,6 +190,31 @@ Koordinaten, und das muss so sein: Ohne sie zeigt die Karte nichts und die Ortss
 nichts. Die echten Aufnahmen gehören dem Museum und liegen nicht im Repo. Alles Weitere in
 [../seed/README.md](../seed/README.md).
 
+## Einen Archivstand aufnehmen
+
+Wenn das Museum einen neuen Stand schickt, stehen zwei Schritte vor dem Import — und beide sind
+einmal übersprungen worden, mit Folgen.
+
+**Erstens: alles wird JPEG.**
+
+```bash
+python3 tools/to_jpeg.py "~/Museum/Neuer Stand" "~/Museum/Neuer Stand zwecks Import/Straßen"
+```
+
+Der Baum wird kopiert, die Quelle bleibt unangetastet. TIFF, PNG und WEBP werden umgewandelt, JPEG
+durchgereicht. **Die Einstellung darin ist gemessen und wird nicht nachjustiert** — warum, steht in
+[decisions.md](decisions.md), Punkt 46. Der Zielordner heißt `Straßen`, damit die Herkunft dieselbe
+Form bekommt wie beim Erstbestand (`KIEKMAP_IMPORT_PROVENANCE` setzt den Vorsatz davor).
+
+**Zweitens: nachzählen, was wirklich neu ist.** Auch ein Stand, der als Differenz geliefert wurde,
+enthält Bilder, die längst im Bestand stehen — der Vergleich lief über Bytes, und die ändern sich
+schon, wenn jemand die Metadaten neu schreibt. Am 16. August 2026 waren das **223 von 619 Dateien**.
+[decisions.md](decisions.md), Punkt 47, beschreibt den Weg: erst pixelgenau bei gleichen
+Kantenlängen, dann grob über verkleinerte Graustufenbilder.
+
+Erst danach `python -m app.cli import <ordner>`. Vorher eine Kopie von `data/` ziehen, **mit den
+`-wal`- und `-shm`-Dateien** — ohne sie ist die Kopie auf dem Stand des letzten Checkpoints.
+
 ## Aufbau
 
 ```

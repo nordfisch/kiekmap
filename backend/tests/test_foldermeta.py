@@ -91,6 +91,16 @@ class TestHausnummerLesen:
     def test_ordner_ohne_nummer_ist_nur_ein_name(self):
         assert split_housenumber("Glasfaser") == (None, "Glasfaser")
 
+    def test_lauter_nullen_sind_keine_hausnummer(self):
+        """ "00" ist der Ablagekorb des Archivs fuer alles ohne Adresse, nicht das Haus Nummer 0.
+
+        Als Nummer gelesen bekaeme das Foto den Ortsnamen "Lehmweg 0" -- eine Adresse, die es
+        nirgends gibt. Und weil in dem Namen eine Ziffer steht, wuerde der "Hilf mit"-Bereich
+        auch nie anbieten, sie richtigzustellen (siehe services/needs.py).
+        """
+        assert split_housenumber("00 div") == (None, "div")
+        assert split_housenumber("00") == (None, None)
+
     def test_zahlname_wird_kein_titel(self, ortsindex):
         """ "049" ist eine Hausnummer, kein Name -- der Titel darf sie nicht doppelt fuehren.
 

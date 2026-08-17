@@ -1612,3 +1612,57 @@ Strassenname ohne Ziffer, und der Ortsindex kennt Adressen dazu. Die Frage waech
 **Was daraus fuer aehnliche Regeln folgt:** Eine Bedingung, die ueber die *Herkunft* eines Wertes
 statt ueber seinen *Inhalt* entscheidet, traegt eine Annahme mit sich, die veralten kann, ohne dass
 die Regel es merkt. Wo es geht, wird gefragt, was bekannt ist -- nicht, wer es eingetragen hat.
+
+## 46. Der Bestand ist JPEG, und das Rezept dafuer steht fest
+
+*Entschieden am 16. August 2026, beim Nachziehen des neueren Archivstands (Punkt 52).*
+
+Ein Museumsarchiv ist gemischt: Scans kommen als TIFF, Bildschirmaufnahmen als PNG, ein Bild von
+einer Webseite als WEBP. Der Bestand fuehrt nur JPEG, und der Grund ist nicht Ordnungsliebe --
+**ein Browser zeigt kein TIFF an.** Der Kiosk brauchte ein Vorschaubild und reichte eine
+Originaldatei heraus, die sich nirgends oeffnen laesst; die Detailansicht bietet genau diese Datei
+an.
+
+**Die Einstellung ist gemessen, nicht gewaehlt.** Der Erstbestand war schon umgewandelt
+angekommen, von einem Werkzeug, das niemand aufgeschrieben hatte. Seine Quantisierungstabellen
+sagen: Pillow, Qualitaet 92, Subsampling 4:4:4, `optimize`. Gegen die 19 Dateien, fuer die beide
+Fassungen vorliegen, kommen damit **vier bitgleich** und **achtzehn pixelgleich** heraus; mit
+Qualitaet 90 keine einzige.
+
+**Das ist mehr als Sauberkeit, es ist die Voraussetzung fuer die Dublettenerkennung.** Der Import
+erkennt eine Dublette am SHA-256 der Datei. Zweimal dasselbe Rezept ueber dieselbe Datei gibt
+denselben Hash -- eine andere Qualitaet gibt einen anderen, und beim naechsten Archivstand kaeme
+jedes schon vorhandene Bild ein zweites Mal herein, ohne dass jemand etwas merkt. Deshalb steht
+die Einstellung in `tools/to_jpeg.py` als Konstante und hat einen eigenen Test, der sie festhaelt.
+
+Die neunzehnte ist `Weidenstieg/Straszenauffahrt`, deren altes JPEG andere Tabellen traegt: Die
+hat jemand von Hand umgewandelt, bevor es ein Rezept gab.
+
+## 47. Ein Diff ueber Bytes ist kein Diff ueber Bilder
+
+*Gelernt am 16. August 2026, an 619 Dateien.*
+
+Vom Museum kam ein neuerer Archivstand, bereits als Differenz geliefert: alles, was im aktuellen
+Bestand des Museums liegt, minus dem, was in unseren Erstimport ging. 619 Dateien. Und im Backlog
+stand die Zusage, der Abgleich erledige sich zum grossen Teil von selbst -- der SHA-256 entscheide
+ueber Dublette oder nicht.
+
+**223 der 619 zeigten ein Bild, das schon im Bestand stand.** Ein Import ueber den ganzen Ordner
+haette 223 zweite Fassungen angelegt.
+
+Der Grund: Das Museum hat seinen Bestand durch **ExifTool** laufen lassen und dabei die
+Metadatenbloecke neu geschrieben -- Ortsangaben korrigiert, Stichwoerter vereinheitlicht, den
+eingebetteten Vorschau-Anhang verkleinert. `P4139301.JPG` liegt alt mit 1 848 144 Bytes vor, neu
+mit 1 843 343: **dieselben Bildpunkte, andere Bytes.** Wer so einen Stand byteweise vergleicht,
+bekommt keinen Diff der Bilder, sondern einen Diff der Bearbeitungslaeufe.
+
+**Die Regel daraus:** Ein Datenstand, der ueber Bytes verglichen wurde, sagt nichts darueber, was
+neu *ist* -- nur darueber, was neu *geschrieben* wurde. Vor jedem Import eines gelieferten Diffs
+wird deshalb ueber den Bildinhalt nachgezaehlt, in zwei Durchgaengen: erst pixelgenau bei gleichen
+Kantenlaengen (das siebt fast alles), dann grob ueber 32x32-Graustufen fuer das, was beim
+Neuausspielen auch die Groesse geaendert hat. Der zweite Durchgang fand sechs weitere, darunter
+eine Sporthalle in dreifacher Aufloesung.
+
+**Der Abstand zwischen Treffer und Nicht-Treffer war dabei kein Ermessen**, und das ist der Grund,
+warum eine Schwelle hier ueberhaupt vertretbar ist: 212 der Treffer lagen bei einer mittleren
+Abweichung von exakt 0,00, der hoechste bei 3,01 -- und der naechste Nicht-Treffer bei 56.
