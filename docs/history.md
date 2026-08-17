@@ -3043,3 +3043,60 @@ ein erlaubtes Format; der Ordner am Stick darf eines enthalten.
 Entschaerft wird es jetzt in `exif.open_image`, durch das **jeder** Leser geht: `thumbnails` lief
 ueber `ImageOps.exif_transpose` in dieselbe Falle, einen Schritt weiter. Der Test baut das TIFF
 nach, statt eine Fixture einzuchecken.
+
+## Punkt 55, beantwortet mit Nein
+
+*16. August 2026, nachdem der Gesamtbestand vorlag.* Das Vorgehen sah fuenf Schritte vor, und der
+dritte hiess **„erst messen, dann bauen"**: Bevor `services/exif.py` XMP lesen lernt, sollte
+feststehen, ob es sich lohnt. Es hat sich nicht gelohnt -- und das ist der Wert des Schritts.
+
+### Zuerst: der gelieferte Diff war vollstaendig
+
+`01 Orte/Straßen` enthaelt 1322 Bilddateien. 1034 liegen byte-identisch bei uns. Die uebrigen 288
+sind **restlos erklaert**: 199 sind die zurueckgestellten Dubletten -- neuere Byte-Fassungen von
+Fotos, die wir haben --, 89 sind die TIFF, PNG und WEBP, aus denen wir JPEG gemacht haben. **Null
+Dateien in keinem von beiden.**
+
+Damit war die grosse Sorge vom Tag zuvor ausgeraeumt: Der Diff des Museums war ueber Hashes
+gerechnet und hat nichts uebersehen. Es versteckt sich kein zweiter Import.
+
+### Dann: was im XMP wirklich steht
+
+1189 der 1322 Dateien tragen XMP. Die Felder klangen vielversprechend -- 874 Ortsangaben, 534
+Beschreibungen, 410 Fotografen. Angesehen sind es andere Dinge:
+
+* `dc:creator`: **„unbekannt"** und **„Winter"**. Fuer „unbekannt" gibt es die Regel seit dem
+  Erstimport, 82 Fotos trugen es woertlich.
+* `dc:description`: **„Gebäude"**, **„Abriss & Neubau"**, **„Winterspaziergang"** -- das Archiv
+  nutzt das Beschreibungsfeld als Kategorie. Die 352 Faelle, die ein leeres Feld gefuellt haetten,
+  waeren zum grossen Teil Kategoriewoerter unter dem Bild gewesen.
+* `Iptc4xmpCore:Location`: **515-mal genau das, was der Ordner schon sagt.**
+
+Beim Ort, dem staerksten Feld, bleiben nach Abzug des Bekannten **26 Fotos, die eine Hausnummer
+gewinnen koennten**. Neun davon tragen denselben Wert „Am Felde 5" -- derselbe Stapelwert, der als
+veraltete `photoshop:Location` auch auf Fotos unter den Nummern 9, 10, 16 und 31 klebt. Zwei
+widersprechen dem Ordner, einer nennt statt einer Nummer „Am Sportzentrum Geräteraum".
+
+**Uebrig bleibt eine Handvoll.** Dafuer den Leser umbauen, zwei widerspruechliche Ortsfelder
+gegeneinander entscheiden und 259 Konflikte vorlegen -- nein. `decisions.md`, Punkt 53; Punkt 55
+ist aufgeloest und seine Nummer vergriffen.
+
+### Und wieder war der Nebenfund der Ertrag
+
+Beim Vergleich der Ortsangaben mit den Ordnernamen fiel **`Hörnstraße/Hörnstraße 14`** auf: ein
+Ordner, der seine Strasse wiederholt. `split_housenumber` sieht keine fuehrende Ziffer, macht
+daraus einen *Namen*, und das Foto hiess **„Hörnstraße 14" ueber der Zeile „Hörnstraße"** -- genau
+der Adressabklatsch, den Punkt 48 zwei Stunden vorher abgeschafft hatte.
+
+Ein Ordner, ein Foto. Die Regel trotzdem in den Code, weil sie zwei Zeilen kostet und dieselbe ist:
+Wiederholt der Unterordner die Strasse, wird sie abgeschnitten -- **aber nur, wenn dahinter
+wirklich eine Hausnummer steht.** Sonst waere aus „Twietenhof" unter „Twiete" ein „nhof" geworden;
+der Vorsatz allein ist zu lose als Grund. Das Foto steht jetzt hausgenau, 15 m von seiner
+EXIF-Koordinate entfernt.
+
+### Ein Messfehler von mir, unterwegs
+
+Der erste Durchgang fand **null** solcher Ordner. Der Grund lag nicht in den Daten: macOS liefert
+Dateinamen in zerlegter Unicode-Form, „Hörnstraße" aus dem Dateisystem ist also nicht dieselbe
+Zeichenkette wie „Hörnstraße" aus dem Ortsindex, und `startswith` sagte nein. `place_service.normalize`
+faengt das ab -- mein Vergleichsskript daneben tat es nicht.

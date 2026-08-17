@@ -155,6 +155,23 @@ def _contains_words(haystack: Sequence[str], needle: Sequence[str]) -> bool:
     )
 
 
+def _without_street(folder: str, street: str) -> str:
+    """Drop a street name the sub-folder repeats: "Hörnstraße 14" below "Hörnstraße" is house 14.
+
+    Only where what remains really is a house number. Otherwise a folder "Twietenhof" below the
+    street "Twiete" would be cut down to "nhof" -- the prefix test alone is too loose, the test
+    for a number behind it is not.
+
+    One folder of the Holm archive is filed this way, and it produced exactly what
+    decisions.md, point 48, set out to remove: a photograph titled "Hörnstraße 14" standing above
+    the line "Hörnstraße".
+    """
+    if not folder.startswith(street) or folder == street:
+        return folder
+    rest = folder[len(street) :].lstrip(" ,-")
+    return rest if rest and split_housenumber(rest)[0] else folder
+
+
 def parse_path(parts: Sequence[str], streets: Mapping[str, str]) -> FolderMeta:
     """Read street, house number and name out of the directory parts of a relative path.
 
@@ -171,7 +188,7 @@ def parse_path(parts: Sequence[str], streets: Mapping[str, str]) -> FolderMeta:
         # Only the folder directly below the street is read as a house number. Anything deeper
         # would be a filing scheme we know nothing about.
         below = parts[index + 1] if index + 1 < len(parts) else None
-        number, name = split_housenumber(below) if below else (None, None)
+        number, name = split_housenumber(_without_street(below, street)) if below else (None, None)
         return FolderMeta(street=street, housenumber=number, name=name)
 
     return FolderMeta()

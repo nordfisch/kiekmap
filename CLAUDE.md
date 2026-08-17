@@ -250,6 +250,14 @@ worden wären („ca. 1970 wurde dieses Haus abgerissen"). Punkt 37 sagt, eine J
 mit einem Datumswort davor — das Wort davor sagt aber nur, *dass* es ein Datum ist, nicht *wovon*.
 `docs/decisions.md`, Punkt 49.
 
+Danach lag der **Gesamtbestand des Archivs** vor, und zwei Fragen sind damit beantwortet. **Der
+gelieferte Diff war vollständig** — von 1322 Dateien unter `Straßen` sind 1034 byte-identisch bei
+uns, die übrigen 288 restlos erklärt, keine einzige unbekannt. Und **das XMP wird nicht gelesen**:
+`dc:creator` sagt „unbekannt", `dc:description` liefert Kategorien wie „Gebäude", und beim Ort
+bleiben nach Abzug des Bekannten eine Handvoll brauchbarer Hausnummern. Punkt 55 ist damit
+aufgelöst — `docs/decisions.md`, Punkt 53. **Erst messen, dann bauen** heißt auch, dass die Messung
+etwas anderes findet als das Gesuchte: Sie fand einen Ordner, der seine Straße wiederholt.
+
 **Alles unter `deploy/pi/` ist weiterhin ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt,
 gelaufen ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst
 hakt, gehört nach [docs/operations.md](docs/operations.md). Ungeprüft bleiben auch die zwei Dinge,

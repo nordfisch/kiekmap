@@ -45,7 +45,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 1 | [Der Erstbestand braucht eine Durchsicht](#1--der-erstbestand-braucht-eine-durchsicht) | Aufgabe | wichtig · dringend |
 | 50 | [Ein Schlagwort für den ganzen Stapel beim Import](#50--ein-schlagwort-für-den-ganzen-stapel-beim-import) | Aufgabe | wichtig |
 | 51 | [Der Abbruch am PIN-Feld heißt „Abbrechen und zurück"](#51--der-abbruch-am-pin-feld-heißt-abbrechen-und-zurück) | Aufgabe | — |
-| 55 | [Das XMP der Archivdateien auswerten](#55--das-xmp-der-archivdateien-auswerten) | Aufgabe | wichtig · dringend |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
 | 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
@@ -70,10 +69,10 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur.
 
-**Dreiunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
-10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48, 49, 52, 53. Sie sind erledigt, aufgelöst
-oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste neue Punkt
-bekommt die **56**.
+**Vierunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
+10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48, 49, 52, 53, 55. Sie sind erledigt,
+aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
+neue Punkt bekommt die **56**.
 
 ---
 
@@ -245,34 +244,6 @@ daraus „starten und durch die Verwaltung gehen". Für Ehrenamtliche besser; f�
 zweites Museum aufsetzt, ist die eine übergebbare Datei dann weg. Vielleicht ist die Antwort
 beides: Datei als Startwert, Datenbank als Übersteuerung — genau das gehört durchdacht, bevor
 etwas gebaut wird.
-
-### 55 · Das XMP der Archivdateien auswerten
-
-**Der Import liest EXIF und IPTC, aber kein XMP** — und genau dort führt das Museum seit dem
-neueren Archivstand die Ortsangabe. `services/exif.py` kennt keinen einzigen XMP-Namensraum.
-
-**Nachgezählt am 16. August 2026:**
-
-| | |
-|---|---|
-| importierte Dateien mit `Iptc4xmpCore:Location` | **251** von 395 |
-| zurückgestellte Dubletten mit einer | 173 |
-| davon **anders als unser Ortsname** | **40** |
-
-Und die Abweichungen sind keine Schreibvarianten, sondern Hausnummern, die wir nicht haben: Foto 18
-und 20 stehen bei uns auf „Am Felde", das Archiv sagt **„Am Felde 5"**. Andere ergänzen den Namen
-des Hofes — „Bredhornweg 86 Haartje", „Am Sportzentrum Waldkindergarten".
-
-**Zwei Felder widersprechen einander in derselben Datei**, und das ist beim Aufgreifen zuerst zu
-klären: ExifTool hat die Korrektur nur nach `Iptc4xmpCore:Location` geschrieben,
-`photoshop:Location` trägt weiter den alten Wert. In `P4139301.JPG` steht einmal
-„Im Ort 16  Hof Boysen" und einmal „Im Ort 13". Wer beide liest, ohne sich zu entscheiden, bekommt
-Zufall.
-
-**Der Weg ist der von [Punkt 1](#1--der-erstbestand-braucht-eine-durchsicht):** auflisten,
-vorlegen, erst nach Bestätigung übernehmen. Ein Ortsname aus dem Archiv, der eine Hausnummer
-trägt, ist wertvoll — aber er überschreibt eine Angabe, die ein Mensch gesetzt haben kann, und
-das darf nicht nebenbei passieren.
 
 ### 42 · Dubletten finden, die beste behalten, den Rest zusammenführen
 

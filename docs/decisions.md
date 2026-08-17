@@ -1791,3 +1791,36 @@ dort auf, wo hinterher eine Luecke steht.** Wo eine Vorgabe die Luecke fuellt, w
 eine Behauptung. Die Probe darauf ist billig und heisst nicht "sind die Bytes mitgekommen", sondern
 "liest unser eigener Leser aus der Kopie dasselbe wie aus der Quelle" -- so steht sie jetzt als
 Test in ``test_to_jpeg.py``.
+
+## 53. Das XMP des Archivs wird nicht gelesen -- nachgemessen, nicht vermutet
+
+*Entschieden am 16. August 2026, nachdem der Gesamtbestand vorlag.*
+
+`services/exif.py` liest EXIF und IPTC, kein XMP. Das stand als Punkt 55 im Backlog, mit einer
+verlockenden Zahl: **251 der neuen Dateien tragen eine Ortsangabe in `Iptc4xmpCore:Location`**, und
+40 der zurueckgestellten wichen von unserem Ortsnamen ab, oft um eine Hausnummer, die uns fehlt.
+
+**Vor dem Bauen wurde gemessen**, ueber alle 1322 Archivdateien unter `Straßen`. 1189 tragen XMP.
+Das Ergebnis kehrt die Erwartung um:
+
+| Feld | was wirklich drinsteht |
+|---|---|
+| `dc:creator` | „unbekannt", „Winter" -- kein Fotograf. Fuer „unbekannt" gibt es die Regel schon |
+| `dc:description` | „Gebäude", „Abriss & Neubau", „Winterspaziergang" -- **Kategorien, keine Beschreibungen** |
+| `Iptc4xmpCore:Location` | 515-mal genau das, was der Ordner schon sagt |
+| `photoshop:Location` | 96-mal im Widerspruch zum ersten, meist ein stehengebliebener Stapelwert |
+
+**Der Ertrag beim Ort, dem staerksten Feld, sind 26 Fotos** -- und davon tragen **neun denselben
+Wert „Am Felde 5"**, der auch als veraltete `photoshop:Location` auf Fotos unter den Nummern 9,
+10, 16 und 31 klebt. Zwei widersprechen dem Ordner, einer nennt statt einer Nummer den Gebaeudenamen
+(„Am Sportzentrum Geräteraum"). **Es bleiben eine Handvoll brauchbarer Angaben, jede einzeln zu
+pruefen.**
+
+Der Umbau des Lesers, eine Entscheidung ueber zwei widerspruechliche Ortsfelder und ein
+Vorlage-Weg fuer 259 Konflikte -- fuer eine Handvoll Hausnummern, die ein Mensch ohnehin ansehen
+muesste. **Das lohnt nicht.**
+
+**Was der Durchgang stattdessen gebracht hat**, ist der Grund, warum er richtig war: Er hat einen
+Ordner gefunden, der seine Strasse wiederholt (`Hörnstraße/Hörnstraße 14`) und damit denselben
+Adressabklatsch erzeugte, den Punkt 48 gerade abgeschafft hatte. **Erst messen, dann bauen** heisst
+eben auch, dass die Messung etwas anderes findet als das Gesuchte.

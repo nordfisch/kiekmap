@@ -175,6 +175,30 @@ class TestPfadLesen:
 
         assert parse_path(("Horn",), street_names(session)).street is None
 
+    def test_ein_unterordner_darf_die_strasse_wiederholen(self, ortsindex):
+        """Das Archiv legt einen Ordner "Hauptstrasse 14" unter "Hauptstrasse" ab.
+
+        Ungelesen wird daraus kein Haus, sondern ein Name -- und damit ein Titel "Hauptstrasse 14"
+        ueber der Zeile "Hauptstrasse". Genau der Adressabklatsch, den decisions.md, Punkt 48,
+        gerade abgeschafft hat.
+        """
+        angabe = parse_path(("Hauptstrasse", "Hauptstrasse 14"), street_names(ortsindex))
+
+        assert (angabe.street, angabe.housenumber, angabe.name) == ("Hauptstrasse", "14", None)
+
+    def test_ein_aehnlicher_name_wird_nicht_zerschnitten(self, session):
+        """Die Gegenprobe: Der Vorsatz allein reicht nicht als Grund zum Abschneiden.
+
+        Unter der Strasse "Twiete" liegt ein Ordner "Twietenhof". Nur nach dem Vorsatz gekuerzt
+        bliebe "nhof" stehen -- ein Name, den es nie gab.
+        """
+        _strasse(session, "Twiete")
+        session.commit()
+
+        angabe = parse_path(("Twiete", "Twietenhof"), street_names(session))
+
+        assert (angabe.housenumber, angabe.name) == (None, "Twietenhof")
+
     def test_die_strasse_darf_der_gewaehlte_ordner_selbst_sein(self, ortsindex):
         """Am Stick waehlt der Ehrenamtliche den Ordner -- oft die Strasse."""
         angabe = parse_path(("Hauptstrasse", "14 Museum"), street_names(ortsindex))

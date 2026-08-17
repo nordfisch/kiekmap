@@ -855,3 +855,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   ihr XMP in einem Zahlen-Tag ab; Pillow wirft darauf `TypeError`, und den fing der Import nicht —
   er ist auf `OSError` und `ValueError` gefasst. TIFF ist ein erlaubtes Format, der Fall also
   erreichbar
+- **Ein Unterordner darf seine Straße wiederholen.** `Hörnstraße/Hörnstraße 14` wurde nicht als
+  Hausnummer gelesen; das Foto hieß „Hörnstraße 14" über der Zeile „Hörnstraße". Abgeschnitten
+  wird nur, wenn dahinter wirklich eine Hausnummer steht — sonst würde aus „Twietenhof" unter
+  „Twiete" ein „nhof"
