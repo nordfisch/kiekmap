@@ -237,6 +237,19 @@ Die Umwandlung nach JPEG liegt jetzt als `tools/to_jpeg.py` im Repo, mit einer a
 Läufe über dieselbe Datei müssen denselben SHA-256 ergeben, sonst kommt beim nächsten Archivstand
 jedes vorhandene Bild ein zweites Mal herein.
 
+Direkt danach fiel auf, dass **323 der 395 neuen Fotos den Adressabklatsch im Titel trugen**, den
+Punkt 41 an 815 Titeln von Hand entfernt hatte: Die Bereinigung hatte den Bestand aufgeräumt und
+die Ursache im Import stehen lassen. Drei Regeln sind deshalb dorthin gewandert — der Ordnertitel
+ist der Zusatz und nicht die Adresse, ein Titel gilt ab 60 Zeichen als Bildunterschrift (gemessen:
+kein handgesetzter Titel überschreitet 58), und der Name der Scannersoftware landet in keinem der
+beiden Felder. `docs/decisions.md`, Punkt 48. **Was von Hand aufgeräumt wird, gehört danach als
+Regel dorthin, wo es entstanden ist** — sonst zählt man dieselbe Arbeit in Monaten.
+
+Dabei hat der Trockenlauf zwei Fotos gefangen, die auf das Jahr ihres eigenen Abrisses datiert
+worden wären („ca. 1970 wurde dieses Haus abgerissen"). Punkt 37 sagt, eine Jahreszahl datiere nur
+mit einem Datumswort davor — das Wort davor sagt aber nur, *dass* es ein Datum ist, nicht *wovon*.
+`docs/decisions.md`, Punkt 49.
+
 **Alles unter `deploy/pi/` ist weiterhin ungeprüft** — beim Bauen gab es kein Gerät. Syntax stimmt,
 gelaufen ist nichts. Der erste Pi ist damit zugleich die Abnahme der Stufen 9 und 10; was zuerst
 hakt, gehört nach [docs/operations.md](docs/operations.md). Ungeprüft bleiben auch die zwei Dinge,

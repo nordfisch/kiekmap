@@ -102,14 +102,14 @@ class TestHausnummerLesen:
         assert split_housenumber("00") == (None, None)
 
     def test_zahlname_wird_kein_titel(self, ortsindex):
-        """ "049" ist eine Hausnummer, kein Name -- der Titel darf sie nicht doppelt fuehren.
+        """ "049" ist eine Hausnummer, kein Name -- ein Foto darunter bekommt keinen Titel.
 
-        Sonst hiesse ein Foto "Hauptstrasse 49, 049".
+        Sonst hiesse es "Hauptstrasse 49, 049" oder, seit dem 16. August 2026, schlicht "049".
         """
         assert split_housenumber("049") == ("49", None)
 
         angabe = parse_path(("Hauptstrasse", "049"), street_names(ortsindex))
-        assert angabe.title == "Hauptstrasse 49"
+        assert (angabe.address, angabe.name) == ("Hauptstrasse 49", None)
 
 
 class TestPfadLesen:
@@ -122,13 +122,13 @@ class TestPfadLesen:
         assert angabe.street == "Hauptstrasse"
         assert angabe.housenumber == "14"
         assert angabe.name == "Gasthof Petersen"
-        assert angabe.title == "Hauptstrasse 14, Gasthof Petersen"
+        assert angabe.address == "Hauptstrasse 14"
 
     def test_ohne_bekannte_strasse_sagt_der_pfad_nichts(self, ortsindex):
         angabe = parse_path(("Urlaub", "2019"), street_names(ortsindex))
 
         assert angabe.street is None
-        assert angabe.title is None
+        assert angabe.address is None
 
     def test_ein_verkuerzter_ordnername_findet_die_strasse(self, session):
         """Das Archiv kuerzt: Ordner "Wiesengrund", Strasse "Im Wiesengrund"."""
@@ -183,11 +183,13 @@ class TestPfadLesen:
 
 
 class TestWasAmFotoLandet:
-    def _importiere(self, session, settings, sample_image, unterpfad: str):
+    def _importiere(
+        self, session, settings, sample_image, unterpfad: str, bild="scan_ohne_exif.jpg"
+    ):
         wurzel = settings.data_dir / "archiv"
         ziel = wurzel / unterpfad
         ziel.parent.mkdir(parents=True, exist_ok=True)
-        ziel.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
+        ziel.write_bytes(sample_image(bild).read_bytes())
 
         outcome = import_file(session, ziel, settings)
         assert outcome.photo is not None
@@ -202,7 +204,31 @@ class TestWasAmFotoLandet:
         assert (foto.lat, foto.lon) == (53.6205, 9.6765)
         assert foto.place_name == "Hauptstrasse 14"
         assert foto.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
-        assert foto.title == "Hauptstrasse 14, Museum"
+        assert foto.title == "Museum"
+
+    def test_der_titel_wiederholt_die_adresse_nicht(
+        self, session, settings, sample_image, ortsindex
+    ):
+        """Der Titel steht in der Detailansicht ueber der Adresse, nicht statt ihrer.
+
+        Bis zum 16. August 2026 hiess dieses Foto "Hauptstrasse 14, Museum" -- und darunter stand
+        noch einmal "Hauptstrasse 14". Punkt 41 hat 815 solcher Titel von Hand auseinandergenommen,
+        der naechste Import schrieb 323 davon zurueck. Wo der Ordner nur eine Nummer nennt, bleibt
+        der Titel leer: Eine Zeile, die nur die naechste wiederholt, ist keine.
+        """
+        mit_namen = self._importiere(
+            session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg"
+        )
+        assert mit_namen.title == "Museum"
+        assert mit_namen.place_name == "Hauptstrasse 14"
+
+        # Ein anderes Bild, sonst erkennt der Import es am SHA-256 als Dublette und liefert das
+        # erste Foto zurueck -- der zweite Teil des Tests pruefte dann sich selbst.
+        ohne_namen = self._importiere(
+            session, settings, sample_image, "Hauptstrasse/10/b.jpg", "hochkant.jpg"
+        )
+        assert ohne_namen.title is None
+        assert ohne_namen.place_name == "Hauptstrasse 10"
 
     def test_ordner_ohne_hausnummer_setzt_das_foto_auf_die_strasse(
         self, session, settings, sample_image, ortsindex

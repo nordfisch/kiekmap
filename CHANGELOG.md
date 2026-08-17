@@ -815,3 +815,18 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Ein Ordner aus lauter Nullen ist keine Hausnummer.** `Lehmweg/00 div/` wurde zur Adresse
   „Lehmweg 0" — die es nirgends gibt, und weil in dem Namen eine Ziffer steht, hätte der
   „Hilf mit"-Bereich nie angeboten, sie richtigzustellen. „00" ist der Ablagekorb des Archivs
+
+### Geändert
+
+- **Der Titel aus dem Ordnernamen wiederholt die Adresse nicht mehr.** „14 Gasthof Petersen" ergibt
+  „Gasthof Petersen", die Adresse steht darunter in `place_name`; ein Ordner, der nur eine Nummer
+  nennt, lässt den Titel leer. Punkt 41 hatte 815 solcher Titel von Hand bereinigt — der Import
+  schrieb 323 davon mit dem nächsten Archivstand zurück
+- **Ein Titel gilt ab 60 Zeichen als Bildunterschrift und wandert in die Beschreibung**, vorher ab
+  120. Die Zahl ist gemessen: Von 781 handgesetzten Titeln überschreitet keiner 58 Zeichen
+- **Der Name der Scannersoftware landet in keinem Feld.** „Intel(R) JPEG Library, version
+  [1.51.12.44]" stand als Titel von 35 Fotos. Anders als ein zu langer Titel weicht er auch nicht
+  in die Beschreibung aus — dort stünde er im Kiosk unter dem Bild
+- **Die 395 Fotos des neuen Archivstands sind nachbereinigt** — 423 Felder in sechs Schritten.
+  Kein Titel im Bestand ist noch länger als 58 Zeichen, keiner wiederholt seine Adresse, 11 Fotos
+  sind aus ihrem eigenen Text datiert

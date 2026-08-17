@@ -2886,3 +2886,69 @@ Adresse, die es nirgends gibt, und weil in dem Namen eine Ziffer steht, haette d
 **Was der Stand noch enthaelt, ist ungehoben:** 251 der 395 neuen Dateien tragen einen Ort im XMP,
 und `services/exif.py` liest kein XMP. Bei 40 der zurueckgestellten weicht er von unserem
 Ortsnamen ab, oft um eine Hausnummer, die uns fehlt. Das ist der neue Punkt 55.
+
+### Und dann standen die langen Titel da
+
+*Noch am 16. August, unmittelbar danach.* Die Rueckmeldung kam sofort: „Jetzt sind ein paar sehr
+lange Titel hinzugekommen, teilweise auch mit Jahreszahl im Titel." Die Frage dahinter war, welche
+Schritte der Bereinigung von Punkt 41 sich auf die 395 neuen anwenden liessen.
+
+Nachgezaehlt sah es harmlos aus: acht Titel ueber 60 Zeichen, neunzehn mit einer Jahreszahl. Die
+Zahl daneben war die eigentliche:
+
+**323 der 395 trugen den Adressabklatsch, den Punkt 41 an 815 Titeln entfernt hatte.**
+
+127 hiessen genau wie ihre Adresse -- „Am Felde 31" ueber „Am Felde 31" --, 196 waren „Adresse,
+Zusatz". Das ist kein Zufall und war kein neuer Fehler: `apply_folder_meta` setzte den Titel
+weiterhin auf `meta.title`, also „Strasse Hausnummer, Zusatz". Punkt 41 hatte den Bestand
+aufgeraeumt und die Ursache stehen lassen; die naechste Lieferung war damit die naechste
+Bereinigung. `decisions.md`, Punkt 48.
+
+Drei Regeln sind deshalb in den Import gewandert, jede mit Test und Gegenprobe:
+
+- **Der Ordnertitel ist der Zusatz**, nicht die Adresse davor. Nennt der Ordner nur eine Nummer,
+  bleibt der Titel leer.
+- **`TITLE_MAX` faellt von 120 auf 60.** Die Zahl ist gemessen: Von den 781 Titeln, die das Museum
+  von Hand gesetzt hat, ueberschreitet **keiner 58 Zeichen**, der Mittelwert liegt bei 13.
+- **Der Name der Scannersoftware landet in keinem der beiden Felder.** „Intel(R) JPEG Library,
+  version [1.51.12.44]" kam als Titel von 35 Fotos. Anders als eine zu lange Bildunterschrift darf
+  er auch nicht in die Beschreibung ausweichen -- das schoebe denselben Unsinn eine Zeile tiefer,
+  wo er im Kiosk unter dem Bild steht.
+
+Dazu die Einmalaktion ueber die 395: **423 Felder**, in sechs Schritten, jeder Schritt der Reihe
+nach, weil erst nach dem Abschneiden des Adressvorsatzes feststeht, welcher Titel wirklich zu lang
+ist. Nichts ging dabei verloren -- was aus einem Feld verschwand, stand danach entweder woanders am
+Foto oder war nie eine Aussage ueber das Foto, und jede Aenderung steht mit ihrem alten Wert im
+Aenderungsprotokoll.
+
+### Der Trockenlauf hat den teuersten Fehler gefangen
+
+Der Datierungsschritt folgte Punkt 37: eine Jahreszahl datiert nur, wenn ein Datumswort davorsteht.
+Er meldete 13 Fotos. Zwei davon lauteten:
+
+    ca. 1970 wurde dieses Haus abgerissen und durch ein Mehrfamilienhaus ersetzt
+
+Das Datumswort steht sauber davor. Nur datiert die Zahl den **Abriss**, und die Aufnahme liegt
+zwingend davor -- sonst gaebe es das Haus auf dem Bild nicht. Zwei Fotos waeren auf das Jahr ihres
+eigenen Verschwindens datiert worden und danach nie wieder gefragt worden.
+
+Punkt 37 hatte die Warnwortliste zugunsten des positiven Musters verworfen, weil eine Warnwortliste
+nie fertig wird. Das stimmt -- gebraucht werden trotzdem beide, und sie tun Verschiedenes: Das Wort
+davor sagt, *dass* eine Zahl ein Datum ist, das Wort dahinter, *wovon*. Und der alte Einwand trifft
+nur eine Richtung: **Eine Liste, die ausschliesslich ablehnt, darf unvollstaendig sein.**
+`decisions.md`, Punkt 49.
+
+Beim ersten Anlauf griff der neue Waechter nicht, und auch das war lehrreich: Er sah nur das
+*erste* Ereignis im Text. Dort stand „1968 wurde der Hof ausgesiedelt, ca. 1970 abgerissen" -- eine
+andere Jahreszahl, also kein Treffer. Ueber alle Ereignisse gesucht, fiel es.
+
+### Was am Ende dastand
+
+**Kein Titel im Bestand ist laenger als 58 Zeichen**, ueber alle 1004 hinweg, der mittlere hat 13.
+Null Adressabklatsch, null Geraetetexte. Die Datierung waechst von 160 auf 171, der Zeitschieber
+reicht bis 2025.
+
+Ein Schritt der Liste lief ins Leere, und die Zahl davor war falsch gemessen: „13 Hausnummern, die
+der Ortsindex nicht kennt" zaehlte auf exakte Uebereinstimmung und uebersah, dass der Import laengst
+`address_near` benutzt -- die Nachbarnummer-Regel aus Punkt 41. **Alle 221 Fotos mit Hausnummer
+liegen hausgenau**, es war nichts nachzuschaerfen.

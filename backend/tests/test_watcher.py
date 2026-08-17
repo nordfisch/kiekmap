@@ -101,7 +101,7 @@ class TestOrdnernamen:
         foto = session.scalars(select(Photo)).one()
         assert foto.place_name == "Hauptstrasse 14"
         assert (foto.lat, foto.lon) == (53.62, 9.676)
-        assert foto.title == "Hauptstrasse 14, Museum"
+        assert foto.title == "Museum"
         assert foto.provenance == "Archiv/Hauptstrasse/14 Museum/023.jpg"
         assert {"Hauptstrasse", "Museum"} <= {schlagwort.name for schlagwort in foto.tags}
 

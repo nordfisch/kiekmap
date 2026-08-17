@@ -104,10 +104,13 @@ nicht maschinell entscheiden, und sie blieben deshalb unangetastet:
 **Was jetzt hier steht, ist der Rest — und der braucht Ortskenntnis.** Er gehört dem Museumsteam,
 nicht dem Rechner:
 
-- **966 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist
+- **959 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist
   genau das, was sich aus keinem vorhandenen Feld ableiten lässt. Wer das Bild ansieht und den Ort
   kennt, schreibt in einer Minute, was keine Regel je finden wird.
-- **847 Fotos ohne Jahr.** Die 83, die eine Jahreszahl im Text trugen, sind durchgesehen; 52 sind
+- **320 Fotos ohne Titel.** Sie tragen ihre Adresse und sonst nichts — der Ordner, aus dem sie
+  kamen, nannte nur eine Hausnummer. Das ist kein Mangel im Sinne eines Fehlers, aber jeder Titel
+  macht ein Foto auf der Karte lesbar, bevor jemand es antippt.
+- **836 Fotos ohne Jahr.** Die 83, die eine Jahreszahl im Text trugen, sind durchgesehen; 52 sind
   datiert, 17 Vorschläge wurden verworfen, weil das Jahr das Gebäude datierte und nicht die
   Aufnahme ([decisions.md](decisions.md), Punkt 37). Der Rest trägt keinen Anhalt. **Ein Teil
   davon löst sich von selbst:** Es ist der Vorrat für „Wann war das?", und der Beitragsbereich

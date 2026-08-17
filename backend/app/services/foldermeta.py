@@ -61,12 +61,6 @@ class FolderMeta:
             return None
         return f"{self.street} {self.housenumber}" if self.housenumber else self.street
 
-    @property
-    def title(self) -> str | None:
-        """ "Hauptstraße 14, Gasthof Petersen" -- what the archive would call this picture."""
-        parts = [part for part in (self.address, self.name) if part]
-        return ", ".join(parts) or None
-
 
 def split_housenumber(folder: str) -> tuple[str | None, str | None]:
     """Split a folder name into house number and whatever else stands there.
@@ -261,8 +255,14 @@ def apply_folder_meta(
     if not photo.place_name:
         photo.place_name = meta.address
 
-    if not photo.title:
-        photo.title = meta.title
+    # **The title is the name beside the number, and nothing else.** Until 16 August 2026 it was
+    # ``meta.title`` -- address included -- and that reads like a title only until it stands under
+    # the picture, where the address is already there in ``place_name``. Punkt 41 cleaned 815 such
+    # titles by hand in August 2026; the next import wrote 323 of them straight back, which is how
+    # the rule was found. A folder that names no house ("049", "Hauptstraße") leaves the title
+    # empty rather than repeating the line below it.
+    if not photo.title and meta.name:
+        photo.title = meta.name
         photo.title_source = Source.CURATOR
 
     # The street goes on *every* photo below it, house number or not. For the ones without a

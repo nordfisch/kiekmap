@@ -250,6 +250,53 @@ class TestKameraTextbausteine:
         assert _own_title(mehrzeilig) is None
         assert _own_description(mehrzeilig) == "Bilderbummel S. 12\nClaus Petersen"
 
+    def test_die_grenze_liegt_bei_sechzig_zeichen(self):
+        """Die Zahl ist am Bestand gemessen, nicht gewaehlt.
+
+        Sie stand bei 120 und liess acht Bildunterschriften des neueren Archivstands als Titel
+        durch, die laengste mit 108 Zeichen. Von den 781 Titeln, die das Museum von Hand gesetzt
+        hat, ueberschreitet **kein einziger 58 Zeichen**; der Mittelwert liegt bei 13.
+        """
+        from app.services.exif import ImageInfo
+        from app.services.importer import TITLE_MAX, _own_description, _own_title
+
+        assert TITLE_MAX == 60
+
+        bildunterschrift = ImageInfo(
+            1,
+            1,
+            "JPEG",
+            title=(
+                "links Hauptstrasse 27, Mitte Hauptstrasse 29, rechts im Vordergrund "
+                "Schulstrasse 2a, Foto aus den 1980er Jahren"
+            ),
+        )
+        assert _own_title(bildunterschrift) is None
+        assert _own_description(bildunterschrift).startswith("links Hauptstrasse 27")
+
+        knapp = ImageInfo(1, 1, "JPEG", title="Pizzeria und Kindergarten von der Strasse gesehen")
+        assert _own_title(knapp) == "Pizzeria und Kindergarten von der Strasse gesehen"
+
+    def test_die_scannersoftware_landet_in_keinem_der_beiden_felder(self):
+        """ "Intel(R) JPEG Library, version [1.51.12.44]" stand als Titel von 35 Fotos.
+
+        Sie ist keine gekuerzte Bildunterschrift, also darf sie auch nicht in die Beschreibung
+        ausweichen wie ein zu langer Titel -- das schoebe denselben Unsinn nur eine Zeile tiefer,
+        wo er im Kiosk unter dem Bild steht. Punkt 41 hat achtzehn davon von Hand entfernt; mit dem
+        naechsten Import waren sie wieder da.
+        """
+        from app.services.exif import ImageInfo
+        from app.services.importer import _own_description, _own_title
+
+        software = ImageInfo(1, 1, "JPEG", title="Intel(R) JPEG Library, version [1.51.12.44]")
+        assert _own_title(software) is None
+        assert _own_description(software) is None
+
+        auch_als_beschreibung = ImageInfo(1, 1, "JPEG", title="Hof Koerner")
+        auch_als_beschreibung.description = "OLYMPUS DIGITAL CAMERA"
+        assert _own_title(auch_als_beschreibung) == "Hof Koerner"
+        assert _own_description(auch_als_beschreibung) is None
+
 
 class TestTextkodierung:
     """Warum IPTC und die XP-Felder verschieden gelesen werden muessen.

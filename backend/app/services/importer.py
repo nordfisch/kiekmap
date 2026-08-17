@@ -13,6 +13,7 @@ Files from the watched folder are moved aside afterwards, never deleted:
 """
 
 import logging
+import re
 import shutil
 import tempfile
 from collections.abc import Callable
@@ -117,11 +118,35 @@ def move_to_done(path: Path, inbox: Path) -> None:
 #: was: "Beschriftung: v. li.: Johann Harms, Tina Harms (Mutter v. Grete, verwitw. ...)",
 #: 223 characters, sometimes with line breaks. As a heading in the detail view that is a wall of
 #: text; as a description it is exactly right, and the folder supplies a heading that fits on one
-#: line. 4 files of the Holm stock, and the number only grows as the archive does.
-TITLE_MAX = 120
+#: line.
+#:
+#: **The number is measured, not chosen.** It stood at 120 and let through eight titles of the
+#: newer archive stand that are plainly captions -- "links Hauptstraße 27, Mitte Hauptstraße 29,
+#: rechts im Vordergrund Schulstraße 2a, Foto aus den 1980er Jahren", 108 characters. The 781
+#: titles the museum curated by hand have a ceiling: **not one exceeds 58 characters**, the median
+#: is 13. Sixty is that ceiling with room to spare, and everything above it is a caption in the
+#: title field.
+TITLE_MAX = 60
+
+#: What the scanning software says about itself, standing in the title field.
+#:
+#: "Intel(R) JPEG Library, version [1.51.12.44]" arrived as the title of 35 photographs of the
+#: newer archive stand, "OLYMPUS DIGITAL CAMERA" as the description of others. It is not a
+#: shortened caption and does not belong in the description either -- it says nothing about the
+#: picture. Punkt 41 removed eighteen of these by hand; they came back with the next import.
+_SOFTWARE = re.compile(
+    r"^\s*(intel\(r\)|olympus digital camera|lead technologies|picasa|hp scanjet|epson scan)",
+    re.I,
+)
+
+
+def _is_software(text: str | None) -> bool:
+    return bool(text and _SOFTWARE.match(text))
 
 
 def _own_title(info: exif_service.ImageInfo) -> str | None:
+    if _is_software(info.title):
+        return None
     if info.title and (len(info.title) > TITLE_MAX or "\n" in info.title):
         return None
     return info.title
@@ -134,10 +159,13 @@ def _own_description(info: exif_service.ImageInfo) -> str | None:
     the detail view that reads like a stutter, and it costs the space where something the picture
     actually needs could stand. 57 files of the Holm stock do it.
 
-    A title too long to be one lands here instead of being thrown away; see ``TITLE_MAX``.
+    A title too long to be one lands here instead of being thrown away; see ``TITLE_MAX``. What
+    the scanning software wrote about itself does not -- see ``_SOFTWARE``, it would only move the
+    same nonsense one line down.
     """
-    long_title = info.title if _own_title(info) is None else None
-    description = info.description or long_title
+    long_title = info.title if _own_title(info) is None and not _is_software(info.title) else None
+    description = None if _is_software(info.description) else info.description
+    description = description or long_title
     if not description:
         return None
     if long_title and info.description:

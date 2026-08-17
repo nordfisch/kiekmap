@@ -1666,3 +1666,62 @@ eine Sporthalle in dreifacher Aufloesung.
 **Der Abstand zwischen Treffer und Nicht-Treffer war dabei kein Ermessen**, und das ist der Grund,
 warum eine Schwelle hier ueberhaupt vertretbar ist: 212 der Treffer lagen bei einer mittleren
 Abweichung von exakt 0,00, der hoechste bei 3,01 -- und der naechste Nicht-Treffer bei 56.
+
+## 48. Was im Titelfeld steht, ist nicht automatisch ein Titel
+
+*Entschieden am 16. August 2026, nachdem der neue Archivstand denselben Fehler dreifach
+zurueckgebracht hatte.*
+
+In der Detailansicht steht der Titel **ueber** der Adresse, nicht an ihrer Stelle. Ein Foto, das
+„Hauptstrasse 14, Museum" heisst und darunter noch einmal „Hauptstrasse 14" fuehrt, sagt eine Zeile
+umsonst -- und die Zeile darueber ist die auffaelligste der ganzen Ansicht.
+
+Punkt 41 hat im August 2026 **815 solcher Titel von Hand auseinandergenommen**. Die Regel, die sie
+erzeugt, blieb dabei stehen: `apply_folder_meta` setzte den Titel weiter auf „Strasse Hausnummer,
+Zusatz". Der naechste Archivstand schrieb **323 von 395** neuen Fotos genau so wieder an. Daher
+drei Regeln statt einer Aufraeumaktion:
+
+**Der Ordnertitel ist der Zusatz.** „14 Gasthof Petersen" ergibt den Titel „Gasthof Petersen", die
+Adresse steht in `place_name`. Nennt der Ordner nur eine Nummer, bleibt der Titel **leer** -- eine
+Zeile, die nur die naechste wiederholt, ist keine.
+
+**Die Laengengrenze ist gemessen, nicht gewaehlt.** `TITLE_MAX` stand bei 120 und liess acht
+Bildunterschriften als Titel durch, die laengste mit 108 Zeichen. Von den 781 Titeln, die das
+Museum von Hand gesetzt hat, ueberschreitet **kein einziger 58 Zeichen**; der Mittelwert liegt bei
+13. Die Grenze steht jetzt bei 60, und was darueber liegt, wandert in die Beschreibung statt
+weggeworfen zu werden.
+
+**Der Name der Scannersoftware gehoert in kein Feld.** „Intel(R) JPEG Library, version
+[1.51.12.44]" kam als Titel von 35 Fotos. Anders als eine zu lange Bildunterschrift darf er
+**nicht** in die Beschreibung ausweichen: Das schoebe denselben Unsinn nur eine Zeile tiefer, wo er
+im Kiosk unter dem Bild stuende. Punkt 41 hatte achtzehn davon von Hand entfernt.
+
+**Die Lehre steckt nicht in den drei Regeln, sondern darin, warum es sie zweimal brauchte.** Eine
+Bereinigung von Hand raeumt den Bestand auf und laesst die Ursache stehen. Solange die Ursache im
+Import sitzt, ist die naechste Lieferung die naechste Bereinigung. Was von Hand aufgeraeumt wird,
+gehoert danach als Regel dorthin, wo es entstanden ist -- sonst zaehlt man dieselbe Arbeit in
+Monaten.
+
+## 49. Ein Datumswort sagt, dass es ein Datum ist -- nicht, wovon
+
+*Ergaenzung zu Punkt 37, am 16. August 2026 im Trockenlauf aufgefallen.*
+
+Punkt 37 hatte die Regel umgedreht: nicht „eine Jahreszahl ohne Warnwort", sondern „eine
+Jahreszahl, der *um*, *ca.*, *im Jahre*, *Herbst* oder *Dezember* vorausgeht". Begruendet damit,
+dass eine Warnwortliste nie fertig wird, ein positives Muster aber schon.
+
+**Das Muster allein reicht nicht.** Im Bestand steht:
+
+    ca. 1970 wurde dieses Haus abgerissen und durch ein Mehrfamilienhaus ersetzt
+
+Das Datumswort steht davor, sauber. Nur datiert die Jahreszahl den **Abriss** -- und die Aufnahme
+liegt zwingend davor, sonst gaebe es das Haus auf dem Bild nicht. Zwei Fotos waeren so auf das Jahr
+ihres eigenen Verschwindens datiert worden, und weil sie damit als datiert gelten, haette sie
+niemand mehr gefragt.
+
+**Beide Listen werden gebraucht, und sie tun Verschiedenes.** Das Datumswort davor sagt, *dass*
+eine Zahl ein Datum ist. Ein Ereigniswort dahinter -- *abgerissen*, *erbaut*, *abgebrannt*,
+*ausgesiedelt*, *verkauft* -- sagt, *wovon*. Der Einwand aus Punkt 37 gilt weiter, trifft aber nur
+die eine Richtung: **Eine Liste, die ausschliesslich ablehnt, darf unvollstaendig sein.** Sie laesst
+dann einen Fall durch, den ein Mensch danach noch sieht; eine Liste, die etwas *annimmt*, macht aus
+einer Luecke eine falsche Angabe.
