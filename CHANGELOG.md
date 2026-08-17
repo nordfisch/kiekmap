@@ -859,3 +859,17 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Hausnummer gelesen; das Foto hieß „Hörnstraße 14" über der Zeile „Hörnstraße". Abgeschnitten
   wird nur, wenn dahinter wirklich eine Hausnummer steht — sonst würde aus „Twietenhof" unter
   „Twiete" ein „nhof"
+
+### Hinzugefügt
+
+- **`python -m app.cli dubletten` findet dasselbe Bild mehrfach im Bestand** — über einen
+  Differenzhash auf den Vorschaubildern, der Helligkeit, Farbstich und Verkleinerung erträgt. Er
+  findet und schreibt nichts: Bei einem Paar trug die *kleinere* Fassung den Bildtext, bei einem
+  anderen stand auf einem von zwei sonst gleichen Bildern ein Lastwagen
+
+### Geändert
+
+- **45 Dubletten sind aus der Ausstellung genommen** — 39 Gruppen zusammengeführt, 58 Felder und
+  11 Schlagwörter vorher auf das behaltene Foto übernommen. Der Bestand steht bei 1279 sichtbaren
+  Fotos, 1275 auf der Karte. „Herausgenommen" heißt weiterhin: aus der Ausstellung, nicht von der
+  Platte

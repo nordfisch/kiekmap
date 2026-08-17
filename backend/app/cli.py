@@ -3,6 +3,7 @@
     python -m app.cli import ~/Scans/Kirchweih   take in a directory (originals stay put)
     python -m app.cli scan                       sweep the inbox folder once
     python -m app.cli stats                      what is in there, what is still missing
+    python -m app.cli dubletten                  the same picture more than once
     python -m app.cli places                     reload the gazetteer
     python -m app.cli pin                        set the PIN for the admin area
     python -m app.cli seed-export                write the collection out to seed/
@@ -92,6 +93,31 @@ def _cmd_stats(_: argparse.Namespace) -> int:
         print(f"  geloescht             {deleted}")
     if total:
         print(f"\n{100 * on_map // total} % haben einen Ort und stehen damit auf der Karte.")
+    return 0
+
+
+def _cmd_duplicates(args: argparse.Namespace) -> int:
+    from app.services.similar import candidate_groups
+
+    settings = get_settings()
+    with SessionLocal() as session:
+        groups = candidate_groups(session, settings, limit=args.abstand)
+
+    total = sum(len(group) for group in groups)
+    print(f"{len(groups)} Gruppen, {total} Fotos, Abstand bis {args.abstand}\n")
+    for number, group in enumerate(groups, 1):
+        print(f"--- Gruppe {number} ({len(group)} Fotos) ---")
+        for photo in group:
+            year = str(photo.date_from)[:4] if photo.date_from else "----"
+            print(
+                f"  Foto {photo.id:5} {photo.width:5}x{photo.height:<5} {year}"
+                f"  {str(photo.place_name)[:24]:26} {str(photo.title)[:34]}"
+            )
+        print()
+
+    if groups:
+        print("Das groesste Bild ist der uebliche, nicht immer der richtige Kandidat zum")
+        print("Behalten -- ein Bildtext kann auf der kleineren Fassung stehen. Bitte ansehen.")
     return 0
 
 
@@ -238,6 +264,15 @@ def main(argv: list[str] | None = None) -> int:
 
     p_stats = commands.add_parser("stats", help="Bestand und Luecken")
     p_stats.set_defaults(handler=_cmd_stats)
+
+    p_duplicates = commands.add_parser("dubletten", help="Dasselbe Bild mehrfach im Bestand")
+    p_duplicates.add_argument(
+        "--abstand",
+        type=int,
+        default=40,
+        help="Wie viele der 256 Bit abweichen duerfen (Vorgabe 40)",
+    )
+    p_duplicates.set_defaults(handler=_cmd_duplicates)
 
     p_places = commands.add_parser("places", help="Ortsverzeichnis neu laden")
     p_places.set_defaults(handler=_cmd_places)

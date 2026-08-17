@@ -3100,3 +3100,55 @@ Der erste Durchgang fand **null** solcher Ordner. Der Grund lag nicht in den Dat
 Dateinamen in zerlegter Unicode-Form, „Hörnstraße" aus dem Dateisystem ist also nicht dieselbe
 Zeichenkette wie „Hörnstraße" aus dem Ortsindex, und `startswith` sagte nein. `place_service.normalize`
 faengt das ab -- mein Vergleichsskript daneben tat es nicht.
+
+## Punkt 42: 44 Gruppen, und die Maschine durfte nicht entscheiden
+
+*16. August 2026.* Der letzte Schritt des Vorgehens, und der einzige, bei dem die Zahl kleiner war
+als befuerchtet.
+
+Der SHA-256 erkennt eine Kopie der Datei, nicht denselben Papierabzug zweimal gescannt. Gesucht
+wurde deshalb mit einem **Differenzhash ueber 256 Bit** auf den 240er Vorschaubildern, die ohnehin
+schon dalagen: 876 000 Paare, ein XOR je Paar, wenige Sekunden.
+
+**44 Gruppen ueber 95 Fotos** -- sieben Prozent des Bestands. 40 Paare, drei Dreier, ein Sechser.
+
+### Die Schwelle wurde angesehen, nicht gewaehlt
+
+Sechzig Paare als Kontaktblatt nebeneinandergelegt und durchgeblaettert. Bis Abstand 12 ist es
+zweifelsfrei dasselbe Bild; bis 30 fast immer; und selbst bei 37 bis 40 ist die Mehrheit noch eine
+Dublette. **Das Signal reisst nicht ab, es wird unscharf** -- also eine grosszuegige Vorgabe und
+ein Mensch am Ende.
+
+### Drei Gruppen zeigten, warum
+
+* **Dieselbe Grundsteinlegung an zwei Adressen**: Foto 810 auf Schulstrasse 9, Jahr 1971; Foto 580
+  auf Lehmweg 8, Jahr 1968. Eines war falsch abgelegt, und ohne die Dublettensuche haette das
+  niemand nebeneinander gesehen. Zwei weitere Gruppen ebenso.
+* **Das kleinere Bild traegt den Bildtext** „Dörpshus vor dem Brand", das groessere nicht.
+  Aufloesung ist dort das falsche Kriterium -- genau der Fall, den der Backlog vorausgesagt hatte.
+* **Ein Lastwagen** steht auf einem von drei sonst gleichen Strassenbildern. Zwei Momente.
+
+### Was daraus wurde
+
+Eine Entscheidungsliste mit 44 Zeilen ans Museum, 36 Vorschlaege und 8 zum Ansehen. Zurueck kamen
+drei Entscheidungen -- welche Adresse bei zweien richtig ist, und welche der sechs Farbfassungen
+bleibt -- und ein „sonst alle fraglichen Gruppen behalten".
+
+**39 Gruppen zusammengefuehrt, 45 Fotos aus der Ausstellung, 58 Felder und 11 Schlagwoerter
+uebernommen, bevor etwas verschwand.** Der Bestand steht bei 1279 sichtbaren Fotos, 1275 auf der
+Karte.
+
+Der Finder liegt als `services/similar.py` im Repo, mit `python -m app.cli dubletten`. Er findet
+und schreibt nichts.
+
+### Ein Fehler in genau der Zeile, die es zu koennen glaubte
+
+Beim ersten Lauf des fertigen Befehls meldete er **eine** Gruppe, wo fuenf stehen mussten. Die
+Union-Find-Struktur fasst zusammen, indem sie jedem Foto eine Wurzel gibt -- und mein Einsammeln
+nahm nur die Nicht-Wurzeln mit. **Aus jeder Gruppe fiel damit ein Foto**, und ein Paar schrumpfte
+auf eines und verschwand aus der Meldung. Am Bestand haette das ausgesehen wie „keine Dubletten
+gefunden".
+
+Aufgefallen ist es nur, weil ich den Befehl direkt nach dem Zusammenfuehren an den fuenf bewusst
+behaltenen Gruppen ausprobiert habe und die Zahl nicht stimmte. Der Test dazu heisst jetzt
+`test_beide_fotos_stehen_in_der_gruppe`.

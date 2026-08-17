@@ -46,7 +46,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 50 | [Ein Schlagwort für den ganzen Stapel beim Import](#50--ein-schlagwort-für-den-ganzen-stapel-beim-import) | Aufgabe | wichtig |
 | 51 | [Der Abbruch am PIN-Feld heißt „Abbrechen und zurück"](#51--der-abbruch-am-pin-feld-heißt-abbrechen-und-zurück) | Aufgabe | — |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
-| 42 | [Dubletten finden, die beste behalten, den Rest zusammenführen](#42--dubletten-finden-die-beste-behalten-den-rest-zusammenführen) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
@@ -69,10 +68,10 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur.
 
-**Vierunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26, 27,
-10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 44, 45, 46, 47, 48, 49, 52, 53, 55. Sie sind erledigt,
-aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md). Der nächste
-neue Punkt bekommt die **56**.
+**Fünfunddreißig Nummern sind vergriffen** — 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25, 26,
+27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 42, 44, 45, 46, 47, 48, 49, 52, 53, 55. Sie sind
+erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in [history.md](history.md).
+Der nächste neue Punkt bekommt die **56**.
 
 ---
 
@@ -80,7 +79,7 @@ neue Punkt bekommt die **56**.
 
 ### 1 · Der Erstbestand braucht eine Durchsicht
 
-1324 Fotos sind eingelesen, und am 11. und 12. August 2026 hat eine maschinelle Runde alles
+1279 Fotos sind in der Ausstellung, und am 11. und 12. August 2026 hat eine maschinelle Runde alles
 herausgeholt, was sich aus Dateien, Ordnernamen und den vorhandenen Textfeldern ableiten ließ —
 Verortung, Titel, Beschreibungen, Datierungen, Schlagwörter. Sie ist abgeschlossen und in der
 [history.md](history.md) beschrieben; sie lief unter der Nummer 41, die damit vergriffen ist.
@@ -103,13 +102,13 @@ nicht maschinell entscheiden, und sie blieben deshalb unangetastet:
 **Was jetzt hier steht, ist der Rest — und der braucht Ortskenntnis.** Er gehört dem Museumsteam,
 nicht dem Rechner:
 
-- **959 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist
+- **922 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist
   genau das, was sich aus keinem vorhandenen Feld ableiten lässt. Wer das Bild ansieht und den Ort
   kennt, schreibt in einer Minute, was keine Regel je finden wird.
-- **320 Fotos ohne Titel.** Sie tragen ihre Adresse und sonst nichts — der Ordner, aus dem sie
+- **309 Fotos ohne Titel.** Sie tragen ihre Adresse und sonst nichts — der Ordner, aus dem sie
   kamen, nannte nur eine Hausnummer. Das ist kein Mangel im Sinne eines Fehlers, aber jeder Titel
   macht ein Foto auf der Karte lesbar, bevor jemand es antippt.
-- **836 Fotos ohne Jahr.** Die 83, die eine Jahreszahl im Text trugen, sind durchgesehen; 52 sind
+- **804 Fotos ohne Jahr.** Die 83, die eine Jahreszahl im Text trugen, sind durchgesehen; 52 sind
   datiert, 17 Vorschläge wurden verworfen, weil das Jahr das Gebäude datierte und nicht die
   Aufnahme ([decisions.md](decisions.md), Punkt 37). Der Rest trägt keinen Anhalt. **Ein Teil
   davon löst sich von selbst:** Es ist der Vorrat für „Wann war das?", und der Beitragsbereich
@@ -244,49 +243,6 @@ daraus „starten und durch die Verwaltung gehen". Für Ehrenamtliche besser; f�
 zweites Museum aufsetzt, ist die eine übergebbare Datei dann weg. Vielleicht ist die Antwort
 beides: Datei als Startwert, Datenbank als Übersteuerung — genau das gehört durchdacht, bevor
 etwas gebaut wird.
-
-### 42 · Dubletten finden, die beste behalten, den Rest zusammenführen
-
-**Die Sperre ist gefallen:** Punkt 52, das Nachziehen des neueren Archivstands, ist am 16. August
-2026 erledigt. Damit ist dieser Punkt an der Reihe — und er hat jetzt konkretes Material statt
-einer Vermutung.
-
-**223 Dateien des neuen Stands liegen unter `Neue Fotos zurueckgestellt/Dublette/`**, weil sie ein
-Bild zeigen, das schon im Bestand steht. Sie sind nicht gelöscht, und drei davon sind gerade das,
-was dieser Punkt sucht:
-
-- **Eine Sporthalle in 3052×2289**, die im Bestand nur mit 1024×768 liegt — dreimal so viel Bild.
-- **Neun „frei"-Fassungen** (Vignette um denselben Scan), die als eigene Fotos hereinkamen.
-- Ein `Entwurf1.jpg` **ohne** den Bildtext, den die vorhandene Fassung trägt — der Fall, für den
-  „die größere ist die bessere" gerade nicht gilt.
-
-Wie die 223 gefunden wurden, steht in [history.md](history.md); der Weg — Kantenlängen vorsieben,
-dann Pixel vergleichen, und für den Rest ein grober Vergleich über 32×32-Graustufen — ist die
-halbe Technik dieses Punktes und liegt damit schon vor.
-
-Derselbe Scan liegt mehrfach im Bestand — in unterschiedlicher Scanqualität, mit anderer
-Farbkorrektur, mal mit und mal ohne den Text darunter. **Der SHA-256 sieht davon nichts:** Er
-erkennt nur bitgleiche Dateien, und zwei Durchläufe desselben Papierabzugs sind nie bitgleich.
-Genau deshalb stand die Wiedererkennung über einen Perceptual Hash bisher als eigener Punkt 3 im
-Backlog; sie geht hier auf, weil das Erkennen allein das Problem nicht löst.
-
-**Der Punkt hat drei Teile, und nur der erste ist Technik:**
-
-1. **Finden.** Perceptual Hash über die Vorschaubilder. Er erträgt Helligkeit, Kontrast und
-   Farbstich; er erträgt **keinen** stark abweichenden Zuschnitt — und ein abgeschnittener
-   Bildtext ist genau das. Was er findet, sind Kandidaten, keine Urteile.
-2. **Auswählen.** Welche ist die beste? Auflösung ist ein Anhalt, aber nicht der einzige: Ein
-   großer Scan mit Farbstich ist schlechter als ein kleiner sauberer, und die Fassung **mit** dem
-   Text darunter trägt mehr Information, auch wenn sie schlechter aussieht.
-3. **Zusammenführen.** Die Dubletten tragen Angaben, die das Behaltene nicht hat — Titel,
-   Beschreibung, Jahr, Ort. Die gehören übernommen, **bevor** etwas verschwindet. Und
-   „verschwinden" heißt hier gelöscht im Sinne von [decisions.md](decisions.md), Punkt 16: aus der
-   Ausstellung genommen, nicht von der Platte entfernt — wer sich vertut, holt sie zurück.
-
-**Zu entscheiden ist der Grad der Selbsttätigkeit.** Vollautomatisch verliert irgendwann das
-bessere Bild, ohne dass es jemand merkt. Halbautomatisch — die Kandidaten werden paarweise
-vorgelegt, jemand bestätigt — kostet Zeit, aber nur einmal. Bei 1324 Fotos ist das tragbar; die
-Frage ist, ob es das bei 5000 noch wäre.
 
 ### 34 · Eine Karte in der Nachbearbeitung des Imports
 

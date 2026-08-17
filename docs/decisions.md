@@ -1824,3 +1824,43 @@ muesste. **Das lohnt nicht.**
 Ordner gefunden, der seine Strasse wiederholt (`Hörnstraße/Hörnstraße 14`) und damit denselben
 Adressabklatsch erzeugte, den Punkt 48 gerade abgeschafft hatte. **Erst messen, dann bauen** heisst
 eben auch, dass die Messung etwas anderes findet als das Gesuchte.
+
+## 54. Dubletten findet die Maschine, entscheiden muss ein Mensch
+
+*Entschieden am 16. August 2026 -- Punkt 42, und die offene Frage darin war der Grad der
+Selbsttaetigkeit.*
+
+Der SHA-256 erkennt eine Kopie der *Datei*. Er erkennt nicht denselben Papierabzug, zweimal
+gescannt, und nicht denselben Scan, einmal gross und einmal klein gespeichert. Gefunden wird das
+mit einem **Differenzhash ueber 256 Bit** auf den vorhandenen Vorschaubildern -- 876 000 Paare,
+ein XOR je Paar, wenige Sekunden. Er ertraegt Helligkeit, Farbstich und Verkleinerung.
+
+**Die Schwelle ist angesehen, nicht gewaehlt.** Sechzig Paare durchgeblaettert: bis Abstand 12
+zweifelsfrei dasselbe Bild, bis 30 fast immer, bei 37 bis 40 immer noch die Mehrheit. Das Signal
+reisst nicht ab, es wird unscharf -- also ist die Vorgabe grosszuegig (40) und ein Mensch
+entscheidet.
+
+**Vollautomatisch waere falsch, und der Beweis stand in den Gruppen:**
+
+* Zwei Fotos derselben Grundsteinlegung standen an **verschiedenen Adressen und in verschiedenen
+  Jahren** -- Schulstrasse 9/1971 gegen Lehmweg 8/1968. Eines war falsch abgelegt. Eine Maschine,
+  die das groessere behaelt, haette die Frage nie gestellt.
+* Bei einem Paar traegt die **kleinere** Fassung den eingebrannten Bildtext „Dörpshus vor dem
+  Brand". Aufloesung ist dort das falsche Kriterium.
+* Auf einem von drei sonst gleichen Strassenbildern steht ein Lastwagen. Zwei Momente, keine
+  Dublette.
+
+**Der Umfang macht die Entscheidung leicht.** Es waren 44 Gruppen ueber 95 Fotos, nicht Hunderte.
+Eine Vorlage-Liste mit 44 Zeilen ist in einer Viertelstunde durchgesehen; eine Automatik, die
+gelegentlich das bessere Bild verliert, waere nie wieder zu pruefen. Deshalb findet
+``services/similar.py`` und schreibt nichts.
+
+**Zusammengefuehrt wird vor dem Herausnehmen**, nicht danach: Titel, Beschreibung, Datierung, Ort,
+Bildnachweis, Schlagwoerter und der Archivpfad wandern auf das behaltene Foto, soweit ihm etwas
+fehlt. Und „herausnehmen" heisst ``status = deleted`` -- aus der Ausstellung, nicht von der Platte
+(Punkt 16). Wer sich vertut, holt es zurueck.
+
+**Zwei Schlagwoerter blieben dabei absichtlich liegen.** „Bauernhaus von Paul Stein, im Jahre 1987.
+Abriss 18.1.1988" ist kein Stichwort, sondern ein Satz aus der Kommazerlegung von Punkt 41. Ihn
+auf das behaltene Foto zu tragen hiesse, den Fehler zu vermehren; am herausgenommenen bleibt er
+stehen, verloren geht also nichts.

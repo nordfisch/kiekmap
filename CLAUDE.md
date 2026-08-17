@@ -250,6 +250,16 @@ worden wären („ca. 1970 wurde dieses Haus abgerissen"). Punkt 37 sagt, eine J
 mit einem Datumswort davor — das Wort davor sagt aber nur, *dass* es ein Datum ist, nicht *wovon*.
 `docs/decisions.md`, Punkt 49.
 
+Am selben Tag ist **Punkt 42** erledigt worden, die Dubletten. Ein Differenzhash über die
+Vorschaubilder fand **44 Gruppen über 95 Fotos**; die Schwelle ist an sechzig durchgeblätterten
+Paaren angesehen, nicht gewählt. **Vollautomatisch wäre falsch gewesen:** Bei einem Paar trägt die
+*kleinere* Fassung den Bildtext, auf einem von drei sonst gleichen Bildern steht ein Lastwagen, und
+dreimal stand dasselbe Bild an zwei verschiedenen Adressen — eine davon falsch, und ohne die
+Dublettensuche hätte das niemand nebeneinander gesehen. Nach der Vorlage beim Museum sind 45 Fotos
+aus der Ausstellung genommen; **der Bestand steht bei 1279 sichtbaren Fotos**. Der Finder liegt als
+`services/similar.py` im Repo (`python -m app.cli dubletten`) und schreibt nichts.
+`docs/decisions.md`, Punkt 54.
+
 Danach lag der **Gesamtbestand des Archivs** vor, und zwei Fragen sind damit beantwortet. **Der
 gelieferte Diff war vollständig** — von 1322 Dateien unter `Straßen` sind 1034 byte-identisch bei
 uns, die übrigen 288 restlos erklärt, keine einzige unbekannt. Und **das XMP wird nicht gelesen**:
