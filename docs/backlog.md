@@ -46,6 +46,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
+| 56 | [Ein aufgehender Cluster soll aus seinem eigenen Punkt herauswachsen](#56--ein-aufgehender-cluster-soll-aus-seinem-eigenen-punkt-herauswachsen) | Fehler | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
 | 54 | [Das Layout der Detailansicht dem Bildformat folgen lassen](#54--das-layout-der-detailansicht-dem-bildformat-folgen-lassen) | Idee | — |
@@ -63,12 +64,12 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
-**Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur.
+**Ein Fehler ist offen** — Punkt 56, und er hat zwei Wirkungen, von denen nur eine auffällt.
 
 **Achtunddreißig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 55.
 Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
-[history.md](history.md). Der nächste neue Punkt bekommt die **56**.
+[history.md](history.md). Der nächste neue Punkt bekommt die **57**.
 
 ---
 
@@ -192,6 +193,41 @@ gerade **nicht** in `region.json`.
 `/photos/tags/alle` gibt es schon. Dazu ein Zustand im Kiosk-Store neben `timeRange` und `bbox`,
 der bei jeder Abfrage mitgeht — und die Abstimmung mit dem Fokus nach einem Beitrag, der Ort und
 Zeit heute schon verstellt und zurücknimmt.
+
+### 56 · Ein aufgehender Cluster soll aus seinem eigenen Punkt herauswachsen
+
+Wer auf einen Kreis mit einer Zahl tippt, zoomt so weit hinein, dass die Gruppe zerfällt. Was dann
+erscheint — kleinere Kreise und Vorschaubilder —, **fliegt aus der oberen linken Ecke der Karte
+herein.** Gewünscht ist das Gegenteil: Sie sollen aus dem Punkt herauswachsen, den der Finger
+gerade berührt hat.
+
+**Es ist kein Gestaltungsmangel, sondern ein Fehler.** Gemeint war nie ein Flug, sondern ein
+Aufblenden an Ort und Stelle: `marker-enter` in `global.css` setzt `opacity: 0` und
+`transform: scale(0.88)`. Nur schreibt MapLibre die Position seiner Marker als
+`transform: translate(…)` in den **Inline-Stil desselben Elements**. Eine CSS-Animation steht in
+der Kaskade über dem Inline-Stil — für die Dauer der Animation gewinnt also `scale(0.88)` und die
+Verschiebung ist weg. Das Element steht bei `translate(0, 0)`, und das ist die linke obere Ecke des
+Kartencontainers. Nach 180 ms springt es an seinen Platz.
+
+**Derselbe Konflikt hat noch einen zweiten Effekt still ausgeschaltet.** `.marker:hover` und
+`.cluster:hover` setzen `transform: scale(1.08)`. Eine gewöhnliche Regel steht in der Kaskade
+*unter* dem Inline-Stil — sie verliert und tut überhaupt nichts. Die Vergrößerung beim Berühren
+gibt es also nicht, seit es Marker gibt.
+
+**Beides hat dieselbe Ursache und dieselbe Lösung:** Das Element, das MapLibre positioniert, darf
+nicht dasselbe sein wie das, welches sich bewegt. Eine Hülle darum trennt die zwei Ebenen — außen
+die Verschiebung durch die Karte, innen alles, was das Stylesheet will.
+
+Darauf lässt sich das Gewünschte dann aufsetzen: Beim Antippen ist bekannt, welcher Kreis gemeint
+war. Sein Ort in Bildschirmpunkten minus der Ort des neuen Markers ergibt den Vektor, aus dem
+dieser kommen soll.
+
+**Zwei Fälle, und nur einer hat einen Ursprung.** Eine Umgruppierung entsteht auch beim Ziehen, bei
+`+`/`−` und beim Aufziehen mit zwei Fingern. Dort gibt es keinen angetippten Punkt; dort bleibt es
+beim Aufblenden an Ort und Stelle — das, was von Anfang an gemeint war.
+
+Wer weniger Bewegung angefordert hat, bekommt weiterhin den Sprung. Das ist bereits so gebaut und
+bleibt.
 
 ### 40 · Ein Durchgang über die ganze Oberfläche
 
