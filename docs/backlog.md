@@ -93,14 +93,14 @@ wurde.
 |---|---|---|---|
 | ~~1.1~~ | [Beschreibungen, die sich selbst wiederholen](#11--beschreibungen-die-sich-selbst-wiederholen) | 16 Fotos | **erledigt** |
 | ~~1.2~~ | [Beschreibungen, die Titel oder Adresse nachsprechen](#12--beschreibungen-die-titel-oder-adresse-nachsprechen) | 45 Fotos | **erledigt** |
-| ~~1.3~~ | [Datierung im Text — auch Jahrzehnte und Epochen](#13--datierung-im-text--auch-jahrzehnte-und-epochen) | 44 datiert | **erledigt** |
-| 1.4 | [Software- und Quellennamen im Titel](#14--software--und-quellennamen-im-titel) | 8 Fotos | Rechner |
-| 1.5 | [Sätze, die als Schlagwort stehen](#15--sätze-die-als-schlagwort-stehen) | 7 Wörter | Rechner |
+| ~~1.3~~ | [Datierung im Text — auch Jahrzehnte und Epochen](#13--datierung-im-text--auch-jahrzehnte-und-epochen) | 55 datiert | **erledigt** |
+| ~~1.4~~ | [Software- und Quellennamen im Titel](#14--software--und-quellennamen-im-titel) | 8 Fotos | **erledigt** |
+| ~~1.5~~ | [Sätze, die als Schlagwort stehen](#15--sätze-die-als-schlagwort-stehen) | 11 Wörter | **erledigt** |
 | 1.6 | [Die drei namentlich vorgemerkten Fotos](#16--die-drei-namentlich-vorgemerkten-fotos) | 3 Fotos | Museum |
-| 1.7 | [947 Fotos ohne Beschreibung](#17--947-fotos-ohne-beschreibung) | 947 | Museum |
-| 1.8 | [309 Fotos ohne Titel](#18--309-fotos-ohne-titel) | 309 | Museum |
+| 1.7 | [942 Fotos ohne Beschreibung](#17--942-fotos-ohne-beschreibung) | 942 | Museum |
+| 1.8 | [310 Fotos ohne Titel](#18--310-fotos-ohne-titel) | 310 | Museum |
 | 1.9 | [4 Fotos ohne Ort](#19--4-fotos-ohne-ort) | 4 | Museum |
-| 1.10 | [Taugen die 289 Schlagwörter?](#110--taugen-die-289-schlagwörter) | 289 | wartet auf Punkt 30 |
+| 1.10 | [Taugen die 281 Schlagwörter?](#110--taugen-die-281-schlagwörter) | 281 | wartet auf Punkt 30 |
 
 **Alle Zahlen sind vom 18. August 2026** und wandern mit jedem Besucherbeitrag. Wer eine braucht,
 holt sie mit `python -m app.cli stats`, statt sie hier abzulesen.
@@ -171,30 +171,45 @@ Monatsgenauigkeit geschärft** — sie sagen „Winter in Holm Dezember 1985", s
 
 #### 1.4 · Software- und Quellennamen im Titel
 
-**8 Titel nennen keine Sache, sondern ein Programm:** zweimal „LEAD Technologies Inc. V1.01" (die
-Scannersoftware) und sechsmal „Google Maps 2026". Die Regel dagegen steht seit Punkt 48 im Importer
-— sie ist nur nie rückwirkend über den Bestand gelaufen.
+**Erledigt am 18. August 2026: 8 Titel, 6 Bildnachweise.**
 
-Die sechs Kartenbilder sind dabei kein Müll, sondern eine Aussage: Das Foto ist ein heutiger
-Vergleichsblick. Der Name gehört in den Bildnachweis, das Jahr in die Datierung, und der Titel
-bleibt leer oder sagt, was zu sehen ist. **Das Jahr ist am 18. August übernommen** (Schritt 1.3),
-die Titel stehen noch.
+Acht Titel nannten keine Sache, sondern ein Programm: zweimal „LEAD Technologies Inc. V1.01" (die
+Scannersoftware) und sechsmal „Google Maps 2026". Die Regel dagegen steht seit Punkt 48 im
+Importer — sie war nur nie rückwirkend über den Bestand gelaufen.
 
-**Drei verwandte Fälle sind schon erledigt.** Die Fotos 1079, 1080 und 1229 trugen die Ordnernotiz
-„Gebäude und Umgebung im Holm der 80er Jahre" als **Titel** — schlimmer als in der Beschreibung,
-weil der Titel im Marker steht, bevor jemand antippt. Sie heißen jetzt „Gasthof Timm",
-„Gasthof Petersen" und „Walter Boysen", jeweils nach einem Schlagwort des Fotos selbst.
+**Kein neuer Titel ist erfunden.** Jeder kommt aus einem Schlagwort des Fotos selbst („Wulff",
+„Petersen", „Scharpe Eck" — dieselben, die schon die Geschwisterfotos tragen) oder aus dem Rest
+des eigenen Titels („modernes Zweifamilienhaus, Google Maps 2026" wurde „Modernes
+Zweifamilienhaus"). Eines hatte kein Schlagwort, das etwas benennt, und ist jetzt titellos; es
+zählt damit zu 1.8 statt zu 1.4.
+
+**Beim Bildnachweis kam ein Fehler heraus, der keiner Regel auffällt.** Die sechs Kartenbilder
+waren „August Möller" gutgeschrieben — dem, der sie eingestellt hat. Das Bild stammt aber von
+Google Maps. Der Nachweis heißt jetzt so, und wer es eingestellt hat, steht nach
+[decisions.md](decisions.md), Punkt 36, in der Herkunft, vor dem Archivpfad.
+
+**Damit ist eine Frage offen, die nicht hierher gehört:** Ob Kartenbilder eines Anbieters in einer
+Ausstellung gezeigt werden dürfen, entscheidet das Museum, nicht der Bestand — und die Frage stellt
+sich schärfer, sobald [Punkt 21](#21--deployment-auf-einem-webserver-evaluieren) das Ganze ins Netz
+stellt. Der richtige Nachweis ist die Voraussetzung dafür, sie überhaupt stellen zu können.
 
 #### 1.5 · Sätze, die als Schlagwort stehen
 
-**7 Schlagwörter sind keine**, sondern Sätze aus der Kommazerlegung von Punkt 41: „Hof Wilhelm
-Petersen, Seitenansicht, abgerissen 1971", „bei der alten Schmiede befand sich im Jahre 1938 eine
-Tankstelle". Sie gehören in die Beschreibung. Drei weitere beginnen mit „Notiz:" und tragen eine
-Archivnotiz mitsamt Jahr — „Notiz: Holmer Berg 1947 G. Dunker"; die zerfällt in Datierung,
-Bildnachweis und Beschreibung.
+**Erledigt am 18. August 2026: 11 Schlagwörter von Fotos genommen, 9 in die Beschreibung
+übernommen, 10 Namen restlos verschwunden.**
 
-Beim Zusammenführen der Dubletten sind diese Wörter bewusst stehen geblieben statt mitzuwandern,
-damit der Fehler sich nicht vermehrt. Hier ist er aufzulösen.
+Sie waren keine Stichwörter, sondern Sätze aus der Kommazerlegung von Punkt 41: „Hof Wilhelm
+Petersen, Seitenansicht, abgerissen 1971", „bei der alten Schmiede befand sich im Jahre 1938 eine
+Tankstelle". Übernommen wurden sie **wörtlich** — umformuliert wurde nichts, damit die Übernahme
+nichts hinzufügt und nichts verliert.
+
+**Zwei fielen ersatzlos weg, und das ist die Regel dahinter:** Ein Satz wandert nur, wo er etwas
+sagt, das nicht schon in einem anderen Feld steht. „Notiz: An de Masch 1978" an einem Foto in der
+Straße An de Masch, datiert auf 1978, sagt nichts — er wäre als Beschreibung nur Lärm. „Notiz:
+Holmer Berg 1947 G. Dunker" dagegen trägt einen Namen, den kein anderes Feld kennt, und ist
+deshalb geblieben.
+
+**Der Bestand zählt jetzt 281 Schlagwörter statt 291.** Ob die verbliebenen taugen, ist 1.10.
 
 #### 1.6 · Die drei namentlich vorgemerkten Fotos
 
@@ -209,13 +224,13 @@ Beim Metadatenabgleich ließ sich für sie nicht maschinell entscheiden:
   hängt eine Leihgeberadresse an, die nach [decisions.md](decisions.md), Punkt 36, in die Herkunft
   gehört und nicht in die Beschreibung.
 
-#### 1.7 · 947 Fotos ohne Beschreibung
+#### 1.7 · 942 Fotos ohne Beschreibung
 
 Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist genau das, was sich aus keinem
 vorhandenen Feld ableiten lässt. Wer das Bild ansieht und den Ort kennt, schreibt in einer Minute,
 was keine Regel je finden wird. Das ist Dauerarbeit, kein Vorgang mit Ende.
 
-#### 1.8 · 309 Fotos ohne Titel
+#### 1.8 · 310 Fotos ohne Titel
 
 Sie tragen ihre Adresse und sonst nichts — der Ordner, aus dem sie kamen, nannte nur eine
 Hausnummer. Kein Fehler, aber jeder Titel macht ein Foto auf der Karte lesbar, bevor jemand es
@@ -228,9 +243,9 @@ in die Beschreibung wandert oder verschwindet, entscheidet nur, wer weiß, was a
 Sie lagen lose oben im Import-Ordner. Ein Blick auf das Bild beantwortet es, eine Regel nicht. Aus
 dem neuen Stand kam keines dazu: Alle 395 stehen auf der Karte.
 
-#### 1.10 · Taugen die 289 Schlagwörter?
+#### 1.10 · Taugen die 281 Schlagwörter?
 
-Die Archivkürzel und die abgeschriebenen Rückseiten sind heraus (bis auf die sieben aus 1.5). Ob
+Die Archivkürzel, die abgeschriebenen Rückseiten und die Sätze aus 1.5 sind heraus. Ob
 die verbliebenen taugen, entscheidet sich erst mit
 [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern), wenn daraus ein Filter wird: Ein Schlagwort,
 das an einem einzigen Foto hängt, ist im Filter eine Zeile für nichts.
