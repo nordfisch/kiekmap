@@ -281,7 +281,22 @@ anlegen — siehe ebenfalls [docs/operations.md](docs/operations.md). Den Contai
 Der Admin-Bereich braucht eine PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die
 Zeile für die `.env`. Ohne sie sagt die Anmeldung das im Klartext, statt jede Eingabe abzulehnen.
 
-**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 19 Punkte nach Verwaltung,
+Am **18. August 2026** ist der **Erstbestand durchgesehen** worden — Punkt 1, der älteste offene
+Eintrag, in zehn Schritte zerlegt und abgearbeitet. Fünf davon standen vorher nicht im Backlog,
+sondern kamen beim Nachmessen heraus. **Der Bestand steht bei 749 Fotos ohne Jahr** statt 804,
+17 davon monatsgenau und 35 jahrzehntgenau statt 3 und 5.
+
+Die Bereinigungsrunde vom 11./12. August hatte im Text nur nach **vierstelligen Jahreszahlen**
+gesucht — „80er Jahre", „Winter 63" und „Foto aus der Nachkriegszeit" liefen ihr durch, und das war
+die größere Hälfte. Derselbe Fehler ist mir dabei noch einmal unterlaufen, eine Ebene tiefer:
+„Notiz: Schule 78" stand undatiert da, während „Notiz: 1978" an drei Nachbarfotos längst als
+Datierung galt. **Bei einer Suche nach Mustern bestimmt die Form des Musters den Befund, nicht der
+Bestand** — `docs/decisions.md`, Punkt 56.
+
+Was bleibt, ist Kuratieren und kein Backlogpunkt mehr: 942 Fotos ohne Beschreibung, 310 ohne Titel,
+4 ohne Ort. Das schreibt, wer das Bild ansieht und den Ort kennt.
+
+**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 17 Punkte nach Verwaltung,
 Besucher-Interface, Infrastruktur und Entwicklung geordnet, jeder mit dem, was beim Aufgreifen
 sonst erst wieder herausgefunden werden müsste. Jeder trägt eine **feste Nummer**, unter der er
 zitiert wird („Punkt 15"), dazu seine Art und seine Einordnung; die Übersichtstabelle oben in der

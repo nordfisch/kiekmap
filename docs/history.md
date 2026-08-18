@@ -2248,8 +2248,8 @@ Die maschinelle Vorbereitung des Erstbestands ist abgeschlossen: Was sich aus Da
 und den vorhandenen Textfeldern ableiten liess, ist abgeleitet. **Die Nummer 41 bleibt vergriffen**
 und wird nie neu vergeben — wer sie in einer alten Notiz findet, findet sie hier.
 
-Was noch von Hand zu tun ist, hat [backlog.md](backlog.md) unter
-[Punkt 1](backlog.md#1--der-erstbestand-braucht-eine-durchsicht) aufgenommen, und es ist genau das,
+Was noch von Hand zu tun war, hat **Punkt 1** aufgenommen -- am 18. August 2026 abgearbeitet und
+damit ebenfalls vergriffen; er steht weiter unten in dieser Datei. Es war genau das,
 was Ortskenntnis braucht: 669 fehlende Beschreibungen, 621 undatierte Fotos ohne Anhalt im Text,
 rund 100 Titel, die eher Notiz als Titel sind, und 5 Fotos ohne Ort. Zwei Fehler, die erst durch
 das Aufraeumen sichtbar wurden, stehen als Punkt 44 und 45 daneben.
@@ -3180,3 +3180,80 @@ Vier Tests, zwei Gegenproben: eine gegen das Uebernehmen selbst, eine gegen die 
 Die Liste unter dem Import bekommt **kein** viertes Feld -- der Backlog nannte das ausdruecklich
 eine Frage und keine Aufgabe, und fuer den Einzelfall gibt es den Foto-Editor, der ein
 Schlagwortfeld laengst hat.
+
+## Punkt 1: der Erstbestand, in zehn Schritten durchgesehen
+
+*18. August 2026 -- der letzte Punkt, der seit dem ersten Import offenstand.*
+
+Punkt 1 war seit dem Erstimport der aelteste offene Eintrag und zuletzt eine Sammelstelle: Zahlen
+aus drei verschiedenen Monaten, Beobachtungen ohne Auftrag, Faelle, die laengst erledigt waren,
+neben solchen, die nie jemand anfassen konnte. Er wurde erst **geordnet**, dann abgearbeitet.
+
+### Die Zerlegung war die halbe Arbeit
+
+Der Punkt vermischte zwei Arten Arbeit, und das war der Grund fuer die Unuebersichtlichkeit: Regeln,
+die ein Rechner anwenden und gegenpruefen kann, und Faelle, bei denen jemand das Bild ansehen und
+den Ort kennen muss. Getrennt waren es zehn Schritte -- und **fuenf davon standen vorher gar nicht
+im Backlog**, sondern kamen beim Nachmessen heraus.
+
+### Was der Rechner konnte: 1.1 bis 1.5
+
+**1.1 -- 16 Beschreibungen trugen ihren eigenen Text zweimal**, durch eine Leerzeile getrennt. Eine
+Naht aus dem Metadatenabgleich vom 16. August, bei der zwei Quellen desselben Archivs aneinander-
+gehaengt wurden, statt sich zu decken. Auf dem Kiosk stand der Absatz doppelt unter dem Bild.
+
+**1.2 -- 45 Beschreibungen, und die Zahl zeigte in die falsche Richtung.** 137 Beschreibungen
+enthielten den Titel des Fotos; **131 davon sagen mehr als er** -- „Funkmast" im Titel, „Errichtung
+des Funkmastes" in der Beschreibung. Die zu streichen haette Angaben vernichtet. Wortgleich waren
+zehn. Von 92 Adress-Echos begannen 37 mit der Adresse; 34 sind abgetrennt, zwei blieben stehen,
+weil ihre Beschreibung „Lehmweg 11 und 11a" sagt und damit mehr weiss als das Ortsfeld, das nur
+eine Hausnummer traegt.
+
+**1.3 -- 55 Fotos datiert, 14 auf den Monat geschaerft.** Die Bereinigungsrunde vom 11./12. August
+hatte im Text nach **vierstelligen Jahreszahlen** gesucht. Alles andere, womit Menschen datieren,
+lief ihr durch: „80er Jahre", „in den 1930gern", „Winter 63", „Foto aus der Nachkriegszeit". Das war
+die groessere Haelfte. Die ergiebigste einzelne Fundstelle war eine Ordnernotiz auf achtzehn Fotos.
+50 weitere Funde sind **begruendet nicht** uebernommen: 26 datieren ein Ereignis statt der Aufnahme,
+15 den Stand des Archivs, eines das Einscannen. `decisions.md`, Punkt 56.
+
+**1.4 -- acht Titel nannten ein Programm statt einer Sache**, zweimal die Scannersoftware, sechsmal
+„Google Maps 2026". Kein neuer Titel ist erfunden: jeder kam aus einem Schlagwort des Fotos selbst
+oder aus dem Rest seines eigenen Titels. Dabei kam ein Fehler heraus, den keine Regel findet -- die
+sechs Kartenbilder waren dem gutgeschrieben, der sie eingestellt hat, nicht der Quelle.
+
+**1.5 -- elf Schlagwoerter waren Saetze** aus der Kommazerlegung von Punkt 41. Neun sind **woertlich**
+in die Beschreibung uebernommen, zwei fielen ersatzlos weg, weil sie nur wiederholten, was Ort und
+Datierung schon sagen.
+
+### Der Fehler, der die Lehre trug
+
+Mitten in 1.3 fiel auf, dass **„Notiz: Schule 78" undatiert dastand, waehrend „Notiz: 1978" an drei
+Nachbarfotos laengst als Datierung akzeptiert war.** Dieselbe Archivnotiz, dieselbe Aussage, zwei
+Zeichen kuerzer -- und meine Suche kannte das zweistellige Jahr nur hinter einem Jahreszeitwort.
+Elf Fotos hingen daran.
+
+Das ist derselbe Fehler, den die Runde im August gemacht hatte, eine Ebene tiefer und von mir
+wiederholt: **Bei einer Suche nach Mustern bestimmt die Form des Musters den Befund, nicht der
+Bestand.** Wer nur eine Schreibweise sucht, misst seine eigene Annahme. Die Gegenprobe ist billig --
+nachsehen, ob dieselbe Aussage anderswo in einer Schreibweise steht, die man schon akzeptiert hat.
+`decisions.md`, Punkt 56.
+
+### Was dabei herauskam
+
+| | vorher | nachher |
+|---|---|---|
+| Fotos ohne Jahr | 804 | **749** |
+| monatsgenau datiert | 3 | **17** |
+| jahrzehntgenau datiert | 5 | **35** |
+| Schlagwoerter | 291 | **281** |
+
+Die Genauigkeit `decade` war vorher praktisch ungenutzt, obwohl das Datenmodell sie von Anfang an
+traegt -- weil niemand nach Jahrzehnten gesucht hatte.
+
+### Was bleibt, ist Kuratieren, kein Backlogpunkt mehr
+
+942 Fotos ohne Beschreibung, 310 ohne Titel, 4 ohne Ort, drei namentlich vorgemerkte Faelle und die
+Frage, ob die 281 Schlagwoerter als Filter taugen. Das ist keine Aufgabe mit Ende, sondern die
+laufende Arbeit am Bestand: Wer das Bild ansieht und den Ort kennt, schreibt in einer Minute, was
+keine Regel je finden wird. Die Frage nach den Schlagwoertern entscheidet sich ohnehin erst mit
+Punkt 30, wenn daraus ein Filter wird.

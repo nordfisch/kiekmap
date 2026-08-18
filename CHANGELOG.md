@@ -885,3 +885,19 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 - **Der Abbruch am PIN-Feld heißt „Abbrechen und zurück"** statt „Zurück zur Karte" — erst die
   Handlung, dann das Ziel. Wer schon Ziffern getippt hat, las dort keine Abkürzung zum Verwerfen
+
+### Geändert
+
+- **Der Erstbestand ist durchgesehen** — Punkt 1, der älteste offene Eintrag, in zehn Schritte
+  zerlegt und abgearbeitet. **55 Fotos datiert und 14 auf den Monat geschärft:** die
+  Bereinigungsrunde vom August hatte im Text nur nach vierstelligen Jahreszahlen gesucht, „80er
+  Jahre" und „Foto aus der Nachkriegszeit" liefen ihr durch. Der Bestand steht bei 749 Fotos ohne
+  Jahr statt 804, 35 davon jahrzehntgenau statt 5
+- **86 Beschreibungen bereinigt** — 16 trugen ihren eigenen Text zweimal, 15 eine Ordnernotiz über
+  acht Straßen, 10 wortgleich den Titel, 34 die Adresse, die schon im Ortsfeld steht. Nicht
+  angetastet wurden die 131, die den Titel enthalten und dabei **mehr** sagen als er
+- **Kein Programmname steht mehr in einem Titel** — zweimal die Scannersoftware, sechsmal „Google
+  Maps 2026". Die sechs Kartenbilder sind jetzt Google Maps gutgeschrieben statt dem, der sie
+  eingestellt hat; der steht nach `decisions.md`, Punkt 36, in der Herkunft
+- **Elf Schlagwörter waren Sätze** und sind in die Beschreibung gewandert, wörtlich. Zwei fielen
+  weg, weil sie nur wiederholten, was Ort und Datierung schon sagen. 281 Schlagwörter statt 291
