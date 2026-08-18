@@ -77,16 +77,101 @@ Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 
 ### 1 · Der Erstbestand braucht eine Durchsicht
 
-1279 Fotos sind in der Ausstellung, und am 11. und 12. August 2026 hat eine maschinelle Runde alles
-herausgeholt, was sich aus Dateien, Ordnernamen und den vorhandenen Textfeldern ableiten ließ —
-Verortung, Titel, Beschreibungen, Datierungen, Schlagwörter. Sie ist abgeschlossen und in der
-[history.md](history.md) beschrieben; sie lief unter der Nummer 41, die damit vergriffen ist.
+1279 Fotos sind in der Ausstellung. Am 11. und 12. August 2026 hat eine maschinelle Runde alles
+herausgeholt, was sich aus Dateien, Ordnernamen und Textfeldern ableiten ließ; sie lief unter der
+Nummer 41 und ist in der [history.md](history.md) beschrieben. **Sie lief über 929 Fotos** — die
+395 vom 16. August (Punkt 52) hat sie nie gesehen, und was aus ihr an Regeln in den Import gewandert
+ist ([decisions.md](decisions.md), Punkt 48), greift nur bei künftigen Ständen, nicht rückwirkend.
 
-**Sie lief über 929 Fotos.** Am 16. August 2026 sind 395 dazugekommen (Punkt 52), und für die ist
-sie nicht gelaufen — was hier steht, gilt für sie ungeprüft.
+**Der Punkt war eine Sammelstelle geworden.** Er ist deshalb in zehn Schritte zerlegt, die einzeln
+abzuhaken sind. Die Trennung, die zählt, ist die letzte Spalte: Ein Rechner-Schritt ist eine Regel,
+die sich messen und gegenprüfen lässt; ein Museums-Schritt braucht jemanden, der das Bild ansieht
+und den Ort kennt. Die beiden vermischt zu bearbeiten war der Grund, warum der Punkt unübersichtlich
+wurde.
 
-**Drei Fotos sind namentlich vorgemerkt.** Beim Metadatenabgleich desselben Tages ließ sich für sie
-nicht maschinell entscheiden, und sie blieben deshalb unangetastet:
+| Schritt | Was | Umfang | Wer |
+|---|---|---|---|
+| ~~1.1~~ | [Beschreibungen, die sich selbst wiederholen](#11--beschreibungen-die-sich-selbst-wiederholen) | 16 Fotos | **erledigt** |
+| 1.2 | [Beschreibungen, die Titel oder Adresse nachsprechen](#12--beschreibungen-die-titel-oder-adresse-nachsprechen) | 137 · 92 | Rechner |
+| ~~1.3~~ | [Datierung im Text — auch Jahrzehnte und Epochen](#13--datierung-im-text--auch-jahrzehnte-und-epochen) | 44 datiert | **erledigt** |
+| 1.4 | [Software- und Quellennamen im Titel](#14--software--und-quellennamen-im-titel) | 8 Fotos | Rechner |
+| 1.5 | [Sätze, die als Schlagwort stehen](#15--sätze-die-als-schlagwort-stehen) | 7 Wörter | Rechner |
+| 1.6 | [Die drei namentlich vorgemerkten Fotos](#16--die-drei-namentlich-vorgemerkten-fotos) | 3 Fotos | Museum |
+| 1.7 | [922 Fotos ohne Beschreibung](#17--922-fotos-ohne-beschreibung) | 922 | Museum |
+| 1.8 | [309 Fotos ohne Titel](#18--309-fotos-ohne-titel) | 309 | Museum |
+| 1.9 | [4 Fotos ohne Ort](#19--4-fotos-ohne-ort) | 4 | Museum |
+| 1.10 | [Taugen die 289 Schlagwörter?](#110--taugen-die-289-schlagwörter) | 289 | wartet auf Punkt 30 |
+
+**Alle Zahlen sind vom 18. August 2026** und wandern mit jedem Besucherbeitrag. Wer eine braucht,
+holt sie mit `python -m app.cli stats`, statt sie hier abzulesen.
+
+#### 1.1 · Beschreibungen, die sich selbst wiederholen
+
+**Erledigt am 18. August 2026: 16 Beschreibungen gekürzt.**
+
+Sie enthielten ihren eigenen Text zweimal, hintereinander weg, durch eine Leerzeile getrennt — eine
+Naht aus dem Metadatenabgleich, bei der zwei Quellen desselben Archivs aneinandergehängt wurden,
+statt sich zu decken. Auf dem Kiosk stand der Absatz doppelt unter dem Bild.
+
+Geschnitten wurde am Absatz und nur, wo die zweite Hälfte zeichengleich zur ersten war, verglichen
+ohne Rücksicht auf Leerraum. Alle 16 waren saubere Dubletten; ein Fall zum Abwägen kam nicht vor.
+Der längste Text schrumpfte von 942 auf 470 Zeichen.
+
+#### 1.2 · Beschreibungen, die Titel oder Adresse nachsprechen
+
+**137 Beschreibungen enthalten den Titel des Fotos, 92 seine Adresse** — „Lehmweg 13, Familie
+Wulff, …", während daneben schon `Lehmweg 13` als Ort steht und „Wulff" als Titel. Das ist derselbe
+Abklatsch, den Punkt 41 aus den Titeln geholt hat, eine Ebene tiefer.
+
+**Anders als 1.1 ist das nicht durchweg Fehler.** Ein Satz braucht sein Subjekt: „Hauptstraße 27,
+links am Haus die Bushaltestelle" liest sich ohne die Adresse wie ein Fragment. Zu streichen ist
+die Wiederholung nur, wo sie voransteht und der Rest ohne sie ein ganzer Satz bleibt. Deshalb ist
+das kein Suchen-und-Ersetzen, sondern eine Vorlage: auflisten, entscheiden, übernehmen.
+
+#### 1.3 · Datierung im Text — auch Jahrzehnte und Epochen
+
+**Erledigt am 18. August 2026: 44 Fotos datiert, 50 begründet nicht.**
+
+Die Runde vom 11./12. August suchte nur **vierstellige Jahreszahlen**. Alles andere, womit Menschen
+datieren, lief ihr durch: „80er Jahre", „in den 1930gern", „Winter 63", „Foto aus der
+Nachkriegszeit". Das war die größere Hälfte — 94 Fotos ohne Jahr trugen eine Datierung im Text.
+
+Die ergiebigste einzelne Fundstelle war eine Ordnernotiz auf **achtzehn** Fotos: „Gebäude und
+Umgebung im Holm der 80er Jahre". Dazu zwei, die das Museum auf die 40er Jahre gelegt hat, weil
+„Nachkriegszeit" einen Zeitraum benennt, aber keine Grenzen.
+
+**Die 50 übrigen sind kein Rest, sondern ein Befund**, und Punkt 37 und 49 tragen ihn: 26 datieren
+ein Ereignis statt der Aufnahme („erbaut 1972", „1990 abgebrannt"), 15 den Stand des Archivs
+(„heute (2018)"), zwei einen Fotokalender, eines das Einscannen. Warum das so entschieden ist und
+warum „vor 1978" **keine** Datierung ist, steht in [decisions.md](decisions.md), Punkt 56.
+
+Sechs Fotos bleiben deshalb bewusst undatiert, obwohl ihr Text ein Jahr nennt: „Aufnahmen vor dem
+2. Weltkrieg", „entstand vor dem Jahr 2000". Sie sind jetzt Vorrat für „Wann war das?".
+
+#### 1.4 · Software- und Quellennamen im Titel
+
+**8 Titel nennen keine Sache, sondern ein Programm:** zweimal „LEAD Technologies Inc. V1.01" (die
+Scannersoftware) und sechsmal „Google Maps 2026". Die Regel dagegen steht seit Punkt 48 im Importer
+— sie ist nur nie rückwirkend über den Bestand gelaufen.
+
+Die sechs Kartenbilder sind dabei kein Müll, sondern eine Aussage: Das Foto ist ein heutiger
+Vergleichsblick. Der Name gehört in den Bildnachweis, das Jahr in die Datierung, und der Titel
+bleibt leer oder sagt, was zu sehen ist.
+
+#### 1.5 · Sätze, die als Schlagwort stehen
+
+**7 Schlagwörter sind keine**, sondern Sätze aus der Kommazerlegung von Punkt 41: „Hof Wilhelm
+Petersen, Seitenansicht, abgerissen 1971", „bei der alten Schmiede befand sich im Jahre 1938 eine
+Tankstelle". Sie gehören in die Beschreibung. Drei weitere beginnen mit „Notiz:" und tragen eine
+Archivnotiz mitsamt Jahr — „Notiz: Holmer Berg 1947 G. Dunker"; die zerfällt in Datierung,
+Bildnachweis und Beschreibung.
+
+Beim Zusammenführen der Dubletten sind diese Wörter bewusst stehen geblieben statt mitzuwandern,
+damit der Fehler sich nicht vermehrt. Hier ist er aufzulösen.
+
+#### 1.6 · Die drei namentlich vorgemerkten Fotos
+
+Beim Metadatenabgleich ließ sich für sie nicht maschinell entscheiden:
 
 - **Foto 17** trägt „vermutlich ehemals Familie Höring, Am Felde" — **denselben Satz wie elf andere
   Fotos an vier Adressen.** Das ist die Notiz eines Ordners, keine Aussage über ein Bild. Das
@@ -97,58 +182,45 @@ nicht maschinell entscheiden, und sie blieben deshalb unangetastet:
   hängt eine Leihgeberadresse an, die nach [decisions.md](decisions.md), Punkt 36, in die Herkunft
   gehört und nicht in die Beschreibung.
 
-**Was jetzt hier steht, ist der Rest — und der braucht Ortskenntnis.** Er gehört dem Museumsteam,
-nicht dem Rechner:
+#### 1.7 · 922 Fotos ohne Beschreibung
 
-- **922 Fotos ohne Beschreibung.** Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist
-  genau das, was sich aus keinem vorhandenen Feld ableiten lässt. Wer das Bild ansieht und den Ort
-  kennt, schreibt in einer Minute, was keine Regel je finden wird.
-- **309 Fotos ohne Titel.** Sie tragen ihre Adresse und sonst nichts — der Ordner, aus dem sie
-  kamen, nannte nur eine Hausnummer. Das ist kein Mangel im Sinne eines Fehlers, aber jeder Titel
-  macht ein Foto auf der Karte lesbar, bevor jemand es antippt.
-- **804 Fotos ohne Jahr.** Die 83, die eine Jahreszahl im Text trugen, sind durchgesehen; 52 sind
-  datiert, 17 Vorschläge wurden verworfen, weil das Jahr das Gebäude datierte und nicht die
-  Aufnahme ([decisions.md](decisions.md), Punkt 37). Der Rest trägt keinen Anhalt. **Ein Teil
-  davon löst sich von selbst:** Es ist der Vorrat für „Wann war das?", und der Beitragsbereich
-  legt ihn Besuchern vor. Die Zeitleiste reicht seit der Datierung von 1880 bis 2030 und ist damit
-  brauchbar — jedes weitere Jahr macht sie dichter, keines mehr macht sie überhaupt erst möglich.
+Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist genau das, was sich aus keinem
+vorhandenen Feld ableiten lässt. Wer das Bild ansieht und den Ort kennt, schreibt in einer Minute,
+was keine Regel je finden wird. Das ist Dauerarbeit, kein Vorgang mit Ende.
 
-  **Noch nicht durchsucht sind die Schlagwörter**, und das ist der eine Anhalt, den die Runde vom
-  11./12. August ausgelassen hat: Sie sah Titel und Beschreibung an, nicht die Stichwörter. Der
-  Vorschlag ist, alle Fotos ohne Jahr, aber mit Beschreibung oder Schlagwörtern nach einer
-  Jahreszahl zu durchsuchen, das Ergebnis **aufzulisten und erst nach Bestätigung zu übernehmen**.
+#### 1.8 · 309 Fotos ohne Titel
 
-  **Nachgezählt am 16. August 2026, und die Ausbeute ist klein:** Von 612 Fotos ohne Jahr tragen
-  **5** ein Schlagwort mit vierstelliger Zahl und **32** eine Beschreibung mit einer — wobei die
-  Beschreibungen weitgehend die schon verworfenen sein dürften; die Überschneidung ist beim
-  Aufgreifen zuerst zu prüfen, sonst wird 17 Fotos zum zweiten Mal dieselbe Frage gestellt.
+Sie tragen ihre Adresse und sonst nichts — der Ordner, aus dem sie kamen, nannte nur eine
+Hausnummer. Kein Fehler, aber jeder Titel macht ein Foto auf der Karte lesbar, bevor jemand es
+antippt. Dazu kommen **rund 100 eigenständige Titel, unter denen einzelne eher Notiz als Titel
+sind:** „Vermutung: hinter der Zahnarztpraxis oder hinter der ‚Börse'". Ob so etwas Titel bleibt,
+in die Beschreibung wandert oder verschwindet, entscheidet nur, wer weiß, was auf dem Bild ist.
 
-  **Wichtiger als die fünf Fotos ist, was dabei zum Vorschein kommt.** Vier der fünf Schlagwörter
-  sind gar keine Stichwörter, sondern Sätze — „Hof Wilhelm Petersen, Seitenansicht, abgerissen
-  1971", „Bauernhaus von Paul Stein, im Jahre 1987. Abriss 18.1.1988", „Fotokalender 2014". Sie
-  stammen aus der Kommazerlegung von Punkt 41 und gehören in die Beschreibung, nicht in die
-  Schlagwortliste. **Und sie zeigen Punkt 37 im Kleinen:** „abgerissen 1971" und „Abriss 18.1.1988"
-  datieren den Abriss des Hauses, nicht die Aufnahme; „Fotokalender 2014" datiert den Kalender.
-  Nur „ca 1943 1944" trägt ein Datumswort und käme durch.
+#### 1.9 · 4 Fotos ohne Ort
 
-  Der Weg — auflisten, bestätigen, übernehmen — ist derselbe, den „Offen ist auch das Wie" unten
-  meint: Er lohnt nur, wenn er auch für die anderen Fragen dieses Punktes taugt, nicht als
-  Einwegskript für fünf Fotos.
-- **Rund 100 eigenständige Titel**, unter denen einzelne eher Notiz als Titel sind: „Vermutung:
-  hinter der Zahnarztpraxis oder hinter der ‚Börse'". Ob so etwas ein Titel bleibt, in die
-  Beschreibung wandert oder verschwindet, entscheidet nur, wer weiß, was auf dem Bild ist.
-- **4 Fotos ohne Ort.** Sie lagen lose oben im Import-Ordner. Ein Blick auf das Bild beantwortet
-  es, eine Regel nicht. Aus dem neuen Stand kam keines dazu: Alle 395 stehen auf der Karte.
-- **253 Schlagwörter**, jetzt alle wirklich Stichwörter — die Archivkürzel und die abgeschriebenen
-  Rückseiten sind heraus. Ob die verbliebenen taugen, entscheidet sich erst mit
-  [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern), wenn daraus ein Filter wird.
+Sie lagen lose oben im Import-Ordner. Ein Blick auf das Bild beantwortet es, eine Regel nicht. Aus
+dem neuen Stand kam keines dazu: Alle 395 stehen auf der Karte.
 
-**Die Zahlen sind vom 16. August 2026** und wandern: Jeder Besucherbeitrag verschiebt sie. Wer eine
-davon braucht, holt sie sich mit `python -m app.cli stats`, statt sie hier abzulesen.
+#### 1.10 · Taugen die 289 Schlagwörter?
 
-**Offen ist auch das Wie.** Ob dafür ein eigener Arbeitsbereich lohnt oder die vorhandene
-Nacharbeits-Liste reicht, ist Teil der Frage — und sie stellt sich jetzt anders als vorher, weil
-es nur noch um Fälle geht, bei denen ohnehin ein Mensch das Bild ansieht.
+Die Archivkürzel und die abgeschriebenen Rückseiten sind heraus (bis auf die sieben aus 1.5). Ob
+die verbliebenen taugen, entscheidet sich erst mit
+[Punkt 30](#30--die-karte-nach-schlagwörtern-filtern), wenn daraus ein Filter wird: Ein Schlagwort,
+das an einem einzigen Foto hängt, ist im Filter eine Zeile für nichts.
+
+#### 760 Fotos ohne Jahr — und warum das kein eigener Schritt ist
+
+Nach 1.3 bleiben 760 ohne jeden Anhalt im Text. **Er löst sich zum Teil von selbst:** Er ist der
+Vorrat für „Wann war das?", und der Beitragsbereich legt ihn Besuchern vor. Die Zeitleiste reicht
+seit der Datierung von 1880 bis 2030 und ist brauchbar — jedes weitere Jahr macht sie dichter,
+keines mehr macht sie überhaupt erst möglich.
+
+#### Offen ist auch das Wie
+
+Ob für die Museums-Schritte ein eigener Arbeitsbereich lohnt oder die vorhandene Nacharbeits-Liste
+reicht, ist Teil der Frage. Sie stellt sich anders als früher, weil es dort nur noch um Fälle geht,
+bei denen ohnehin ein Mensch das Bild ansieht. Für die Rechner-Schritte ist sie beantwortet:
+auflisten, vorlegen, nach Bestätigung schreiben, jede Änderung ins Änderungsprotokoll.
 
 ### 31 · Einstellungen in der Verwaltung pflegen statt in der `.env`
 

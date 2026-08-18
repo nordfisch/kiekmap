@@ -1891,3 +1891,32 @@ Reihenfolge kostet deshalb nichts und entscheidet nur, wer einen Namen zuerst an
 **Kommas trennen.** Das ist dieselbe Zerlegung, die bei Punkt 41 aus Bildunterschriften
 Schlagwoerter gemacht hat -- aber nicht derselbe Fall: Dort zerschnitt eine Maschine eine
 Beschreibung, hier tippt ein Mensch in ein Feld, das „Schlagwörter" heisst.
+
+## 56. Ein Jahrzehnt ist eine Datierung -- „vor 1978" ist keine
+
+*Entschieden am 18. August 2026 -- Punkt 1.3, die Datierungen im Text.*
+
+Die Bereinigungsrunde vom 11./12. August suchte im Text nach **vierstelligen Jahreszahlen**. Sie
+fand 83 und uebernahm 52. Was sie nicht suchte, war alles andere, womit Menschen datieren: „80er
+Jahre", „in den 1930gern", „Winter 63", „Foto aus der Nachkriegszeit".
+
+**Das war die groessere Haelfte.** Nachgezaehlt am 18. August trugen 94 Fotos ohne Jahr eine
+Datierung im Text; 44 liessen sich uebernehmen, und die ergiebigste einzelne Fundstelle war eine
+Ordnernotiz auf **achtzehn** Fotos: „Gebäude und Umgebung im Holm der 80er Jahre". Ein Jahrzehnt
+ist kein unscharfes Jahr, sondern eine eigene Aussage -- ``date_precision`` kennt ``decade`` genau
+dafuer (Punkt 2 dieser Liste).
+
+**„Vor 1978" dagegen wird nicht uebernommen, und der Grund liegt im Zeitfilter.** Er fragt auf
+Ueberlappung ab. Ein Foto mit dem Intervall 1880--1978 ueberlappt mit *jeder* Stellung des
+Schiebers und stuende deshalb ueberall -- schlechter als undatiert, denn undatiert legt der
+Beitragsbereich es wenigstens als Frage vor. Eine Datierung braucht beide Enden; wo eines erfunden
+werden muesste, ist keine da.
+
+**Zwei Muster sind dabei als eigene Faelle herausgekommen**, beide Verwandte von Punkt 49:
+
+- **Die Jahreszahl des Archivstands.** „heute (2018) Marc Sieveking", „bis 2018 Besitzer", „2026
+  Reitanlage Holm". Im Holmer Bestand ist „2018" fast nie ein Aufnahmejahr, sondern der Tag, an dem
+  jemand das Archiv gepflegt hat. Fuenfzehn Fotos.
+- **Das Scandatum in Prosa.** „Im Januar 2020 eingescannt von einem SW-Abzug von Olaf Sieveking."
+  Dieselbe Falle wie das EXIF-Datum eines Scans, nur in einem Textfeld statt in einem Tag -- und
+  ohne die Jahresgrenze aus ``services/exif.py``, die sie dort abfaengt.
