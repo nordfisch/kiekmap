@@ -92,7 +92,7 @@ wurde.
 | Schritt | Was | Umfang | Wer |
 |---|---|---|---|
 | ~~1.1~~ | [Beschreibungen, die sich selbst wiederholen](#11--beschreibungen-die-sich-selbst-wiederholen) | 16 Fotos | **erledigt** |
-| 1.2 | [Beschreibungen, die Titel oder Adresse nachsprechen](#12--beschreibungen-die-titel-oder-adresse-nachsprechen) | 37 Fotos | Vorlage |
+| ~~1.2~~ | [Beschreibungen, die Titel oder Adresse nachsprechen](#12--beschreibungen-die-titel-oder-adresse-nachsprechen) | 45 Fotos | **erledigt** |
 | ~~1.3~~ | [Datierung im Text — auch Jahrzehnte und Epochen](#13--datierung-im-text--auch-jahrzehnte-und-epochen) | 44 datiert | **erledigt** |
 | 1.4 | [Software- und Quellennamen im Titel](#14--software--und-quellennamen-im-titel) | 8 Fotos | Rechner |
 | 1.5 | [Sätze, die als Schlagwort stehen](#15--sätze-die-als-schlagwort-stehen) | 7 Wörter | Rechner |
@@ -119,20 +119,27 @@ Der längste Text schrumpfte von 942 auf 470 Zeichen.
 
 #### 1.2 · Beschreibungen, die Titel oder Adresse nachsprechen
 
-**Die Zahl sah größer aus, als der Punkt ist — und die Richtung war falsch herum.** 137
-Beschreibungen enthielten den Titel des Fotos. Aber **131 davon sagen mehr als er**: „Funkmast" im
-Titel, „Errichtung des Funkmastes" in der Beschreibung; „Sporthalle" und „Alte Sporthalle";
-„Gasthof Timm" und „Gasthof Timm kurz vor dem Abriss". Die zu streichen hieße, Angaben zu
-verlieren. **Wortgleich waren zehn**, und die sind am 18. August gelöscht.
+**Erledigt am 18. August 2026: 45 Beschreibungen geändert — aber nicht die, nach denen es aussah.**
 
-Bei den 92 Adress-Echos dasselbe: Nur **37 beginnen** mit der Adresse — die Form, die sich
-abtrennen lässt. Der Rest nennt sie mitten im Satz, wo sie meist etwas tut.
+Die Zahl war größer als der Punkt, und die Richtung war falsch herum. 137 Beschreibungen enthielten
+den Titel des Fotos; **131 davon sagen mehr als er**: „Funkmast" im Titel, „Errichtung des
+Funkmastes" in der Beschreibung; „Sporthalle" und „Alte Sporthalle"; „Gasthof Timm" und
+„Gasthof Timm kurz vor dem Abriss". Die zu streichen hieße, Angaben zu verlieren. **Wortgleich
+waren zehn** — nur dort trug die Beschreibung nichts bei, und nur die sind gelöscht.
 
-**Was bleibt, sind diese 37, und sie sind einzeln zu beurteilen.** „Hauptstraße 27, links am Haus
-die Bushaltestelle" verliert ohne die Adresse sein Subjekt und bleibt als Fragment zurück; anderswo
-steht sie schlicht doppelt. Zu streichen ist sie nur, wo der Rest ohne sie ein ganzer Satz bleibt —
-sonst muss umformuliert werden, und das ist eine Textänderung an Museumsgut, keine Bereinigung.
-Deshalb: auflisten, vorlegen, erst nach Bestätigung schreiben.
+Bei den 92 Adress-Echos dasselbe: Nur **37 begannen** mit der Adresse, der Rest nennt sie mitten im
+Satz, wo sie etwas tut. Von den 37 sind 34 abgetrennt — neunmal musste der Satz vorn neu groß
+anfangen („Hörnstraße 4, nach dem Umbau 1954" wurde „Nach dem Umbau 1954") —, einer war *nur* die
+Adresse und ist leer, und **zwei blieben stehen**: Bei ihnen sagt die Beschreibung „Lehmweg 11 und
+11a", weiß also mehr als das Ortsfeld, das nur eine Hausnummer tragen kann.
+
+**Die Lehre steckt in den 131.** Ein Feld, das ein anderes wiederholt, ist nicht deshalb überflüssig
+— es kann die längere Fassung sein. Gezählt wurde erst die Wiederholung, entschieden hat der
+Zuwachs.
+
+Offen bleibt eine kleinere Schwester davon: An sechs Beschreibungen der Gruppe *Im Sande 14* hängt
+hinten ein zweiter Block, der den Satzanfang mit einer Quellenangabe wiederholt. Keine exakte
+Doppelung, deshalb von 1.1 nicht gefangen.
 
 #### 1.3 · Datierung im Text — auch Jahrzehnte und Epochen
 
