@@ -92,12 +92,12 @@ wurde.
 | Schritt | Was | Umfang | Wer |
 |---|---|---|---|
 | ~~1.1~~ | [Beschreibungen, die sich selbst wiederholen](#11--beschreibungen-die-sich-selbst-wiederholen) | 16 Fotos | **erledigt** |
-| 1.2 | [Beschreibungen, die Titel oder Adresse nachsprechen](#12--beschreibungen-die-titel-oder-adresse-nachsprechen) | 137 · 92 | Rechner |
+| 1.2 | [Beschreibungen, die Titel oder Adresse nachsprechen](#12--beschreibungen-die-titel-oder-adresse-nachsprechen) | 37 Fotos | Vorlage |
 | ~~1.3~~ | [Datierung im Text — auch Jahrzehnte und Epochen](#13--datierung-im-text--auch-jahrzehnte-und-epochen) | 44 datiert | **erledigt** |
 | 1.4 | [Software- und Quellennamen im Titel](#14--software--und-quellennamen-im-titel) | 8 Fotos | Rechner |
 | 1.5 | [Sätze, die als Schlagwort stehen](#15--sätze-die-als-schlagwort-stehen) | 7 Wörter | Rechner |
 | 1.6 | [Die drei namentlich vorgemerkten Fotos](#16--die-drei-namentlich-vorgemerkten-fotos) | 3 Fotos | Museum |
-| 1.7 | [922 Fotos ohne Beschreibung](#17--922-fotos-ohne-beschreibung) | 922 | Museum |
+| 1.7 | [947 Fotos ohne Beschreibung](#17--947-fotos-ohne-beschreibung) | 947 | Museum |
 | 1.8 | [309 Fotos ohne Titel](#18--309-fotos-ohne-titel) | 309 | Museum |
 | 1.9 | [4 Fotos ohne Ort](#19--4-fotos-ohne-ort) | 4 | Museum |
 | 1.10 | [Taugen die 289 Schlagwörter?](#110--taugen-die-289-schlagwörter) | 289 | wartet auf Punkt 30 |
@@ -119,14 +119,20 @@ Der längste Text schrumpfte von 942 auf 470 Zeichen.
 
 #### 1.2 · Beschreibungen, die Titel oder Adresse nachsprechen
 
-**137 Beschreibungen enthalten den Titel des Fotos, 92 seine Adresse** — „Lehmweg 13, Familie
-Wulff, …", während daneben schon `Lehmweg 13` als Ort steht und „Wulff" als Titel. Das ist derselbe
-Abklatsch, den Punkt 41 aus den Titeln geholt hat, eine Ebene tiefer.
+**Die Zahl sah größer aus, als der Punkt ist — und die Richtung war falsch herum.** 137
+Beschreibungen enthielten den Titel des Fotos. Aber **131 davon sagen mehr als er**: „Funkmast" im
+Titel, „Errichtung des Funkmastes" in der Beschreibung; „Sporthalle" und „Alte Sporthalle";
+„Gasthof Timm" und „Gasthof Timm kurz vor dem Abriss". Die zu streichen hieße, Angaben zu
+verlieren. **Wortgleich waren zehn**, und die sind am 18. August gelöscht.
 
-**Anders als 1.1 ist das nicht durchweg Fehler.** Ein Satz braucht sein Subjekt: „Hauptstraße 27,
-links am Haus die Bushaltestelle" liest sich ohne die Adresse wie ein Fragment. Zu streichen ist
-die Wiederholung nur, wo sie voransteht und der Rest ohne sie ein ganzer Satz bleibt. Deshalb ist
-das kein Suchen-und-Ersetzen, sondern eine Vorlage: auflisten, entscheiden, übernehmen.
+Bei den 92 Adress-Echos dasselbe: Nur **37 beginnen** mit der Adresse — die Form, die sich
+abtrennen lässt. Der Rest nennt sie mitten im Satz, wo sie meist etwas tut.
+
+**Was bleibt, sind diese 37, und sie sind einzeln zu beurteilen.** „Hauptstraße 27, links am Haus
+die Bushaltestelle" verliert ohne die Adresse sein Subjekt und bleibt als Fragment zurück; anderswo
+steht sie schlicht doppelt. Zu streichen ist sie nur, wo der Rest ohne sie ein ganzer Satz bleibt —
+sonst muss umformuliert werden, und das ist eine Textänderung an Museumsgut, keine Bereinigung.
+Deshalb: auflisten, vorlegen, erst nach Bestätigung schreiben.
 
 #### 1.3 · Datierung im Text — auch Jahrzehnte und Epochen
 
@@ -147,6 +153,14 @@ warum „vor 1978" **keine** Datierung ist, steht in [decisions.md](decisions.md
 
 Sechs Fotos bleiben deshalb bewusst undatiert, obwohl ihr Text ein Jahr nennt: „Aufnahmen vor dem
 2. Weltkrieg", „entstand vor dem Jahr 2000". Sie sind jetzt Vorrat für „Wann war das?".
+
+**Eine Nachlese kam noch dazu, und sie ging auf die Suche zurück, nicht auf die Daten.** Das
+zweistellige Jahr war nur hinter einem Jahreszeitwort gesucht („Winter 63"), das nackte nicht —
+acht Fotos tragen eine Archivnotiz der Form „Notiz: Schule 78", während drei andere dieselbe
+Notiz mit ausgeschriebenem „1978" tragen und längst datiert waren. Ebenso fehlte der Monatsname:
+„März 73", „Notiz: 5.80", „Notiz: 7.72". Elf Fotos mehr, dazu **vierzehn von der Jahres- auf die
+Monatsgenauigkeit geschärft** — sie sagen „Winter in Holm Dezember 1985", standen aber nur auf
+1985. **760 → 749 Fotos ohne Jahr.**
 
 #### 1.4 · Software- und Quellennamen im Titel
 
@@ -182,7 +196,7 @@ Beim Metadatenabgleich ließ sich für sie nicht maschinell entscheiden:
   hängt eine Leihgeberadresse an, die nach [decisions.md](decisions.md), Punkt 36, in die Herkunft
   gehört und nicht in die Beschreibung.
 
-#### 1.7 · 922 Fotos ohne Beschreibung
+#### 1.7 · 947 Fotos ohne Beschreibung
 
 Maschinell ist da nichts mehr zu holen: Eine Beschreibung ist genau das, was sich aus keinem
 vorhandenen Feld ableiten lässt. Wer das Bild ansieht und den Ort kennt, schreibt in einer Minute,
@@ -208,9 +222,9 @@ die verbliebenen taugen, entscheidet sich erst mit
 [Punkt 30](#30--die-karte-nach-schlagwörtern-filtern), wenn daraus ein Filter wird: Ein Schlagwort,
 das an einem einzigen Foto hängt, ist im Filter eine Zeile für nichts.
 
-#### 760 Fotos ohne Jahr — und warum das kein eigener Schritt ist
+#### 749 Fotos ohne Jahr — und warum das kein eigener Schritt ist
 
-Nach 1.3 bleiben 760 ohne jeden Anhalt im Text. **Er löst sich zum Teil von selbst:** Er ist der
+Nach 1.3 bleiben 749 ohne jeden Anhalt im Text. **Er löst sich zum Teil von selbst:** Er ist der
 Vorrat für „Wann war das?", und der Beitragsbereich legt ihn Besuchern vor. Die Zeitleiste reicht
 seit der Datierung von 1880 bis 2030 und ist brauchbar — jedes weitere Jahr macht sie dichter,
 keines mehr macht sie überhaupt erst möglich.

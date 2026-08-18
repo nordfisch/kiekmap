@@ -1917,6 +1917,13 @@ werden muesste, ist keine da.
 - **Die Jahreszahl des Archivstands.** „heute (2018) Marc Sieveking", „bis 2018 Besitzer", „2026
   Reitanlage Holm". Im Holmer Bestand ist „2018" fast nie ein Aufnahmejahr, sondern der Tag, an dem
   jemand das Archiv gepflegt hat. Fuenfzehn Fotos.
+- **Das nicht ausgeschriebene Jahr.** „Notiz: Schule 78" ist dieselbe Archivnotiz wie „Notiz:
+  1978", nur zwei Zeichen kuerzer -- und fiel durch, weil die Suche das zweistellige Jahr nur
+  hinter einem Jahreszeitwort kannte („Winter 63"), nicht hinter einem Hausnamen. Dasselbe beim
+  Monat: „März 73", „Notiz: 5.80". **Bei einer Suche nach Mustern bestimmt die Form des Musters
+  den Befund**, nicht der Bestand -- und wer nur eine Schreibweise sucht, misst seine eigene
+  Annahme. Die Gegenprobe dagegen ist billig: nachsehen, ob dieselbe Aussage anderswo in einer
+  anderen Schreibweise steht, die man akzeptiert hat.
 - **Das Scandatum in Prosa.** „Im Januar 2020 eingescannt von einem SW-Abzug von Olaf Sieveking."
   Dieselbe Falle wie das EXIF-Datum eines Scans, nur in einem Textfeld statt in einem Tag -- und
   ohne die Jahresgrenze aus ``services/exif.py``, die sie dort abfaengt.
