@@ -3257,3 +3257,57 @@ Frage, ob die 281 Schlagwoerter als Filter taugen. Das ist keine Aufgabe mit End
 laufende Arbeit am Bestand: Wer das Bild ansieht und den Ort kennt, schreibt in einer Minute, was
 keine Regel je finden wird. Die Frage nach den Schlagwoertern entscheidet sich ohnehin erst mit
 Punkt 30, wenn daraus ein Filter wird.
+
+## Punkt 56: der aufgehende Cluster, und zwei stille Nachbarn
+
+*18. August 2026 -- eine Animation, die aus der Ecke kam, und warum.*
+
+Wer auf einen Kreis mit einer Zahl tippt, zoomt so weit hinein, dass die Gruppe zerfaellt. Was dann
+erschien, **flog aus der oberen linken Ecke der Karte herein**. Gewuenscht war das Gegenteil: aus
+dem Punkt herauswachsen, den der Finger gerade beruehrt hat.
+
+### Kein Gestaltungsmangel, sondern ein Kaskadenkonflikt
+
+Gemeint war nie ein Flug, sondern ein Aufblenden an Ort und Stelle -- `marker-enter` setzte
+`opacity: 0` und `transform: scale(0.88)`. Nur schreibt MapLibre die Position seiner Marker als
+`transform: translate(...)` in den **Inline-Stil desselben Elements**. Eine Animation steht in der
+Kaskade ueber dem Inline-Stil: fuer 180 ms gewann `scale(0.88)`, die Verschiebung war weg, das
+Element stand bei `translate(0, 0)` -- der linken oberen Ecke des Kartencontainers.
+
+**Derselbe Konflikt hatte einen zweiten Effekt still ausgeschaltet.** `.marker:hover` setzte
+`transform: scale(1.08)`. Eine gewoehnliche Regel steht in der Kaskade *unter* dem Inline-Stil --
+sie verlor und tat gar nichts, seit es Marker gibt. Zwei Symptome, entgegengesetzte Richtungen,
+eine Ursache: **zwei Ebenen stritten sich um eine Eigenschaft an einem Element.**
+
+Die Loesung ist eine Huelle. Aussen die Verschiebung durch die Karte, innen alles, was das
+Stylesheet will. Darauf laesst sich das Gewuenschte aufsetzen: Beim Antippen ist bekannt, welcher
+Kreis gemeint war; sein Ort in Bildschirmpunkten minus der Ort des neuen Markers ergibt den Vektor.
+
+### Denselben Fehler noch einmal gemacht
+
+Der erste Anlauf legte die Animation auf die Huelle -- also wieder auf genau das Element, das
+MapLibre verschiebt. Der Konflikt bestand unveraendert fort, nur um den Versatz verschoben.
+Aufgefallen ist es nicht beim Ansehen, sondern beim **Nachmessen**: Die Startpunkte der dreizehn
+Marker lagen 483 Pixel auseinander, statt auf einem Punkt. Nach der Korrektur -- Animation auf den
+Marker, Huelle fuer die Karte -- ist die Streuung **null**, alle siebzehn starten auf `(288, 330)`,
+der Kartenmitte, wo der angetippte Kreis nach dem Heranfahren steht.
+
+**Eine Animation laesst sich nicht durch Hinsehen pruefen.** 320 ms sind zu kurz, um zu erkennen,
+ob etwas aus einem Punkt kommt oder aus vier benachbarten. Gemessen wurde am Inline-`transform` der
+Huelle, den MapLibre schreibt: Der steht still, waehrend das Innere sich bewegt, und bleibt auch
+dann lesbar, wenn der Marker inzwischen ersetzt wurde.
+
+### Und der Kreis, den kein Finger erreicht
+
+Waehrend der Pruefung fiel im Museum auf, dass **ein Vorschaubild einen Kreis verdecken kann**.
+MapLibre haengt die Marker in der Reihenfolge an, in der supercluster sie liefert; ein spaeter
+gebautes Bild liegt also ueber einem frueher gebauten Kreis. Ein verdeckter Kreis ist nicht
+antippbar, und damit ist der einzige Weg zu den Fotos dahinter zu. Umgekehrt kostet ein verdecktes
+Bild nichts -- der Kreis darueber fuehrt zu denselben Fotos. **Ein Kreis liegt deshalb immer ueber
+einem Bild.**
+
+Der erste Versuch war eine Stufe zu wenig: Wer etwas beruehrt, holt es nach vorn, damit die
+Vergroesserung nicht am Nachbarn abgeschnitten wird -- und ein beruehrtes Vorschaubild stieg damit
+ueber jeden Kreis. Gemessen: zwei gerade befreite Kreise waren wieder zu. Jetzt sind es **zwei
+Baender zu zwei Stufen**: Beruehrtes steigt innerhalb seines eigenen Bandes. Siebzehn von siebzehn
+Kreisen sind erreichbar, auch mit einem beruehrten Bild daneben.

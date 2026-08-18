@@ -901,3 +901,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   eingestellt hat; der steht nach `decisions.md`, Punkt 36, in der Herkunft
 - **Elf Schlagwörter waren Sätze** und sind in die Beschreibung gewandert, wörtlich. Zwei fielen
   weg, weil sie nur wiederholten, was Ort und Datierung schon sagen. 281 Schlagwörter statt 291
+
+### Behoben
+
+- **Ein aufgehender Cluster wächst jetzt aus dem angetippten Punkt heraus** statt aus der oberen
+  linken Ecke der Karte hereinzufliegen. Gemeint war immer ein Aufblenden an Ort und Stelle; die
+  Animation lief auf demselben Element, in dessen Inline-Stil MapLibre die Position schreibt, und
+  gewann gegen sie
+- **Die Vergrößerung beim Berühren eines Markers gibt es wieder** — dieselbe Ursache, andere
+  Richtung: als gewöhnliche Regel verlor sie gegen den Inline-Stil und tat gar nichts
+- **Ein Kreis liegt immer über einem Vorschaubild** und ist damit erreichbar. Verdeckt war er
+  vorher nicht antippbar, und das ist der einzige Weg zu den Fotos dahinter; ein verdecktes Bild
+  kostet dagegen nichts, weil der Kreis darüber zu denselben Fotos führt

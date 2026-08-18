@@ -595,16 +595,66 @@ button {
  * Only the arrival is animated, and only on that one frame -- see `clusterStep.ts`. Without it all
  * markers jump at once, which reads as a glitch rather than as a change of scale. Fading the old
  * ones out instead would mean keeping removed elements alive on a timer, which is the kind of
- * state `draw()` deliberately has none of. */
+ * state `draw()` deliberately has none of.
+ *
+ * **This runs on the marker itself, never on the `.marker-shell` around it.** MapLibre writes the
+ * marker position as `transform: translate(...)` into the shell's inline style, and an animation
+ * outranks an inline style: put on the shell, `scale(...)` would win for the whole duration, the
+ * translate would be gone, and the marker would start at the container's top left corner. That is
+ * the bug this whole arrangement exists to undo -- see `PhotoLayer.tsx`.
+ *
+ * Both offsets default to zero, which is the plain pop in place. Where a cluster was tapped,
+ * `draw()` fills them with the vector from this marker to that cluster -- so the new markers grow
+ * out of the circle the finger touched instead of appearing beside it. */
 @keyframes marker-enter {
   from {
     opacity: 0;
-    transform: scale(0.88);
+    transform: translate(var(--enter-x, 0), var(--enter-y, 0)) scale(var(--enter-scale, 0.88));
   }
+}
+
+/* Nothing but a place to stand, so that the two transforms never meet on one element: the map
+ * writes the outer one, the stylesheet the inner.
+ *
+ * It is also the only element that can order the markers front to back. MapLibre appends them in
+ * the order supercluster hands them over, so a thumbnail built later covers a circle built
+ * earlier -- and a covered circle cannot be tapped, which takes away the only way into the photos
+ * behind it. **A circle therefore always lies above a picture.** A picture that is covered costs
+ * nothing: the circle over it leads to the same photos.
+ *
+ * Two bands of two, not four steps: whatever is being touched rises **within its own band**, so
+ * the enlargement is not clipped by a neighbour, and a touched picture still cannot climb over a
+ * circle. One band with a single raised level looked right and was not -- measured on 18 August
+ * 2026, a hovered thumbnail buried two circles that had just been freed. */
+.marker-shell {
+  z-index: 1;
+  will-change: transform;
+}
+
+.marker-shell:hover,
+.marker-shell:focus-within {
+  z-index: 2;
+}
+
+.marker-shell--cluster {
+  z-index: 3;
+}
+
+.marker-shell--cluster:hover,
+.marker-shell--cluster:focus-within {
+  z-index: 4;
 }
 
 .marker--enter {
   animation: marker-enter 180ms ease-out;
+}
+
+/* Travelling from the tapped circle takes longer than growing in place -- 180 ms across a screen
+ * width reads as a flicker rather than as movement. The curve leaves fast and settles slowly, so
+ * the eye can follow a marker to where it comes to rest. */
+.marker--fan {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 /* Anyone who has asked for less motion gets the jump -- it was the state of things until today,
@@ -669,7 +719,6 @@ button {
 .marker:hover,
 .marker:focus-visible {
   transform: scale(1.08);
-  z-index: 2;
 }
 
 .marker__image {

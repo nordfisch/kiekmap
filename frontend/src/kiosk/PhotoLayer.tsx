@@ -77,6 +77,30 @@ export function buildIndex(photos: PhotoMarker[]): Supercluster<PhotoProps, Clus
   return index;
 }
 
+/**
+ * The element MapLibre positions, wrapped around the one that moves.
+ *
+ * MapLibre writes the marker position as ``transform: translate(...)`` into the inline style of
+ * the element it is given. Anything that also sets ``transform`` there does not compose with it,
+ * it competes with it -- and the cascade decides in opposite directions: an **animation** outranks
+ * an inline style, so ``marker-enter`` used to win, lose the translate and drop the marker at the
+ * container's top left corner for its whole duration. A plain **rule** loses to it, so
+ * ``.marker:hover`` did nothing at all, silently, for as long as there have been markers.
+ *
+ * One element cannot serve both. The shell separates the two layers: outside the map's translate,
+ * inside everything the stylesheet wants.
+ */
+function markerShell(content: HTMLElement): HTMLElement {
+  const shell = document.createElement("div");
+  shell.className = "marker-shell";
+  // A circle must stay tappable, so it is stacked above the thumbnails -- see `global.css`.
+  // The class goes here rather than at the two call sites because the stacking follows from
+  // what the marker *is*, and the shell is the only element that can carry it.
+  if (content.classList.contains("cluster")) shell.classList.add("marker-shell--cluster");
+  shell.appendChild(content);
+  return shell;
+}
+
 function photoElement(stack: Stack, onSelect: () => void): HTMLElement {
   const photo = stack.photos[0]!;
   const count = stack.photos.length;
@@ -169,9 +193,22 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
   const drawn = useRef<string | null>(null);
   /** When the running entrance began -- null while none is. See ``stillEntering``. */
   const enteredAt = useRef<number | null>(null);
+  /**
+   * The circle a finger last tapped -- null when the regrouping came from somewhere else.
+   *
+   * A regrouping also happens on a pinch, on ``+``/``-`` and while panning, and none of those has
+   * a point the visitor pointed at. Only a tap does, and only then do the new markers grow out of
+   * it; otherwise they pop where they belong, which is what the animation always meant to do.
+   */
+  const tappedAt = useRef<[number, number] | null>(null);
 
   useEffect(() => {
     function draw() {
+      // Consumed at the top, before any early return: a tap that did not change the grouping must
+      // not leave its origin lying around for the next one, which would fan from a stale circle.
+      const from = tappedAt.current;
+      tappedAt.current = null;
+
       const bounds = map.getBounds();
       const zoom = clusterZoom(map.getZoom());
       const groups = index.getClusters(
@@ -198,14 +235,35 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
         const [lon, lat] = group.geometry.coordinates as [number, number];
         // Only fading in, never out: fading out would mean keeping removed elements alive on a
         // timer -- exactly the kind of state the wholesale rebuild above avoids.
-        const enter = (element: HTMLElement) => {
-          if (entering) element.classList.add("marker--enter");
-          return element;
+        const enter = (content: HTMLElement) => {
+          // The animation goes on the content, the shell goes to MapLibre. The other way round
+          // reproduces the very bug the shell exists to prevent -- measured on 18 August 2026:
+          // with the animation on the shell the markers still started at the container origin,
+          // merely displaced by the offset, so they fanned out of four different points.
+          if (!entering) return markerShell(content);
+          content.classList.add("marker--enter");
+          if (from) {
+            // Where the tapped circle now sits, minus where this marker sits: the vector the
+            // marker travels along, in screen pixels, so it reads the same at every zoom. The
+            // circle has been eased to the centre by then, which is exactly where the visitor
+            // last saw it.
+            const origin = map.project(from);
+            const here = map.project([lon, lat]);
+            content.classList.add("marker--fan");
+            content.style.setProperty("--enter-x", `${origin.x - here.x}px`);
+            content.style.setProperty("--enter-y", `${origin.y - here.y}px`);
+            // Smaller than the pop in place: it should look like it came out of the circle, not
+            // like it was already there and merely slid over.
+            content.style.setProperty("--enter-scale", "0.4");
+          }
+          return markerShell(content);
         };
 
         if (isCluster(group)) {
           const { cluster_id: clusterId, photos: count } = group.properties;
           const element = clusterElement(count, () => {
+            // Remembered for the draw that follows this movement -- see ``tappedAt``.
+            tappedAt.current = [lon, lat];
             // Zoom in far enough for this group to dissolve.
             map.easeTo({
               center: [lon, lat],
