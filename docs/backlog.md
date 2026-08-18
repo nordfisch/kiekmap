@@ -177,7 +177,13 @@ Scannersoftware) und sechsmal „Google Maps 2026". Die Regel dagegen steht seit
 
 Die sechs Kartenbilder sind dabei kein Müll, sondern eine Aussage: Das Foto ist ein heutiger
 Vergleichsblick. Der Name gehört in den Bildnachweis, das Jahr in die Datierung, und der Titel
-bleibt leer oder sagt, was zu sehen ist.
+bleibt leer oder sagt, was zu sehen ist. **Das Jahr ist am 18. August übernommen** (Schritt 1.3),
+die Titel stehen noch.
+
+**Drei verwandte Fälle sind schon erledigt.** Die Fotos 1079, 1080 und 1229 trugen die Ordnernotiz
+„Gebäude und Umgebung im Holm der 80er Jahre" als **Titel** — schlimmer als in der Beschreibung,
+weil der Titel im Marker steht, bevor jemand antippt. Sie heißen jetzt „Gasthof Timm",
+„Gasthof Petersen" und „Walter Boysen", jeweils nach einem Schlagwort des Fotos selbst.
 
 #### 1.5 · Sätze, die als Schlagwort stehen
 
