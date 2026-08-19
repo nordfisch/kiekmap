@@ -3352,11 +3352,9 @@ haben ihre Tests bekommen.
 ### Drei Fehler, und alle drei fallen beim Benutzen nicht auf
 
 Das ist die Eigenschaft, die sie verbindet, und der Grund, warum ein Durchgang von aussen etwas
-findet, was das tägliche Arbeiten nicht findet. Sie stehen jetzt als
-[Punkt 57](backlog.md#57--der-eingangs-watcher-sichert-einen-ganzen-durchgang-auf-einmal),
-[Punkt 58](backlog.md#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen)
-und [Punkt 59](backlog.md#59--ein-fehler-beim-rendern-hinterlässt-einen-weissen-bildschirm)
-im Backlog.
+findet, was das tägliche Arbeiten nicht findet. Sie wurden Punkt 57, 58 und 59; **57 und 59
+sind noch am selben Tag behoben worden** (siehe unten), offen bleibt
+[Punkt 58](backlog.md#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen).
 
 **Der Eingangs-Watcher sichert einen ganzen Durchgang auf einmal.** `session.commit()` steht hinter
 der Schleife, während `import_file` jede Datei schon in sich nach `_erledigt/` verschiebt. Eine
@@ -3404,3 +3402,42 @@ Nicht gefunden wurde ein Fachfehler. Keine der Stellen, die dieses Projekt eigen
 hält nicht, was sie zusagt. Auch ein Verdacht löste sich in Luft auf: `httpx2` in den
 Entwicklungsabhängigkeiten sieht nach Vertipper aus, ist aber das echte Nachfolgepaket von `httpx`
 aus demselben Haus.
+
+## Punkt 57 und 59, behoben am selben Tag
+
+Zwei der drei Fehler aus dem Durchgang sind gleich repariert worden. Beide Male lag die richtige
+Lösung schon im Repo — einmal einen Modul weiter, einmal als Reflex, der hier falsch war.
+
+### Der Watcher: die Regel stand nebenan
+
+`session.commit()` wanderte in die Schleife, wo es in `importer.import_from_folder` seit jeher
+steht. Zwei Zeilen, und ein Test, der ohne sie fehlschlägt: Eine Ausnahme beim zweiten Foto darf
+das erste nicht mitnehmen. Er prüft in einer **frischen Sitzung** nach, denn genau darum geht es —
+steht die Zeile in der Datenbank oder nur im Gedächtnis der abgebrochenen? Dazu die zweite Hälfte
+der Zusage: Was liegen blieb, kommt beim nächsten Blick herein.
+
+Bemerkenswert ist nicht der Fehler, sondern dass die Begründung dagegen schon geschrieben dastand:
+„Ein halb herausgezogener Stick lässt dann liegen, was schon gelesen wurde, statt nichts." Derselbe
+Satz gilt für den Eingangsordner. **Eine Regel wandert nicht von selbst mit, nur weil sie
+aufgeschrieben ist.**
+
+### Die Fehlergrenze: der Aufräumreflex war der Fehler
+
+Die erste Fassung war ordentlich gebaut — Zeitgeber als Feld, `componentWillUnmount`, `clearTimeout`.
+Und sie tat nichts. Der Bildschirm zeigte die Meldung und blieb dann stehen.
+
+Aufgefallen ist es **nicht beim Lesen, sondern beim Messen**: ein Absturzschalter in `App`, ein
+`console.log` vor und nach dem Setzen des Zeitgebers, und die Spur las sich in zwei Zeilen —
+„Timer gesetzt", direkt danach „unmount, Timer war 3". Nach dem Fangen baut React den Baum von
+Grund auf neu und nimmt die Fehlergrenze mit; das Aufräumen löschte also jedes Mal genau die
+Selbstheilung, um derentwillen es sie gibt. Warum der Zeitgeber jetzt stehen bleibt, steht als
+Punkt 57 in [decisions.md](decisions.md).
+
+Nachgemessen im Browser, nicht angesehen: `timeOrigin` der neu geladenen Seite minus dem Vermerk
+über den letzten Versuch ergab **8003 ms**, und der Navigationstyp war `reload`. Der zweite
+Absturz danach zeigte den anderen Satz — „Bitte einmal auf die Schaltfläche tippen" — und lud
+nicht noch einmal. Genau die zwei Zustände, die der Entwurf vorsieht.
+
+**Beide Male hätte ein Blick nicht gereicht.** Der Watcher-Fehler braucht eine Ausnahme mitten im
+Durchgang, die im Betrieb vielleicht nie eintritt; die tote Selbstheilung sieht aus wie eine
+funktionierende, solange niemand acht Sekunden wartet und nachsieht, ob wirklich neu geladen wurde.

@@ -42,12 +42,10 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | # | Punkt | Art | Einordnung |
 |---|---|---|---|
 | | **Verwaltung** | | |
-| 57 | [Der Eingangs-Watcher sichert einen ganzen Durchgang auf einmal](#57--der-eingangs-watcher-sichert-einen-ganzen-durchgang-auf-einmal) | Fehler | wichtig · dringend |
 | 58 | [Zeitstempel gehen als UTC hinaus und werden als Ortszeit gelesen](#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen) | Fehler | wichtig |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
-| 59 | [Ein Fehler beim Rendern hinterlässt einen weissen Bildschirm](#59--ein-fehler-beim-rendern-hinterlässt-einen-weissen-bildschirm) | Fehler | wichtig · dringend |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
@@ -69,39 +67,20 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 60 | [Die Sicherung ist sechs Module in einer Datei](#60--die-sicherung-ist-sechs-module-in-einer-datei) | Aufgabe | — |
 | 61 | [Zwei Regeln stehen an zwei Orten](#61--zwei-regeln-stehen-an-zwei-orten) | Aufgabe | — |
 
-**Drei Fehler sind offen** — 57, 58 und 59, alle drei aus dem Durchgang über den Code vom
-19. August 2026 ([Punkt 39](history.md#punkt-39-der-durchgang-von-aussen), inzwischen
-erledigt). Keiner davon fällt beim Benutzen auf; das ist bei allen dreien die Eigenschaft, die sie gefährlich macht.
+**Ein Fehler ist offen** — Punkt 58 aus dem Durchgang über den Code vom 19. August 2026
+([Punkt 39](history.md#punkt-39-der-durchgang-von-aussen)). Die beiden anderen desselben Tages
+sind noch am selben Tag behoben worden; was dabei herauskam, steht in
+[history.md](history.md#punkt-57-und-59-behoben-am-selben-tag). Keiner der drei fiel beim
+Benutzen auf — das ist die Eigenschaft, die sie gefährlich machte.
 
-**Vierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
+**Zweiundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-55, 56. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+55, 56, 57, 59. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **64**.
 
 ---
 
 ## Verwaltung
-
-### 57 · Der Eingangs-Watcher sichert einen ganzen Durchgang auf einmal
-
-`services/watcher.py`, `scan_once`: Die Schleife über die fertig geschriebenen Dateien ruft
-`import_file(…, move_aside=True)`, und `session.commit()` steht **hinter** der Schleife.
-`import_file` verschiebt die Datei aber in sich selbst nach `_erledigt/`, bevor irgendetwas
-festgeschrieben ist.
-
-Fliegt bei Datei *n* eine Ausnahme, die `import_file` nicht abfängt, fängt sie `_loop` („der
-Watcher darf nie aufgeben"), und die Sitzung wird ohne Commit geschlossen. Dann sind die Zeilen der
-Dateien 1 bis *n*−1 weg, während ihre Quelldateien in `_erledigt/` liegen — und im Import-Protokoll
-steht ebenfalls nichts, weil dessen Einträge in derselben Transaktion hängen. Genau der stille
-Verlust, gegen den dieses Protokoll gebaut wurde: Ein übersprungenes Foto wäre von einem nie
-kopierten nicht zu unterscheiden.
-
-**Die Lösung steht einen Modul weiter schon da.** `importer.import_from_folder` committet **in**
-der Schleife, mit der Begründung: „Ein halb herausgezogener Stick lässt dann liegen, was schon
-gelesen wurde, statt nichts." Dieselbe Regel gilt hier, sie ist nur nicht mitgewandert.
-
-Der Test dazu beschreibt den Fehlerfall: Eine Ausnahme mitten im Durchgang darf kein Foto
-verlieren, das schon nach `_erledigt/` verschoben wurde.
 
 ### 58 · Zeitstempel gehen als UTC hinaus und werden als Ortszeit gelesen
 
@@ -219,23 +198,6 @@ Nicht wichtig, nicht dringend — erst zu prüfen und zu bewerten, dann zu spezi
 ---
 
 ## Besucher-Interface
-
-### 59 · Ein Fehler beim Rendern hinterlässt einen weissen Bildschirm
-
-Es gibt keine `ErrorBoundary`, kein `window.onerror`, kein `unhandledrejection` — geprüft über den
-ganzen `frontend/src`-Baum. Eine Ausnahme beim Rendern reisst damit den ganzen Baum ab, und
-zurück bleibt eine weisse Seite.
-
-**Das Schlimme daran ist die zweite Hälfte:** Der Leerlauf-Neustart, der das Gerät sonst von jedem
-verfahrenen Zustand heilt, hängt in `MapView` (`watchForIdle` in dessen Effekt). Mit dem Absturz
-ist er weg. Auf einem Gerät ohne Tastatur, ohne Adressleiste und ohne Reload-Knopf heisst das: Die
-Vitrine steht weiss, bis jemand den Stecker zieht — und niemand vom Museumsteam weiss, dass das die
-Abhilfe wäre.
-
-Der Aufwand steht in keinem Verhältnis zum Schaden: eine Umhüllung um `App`, die einen deutschen
-Satz zeigt und nach ein paar Sekunden `location.reload()` ruft. Beim Bauen mitzuentscheiden ist,
-ob der Leerlaufwächter aus `MapView` heraus an eine Stelle wandert, die ein Absturz nicht mitnimmt
-— dann heilt das Gerät auch den Fall, den die Umhüllung nicht fängt.
 
 ### 30 · Die Karte nach Schlagwörtern filtern
 

@@ -1927,3 +1927,37 @@ werden muesste, ist keine da.
 - **Das Scandatum in Prosa.** „Im Januar 2020 eingescannt von einem SW-Abzug von Olaf Sieveking."
   Dieselbe Falle wie das EXIF-Datum eines Scans, nur in einem Textfeld statt in einem Tag -- und
   ohne die Jahresgrenze aus ``services/exif.py``, die sie dort abfaengt.
+
+## 57. Der Kiosk heilt sich selbst — aber nur einmal
+
+*Entschieden am 19. August 2026 — Backlogpunkt 59, gefunden beim Durchgang über den Code.*
+
+Ein Fehler beim Rendern reisst in React den ganzen Baum ab, und übrig bleibt eine weisse Seite. Am
+Schreibtisch ist das eine Unannehmlichkeit — man drückt Neu laden. Im Museum gibt es nichts zu
+drücken: Chromium läuft unter `cage` ohne Tastatur, ohne Adressleiste, ohne Knöpfe. Und der
+Leerlauf-Neustart, der sonst jeden verfahrenen Zustand heilt, sitzt in `MapView` und geht mit
+unter. Die Vitrine steht dann weiss, bis jemand den Stecker zieht.
+
+Also lädt die Seite sich selbst neu. Die einzige Frage, die dabei zu entscheiden war: **wie oft.**
+
+**Genau einmal, dann redet das Gerät.** Ein Absturz, der beim Laden wiederkommt, liesse den
+Bildschirm sonst endlos flackern — schlechter als eine Meldung, die jemand lesen kann. Nach dem
+ersten selbsttätigen Versuch steht deshalb ein Satz da und ein Knopf darunter. Der Vermerk über den
+letzten Versuch liegt im `sessionStorage`: Er übersteht das Neuladen und stirbt mit dem Tab, auf
+dem Pi also spätestens beim morgendlichen Neustart — dieselbe Überlegung wie beim Admin-Token.
+
+**Eine rückwärts gesprungene Uhr gilt als „lange her".** Der Pi hat keine Echtzeituhr; nach einem
+Stromausfall kann seine Uhr um Jahre danebenliegen. Rechnete man stur vorwärts, wäre die
+Selbstheilung damit dauerhaft abgeschaltet — genau der Zustand, den sie verhindern soll. Deshalb
+zählt eine negative Differenz als abgelaufen. (Dieselbe Gerätewahrheit steht hinter dem Countdown
+in `services/auth.py`.)
+
+**Und der Zeitgeber wird nicht aufgeräumt — das ist der Fallstrick, nicht die Schlamperei.** Die
+ordentliche Fassung hatte ein `componentWillUnmount`, das ihn löscht, und damit tat das Ganze
+nichts: Nach dem Fangen baut React den Baum von Grund auf neu und nimmt die Fehlergrenze mit.
+Gemessen an der Spur im Protokoll — „Timer gesetzt", „unmount" — und die Seite stand unverändert
+da. Der Aufräumreflex ist richtig für einen Zeitgeber, der zu einer Ansicht gehört; er ist falsch
+für einen, der zum Gerät gehört.
+
+Was das kostet: Ein Absturz, den der Neuaufbau zufällig behebt, lädt acht Sekunden später trotzdem
+neu. Für einen Kiosk ist das ohnehin die ehrliche Antwort — nach einem Absturz eine saubere Seite.

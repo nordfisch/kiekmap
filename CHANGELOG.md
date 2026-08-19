@@ -913,3 +913,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Ein Kreis liegt immer über einem Vorschaubild** und ist damit erreichbar. Verdeckt war er
   vorher nicht antippbar, und das ist der einzige Weg zu den Fotos dahinter; ein verdecktes Bild
   kostet dagegen nichts, weil der Kreis darüber zu denselben Fotos führt
+- **Ein Absturz der Oberfläche lässt das Gerät nicht mehr weiss stehen.** Ein Fehler beim Rendern
+  riss die ganze Seite ab, und der Leerlauf-Neustart, der sonst jeden verfahrenen Zustand heilt,
+  ging mit unter — ohne Tastatur und Adressleiste war die Vitrine damit tot. Jetzt steht ein
+  deutscher Satz da, die Seite lädt sich nach acht Sekunden selbst neu, und ein Knopf tut es
+  sofort. **Beim zweiten Mal lädt nichts mehr von selbst**, sonst flackerte der Bildschirm bei
+  einem Fehler, der beim Laden wiederkommt
+- **Der Eingangsordner verliert bei einem Abbruch nicht mehr, was er schon gelesen hat.** Der
+  ganze Durchgang wurde erst am Ende gesichert, während jede Datei schon vorher nach `_erledigt/`
+  wanderte: Eine Ausnahme mittendrin nahm die Fotos davor mit — und das Import-Protokoll gleich
+  dazu, das den Verlust hätte zeigen sollen

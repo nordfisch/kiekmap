@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from sqlalchemy import select
 
 from app.models import Photo
@@ -51,6 +52,93 @@ def test_import_laeuft_ohne_zutun_durch(session, settings, fixtures_dir: Path):
     watcher.scan_once()  # Groessen merken
     assert watcher.scan_once() == 2
     assert len(session.scalars(select(Photo)).all()) == 2
+
+
+class TestEinAbbruchMittendrin:
+    """Was schon gelesen wurde, muss stehen bleiben -- Fehler 57.
+
+    ``import_file`` schiebt jede Datei in sich selbst nach ``_erledigt/``, bevor irgendetwas
+    festgeschrieben ist. Wurde der ganze Durchgang erst am Ende gesichert, nahm eine Ausnahme
+    mittendrin die Zeilen aller vorher gelesenen Fotos mit -- und das Import-Protokoll gleich dazu,
+    weil dessen Eintraege in derselben Transaktion hingen. Die Quelldateien lagen dann in
+    ``_erledigt/``, und nichts sagte, dass es sie je gegeben hat.
+
+    ``_loop`` faengt die Ausnahme und macht beim naechsten Blick weiter, der Dienst laeuft also
+    unbeirrt vor sich hin. Genau deshalb faellt der Verlust niemandem auf.
+    """
+
+    def _ablegen(self, settings, fixtures_dir: Path, name: str, quelle: str):
+        ziel = settings.incoming_dir / name
+        ziel.write_bytes((fixtures_dir / quelle).read_bytes())
+
+    def test_ein_fehler_beim_zweiten_foto_verliert_das_erste_nicht(
+        self, session, settings, fixtures_dir: Path, monkeypatch
+    ):
+        from app.models import ImportLog
+        from app.services import watcher as watcher_modul
+
+        self._ablegen(settings, fixtures_dir, "1_erstes.jpg", "scan_ohne_exif.jpg")
+        self._ablegen(settings, fixtures_dir, "2_zweites.jpg", "hochkant.jpg")
+
+        echter_import = watcher_modul.import_file
+
+        def stolpert(session_, path, *args, **kwargs):
+            if path.name.startswith("2_"):
+                raise RuntimeError("etwas Unvorhergesehenes")
+            return echter_import(session_, path, *args, **kwargs)
+
+        monkeypatch.setattr(watcher_modul, "import_file", stolpert)
+
+        watcher = IncomingWatcher(settings, interval=0)
+        watcher.scan_once()  # Groessen merken
+        with pytest.raises(RuntimeError):
+            watcher.scan_once()
+
+        # Eine frische Sitzung, denn genau darum geht es: Steht es in der Datenbank oder nur im
+        # Gedaechtnis der abgebrochenen?
+        import app.db
+
+        with app.db.SessionLocal() as frisch:
+            foto = frisch.scalar(select(Photo).where(Photo.original_filename == "1_erstes.jpg"))
+            assert foto is not None, "das erste Foto darf der Abbruch nicht mitnehmen"
+            eintraege = frisch.scalars(select(ImportLog)).all()
+            assert [eintrag.path for eintrag in eintraege] != [], "das Protokoll fehlt komplett"
+            assert any("1_erstes.jpg" in eintrag.path for eintrag in eintraege)
+
+        # Und die Quelldatei liegt weggeraeumt -- das ist der Zustand, zu dem die Zeile gehoert.
+        assert (settings.incoming_dir / "_erledigt" / "1_erstes.jpg").is_file()
+
+    def test_der_naechste_blick_holt_nach_was_liegen_blieb(
+        self, session, settings, fixtures_dir: Path, monkeypatch
+    ):
+        """Die zweite Haelfte der Zusage: Der Watcher gibt nicht auf.
+
+        Die Datei, an der es scheiterte, liegt noch im Eingang und ihre Groesse steht noch im
+        Gedaechtnis -- beim naechsten Durchgang ist sie wieder an der Reihe.
+        """
+        from app.services import watcher as watcher_modul
+
+        self._ablegen(settings, fixtures_dir, "1_erstes.jpg", "scan_ohne_exif.jpg")
+        self._ablegen(settings, fixtures_dir, "2_zweites.jpg", "hochkant.jpg")
+
+        echter_import = watcher_modul.import_file
+        gestolpert = []
+
+        def stolpert_einmal(session_, path, *args, **kwargs):
+            if path.name.startswith("2_") and not gestolpert:
+                gestolpert.append(path)
+                raise RuntimeError("etwas Unvorhergesehenes")
+            return echter_import(session_, path, *args, **kwargs)
+
+        monkeypatch.setattr(watcher_modul, "import_file", stolpert_einmal)
+
+        watcher = IncomingWatcher(settings, interval=0)
+        watcher.scan_once()
+        with pytest.raises(RuntimeError):
+            watcher.scan_once()
+
+        assert watcher.scan_once() == 1, "das zweite Foto kommt beim naechsten Blick herein"
+        assert len(session.scalars(select(Photo)).all()) == 2
 
 
 class TestOrdnernamen:

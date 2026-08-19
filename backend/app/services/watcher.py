@@ -107,9 +107,16 @@ class IncomingWatcher:
                     session, path, self.settings, move_aside=True, root=self.settings.incoming_dir
                 )
                 self._sizes.pop(path, None)
+                # Per file, not once for the whole sweep -- and that is not a matter of taste.
+                # ``import_file`` moves the file to ``_erledigt/`` inside itself, before anything
+                # is written down. Committed at the end, an exception on the fifth file would take
+                # the rows of the first four with it while their sources lie in ``_erledigt/`` --
+                # and the import log along with them, because its entries hang in the same
+                # transaction. The one record that would have shown it is the one that is lost.
+                # ``importer.import_from_folder`` has always done it this way.
+                session.commit()
                 log.info("%s: %s -- %s", outcome.result, path.name, outcome.message)
                 if outcome.succeeded:
                     count += 1
-            session.commit()
 
         return count

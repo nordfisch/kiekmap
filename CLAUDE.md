@@ -306,7 +306,10 @@ schreibt einen ganzen Durchgang erst am Ende fest, während er jede Datei schon 
 `_erledigt/` schiebt — eine Ausnahme mittendrin verliert die Fotos davor samt Protokoll. Zeitstempel
 gehen ohne Zeitzonenmarker hinaus und werden im Browser als Ortszeit gelesen. Und ein Fehler beim
 Rendern hinterlässt einen weissen Bildschirm, den kein Leerlauf-Neustart mehr heilt, weil der mit
-abstürzt. Sie stehen als Punkt 57, 58 und 59 im Backlog; angefasst wurde nichts.
+abstürzt. **Der erste und der dritte sind noch am selben Tag behoben worden**, mit Test und im
+Browser nachgemessen; offen bleibt Punkt 58, die Zeitstempel. Warum die Fehlergrenze ihren
+Zeitgeber nicht aufräumt — der Aufräumreflex war dort genau der Fehler —, steht in
+`docs/decisions.md`, Punkt 57.
 
 Der zweite trägt die Lehre: Er war schon einmal angefasst und an der Stelle, wo er auffiel,
 **umgangen** worden — die Übersichtskacheln senden seither Tage statt Zeitstempel, mit einem

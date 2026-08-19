@@ -45,6 +45,19 @@ export const t = {
      */
     resetHint: "Von vorn beginnen",
     loadingMap: "Karte wird geladen …",
+
+    /**
+     * What stands there when the interface has crashed -- see `ErrorBoundary.tsx`.
+     *
+     * Written for a visitor, not for a developer: nothing about an error, a version or a console.
+     * Somebody standing in front of the device wants to know whether they broke it (no) and what
+     * happens next (this fixes itself).
+     */
+    crashTitle: "Einen Moment, bitte",
+    crashReloading: "Etwas hat nicht geklappt. Die Seite lädt sich gleich von selbst neu.",
+    /** The second time round nothing reloads by itself -- so the sentence has to ask. */
+    crashStuck: "Etwas hat nicht geklappt. Bitte einmal auf die Schaltfläche tippen.",
+    crashRetry: "Noch einmal versuchen",
   },
 
   map: {

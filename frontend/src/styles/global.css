@@ -1311,6 +1311,22 @@ button.timeline__undated:hover {
   color: #a03030;
 }
 
+/* Der Kasten, in dem der Absturz erklaert wird -- siehe ErrorBoundary.tsx.
+ *
+ * Schmal gehalten, weil .splash ueber die ganze Breite geht: Zwei Zeilen Text quer ueber einen
+ * 27-Zoll-Bildschirm liest niemand. Der Knopf darunter erbt Groesse und Fingerflaeche von
+ * .button. */
+.splash__panel {
+  max-width: 26rem;
+}
+
+.splash__title {
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
 /* Enlarge MapLibre's own controls to finger size. */
 .maplibregl-ctrl button {
   width: 3rem;
