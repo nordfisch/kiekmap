@@ -42,7 +42,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | # | Punkt | Art | Einordnung |
 |---|---|---|---|
 | | **Verwaltung** | | |
-| 58 | [Zeitstempel gehen als UTC hinaus und werden als Ortszeit gelesen](#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen) | Fehler | wichtig |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
@@ -67,62 +66,20 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 60 | [Die Sicherung ist sechs Module in einer Datei](#60--die-sicherung-ist-sechs-module-in-einer-datei) | Aufgabe | — |
 | 61 | [Zwei Regeln stehen an zwei Orten](#61--zwei-regeln-stehen-an-zwei-orten) | Aufgabe | — |
 
-**Ein Fehler ist offen** — Punkt 58 aus dem Durchgang über den Code vom 19. August 2026
-([Punkt 39](history.md#punkt-39-der-durchgang-von-aussen)). Die beiden anderen desselben Tages
-sind noch am selben Tag behoben worden; was dabei herauskam, steht in
-[history.md](history.md#punkt-57-und-59-behoben-am-selben-tag). Keiner der drei fiel beim
-Benutzen auf — das ist die Eigenschaft, die sie gefährlich machte.
+**Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
+dem Durchgang über den Code vom 19. August 2026
+([Punkt 39](history.md#punkt-39-der-durchgang-von-aussen)) sind noch am selben Tag behoben
+worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
+die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Zweiundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
+**Dreiundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-55, 56, 57, 59. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+55, 56, 57, 58, 59. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **64**.
 
 ---
 
 ## Verwaltung
-
-### 58 · Zeitstempel gehen als UTC hinaus und werden als Ortszeit gelesen
-
-Die Datenbank schreibt UTC (`func.now()`; `_stamp()` in `services/backup.py` ausdrücklich).
-Pydantic gibt das **ohne Zeitzonenmarker** aus — `"2026-08-18T19:25:21"` —, und `new Date(iso)`
-liest eine ISO-Zeit ohne Marker nach Norm als **Ortszeit**. Nachgemessen am 19. August 2026:
-
-```
-naiv  -> 18.8.2026, 19:25:21
-mit Z -> 18.8.2026, 21:25:21
-```
-
-Betroffen sind die drei Stellen, die einen rohen Stempel über die Leitung schicken:
-
-| Wo | Feld | Was zu sehen ist |
-|---|---|---|
-| `admin/Changes.tsx` (`when`) | `created_at`, `reverted_at` | Tag **und Uhrzeit** — im Sommer zwei Stunden zu früh |
-| `admin/ImportLog.tsx` | `created_at` | dito |
-| `admin/Backup.tsx` (`formatDate`) | `last_backup_at`, `created_at` | nur das Datum — kippt bei einer Sicherung zwischen 00:00 und 02:00 Ortszeit auf den Vortag |
-
-**Das ist der Rest eines schon einmal angefassten Problems, und das ist der Grund, es hier
-aufzuschreiben.** Der Commit vom 30. Juli 2026, der die zweite Uhr beseitigte und `days_since()`
-baute, hat für die drei Kacheln der Übersicht den Zeitstempel **gar nicht mehr gesendet**, sondern
-Tage. Der Kommentar, der dabei in `schemas.py` entstand, benennt den Befund wörtlich: *„a stored
-stamp carries no time zone and JavaScript would read it as local time."* Für die Kacheln wurde das
-Problem also umgangen, nicht behoben; einen Serializer, der UTC markiert, gibt es bis heute nicht.
-
-Dazu die zweite Uhr, die an einer Stelle stehengeblieben ist: `api/admin.py` setzt
-`change.reverted_at = datetime.now()` — Ortszeit, während `created_at` UTC ist. Ein sofort
-zurückgenommener Beitrag steht damit in der Datenbank zwei Stunden nach sich selbst.
-
-**Zwei Dinge, die richtig sind und nicht mitkonvertiert werden dürfen:**
-
-- `dates.days_since` rechnet beide Seiten sauber um. Die Tageszählungen stimmen; falsch ist allein
-  die ausgeschriebene Uhrzeit.
-- `admin/PhotoEditor.tsx` zeigt `exif_datetime` ebenfalls mit `new Date(...)`, und **das ist
-  korrekt**: Ein EXIF-Datum ist eine naive Wanduhrzeit aus Kamera oder Scanner, ohne Zone. Es als
-  Ortszeit zu lesen trifft genau zu. Wer es mit den übrigen zusammen auf UTC umstellt, baut den
-  Fehler erst ein.
-
-Zu entscheiden ist nur, an welchem Ende gerechnet wird: Gibt das Backend UTC-bewusste Zeitstempel
-aus, ist der Browser von selbst richtig — und die drei Anzeigestellen bleiben, wie sie sind.
 
 ### 31 · Einstellungen in der Verwaltung pflegen statt in der `.env`
 
@@ -759,7 +716,6 @@ Regel.
 
 **Das Datumsformat.** `admin/format.ts` exportiert `formatDateTime`, das **nirgends benutzt wird**,
 während `admin/Changes.tsx` (`when`) und `admin/ImportLog.tsx` sich dieselbe Formatierung je noch
-einmal von Hand hinschreiben. Drei Fassungen, eine davon tot. Beim Zusammenlegen ist
-[Punkt 58](#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen) mitzudenken: Die
-eine Fassung, die übrig bleibt, ist genau der Ort, an dem die Zeitzone einmal richtig behandelt
-werden kann.
+einmal von Hand hinschreiben. Drei Fassungen, eine davon tot. Die Zeitzone ist dabei kein Thema
+mehr — sie wird seit dem 19. August am API-Rand behandelt ([decisions.md](decisions.md), Punkt
+58); es geht allein darum, dass dieselbe Formatierung nicht dreimal dasteht.

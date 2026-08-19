@@ -3352,9 +3352,8 @@ haben ihre Tests bekommen.
 ### Drei Fehler, und alle drei fallen beim Benutzen nicht auf
 
 Das ist die Eigenschaft, die sie verbindet, und der Grund, warum ein Durchgang von aussen etwas
-findet, was das tägliche Arbeiten nicht findet. Sie wurden Punkt 57, 58 und 59; **57 und 59
-sind noch am selben Tag behoben worden** (siehe unten), offen bleibt
-[Punkt 58](backlog.md#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen).
+findet, was das tägliche Arbeiten nicht findet. Sie wurden Punkt 57, 58 und 59 — und **alle
+drei sind noch am selben Tag behoben worden**; siehe unten.
 
 **Der Eingangs-Watcher sichert einen ganzen Durchgang auf einmal.** `session.commit()` steht hinter
 der Schleife, während `import_file` jede Datei schon in sich nach `_erledigt/` verschiebt. Eine
@@ -3403,10 +3402,11 @@ hält nicht, was sie zusagt. Auch ein Verdacht löste sich in Luft auf: `httpx2`
 Entwicklungsabhängigkeiten sieht nach Vertipper aus, ist aber das echte Nachfolgepaket von `httpx`
 aus demselben Haus.
 
-## Punkt 57 und 59, behoben am selben Tag
+## Punkt 57, 58 und 59, behoben am selben Tag
 
-Zwei der drei Fehler aus dem Durchgang sind gleich repariert worden. Beide Male lag die richtige
-Lösung schon im Repo — einmal einen Modul weiter, einmal als Reflex, der hier falsch war.
+Alle drei Fehler aus dem Durchgang sind noch am selben Tag repariert worden. Jedes Mal lag die
+richtige Lösung schon im Repo — einmal einen Modul weiter, einmal als Reflex, der hier falsch
+war, einmal als Kommentar, dem vier Wochen lang niemand gefolgt ist.
 
 ### Der Watcher: die Regel stand nebenan
 
@@ -3441,3 +3441,36 @@ nicht noch einmal. Genau die zwei Zustände, die der Entwurf vorsieht.
 **Beide Male hätte ein Blick nicht gereicht.** Der Watcher-Fehler braucht eine Ausnahme mitten im
 Durchgang, die im Betrieb vielleicht nie eintritt; die tote Selbstheilung sieht aus wie eine
 funktionierende, solange niemand acht Sekunden wartet und nachsieht, ob wirklich neu geladen wurde.
+
+### Und Punkt 58: der Marker gehört an das Ende, das die Zone kennt
+
+Der dritte Fehler war der, der am längsten unbemerkt dastand — und der einzige, dessen Ursache
+schon einmal aufgeschrieben worden war, ohne dass jemand ihr gefolgt wäre.
+
+Die Wahl bestand zwischen „drei Anzeigestellen im Browser rechnen um" und „das Backend sagt, welche
+Zone es meint". Die zweite ist die kürzere und die haltbarere: Ein `UtcDatetime` in `schemas.py`
+sagt es einmal, sieben Felder tragen es, und `Changes.tsx`, `ImportLog.tsx` und `Backup.tsx` sind
+unverändert geblieben. Die vierte Anzeigestelle, die jemand später dazubaut, ist damit von selbst
+richtig.
+
+Am Wert nachgemessen, im Browser und in `Europe/Berlin`:
+
+| | angezeigt |
+|---|---|
+| `2026-08-05T08:10:58` (vorher) | 5. August um **08:10** |
+| `2026-08-05T08:10:58Z` (jetzt) | 5. August um **10:10** |
+| `2018-08-28T14:07:18` (Scandatum) | 28. August um 14:07 |
+
+**Die dritte Zeile ist der eigentliche Ertrag.** Das EXIF-Datum bekommt den Marker ausdrücklich
+nicht: Es kommt aus einer Kamera oder einem Scanner, die die Wanduhr ihres Standorts schreiben und
+von keiner Zone wissen. Wer es mit den übrigen zusammen auf UTC umstellt, verschiebt einen Scan von
+14:00 auf 16:00 und erfindet eine Tatsache. Ein Zeitstempel trägt nicht nur einen Wert, sondern
+eine Herkunft — dieselbe Einsicht wie bei den Feldern der Fotos, eine Ebene tiefer. Es hat einen
+eigenen Test, der ohne die Änderung **als einziger von sechs bestanden hätte**: Was schon richtig
+war, muss richtig bleiben.
+
+Daneben lag die zweite Uhr, die der 30. Juli übersehen hatte: `reverted_at` kam aus
+`datetime.now()`. Sie steht jetzt als `dates.utc_now()` an einer Stelle und hat einen Namen. Und
+zwei Dateinamen, die Menschen im Dateimanager lesen, waren sich uneins — der beiseitegelegte
+Ordner schrieb Ortszeit, der Name des heruntergeladenen Archivs UTC; jetzt beide Ortszeit, denn
+wer um halb eins nachts eine Sicherung zieht, sucht das heutige Datum.

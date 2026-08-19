@@ -26,7 +26,7 @@ import time
 import zipfile
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy import text
@@ -63,13 +63,14 @@ JobResult = str | tuple[str, list[dict] | None]
 
 
 def _stamp() -> str:
-    """Now, as it goes into the JSON files: UTC, and without the marker saying so.
+    """Now, as it goes into the JSON files -- the same clock the database writes.
 
-    One clock for the whole device. The database writes UTC anyway (``func.now()``), and a state
-    file in local time next to it would make every difference computed across the two wrong by the
-    offset -- enough to turn last night's backup into "vorgestern".
+    One clock for the whole device. A state file in local time next to a database in UTC would
+    make every difference computed across the two wrong by the offset -- enough to turn last
+    night's backup into "vorgestern". Since 19 August 2026 that clock has a name of its own, so
+    that a third place cannot pick a different one; see ``dates.utc_now``.
     """
-    return datetime.now(UTC).replace(tzinfo=None).isoformat(timespec="seconds")
+    return dates.utc_now().isoformat(timespec="seconds")
 
 
 # --- what is on the stick ---------------------------------------------------
@@ -546,10 +547,16 @@ def archive_name(settings: Settings) -> str:
     """``kiekmap-sicherung-holm-2026-08-03.zip``.
 
     Plain ASCII: it travels in an HTTP header and lands as a file name on somebody's computer.
+
+    **Local time, unlike everything that gets stored.** The rule that runs through this module is
+    "stored is UTC" (``dates.utc_now``) -- and a file name is not stored, it is read. Whoever
+    downloads a backup at half past midnight looks for today's date, not yesterday's. The
+    set-aside folder beside it has always been named this way; since 19 August 2026 the two
+    agree.
     """
     slug = "".join(c for c in places.normalize(_place(settings)) if c.isalnum() or c == "-")
     place = f"-{slug}" if slug else ""
-    return f"{BACKUP_DIR_NAME}{place}-{datetime.now(UTC):%Y-%m-%d}.zip"
+    return f"{BACKUP_DIR_NAME}{place}-{datetime.now():%Y-%m-%d}.zip"
 
 
 def stream_archive(session: Session, settings: Settings) -> Iterator[bytes]:

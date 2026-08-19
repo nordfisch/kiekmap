@@ -1,13 +1,36 @@
 """API payload shapes."""
 
-from datetime import date, datetime
-from typing import Self
+from datetime import UTC, date, datetime
+from typing import Annotated, Self
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from app.models import DatePrecision, ImportLog, Photo, PhotoStatus, Place
 from app.services.dates import format_label, format_short
 from app.services.places import ACCURACY_ADDRESS_M, ACCURACY_STREET_M
+
+
+def _as_utc(value: datetime) -> datetime:
+    """Say out loud what a stored timestamp already is."""
+    return value if value.tzinfo else value.replace(tzinfo=UTC)
+
+
+#: A stored timestamp on its way out -- and the marker that makes it readable at the other end.
+#:
+#: Everything this program stores is UTC: SQLite's ``func.now()``, the JSON state files,
+#: ``dates.utc_now``. Written out without a time zone, that is a trap rather than a value --
+#: ``new Date("2026-08-18T19:25:21")`` reads a marker-less ISO time as **local** by specification,
+#: so the admin area showed every visitor contribution and every import two hours before it
+#: happened, and a backup made after 22:00 UTC on the day before it was made.
+#:
+#: The fix belongs here rather than in the three places that display it: one end has to name the
+#: zone, and the end that knows it is this one. See docs/decisions.md, point 58.
+#:
+#: **``Photo.exif_datetime`` deliberately does not get this**, and that is the whole subtlety: it
+#: comes out of a camera or a scanner, which write the wall clock where they stood and no zone at
+#: all. Reading it as local time is exactly right; stamping UTC on it would move a scan of 14:00
+#: to 16:00 and invent a fact.
+UtcDatetime = Annotated[datetime, AfterValidator(_as_utc)]
 
 
 class PhotoMarker(BaseModel):
@@ -94,7 +117,7 @@ class PhotoDetail(BaseModel):
     width: int
     height: int
     bytes: int
-    imported_at: datetime
+    imported_at: UtcDatetime
 
     tags: list[str]
     needs_location: bool
@@ -336,7 +359,7 @@ class PhotoAdminItem(BaseModel):
     needs_date: bool
     status: str
     original_filename: str
-    imported_at: datetime
+    imported_at: UtcDatetime
 
     @classmethod
     def from_photo(cls, photo: Photo) -> "PhotoAdminItem":
@@ -371,8 +394,8 @@ class ChangeItem(BaseModel):
     old_value: str | None
     new_value: str | None
     source: str
-    created_at: datetime
-    reverted_at: datetime | None
+    created_at: UtcDatetime
+    reverted_at: UtcDatetime | None
     #: False when the field has since been curated -- reverting would then destroy that work.
     revertable: bool
 
@@ -390,7 +413,7 @@ class ImportLogItem(BaseModel):
     result: str
     message: str | None
     photo_id: int | None
-    created_at: datetime
+    created_at: UtcDatetime
 
     @classmethod
     def from_entry(cls, entry: ImportLog) -> "ImportLogItem":
@@ -413,7 +436,7 @@ class ImportLogList(BaseModel):
 class BackupReminder(BaseModel):
     """Nudge for the start page: "Letzte Sicherung vor 34 Tagen". Never an automatism."""
 
-    last_backup_at: datetime | None
+    last_backup_at: UtcDatetime | None
     last_drive: str
     days_since: int | None
     #: True when it is time, and also when there has never been a backup at all.
@@ -428,7 +451,7 @@ class DownloadTicket(BaseModel):
 
 
 class BackupOnDrive(BaseModel):
-    created_at: datetime
+    created_at: UtcDatetime
     photos: int
     bytes: int
     place: str

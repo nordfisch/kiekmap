@@ -1961,3 +1961,40 @@ für einen, der zum Gerät gehört.
 
 Was das kostet: Ein Absturz, den der Neuaufbau zufällig behebt, lädt acht Sekunden später trotzdem
 neu. Für einen Kiosk ist das ohnehin die ehrliche Antwort — nach einem Absturz eine saubere Seite.
+
+## 58. Gespeichert wird UTC, hinausgeschrieben mit Marker, gelesen als Wanduhr
+
+*Entschieden am 19. August 2026 — Backlogpunkt 58, gefunden beim Durchgang über den Code.*
+
+Alles, was dieses Programm speichert, ist UTC: `func.now()` in SQLite, die JSON-Zustandsdateien,
+seit heute `dates.utc_now()`. Das war schon am 30. Juli entschieden, als die zweite Uhr
+verschwand. Nur endete die Regel bisher an der Datenbank.
+
+**Ohne Zonenmarker ist ein Zeitstempel keine Angabe, sondern eine Falle.**
+`new Date("2026-08-18T19:25:21")` liest eine markerlose ISO-Zeit laut Norm als **Ortszeit**. Der
+Verwaltungsbereich zeigte damit jeden Besucherbeitrag und jede Protokollzeile zwei Stunden zu
+früh, und die Sicherungskachel konnte den Tag verschieben: Eine Sicherung um halb eins nachts ist
+22:30 UTC vom Vortag.
+
+**Der Marker gehört an das Ende, das die Zone kennt.** Drei Anzeigestellen im Browser umrechnen zu
+lassen hiesse, dieselbe Regel dreimal hinzuschreiben — und die vierte, die jemand später
+dazubaut, vergisst sie. Ein `UtcDatetime` in `schemas.py` sagt es einmal, und die Anzeige durfte
+bleiben, wie sie war.
+
+**Das `exif_datetime` bekommt ihn ausdrücklich nicht**, und darin liegt die eigentliche
+Unterscheidung. Es kommt aus einer Kamera oder einem Scanner. Die schreiben die Wanduhr ihres
+Standorts und wissen von keiner Zone; als Ortszeit gelesen ist der Wert genau richtig. Wer ihm UTC
+aufstempelt, verschiebt einen Scan von 14:00 auf 16:00 und erfindet damit eine Tatsache. **Ein
+Zeitstempel trägt nicht nur einen Wert, sondern eine Herkunft** — dieselbe Einsicht wie bei den
+Feldern der Fotos, eine Ebene tiefer.
+
+Daneben stand die zweite Uhr, die 30. Juli übersehen hatte: `reverted_at` kam aus `datetime.now()`
+und war Ortszeit, während `created_at` aus SQLite kam und UTC war. Ein sofort zurückgenommener
+Beitrag stand damit in der Datenbank zwei Stunden nach sich selbst — und **keine Prüfung im Schema
+fängt so etwas**, weil beide Werte gültige Zeitstempel sind. Deshalb heisst die Uhr jetzt
+`dates.utc_now()` und hat einen Namen, statt an drei Stellen einzeln hingeschrieben zu werden.
+
+**Dateinamen sind die Ausnahme und tragen Ortszeit.** Der Ordner `vorher-2026-08-19-2230` und der
+Name des heruntergeladenen Archivs werden von Menschen im Dateimanager gelesen, nicht von einem
+Programm verglichen. Wer um halb eins nachts eine Sicherung zieht, sucht das heutige Datum. Die
+beiden waren sich darin uneins; jetzt nicht mehr.

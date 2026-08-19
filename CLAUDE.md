@@ -306,10 +306,12 @@ schreibt einen ganzen Durchgang erst am Ende fest, während er jede Datei schon 
 `_erledigt/` schiebt — eine Ausnahme mittendrin verliert die Fotos davor samt Protokoll. Zeitstempel
 gehen ohne Zeitzonenmarker hinaus und werden im Browser als Ortszeit gelesen. Und ein Fehler beim
 Rendern hinterlässt einen weissen Bildschirm, den kein Leerlauf-Neustart mehr heilt, weil der mit
-abstürzt. **Der erste und der dritte sind noch am selben Tag behoben worden**, mit Test und im
-Browser nachgemessen; offen bleibt Punkt 58, die Zeitstempel. Warum die Fehlergrenze ihren
-Zeitgeber nicht aufräumt — der Aufräumreflex war dort genau der Fehler —, steht in
-`docs/decisions.md`, Punkt 57.
+abstürzt. **Alle drei sind noch am selben Tag behoben worden**, jeder mit Test und im Browser
+nachgemessen. Zwei Regeln sind dabei entstanden: Die Fehlergrenze räumt ihren Zeitgeber
+**nicht** auf, weil React sie nach dem Fangen mitnimmt und der Aufräumreflex genau die
+Selbstheilung löschte (`docs/decisions.md`, Punkt 57). Und gespeichert wird UTC,
+hinausgeschrieben mit Zonenmarker — **ausser dem EXIF-Datum**, das die Wanduhrzeit eines
+Scanners ist und keine Zone kennt (Punkt 58).
 
 Der zweite trägt die Lehre: Er war schon einmal angefasst und an der Stelle, wo er auffiel,
 **umgangen** worden — die Übersichtskacheln senden seither Tage statt Zeitstempel, mit einem

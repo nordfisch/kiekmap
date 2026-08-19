@@ -162,6 +162,18 @@ def overlaps(
     return start <= selected_end and end >= selected_start
 
 
+def utc_now() -> datetime:
+    """Now, in the shape everything stored has: UTC, without the marker saying so.
+
+    One clock for the device. SQLite's ``func.now()`` writes UTC, the JSON state files write UTC,
+    and a column filled from Python has to match -- a naive local timestamp beside a naive UTC one
+    is a difference nothing in the schema catches and nothing in the reading notices. It stood in
+    ``reverted_at`` for weeks: a contribution taken back immediately was logged two hours after
+    itself. See docs/decisions.md, point 58.
+    """
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
 def days_since(when: datetime, now: datetime | None = None) -> int:
     """How many days ago, counted in calendar days rather than in 24-hour blocks.
 

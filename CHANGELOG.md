@@ -923,3 +923,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   ganze Durchgang wurde erst am Ende gesichert, während jede Datei schon vorher nach `_erledigt/`
   wanderte: Eine Ausnahme mittendrin nahm die Fotos davor mit — und das Import-Protokoll gleich
   dazu, das den Verlust hätte zeigen sollen
+- **Die Uhrzeiten im Verwaltungsbereich stimmen.** Besucherbeiträge, Import-Protokoll und
+  Sicherungskachel standen zwei Stunden zu früh: Gespeichert wird UTC, und ein Zeitstempel ohne
+  Zonenmarker gilt im Browser laut Norm als Ortszeit. Die API nennt die Zone jetzt. **Das
+  Scandatum aus dem EXIF bleibt absichtlich ohne** — es ist die Wanduhrzeit eines Scanners und
+  wäre umgerechnet um zwei Stunden falsch
+- Der Name des heruntergeladenen Archivs trägt das Datum der Ortszeit, wie der Ordner
+  `vorher-…` daneben. Eine Sicherung um halb eins nachts hiess vorher nach gestern

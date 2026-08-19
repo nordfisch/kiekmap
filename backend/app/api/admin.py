@@ -528,7 +528,7 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail
         photo.date_precision = DatePrecision.UNKNOWN
         photo.date_source = None
 
-    change.reverted_at = datetime.now()
+    change.reverted_at = dates.utc_now()
     session.commit()
     session.refresh(photo)
     log.info("Curator reverted visitor contribution %s on photo %s", change.id, photo.id)
