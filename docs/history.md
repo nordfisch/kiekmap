@@ -3311,3 +3311,96 @@ Vergroesserung nicht am Nachbarn abgeschnitten wird -- und ein beruehrtes Vorsch
 ueber jeden Kreis. Gemessen: zwei gerade befreite Kreise waren wieder zu. Jetzt sind es **zwei
 Baender zu zwei Stufen**: Beruehrtes steigt innerhalb seines eigenen Bandes. Siebzehn von siebzehn
 Kreisen sind erreichbar, auch mit einem beruehrten Bild daneben.
+
+## Punkt 39: der Durchgang von aussen
+
+Am 19. August 2026 ist der Code geprüft worden — der Punkt, der seit Langem verlangte, dass jemand
+ohne die Vorgeschichte darüberliest, bevor veröffentlicht wird und bevor das Gerät im Museum steht.
+Geprüft wurde Stand `04d4a38`: Backend, Frontend, Deployment, Dokumentation und die Tests selbst.
+
+### Der Zustand, gemessen und nicht geschätzt
+
+| Prüfung | Ergebnis |
+|---|---|
+| `pytest` | 428 grün, 7,7 s |
+| `vitest` | 173 grün, 19 Dateien |
+| `tsc -b --noEmit` | sauber |
+| `prettier --check` | sauber |
+| `tools/language_check.py` | 542 deutsche, 1458 englische Kommentare, kein Verstoss |
+| `tools/check_anchors.py` | kein toter Anker in acht Dateien |
+| `tools/check_settings.py` | acht Einstellungen, alle erreichen den Container |
+
+Die Trennung, auf der das Backend steht — `api/` dünn, `services/` denkend —, ist durchgehalten;
+kein Endpunkt trägt Fachlogik. Mehrere Konstanten sind **gemessen und nicht gewählt**: `TITLE_MAX`
+an 781 handgesetzten Titeln, die Rangfolge in `services/needs.py` an 612 gegen 116 Fotos, die
+Dublettenschwelle an sechzig durchgeblätterten Paaren.
+
+### Die Frage aus dem Punkt selbst, beantwortet
+
+Punkt 39 fragte, ob die Tests prüfen, was sie zu prüfen **vorgeben** — bei Namen, die wie
+Zusagen klingen, ist das keine rhetorische Frage. Sie tun es.
+`test_dates.py::TestUeberlappung` prüft wirklich die Überlappung, samt Randberührung und samt dem
+undatierten Foto, das in keiner Auswahl erscheinen darf; `TestBalkenbreite` prüft die leere
+Sammlung, an der eine Division scheitern könnte.
+
+Auch die zweite Sorge des Punktes — Nebenwirkungen zwischen den Zuständen, an reinen Funktionen
+nicht zu sehen — ist inzwischen gegenstandslos: `store/kiosk.test.ts` und
+`store/contribute.test.ts` prüfen Fokus, die Rückgabe des Zeitraums nach zwei Beiträgen und den
+Schalter für die undatierten Fotos in beide Richtungen. Die beiden Fehler vom 8. und 9. August
+haben ihre Tests bekommen.
+
+### Drei Fehler, und alle drei fallen beim Benutzen nicht auf
+
+Das ist die Eigenschaft, die sie verbindet, und der Grund, warum ein Durchgang von aussen etwas
+findet, was das tägliche Arbeiten nicht findet. Sie stehen jetzt als
+[Punkt 57](backlog.md#57--der-eingangs-watcher-sichert-einen-ganzen-durchgang-auf-einmal),
+[Punkt 58](backlog.md#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen)
+und [Punkt 59](backlog.md#59--ein-fehler-beim-rendern-hinterlässt-einen-weissen-bildschirm)
+im Backlog.
+
+**Der Eingangs-Watcher sichert einen ganzen Durchgang auf einmal.** `session.commit()` steht hinter
+der Schleife, während `import_file` jede Datei schon in sich nach `_erledigt/` verschiebt. Eine
+Ausnahme mitten im Durchgang nimmt die Zeilen aller vorher gelesenen Fotos mit — und, weil es in
+derselben Transaktion hängt, auch das Import-Protokoll, das genau diesen Fall sichtbar machen
+sollte. Die Lösung stand die ganze Zeit einen Modul weiter: `import_from_folder` committet in der
+Schleife und begründet es sogar.
+
+**Zeitstempel gehen als UTC hinaus und werden als Ortszeit gelesen.** Und das ist der
+interessanteste der drei, weil er schon einmal angefasst worden war: Der Commit vom 30. Juli 2026
+hat die zweite Uhr beseitigt und für die Übersichtskacheln den Zeitstempel gar nicht mehr gesendet,
+sondern Tage — mit einem Kommentar in `schemas.py`, der den Befund wörtlich benennt. Das Problem war
+also **bekannt und umgangen, nicht behoben**. Übrig blieben die drei Stellen, die weiterhin einen
+rohen Stempel schicken; in der Beitragsliste steht seither an zwölf Besucherbeiträgen eine Uhrzeit,
+die zwei Stunden zu früh ist.
+
+**Ein Fehler beim Rendern hinterlässt einen weissen Bildschirm.** Es gibt keine `ErrorBoundary` —
+und der Leerlauf-Neustart, der das Gerät sonst von jedem verfahrenen Zustand heilt, hängt in
+`MapView` und ist mit dem Absturz weg. Auf einem Gerät ohne Tastatur, ohne Adressleiste und ohne
+Reload-Knopf heisst das: die Vitrine steht weiss, bis jemand den Stecker zieht.
+
+### Was der Durchgang über das Umgehen gelernt hat
+
+Der zweite Fehler ist der lehrreiche. Er war nicht übersehen worden — er war **an der Stelle, wo er
+auffiel, sauber gelöst** worden, indem der Zeitstempel dort durch eine Tagesangabe ersetzt wurde.
+Das war die richtige Lösung für die Kacheln und zugleich der Grund, warum die drei anderen Stellen
+liegen blieben: Wer ein Symptom beseitigt, verliert den Anlass, nach den übrigen zu suchen. Der
+Kommentar, der dabei entstand, beschreibt die Ursache genau — und stand vier Wochen unbeachtet da.
+
+**Ein Kommentar, der eine Ursache benennt, ist kein Ersatz dafür, sie zu suchen.** Dasselbe Muster
+wie beim Erstbestand am 18. August, nur eine Ebene höher: Dort bestimmte die Form des Suchmusters
+den Befund, hier bestimmte der Ort des Symptoms den Umfang der Reparatur.
+
+### Der Rest, und was ausdrücklich nicht gefunden wurde
+
+Vier weitere Punkte sind ins Backlog gewandert: die Sicherung, die sechs Module in einer Datei ist
+(60); zwei Regeln, die an zwei Orten stehen (61); die drei Prüfungen, die nur von Hand laufen und
+keine Zahl nachzählen (62); und die Frage, ob die bestehende Arbeitsweise beim Testen der
+Oberfläche als Entscheidung aufgeschrieben gehört (63). Zwei Betriebsbefunde sind an die Punkte 21
+und 22 angehängt worden — die Arithmetik hinter „vier Ziffern sind zu wenig" und die ungepinnten
+Abhängigkeiten des Backends.
+
+Nicht gefunden wurde ein Fachfehler. Keine der Stellen, die dieses Projekt eigen machen — die
+Überlappung, das Scandatum, die Genauigkeit neben der Koordinate, die Vorrangregeln beim Import —
+hält nicht, was sie zusagt. Auch ein Verdacht löste sich in Luft auf: `httpx2` in den
+Entwicklungsabhängigkeiten sieht nach Vertipper aus, ist aber das echte Nachfolgepaket von `httpx`
+aus demselben Haus.

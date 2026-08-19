@@ -42,9 +42,12 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | # | Punkt | Art | Einordnung |
 |---|---|---|---|
 | | **Verwaltung** | | |
+| 57 | [Der Eingangs-Watcher sichert einen ganzen Durchgang auf einmal](#57--der-eingangs-watcher-sichert-einen-ganzen-durchgang-auf-einmal) | Fehler | wichtig · dringend |
+| 58 | [Zeitstempel gehen als UTC hinaus und werden als Ortszeit gelesen](#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen) | Fehler | wichtig |
 | 31 | [Einstellungen in der Verwaltung pflegen statt in der `.env`](#31--einstellungen-in-der-verwaltung-pflegen-statt-in-der-env) | Frage | wichtig |
 | 34 | [Eine Karte in der Nachbearbeitung des Imports](#34--eine-karte-in-der-nachbearbeitung-des-imports) | Idee | — |
 | | **Besucher-Interface** | | |
+| 59 | [Ein Fehler beim Rendern hinterlässt einen weissen Bildschirm](#59--ein-fehler-beim-rendern-hinterlässt-einen-weissen-bildschirm) | Fehler | wichtig · dringend |
 | 30 | [Die Karte nach Schlagwörtern filtern](#30--die-karte-nach-schlagwörtern-filtern) | Idee | wichtig |
 | 40 | [Ein Durchgang über die ganze Oberfläche](#40--ein-durchgang-über-die-ganze-oberfläche) | Aufgabe | wichtig |
 | 43 | [Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](#43--der-zeitschieber-soll-jahrgenau-zählen-nicht-jahrzehntgenau) | Aufgabe | — |
@@ -59,20 +62,88 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 20 | [Das Gerät muss einen Stromausfall überstehen](#20--das-gerät-muss-einen-stromausfall-überstehen) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
-| 39 | [Den Code prüfen lassen](#39--den-code-prüfen-lassen) | Aufgabe | wichtig |
+| 62 | [Die drei Prüfungen laufen nur von Hand — und zählen nicht nach](#62--die-drei-prüfungen-laufen-nur-von-hand--und-zählen-nicht-nach) | Aufgabe | wichtig |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
+| 63 | [Komponenten sind ungetestet, und die Regel dafür fehlt](#63--komponenten-sind-ungetestet-und-die-regel-dafür-fehlt) | Frage | wichtig |
+| 60 | [Die Sicherung ist sechs Module in einer Datei](#60--die-sicherung-ist-sechs-module-in-einer-datei) | Aufgabe | — |
+| 61 | [Zwei Regeln stehen an zwei Orten](#61--zwei-regeln-stehen-an-zwei-orten) | Aufgabe | — |
 
-**Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur.
+**Drei Fehler sind offen** — 57, 58 und 59, alle drei aus dem Durchgang über den Code vom
+19. August 2026 ([Punkt 39](history.md#punkt-39-der-durchgang-von-aussen), inzwischen
+erledigt). Keiner davon fällt beim Benutzen auf; das ist bei allen dreien die Eigenschaft, die sie gefährlich macht.
 
-**Neununddreißig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
-26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 55, 56.
-Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
-[history.md](history.md). Der nächste neue Punkt bekommt die **57**.
+**Vierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
+26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
+55, 56. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+[history.md](history.md). Der nächste neue Punkt bekommt die **64**.
 
 ---
 
 ## Verwaltung
+
+### 57 · Der Eingangs-Watcher sichert einen ganzen Durchgang auf einmal
+
+`services/watcher.py`, `scan_once`: Die Schleife über die fertig geschriebenen Dateien ruft
+`import_file(…, move_aside=True)`, und `session.commit()` steht **hinter** der Schleife.
+`import_file` verschiebt die Datei aber in sich selbst nach `_erledigt/`, bevor irgendetwas
+festgeschrieben ist.
+
+Fliegt bei Datei *n* eine Ausnahme, die `import_file` nicht abfängt, fängt sie `_loop` („der
+Watcher darf nie aufgeben"), und die Sitzung wird ohne Commit geschlossen. Dann sind die Zeilen der
+Dateien 1 bis *n*−1 weg, während ihre Quelldateien in `_erledigt/` liegen — und im Import-Protokoll
+steht ebenfalls nichts, weil dessen Einträge in derselben Transaktion hängen. Genau der stille
+Verlust, gegen den dieses Protokoll gebaut wurde: Ein übersprungenes Foto wäre von einem nie
+kopierten nicht zu unterscheiden.
+
+**Die Lösung steht einen Modul weiter schon da.** `importer.import_from_folder` committet **in**
+der Schleife, mit der Begründung: „Ein halb herausgezogener Stick lässt dann liegen, was schon
+gelesen wurde, statt nichts." Dieselbe Regel gilt hier, sie ist nur nicht mitgewandert.
+
+Der Test dazu beschreibt den Fehlerfall: Eine Ausnahme mitten im Durchgang darf kein Foto
+verlieren, das schon nach `_erledigt/` verschoben wurde.
+
+### 58 · Zeitstempel gehen als UTC hinaus und werden als Ortszeit gelesen
+
+Die Datenbank schreibt UTC (`func.now()`; `_stamp()` in `services/backup.py` ausdrücklich).
+Pydantic gibt das **ohne Zeitzonenmarker** aus — `"2026-08-18T19:25:21"` —, und `new Date(iso)`
+liest eine ISO-Zeit ohne Marker nach Norm als **Ortszeit**. Nachgemessen am 19. August 2026:
+
+```
+naiv  -> 18.8.2026, 19:25:21
+mit Z -> 18.8.2026, 21:25:21
+```
+
+Betroffen sind die drei Stellen, die einen rohen Stempel über die Leitung schicken:
+
+| Wo | Feld | Was zu sehen ist |
+|---|---|---|
+| `admin/Changes.tsx` (`when`) | `created_at`, `reverted_at` | Tag **und Uhrzeit** — im Sommer zwei Stunden zu früh |
+| `admin/ImportLog.tsx` | `created_at` | dito |
+| `admin/Backup.tsx` (`formatDate`) | `last_backup_at`, `created_at` | nur das Datum — kippt bei einer Sicherung zwischen 00:00 und 02:00 Ortszeit auf den Vortag |
+
+**Das ist der Rest eines schon einmal angefassten Problems, und das ist der Grund, es hier
+aufzuschreiben.** Der Commit vom 30. Juli 2026, der die zweite Uhr beseitigte und `days_since()`
+baute, hat für die drei Kacheln der Übersicht den Zeitstempel **gar nicht mehr gesendet**, sondern
+Tage. Der Kommentar, der dabei in `schemas.py` entstand, benennt den Befund wörtlich: *„a stored
+stamp carries no time zone and JavaScript would read it as local time."* Für die Kacheln wurde das
+Problem also umgangen, nicht behoben; einen Serializer, der UTC markiert, gibt es bis heute nicht.
+
+Dazu die zweite Uhr, die an einer Stelle stehengeblieben ist: `api/admin.py` setzt
+`change.reverted_at = datetime.now()` — Ortszeit, während `created_at` UTC ist. Ein sofort
+zurückgenommener Beitrag steht damit in der Datenbank zwei Stunden nach sich selbst.
+
+**Zwei Dinge, die richtig sind und nicht mitkonvertiert werden dürfen:**
+
+- `dates.days_since` rechnet beide Seiten sauber um. Die Tageszählungen stimmen; falsch ist allein
+  die ausgeschriebene Uhrzeit.
+- `admin/PhotoEditor.tsx` zeigt `exif_datetime` ebenfalls mit `new Date(...)`, und **das ist
+  korrekt**: Ein EXIF-Datum ist eine naive Wanduhrzeit aus Kamera oder Scanner, ohne Zone. Es als
+  Ortszeit zu lesen trifft genau zu. Wer es mit den übrigen zusammen auf UTC umstellt, baut den
+  Fehler erst ein.
+
+Zu entscheiden ist nur, an welchem Ende gerechnet wird: Gibt das Backend UTC-bewusste Zeitstempel
+aus, ist der Browser von selbst richtig — und die drei Anzeigestellen bleiben, wie sie sind.
 
 ### 31 · Einstellungen in der Verwaltung pflegen statt in der `.env`
 
@@ -148,6 +219,23 @@ Nicht wichtig, nicht dringend — erst zu prüfen und zu bewerten, dann zu spezi
 ---
 
 ## Besucher-Interface
+
+### 59 · Ein Fehler beim Rendern hinterlässt einen weissen Bildschirm
+
+Es gibt keine `ErrorBoundary`, kein `window.onerror`, kein `unhandledrejection` — geprüft über den
+ganzen `frontend/src`-Baum. Eine Ausnahme beim Rendern reisst damit den ganzen Baum ab, und
+zurück bleibt eine weisse Seite.
+
+**Das Schlimme daran ist die zweite Hälfte:** Der Leerlauf-Neustart, der das Gerät sonst von jedem
+verfahrenen Zustand heilt, hängt in `MapView` (`watchForIdle` in dessen Effekt). Mit dem Absturz
+ist er weg. Auf einem Gerät ohne Tastatur, ohne Adressleiste und ohne Reload-Knopf heisst das: Die
+Vitrine steht weiss, bis jemand den Stecker zieht — und niemand vom Museumsteam weiss, dass das die
+Abhilfe wäre.
+
+Der Aufwand steht in keinem Verhältnis zum Schaden: eine Umhüllung um `App`, die einen deutschen
+Satz zeigt und nach ein paar Sekunden `location.reload()` ruft. Beim Bauen mitzuentscheiden ist,
+ob der Leerlaufwächter aus `MapView` heraus an eine Stelle wandert, die ein Absturz nicht mitnimmt
+— dann heilt das Gerät auch den Fall, den die Umhüllung nicht fängt.
 
 ### 30 · Die Karte nach Schlagwörtern filtern
 
@@ -560,26 +648,48 @@ dritte Überlagerung neben der des Pi und der des Macs — die Pi-Datei bleibt u
 Passwort nennt, ist das hinnehmbar; ein echter Bedienbarkeitstest mit unvorbereiteten Besuchern
 gehört vor Ort auf ein Gerät.
 
-### 39 · Den Code prüfen lassen
+#### Zwei Zahlen zum Entwurf, nachgetragen am 19. August 2026
 
-Das Programm ist von einer Person und einem Sprachmodell gebaut worden. Vor einer Veröffentlichung
-([Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)) und vor dem ersten
-Dauerbetrieb im Museum gehört ein Durchgang von aussen darüber — durch ein anderes Modell oder
-einen zweiten Menschen.
+Beim Durchgang über den Code (Punkt 39) sind zwei Dinge gemessen worden, die den Entwurf oben nicht
+umstossen, aber schärfen:
 
-**Worauf sich das lohnt zu richten**, weil es die Stellen sind, die dieses Projekt eigen machen:
+**Die Sperre gegen Rateversuche hält 33 Stunden, nicht ewig.** `services/auth.py`: fünf
+Fehlversuche, dann 60 Sekunden Sperre — also 300 Versuche in der Stunde und der ganze vierstellige
+Raum in rund 33 Stunden. Das ist die Zahl hinter dem Satz „vier sind im offenen Netz zu wenig",
+und sie hat eine zweite Seite: Die Sperre gilt **geräteweit**, nicht je Aufrufer. Wer sie auslöst,
+sperrt damit auch die Ehrenamtlichen aus. Beim Verlängern der PIN ist deshalb mitzuentscheiden, ob
+die Sperre mitwächst (steigende Wartezeit statt fester 60 Sekunden).
 
-- **Die stillen Fachfehler.** Überlappung statt Enthaltensein bei den Datumsintervallen, das
-  Scandatum, das nicht datieren darf, die Genauigkeit, die neben der Koordinate mitreist. Sie
-  haben Tests — die Frage ist, ob die Tests das prüfen, was sie zu prüfen vorgeben.
-- **Nebenwirkungen zwischen den Zuständen.** Karte, Zeitraum, Beitragsbereich und Fokus greifen
-  ineinander; die beiden Fehler vom 8. und 9. August entstanden genau dort und waren an reinen
-  Funktionen nicht zu sehen.
-- **Was auf dem Pi anders ist.** Speicherverhalten über Stunden, WebGL neben Bewegtbild, die
-  Annahmen in `deploy/pi/`, die noch nie gelaufen sind.
+**Auch der Pi veröffentlicht Port 80 auf allen Schnittstellen.** `deploy/docker-compose.yml` sagt
+`ports: "80:80"`. Für den Entwurf oben ist das gelöst — `ports: !reset []` beim `frontend` ist die
+sicherheitskritische Zeile —, für das Gerät im Museum nicht: Sobald der Pi in einem Netz hängt,
+ist der Verwaltungsbereich mit der vierstelligen PIN von jedem Rechner darin erreichbar. Solange
+das Gerät allein steht, trifft das niemanden; es gehört zu [Punkt 15](#15--abnahme-auf-dem-ersten-pi)
+gefragt, wie das Museumsnetz aussieht. Die Gegenmassnahme wäre eine Zeile (`127.0.0.1:80:80`) und
+kostet den Zugriff vom Nebenrechner, den das Team vielleicht will.
 
-Kein Selbstzweck: Der Nutzen entsteht dort, wo jemand ohne die Vorgeschichte liest — und deshalb
-Annahmen sieht, die dem, der sie getroffen hat, unsichtbar sind.
+### 62 · Die drei Prüfungen laufen nur von Hand — und zählen nicht nach
+
+`tools/language_check.py`, `tools/check_anchors.py` und `tools/check_settings.py` sind genau die
+Prüfungen, die fangen, was kein Test sieht. Die dritte ist aus dem Fall entstanden, in dem eine
+halb durchgereichte `.env` **mit 393 grünen Tests daneben** still Schlagwort, Bildnachweis und
+Herkunft verlor. Sie laufen trotzdem nur, wenn jemand daran denkt: keine CI, kein Hook, kein
+`make check`.
+
+**Das Symptom liegt schon vor:** [index.md](index.md) nannte „33 Entscheidungen" bei 56 und
+„21 Punkte" bei 17. `check_anchors` prüft, ob ein Verweis irgendwohin zeigt, aber nicht, ob eine
+Zahl im Fliesstext noch stimmt. Die Zahlen sind am 19. August 2026 aus `index.md` entfernt worden,
+weil eine Zahl, die niemand nachzählt, wieder veraltet.
+
+Zwei Dinge sind zu entscheiden, und sie hängen nicht aneinander:
+
+- **Wo die drei laufen sollen.** Ein `make check`, das sie mit `make test` und `make lint`
+  zusammenfasst, ist der kleinste Schritt; ein Git-Hook der nächste. Eine CI setzt voraus, dass
+  [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) entschieden ist —
+  ohne öffentliches Repo gibt es keinen Ort dafür.
+- **Ob eine vierte Prüfung nachzählt.** Sie müsste die Punkte im Backlog und die Entscheidungen in
+  `decisions.md` zählen und mit dem vergleichen, was `index.md` und `CLAUDE.md` behaupten. Machbar
+  in dreissig Zeilen — die Frage ist, ob solche Zahlen im Text überhaupt stehen sollen.
 
 ### 22 · Versionierung, Releaseprozess und Veröffentlichung des Codes
 
@@ -607,6 +717,14 @@ anders kam als geplant, steht in [history.md](history.md). **Offen bleibt der Re
 selbst** — und [Punkt 23](#23--lizenz-des-projekts-und-der-verwendeten-komponenten), der vor einer
 Veröffentlichung ebenfalls beantwortet sein muss.
 
+**Dazu gehört das Festnageln der Abhängigkeiten**, nachgetragen am 19. August 2026. Das Frontend
+hat eine `package-lock.json`; `backend/pyproject.toml` nennt nur untere Schranken (`fastapi>=0.115`,
+`pillow>=11.0` …) und es gibt keine Lockdatei. Ein Neubau des Abbilds in einem Jahr zieht damit
+andere Versionen als der heutige. Bei einem Dienst, der wöchentlich neu gebaut wird, fällt das
+sofort auf; bei einem Gerät, das offline steht und einmal im Jahr angefasst wird, fällt es im
+Museum auf. Eine Lockdatei (`pip-compile`, `uv lock`) macht aus einer Version eine Zusage — und
+gehört zu dem, was ein Release überhaupt erst zu einem Release macht.
+
 ### 23 · Lizenz des Projekts und der verwendeten Komponenten
 
 Noch festzulegen, und **Voraussetzung für [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)**.
@@ -624,3 +742,62 @@ Zwei getrennte Fragen, die oft verwechselt werden:
   ist.
 
 Gehört anschließend in eine `LICENSE`-Datei und in den Lizenzabschnitt des README.
+
+### 63 · Komponenten sind ungetestet, und die Regel dafür fehlt
+
+Getestet ist, was rein rechnet: `focus.ts`, `stacks.ts`, `streetGroups.ts`, `houseNumbers.ts`,
+`timeAxis.ts`, `clusterStep.ts`, `mapCaption.ts`, dazu beide Stores. Ungetestet sind rund
+fünfundzwanzig `.tsx`-Dateien; es gibt kein jsdom, keine Testing-Library, kein Rendern im Test.
+
+**Das ist erkennbar Absicht und es funktioniert.** Die Arbeitsweise ist über Monate dieselbe:
+Sobald in einer Komponente eine Entscheidung steckt, wandert sie in ein reines Modul und bekommt
+dort ihren Test — genau so sind die sieben Module oben entstanden. Auch die Nebenwirkungen zwischen
+den Zuständen, die als schwer prüfbar galten, sind auf diesem Weg abgedeckt:
+`store/kiosk.test.ts` und `store/contribute.test.ts` prüfen Fokus, die Rückgabe des Zeitraums nach
+zwei Beiträgen und den Schalter für die undatierten Fotos in beide Richtungen.
+
+**Nur steht die Regel nirgends** — weder in [decisions.md](decisions.md) noch in
+[development.md](development.md). Der Abschnitt „Was getestet wird" nennt die vier wichtigsten
+Testklassen, sagt aber nicht, warum keine Komponente darunter ist.
+
+Zu entscheiden ist deshalb nicht, ob getestet wird, sondern ob die bestehende Arbeitsweise als
+Entscheidung aufgeschrieben wird. Fällt die Antwort ja aus, gehört sie nach `decisions.md` und
+dieser Punkt ist aufgelöst, nicht erledigt. Fällt sie nein aus, ist zu sagen, welche Komponente
+einen Test verdient und womit er laufen soll — und das ist dann eine Aufgabe mit Werkzeugwahl.
+
+### 60 · Die Sicherung ist sechs Module in einer Datei
+
+`services/backup.py` hat 938 Zeilen und tut sechs verschiedene Dinge: Laufwerke finden, auf den
+Stick sichern, das Archiv im Strom bauen, wiederherstellen, die Zustandsdatei führen und den einen
+Auftrag verwalten. Die Testdatei daneben hat 908.
+
+Jedes Stück für sich ist sauber und begründet, und die Grenzen sind sogar schon gezogen — als
+Kommentarbalken (`--- drives ---`, `--- restoring ---`, `--- the one long-running job ---`). Es ist
+die einzige Datei im Backend, die ihren Namen überwachsen hat: Wer ohne die Vorgeschichte etwas an
+der Wiederherstellung sucht, liest an fünf anderen Themen vorbei.
+
+Ein Schnitt entlang der vorhandenen Balken — `drives.py`, `archive.py`, `restore.py`, `job.py` —
+machte aus den Kommentaren Modulgrenzen. **Nicht dringend und nicht wichtig**, und mit einer
+ausdrücklichen Warnung: Das ist der am besten getestete Teil des Backends, ein Umbau bewegt viel
+und gewinnt nichts, was ein Besucher merkt. Erst aufgreifen, wenn ohnehin jemand darin arbeitet.
+
+### 61 · Zwei Regeln stehen an zwei Orten
+
+Das Projekt argumentiert an mehreren Stellen selbst so — „eine Regel, die an zwei Orten lebt, ist
+eine Regel, die sich mit sich selbst uneins wird" (`api/contribute.py`). Zwei Stellen halten sich
+nicht daran:
+
+**Die Dateiendung.** `api/photos.py`, `image()`, leitet sie aus dem MIME-Typ her:
+`photo.mime.split("/")[-1].replace("jpeg", "jpg").replace("tiff", "tif")` — obwohl
+`storage.ALLOWED_FORMATS` genau diese Zuordnung schon hält. Heute stimmen beide überein; ein
+Format, dessen Endung nicht das Ende seines MIME-Typs ist, brächte sie auseinander, und zwar still:
+Die Originaldatei läge unter einem Namen, den der Ausliefernde nicht bildet, und der Endpunkt
+antwortete „Originaldatei fehlt". Ein `suffix_for_mime()` in `storage.py` machte daraus wieder eine
+Regel.
+
+**Das Datumsformat.** `admin/format.ts` exportiert `formatDateTime`, das **nirgends benutzt wird**,
+während `admin/Changes.tsx` (`when`) und `admin/ImportLog.tsx` sich dieselbe Formatierung je noch
+einmal von Hand hinschreiben. Drei Fassungen, eine davon tot. Beim Zusammenlegen ist
+[Punkt 58](#58--zeitstempel-gehen-als-utc-hinaus-und-werden-als-ortszeit-gelesen) mitzudenken: Die
+eine Fassung, die übrig bleibt, ist genau der Ort, an dem die Zeitzone einmal richtig behandelt
+werden kann.

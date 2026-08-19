@@ -296,7 +296,25 @@ Bestand** — `docs/decisions.md`, Punkt 56.
 Was bleibt, ist Kuratieren und kein Backlogpunkt mehr: 942 Fotos ohne Beschreibung, 310 ohne Titel,
 4 ohne Ort. Das schreibt, wer das Bild ansieht und den Ort kennt.
 
-**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — 17 Punkte nach Verwaltung,
+Am **19. August 2026** ist der **Code von aussen geprüft** worden — Punkt 39. Alles grün: 428
+Backend- und 173 Frontend-Tests, Typprüfung, Formatierung und die drei Prüfskripte. Kein
+Fachfehler; die Stellen, die dieses Projekt eigen machen, halten, was sie zusagen, und die Tests
+prüfen wirklich, was ihre Namen versprechen.
+
+**Drei stille Fehler kamen heraus**, keiner davon beim Benutzen zu bemerken: Der Eingangs-Watcher
+schreibt einen ganzen Durchgang erst am Ende fest, während er jede Datei schon vorher nach
+`_erledigt/` schiebt — eine Ausnahme mittendrin verliert die Fotos davor samt Protokoll. Zeitstempel
+gehen ohne Zeitzonenmarker hinaus und werden im Browser als Ortszeit gelesen. Und ein Fehler beim
+Rendern hinterlässt einen weissen Bildschirm, den kein Leerlauf-Neustart mehr heilt, weil der mit
+abstürzt. Sie stehen als Punkt 57, 58 und 59 im Backlog; angefasst wurde nichts.
+
+Der zweite trägt die Lehre: Er war schon einmal angefasst und an der Stelle, wo er auffiel,
+**umgangen** worden — die Übersichtskacheln senden seither Tage statt Zeitstempel, mit einem
+Kommentar, der die Ursache genau benennt. Vier Wochen las ihn niemand. **Wer ein Symptom beseitigt,
+verliert den Anlass, nach den übrigen zu suchen.** `docs/history.md`, „Punkt 39: der Durchgang von
+aussen".
+
+**Was offen ist, steht in [docs/backlog.md](docs/backlog.md)** — nach Verwaltung,
 Besucher-Interface, Infrastruktur und Entwicklung geordnet, jeder mit dem, was beim Aufgreifen
 sonst erst wieder herausgefunden werden müsste. Jeder trägt eine **feste Nummer**, unter der er
 zitiert wird („Punkt 15"), dazu seine Art und seine Einordnung; die Übersichtstabelle oben in der
