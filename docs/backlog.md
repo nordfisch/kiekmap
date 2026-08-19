@@ -64,7 +64,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 | 63 | [Komponenten sind ungetestet, und die Regel dafür fehlt](#63--komponenten-sind-ungetestet-und-die-regel-dafür-fehlt) | Frage | wichtig |
 | 60 | [Die Sicherung ist sechs Module in einer Datei](#60--die-sicherung-ist-sechs-module-in-einer-datei) | Aufgabe | — |
-| 61 | [Zwei Regeln stehen an zwei Orten](#61--zwei-regeln-stehen-an-zwei-orten) | Aufgabe | — |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
 dem Durchgang über den Code vom 19. August 2026
@@ -72,9 +71,9 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Dreiundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
+**Vierundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-55, 56, 57, 58, 59. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+55, 56, 57, 58, 59, 61. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **64**.
 
 ---
@@ -699,23 +698,3 @@ Ein Schnitt entlang der vorhandenen Balken — `drives.py`, `archive.py`, `resto
 machte aus den Kommentaren Modulgrenzen. **Nicht dringend und nicht wichtig**, und mit einer
 ausdrücklichen Warnung: Das ist der am besten getestete Teil des Backends, ein Umbau bewegt viel
 und gewinnt nichts, was ein Besucher merkt. Erst aufgreifen, wenn ohnehin jemand darin arbeitet.
-
-### 61 · Zwei Regeln stehen an zwei Orten
-
-Das Projekt argumentiert an mehreren Stellen selbst so — „eine Regel, die an zwei Orten lebt, ist
-eine Regel, die sich mit sich selbst uneins wird" (`api/contribute.py`). Zwei Stellen halten sich
-nicht daran:
-
-**Die Dateiendung.** `api/photos.py`, `image()`, leitet sie aus dem MIME-Typ her:
-`photo.mime.split("/")[-1].replace("jpeg", "jpg").replace("tiff", "tif")` — obwohl
-`storage.ALLOWED_FORMATS` genau diese Zuordnung schon hält. Heute stimmen beide überein; ein
-Format, dessen Endung nicht das Ende seines MIME-Typs ist, brächte sie auseinander, und zwar still:
-Die Originaldatei läge unter einem Namen, den der Ausliefernde nicht bildet, und der Endpunkt
-antwortete „Originaldatei fehlt". Ein `suffix_for_mime()` in `storage.py` machte daraus wieder eine
-Regel.
-
-**Das Datumsformat.** `admin/format.ts` exportiert `formatDateTime`, das **nirgends benutzt wird**,
-während `admin/Changes.tsx` (`when`) und `admin/ImportLog.tsx` sich dieselbe Formatierung je noch
-einmal von Hand hinschreiben. Drei Fassungen, eine davon tot. Die Zeitzone ist dabei kein Thema
-mehr — sie wird seit dem 19. August am API-Rand behandelt ([decisions.md](decisions.md), Punkt
-58); es geht allein darum, dass dieselbe Formatierung nicht dreimal dasteht.

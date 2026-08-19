@@ -27,6 +27,26 @@ ALLOWED_FORMATS = {
 }
 
 
+#: The other direction of ``ALLOWED_FORMATS``: from what a row says it is to what its file is
+#: called. Derived rather than written out, so the two cannot drift apart.
+#:
+#: Two formats share a MIME type -- JPEG and MPO are both ``image/jpeg`` and both ``.jpg``, which
+#: is what makes this reversal well defined in the first place.
+_SUFFIX_BY_MIME = {mime: suffix for mime, suffix in ALLOWED_FORMATS.values()}
+
+
+def suffix_for_mime(mime: str) -> str | None:
+    """The file ending belonging to a stored MIME type, or None for one we never wrote.
+
+    Its own function because three callers need it and each of them used to answer it for itself.
+    One of the three answered it by arithmetic on the string -- ``mime.split("/")[-1]`` with
+    ``jpeg`` and ``tiff`` patched back by hand -- which happened to agree with the table and would
+    have stopped agreeing the moment a format arrived whose ending is not the tail of its MIME
+    type. A rule that lives in two places is a rule that will disagree with itself.
+    """
+    return _SUFFIX_BY_MIME.get(mime)
+
+
 def sha256_of_file(path: Path, block_size: int = 1024 * 1024) -> str:
     """Chunked, so that even a 200 MB TIFF never has to fit into memory."""
     hasher = hashlib.sha256()

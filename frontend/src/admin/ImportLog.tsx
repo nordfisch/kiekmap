@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { fetchImportLog } from "../api/admin";
 import { t } from "../text/de";
+import { formatLogTime } from "./format";
 import { Pager } from "./Pager";
 import { clampOffset } from "./pagination";
 import { useLoaded } from "./useLoaded";
@@ -71,15 +72,7 @@ export function ImportLog() {
               </span>
               <span className="log-row__filename">{entry.filename}</span>
               <span className="log-row__message">{entry.message}</span>
-              <span className="log-row__time">
-                {new Date(entry.created_at).toLocaleString("de-DE", {
-                  day: "numeric",
-                  month: "numeric",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
+              <span className="log-row__time">{formatLogTime(entry.created_at)}</span>
             </li>
           ))}
         </ul>

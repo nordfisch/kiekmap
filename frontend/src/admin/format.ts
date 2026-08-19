@@ -37,6 +37,25 @@ export function formatDaysSince(days: number | null): string {
   return COUNT.format(days);
 }
 
+/**
+ * Three shapes for three lists, and the differences are deliberate.
+ *
+ * They lived in three places until 19 August 2026 -- one of them exported and used by nobody,
+ * the other two written out by hand inside the components that show them. Gathered here because
+ * this module is where formatting belongs; kept apart because each of them leaves out something
+ * on purpose:
+ *
+ *   | where | shape | what it leaves out, and why |
+ *   |---|---|---|
+ *   | backup tile | `formatDate` | the time -- a backup is a day, not a minute |
+ *   | contributions | `formatWhen` | the year -- the list holds this season's entries |
+ *   | import log | `formatLogTime` | nothing, but writes the month as a number, because the
+ *     column is narrow, right-aligned and set in `tabular-nums` so the rows line up |
+ *
+ * Folding them into one would cost either the alignment in the log or the readability in the
+ * other two. **The time zone is not part of this decision** -- the backend names it, so every
+ * one of the three is right by itself; see `docs/decisions.md`, point 58.
+ */
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("de-DE", {
     day: "numeric",
@@ -45,10 +64,19 @@ export function formatDate(iso: string): string {
   });
 }
 
-export function formatDateTime(iso: string): string {
+export function formatWhen(iso: string): string {
   return new Date(iso).toLocaleString("de-DE", {
     day: "numeric",
     month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export function formatLogTime(iso: string): string {
+  return new Date(iso).toLocaleString("de-DE", {
+    day: "numeric",
+    month: "numeric",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",

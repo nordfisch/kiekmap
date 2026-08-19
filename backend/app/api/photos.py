@@ -14,7 +14,12 @@ from app.db import get_session
 from app.models import DatePrecision, Photo, PhotoStatus, Tag
 from app.schemas import Bar, Histogram, PhotoDetail, PhotoList, PhotoMarker
 from app.services.dates import bar_width
-from app.services.storage import THUMBNAIL_SIZES, original_path, thumbnail_path
+from app.services.storage import (
+    THUMBNAIL_SIZES,
+    original_path,
+    suffix_for_mime,
+    thumbnail_path,
+)
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/photos", tags=["fotos"])
@@ -269,7 +274,14 @@ def image(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> Response:
     photo = _get_photo(session, photo_id)
-    suffix = "." + photo.mime.split("/")[-1].replace("jpeg", "jpg").replace("tiff", "tif")
+    suffix = suffix_for_mime(photo.mime)
+    if suffix is None:
+        # Nothing this program ever wrote: the import only stores what ALLOWED_FORMATS knows.
+        # A row like that has no file to point at, so the visitor gets the same answer as for a
+        # missing one -- and the log says which it was.
+        log.error("Photo %s carries an unknown MIME type: %s", photo.id, photo.mime)
+        raise HTTPException(404, "Originaldatei fehlt")
+
     path = original_path(settings.photos_dir, photo.sha256, suffix)
     if not path.is_file():
         log.error("Original file missing: %s", path)

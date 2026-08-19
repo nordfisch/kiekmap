@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { fetchChanges, revertChange } from "../api/admin";
 import { t } from "../text/de";
+import { formatWhen } from "./format";
 import { Pager } from "./Pager";
 import { clampOffset } from "./pagination";
 import { useLoaded } from "./useLoaded";
@@ -23,15 +24,6 @@ const FIELD_NAMES: Record<string, string> = {
   date: t.admin.changes.fieldDate,
   housenumber: t.admin.changes.fieldHouseNumber,
 };
-
-function when(iso: string): string {
-  return new Date(iso).toLocaleString("de-DE", {
-    day: "numeric",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export function Changes() {
   const [includeReverted, setIncludeReverted] = useState(false);
@@ -98,7 +90,7 @@ export function Changes() {
                 <span className="photo-row__meta">
                   {FIELD_NAMES[change.field] ?? change.field}: {change.new_value}
                 </span>
-                <span className="photo-row__meta">{when(change.created_at)}</span>
+                <span className="photo-row__meta">{formatWhen(change.created_at)}</span>
               </div>
 
               {change.reverted_at ? (

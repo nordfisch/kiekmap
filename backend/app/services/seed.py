@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session
 from app.config import Settings
 from app.models import Change, ImportLog, Photo, PhotoTag, Tag
 from app.services.importer import import_file
-from app.services.storage import ALLOWED_FORMATS, original_path
+from app.services.storage import original_path, suffix_for_mime
 
 log = logging.getLogger(__name__)
 
@@ -112,13 +112,12 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
     images = target / IMAGE_DIR_NAME
     images.mkdir(parents=True, exist_ok=True)
 
-    suffixes = {mime: suffix for mime, suffix in ALLOWED_FORMATS.values()}
     taken: set[str] = set()
     entries: list[dict] = []
     contributions = 0
 
     for photo in session.scalars(select(Photo).order_by(Photo.id)):
-        suffix = suffixes.get(photo.mime)
+        suffix = suffix_for_mime(photo.mime)
         if suffix is None:
             log.warning("Foto %s: unbekanntes Format %s -- uebersprungen", photo.id, photo.mime)
             continue

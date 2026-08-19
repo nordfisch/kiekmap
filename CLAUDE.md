@@ -313,6 +313,14 @@ Selbstheilung löschte (`docs/decisions.md`, Punkt 57). Und gespeichert wird UTC
 hinausgeschrieben mit Zonenmarker — **ausser dem EXIF-Datum**, das die Wanduhrzeit eines
 Scanners ist und keine Zone kennt (Punkt 58).
 
+Dazu **Punkt 61**, zwei Regeln an zwei Orten — und beide lagen anders als notiert: Die
+Zuordnung MIME-Typ zu Dateiendung stand an *drei* Stellen, eine davon rechnete auf dem
+String; sie heisst jetzt `suffix_for_mime`, und ihr Test prüft die Tabelle gegen sich selbst
+statt Beispiele. Die drei Datumsformate dagegen waren **keine** Doppelung: Jedes lässt etwas
+anderes weg, und Zusammenlegen hätte gekostet statt gespart. Sie liegen jetzt beieinander,
+mit dem Grund dabei. **Ein Backlogeintrag ist eine Notiz, kein Befund** — beide Hälften sahen
+beim Aufgreifen anders aus als beim Aufschreiben.
+
 Der zweite trägt die Lehre: Er war schon einmal angefasst und an der Stelle, wo er auffiel,
 **umgangen** worden — die Übersichtskacheln senden seither Tage statt Zeitstempel, mit einem
 Kommentar, der die Ursache genau benennt. Vier Wochen las ihn niemand. **Wer ein Symptom beseitigt,

@@ -930,3 +930,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   wäre umgerechnet um zwei Stunden falsch
 - Der Name des heruntergeladenen Archivs trägt das Datum der Ortszeit, wie der Ordner
   `vorher-…` daneben. Eine Sicherung um halb eins nachts hiess vorher nach gestern
+- Die Zuordnung von MIME-Typ zu Dateiendung steht nur noch an einer Stelle (`suffix_for_mime`).
+  Ein Foto mit einem Typ, den dieses Programm nie geschrieben hat — denkbar aus einer
+  zurückgespielten Sicherung —, ergab vorher stillschweigend einen Pfad, den es nicht gibt; jetzt
+  steht im Protokoll, woran es lag
+- Die drei Datumsformate des Verwaltungsbereichs liegen zusammen in `admin/format.ts`, mit dem
+  Grund dabei, warum sie sich unterscheiden. Sichtbar ändert sich nichts

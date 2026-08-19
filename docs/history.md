@@ -3474,3 +3474,57 @@ Daneben lag die zweite Uhr, die der 30. Juli übersehen hatte: `reverted_at` kam
 zwei Dateinamen, die Menschen im Dateimanager lesen, waren sich uneins — der beiseitegelegte
 Ordner schrieb Ortszeit, der Name des heruntergeladenen Archivs UTC; jetzt beide Ortszeit, denn
 wer um halb eins nachts eine Sicherung zieht, sucht das heutige Datum.
+
+## Punkt 61: zwei Regeln, und beide lagen anders als notiert
+
+Der Backlogeintrag sagte „zwei Regeln stehen an zwei Orten". Beim Aufgreifen stellte sich heraus,
+dass die eine an **drei** Orten stand und die andere gar keine Doppelung war.
+
+### Die Dateiendung: drei Aufrufer, einer davon rechnete
+
+`ALLOWED_FORMATS` in `services/storage.py` sagt, welche Endung zu welchem MIME-Typ gehört. Drei
+Stellen brauchen die Umkehrung, und jede beantwortete sie für sich:
+
+- `services/seed.py` baute sich die Tabelle aus `ALLOWED_FORMATS` — richtig, mit Warnung für
+  Unbekanntes.
+- `api/photos.py` rechnete auf dem String: `mime.split("/")[-1]`, mit `jpeg` und `tiff` von Hand
+  zurückgebogen. Das stimmte zufällig mit der Tabelle überein und hätte in dem Augenblick
+  aufgehört zu stimmen, in dem ein Format hereinkommt, dessen Endung nicht das Ende seines
+  MIME-Typs ist.
+- `services/importer.py` liest die Tabelle vorwärts und war nie betroffen.
+
+Jetzt gibt es `suffix_for_mime()`, aus derselben Tabelle abgeleitet. Der Test dazu prüft keine
+Beispiele, sondern **die Tabelle gegen sich selbst**: Was der Import ablegen darf, muss die
+Auslieferung benennen können. Das ist die Form von Gegenprobe, die ein Auseinanderlaufen nicht
+bemerkt, sondern unmöglich macht.
+
+Nebenbei ist ein stiller Fall laut geworden: Ein Foto mit einem MIME-Typ, den dieses Programm nie
+geschrieben hat — denkbar aus einer zurückgespielten Sicherung — ergab vorher stillschweigend
+einen Pfad, den es nicht gibt. Die Antwort an den Besucher ist dieselbe geblieben, weil sie für ihn
+stimmt; im Protokoll steht jetzt, woran es wirklich lag.
+
+### Das Datumsformat: keine Doppelung, sondern drei Entscheidungen ohne Ort
+
+Hier lag der Backlogeintrag schlicht falsch. Er sprach von „drei Fassungen, eine davon tot" und
+unterstellte, es sei dieselbe Formatierung. Nachgesehen sind es drei verschiedene, und jede lässt
+etwas anderes weg:
+
+| wo | was fehlt | warum |
+|---|---|---|
+| Sicherungskachel | die Uhrzeit | Eine Sicherung ist ein Tag, keine Minute |
+| Besucherbeiträge | das Jahr | Die Liste zeigt, was in dieser Saison hereinkam |
+| Import-Protokoll | nichts, aber der Monat ist eine Zahl | Die Spalte ist schmal und in `tabular-nums` gesetzt, damit die Zeilen untereinander stehen |
+
+**Zusammenlegen hätte also etwas gekostet**, nicht gespart — entweder die Ausrichtung im Protokoll
+oder die Lesbarkeit in den anderen beiden. Was wirklich fehlte, war ein Ort: Zwei der drei standen
+in den Komponenten, die vierte Fassung war exportiert und wurde von niemandem benutzt. Alle drei
+liegen jetzt in `admin/format.ts`, mit der Tabelle oben als Kommentar, damit der Nächste sie nicht
+„aufräumt".
+
+Ihre Tests prüfen deshalb nicht, wie ein Datum in Berlin aussieht, sondern **was jede Form
+weglässt** — und laufen damit in jeder Zeitzone. Die Zone selbst ist seit
+[Punkt 58](decisions.md) kein Thema dieser Funktionen mehr.
+
+**Ein Backlogeintrag ist eine Notiz, kein Befund.** Beide Hälften dieses Punktes sahen beim
+Aufschreiben anders aus als beim Aufgreifen, und in beiden Fällen war das Nachsehen billiger als
+das Vertrauen.

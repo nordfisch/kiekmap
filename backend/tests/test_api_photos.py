@@ -442,3 +442,48 @@ class TestAuslieferung:
 
         assert antwort["total"] == 1
         assert antwort["photos"][0]["date_label"] == "21. Juni 1975"
+
+
+class TestDateiendung:
+    """Woher die Auslieferung weiss, wie die Datei auf der Platte heisst -- Punkt 61.
+
+    Der Dateiname ist der SHA-256 plus die Endung des Formats. Welche Endung zu welchem MIME-Typ
+    gehoert, steht in ``ALLOWED_FORMATS`` -- und stand daneben ein zweites Mal in ``api/photos.py``,
+    als Rechnung auf dem String: ``mime.split("/")[-1]``, mit ``jpeg`` und ``tiff`` von Hand
+    zurueckgebogen. Beide stimmten ueberein, solange jede Endung das Ende ihres MIME-Typs ist.
+    """
+
+    def test_jeder_erlaubte_typ_findet_seine_endung(self):
+        """Die Gegenprobe, die das Auseinanderlaufen unmoeglich macht.
+
+        Sie prueft nicht eine Liste von Beispielen, sondern die Tabelle gegen sich selbst: Was der
+        Import ablegen darf, muss die Auslieferung benennen koennen.
+        """
+        from app.services.storage import ALLOWED_FORMATS, suffix_for_mime
+
+        for mime, endung in ALLOWED_FORMATS.values():
+            assert suffix_for_mime(mime) == endung, f"{mime} findet seine Endung nicht"
+
+    def test_ein_unbekannter_typ_ergibt_keine_endung(self):
+        from app.services.storage import suffix_for_mime
+
+        assert suffix_for_mime("image/heic") is None
+        assert suffix_for_mime("") is None
+
+    def test_ein_foto_mit_unbekanntem_typ_meldet_die_fehlende_datei(
+        self, client: TestClient, session, make_photo
+    ):
+        """So etwas legt der Import nie an -- eine zurueckgespielte Sicherung aber vielleicht.
+
+        Vorher entstand daraus stillschweigend ein Pfad, den es nicht gibt. Die Antwort ist
+        dieselbe geblieben, weil sie fuer den Besucher stimmt; im Protokoll steht jetzt, woran es
+        wirklich lag.
+        """
+        foto = make_photo()
+        foto.mime = "image/heic"
+        session.commit()
+
+        antwort = client.get(f"/api/photos/{foto.id}/image")
+
+        assert antwort.status_code == 404
+        assert antwort.json()["detail"] == "Originaldatei fehlt"
