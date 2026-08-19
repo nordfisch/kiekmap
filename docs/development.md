@@ -150,6 +150,17 @@ nicht tut, ist Zahlen im Fliesstext nachzählen**; warum das falsch wäre, steht
 Alle beschreiben Fehler, die im Museum aufgefallen wären, nicht in der Entwicklung — und drei
 davon sind beim echten Erstimport tatsächlich aufgetreten, bevor sie Test wurden.
 
+**Im Frontend folgt daraus, dass keine Komponente einen Test hat** — und das ist kein Rückstand,
+sondern die Regel: *Jede Entscheidung wandert in eine reine Funktion und bekommt dort ihren Test,
+das Rendern bekommt keinen.* Wo die Funktion wohnt, ist gleichgültig; `PhotoLayer.test.ts` prüft
+`buildIndex` aus einer `.tsx`-Datei, ohne etwas zu rendern.
+
+Der Grund ist derselbe wie oben: Eine falsch gezeichnete Schaltfläche sieht falsch aus, dafür
+braucht es einen Blick und keinen Test. Ein falsch gerundetes Jahr sieht nach nichts aus — die
+Karte zeigt einfach etwas anderes. Beim Bauen heisst das: Sobald in einer Komponente gerechnet,
+sortiert oder entschieden wird, gehört das in ein Modul daneben. Kein jsdom, keine Testing
+Library; warum, steht in [decisions.md](decisions.md), Punkt 60.
+
 **Der Offline-Test ist die wichtigste Prüfung des Projekts** und lässt sich nicht automatisieren:
 Netz trennen, Karte bewegen, Fotos öffnen, einen Beitrag abgeben — und danach in den DevTools
 nachsehen, dass keine Anfrage an eine fremde Herkunft gegangen ist.

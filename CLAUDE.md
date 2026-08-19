@@ -332,6 +332,14 @@ Fliesstext zählt sie ausdrücklich nicht**: Von vier Fundstellen im Repo darf k
 berichtigt werden — zwei sind Zitate, zwei meinen Punkte auf einer Karte, eine ist ein Satz in
 der Historie, der an seinem Datum stimmte. `docs/decisions.md`, Punkt 59.
 
+Zuletzt **Punkt 63**, aufgelöst statt erledigt: Das Frontend hat keinen Komponententest, und
+das ist die Regel, kein Rückstand — *jede Entscheidung wandert in eine reine Funktion und
+bekommt dort ihren Test, das Rendern bekommt keinen.* Gemessen hielt die Praxis längst: Jedes
+`useMemo` in einer Komponente ruft eine importierte reine Funktion auf. Eine Lücke fand sich
+beim Nachsehen doch — der Zeitschieber rechnete die Fingerposition selbst in ein Jahr um, und
+ein Rundungsfehler dort wählt 1931 statt 1932, ohne dass etwas falsch *aussieht*.
+`docs/decisions.md`, Punkt 60.
+
 Der zweite trägt die Lehre: Er war schon einmal angefasst und an der Stelle, wo er auffiel,
 **umgangen** worden — die Übersichtskacheln senden seither Tage statt Zeitstempel, mit einem
 Kommentar, der die Ursache genau benennt. Vier Wochen las ihn niemand. **Wer ein Symptom beseitigt,

@@ -8,6 +8,7 @@ import {
   minSpan,
   resizeRange,
   shiftRange,
+  yearAtFraction,
 } from "./timeAxis";
 
 describe("Achse", () => {
@@ -171,5 +172,36 @@ describe("Die Mindestbreite des Zeitraums", () => {
     expect(minSpan(25)).toBe(25);
     expect(minSpan(1)).toBe(10);
     expect(minSpan(10)).toBe(10);
+  });
+});
+
+describe("Welches Jahr unter dem Finger liegt", () => {
+  const achse = { min: 1880, max: 2030 };
+
+  it("trifft die Enden genau", () => {
+    expect(yearAtFraction(0, achse)).toBe(1880);
+    expect(yearAtFraction(1, achse)).toBe(2030);
+  });
+
+  it("haelt am Ende, wenn der Finger die Bahn verlaesst", () => {
+    // Auf einem Touchscreen rutscht man staendig ueber den Rand hinaus. Ohne die Klammer liefe
+    // die Auswahl aus der Achse heraus -- und die Bahn zeigte einen Zeitraum, den es nicht gibt.
+    expect(yearAtFraction(-0.4, achse)).toBe(1880);
+    expect(yearAtFraction(2.5, achse)).toBe(2030);
+  });
+
+  it("ist die Umkehrung von fraction -- fuer jedes Jahr der Achse", () => {
+    // Die Gegenprobe, um derentwillen die Rechnung ueberhaupt aus dem Schieber herausgezogen
+    // wurde: Ein Rundungsfehler waehlt 1931, wo der Besucher auf 1932 gezielt hat, und auf dem
+    // Bildschirm sieht nichts falsch aus. Nur die Karte zeigt etwas anderes.
+    for (let jahr = achse.min; jahr <= achse.max; jahr++) {
+      expect(yearAtFraction(fraction(jahr, achse), achse), `Jahr ${jahr}`).toBe(jahr);
+    }
+  });
+
+  it("kommt mit einer Achse aus einem einzigen Schritt zurecht", () => {
+    const schmal = { min: 1930, max: 1940 };
+
+    expect(yearAtFraction(0.5, schmal)).toBe(1935);
   });
 });

@@ -61,7 +61,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
-| 63 | [Komponenten sind ungetestet, und die Regel dafür fehlt](#63--komponenten-sind-ungetestet-und-die-regel-dafür-fehlt) | Frage | wichtig |
 | 60 | [Die Sicherung ist sechs Module in einer Datei](#60--die-sicherung-ist-sechs-module-in-einer-datei) | Aufgabe | — |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
@@ -70,9 +69,9 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Fünfundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
+**Sechsundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-55, 56, 57, 58, 59, 61, 62. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+55, 56, 57, 58, 59, 61, 62, 63. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **64**.
 
 ---
@@ -636,28 +635,6 @@ Zwei getrennte Fragen, die oft verwechselt werden:
   ist.
 
 Gehört anschließend in eine `LICENSE`-Datei und in den Lizenzabschnitt des README.
-
-### 63 · Komponenten sind ungetestet, und die Regel dafür fehlt
-
-Getestet ist, was rein rechnet: `focus.ts`, `stacks.ts`, `streetGroups.ts`, `houseNumbers.ts`,
-`timeAxis.ts`, `clusterStep.ts`, `mapCaption.ts`, dazu beide Stores. Ungetestet sind rund
-fünfundzwanzig `.tsx`-Dateien; es gibt kein jsdom, keine Testing-Library, kein Rendern im Test.
-
-**Das ist erkennbar Absicht und es funktioniert.** Die Arbeitsweise ist über Monate dieselbe:
-Sobald in einer Komponente eine Entscheidung steckt, wandert sie in ein reines Modul und bekommt
-dort ihren Test — genau so sind die sieben Module oben entstanden. Auch die Nebenwirkungen zwischen
-den Zuständen, die als schwer prüfbar galten, sind auf diesem Weg abgedeckt:
-`store/kiosk.test.ts` und `store/contribute.test.ts` prüfen Fokus, die Rückgabe des Zeitraums nach
-zwei Beiträgen und den Schalter für die undatierten Fotos in beide Richtungen.
-
-**Nur steht die Regel nirgends** — weder in [decisions.md](decisions.md) noch in
-[development.md](development.md). Der Abschnitt „Was getestet wird" nennt die vier wichtigsten
-Testklassen, sagt aber nicht, warum keine Komponente darunter ist.
-
-Zu entscheiden ist deshalb nicht, ob getestet wird, sondern ob die bestehende Arbeitsweise als
-Entscheidung aufgeschrieben wird. Fällt die Antwort ja aus, gehört sie nach `decisions.md` und
-dieser Punkt ist aufgelöst, nicht erledigt. Fällt sie nein aus, ist zu sagen, welche Komponente
-einen Test verdient und womit er laufen soll — und das ist dann eine Aufgabe mit Werkzeugwahl.
 
 ### 60 · Die Sicherung ist sechs Module in einer Datei
 

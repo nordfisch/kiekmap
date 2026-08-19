@@ -3585,3 +3585,53 @@ Geprüft ist die Prüfung selbst an neun absichtlich verbogenen Fassungen der be
 Anker, Zeile ohne Abschnitt, Nummer offen und vergriffen zugleich, verschwundene Nummer bei sonst
 stimmigem Zahlwort, Nummer jenseits der nächsten freien, umformulierter Satz, doppelte und
 vertauschte Entscheidungsnummer. Alle neun fallen auf, die unveränderten Dateien nicht.
+
+## Punkt 63: eine Frage, und die Antwort stand längst im Repo
+
+Der Punkt fragte, ob die bestehende Arbeitsweise beim Testen der Oberfläche als Entscheidung
+aufgeschrieben gehört — oder ob stattdessen Komponententests fällig sind. Er ist **aufgelöst**,
+nicht erledigt: Es war nichts zu bauen, sondern etwas zu entscheiden.
+
+### Erst messen
+
+Die Behauptung im Backlogeintrag lautete, die Praxis sei „erkennbar Absicht und funktioniert".
+Behauptet war das leicht; nachgesehen sieht es so aus: **Jedes `useMemo` in einer Komponente ruft
+eine importierte reine Funktion auf** — `offeredDecades`, `buildIndex`, `groupStreets`,
+`axisBounds`, `blocksOf(groupByBase(…))`. Sechzehn reine Module tragen die Entscheidungen, rund
+fünfundzwanzig Komponenten die Darstellung. Die Praxis hielt also, bevor sie irgendwo stand.
+
+Dabei fiel auf, dass die Regel schärfer ist als „Komponenten werden nicht getestet":
+`PhotoLayer.test.ts` prüft `buildIndex` **aus einer `.tsx`-Datei**, ohne etwas zu rendern. Die
+Dateiendung ist kein Kriterium. Die Frage ist, ob ein Wert berechnet oder ein Knopf gezeichnet
+wird.
+
+### Und dabei eine Lücke gefunden
+
+Der Zeitschieber rechnete die Fingerposition selbst in ein Jahr um — klammern, runden, mitten in
+der Komponente. Das ist genau die Sorte Fehler, für die das ganze Vorgehen existiert: Ein
+Rundungsfehler wählt 1931, wo der Besucher auf 1932 gezielt hat, und **auf dem Bildschirm sieht
+nichts falsch aus.** Die Karte zeigt einfach etwas anderes.
+
+Jetzt ist es `yearAtFraction` in `timeAxis.ts`, die Umkehrung von `fraction` — und der Test prüft
+genau das: Jedes Jahr der Achse muss aus seinem eigenen Anteil wieder herauskommen. Die
+Fingerposition selbst bleibt in der Komponente, denn wo der Finger ist, gehört dem DOM; was das
+bedeutet, gehört der Achse.
+
+Im Browser nachgemessen: Bahn von 333 bis 604, gezogen auf 468 — das sind 49,8 %, auf der Achse
+1880 bis 2030 also 1954,7. Auf dem Bildschirm stand danach **1955 bis 2030**.
+
+### Wo die Grenze verläuft
+
+Der Gegenfall aus derselben Messung: Die Grösse eines Kreises auf der Karte,
+`48 + log10(Anzahl) × 26`, bleibt in `PhotoLayer.tsx`. Auch eine Rechnung — aber ein falscher Wert
+ergibt einen Kreis, der falsch *aussieht*. **Sichtbar falsch braucht keinen Test.** Das ist das
+Kriterium, und es ist dasselbe, das die vier wichtigsten Testklassen des Backends ausgewählt hat.
+
+Kein jsdom also: Es wäre ein nachgebauter Browser, und geprüft würde der Nachbau. Was am Rendern
+dieses Programms wirklich schiefgehen kann — null fremde Herkünfte offline, ein Kreis unter einem
+Vorschaubild noch mit dem Finger zu treffen, eine Beschriftung im Ausstellungsraum lesbar — prüft
+jsdom ohnehin nicht. Das erste ist ein Einzeiler in den Entwicklerwerkzeugen, das zweite wurde am
+Inline-`transform` nachgemessen, das dritte braucht einen Menschen vor dem Gerät und heisst
+Punkt 14.
+
+`decisions.md`, Punkt 60.

@@ -31,7 +31,14 @@ import {
 
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text/de";
-import { axisBounds, barHeight, fraction, resizeRange, shiftRange } from "./timeAxis";
+import {
+  axisBounds,
+  barHeight,
+  fraction,
+  resizeRange,
+  shiftRange,
+  yearAtFraction,
+} from "./timeAxis";
 
 type Grip = "start" | "end" | "range";
 
@@ -75,9 +82,9 @@ export function TimeSlider() {
   const positionToYear = useCallback(
     (clientX: number): number => {
       if (!track.current || !bounds) return 0;
+      // Where the finger is, is the DOM's business; what that means is timeAxis's.
       const box = track.current.getBoundingClientRect();
-      const fraction = Math.min(1, Math.max(0, (clientX - box.left) / box.width));
-      return Math.round(bounds.min + fraction * (bounds.max - bounds.min));
+      return yearAtFraction((clientX - box.left) / box.width, bounds);
     },
     [bounds],
   );

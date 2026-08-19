@@ -111,6 +111,24 @@ export function fraction(year: number, bounds: Bounds): number {
   return Math.min(1, Math.max(0, raw));
 }
 
+/**
+ * The other way round: which year lies at that point of the track.
+ *
+ * The inverse of ``fraction``, and it belongs beside it rather than in the slider, because its
+ * mistakes are the quiet kind. A rounding that goes the wrong way selects 1931 while the visitor
+ * aimed at 1932, and nothing on screen looks wrong -- the map simply shows a slightly different
+ * set. The test therefore checks the round trip: every year has to come back out of its own
+ * fraction.
+ *
+ * Takes the raw share rather than a pointer position: where the finger is belongs to the DOM and
+ * stays in the component, what that means belongs here. Clamped like ``fraction``, so a finger
+ * dragged past the end of the track holds at the end instead of walking off the axis.
+ */
+export function yearAtFraction(share: number, bounds: Bounds): number {
+  const clamped = Math.min(1, Math.max(0, share));
+  return Math.round(bounds.min + clamped * (bounds.max - bounds.min));
+}
+
 /** Pull a selection into the axis, so the state cannot become invalid in the first place. */
 export function clampRange(range: TimeRange, bounds: Bounds): TimeRange {
   const from = Math.min(Math.max(range.from, bounds.min), bounds.max);

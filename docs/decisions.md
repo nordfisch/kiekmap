@@ -2039,3 +2039,50 @@ Klon einzuschalten (`git config core.hooksPath .githooks`) — versioniert, aber
 
 Eine CI wäre der nächste Schritt und ist bewusst keiner: Sie setzt voraus, dass
 [Punkt 22](backlog.md) entschieden ist. Ohne ein öffentliches Repo gibt es keinen Ort dafür.
+
+## 60. Getestet wird, was still falsch sein kann — gerendert wird, was man sieht
+
+*Entschieden am 19. August 2026 — Backlogpunkt 63, aufgelöst statt erledigt.*
+
+Das Frontend hat rund fünfundzwanzig Komponenten und **keinen einzigen Komponententest**: kein
+jsdom, keine Testing Library, kein Rendern im Test. Das war nie entschieden, sondern nur immer so
+gemacht. Aufgeschrieben ist es jetzt, weil ein Durchgang von aussen sonst berechtigt fragt, was da
+fehlt — und weil sonst der Nächste zwei Testrahmen dazulegt, ohne dass jemand widerspricht.
+
+**Die Regel ist nicht „Komponenten werden nicht getestet".** Sie lautet: *Jede Entscheidung wandert
+in eine reine Funktion und bekommt dort ihren Test — das Rendern bekommt keinen.*
+
+Wo die Funktion wohnt, ist dabei gleichgültig. `PhotoLayer.test.ts` prüft `buildIndex` aus einer
+`.tsx`-Datei, ohne irgendetwas zu rendern; die Datei ist kein Kriterium, die Frage ist, ob ein Wert
+berechnet oder ein Knopf gezeichnet wird.
+
+**Der Grund ist derselbe wie überall in diesem Projekt: Es wird geprüft, was *still* schiefgeht.**
+Eine falsch gezeichnete Schaltfläche sieht falsch aus — dafür braucht es keinen Test, sondern einen
+Blick. Ein falsch gerundetes Jahr sieht nach gar nichts aus; die Karte zeigt einfach etwas anderes,
+und niemand erfährt je davon. Genau diese Sorte gehört in ein Modul.
+
+**Gemessen, nicht behauptet:** Am 19. August 2026 ruft **jedes `useMemo` in einer Komponente eine
+importierte reine Funktion auf** — `offeredDecades`, `buildIndex`, `groupStreets`, `axisBounds`,
+`blocksOf(groupByBase(…))`. Sechzehn reine Module tragen die Entscheidungen, die Komponenten die
+Darstellung. Die Praxis hielt also, bevor sie hier stand.
+
+**Eine Lücke fand sich beim Aufschreiben doch**, und sie war genau die beschriebene Sorte: Der
+Zeitschieber rechnete die Fingerposition selbst in ein Jahr um — Klammern und Runden, inmitten der
+Komponente. Ein Rundungsfehler dort wählt 1931, wo der Besucher auf 1932 gezielt hat, und auf dem
+Bildschirm sieht nichts falsch aus. Das ist jetzt `yearAtFraction` in `timeAxis.ts`, die Umkehrung
+von `fraction`, und der Test prüft genau das: Jedes Jahr der Achse muss aus seinem eigenen Anteil
+wieder herauskommen.
+
+**Wo die Grenze verläuft**, zeigt der Gegenfall aus derselben Messung: Die Grösse eines Kreises auf
+der Karte (`48 + log10(Anzahl) × 26`) bleibt in `PhotoLayer.tsx`. Sie ist auch eine Rechnung — aber
+ein falscher Wert ergibt einen Kreis, der falsch *aussieht*. Sichtbar falsch braucht keinen Test.
+
+**Warum kein jsdom.** Es wäre ein nachgebauter Browser, und geprüft würde der Nachbau. Was am
+Rendern dieses Programms wirklich schiefgehen kann, prüft jsdom ohnehin nicht: ob die Seite offline
+null fremde Herkünfte anfragt, ob ein Kreis unter einem Vorschaubild noch mit dem Finger zu treffen
+ist, ob eine Beschriftung auf dem Gerät im Ausstellungsraum lesbar bleibt. Das erste ist ein
+Einzeiler in den Entwicklerwerkzeugen, das zweite wurde am Inline-`transform` nachgemessen, das
+dritte ist [Punkt 14](backlog.md) und braucht einen Menschen vor dem Bildschirm.
+
+Ein zweiter Testrahmen für das, was ein Blick beantwortet, kostet Abhängigkeiten, Laufzeit und
+Pflege — und liesse ausgerechnet die Prüfungen ungetan, auf die es hier ankommt.
