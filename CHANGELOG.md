@@ -936,3 +936,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   steht im Protokoll, woran es lag
 - Die drei Datumsformate des Verwaltungsbereichs liegen zusammen in `admin/format.ts`, mit dem
   Grund dabei, warum sie sich unterscheiden. Sichtbar ändert sich nichts
+- `make check` prüft alles, was vor einem Commit laufen soll: Stil, die vier Prüfungen neben den
+  Tests, und die Tests selbst — die schnellen zuerst. Dazu `make docs-check` für die Prüfungen
+  allein und ein Git-Hook unter `.githooks/pre-commit`, der nur sie ausführt (unter einer Sekunde,
+  einzuschalten mit `git config core.hooksPath .githooks`)
+- `tools/check_numbers.py` rechnet die Buchführung des Backlogs über seine eigenen Nummern nach:
+  Jede je vergebene Nummer ist entweder offen oder vergriffen, die Übersichtstabelle deckt sich
+  mit dem Fliesstext, und jede Zeile verweist auf ihren eigenen Punkt

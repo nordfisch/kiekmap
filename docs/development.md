@@ -92,19 +92,33 @@ Ob eine Datei sich daran hält, beantwortet `python tools/language_check.py`.
 ## Testen
 
 ```bash
-make test          # alles
+make check         # alles: Stil, die vier Pruefungen, alle Tests -- das Ziel vor einem Commit
+make test          # nur die Tests
 make test-backend  # pytest
 make test-frontend # Typecheck und vitest
 make lint          # ruff
+make docs-check    # nur die vier Pruefungen unten
 ```
 
-**Drei Prüfungen laufen daneben, von Hand, weil sie Dateien lesen, die kein Test je sieht:**
+**Vier Prüfungen laufen neben den Tests, weil sie Dateien lesen, die kein Test je sieht:**
 
 ```bash
 python3 tools/language_check.py   # hält sich der Quelltext an die Sprachregelung?
 python3 tools/check_anchors.py    # zeigen die Verweise in docs/ noch irgendwohin?
                                   #   (auch zwischen Dateien, seit dem 15. August 2026)
 python3 tools/check_settings.py   # erreicht jede Einstellung den Container?
+python3 tools/check_numbers.py    # stimmt die Buchführung des Backlogs über seine Nummern?
+```
+
+Sie brauchen weder `venv` noch `node_modules` — reine Leser, `python3` aus dem System genügt.
+
+**Und sie hängen im Git-Hook**, weil „von Hand" in der Praxis „gar nicht" hiess. `.githooks/pre-commit`
+führt genau diese vier aus, **nicht** die Testreihe: Die läuft ohnehin, vergessen wurden diese vier,
+und zusammen brauchen sie unter einer Sekunde. Einzuschalten ist er einmal je Klon, umgehen lässt
+er sich mit `--no-verify`:
+
+```bash
+git config core.hooksPath .githooks
 ```
 
 Die dritte gibt es seit dem 14. August 2026, und sie hat einen Anlass: Die Compose-Datei reichte
@@ -113,6 +127,14 @@ zurück. Ein Import verlor dadurch Schlagwort, Bildnachweis und Herkunft — **o
 und mit 393 grünen Tests daneben**, denn eine Compose-Datei wird von keinem Test angefasst. Sie
 prüft auch die Gegenrichtung: ein Name in `docker-compose.yml` oder `deploy/.env.example`, den es
 in `config.py` nicht gibt, wirkt folgenlos und fällt sonst niemandem auf.
+
+Die vierte kam am 19. August 2026 dazu und hat ebenfalls einen: Ein Punkt, der in die Historie
+zieht, verlangt vier Bearbeitungen an drei Stellen — Tabellenzeile weg, Abschnitt weg, Nummer in
+die Liste der vergriffenen, Zahlwort davor erhöhen. An einem Tag ist das viermal passiert. Sie
+prüft die Zusage nach, die der Backlog über sich selbst macht: Jede je vergebene Nummer ist
+entweder offen oder vergriffen — keine Lücke, kein Überhang, keine zweimal. **Was sie ausdrücklich
+nicht tut, ist Zahlen im Fliesstext nachzählen**; warum das falsch wäre, steht in
+[decisions.md](decisions.md), Punkt 59.
 
 **Was getestet wird.** Nicht Abdeckung um der Zahl willen, sondern die Stellen, an denen ein Fehler
 *still* passiert. Die drei wichtigsten Testklassen im Projekt:

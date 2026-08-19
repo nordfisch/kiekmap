@@ -1998,3 +1998,44 @@ fängt so etwas**, weil beide Werte gültige Zeitstempel sind. Deshalb heisst di
 Name des heruntergeladenen Archivs werden von Menschen im Dateimanager gelesen, nicht von einem
 Programm verglichen. Wer um halb eins nachts eine Sicherung zieht, sucht das heutige Datum. Die
 beiden waren sich darin uneins; jetzt nicht mehr.
+
+## 59. Eine Zahl in der Prosa ist ein Zitat oder ein Protokoll — geprüft wird die Buchführung
+
+*Entschieden am 19. August 2026 — Backlogpunkt 62.*
+
+Drei Prüfungen laufen neben den Tests, weil sie Dateien lesen, die kein Test je sieht. Sie liefen
+bisher nur, wenn jemand daran dachte. Das Symptom stand in [index.md](index.md): „33
+Entscheidungen" bei 56 und „21 Punkte" bei 17 — beides seit Wochen falsch, beides ohne Folgen,
+beides von niemandem bemerkt.
+
+Der naheliegende Schluss war, eine vierte Prüfung nachzählen zu lassen. **Nachgemessen war das
+falsch.** Das Muster „N Punkte" trifft in dieser Dokumentation vier Stellen, und **keine einzige
+davon darf berichtigt werden**:
+
+- zweimal steht die alte, falsche Zahl absichtlich da — als Zitat, im Backlogpunkt selbst;
+- zweimal sind Punkte auf einer Karte gemeint, keine Backlogpunkte;
+- einmal steht in der Historie ein Satz, der an seinem Datum stimmte und stehenbleiben muss.
+
+**Eine Zahl in laufendem Text ist fast nie eine Behauptung über den Jetztzustand.** Sie ist ein
+Zitat oder ein Protokolleintrag, und beide werden durch eine Berichtigung falsch. Die zwei
+Stellen, die wirklich aktuell sein sollten, haben ihre Zahlen deshalb verloren statt eine Prüfung
+bekommen.
+
+**Was sich prüfen lässt, ist die Buchführung des Backlogs über sich selbst.** Sie ist nicht Prosa,
+sondern Struktur, und sie hat eine Zusage, die entweder gilt oder nicht: Jede je vergebene Nummer
+ist entweder offen oder vergriffen — keine Lücke, kein Überhang, keine zweimal. Genau das heisst
+„Nummern werden nie neu vergeben". `tools/check_numbers.py` rechnet das nach, dazu die Übereinstimmung
+von Tabelle und Fliesstext, den Anker jeder Zeile auf ihren *eigenen* Punkt, und das
+ausgeschriebene Zahlwort vor der Liste.
+
+Der Anlass ist Erfahrung, keine Vorsorge: Ein Punkt, der in die Historie zieht, verlangt vier
+Bearbeitungen an drei Stellen. An einem Tag ist das viermal passiert.
+
+**Und ein Ort, an dem sie laufen.** `make check` bündelt Stil, die vier Prüfungen und die Tests —
+die schnellen zuerst. Daneben liegt der Hook unter `.githooks/pre-commit`, der **nur** die vier
+Prüfungen ausführt und keine Testreihe: Die Tests laufen ohnehin, vergessen werden die vier, und
+zusammen brauchen sie unter einer Sekunde. Ein Hook, den man merkt, wird abgeschaltet. Er ist je
+Klon einzuschalten (`git config core.hooksPath .githooks`) — versioniert, aber nicht aufgedrängt.
+
+Eine CI wäre der nächste Schritt und ist bewusst keiner: Sie setzt voraus, dass
+[Punkt 22](backlog.md) entschieden ist. Ohne ein öffentliches Repo gibt es keinen Ort dafür.

@@ -3528,3 +3528,60 @@ weglässt** — und laufen damit in jeder Zeitzone. Die Zone selbst ist seit
 **Ein Backlogeintrag ist eine Notiz, kein Befund.** Beide Hälften dieses Punktes sahen beim
 Aufschreiben anders aus als beim Aufgreifen, und in beiden Fällen war das Nachsehen billiger als
 das Vertrauen.
+
+## Punkt 62: die vierte Prüfung prüft etwas anderes als geplant
+
+Der Punkt hatte zwei Hälften — „die drei Prüfungen laufen nur von Hand" und „sie zählen nicht
+nach". Die erste war eine Aufgabe, die zweite entpuppte sich als Fehlschluss.
+
+### Der Ort: `make check` und ein Hook, den man nicht merkt
+
+`make check` bündelt Stil, die Prüfungen und alle Tests, die schnellen zuerst — wer den Stil
+verletzt hat, soll das nach zwei Sekunden erfahren und nicht nach zehn. Es hat sich beim ersten
+Lauf gleich bewährt und den Zeilenumbruch in der frisch geschriebenen Prüfung selbst bemängelt.
+
+Daneben liegt `.githooks/pre-commit`, und der führt **nur die vier schnellen Prüfungen** aus, keine
+Testreihe. Die Überlegung dahinter: Die Tests laufen ohnehin, weil `make test` sie ausführt und
+niemand sie vergisst — vergessen wurden genau die vier, die unter einer Sekunde brauchen. **Ein
+Hook, den man merkt, wird abgeschaltet.** Er ist versioniert, aber nicht aufgedrängt: einmal je
+Klon mit `git config core.hooksPath .githooks`.
+
+Eine CI wäre der nächste Schritt und bleibt liegen, weil sie einen Ort braucht — und der hängt an
+Punkt 22.
+
+### Das Nachzählen: gemessen, dann verworfen
+
+Der Plan war, eine Prüfung die Zahlen im Text nachrechnen zu lassen. Das Symptom lag ja vor:
+`index.md` nannte „33 Entscheidungen" bei 56 und „21 Punkte" bei 17.
+
+**Die Messung fand etwas anderes als das Gesuchte.** Das Muster „N Punkte" trifft in dieser
+Dokumentation vier Stellen, und **keine einzige davon darf berichtigt werden**: Zweimal steht die
+alte, falsche Zahl mit Absicht da — als Zitat im Backlogpunkt selbst. Zweimal sind Punkte auf einer
+Karte gemeint. Und einmal steht in dieser Datei hier ein Satz, der an seinem Datum stimmte und
+stehenbleiben muss.
+
+Eine Zahl in laufendem Text ist fast nie eine Behauptung über den Jetztzustand; sie ist ein Zitat
+oder ein Protokolleintrag, und beide werden durch eine Berichtigung falsch. Die zwei Stellen, die
+wirklich aktuell sein sollten, haben ihre Zahlen deshalb gestern verloren, statt heute eine Prüfung
+zu bekommen.
+
+### Was stattdessen geprüft wird
+
+Die Buchführung des Backlogs über sich selbst — Struktur statt Prosa, mit einer Zusage, die
+entweder gilt oder nicht: **Jede je vergebene Nummer ist entweder offen oder vergriffen.** Keine
+Lücke, kein Überhang, keine zweimal. Dazu die Übereinstimmung von Tabelle und Fliesstext, der Anker
+jeder Zeile auf ihren *eigenen* Punkt, und das ausgeschriebene Zahlwort vor der Liste
+(„Vierundvierzig Nummern sind vergriffen").
+
+Der Anlass ist Erfahrung: Ein Punkt, der in die Historie zieht, verlangt vier Bearbeitungen an drei
+Stellen. An diesem einen Tag ist das viermal passiert.
+
+`decisions.md` bekommt dieselbe Prüfung in schwächerer Form — dort sind Lücken **erlaubt**, weil
+Punkt 8 zurückgezogen wurde und seine Nummer mit einer Begründung leer bleibt. Geprüft wird nur,
+dass keine Nummer zweimal vorkommt und dass sie aufsteigen. Eine Lücke ist dort eine Aussage, kein
+Fehler.
+
+Geprüft ist die Prüfung selbst an neun absichtlich verbogenen Fassungen der beiden Dateien: fremder
+Anker, Zeile ohne Abschnitt, Nummer offen und vergriffen zugleich, verschwundene Nummer bei sonst
+stimmigem Zahlwort, Nummer jenseits der nächsten freien, umformulierter Satz, doppelte und
+vertauschte Entscheidungsnummer. Alle neun fallen auf, die unveränderten Dateien nicht.

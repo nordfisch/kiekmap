@@ -110,8 +110,10 @@ seed/        Beispielbestand für Entwicklung und Test, Bilder noch nicht im Rep
 
 ```bash
 make dev          # Backend (8000) und Frontend (5173) mit Hot Reload
-make test         # pytest und vitest
+make check        # alles vor einem Commit: Stil, die vier Prüfungen, alle Tests
+make test         # nur die Tests -- pytest und vitest
 make lint         # ruff check und format --check
+make docs-check   # nur die vier Prüfungen
 make tiles        # Offline-Karte, Schriften, Symbole für die Region
 make places       # Ortsindex bauen und einlesen
 make seed         # Beispielbestand aus seed/ herstellen (löscht den vorhandenen!)
@@ -127,12 +129,14 @@ make prod         # alles in Containern, wie auf dem Pi
 **Tests.** Jede fachliche Entscheidung bekommt einen Test, der den *Fehlerfall* beschreibt, nicht
 nur den Erfolgsfall. Die wertvollsten Tests hier heißen `test_jahrzehnt_erscheint_bei_auswahl_
 mittendrin` und `test_scandatum_datiert_das_foto_nicht` — beide decken Fehler ab, die still
-passieren würden. Vor jedem Commit `make lint && make test`.
+passieren würden. **Vor jedem Commit `make check`.**
 
-**Drei Prüfungen laufen daneben**, weil sie Dateien lesen, die kein Test je sieht:
-`tools/language_check.py` (Sprachregelung), `tools/check_anchors.py` (Verweise in `docs/`) und
-`tools/check_settings.py` (erreicht jede Einstellung den Container?). Alle drei mit `python3`,
-ohne venv. Näheres in [docs/development.md](docs/development.md).
+**Vier Prüfungen laufen neben den Tests**, weil sie Dateien lesen, die kein Test je sieht:
+`tools/language_check.py` (Sprachregelung), `tools/check_anchors.py` (Verweise in `docs/`),
+`tools/check_settings.py` (erreicht jede Einstellung den Container?) und
+`tools/check_numbers.py` (stimmt die Buchführung des Backlogs über seine Nummern?). Alle vier
+mit `python3`, ohne venv; `make check` und der Hook unter `.githooks/` führen sie aus. Näheres
+in [docs/development.md](docs/development.md).
 
 **Kommentare** erklären das *Warum*, nicht das *Was*. Ein Kommentar, der nur wiederholt, was der
 Code sagt, wird gelöscht. Ein Kommentar, der einen Fallstrick benennt, ist Gold — davon gibt es
@@ -320,6 +324,13 @@ statt Beispiele. Die drei Datumsformate dagegen waren **keine** Doppelung: Jedes
 anderes weg, und Zusammenlegen hätte gekostet statt gespart. Sie liegen jetzt beieinander,
 mit dem Grund dabei. **Ein Backlogeintrag ist eine Notiz, kein Befund** — beide Hälften sahen
 beim Aufgreifen anders aus als beim Aufschreiben.
+
+Und **Punkt 62**: Die Prüfungen laufen jetzt an einem Ort — `make check` bündelt Stil,
+Prüfungen und Tests, der Hook unter `.githooks/pre-commit` nimmt nur die vier schnellen. Eine
+vierte Prüfung zählt die Buchführung des Backlogs über seine eigenen Nummern nach. **Zahlen im
+Fliesstext zählt sie ausdrücklich nicht**: Von vier Fundstellen im Repo darf keine einzige
+berichtigt werden — zwei sind Zitate, zwei meinen Punkte auf einer Karte, eine ist ein Satz in
+der Historie, der an seinem Datum stimmte. `docs/decisions.md`, Punkt 59.
 
 Der zweite trägt die Lehre: Er war schon einmal angefasst und an der Stelle, wo er auffiel,
 **umgangen** worden — die Übersichtskacheln senden seither Tage statt Zeitstempel, mit einem

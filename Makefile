@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
-        migrate revision seed seed-save empty lint tiles places build prod prod-mac prod-down clean
+        migrate revision seed seed-save empty lint docs-check check tiles places build prod \
+        prod-mac prod-down clean
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
@@ -115,6 +116,23 @@ test-frontend: frontend/node_modules
 lint: $(VENV)  ## Code-Stil pruefen
 	$(VENV)/bin/ruff check backend tiles tools
 	$(VENV)/bin/ruff format --check backend tiles tools
+
+# Die vier Pruefungen, die Dateien lesen, die kein Test je sieht: Sprachregelung, Verweise in
+# docs/, der Weg jeder Einstellung in den Container, und die Buchfuehrung des Backlogs ueber
+# seine eigenen Nummern.
+#
+# Reine Leser, deshalb ohne venv und ohne node_modules -- python3 aus dem System genuegt. Zusammen
+# brauchen sie unter einer Sekunde, und genau deshalb haengen sie auch im Git-Hook unter
+# .githooks/. Warum es sie ueberhaupt braucht: docs/decisions.md, Punkt 59.
+docs-check:  ## Sprachregelung, Verweise, Einstellungen, Nummern
+	@python3 tools/language_check.py
+	@python3 tools/check_anchors.py
+	@python3 tools/check_settings.py
+	@python3 tools/check_numbers.py
+
+# Das Ziel vor einem Commit. Die schnellen zuerst: Wer den Stil verletzt hat, soll das nach zwei
+# Sekunden erfahren und nicht nach zehn.
+check: lint docs-check test  ## Alles pruefen, was vor einem Commit laufen soll
 
 build: frontend/node_modules  ## Frontend-Bundle bauen (Ergebnis in frontend/dist)
 	cd frontend && npm run build

@@ -59,7 +59,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 20 | [Das Gerät muss einen Stromausfall überstehen](#20--das-gerät-muss-einen-stromausfall-überstehen) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
-| 62 | [Die drei Prüfungen laufen nur von Hand — und zählen nicht nach](#62--die-drei-prüfungen-laufen-nur-von-hand--und-zählen-nicht-nach) | Aufgabe | wichtig |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 | 63 | [Komponenten sind ungetestet, und die Regel dafür fehlt](#63--komponenten-sind-ungetestet-und-die-regel-dafür-fehlt) | Frage | wichtig |
@@ -71,9 +70,9 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Vierundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
+**Fünfundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-55, 56, 57, 58, 59, 61. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+55, 56, 57, 58, 59, 61, 62. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **64**.
 
 ---
@@ -585,29 +584,6 @@ ist der Verwaltungsbereich mit der vierstelligen PIN von jedem Rechner darin err
 das Gerät allein steht, trifft das niemanden; es gehört zu [Punkt 15](#15--abnahme-auf-dem-ersten-pi)
 gefragt, wie das Museumsnetz aussieht. Die Gegenmassnahme wäre eine Zeile (`127.0.0.1:80:80`) und
 kostet den Zugriff vom Nebenrechner, den das Team vielleicht will.
-
-### 62 · Die drei Prüfungen laufen nur von Hand — und zählen nicht nach
-
-`tools/language_check.py`, `tools/check_anchors.py` und `tools/check_settings.py` sind genau die
-Prüfungen, die fangen, was kein Test sieht. Die dritte ist aus dem Fall entstanden, in dem eine
-halb durchgereichte `.env` **mit 393 grünen Tests daneben** still Schlagwort, Bildnachweis und
-Herkunft verlor. Sie laufen trotzdem nur, wenn jemand daran denkt: keine CI, kein Hook, kein
-`make check`.
-
-**Das Symptom liegt schon vor:** [index.md](index.md) nannte „33 Entscheidungen" bei 56 und
-„21 Punkte" bei 17. `check_anchors` prüft, ob ein Verweis irgendwohin zeigt, aber nicht, ob eine
-Zahl im Fliesstext noch stimmt. Die Zahlen sind am 19. August 2026 aus `index.md` entfernt worden,
-weil eine Zahl, die niemand nachzählt, wieder veraltet.
-
-Zwei Dinge sind zu entscheiden, und sie hängen nicht aneinander:
-
-- **Wo die drei laufen sollen.** Ein `make check`, das sie mit `make test` und `make lint`
-  zusammenfasst, ist der kleinste Schritt; ein Git-Hook der nächste. Eine CI setzt voraus, dass
-  [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) entschieden ist —
-  ohne öffentliches Repo gibt es keinen Ort dafür.
-- **Ob eine vierte Prüfung nachzählt.** Sie müsste die Punkte im Backlog und die Entscheidungen in
-  `decisions.md` zählen und mit dem vergleichen, was `index.md` und `CLAUDE.md` behaupten. Machbar
-  in dreissig Zeilen — die Frage ist, ob solche Zahlen im Text überhaupt stehen sollen.
 
 ### 22 · Versionierung, Releaseprozess und Veröffentlichung des Codes
 
