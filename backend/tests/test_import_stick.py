@@ -28,7 +28,7 @@ def stick(tmp_path: Path, settings, monkeypatch: pytest.MonkeyPatch) -> Path:
     drive.mkdir(parents=True)
 
     settings.media_dir = media
-    monkeypatch.setattr(backup, "_is_mounted", lambda path: path == drive)
+    monkeypatch.setattr(backup.drives, "_is_mounted", lambda path: path == drive)
     return drive
 
 

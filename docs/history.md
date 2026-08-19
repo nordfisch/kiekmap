@@ -3635,3 +3635,58 @@ Inline-`transform` nachgemessen, das dritte braucht einen Menschen vor dem Gerä
 Punkt 14.
 
 `decisions.md`, Punkt 60.
+
+## Punkt 60: 938 Zeilen in zehn Dateien, und die Tests merken nichts davon
+
+Der letzte Punkt aus dem Durchgang, und der einzige, der ausdrücklich als „nicht dringend, nicht
+wichtig" dastand — mit der Warnung, dass er den am besten getesteten Teil des Backends bewegt.
+
+### Die Bedingung stand vor dem Zuschnitt
+
+Nicht „wie schneide ich das", sondern: **Woran erkenne ich hinterher, dass nichts kaputtgegangen
+ist?** Neben der Datei liegen 908 Zeilen Testcode. Werden sie mitumgeschrieben, sind sie kein
+Beweis mehr, sondern eine zweite Behauptung.
+
+Also ein Paket mit einer Tür statt zehn neuer Importpfade: `app/services/backup/__init__.py` reicht
+die zweiunddreissig Namen durch, die der Rest des Programms benutzt. `from app.services import
+backup` heisst weiterhin dasselbe.
+
+Nachgezählt am Ende: **sechs geänderte Zeilen** in 1814 Zeilen Testcode, und keine davon eine
+Zusage. Es sind die Stellen, an denen `monkeypatch` `_is_mounted` und `_is_writable` umsetzt —
+jetzt an `backup.drives` statt an `backup`. 439 Tests vorher, 439 Tests nachher.
+
+Dass diese sechs Stellen überhaupt kommen würden, liess sich vorher sehen: Ein `grep` nach
+`backup._` in den Tests findet genau sie. **Wer vor einem Umbau nachsieht, welche privaten Namen
+von aussen angefasst werden, kennt die Bruchstellen, bevor er sie erzeugt.**
+
+### Was die Trennung ans Licht brachte
+
+Die Wiederherstellung setzte den Grössen-Zwischenspeicher mit `global _size_cache` zurück. Das
+funktioniert nur, solange beide in derselben Datei stehen — in einer Datei sieht man es gar nicht,
+über zwei Module hinweg ist es sofort ein Fehler. Daraus wurde `collection.forget_size()`: aus
+einem stillen Zugriff eine benannte Handlung.
+
+Ähnlich die Unterstriche. Wer zwischen Modulen gebraucht wird, verliert ihn — `copy_if_new`,
+`vacuum_into`, `human_size`, `manifest_bytes`. Der fehlende Unterstrich ist die Auskunft „das
+benutzt jemand anderes"; in einer einzigen Datei konnte man das nicht sehen.
+
+### Zehn Dateien
+
+| Datei | Zeilen | wofür |
+|---|---|---|
+| `common.py` | 75 | Namen, Fehler, das gemeinsame Vokabular |
+| `manifest.py` | 150 | was eine Sicherung über sich selbst sagt |
+| `drives.py` | 118 | welche Datenträger es gibt |
+| `collection.py` | 113 | was „der Bestand" auf der Platte ist |
+| `write.py` | 94 | ihn auf den Stick schreiben |
+| `archive.py` | 165 | dasselbe als eine Datei zum Herunterladen |
+| `restore.py` | 206 | ihn zurückholen |
+| `state.py` | 62 | wann zuletzt gesichert wurde |
+| `job.py` | 105 | der eine lange Auftrag |
+| `__init__.py` | 98 | die Tür, und wo was steht |
+
+Der Schnitt folgt den Kommentarbalken, die vorher schon in der Datei standen. Das ist kein Zufall,
+sondern der Grund, warum der Umbau überhaupt in einer Sitzung machbar war: **Die Grenzen waren
+längst gezogen, sie waren nur nicht durchgesetzt.**
+
+`decisions.md`, Punkt 61.

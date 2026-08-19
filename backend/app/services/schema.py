@@ -6,7 +6,7 @@ questions while it is running -- and it exists because of a failure that went un
 days.
 
 **A backup brings its own schema.** Restoring swaps the database file as a whole
-(``backup._swap_in``); the running service is then merely re-attached to it
+(``backup.restore._swap_in``); the running service is then merely re-attached to it
 (``api/backup._reopen_database``). No migration happens in between, because migrations happen at
 *start*, and a restore is not a start. On 12 August 2026 that meant a device that looked entirely
 normal -- photos, map, timeline -- while **every write ended in a 500**:

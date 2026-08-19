@@ -253,7 +253,7 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 
 **Warum es überhaupt eine Frage ist.** Eine Sicherung enthält `kiekmap.db` genau so, wie die Datei
 damals aussah — mitsamt ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird
-die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup.py`); danach hängt sich das
+die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`); danach hängt sich das
 laufende Programm nur neu an sie (`_reopen_database`). Migrationen laufen dabei nicht von selbst:
 Sie laufen beim *Start* (`backend/docker-entrypoint.sh`), und eine Wiederherstellung ist kein Start.
 

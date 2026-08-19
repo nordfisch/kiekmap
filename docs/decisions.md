@@ -1425,7 +1425,7 @@ einen **echten** brauchen, waere nicht mehr zu erkennen. Abgeleitet steht auf de
 
 ## 40. Ein Symlink ist nie ein Datentraeger
 
-Die Suche nach Sicherungszielen (`services/backup.py`, `find_drives`) **ueberspringt Symlinks**,
+Die Suche nach Sicherungszielen (`services/backup/drives.py`, `find_drives`) **ueberspringt Symlinks**,
 auf beiden Ebenen, die sie durchsucht.
 
 Der Grund ist eine Eigenheit von `os.path.ismount`: Es antwortet fuer einen Symlink
@@ -1486,7 +1486,7 @@ sich mit einem Klick loesen laesst: neu sichern.
 ## 42. Die Wiederherstellung bringt das Schema selbst auf Stand
 
 Eine zurueckgespielte Sicherung wird migriert, und zwar von der Wiederherstellung selbst
-(`services/schema.py`, aufgerufen in `backup._swap_in`). Ein Neustart ist dafuer nicht mehr noetig.
+(`services/schema.py`, aufgerufen in `backup.restore._swap_in`). Ein Neustart ist dafuer nicht mehr noetig.
 
 **Der Anlass ist ein Fehler, der zwei Tage lang unbemerkt lief.** Eine Sicherung bringt ihr Schema
 mit; getauscht wird die Datei im Ganzen, und das laufende Programm haengt sich nur neu an sie.
@@ -2086,3 +2086,39 @@ dritte ist [Punkt 14](backlog.md) und braucht einen Menschen vor dem Bildschirm.
 
 Ein zweiter Testrahmen für das, was ein Blick beantwortet, kostet Abhängigkeiten, Laufzeit und
 Pflege — und liesse ausgerechnet die Prüfungen ungetan, auf die es hier ankommt.
+
+## 61. Ein Paket mit einer Tür — und die Tests bleiben, wie sie waren
+
+*Entschieden am 19. August 2026 — Backlogpunkt 60.*
+
+`services/backup.py` hatte 938 Zeilen und tat sechs Dinge: Laufwerke finden, auf den Stick
+sichern, das Archiv im Strom bauen, wiederherstellen, die Zustandsdatei führen, den einen Auftrag
+verwalten. Jedes Stück war begründet, die Grenzen standen sogar schon da — als Kommentarbalken.
+Es war die einzige Datei im Backend, die ihren Namen überwachsen hatte.
+
+**Die Bedingung, unter der der Umbau überhaupt lohnte, war: Die Tests dürfen sich nicht ändern.**
+Daneben liegen 908 Zeilen Testcode, und sie sind der einzige Beweis, dass eine Umschichtung nichts
+kaputtmacht. Wer sie mit umschreibt, hat den Beweis weggeworfen und muss dem Ergebnis glauben.
+
+Deshalb ein **Paket mit einer Tür**: `app/services/backup/__init__.py` reicht genau die Namen
+durch, die der Rest des Programms benutzt. `from app.services import backup` heisst weiterhin, was
+es hiess; keine Importzeile in `api/`, in `watcher.py` oder in den Tests hat sich bewegt. Am Ende
+sind **sechs Zeilen** in den Tests anders, und keine davon ist eine Zusage: Es sind die Stellen,
+an denen `monkeypatch` einen privaten Namen umsetzt, jetzt `backup.drives._is_mounted` statt
+`backup._is_mounted`. Ein Test, der in einen privaten Namen greift, greift damit sichtbar in ein
+bestimmtes Modul — das ist ehrlicher als vorher, nicht weniger ehrlich.
+
+**Was die Aufteilung ans Licht brachte**, hätte man vorher nicht gesehen: Die Wiederherstellung
+setzte den Grössen-Zwischenspeicher mit `global _size_cache` zurück. Das funktioniert nur, solange
+beide in derselben Datei stehen — die Trennung machte daraus `collection.forget_size()`, und
+damit aus einem stillen Zugriff eine benannte Handlung.
+
+**Wer zwischen Modulen gebraucht wird, verliert den Unterstrich.** `copy_if_new`, `vacuum_into`,
+`human_size`, `manifest_bytes`: Der fehlende Unterstrich ist die Auskunft „das benutzt jemand
+anderes", und der vorhandene bleibt dort, wo er stimmt — `_swap_in`, `_set_aside`, `_ArchiveStream`
+sind weiterhin die Sache ihres einen Moduls.
+
+**Und die Warnung von gestern gilt weiter**, sie hat sich nur erledigt: Der Umbau gewinnt nichts,
+was ein Besucher merkt. Er war fällig, weil die Datei ihren Namen überwachsen hatte — nicht, weil
+etwas falsch war. Wer in dieser Lage steht, sollte zuerst prüfen, ob die Tests einen Umbau
+*tragen*; tun sie es nicht, ist das Aufteilen der zweite Schritt und nicht der erste.

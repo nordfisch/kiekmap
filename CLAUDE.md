@@ -340,6 +340,13 @@ beim Nachsehen doch — der Zeitschieber rechnete die Fingerposition selbst in e
 ein Rundungsfehler dort wählt 1931 statt 1932, ohne dass etwas falsch *aussieht*.
 `docs/decisions.md`, Punkt 60.
 
+Zum Schluss **Punkt 60**: `services/backup.py` mit seinen 938 Zeilen ist ein Paket aus zehn
+Modulen geworden, geschnitten entlang der Kommentarbalken, die schon darin standen. Die
+Bedingung stand vor dem Zuschnitt: **Die Tests dürfen sich nicht ändern**, sonst ist der
+Beweis weg, dass nichts kaputtging. `__init__.py` ist die Tür, `from app.services import
+backup` heisst weiterhin dasselbe — geändert haben sich **sechs Zeilen** in 1814 Zeilen
+Testcode, alle sechs Ziele eines `monkeypatch`. `docs/decisions.md`, Punkt 61.
+
 Der zweite trägt die Lehre: Er war schon einmal angefasst und an der Stelle, wo er auffiel,
 **umgangen** worden — die Übersichtskacheln senden seither Tage statt Zeitstempel, mit einem
 Kommentar, der die Ursache genau benennt. Vier Wochen las ihn niemand. **Wer ein Symptom beseitigt,

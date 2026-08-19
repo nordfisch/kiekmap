@@ -61,7 +61,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 | 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
-| 60 | [Die Sicherung ist sechs Module in einer Datei](#60--die-sicherung-ist-sechs-module-in-einer-datei) | Aufgabe | — |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
 dem Durchgang über den Code vom 19. August 2026
@@ -69,9 +68,9 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Sechsundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
+**Siebenundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-55, 56, 57, 58, 59, 61, 62, 63. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+55, 56, 57, 58, 59, 60, 61, 62, 63. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **64**.
 
 ---
@@ -102,7 +101,7 @@ andere aus der Tabelle beschreibt die **Sammlung** oder den **Ort** und ist ein 
 
 **2. Nach einer Wiederherstellung sind die Einstellungen weg.** Die Sicherung nimmt neben der
 Datenbank und den Bildern nur `region.json` und `places.json` mit (`LOOSE_FILES` in
-`services/backup.py`) — **die `.env` nicht**. Wer ein Gerät ersetzt und die Sicherung einspielt,
+`services/backup/common.py`) — **die `.env` nicht**. Wer ein Gerät ersetzt und die Sicherung einspielt,
 hat den ganzen Bestand zurück, aber keine PIN, keine Import-Schlagwörter und keinen Bildnachweis.
 Das ist heute schon so und fällt nur nicht auf, weil es noch kein zweites Gerät gab; **[Punkt
 18](#18--wiederherstellung-wirklich-proben) wird es zutage fördern.** Einstellungen in der
@@ -635,19 +634,3 @@ Zwei getrennte Fragen, die oft verwechselt werden:
   ist.
 
 Gehört anschließend in eine `LICENSE`-Datei und in den Lizenzabschnitt des README.
-
-### 60 · Die Sicherung ist sechs Module in einer Datei
-
-`services/backup.py` hat 938 Zeilen und tut sechs verschiedene Dinge: Laufwerke finden, auf den
-Stick sichern, das Archiv im Strom bauen, wiederherstellen, die Zustandsdatei führen und den einen
-Auftrag verwalten. Die Testdatei daneben hat 908.
-
-Jedes Stück für sich ist sauber und begründet, und die Grenzen sind sogar schon gezogen — als
-Kommentarbalken (`--- drives ---`, `--- restoring ---`, `--- the one long-running job ---`). Es ist
-die einzige Datei im Backend, die ihren Namen überwachsen hat: Wer ohne die Vorgeschichte etwas an
-der Wiederherstellung sucht, liest an fünf anderen Themen vorbei.
-
-Ein Schnitt entlang der vorhandenen Balken — `drives.py`, `archive.py`, `restore.py`, `job.py` —
-machte aus den Kommentaren Modulgrenzen. **Nicht dringend und nicht wichtig**, und mit einer
-ausdrücklichen Warnung: Das ist der am besten getestete Teil des Backends, ein Umbau bewegt viel
-und gewinnt nichts, was ein Besucher merkt. Erst aufgreifen, wenn ohnehin jemand darin arbeitet.

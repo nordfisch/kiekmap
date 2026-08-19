@@ -33,14 +33,14 @@ def stick(tmp_path: Path, settings, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Ein Ordner, der als USB-Stick durchgeht.
 
     Ein echter Einhaengepunkt laesst sich im Test nicht herstellen, deshalb steht die Pruefung
-    ``_is_mounted`` fuer diesen einen Ordner still.
+    ``drives._is_mounted`` fuer diesen einen Ordner still.
     """
     media = tmp_path / "media"
     drive = media / "SANDISK"
     drive.mkdir(parents=True)
 
     settings.media_dir = media
-    monkeypatch.setattr(backup, "_is_mounted", lambda path: path == drive)
+    monkeypatch.setattr(backup.drives, "_is_mounted", lambda path: path == drive)
     return drive
 
 
@@ -106,7 +106,7 @@ class TestDatentraegerErkennen:
         tief = media / "pi" / "USB-STICK"
         tief.mkdir(parents=True)
         settings.media_dir = media
-        monkeypatch.setattr(backup, "_is_mounted", lambda path: path == tief)
+        monkeypatch.setattr(backup.drives, "_is_mounted", lambda path: path == tief)
 
         gefunden = backup.find_drives(media)
 
@@ -135,7 +135,7 @@ class TestDatentraegerErkennen:
         # Aufgeloest verglichen, nicht woertlich: Sonst bildet die eingesetzte Pruefung den
         # Symlink gar nicht ab, und der Test waere auch ohne die Absicherung gruen.
         monkeypatch.setattr(
-            backup, "_is_mounted", lambda path: path.resolve() == eingehaengt.resolve()
+            backup.drives, "_is_mounted", lambda path: path.resolve() == eingehaengt.resolve()
         )
 
         assert backup.find_drives(media) == []
@@ -148,7 +148,7 @@ class TestDatentraegerErkennen:
         Auf dem Mac faengt diese Pruefung ausserdem die Systemeinhaengungen unter /Volumes ab,
         die sonst als Sicherungsziel in der Liste stuenden.
         """
-        monkeypatch.setattr(backup, "_is_writable", lambda path: False)
+        monkeypatch.setattr(backup.drives, "_is_writable", lambda path: False)
 
         assert backup.find_drives(settings.media_dir) == []
 

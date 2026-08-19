@@ -943,3 +943,6 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - `tools/check_numbers.py` rechnet die Buchführung des Backlogs über seine eigenen Nummern nach:
   Jede je vergebene Nummer ist entweder offen oder vergriffen, die Übersichtstabelle deckt sich
   mit dem Fliesstext, und jede Zeile verweist auf ihren eigenen Punkt
+- `services/backup.py` ist ein Paket aus zehn Modulen geworden — Laufwerke, Bestand, Schreiben,
+  Archiv, Wiederherstellen, Zustand, Auftrag. `from app.services import backup` heisst weiterhin
+  dasselbe, und am Programm ändert sich nichts

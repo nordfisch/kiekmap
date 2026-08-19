@@ -72,7 +72,8 @@ class IncomingWatcher:
             and not SPECIAL_DIRS & set(path.relative_to(inbox).parts)
             # A backup is not a photo. Without this line it would run into ``import_file``, be
             # "Kein lesbares Bild" there and land in ``_problem/``. Instead it stays put until
-            # somebody in the admin area agrees -- see services/backup.py, ``waiting_archive``.
+            # somebody in the admin area agrees -- see ``waiting_archive`` in
+            # services/backup/manifest.py.
             # The inbox is to replace nothing of its own accord.
             and not backup.looks_like_archive(path.name)
         ]
