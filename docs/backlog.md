@@ -627,3 +627,62 @@ andere Versionen als der heutige. Bei einem Dienst, der wöchentlich neu gebaut 
 sofort auf; bei einem Gerät, das offline steht und einmal im Jahr angefasst wird, fällt es im
 Museum auf. Eine Lockdatei (`pip-compile`, `uv lock`) macht aus einer Version eine Zusage — und
 gehört zu dem, was ein Release überhaupt erst zu einem Release macht.
+
+#### Namen und Adressen im Repo — vor der Veröffentlichung zu entscheiden
+
+Die Frage kam am 21. August 2026 auf und lautete zuerst: *Sollen die Abschnitte zur Bereinigung des
+Erstbestands aus der [history.md](history.md) heraus? Oder reicht es, personenbezogene und
+konkrete Adressdaten zu entfernen und zusammenzufassen, was getan wurde?*
+
+**Nachgezählt sieht die Frage anders aus, als sie gestellt war.** Echte Namen aus dem Holmer
+Bestand — Familien, Hofnamen, Gaststätten, Geber, ein aktueller Eigentümer — stehen an
+
+| | Zeilen |
+|---|---|
+| Dokumentation gesamt | 19 |
+| davon `history.md` | 7 |
+| davon `decisions.md` | 11 |
+| Quelltext | 32 |
+| davon in Testdateien | 22 |
+
+**Die Historie ist also der kleinere Teil**, und sie herauszuschneiden löste das Problem nicht. Der
+Schwerpunkt liegt in den Tests, und zwar aus einem guten Grund: CLAUDE.md verlangt dort ausdrücklich
+echte Holmer Daten, *„weil sie den Fall konkret machen"*. Genau diese Regel kollidiert jetzt mit der
+Veröffentlichung.
+
+**Die Fälle sind unterschiedlich schwer, und das Zusammenwerfen macht die Entscheidung schwierig:**
+
+1. **Eine lebende, identifizierbare Person an einem Grundstück** — eine Fundstelle, eine
+   Archivnotiz der Form „heute (Jahr) <Name>". Der klarste Fall, weil hier Name, Ort und Gegenwart
+   zusammenkommen.
+2. **Namen von Gebern und Leihgebern** aus dem Herkunftsfeld, drei Fundstellen. Und darin die
+   Ironie: [decisions.md](decisions.md), Punkt 36 erklärt die Herkunft zur *internen* Notiz, die den
+   Kiosk nie erreichen darf — und zitiert in derselben Datei drei davon wörtlich.
+3. **Lange Verstorbene** in historischen Bildunterschriften, etwa zu einem Hof nach einem
+   Bombenangriff. Die DSGVO gilt für Verstorbene nicht; ein Persönlichkeitsrecht wirkt fort.
+4. **Familien- und Firmennamen an einer Hausnummer** — die Masse der Fundstellen, im Ort öffentlich
+   bekannt, einzeln harmlos. In Summe ergeben sie eine Liste, wer wo wohnt.
+5. **Eine Bildunterschrift mit Verwandtschaftsangaben und Familienstand**, in einem Test und in
+   einem Kommentar. Der schärfste Einzelfund, weil er weit über einen Namen hinausgeht.
+
+**Und die teure Hälfte liegt im Git-Verlauf.** Eine Zeile heute zu ändern nimmt sie aus 177 Commits
+nicht heraus; allein einer der Namen kommt in 16 Commits vor. Das ist derselbe Fall wie beim Wappen
+am 5. August, und dort ist die Historie umgeschrieben worden. **Deshalb muss das vor der
+Veröffentlichung entschieden sein** — danach ist es nicht mehr entscheidbar.
+
+**Vorschlag, wenn es aufgegriffen wird:** nicht herausschneiden, sondern **ersetzen**. Der Wert
+dieser Abschnitte liegt im Muster, nie im Wert — dass eine Jahreszahl neben einem Namen der Stand
+des Archivs ist und kein Aufnahmedatum, zeigt ein erfundener Name genauso. Dasselbe gilt für das
+Kodierungsbeispiel, das nur einen Umlaut braucht. Die Regel wäre die, nach der `seed/` schon lebt:
+**Beispiele sind erfunden.** Für die Tests hiesse das, die Sprachregelung in CLAUDE.md um einen Satz
+zu ergänzen — Holmer *Koordinaten* ja, Holmer *Namen* nein.
+
+Zu entscheiden bleiben zwei Dinge, und nur das erste ist billig:
+
+- **Reicht Ersetzen im aktuellen Stand?** Dann ist es ein Nachmittag Arbeit an 51 Zeilen.
+- **Wird der Git-Verlauf mitgezogen?** Das kostet einen `filter-repo`-Lauf über 177 Commits und
+  macht jede vorher gezogene Kopie unbrauchbar. Beim Wappen war die Antwort ja; dort ging es aber um
+  eine Datei, nicht um Textstellen in achtundvierzig.
+
+Ein Satz zum Umgang mit dieser Notiz selbst: **Sie nennt bewusst keinen der Namen.** Ein
+Backlogeintrag, der die Fundstellen aufzählt, wäre eine Fundstelle mehr.
