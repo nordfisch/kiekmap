@@ -89,6 +89,23 @@ Einstellungswert, `"März"` in der Monatsliste — ohne Umlaut wären sie schlic
 
 Ob eine Datei sich daran hält, beantwortet `python tools/language_check.py`.
 
+## Beispiele sind erfunden
+
+Holmer **Koordinaten, Straßen und Hausnummern** gehören in Testdaten und Kommentare — sie
+machen den Fall konkret. Holmer **Namen** nicht: keine Familien, keine Höfe, keine Firmen,
+weder im Test noch im Kommentar noch in der Dokumentation.
+
+Der Beispielbestand stellt den Kader, und er reicht für alles: **Gasthof Petersen**,
+**Hof Sieveking**, **Familie Wendt**, **Familie Boysen**, **A. Brahms**, dazu **Timm**,
+**Möller**, **Harms** und **Ohlsen**. Wer einen weiteren braucht, erfindet ihn und trägt ihn
+hier ein.
+
+**Der Grund ist nicht Vorsicht, sondern dass es nichts kostet.** Was ein Beispiel zeigen soll,
+zeigt ein erfundener Name genauso: Dass eine Jahreszahl neben einem Namen der Archivstand ist
+und kein Aufnahmedatum, hängt nicht daran, wer der Mensch war. Am 21. August 2026 sind so 87
+Fundstellen in 15 Dateien ersetzt worden, ohne dass ein einziges Beispiel an Schärfe verlor.
+Der Anlass steht in [backlog.md](backlog.md), Punkt 64.
+
 ## Der Kopf jeder Quelldatei
 
 Zwei Zeilen, über dem Docstring, unter einer etwaigen Shebang-Zeile:

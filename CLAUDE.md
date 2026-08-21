@@ -159,6 +159,14 @@ Koordinate, einen Ortsnamen oder eine sammlungsabhängige Zahl in den Code schre
 sie stattdessen nach `region.json` oder in die Einstellungen. Testdaten sind ausgenommen — dort
 sind Holmer Koordinaten erwünscht, weil sie den Fall konkret machen.
 
+**Namen aus dem Bestand sind davon ausgenommen: Beispiele sind erfunden.** Koordinaten, Straßen
+und Hausnummern ja — Familien-, Hof- und Firmennamen nein, weder im Test noch im Kommentar noch in
+der Doku. Der Beispielbestand hat dafür einen Kader, und er reicht: **Gasthof Petersen**,
+**Hof Sieveking**, **Familie Wendt**, **Familie Boysen**, **A. Brahms**, dazu **Timm**, **Möller**,
+**Harms** und **Ohlsen**. Was ein Beispiel zeigen soll, zeigt ein erfundener Name genauso — dass
+eine Jahreszahl neben einem Namen der Archivstand ist und kein Aufnahmedatum, hängt nicht am Namen.
+Der Bestand steht in `data/` und geht nie ins Repo; seine Menschen auch nicht.
+
 Vorgehen beim Adaptieren steht in [docs/adaption.md](docs/adaption.md); dort auch, was eine zweite
 Sprache kosten würde und ab wann sich Modularisierung lohnt.
 

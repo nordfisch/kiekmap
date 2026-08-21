@@ -958,3 +958,5 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Temporaerverzeichnis liegen
 - `docs/licensing.md` beantwortet als neunte Datei, was weitergegeben werden darf und unter welchen
   Bedingungen
+- Beispiele in Tests, Kommentaren und Dokumentation nennen keine Namen aus dem Holmer Bestand
+  mehr, sondern den erfundenen Kader aus `seed/`. Am Programm ändert sich nichts

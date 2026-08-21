@@ -640,53 +640,37 @@ Neun Dateien unter `docs/`, dazu `CLAUDE.md`, `README.md` und der `CHANGELOG` �
 Zeilen**, gewachsen über vier Monate und nie im Ganzen durchgesehen. Vier Fragen, und die erste
 hat einen Termin.
 
-#### 1. Schützenswerte Angaben — vor der Veröffentlichung
+#### 1. Schützenswerte Angaben — der aktuelle Stand ist bereinigt
 
-**Diese Hälfte blockiert [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)
-und muss zuerst entschieden werden.** Echte Namen aus dem Holmer Bestand — Familien, Hofnamen,
-Gaststätten, Geber, ein aktueller Eigentümer — stehen an:
+**Erledigt am 21. August 2026, mit einer offenen Frage am Ende.**
 
-| | Zeilen |
-|---|---|
-| Dokumentation gesamt | 19 |
-| davon `history.md` | 7 |
-| davon `decisions.md` | 11 |
-| Quelltext | 32 |
-| davon in Testdateien | 22 |
+Gesucht wurde nicht nach Verdacht, sondern nach Befund: Aus `data/kiekmap.db` liessen sich die
+Namen ziehen, die im Bestand tatsächlich vorkommen, und mit dieser Liste wurde das Repo
+durchsucht. Das förderte einen Namen zutage, den die erste Zählung übersehen hatte — er stand
+sogar im Produktivcode (`kiosk/mapCaption.ts`).
 
-Die Frage kam als „sollen die Abschnitte zur Bereinigung des Erstbestands aus der Historie heraus?"
-auf. **Nachgezählt liegt der Schwerpunkt woanders:** in den Tests, und zwar aus einem guten Grund —
-[CLAUDE.md](../CLAUDE.md) verlangt dort ausdrücklich echte Holmer Daten, *„weil sie den Fall konkret
-machen"*. Genau diese Regel kollidiert mit einer Veröffentlichung.
+**87 Fundstellen in 15 Dateien**, ersetzt statt gestrichen. Der Beispielbestand hatte den Kader
+längst: Gasthof Petersen liegt dort an derselben Hausnummer wie das Gasthaus, das er ersetzt.
+Kein Beispiel hat dabei an Schärfe verloren — die Regel steht jetzt in
+[development.md](development.md) und in [CLAUDE.md](../CLAUDE.md): **Holmer Koordinaten ja,
+Holmer Namen nein.**
 
-**Fünf unterschiedlich schwere Fälle**, und das Zusammenwerfen macht die Entscheidung schwierig:
+Die Tests haben die Arbeit geprüft und dabei eine Fundstelle gefangen, die der Ersetzung durchging:
+eine kleingeschriebene Fassung desselben Namens, die belegt, dass eine Beschreibung ihren Titel
+nicht wiederholen darf.
 
-1. **Eine lebende, identifizierbare Person an einem Grundstück** — eine Fundstelle, eine Archivnotiz
-   der Form „heute (Jahr) <Name>". Der klarste Fall: Name, Ort und Gegenwart zusammen.
-2. **Namen von Gebern und Leihgebern** aus dem Herkunftsfeld, drei Fundstellen. Darin die Ironie:
-   [decisions.md](decisions.md), Punkt 36 erklärt die Herkunft zur *internen* Notiz, die den Kiosk
-   nie erreichen darf — und zitiert in derselben Datei drei davon wörtlich.
-3. **Lange Verstorbene** in historischen Bildunterschriften. Die DSGVO gilt für Verstorbene nicht;
-   ein Persönlichkeitsrecht wirkt fort.
-4. **Familien- und Firmennamen an einer Hausnummer** — die Masse, im Ort öffentlich bekannt, einzeln
-   harmlos. In Summe ergeben sie eine Liste, wer wo wohnt.
-5. **Eine Bildunterschrift mit Verwandtschaftsangaben und Familienstand**, in einem Test und in
-   einem Kommentar. Der schärfste Einzelfund, weil er weit über einen Namen hinausgeht.
+**Offen bleibt allein der Git-Verlauf.** Die alten Fassungen stehen in 177 Commits; allein einer
+der Namen kommt in sechzehn davon vor. Solange das Repo privat ist, trifft das niemanden — mit der
+Veröffentlichung wird es öffentlich, und danach ist es nicht mehr zu ändern. Zwei Wege:
 
-**Die teure Hälfte liegt im Git-Verlauf.** Eine Zeile heute zu ändern nimmt sie aus 177 Commits
-nicht heraus; allein einer der Namen kommt in 16 davon vor. Derselbe Fall wie beim Wappen am
-5. August, und dort ist die Historie umgeschrieben worden. **Deshalb vor der Veröffentlichung** —
-danach ist es nicht mehr entscheidbar.
+- **Verlauf umschreiben** (`git filter-repo --replace-text` mit derselben Ersetzungsliste). Beim
+  Wappen am 5. August ist genau das gemacht worden. Es macht jede vorher gezogene Kopie
+  unbrauchbar — heute ohne Belang, denn es gibt keinen Remote.
+- **Stehen lassen** und die Veröffentlichung mit einem frischen Verlauf beginnen (ein Commit, oder
+  ab einem Stichtag). Das kostet die Historie, die dieses Repo auszeichnet — und die ist einer der
+  Gründe, es überhaupt zu zeigen.
 
-**Vorschlag:** nicht herausschneiden, sondern **ersetzen**. Der Wert dieser Abschnitte liegt im
-Muster, nie im Wert — dass eine Jahreszahl neben einem Namen der Archivstand ist und kein
-Aufnahmedatum, zeigt ein erfundener Name genauso; das Kodierungsbeispiel braucht nur einen Umlaut.
-Die Regel wäre die, nach der `seed/` schon lebt: **Beispiele sind erfunden.** Für die Tests hiesse
-das einen Satz mehr in der Sprachregelung — Holmer *Koordinaten* ja, Holmer *Namen* nein.
-
-Zu entscheiden bleiben zwei Dinge, und nur das erste ist billig: **Reicht Ersetzen im aktuellen
-Stand?** (ein Nachmittag an 51 Zeilen) — oder **wird der Git-Verlauf mitgezogen?** (ein
-`filter-repo`-Lauf über 177 Commits, der jede vorher gezogene Kopie unbrauchbar macht).
+**Zu entscheiden vor [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes).**
 
 #### 2. Redundanzen
 

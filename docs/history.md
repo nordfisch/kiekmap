@@ -3748,3 +3748,45 @@ Aufgefallen ist keiner davon beim Lesen, sondern an der Zahl am Zeilenende: **9 
 dann 26.** Ein Werkzeug, das eine Vollzähligkeit herstellen soll, muss die Zahl mitschreiben, die
 es erreicht hat — sonst produziert es zuverlässig und leise das Falsche. Dieselbe Lehre wie bei
 `tools/build_seed.py`, das seine Lücken nachzählt und abbricht, wenn eine fehlt.
+
+## Punkt 64, Abschnitt 1: die Namen aus dem Repo
+
+Vor der Veröffentlichung stand die Frage, ob die Abschnitte zur Bereinigung des Erstbestands aus
+dieser Datei heraus müssten — es stünden echte Namen darin.
+
+### Die Datenbank wusste es besser als die Suche
+
+Nach Verdacht zu suchen hätte gefunden, woran ich mich erinnere. Gesucht wurde deshalb nach
+Befund: Aus `data/kiekmap.db` liessen sich die Namen ziehen, die im Bestand wirklich vorkommen —
+mit ihrer Häufigkeit —, und mit dieser Liste wurde das Repo durchsucht.
+
+Das förderte einen Namen zutage, den die erste Zählung übersehen hatte, obwohl er im Bestand
+**176 mal** vorkommt. Er stand nicht nur in der Dokumentation, sondern im **Produktivcode**, im
+Kommentar über der Funktion, die Marker beschriftet. **Wer nach dem sucht, was er kennt, findet
+nicht, was da ist.**
+
+### 87 Fundstellen, und der Kader stand schon bereit
+
+Ersetzt, nicht gestrichen — der Wert dieser Stellen liegt im Muster, nie im Wert. Und der
+Beispielbestand unter `seed/` hatte die Rollen längst besetzt: Sein *Gasthof Petersen* liegt an
+derselben Hausnummer wie das Gasthaus, das er ersetzt; seine *Familie Wendt* ist der Nachlass, seine
+*Familie Boysen* der frühere Eigentümer, sein *A. Brahms* der Fotograf. Vier weitere Namen mussten
+erfunden werden, mehr nicht.
+
+Kein Beispiel hat dabei an Schärfe verloren. Das Kodierungsbeispiel — ein Name, der zweimal durch
+die falsche Kodierung gedreht wurde — brauchte nur einen Umlaut, nicht diesen Umlaut.
+
+### Der Test hat die Arbeit geprüft
+
+Von 439 Tests schlug einer fehl: Eine **kleingeschriebene** Fassung desselben Namens war der
+Ersetzung durchgegangen. Sie steht dort, weil sie belegt, dass eine Beschreibung ihren Titel auch
+dann nicht wiederholen darf, wenn sie anders geschrieben ist — und genau diese Eigenschaft machte
+sie unsichtbar für eine Suche, die auf Grossschreibung baute. Zweimal derselbe Fehler an einem
+Nachmittag, auf zwei Ebenen.
+
+### Was offen bleibt
+
+Der Git-Verlauf. 177 Commits tragen die alten Fassungen; allein einer der Namen steht in sechzehn
+davon. Solange das Repo privat ist, trifft das niemanden — mit der Veröffentlichung wird es
+öffentlich, und danach ist es nicht mehr zu ändern. Die Entscheidung steht im
+[backlog.md](backlog.md), Punkt 64.
