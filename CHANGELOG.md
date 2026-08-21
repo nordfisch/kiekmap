@@ -960,3 +960,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Bedingungen
 - Beispiele in Tests, Kommentaren und Dokumentation nennen keine Namen aus dem Holmer Bestand
   mehr, sondern den erfundenen Kader aus `seed/`. Am Programm ändert sich nichts
+- `docs/history.md` hat ein **Register** bekommen: eine Zeile je Abschnitt mit Datum und
+  Sprungmarke, erzeugt von `tools/build_register.py` und von `make check` nachgeprüft. Die Datei
+  bleibt eine — geteilt hätte sie ihre Reihenfolge verloren, und die ist ihr eigentlicher Inhalt
+- Jeder Abschnitt der Historie nennt sein Datum in den ersten Zeilen darunter; die Prüfung bricht
+  ab, wenn einer es nicht tut. Neun hatten es vergessen
+- Acht Verweise auf `history.md` zeigen jetzt auf die Stelle, die sie meinen, statt auf die Datei
+- `tools/check_anchors.py` erkennt Überschriften der ersten Ebene als Sprungmarken und prüft auch
+  `docs/architecture.md`, die bis dahin fehlte
+- Die Übersicht in `docs/index.md` hat eine Gruppe „Es übernehmen" für `adaption.md` und
+  `licensing.md` — beide richten sich an ein zweites Museum, nicht an Entwickler dieses Geräts

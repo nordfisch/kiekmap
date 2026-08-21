@@ -18,20 +18,114 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 *„Was der Plan nicht wusste"* und sind der eigentliche Grund für diese Datei.
 
-## Die Arbeitsblöcke
+<!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand aendern -->
 
-| | Block | Zeitraum | Commits |
-|---|---|---|---|
-| I | Die Stufen 0 bis 10 | 28.–30. Juli 2026 | `0e0dc23` … `bc11222` |
-| II | Umbau des Verwaltungsmenüs | 30. Juli 2026 | `0b9ee6e` |
-| III | Nachbesserungen an der Verwaltung | 30.–31. Juli 2026 | `4fdad66` … `bb18411` |
-| IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `8b33e65` … `0f3c463` |
-| V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `08fb3ed` … `a3967bb` |
-| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `959c4e7` … `804e0c9` |
+## Register
 
+91 Eintraege. **Gesucht wird hier meist ein Datum**, nicht ein Titel --
+die Titel sind Merkhilfen. Fuer ein Stichwort ist `grep` das bessere Werkzeug; die
+Datei ist ausfuehrlich genug dafuer.
+
+| Datum | Abschnitt |
+|---|---|
+| 28.–30. Juli 2026 | **[Teil I — Die Stufen 0 bis 10](#teil-i--die-stufen-0-bis-10)** |
+| 28.–30. Juli 2026 | [Stufe 0 — Gerüst und Entscheidungen](#stufe-0--gerüst-und-entscheidungen) |
+| 28.–30. Juli 2026 | [Stufe 1 — FastAPI, SQLite, Alembic, Docker](#stufe-1--fastapi-sqlite-alembic-docker) |
+| 28.–30. Juli 2026 | [Stufe 2 — Frontend-Gerüst und Offline-Karte](#stufe-2--frontend-gerüst-und-offline-karte) |
+| 28.–30. Juli 2026 | [Stufe 3 — Import-Pipeline](#stufe-3--import-pipeline) |
+| 28.–30. Juli 2026 | [Stufe 4 — Abfrage-API](#stufe-4--abfrage-api) |
+| 28.–30. Juli 2026 | [Stufen 5 und 6 — Karte mit Markern, Zeitschieber](#stufen-5-und-6--karte-mit-markern-zeitschieber) |
+| 28.–30. Juli 2026 | [Stufe 7 — „Hilf mit"](#stufe-7--hilf-mit) |
+| 28.–30. Juli 2026 | [Stufe 7.5 — Sprachregelung](#stufe-75--sprachregelung) |
+| 28.–30. Juli 2026 | [Stufe 7.6 — Deutsche Texte im Backend nach Konvention ordnen](#stufe-76--deutsche-texte-im-backend-nach-konvention-ordnen) |
+| 28.–30. Juli 2026 | [Stufe 8 — Admin-Bereich mit Stapel-Upload](#stufe-8--admin-bereich-mit-stapel-upload) |
+| 28.–30. Juli 2026 | [Das Raster der Kioskansicht](#das-raster-der-kioskansicht) |
+| 28.–30. Juli 2026 | [Stufe 9 — Sicherung und Wiederherstellung auf USB](#stufe-9--sicherung-und-wiederherstellung-auf-usb) |
+| 28.–30. Juli 2026 | [Vormerkung erledigt: „Weiß ich nicht" wechselt die Frage](#vormerkung-erledigt-weiß-ich-nicht-wechselt-die-frage) |
+| 28.–30. Juli 2026 | [Der Dank lief ins Leere](#der-dank-lief-ins-leere) |
+| 28.–30. Juli 2026 | [Kartenstil „Papier"](#kartenstil-papier) |
+| 28.–30. Juli 2026 | [Vormerkung erledigt: Hausnummern im Ortsindex](#vormerkung-erledigt-hausnummern-im-ortsindex) |
+| 28.–30. Juli 2026 | [Stufe 10 — Kiosk-Deployment auf dem Pi](#stufe-10--kiosk-deployment-auf-dem-pi) |
+| 28.–30. Juli 2026 | [Vormerkung erledigt: Import vom USB-Stick](#vormerkung-erledigt-import-vom-usb-stick) |
+| 30. Juli 2026 | **[Teil II — Umbau des Verwaltungsmenüs](#teil-ii--umbau-des-verwaltungsmenüs)** |
+| 30.–31. Juli 2026 | **[Teil III — Nachbesserungen an der Verwaltung](#teil-iii--nachbesserungen-an-der-verwaltung)** |
+| 30.–31. Juli 2026 | [Statuskacheln in der Übersicht](#statuskacheln-in-der-übersicht) |
+| 30.–31. Juli 2026 | [Seitenweises Blättern](#seitenweises-blättern) |
+| 30.–31. Juli 2026 | [Gemeinsames Jahresfeld, Überschriften](#gemeinsames-jahresfeld-überschriften) |
+| 30.–31. Juli 2026 | [Ablagefeld für beide Importwege](#ablagefeld-für-beide-importwege) |
+| 31. Juli 2026 | **[Teil IV — Besucheransicht: Fehler und Verbesserungen](#teil-iv--besucheransicht-fehler-und-verbesserungen)** |
+| 31. Juli 2026 | [1. Ruhigeres Bild](#1-ruhigeres-bild) |
+| 31. Juli 2026 | [2. Der Zeitschieber lief aus seinem Feld](#2-der-zeitschieber-lief-aus-seinem-feld) |
+| 31. Juli 2026 | [3. Jahrzehnte kommen aus dem Bestand](#3-jahrzehnte-kommen-aus-dem-bestand) |
+| 31. Juli 2026 | [4. Der eigene Beitrag wird sofort sichtbar](#4-der-eigene-beitrag-wird-sofort-sichtbar) |
+| 31. Juli 2026 | [5. Fotos am selben Ort](#5-fotos-am-selben-ort) |
+| 31. Juli 2026 | [6. Das Foto im Beitragsbereich groß ansehen](#6-das-foto-im-beitragsbereich-groß-ansehen) |
+| 31. Juli – 2. August 2026 | **[Teil V — Nachbesserungen an der Besucheransicht](#teil-v--nachbesserungen-an-der-besucheransicht)** |
+| 2. August – 21. August 2026 | **[Teil VI — Einzelne Punkte aus dem Backlog](#teil-vi--einzelne-punkte-aus-dem-backlog)** |
+| 2. August 2026 | [Verwaltung verlassen lädt die Besucheransicht neu](#verwaltung-verlassen-lädt-die-besucheransicht-neu) |
+| 2. August 2026 | [Der Bearbeitungsdialog fängt oben an](#der-bearbeitungsdialog-fängt-oben-an) |
+| 2. August 2026 | [Gleichnamige Straßen werden nicht mehr verschmolzen](#gleichnamige-straßen-werden-nicht-mehr-verschmolzen) |
+| 2. August 2026 | [Fotos löschen — und ein Datenverlust, der beinahe unbemerkt geblieben wäre](#fotos-löschen--und-ein-datenverlust-der-beinahe-unbemerkt-geblieben-wäre) |
+| 2. August 2026 | [Abbruch in der Hausnummern-Auswahl](#abbruch-in-der-hausnummern-auswahl) |
+| 2. August 2026 | [`architecture.md` — was es gibt und wie es ineinandergreift](#architecturemd--was-es-gibt-und-wie-es-ineinandergreift) |
+| 3. August 2026 | [Ein Beispielbestand — und drei Funde auf dem Weg dahin](#ein-beispielbestand--und-drei-funde-auf-dem-weg-dahin) |
+| 3. August 2026 | [Der Schließen-Knopf steht wieder oben rechts](#der-schließen-knopf-steht-wieder-oben-rechts) |
+| 3. August 2026 | [Der schwarze Blitz hinter dem Bild](#der-schwarze-blitz-hinter-dem-bild) |
+| 3. August 2026 | [Die Sicherung gibt es jetzt auch als eine Datei](#die-sicherung-gibt-es-jetzt-auch-als-eine-datei) |
+| 3. August 2026 | [Der Rückweg führt durch den Eingangsordner](#der-rückweg-führt-durch-den-eingangsordner) |
+| 4. August 2026 | [Datieren in der Detailansicht](#datieren-in-der-detailansicht) |
+| 4.–5. August 2026 | [Der Erstbestand: 929 Fotos aus einem sortierten Archiv](#der-erstbestand-929-fotos-aus-einem-sortierten-archiv) |
+| 5. August 2026 | [Sprach- und Namenskonsistenz](#sprach--und-namenskonsistenz) |
+| 5. August 2026 | [Zwei Blocker vor der Veröffentlichung](#zwei-blocker-vor-der-veröffentlichung) |
+| 8. August 2026 | [Der Backlog bekommt eine Ordnung — und liefert zwei Fehler ab](#der-backlog-bekommt-eine-ordnung--und-liefert-zwei-fehler-ab) |
+| 8. August 2026 | [Der Dank, der nichts einlöste](#der-dank-der-nichts-einlöste) |
+| 8. August 2026 | [Die Tastaturfrage, beantwortet ohne Tastatur](#die-tastaturfrage-beantwortet-ohne-tastatur) |
+| 9. August 2026 | [Was der Erstbestand über den Zeitschieber verriet](#was-der-erstbestand-über-den-zeitschieber-verriet) |
+| 9. August 2026 | [Der Durchgang über den Backlog](#der-durchgang-über-den-backlog) |
+| 9. August 2026 | [Die Kachel, die drei Viertel der Sammlung verschwinden liess](#die-kachel-die-drei-viertel-der-sammlung-verschwinden-liess) |
+| 9. August 2026 | [Die Karte antwortet erst, wenn sie gefragt wird](#die-karte-antwortet-erst-wenn-sie-gefragt-wird) |
+| 9. August 2026 | [Was der Schieber wegnahm, ohne es zu sagen](#was-der-schieber-wegnahm-ohne-es-zu-sagen) |
+| 9. August 2026 | [Die Strassenauswahl in der Adaptionsanleitung](#die-strassenauswahl-in-der-adaptionsanleitung) |
+| 9. August 2026 | [Siebenhundertmal „Jahr unbekannt"](#siebenhundertmal-jahr-unbekannt) |
+| 9. August 2026 | [Der kurze Weg vom Foto in seine Bearbeitung](#der-kurze-weg-vom-foto-in-seine-bearbeitung) |
+| 9. August 2026 | [Fuenf Formen, vier Rollen](#fuenf-formen-vier-rollen) |
+| 9. August 2026 | [Die Kopfzeile findet ihre Mitte](#die-kopfzeile-findet-ihre-mitte) |
+| 9. und 10. August 2026 | [Nachschaerfen: der Weg vom Ort zur Hausnummer](#nachschaerfen-der-weg-vom-ort-zur-hausnummer) |
+| 10. August 2026 | [Die dritte Frage, die Zahlen auf der Karte und ein Waechter zu viel](#die-dritte-frage-die-zahlen-auf-der-karte-und-ein-waechter-zu-viel) |
+| 11. August 2026 | [Der Erstbestand wird bereinigt — und zwei Regeln drehen sich um](#der-erstbestand-wird-bereinigt--und-zwei-regeln-drehen-sich-um) |
+| 12. August 2026 | [Der Rest von Punkt 41: Text stand in den falschen Feldern](#der-rest-von-punkt-41-text-stand-in-den-falschen-feldern) |
+| 12. August 2026 | [Ein Antwortweg statt zweier -- und ein Fehler, der zwei Tage lief](#ein-antwortweg-statt-zweier----und-ein-fehler-der-zwei-tage-lief) |
+| 12. August 2026 | [Der Titel kommt auf die Karte, und die Beschriftung bekommt einen Mund](#der-titel-kommt-auf-die-karte-und-die-beschriftung-bekommt-einen-mund) |
+| 14. August 2026 | [Der Containerbetrieb ist keine Zusage mehr, sondern gemessen](#der-containerbetrieb-ist-keine-zusage-mehr-sondern-gemessen) |
+| 15. August 2026 | [Aus dem Arbeitsnamen wird Kiekmap](#aus-dem-arbeitsnamen-wird-kiekmap) |
+| 15. August 2026 | [Der Neustart entfaellt: die Wiederherstellung migriert selbst](#der-neustart-entfaellt-die-wiederherstellung-migriert-selbst) |
+| 16. August 2026 | [Der Kopfbereich hoert auf, am Ansichtsfenster zu haengen](#der-kopfbereich-hoert-auf-am-ansichtsfenster-zu-haengen) |
+| 16. August 2026 | [Die Detailansicht: das Bild bekommt Platz, die Knoepfe bekommen einen Ort](#die-detailansicht-das-bild-bekommt-platz-die-knoepfe-bekommen-einen-ort) |
+| 16. August 2026 | [Der Knopf, der angeblich am Jahr hing](#der-knopf-der-angeblich-am-jahr-hing) |
+| 16. August 2026 | [Der Diff, der keiner war](#der-diff-der-keiner-war) |
+| 16. August 2026 | [Was auf dem Weg verloren ging](#was-auf-dem-weg-verloren-ging) |
+| 16. August 2026 | [Punkt 55, beantwortet mit Nein](#punkt-55-beantwortet-mit-nein) |
+| 16. August 2026 | [Punkt 42: 44 Gruppen, und die Maschine durfte nicht entscheiden](#punkt-42-44-gruppen-und-die-maschine-durfte-nicht-entscheiden) |
+| 16. August 2026 | [Zwei kleine Punkte, und einer hatte einen Fallstrick](#zwei-kleine-punkte-und-einer-hatte-einen-fallstrick) |
+| 18. August 2026 | [Punkt 1: der Erstbestand, in zehn Schritten durchgesehen](#punkt-1-der-erstbestand-in-zehn-schritten-durchgesehen) |
+| 18. August 2026 | [Punkt 56: der aufgehende Cluster, und zwei stille Nachbarn](#punkt-56-der-aufgehende-cluster-und-zwei-stille-nachbarn) |
+| 19. August 2026 | [Punkt 39: der Durchgang von aussen](#punkt-39-der-durchgang-von-aussen) |
+| 19. August 2026 | [Punkt 57, 58 und 59, behoben am selben Tag](#punkt-57-58-und-59-behoben-am-selben-tag) |
+| 19. August 2026 | [Punkt 61: zwei Regeln, und beide lagen anders als notiert](#punkt-61-zwei-regeln-und-beide-lagen-anders-als-notiert) |
+| 19. August 2026 | [Punkt 62: die vierte Prüfung prüft etwas anderes als geplant](#punkt-62-die-vierte-prüfung-prüft-etwas-anderes-als-geplant) |
+| 19. August 2026 | [Punkt 63: eine Frage, und die Antwort stand längst im Repo](#punkt-63-eine-frage-und-die-antwort-stand-längst-im-repo) |
+| 19. August 2026 | [Punkt 60: 938 Zeilen in zehn Dateien, und die Tests merken nichts davon](#punkt-60-938-zeilen-in-zehn-dateien-und-die-tests-merken-nichts-davon) |
+| 21. August 2026 | [Punkt 23: die Lizenz war die kleinere Hälfte](#punkt-23-die-lizenz-war-die-kleinere-hälfte) |
+| 21. August 2026 | [Punkt 64, Abschnitt 1: die Namen aus dem Repo](#punkt-64-abschnitt-1-die-namen-aus-dem-repo) |
+| 21. August 2026 | [Punkt 64, Abschnitt 2: CLAUDE.md war zur Hälfte ein Tagebuch](#punkt-64-abschnitt-2-claudemd-war-zur-hälfte-ein-tagebuch) |
+| 21. August 2026 | [Punkt 64, Abschnitt 3: die Historie war nicht zu lang, sie hatte keinen Eingang](#punkt-64-abschnitt-3-die-historie-war-nicht-zu-lang-sie-hatte-keinen-eingang) |
+
+<!-- register:ende -->
 ---
 
 # Teil I — Die Stufen 0 bis 10
+
+`0e0dc23` … `bc11222` · 28.–30. Juli 2026.
 
 Der ursprüngliche Bauplan sah elf Stufen vor, jede in einem lauffähigen, committeten Zustand
 endend, jede mit einem Abnahmekriterium in der Form *„Fertig, wenn …"*. Zehn davon sind gebaut.
@@ -1123,6 +1217,8 @@ einengt, blendet sie aus — richtig so. Die Auswahl ist damit über den Marker 
 anzeigen" erreichbar.
 
 ## Der Erstbestand: 929 Fotos aus einem sortierten Archiv
+
+`3378f5c` … `d768ad7` · 4.–5. August 2026.
 
 Der Anlass war ein Ordner mit 929 Bildern, den das Museum vorbereitet hatte — und die Frage, ob
 daraus ein Programm entsteht, das einmal läuft, oder ob der Import selbst es lernt. Es wurde das
@@ -3404,6 +3500,8 @@ aus demselben Haus.
 
 ## Punkt 57, 58 und 59, behoben am selben Tag
 
+`76a8e94` … `b5a37d7` · 19. August 2026.
+
 Alle drei Fehler aus dem Durchgang sind noch am selben Tag repariert worden. Jedes Mal lag die
 richtige Lösung schon im Repo — einmal einen Modul weiter, einmal als Reflex, der hier falsch
 war, einmal als Kommentar, dem vier Wochen lang niemand gefolgt ist.
@@ -3477,6 +3575,8 @@ wer um halb eins nachts eine Sicherung zieht, sucht das heutige Datum.
 
 ## Punkt 61: zwei Regeln, und beide lagen anders als notiert
 
+`4caac03` · 19. August 2026.
+
 Der Backlogeintrag sagte „zwei Regeln stehen an zwei Orten". Beim Aufgreifen stellte sich heraus,
 dass die eine an **drei** Orten stand und die andere gar keine Doppelung war.
 
@@ -3530,6 +3630,8 @@ Aufschreiben anders aus als beim Aufgreifen, und in beiden Fällen war das Nachs
 das Vertrauen.
 
 ## Punkt 62: die vierte Prüfung prüft etwas anderes als geplant
+
+`9d03eff` · 19. August 2026.
 
 Der Punkt hatte zwei Hälften — „die drei Prüfungen laufen nur von Hand" und „sie zählen nicht
 nach". Die erste war eine Aufgabe, die zweite entpuppte sich als Fehlschluss.
@@ -3588,6 +3690,8 @@ vertauschte Entscheidungsnummer. Alle neun fallen auf, die unveränderten Dateie
 
 ## Punkt 63: eine Frage, und die Antwort stand längst im Repo
 
+`dd9572c` · 19. August 2026.
+
 Der Punkt fragte, ob die bestehende Arbeitsweise beim Testen der Oberfläche als Entscheidung
 aufgeschrieben gehört — oder ob stattdessen Komponententests fällig sind. Er ist **aufgelöst**,
 nicht erledigt: Es war nichts zu bauen, sondern etwas zu entscheiden.
@@ -3637,6 +3741,8 @@ Punkt 14.
 `decisions.md`, Punkt 60.
 
 ## Punkt 60: 938 Zeilen in zehn Dateien, und die Tests merken nichts davon
+
+`38ead98` · 19. August 2026.
 
 Der letzte Punkt aus dem Durchgang, und der einzige, der ausdrücklich als „nicht dringend, nicht
 wichtig" dastand — mit der Warnung, dass er den am besten getesteten Teil des Backends bewegt.
@@ -3692,6 +3798,8 @@ längst gezogen, sie waren nur nicht durchgesetzt.**
 `decisions.md`, Punkt 61.
 
 ## Punkt 23: die Lizenz war die kleinere Hälfte
+
+`6ea0692` · 21. August 2026.
 
 Der Punkt hiess „Lizenz des Projekts und der verwendeten Komponenten" und war Voraussetzung für
 die Veröffentlichung. Die Arbeit lag nicht bei der Wahl, sondern beim Nachzählen.
@@ -3750,6 +3858,8 @@ es erreicht hat — sonst produziert es zuverlässig und leise das Falsche. Dies
 `tools/build_seed.py`, das seine Lücken nachzählt und abbricht, wenn eine fehlt.
 
 ## Punkt 64, Abschnitt 1: die Namen aus dem Repo
+
+`1c3c344` … `1f2c5f4` · 21. August 2026.
 
 Vor der Veröffentlichung stand die Frage, ob die Abschnitte zur Bereinigung des Erstbestands aus
 dieser Datei heraus müssten — es stünden echte Namen darin.
@@ -3811,6 +3921,8 @@ Bildnachweis zeigt. Nachgesehen in der Datenbank: Zu beiden gibt es genau ein Fo
 
 ## Punkt 64, Abschnitt 2: CLAUDE.md war zur Hälfte ein Tagebuch
 
+`f22bd36` · 21. August 2026.
+
 Die Frage war, ob Überschneidungen zwischen `CLAUDE.md` und den Dateien für Menschen ein Problem
 sind. Sie hing an einer technischen Vorfrage, die sich nachschlagen liess: **Wird die Datei
 überhaupt gebraucht, oder täte es ein Querverweis?**
@@ -3856,3 +3968,92 @@ Gemessen berührte ein Arbeitsschritt vier bis neun Doku-Dateien. Jetzt sind es 
 es steht geschrieben: CHANGELOG, history, backlog — dazu decisions.md, wenn eine Entscheidung
 herauskam. **`CLAUDE.md` gehört nicht dazu**, denn sie sagt, wie man arbeitet, nicht was geschehen
 ist.
+
+---
+
+## Punkt 64, Abschnitt 3: die Historie war nicht zu lang, sie hatte keinen Eingang
+
+21. August 2026.
+
+Die Frage im Punkt lautete: aufteilen oder nicht? 3.858 Zeilen, die grösste Datei im Repo, rein
+chronologisch angehängt. Die Antwort kam aus dem Messen, und sie war eine andere Frage.
+
+### Erst messen
+
+90 Abschnitte, der mittlere 55 Zeilen lang. Teil VI allein 3.294 Zeilen — 85 Prozent der Datei
+unter einer Überschrift, die „Einzelne Punkte aus dem Backlog" heisst, also *alles Übrige*. Das sah
+zunächst nach dem Befund aus.
+
+War es aber nicht. Die 56 Abschnitte von Teil VI verteilen sich auf zwanzig Arbeitstage, zwei bis
+acht am Tag, gleichmässig gross, streng in der Reihenfolge ihres Entstehens. **Die Datei ist
+geordnet — sie zeigt ihre Ordnung nur nicht.** Die Datumsangaben lagen in der Prosa, wo nichts
+sie erreicht.
+
+Und dann die Zahl, die den Ausschlag gab: **31 Verweise aus anderen Dateien zeigen hierher, 30
+davon ohne Anker.** Auf 3.858 Zeilen. Wer aus `decisions.md` einem „siehe history.md" folgt,
+landet in Zeile 1 und hat nichts gewonnen. Das ist der Befund, nicht die Länge — eine Datei, die
+niemand von vorn liest, darf lang sein; ein Verweis, der nichts eingrenzt, ist kaum einer.
+
+### Aufteilen hätte das Gegenteil bewirkt
+
+Nach Jahr: gegenstandslos, das Projekt ist vier Monate alt. Nach Thema: Es zerstört die
+Reihenfolge, und die ist das Einzige, was diese Datei gegenüber CHANGELOG und Entscheidungen
+voraushat. Dazu kämen Kosten, die niemand bemerkt: Anhängen bräuchte plötzlich eine Entscheidung —
+*in welche Datei?* —, und Abschnitte wie „Punkt 57, 58 und 59, behoben am selben Tag" gehören in
+drei Themen gleichzeitig.
+
+### Drei Schritte statt eines Schnitts
+
+Ein **Register** am Anfang, eine Zeile je Abschnitt mit Datum und Sprungmarke. Es ersetzt die
+Tabelle der Arbeitsblöcke, die eine Commit-Spanne nannte — `959c4e7` … `804e0c9` — und damit seit
+fünfzig Abschnitten falsch war. Die Spanne von Teil VI rechnet das Register jetzt aus seinen
+Abschnitten aus; sie kann nicht wieder veralten.
+
+**Das Datum ist der Eingang, nicht der Titel.** Gesucht wird ein Tag. Die Überschriften hier sind
+Merkhilfen — „Der Diff, der keiner war", „Der schwarze Blitz hinter dem Bild" —, und die taugen
+zum Wiedererkennen, nicht zum Suchen: Man kann nicht nach einem Fehler suchen, den man noch nicht
+benennen kann. Dafür gibt es `grep`, und die Datei ist ausführlich genug dafür.
+
+**Acht Verweise haben ein Ziel bekommen**, die, die erkennbar eine Stelle meinten. Einer davon war
+schon von aussen sichtbar schief: `[Punkt 62](history.md)` — eine Beschriftung, die einen Punkt
+nennt, und ein Ziel, das die ganze Datei ist. Die übrigen 22 meinen wirklich die Datei und bleiben.
+
+### Die Gewohnheit war eingeschlafen
+
+Die Zusage, die das Register braucht, lautet: *Jeder Abschnitt nennt sein Datum in den ersten
+Zeilen darunter.* Sie war nie aufgeschrieben, und sie wurde trotzdem 81 Mal eingehalten — und
+**neunmal nicht, in den neuesten Abschnitten**. Genau die, die zuletzt geschrieben wurden. Die
+Sperre in `tools/build_register.py` hat sie in der ersten Sekunde aufgezählt, was ihr Wert ist:
+Eine Konvention ohne Prüfung hält, bis jemand sie nicht kennt.
+
+Für die Teile I bis V gilt eine Ausnahme, und sie ist keine Nachsicht, sondern Ehrlichkeit:
+Niemand hat notiert, an welchem Tag Stufe 4 gebaut wurde. Bekannt ist der Block, 28. bis 30. Juli.
+Also nennt der Block sein Datum einmal und seine Abschnitte erben es. Ein Teil, der keins nennt —
+Teil VI —, gibt keins weiter, und seine Abschnitte müssen selbst liefern. Eine Regel, ein Satz,
+keine Sonderfälle.
+
+### Was der Weg noch aufdeckte
+
+**Git taugte nicht als Datumsquelle**, obwohl es nach der besseren Idee aussah: eine Messung statt
+einer Behauptung. Nachgesehen meldet Git für alle 28 Abschnitte der Teile I bis V den 2. August —
+den Tag, an dem sie aus drei Plandokumenten zusammengeführt wurden. Es datiert das Aufschreiben,
+nicht die Arbeit. Und einen Tag zuvor hatte `git filter-repo` alle Datumsangaben auf einmal
+verschoben; eine Quelle, die das tut, trägt kein Register.
+
+**`architecture.md` fehlte in `tools/check_anchors.py`.** Aufgefallen ist es nur, weil der neue
+Verweis dorthin nicht geprüft wurde. Kein Vorsatz — die Datei kam später dazu und war nie
+nachgetragen worden, und niemand hatte es gemerkt, weil bis dahin kein Anker in sie hinein oder
+aus ihr heraus zeigte.
+
+**Und der Ankerprüfer kannte nur `##` und tiefer.** Die Annahme dahinter war vernünftig: Eine
+Überschrift der ersten Ebene ist ein Dokumenttitel, und auf den verweist niemand. Bis das Register
+auf die sechs Teile verwies und alle sechs als tot gemeldet wurden. Die Änderung kann nur Anker
+hinzufügen, nie welche wegnehmen — was vorher grün war, bleibt grün.
+
+### Und die Ablage
+
+`seed/README.md` stand längst in der Übersicht; die Frage im Punkt war schon beantwortet.
+`adaption.md` dagegen stand falsch. Sie lag mit `licensing.md` unter „Daran arbeiten" — aber
+niemand, der an diesem Gerät weiterbaut, liest sie. Beide richten sich an jemanden, der ein
+**eigenes** aufsetzt. Das ist ein anderer Mensch mit einer anderen Frage, und es ist der
+eigentliche Zweck des Projekts. Die Übersicht hat dafür jetzt „Es übernehmen".

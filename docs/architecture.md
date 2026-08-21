@@ -239,7 +239,7 @@ fremde Herkunft absetzen. Der Einzeiler dafür steht in [development.md](develop
 **Fremdschlüssel und Migrationen vertragen sich in SQLite schlecht.** Ein Tabellenneubau löscht
 das Original, und mit eingeschalteter Prüfung räumt das ab, was daran hängt. `alembic/env.py`
 schaltet sie deshalb für die Dauer einer Migration ab — im Betrieb bleibt sie an. Ein Test hält
-das fest; die Geschichte dazu steht in [history.md](history.md).
+das fest; die Geschichte dazu steht in [history.md](history.md#fotos-löschen--und-ein-datenverlust-der-beinahe-unbemerkt-geblieben-wäre).
 
 **Der Pi hat keine Browser-Bedienung.** Kein Reload-Knopf, keine Adressleiste, keine Tastatur.
 Deshalb lädt der Leerlauf nach fünf Minuten die Seite neu, statt nur den Zustand zurückzusetzen,

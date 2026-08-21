@@ -1,10 +1,11 @@
 #!/bin/sh
 #
-# Die vier Pruefungen, die kein Test je ausfuehrt -- Sprachregelung, Verweise in docs/, der Weg
-# jeder Einstellung in den Container, und die Buchfuehrung des Backlogs ueber seine Nummern.
+# Die fuenf Pruefungen, die kein Test je ausfuehrt -- Sprachregelung, Verweise in docs/, der Weg
+# jeder Einstellung in den Container, die Buchfuehrung des Backlogs ueber seine Nummern, und das
+# Register der Historie.
 #
 # Absichtlich **ohne** die Testreihe: Die laeuft ohnehin, weil `make test` und `make check` sie
-# ausfuehren und niemand sie vergisst. Vergessen werden die vier hier, und die sind zusammen unter
+# ausfuehren und niemand sie vergisst. Vergessen werden die fuenf hier, und die sind zusammen unter
 # einer Sekunde durch -- ein Hook, den man merkt, wird abgeschaltet.
 #
 # Eingeschaltet wird er einmal je Klon:
@@ -19,18 +20,27 @@ set -e
 cd "$(git rev-parse --show-toplevel)"
 
 if ! command -v python3 >/dev/null 2>&1; then
-    echo "Hinweis: python3 fehlt, die vier Pruefungen entfallen." >&2
+    echo "Hinweis: python3 fehlt, die fuenf Pruefungen entfallen." >&2
     exit 0
 fi
 
-for pruefung in language_check check_anchors check_settings check_numbers; do
-    if ! python3 "tools/$pruefung.py" >/dev/null; then
+# Eine Funktion statt einer Schleife ueber Namen, seit eine der Pruefungen ein Argument braucht.
+pruefe() {
+    skript="$1"
+    shift
+    if ! python3 "tools/$skript.py" "$@" >/dev/null; then
         echo "" >&2
-        echo "  tools/$pruefung.py meldet etwas. Im Klartext:" >&2
+        echo "  tools/$skript.py meldet etwas. Im Klartext:" >&2
         echo "" >&2
-        python3 "tools/$pruefung.py" >&2 || true
+        python3 "tools/$skript.py" "$@" >&2 || true
         echo "" >&2
         echo "  (Zum Umgehen: git commit --no-verify)" >&2
         exit 1
     fi
-done
+}
+
+pruefe language_check
+pruefe check_anchors
+pruefe check_settings
+pruefe check_numbers
+pruefe build_register --check

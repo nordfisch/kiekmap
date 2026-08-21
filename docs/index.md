@@ -20,11 +20,21 @@ wenn etwas unerklärlich aussieht. Meist steht dort, warum.
 |---|---|---|
 | [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler |
 | [backlog.md](backlog.md) | Was fehlt noch? — nach Bereich geordnet, jeder Punkt mit Nummer, Art und Einordnung | wer etwas aufgreifen will |
-| [adaption.md](adaption.md) | Wie richte ich das für **einen anderen Ort** ein? | ein zweites Museum |
-| [licensing.md](licensing.md) | Was darf weitergegeben werden, und unter welchen Bedingungen? | wer veröffentlicht oder übernimmt |
 
 Für Coding-Agents kommt [../CLAUDE.md](../CLAUDE.md) dazu — dieselben Regeln, auf das Nötigste
 gekürzt, mit den drei Dingen vorneweg, die man hier falsch machen kann.
+
+## Es übernehmen
+
+| Datei | Frage | Für wen |
+|---|---|---|
+| [adaption.md](adaption.md) | Wie richte ich das für **einen anderen Ort** ein? | ein zweites Museum |
+| [licensing.md](licensing.md) | Was darf weitergegeben werden, und unter welchen Bedingungen? | wer veröffentlicht oder übernimmt |
+
+Diese beiden standen bis zum 21. August 2026 unter „Daran arbeiten" und waren dort falsch
+einsortiert: Sie richten sich nicht an jemanden, der *dieses* Gerät weiterbaut, sondern an
+jemanden, der ein **eigenes** aufsetzt. Das sind zwei verschiedene Leute mit zwei verschiedenen
+Fragen, und die zweite Frage ist der eigentliche Zweck des Projekts.
 
 ## Das Gerät betreiben
 

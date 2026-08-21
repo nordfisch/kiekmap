@@ -126,15 +126,15 @@ Schaden klein.
 ## Testen
 
 ```bash
-make check         # alles: Stil, die vier Pruefungen, alle Tests -- das Ziel vor einem Commit
+make check         # alles: Stil, die fuenf Pruefungen, alle Tests -- das Ziel vor einem Commit
 make test          # nur die Tests
 make test-backend  # pytest
 make test-frontend # Typecheck und vitest
 make lint          # ruff
-make docs-check    # nur die vier Pruefungen unten
+make docs-check    # nur die fuenf Pruefungen unten
 ```
 
-**Vier Prüfungen laufen neben den Tests, weil sie Dateien lesen, die kein Test je sieht:**
+**Fünf Prüfungen laufen neben den Tests, weil sie Dateien lesen, die kein Test je sieht:**
 
 ```bash
 python3 tools/language_check.py   # hält sich der Quelltext an die Sprachregelung?
@@ -142,12 +142,13 @@ python3 tools/check_anchors.py    # zeigen die Verweise in docs/ noch irgendwohi
                                   #   (auch zwischen Dateien, seit dem 15. August 2026)
 python3 tools/check_settings.py   # erreicht jede Einstellung den Container?
 python3 tools/check_numbers.py    # stimmt die Buchführung des Backlogs über seine Nummern?
+python3 tools/build_register.py --check   # ist das Register der Historie noch vollständig?
 ```
 
 Sie brauchen weder `venv` noch `node_modules` — reine Leser, `python3` aus dem System genügt.
 
 **Und sie hängen im Git-Hook**, weil „von Hand" in der Praxis „gar nicht" hiess. `.githooks/pre-commit`
-führt genau diese vier aus, **nicht** die Testreihe: Die läuft ohnehin, vergessen wurden diese vier,
+führt genau diese fünf aus, **nicht** die Testreihe: Die läuft ohnehin, vergessen wurden diese fünf,
 und zusammen brauchen sie unter einer Sekunde. Einzuschalten ist er einmal je Klon, umgehen lässt
 er sich mit `--no-verify`:
 
@@ -169,6 +170,12 @@ prüft die Zusage nach, die der Backlog über sich selbst macht: Jede je vergebe
 entweder offen oder vergriffen — keine Lücke, kein Überhang, keine zweimal. **Was sie ausdrücklich
 nicht tut, ist Zahlen im Fliesstext nachzählen**; warum das falsch wäre, steht in
 [decisions.md](decisions.md), Punkt 59.
+
+Die fünfte kam am 21. August 2026 dazu, mit dem Register am Anfang von
+[history.md](history.md). Sie ist eigentlich ein Erzeuger — `make register` schreibt die Tabelle,
+`--check` sagt nur, dass sie nicht mehr stimmt. Beides braucht dieselbe Zusage: **jeder Abschnitt
+der Historie nennt sein Datum in den ersten Zeilen darunter.** Wer das vergisst, erfährt es beim
+Commit und nicht ein halbes Jahr später an einer Tabelle mit Lücken.
 
 **Was getestet wird.** Nicht Abdeckung um der Zahl willen, sondern die Stellen, an denen ein Fehler
 *still* passiert. Die drei wichtigsten Testklassen im Projekt:

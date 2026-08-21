@@ -1041,7 +1041,7 @@ nicht, und wer sich die Karte vorlesen laesst, hat den Marker nicht im Blick. De
 Marker beide Formen.
 
 **Der Erstbestand ist inzwischen aufgeraeumt** (11. und 12. August 2026, siehe
-[history.md](history.md)), und damit ist die Voraussetzung dieser Entscheidung entfallen: Die Titel
+[history.md](history.md#der-erstbestand-wird-bereinigt--und-zwei-regeln-drehen-sich-um)), und damit ist die Voraussetzung dieser Entscheidung entfallen: Die Titel
 sind keine Adressen mehr. **Am 12. August ist sie deshalb neu getroffen worden** — die Beschriftung
 nimmt jetzt den Titel und faellt auf die Adresse zurueck; siehe Punkt 39 unten.
 
@@ -1188,7 +1188,7 @@ einem Straßennamen ohne Hausnummer **bewusst unverortet**, mit der Begründung:
 es zwei Fragen gab. Mit der dritten fallen diese Fotos nicht heraus, sondern **in die genauere
 Frage hinein** — die Begründung ist damit hinfällig, und die Regel gehört umgekehrt. Betroffen sind
 64 der 72 Fotos ohne Ort. **Ausgeführt am 11. August 2026** — die Regel in `_locate` ist umgekehrt,
-und dieselben Fotos sind im Bestand nachgezogen worden; siehe [history.md](history.md) und Punkt 34
+und dieselben Fotos sind im Bestand nachgezogen worden; siehe [history.md](history.md#der-erstbestand-wird-bereinigt--und-zwei-regeln-drehen-sich-um) und Punkt 34
 weiter unten.
 
 ## 33. Stapel werden nicht gestreut, Stufenwechsel werden animiert
@@ -2177,3 +2177,56 @@ Anpassen der Doku bereits. Zwei Dateien und eine Abgrenzungsregel wären Verwalt
 **Was die Entscheidung ausdrücklich nicht berührt: den Fotobestand.** Eine Softwarelizenz
 lizenziert das Programm, nicht die Daten. Das steht samt der ODbL-Frage beim Ortsverzeichnis in
 [licensing.md](licensing.md) — der Datei, die es seit dieser Entscheidung gibt.
+
+---
+
+## 63. Die Historie wird nicht aufgeteilt, sondern erschlossen — über ihr Datum
+
+*Entschieden am 21. August 2026 — Backlogpunkt 64, Abschnitt 3.*
+
+`history.md` ist mit 3.858 Zeilen die grösste Datei im Repo und wächst mit jedem Arbeitsschritt.
+Die Frage war, ob sie aufzuteilen ist — nach Jahr, nach Thema — oder ob eine Datei, die niemand von
+vorn liest, lang sein darf.
+
+**Nachgemessen war die Länge nicht das Problem.** 90 Abschnitte, der mittlere 55 Zeilen lang, alle
+in einer Reihenfolge, die nie umsortiert wird. Eine Aufteilung nach Jahr wäre gegenstandslos — das
+Projekt ist vier Monate alt. Eine nach Thema würde das Einzige zerstören, was diese Datei
+gegenüber [CHANGELOG](../CHANGELOG.md) und den Entscheidungen voraushat: **die Reihenfolge.** Und
+sie brächte bei jedem Anhängen eine Frage mit, die es heute nicht gibt — *in welche Datei?* —,
+deren falsche Antwort niemandem auffällt.
+
+**Das Problem war ein anderes, und es war messbar:** 31 Verweise aus anderen Dateien zeigten auf
+`history.md`, **30 davon ohne Anker** — also auf 3.858 Zeilen. Ein Verweis, der nichts eingrenzt,
+ist kaum ein Verweis. Dazu kam, dass die Datei keinen Eingang hatte: Wer sie öffnete, stand vor
+einer Wand.
+
+**Also erschlossen statt zerteilt**, in drei Schritten:
+
+1. **Ein Register am Anfang**, eine Zeile je Abschnitt, mit Datum und Sprungmarke. Es ersetzt die
+   Tabelle der Arbeitsblöcke, die eine Commit-Spanne nannte und seit fünfzig Abschnitten falsch war.
+2. **Das Datum ist der Eingang, nicht der Titel.** Gesucht wird ein Tag — *„was war um den
+   Neunten?"* —, selten eine Überschrift; die Titel hier sind Merkhilfen. Für ein Stichwort ist
+   `grep` das bessere Werkzeug, und die Datei ist ausführlich genug dafür.
+3. **Die acht Verweise, die eine bestimmte Stelle meinten, zeigen jetzt dorthin.** Die übrigen
+   meinen wirklich die ganze Datei und bleiben, wie sie sind.
+
+**Damit steht eine Zusage, und sie hat eine Prüfung:** *Jeder Abschnitt nennt sein Datum in den
+ersten Zeilen darunter.* Neun Abschnitte taten das nicht — die neuesten, in denen die Gewohnheit
+eingeschlafen war. `tools/build_register.py` erzeugt das Register und **bricht ab**, wenn ein
+Abschnitt kein Datum nennt, nach dem Vorbild von `build_seed.py` und `build_notices.py`: Neunzig
+Zeilen von Hand sind in einem Monat falsch, und ein Register, das einen Abschnitt still auslässt,
+ist schlimmer als keins.
+
+**Eine Regel über Datumsangaben, ohne Ausnahme:** Ein Abschnitt erbt das Datum seines Teils, und
+ein Teil, der keins nennt, gibt keins weiter. Die Teile I bis V sind abgeschlossene Blöcke —
+niemand hat notiert, an welchem Tag Stufe 4 gebaut wurde, nur dass der Block vom 28. bis zum
+30. Juli lief; also sagt der Block es einmal, und seine achtzehn Abschnitte erben es. Teil VI ist
+ein Tagebuch und nennt kein eigenes Datum; seine Abschnitte müssen ihres deshalb selbst nennen,
+und die Sperre fängt den, der es vergisst. Die Spanne von Teil VI rechnet das Register aus seinen
+Abschnitten aus — so kann sie nicht wieder veralten.
+
+**Verworfen: das Datum aus Git zu ziehen.** Es wäre eine Messung statt einer Behauptung, aber es
+misst das Falsche. Git datiert das Aufschreiben, nicht die Arbeit: Für alle 28 Abschnitte der
+Teile I bis V meldet es den 2. August, den Tag, an dem sie aus drei Plandokumenten
+zusammengeführt wurden. Dazu kommt, dass ein umgeschriebener Verlauf alle Datumsangaben auf einmal
+verschiebt — am Tag zuvor war genau das passiert.

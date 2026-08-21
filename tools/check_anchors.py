@@ -29,11 +29,15 @@ ROOT = Path(__file__).resolve().parent.parent
 #: ``operations.md`` pointing nowhere and nothing noticed. They are the files the museum team and
 #: whoever keeps the device running actually read; a link that goes nowhere there costs more than
 #: one in the backlog.
+#:
+#: ``architecture.md`` was missing until 21 August 2026 -- an oversight, not a decision. Nothing
+#: had noticed, because until then nobody had linked into it or out of it by anchor.
 DOCUMENTS = (
     "docs/backlog.md",
     "docs/decisions.md",
     "docs/history.md",
     "docs/index.md",
+    "docs/architecture.md",
     "docs/adaption.md",
     "docs/development.md",
     "docs/licensing.md",
@@ -54,9 +58,15 @@ def slug(heading: str) -> str:
 
 
 def headings_of(path: Path) -> set[str]:
-    """The anchors a file offers."""
+    """The anchors a file offers.
+
+    ``#`` counts. It used to start at ``##``, on the assumption that a level-one heading is a
+    document title and nothing links to it -- until the register in ``history.md`` linked to its
+    six parts and all six were reported dead. Only ever adds anchors, so nothing that passed
+    before can fail now.
+    """
     text = path.read_text(encoding="utf-8")
-    return {slug(match.group(1)) for match in re.finditer(r"^#{2,6} (.+)$", text, re.M)}
+    return {slug(match.group(1)) for match in re.finditer(r"^#{1,6} (.+)$", text, re.M)}
 
 
 def check(path: Path, headings: dict[str, set[str]]) -> list[str]:

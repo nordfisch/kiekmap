@@ -179,7 +179,7 @@ Nachgezählt an den 929 Fotos:
 
 Von 308 Schlagwörtern saßen **260 auf weniger als zehn Fotos**, und „Erntefest" — das Beispiel aus
 der Idee — gibt es nicht; es gibt „Fest" und „Feuerwehr". **Die Archivkürzel und die abgeschriebenen
-Fotorückseiten sind inzwischen heraus** ([history.md](history.md), 12. August 2026); von 308
+Fotorückseiten sind inzwischen heraus** ([history.md](history.md#der-rest-von-punkt-41-text-stand-in-den-falschen-feldern), 12. August 2026); von 308
 Schlagwörtern sind 253 geblieben, und die sind alle wirklich Stichwörter. Ob sie für einen Filter
 taugen, ist damit erst jetzt zu beurteilen — und die Zahlen in diesem Punkt sind vom 9. August und
 entsprechend zu erneuern.
@@ -303,7 +303,7 @@ er wegwirft, hat niemand weggeworfen.
 **Der Rest von Punkt 10**, der am 16. August 2026 bewusst liegen geblieben ist. Behoben sind dort
 die drei pragmatischen Teile: Die Textspalte wächst mit statt fest zu stehen (auf 1024 px bekommt
 das Bild 610 statt 466 px), die Blätterknöpfe stehen fest am unteren Rand, und der Schließen-Knopf
-sitzt in der Ecke des Schirms. Siehe [history.md](history.md) und
+sitzt in der Ecke des Schirms. Siehe [history.md](history.md#die-detailansicht-das-bild-bekommt-platz-die-knoepfe-bekommen-einen-ort) und
 [decisions.md](decisions.md), Punkt 44.
 
 **Was offen bleibt, ist der Weg an die Ursache:** Ein Querformat braucht Breite und hat Höhe übrig
@@ -426,7 +426,7 @@ kamen aus Punkt 12 und 24 dazu:
   neu startet?
 
 **Wozu die Tastatur gebraucht wird**, damit die Prüfung ihren Sinn behält: Die Besucheransicht
-braucht seit dem 8. August 2026 keine mehr (siehe [history.md](history.md)) — der
+braucht seit dem 8. August 2026 keine mehr (siehe [history.md](history.md#die-tastaturfrage-beantwortet-ohne-tastatur)) — der
 Verwaltungsbereich dagegen hat **13 Eingabefelder in sieben Dateien**, und daran soll sich nichts
 ändern: Wer Fotos pflegt, tippt. Die Antwort steht damit fest — eine **ausleihbare** Tastatur, die
 nur zur Pflege angesteckt wird. Sie liegt dann nicht im Ausstellungsraum herum, verschmutzt nicht
@@ -605,7 +605,7 @@ Begründungen.
 
 **Die beiden Blocker davor sind erledigt** (5. August 2026): das Wappen ist aus Repo und Historie
 verschwunden, der Beispielbestand ist erfunden und mitgeliefert. Wie das ausging und was dabei
-anders kam als geplant, steht in [history.md](history.md). **Offen bleibt der Releaseprozess
+anders kam als geplant, steht in [history.md](history.md#zwei-blocker-vor-der-veröffentlichung). **Offen bleibt der Releaseprozess
 selbst.**
 
 **Die Lizenzfrage ist seit dem 20. August 2026 beantwortet** (Punkt 23): Apache-2.0, Copyright
@@ -619,7 +619,7 @@ Gerät richtig.
 
 Dazu die Frage, die ein Release erst auslöst: Was passiert mit `THIRD-PARTY.txt`? Sie wird erzeugt
 und ist eingecheckt, also aktuell — aber nur, solange `make check` läuft. In einer CI
-([Punkt 62](history.md)) wäre das automatisch.
+([Punkt 62](history.md#punkt-62-die-vierte-prüfung-prüft-etwas-anderes-als-geplant)) wäre das automatisch.
 
 **Dazu gehört das Festnageln der Abhängigkeiten**, nachgetragen am 19. August 2026. Das Frontend
 hat eine `package-lock.json`; `backend/pyproject.toml` nennt nur untere Schranken (`fastapi>=0.115`,
@@ -713,15 +713,43 @@ an neun — CHANGELOG, history, backlog, dazu decisions.md, wenn eine Entscheidu
 CLAUDE.md gehört nicht dazu. Damit sinkt die gemessene Streuung von vier bis neun Dateien je
 Arbeitsschritt auf drei bis vier.
 
-#### 3. Aufteilung und Ablage
+#### 3. Aufteilung und Ablage — nicht zerteilt, sondern erschlossen
 
-`history.md` ist mit **3.750 Zeilen** das grösste Ding im Repo und wächst mit jedem Arbeitsschritt.
-Sie ist rein chronologisch angehängt; einen Weg hinein gibt es nicht ausser Lesen. Zu klären, ob das
-ein Problem ist — eine Datei, die niemand von vorn liest, darf lang sein — oder ob eine Aufteilung
-nach Jahr oder Thema hilft, und was sie an Verweisen kostet.
+**Erledigt am 21. August 2026.**
 
-Dazu die kleineren Fragen: Gehört der Beispielbestand (`seed/README.md`) in die Übersicht?
-Steht `adaption.md` an der richtigen Stelle, jetzt wo [licensing.md](licensing.md) danebenliegt?
+`history.md` stand bei **3.858 Zeilen** und wächst mit jedem Arbeitsschritt. Zu klären war, ob eine
+Aufteilung hilft. **Nachgemessen war die Länge nicht das Problem:** 90 Abschnitte, der mittlere
+55 Zeilen lang, in einer Reihenfolge, die nie umsortiert wird. Ein Schnitt nach Jahr wäre bei einem
+vier Monate alten Projekt gegenstandslos, einer nach Thema würde zerstören, was die Datei allein
+kann — die Reihenfolge —, und brächte bei jedem Anhängen die Frage *„in welche Datei?"* mit, deren
+falsche Antwort niemandem auffällt.
+
+**Das Problem lag woanders und war zählbar:** 31 Verweise aus anderen Dateien zeigten hierher,
+**30 davon ohne Anker**, also auf 3.858 Zeilen. Und die Datei hatte keinen Eingang.
+
+Also erschlossen: ein **Register** am Anfang, eine Zeile je Abschnitt mit Datum und Sprungmarke,
+erzeugt von `tools/build_register.py` und von `make check` nachgeprüft. Es ersetzt die Tabelle der
+Arbeitsblöcke, die eine Commit-Spanne nannte und seit fünfzig Abschnitten falsch war. Die acht
+Verweise, die eine bestimmte Stelle meinten, zeigen jetzt dorthin; die übrigen meinen wirklich die
+ganze Datei.
+
+**Der Eingang ist das Datum, nicht der Titel** — gesucht wird ein Tag, selten eine Überschrift.
+Daraus wurde eine Zusage mit Sperre: *Jeder Abschnitt nennt sein Datum in den ersten Zeilen
+darunter.* Neun taten das nicht, die neuesten; sie haben es nachgetragen bekommen. Die Begründung
+und die Ausnahmeregel für die Teile I bis V stehen in
+[decisions.md](decisions.md#63-die-historie-wird-nicht-aufgeteilt-sondern-erschlossen--über-ihr-datum).
+
+**Die beiden kleinen Fragen dazu:** `seed/README.md` steht längst in der
+[Übersicht](index.md) — die Frage war schon beantwortet. `adaption.md` stand dagegen falsch:
+zusammen mit `licensing.md` unter „Daran arbeiten", obwohl beide sich nicht an jemanden richten,
+der *dieses* Gerät weiterbaut, sondern an jemanden, der ein **eigenes** aufsetzt. Die Übersicht hat
+dafür jetzt eine eigene Gruppe, „Es übernehmen".
+
+**Nebenbei gefunden:** `architecture.md` fehlte in der Liste von `tools/check_anchors.py`. Kein
+Vorsatz, ein Versehen — und unbemerkt geblieben, weil bis dahin niemand mit einem Anker in die
+Datei oder aus ihr heraus verwiesen hatte. Sie steht jetzt drin. Ebenso hat der Ankerprüfer
+gelernt, dass eine Überschrift der ersten Ebene auch eine Sprungmarke ist: Die sechs Teile der
+Historie galten ihm zunächst als tote Verweise.
 
 #### 4. Lücken
 

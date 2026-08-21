@@ -118,18 +118,24 @@ lint: $(VENV)  ## Code-Stil pruefen
 	$(VENV)/bin/ruff check backend tiles tools
 	$(VENV)/bin/ruff format --check backend tiles tools
 
-# Die vier Pruefungen, die Dateien lesen, die kein Test je sieht: Sprachregelung, Verweise in
+# Die fuenf Pruefungen, die Dateien lesen, die kein Test je sieht: Sprachregelung, Verweise in
 # docs/, der Weg jeder Einstellung in den Container, und die Buchfuehrung des Backlogs ueber
 # seine eigenen Nummern.
 #
 # Reine Leser, deshalb ohne venv und ohne node_modules -- python3 aus dem System genuegt. Zusammen
 # brauchen sie unter einer Sekunde, und genau deshalb haengen sie auch im Git-Hook unter
 # .githooks/. Warum es sie ueberhaupt braucht: docs/decisions.md, Punkt 59.
-docs-check:  ## Sprachregelung, Verweise, Einstellungen, Nummern
+docs-check:  ## Sprachregelung, Verweise, Einstellungen, Nummern, Register
 	@python3 tools/language_check.py
 	@python3 tools/check_anchors.py
 	@python3 tools/check_settings.py
 	@python3 tools/check_numbers.py
+	@python3 tools/build_register.py --check
+
+# Das Register am Anfang von docs/history.md. Erzeugt statt gepflegt, aus demselben Grund wie die
+# Lizenzhinweise: neunzig Zeilen von Hand sind in einem Monat falsch. Siehe docs/decisions.md.
+register:  ## Register in docs/history.md neu schreiben
+	@python3 tools/build_register.py
 
 # Die Lizenzhinweise, die mit jedem Artefakt mitgehen muessen -- MIT und BSD verlangen den
 # Copyright-Vermerk in *jeder* Kopie, und ein gebuendeltes index-*.js ist eine Kopie.
