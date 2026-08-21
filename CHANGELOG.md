@@ -946,3 +946,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - `services/backup.py` ist ein Paket aus zehn Modulen geworden — Laufwerke, Bestand, Schreiben,
   Archiv, Wiederherstellen, Zustand, Auftrag. `from app.services import backup` heisst weiterhin
   dasselbe, und am Programm ändert sich nichts
+- **Das Projekt steht unter der Apache-Lizenz 2.0**, Copyright 2026 Kalle Erlhoff — `LICENSE` und
+  `NOTICE` liegen an der Wurzel und gelten für Code, Dokumentation und die Beispielbilder. Der
+  Fotobestand des Museums ist ausdrücklich nicht erfasst: Eine Softwarelizenz lizenziert das
+  Programm, nicht die Daten
+- **Die Lizenzhinweise der mitgelieferten Pakete reisen jetzt mit.** `make notices` erzeugt zu
+  jedem Artefakt eine `THIRD-PARTY.txt` mit den vollen Lizenztexten — 37 Pakete im Frontend, 26 im
+  Backend. Das Bundle trug vorher zwei Hinweise für siebenunddreissig Pakete
+- Die Karte nennt neben OpenStreetMap auch die Datenlizenz: „© OpenStreetMap-Mitwirkende, ODbL"
+- Die Lizenz der Kartensymbole wird von `make tiles` mitgeholt, bisher blieb sie im
+  Temporaerverzeichnis liegen
+- `docs/licensing.md` beantwortet als neunte Datei, was weitergegeben werden darf und unter welchen
+  Bedingungen

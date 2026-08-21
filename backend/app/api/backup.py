@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Backup onto a USB stick, and restoring from one.
 
 Both take minutes, so neither happens inside the request. A thread does the work and the screen

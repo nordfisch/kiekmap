@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+// SPDX-License-Identifier: Apache-2.0
+
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 

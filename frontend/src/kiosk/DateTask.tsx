@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * "Wann war das?" -- dating a photo, in the contribution panel.
  *

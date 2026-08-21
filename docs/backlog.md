@@ -60,7 +60,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
-| 23 | [Lizenz des Projekts und der verwendeten Komponenten](#23--lizenz-des-projekts-und-der-verwendeten-komponenten) | Frage | wichtig |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
 dem Durchgang über den Code vom 19. August 2026
@@ -68,9 +67,9 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Siebenundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 24, 25,
-26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-55, 56, 57, 58, 59, 60, 61, 62, 63. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+**Achtundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 23, 24,
+25, 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52,
+53, 55, 56, 57, 58, 59, 60, 61, 62, 63. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **64**.
 
 ---
@@ -606,8 +605,20 @@ Begründungen.
 **Die beiden Blocker davor sind erledigt** (5. August 2026): das Wappen ist aus Repo und Historie
 verschwunden, der Beispielbestand ist erfunden und mitgeliefert. Wie das ausging und was dabei
 anders kam als geplant, steht in [history.md](history.md). **Offen bleibt der Releaseprozess
-selbst** — und [Punkt 23](#23--lizenz-des-projekts-und-der-verwendeten-komponenten), der vor einer
-Veröffentlichung ebenfalls beantwortet sein muss.
+selbst.**
+
+**Die Lizenzfrage ist seit dem 20. August 2026 beantwortet** (Punkt 23): Apache-2.0, Copyright
+Kalle Erlhoff, `LICENSE` und `NOTICE` liegen an der Wurzel. Was daraus für ein Release folgt, steht
+in [licensing.md](licensing.md) — und ein Satz daraus gehört hierher, weil er den Releaseprozess
+festlegt: **Dockerfiles veröffentlichen, keine gebauten Abbilder.** Ein Abbild aus
+`python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes Debian- bzw. Alpine-Userland;
+wer es weitergibt, übernimmt dessen Pflichten. Wer nur die Dockerfiles veröffentlicht, lässt sie
+dort, wo sie hingehören. Der Weg über `abbilder.tar` in `deploy/pi/update.sh` bleibt für das eigene
+Gerät richtig.
+
+Dazu die Frage, die ein Release erst auslöst: Was passiert mit `THIRD-PARTY.txt`? Sie wird erzeugt
+und ist eingecheckt, also aktuell — aber nur, solange `make check` läuft. In einer CI
+([Punkt 62](history.md)) wäre das automatisch.
 
 **Dazu gehört das Festnageln der Abhängigkeiten**, nachgetragen am 19. August 2026. Das Frontend
 hat eine `package-lock.json`; `backend/pyproject.toml` nennt nur untere Schranken (`fastapi>=0.115`,
@@ -616,21 +627,3 @@ andere Versionen als der heutige. Bei einem Dienst, der wöchentlich neu gebaut 
 sofort auf; bei einem Gerät, das offline steht und einmal im Jahr angefasst wird, fällt es im
 Museum auf. Eine Lockdatei (`pip-compile`, `uv lock`) macht aus einer Version eine Zusage — und
 gehört zu dem, was ein Release überhaupt erst zu einem Release macht.
-
-### 23 · Lizenz des Projekts und der verwendeten Komponenten
-
-Noch festzulegen, und **Voraussetzung für [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)**.
-Zwei getrennte Fragen, die oft verwechselt werden:
-
-- **Unter welcher Lizenz steht Kiekmap selbst?** Für ein Projekt, das ausdrücklich für ein zweites
-  Museum nachnutzbar sein soll, ist das keine Formalie — ohne Lizenz ist Nachnutzung rechtlich
-  nicht erlaubt, auch wenn der Code offen daliegt.
-- **Was verlangen die verwendeten Komponenten?** Bisher steht im README nur der Satz „Alle
-  verwendeten Komponenten sind Open Source" — das ist geglaubt, nicht geprüft. Nachzusehen sind
-  mindestens MapLibre GL (BSD-3), PMTiles, `@protomaps/basemaps` samt der mitgelieferten
-  **Schriften und Symbole** unter `frontend/public/basemaps/`, die OpenStreetMap-Daten in Kacheln
-  und Ortsindex (ODbL — verlangt Namensnennung, die auf der Karte steht) und die
-  Python-Abhängigkeiten. Die Kombination entscheidet, welche Lizenz für Kiekmap überhaupt möglich
-  ist.
-
-Gehört anschließend in eine `LICENSE`-Datei und in den Lizenzabschnitt des README.

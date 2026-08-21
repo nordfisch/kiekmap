@@ -87,4 +87,17 @@ Welche Datei welche Frage beantwortet, sagt [docs/index.md](docs/index.md).
 
 ## Lizenz
 
-Noch festzulegen. Alle verwendeten Komponenten sind Open Source.
+Copyright 2026 Kalle Erlhoff, lizenziert unter der **Apache-Lizenz 2.0** (`SPDX-License-Identifier:
+Apache-2.0`). Der Lizenztext steht in [LICENSE](LICENSE), die Namensnennung in [NOTICE](NOTICE);
+beide reisen mit jeder Weitergabe mit.
+
+**Alle 169 verwendeten Fremdkomponenten sind permissiv lizenziert** — nachgezählt an den
+installierten Paketen, nicht an den Manifestdateien: MIT, ISC, BSD-2, BSD-3, Apache-2.0, HPND und
+PSF. Kein Copyleft, nichts, was einer Nutzung im Weg steht.
+
+**Die Kartendaten sind eine eigene Frage.** Sie stammen aus OpenStreetMap und stehen unter der
+**ODbL 1.0**; die Schriften unter der OFL 1.1, die Kartensymbole unter MIT. Was das für eine
+Weitergabe bedeutet — und was der Fotobestand des Museums damit zu tun hat, nämlich nichts —,
+steht in [docs/licensing.md](docs/licensing.md).
+
+Ohne Gewähr, ohne Haftung, wie in Abschnitt 7 und 8 der Lizenz beschrieben.

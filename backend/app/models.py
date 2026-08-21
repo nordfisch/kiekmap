@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Tables.
 
 Two traits shape this model, both following from the fact that historical photos are scans

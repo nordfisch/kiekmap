@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * How the map looks.
  *
@@ -169,7 +172,11 @@ export function buildStyle(region: Region): maplibregl.StyleSpecification {
       protomaps: {
         type: "vector",
         url: "pmtiles:///tiles/map.pmtiles",
-        attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>-Mitwirkende',
+        // The licence belongs beside the name, not only the name: vector tiles are a derivative
+        // database in the sense of the ODbL, which asks that they be recognisable as one.
+        // See docs/licensing.md.
+        attribution:
+          '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, ODbL',
       },
     },
     layers: layers("protomaps", flavor, { lang: "de" })

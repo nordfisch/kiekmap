@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests der Sicherung auf USB-Stick.
 
 Drei Zusagen tragen diese Stufe, und alle drei brechen still:

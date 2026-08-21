@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests des Imports vom USB-Stick.
 
 Die eine Zusage, die diese Funktion von der Ordnerueberwachung unterscheidet: **Der Stick gehoert

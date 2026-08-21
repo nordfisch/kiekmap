@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Backup onto a USB stick, and restoring from one.
 
 Deliberately a feature with a screen and a progress bar, not a shell script. The people who do

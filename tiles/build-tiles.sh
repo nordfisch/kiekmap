@@ -104,6 +104,13 @@ else
   rm -rf "$ZIEL/basemaps/fonts" "$ZIEL/basemaps/sprites"
   mv "$TMP/basemaps-assets-main/fonts" "$ZIEL/basemaps/fonts"
   mv "$TMP/basemaps-assets-main/sprites" "$ZIEL/basemaps/sprites"
+  # Die Lizenz des Archivs mitnehmen. Dass die Schriften belegt sind, war bisher Zufall: Ihre
+  # OFL.txt liegt *innerhalb* von fonts/. Die Symbole (MIT, abgeleitet von tangrams/icons) hatten
+  # gar keinen Text dabei, weil hier nur die zwei Ordner herausgeholt wurden und der Rest mit dem
+  # Temporaerverzeichnis verschwand. Siehe docs/licensing.md.
+  for LIZENZ in "$TMP/basemaps-assets-main"/LICENSE*; do
+    [ -f "$LIZENZ" ] && cp "$LIZENZ" "$ZIEL/basemaps/"
+  done
 fi
 
 # --- Ergebnis ---------------------------------------------------------------

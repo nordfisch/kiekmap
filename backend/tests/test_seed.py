@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Der Beispielbestand: sichern, wegwerfen, zurueckholen.
 
 Die eine Zusage, an der alles haengt: **Was gesichert wurde, kommt vollstaendig zurueck.** Ein

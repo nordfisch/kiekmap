@@ -1,0 +1,18 @@
+Kiekmap
+Copyright 2026 Kalle Erlhoff
+
+Lizenziert unter der Apache License, Version 2.0. Der Lizenztext steht in LICENSE.
+
+Dieses Produkt enthält Software Dritter. Die vollständigen Lizenztexte werden beim Bauen erzeugt
+und liegen als THIRD-PARTY.txt neben dem jeweiligen Artefakt.
+
+Die Kartendaten stammen aus OpenStreetMap und stehen unter der Open Database License (ODbL) 1.0:
+© OpenStreetMap-Mitwirkende, https://www.openstreetmap.org/copyright
+Das betrifft die Kartendatei, den Ortsindex und die Tabelle „places" in der Datenbank.
+
+Die Kartenschriften sind Noto, Copyright The Noto Project Authors, unter der SIL Open Font
+License 1.1. Die Kartensymbole stammen aus protomaps/basemaps-assets (MIT). Beide Lizenztexte
+liegen unter basemaps/ neben den Dateien, für die sie gelten.
+
+Der Fotobestand des Museums ist nicht Bestandteil dieser Software und nicht von dieser Lizenz
+erfasst. Die Bilder unter seed/ sind erfunden und von tools/build_seed.py gezeichnet.

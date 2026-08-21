@@ -3,6 +3,8 @@ name = "kiekmap-backend"
 version = "0.1.0"
 description = "Bilddatenbank fuer historische Ortsfotos im Heimatmuseum"
 requires-python = ">=3.12"
+authors = [{ name = "Kalle Erlhoff" }]
+license = "Apache-2.0"
 
 dependencies = [
     "fastapi>=0.115",

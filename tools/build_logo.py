@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Builds the placeholder emblem at ``frontend/public/logo.png``.
 
     python3 tools/build_logo.py

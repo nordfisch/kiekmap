@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+// SPDX-License-Identifier: Apache-2.0
+
 /** Numbers and dates as they are read out loud in German. */
 
 const NUMBER = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });

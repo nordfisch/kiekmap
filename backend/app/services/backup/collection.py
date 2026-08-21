@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """What "the collection" is on the disk -- how big it is, and how it is copied.
 
 Shared by all three routes out of it: the stick, the archive and the restore. That it lives in one

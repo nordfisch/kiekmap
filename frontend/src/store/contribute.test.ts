@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+// SPDX-License-Identifier: Apache-2.0
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // `importOriginal` statt einer vollständigen Attrappe, und zwar wegen genau einer Zeile: `NEEDS`

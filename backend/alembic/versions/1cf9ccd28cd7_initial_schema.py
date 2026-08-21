@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Initial schema
 
 The whole schema in one step, and deliberately so: the three revisions before it were folded

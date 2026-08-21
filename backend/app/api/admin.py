@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """The admin area.
 
 Used once or twice a year, by volunteers, on the same touchscreen the visitors use. That shapes

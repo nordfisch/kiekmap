@@ -2122,3 +2122,58 @@ sind weiterhin die Sache ihres einen Moduls.
 was ein Besucher merkt. Er war fällig, weil die Datei ihren Namen überwachsen hatte — nicht, weil
 etwas falsch war. Wer in dieser Lage steht, sollte zuerst prüfen, ob die Tests einen Umbau
 *tragen*; tun sie es nicht, ist das Aufteilen der zweite Schritt und nicht der erste.
+
+## 62. Apache-2.0 — weil das Projekt zum Übernehmen gebaut ist
+
+*Entschieden am 20. August 2026 — Backlogpunkt 23.*
+
+Die Wahl war frei: Von 169 Fremdpaketen ist **kein einziges Copyleft**, gemessen an den
+installierten Paketen statt an den Manifestdateien. Keine Abhängigkeit schreibt etwas vor, keine
+verhindert eine Veröffentlichung. Zur Wahl standen MIT, BSD-3-Clause, Apache-2.0, MPL-2.0,
+EUPL-1.2 und die GPL-Familie.
+
+Drei Ziele gaben den Ausschlag — andere sollen es nutzen können, Rückmeldungen und Mitwirkung
+sollen möglich sein, der Name soll mitgehen —, und ein Vorbehalt: Sorge vor rechtlichen
+Auseinandersetzungen.
+
+**Ausschlaggebend war §4.2, und der Grund steht in [adaption.md](adaption.md).** Dieses Projekt ist
+ausdrücklich dafür gebaut, dass ein zweites Museum es übernimmt; eine ganze Datei erklärt Schritt
+für Schritt, wie. Apache verlangt, dass **geänderte Dateien als geändert gekennzeichnet** werden.
+Eine Übernahme, die schiefgeht, bleibt damit sichtbar eine Übernahme und nicht „Kiekmap". Genau das
+schützt den Namen, an dem die Sichtbarkeit hängt. MIT gibt das nicht her.
+
+**§5 erledigt die Beitragsfrage, bevor sie entsteht.** Beiträge stehen ohne weitere Vereinbarung
+unter derselben Lizenz. Bleiben sie aus — wahrscheinlicher als erhofft, so sind Nischenprojekte —,
+hat es nichts gekostet.
+
+**§4.1 und §4.4** verlangen Copyright-Vermerk *und* NOTICE-Datei bei jeder Weitergabe. Mehr
+Namensnennung gibt eine permissive Lizenz nicht her.
+
+**Was nicht den Ausschlag gab, obwohl es so aussieht:** die ausführlichere Freizeichnung in §§7–8.
+Sie liest sich beruhigender als MITs zwei Sätze, bewirkt in Deutschland aber kaum mehr — § 276
+Abs. 3 BGB und das AGB-Recht begrenzen beide gleich. Was das Risiko klein hält, ist die
+Unentgeltlichkeit, nicht die Klausel. Und der Patentgrant in §3 ist hier gegenstandslos: An einer
+Fotoverwaltung mit Karte ist nichts patentiert. Sein Wert liegt darin, die Frage gar nicht erst zu
+haben.
+
+**Verworfen:**
+
+- **MIT** wäre die naheliegendste Wahl für ein Projekt dieser Grösse und ist es fast geworden. Es
+  fehlen ihr genau die drei Paragrafen oben. Der Unterschied in der Praxis ist klein, der
+  Unterschied bei einer missratenen Übernahme nicht.
+- **BSD-3-Clause** schützt den Namen nur gegen Werbung, nicht gegen Verwechslung.
+- **MPL-2.0** und **EUPL-1.2** — schwaches Copyleft, beide vertretbar. Die EUPL hat einen
+  verbindlichen deutschen Text und passt kulturell; sie ist international aber so unbekannt, dass
+  sie eher abschreckt, als Beiträge einbringt. Das Ziel war Verbreitung, nicht Rückfluss.
+- **GPL-3.0/AGPL-3.0** — starkes Copyleft. Für einen Offline-Kiosk greift die AGPL ohnehin nicht,
+  und die GPL erschwert einer Einrichtung genau das, was hier erwünscht ist.
+
+**Eine Lizenz für alles**, Code wie Dokumentation. Getrennt wäre genauer — Code-Lizenzen reden von
+„the Software" und von Patenten, was auf 9.400 Zeilen Prosa schief liegt —, und der nächste
+Verwandte macht es so (CollectionBuilder: MIT plus CC-BY-SA für die Doku). Es verschafft aber
+niemandem mehr Rechte: Eine permissive Lizenz über dem ganzen Repo erlaubt das Kopieren und
+Anpassen der Doku bereits. Zwei Dateien und eine Abgrenzungsregel wären Verwaltung ohne Gewinn.
+
+**Was die Entscheidung ausdrücklich nicht berührt: den Fotobestand.** Eine Softwarelizenz
+lizenziert das Programm, nicht die Daten. Das steht samt der ODbL-Frage beim Ortsverzeichnis in
+[licensing.md](licensing.md) — der Datei, die es seit dieser Entscheidung gibt.

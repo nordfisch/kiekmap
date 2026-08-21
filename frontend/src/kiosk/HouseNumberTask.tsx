@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * "Welche Hausnummer?" -- sharpening a photo that so far only knows its street.
  *

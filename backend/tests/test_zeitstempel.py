@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Was die API ueber die Uhrzeit sagt -- und was sie bewusst nicht sagt.
 
 Gespeichert wird ueberall UTC: ``func.now()`` in SQLite, ``dates.utc_now()`` in Python, die

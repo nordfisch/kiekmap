@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Access to the admin area: PIN, sessions, and a lock against guessing.
 
 A PIN rather than a password, because the only input device in the museum is a touchscreen with

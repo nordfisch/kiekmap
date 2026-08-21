@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Builds a copy of an archive folder in which every picture is a JPEG.
 
     python3 tools/to_jpeg.py "~/Museum/Neue Fotos" "~/Museum/Neue Fotos zwecks Import/Straßen"

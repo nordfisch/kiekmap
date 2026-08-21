@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Do the settings of ``config.py`` reach the container?
 
 The check exists because of a failure that produced no error message at all. Until 14 August 2026

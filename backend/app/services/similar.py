@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Finding the same picture twice.
 
 The SHA-256 of a file recognizes a copy of the file. It does **not** recognize the same

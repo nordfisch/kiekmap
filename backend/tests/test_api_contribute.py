@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests des "Hilf mit"-Bereichs.
 
 Der Kernpunkt: Beitraege werden direkt uebernommen, aber sie duerfen nur fuellen, was leer ist.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Watching the inbox folder.
 
 Whatever is copied in here ends up in the database -- no login, no interface. For the museum team

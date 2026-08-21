@@ -14,6 +14,10 @@ COPY pyproject.toml ./
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip && pip install .
 
+# Die Lizenzhinweise gehoeren ins Abbild, nicht nur ins Repo: Sie muessen mit jeder Kopie
+# mitgehen. Erzeugt von tools/build_notices.py, eingecheckt, damit dieser Kontext fuer sich
+# vollstaendig ist -- die LICENSE der Projektwurzel liegt ausserhalb davon.
+COPY THIRD-PARTY.txt ./
 COPY app ./app
 COPY alembic ./alembic
 COPY alembic.ini ./

@@ -3690,3 +3690,61 @@ sondern der Grund, warum der Umbau überhaupt in einer Sitzung machbar war: **Di
 längst gezogen, sie waren nur nicht durchgesetzt.**
 
 `decisions.md`, Punkt 61.
+
+## Punkt 23: die Lizenz war die kleinere Hälfte
+
+Der Punkt hiess „Lizenz des Projekts und der verwendeten Komponenten" und war Voraussetzung für
+die Veröffentlichung. Die Arbeit lag nicht bei der Wahl, sondern beim Nachzählen.
+
+### Erst messen: 169 Pakete, keins davon Copyleft
+
+Im README stand seit jeher: *„Alle verwendeten Komponenten sind Open Source."* Der Backlogeintrag
+sagte dazu, das sei geglaubt und nicht geprüft. Geprüft, und zwar an den **installierten** Paketen
+statt an den Manifestdateien, stimmt es: 39 Python-Pakete und 128 npm-Pakete, durchweg MIT, ISC,
+BSD-2, BSD-3, Apache-2.0, HPND und PSF. Kein einziges Copyleft, nichts, was eine Wahl vorgeschrieben
+oder eine Veröffentlichung verhindert hätte.
+
+Das war die beruhigende Hälfte. Die andere kam beim Blick auf das, was das Repo **verlässt**.
+
+### Drei Lücken, und die erste war eine echte Verletzung
+
+**Das gebaute Frontend nannte seine Herkunft nicht.** 1,4 MB Bundle, 37 Pakete darin, genau
+**zwei** Lizenzhinweise — `@license React` und ein Verweis auf MapLibres BSD-3. Kein einziger
+Copyright-Vermerk hatte den Bau überlebt. MIT verlangt ihn wörtlich „in all copies or substantial
+portions", BSD-3 ebenso für die Binärform. Von den Sorgen, mit denen dieser Punkt aufgegriffen
+wurde — Lizenzverletzung, Haftung, Namensnennung —, war ausgerechnet die erste die begründete.
+
+**Die Kartensymbole reisten ohne ihren Lizenztext.** `build-tiles.sh` holt aus dem Assets-Archiv
+zwei Ordner heraus und wirft den Rest samt LICENSE mit dem Temporärverzeichnis weg. Dass die
+Schriften korrekt belegt waren, war Zufall: Ihre `OFL.txt` liegt *innerhalb* von `fonts/`.
+
+**Und die Karte nannte die Datenlizenz nicht.** Unten rechts stand „© OpenStreetMap-Mitwirkende" —
+die Namensnennung stimmte, die ODbL fehlte. Vektorkacheln sind eine abgeleitete Datenbank, und die
+verlangt, als solche kenntlich zu sein.
+
+### Was die Bestandsaufnahme nebenbei zutage förderte
+
+Zwei Dinge, nach denen niemand gesucht hatte. Erstens: **Weder `pyproject.toml` noch
+`package.json` nannten einen Autor.** Zweitens, und das ist die feinere: **Die Tabelle `places`
+steht unter ODbL** — sie kommt aus OpenStreetMap und liegt in `kiekmap.db`, also in jeder
+Sicherung. Wer die Datenbank aus dem Haus gibt, gibt fremdlizenziertes Material mit. Dafür steht
+jetzt ein Satz im Handbuch, in der Sprache, in der das Handbuch geschrieben ist.
+
+### Die Wahl, und wie das Bauen sie prüfte
+
+**Apache-2.0**, entschieden an §4.2: Das Projekt ist zum Übernehmen gebaut, und geänderte Dateien
+müssen als geändert gekennzeichnet sein — eine missratene Übernahme bleibt damit sichtbar eine
+Übernahme. Die Begründung samt der verworfenen Alternativen steht in
+[decisions.md](decisions.md), Punkt 62.
+
+`tools/build_notices.py` erzeugt die Hinweisdateien und ist dabei dreimal an sich selbst
+gescheitert, jedes Mal an derselben Sorte Fehler: **eine Zeichenkette, die fast richtig zerlegt
+wurde.** Der Dateiname aus `pyproject.toml` behielt sein Anführungszeichen. Die Trennzeichen für
+Versionsangaben liessen bei `pydantic!=1.8` ein `pydantic!` übrig. Und `dependencies = [ … ]` wurde
+beim ersten `]` abgeschnitten — das steckt in `uvicorn[standard]`, die Liste war nach einem Eintrag
+zu Ende.
+
+Aufgefallen ist keiner davon beim Lesen, sondern an der Zahl am Zeilenende: **9 Pakete, dann 16,
+dann 26.** Ein Werkzeug, das eine Vollzähligkeit herstellen soll, muss die Zahl mitschreiben, die
+es erreicht hat — sonst produziert es zuverlässig und leise das Falsche. Dieselbe Lehre wie bei
+`tools/build_seed.py`, das seine Lücken nachzählt und abbricht, wenn eine fehlt.

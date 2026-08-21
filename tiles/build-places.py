@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Builds the gazetteer for the search in the "Hilf mit" panel.
 
     python3 tiles/build-places.py

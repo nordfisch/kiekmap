@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """The sample collection: writing it out, and putting it back.
 
 A development state that cannot be restored is not a state, it is a coincidence. This is what

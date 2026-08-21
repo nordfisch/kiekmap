@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Bringing a backup back onto the device.
 
 In three movements, and the order is the whole point: copy everything into a working folder beside

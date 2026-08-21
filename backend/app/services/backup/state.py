@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """When the last backup was made -- a note about this device, not about the collection.
 
 Deliberately not part of the backup itself: a stick carried to a second museum would otherwise

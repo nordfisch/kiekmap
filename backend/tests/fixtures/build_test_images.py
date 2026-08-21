@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Erzeugt die Testbilder in diesem Verzeichnis.
 
 Aufruf: ``python tests/fixtures/build_test_images.py``

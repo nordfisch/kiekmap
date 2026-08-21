@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Read the folder structure a collection was sorted into.
 
 A museum archive is rarely a flat pile. Holm's is filed by address::

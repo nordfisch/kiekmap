@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests fuer die Rechnung hinter dem Ortsindex.
 
 Die Zahlen stammen aus dem echten Fall: Im Ausschnitt fuer Holm liegen siebzehn Strassen namens

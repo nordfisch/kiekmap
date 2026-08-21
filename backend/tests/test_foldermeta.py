@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Tests der Pfad-Schicht: was die Ordnerstruktur ueber ein Foto sagt.
 
 Ein Museumsarchiv ist sortiert, und die Sortierung ist eine Aussage. Sie zu verwerfen hiesse,

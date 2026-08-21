@@ -89,6 +89,23 @@ Einstellungswert, `"März"` in der Monatsliste — ohne Umlaut wären sie schlic
 
 Ob eine Datei sich daran hält, beantwortet `python tools/language_check.py`.
 
+## Der Kopf jeder Quelldatei
+
+Zwei Zeilen, über dem Docstring, unter einer etwaigen Shebang-Zeile:
+
+```python
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+```
+
+In `.ts` und `.tsx` mit `//` statt `#`. Von der Apache-Lizenz **nicht** verlangt — die gilt über
+die [LICENSE](../LICENSE) für das ganze Repo. Sie stehen trotzdem da, weil sie das einzige sind,
+was eine **einzeln kopierte Datei** überlebt: Wer `services/dates.py` in sein Projekt zieht,
+nimmt sonst keine Spur mit. Siehe [licensing.md](licensing.md).
+
+**Keine Prüfung erzwingt sie.** Neue Dateien bekommen sie von Hand; vergisst sie jemand, ist der
+Schaden klein.
+
 ## Testen
 
 ```bash

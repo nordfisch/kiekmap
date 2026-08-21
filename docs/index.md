@@ -1,6 +1,6 @@
 # Dokumentation
 
-Acht Dateien, jede mit genau einer Frage. Wer hier landet und nicht weiß, wohin: **Die erste
+Neun Dateien, jede mit genau einer Frage. Wer hier landet und nicht weiß, wohin: **Die erste
 Spalte sagt, was drinsteht, die zweite, für wen.**
 
 ## Das System verstehen
@@ -21,6 +21,7 @@ wenn etwas unerklärlich aussieht. Meist steht dort, warum.
 | [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler |
 | [backlog.md](backlog.md) | Was fehlt noch? — nach Bereich geordnet, jeder Punkt mit Nummer, Art und Einordnung | wer etwas aufgreifen will |
 | [adaption.md](adaption.md) | Wie richte ich das für **einen anderen Ort** ein? | ein zweites Museum |
+| [licensing.md](licensing.md) | Was darf weitergegeben werden, und unter welchen Bedingungen? | wer veröffentlicht oder übernimmt |
 
 Für Coding-Agents kommt [../CLAUDE.md](../CLAUDE.md) dazu — dieselben Regeln, auf das Nötigste
 gekürzt, mit den drei Dingen vorneweg, die man hier falsch machen kann.

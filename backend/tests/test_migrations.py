@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Dass eine Migration nichts mitreisst, was an den Tabellen haengt.
 
 Der Anlass ist ein echter Verlust: Die Migration, die ``hidden`` in ``deleted`` umbenannte, baute

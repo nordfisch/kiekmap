@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Alembic environment.
 
 The database URL comes from ``app.config``, not from alembic.ini -- so there is exactly one place

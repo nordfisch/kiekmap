@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Take photos into the database.
 
 Per file: hash it, check for duplicates, read the image, extract metadata, store the original,

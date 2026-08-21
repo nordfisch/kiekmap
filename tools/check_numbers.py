@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Check the backlog's own bookkeeping -- the numbers it keeps about itself.
 
     python3 tools/check_numbers.py

@@ -340,6 +340,20 @@ beim Nachsehen doch — der Zeitschieber rechnete die Fingerposition selbst in e
 ein Rundungsfehler dort wählt 1931 statt 1932, ohne dass etwas falsch *aussieht*.
 `docs/decisions.md`, Punkt 60.
 
+Am **20. August 2026** ist die **Lizenzfrage beantwortet** worden — Punkt 23. Das Projekt steht
+unter **Apache-2.0**, Copyright Kalle Erlhoff; ausschlaggebend war §4.2, weil das Projekt zum
+Übernehmen gebaut ist und eine missratene Übernahme sichtbar eine Übernahme bleiben soll
+(`docs/decisions.md`, Punkt 62). Von 169 Fremdpaketen ist keines Copyleft — der Satz im README
+stimmte, er war nur nie geprüft.
+
+**Die Arbeit lag nicht bei der Wahl, sondern beim Nachzählen.** Das gebaute Frontend trug
+**zwei** Lizenzhinweise für siebenunddreissig Pakete; MIT verlangt den Vermerk in *jeder*
+Kopie. `make notices` erzeugt die `THIRD-PARTY.txt` jetzt je Artefakt, `make check` merkt,
+wenn sie veraltet. Dazu zwei kleinere Lücken: die Kartensymbole reisten ohne Lizenztext, und
+die Karte nannte die ODbL nicht. **Was weitergegeben werden darf, steht jetzt in
+`docs/licensing.md`** — auch, dass der Fotobestand nicht erfasst ist und dass die Tabelle
+`places` aus OpenStreetMap stammt und in jeder Sicherung mitfährt.
+
 Zum Schluss **Punkt 60**: `services/backup.py` mit seinen 938 Zeilen ist ein Paket aus zehn
 Modulen geworden, geschnitten entlang der Kommentarbalken, die schon darin standen. Die
 Bedingung stand vor dem Zuschnitt: **Die Tests dürfen sich nicht ändern**, sonst ist der

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Where the database schema stands, and how it is brought up to date.
 
 Alembic normally runs from the command line, once, at startup

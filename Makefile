@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
-        migrate revision seed seed-save empty lint docs-check check tiles places build prod \
+        migrate revision seed seed-save empty lint docs-check notices notices-check check \
+        tiles places build prod \
         prod-mac prod-down clean
 
 PYTHON  ?= python3.12
@@ -130,11 +131,22 @@ docs-check:  ## Sprachregelung, Verweise, Einstellungen, Nummern
 	@python3 tools/check_settings.py
 	@python3 tools/check_numbers.py
 
+# Die Lizenzhinweise, die mit jedem Artefakt mitgehen muessen -- MIT und BSD verlangen den
+# Copyright-Vermerk in *jeder* Kopie, und ein gebuendeltes index-*.js ist eine Kopie.
+#
+# Erzeugt statt gepflegt, aber eingecheckt: Jeder Docker-Kontext bleibt fuer sich vollstaendig, und
+# eine neue Abhaengigkeit taucht im Diff auf, wo sie jemand sieht. Siehe docs/licensing.md.
+notices: deps  ## Lizenzhinweise der mitgelieferten Pakete erzeugen
+	@python3 tools/build_notices.py
+
+notices-check: deps
+	@python3 tools/build_notices.py --check
+
 # Das Ziel vor einem Commit. Die schnellen zuerst: Wer den Stil verletzt hat, soll das nach zwei
 # Sekunden erfahren und nicht nach zehn.
-check: lint docs-check test  ## Alles pruefen, was vor einem Commit laufen soll
+check: lint docs-check notices-check test  ## Alles pruefen, was vor einem Commit laufen soll
 
-build: frontend/node_modules  ## Frontend-Bundle bauen (Ergebnis in frontend/dist)
+build: frontend/node_modules notices  ## Frontend-Bundle bauen (Ergebnis in frontend/dist)
 	cd frontend && npm run build
 
 # --- Betrieb ----------------------------------------------------------------

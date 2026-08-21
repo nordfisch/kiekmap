@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """What a backup says about itself -- and how that is read back.
 
 One reader for both shapes, the folder on the stick and the entry in the archive: a backup that

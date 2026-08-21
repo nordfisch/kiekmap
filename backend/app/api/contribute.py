@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """The "Hilf mit" panel: visitors fill in missing statements.
 
 For historical scans, place and year are nowhere in the file. Someone who knows the village often

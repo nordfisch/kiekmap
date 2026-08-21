@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+
 """Command line for bulk import and inspection.
 
     python -m app.cli import ~/Scans/Kirchweih   take in a directory (originals stay put)

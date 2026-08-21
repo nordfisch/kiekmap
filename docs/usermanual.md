@@ -136,6 +136,12 @@ normale Dateien.
 > **Wenn kein Stick erscheint:** Steckt er richtig? Manche sehr alten Sticks werden nicht erkannt.
 > Ein anderer Stick ist der schnellste Versuch.
 
+> **Wenn Sie eine Sicherung aus dem Haus geben** — an ein anderes Museum, an eine Firma, an
+> jemanden zum Ausprobieren: In der Datenbank steckt neben Ihren Fotos auch das Ortsverzeichnis,
+> und das stammt aus OpenStreetMap. Legen Sie dann bitte den Hinweis „Ortsdaten:
+> © OpenStreetMap-Mitwirkende, ODbL" dazu. Ein Satz in der Mail genügt. Für Ihre eigenen Fotos
+> ändert sich dadurch nichts — die gehören weiterhin dem Museum.
+
 ## Sicherung als eine Datei herunterladen
 
 Wenn kein Stick zur Hand ist, geht es auch über den Rechner, an dem Sie gerade sitzen: Verwaltung
