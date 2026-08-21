@@ -25,9 +25,9 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 | I | Die Stufen 0 bis 10 | 28.–30. Juli 2026 | `0e0dc23` … `bc11222` |
 | II | Umbau des Verwaltungsmenüs | 30. Juli 2026 | `0b9ee6e` |
 | III | Nachbesserungen an der Verwaltung | 30.–31. Juli 2026 | `4fdad66` … `bb18411` |
-| IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `45ae42d` … `d5509fd` |
-| V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `99cd9e3` … `6eb4c69` |
-| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `1e99559` … `cc98623` |
+| IV | Besucheransicht: Fehler und Verbesserungen | 31. Juli 2026 | `8b33e65` … `0f3c463` |
+| V | Nachbesserungen an der Besucheransicht | 31. Juli – 2. August 2026 | `08fb3ed` … `a3967bb` |
+| VI | Einzelne Punkte aus dem Backlog | ab 2. August 2026 | `959c4e7` … `804e0c9` |
 
 ---
 
@@ -411,7 +411,7 @@ entgegengehalten — die Art Sackgasse, in der eine ehrenamtliche Person aufgibt
 
 # Teil IV — Besucheransicht: Fehler und Verbesserungen
 
-`45ae42d` … `d5509fd` · 31. Juli 2026. Der Plan dazu stand in
+`8b33e65` … `0f3c463` · 31. Juli 2026. Der Plan dazu stand in
 `docs/archiv/besucheransicht.md`, bis das Verzeichnis am 5. August 2026 entfiel.
 
 Sechs Punkte aus dem Durchsehen der Kioskansicht: ein handfester Fehler, zwei Sackgassen in der
@@ -421,14 +421,14 @@ Fundament, auf dem zwei andere Punkte aufbauen.
 
 ## 1. Ruhigeres Bild
 
-`45ae42d` · Alle vier Trennlinien zwischen Titel, Zeitschieber, Beitragsbereich und Karte fallen —
+`8b33e65` · Alle vier Trennlinien zwischen Titel, Zeitschieber, Beitragsbereich und Karte fallen —
 die Bereiche unterscheiden sich danach nur noch durch den Papierton gegen die Karte, und das ist
 die einzige Kante mit einer Aufgabe. Neben dem Wappen steht „Bilder aus" statt „Bilder aus
 unserem", beide Zeilen größer, zusammen so hoch wie das Wappen.
 
 ## 2. Der Zeitschieber lief aus seinem Feld
 
-`39b2927` · **Der handfeste Fehler.** Nach dem Hineinzoomen auf zwei Fotos am Friedhofsweg (beide
+`f1d4f4f` · **Der handfeste Fehler.** Nach dem Hineinzoomen auf zwei Fotos am Friedhofsweg (beide
 „1950er") stand auf der Skala 1950–1960, in der Auswahl aber weiterhin 1920 bis 2019. Die Elemente
 rechnen ihre Position in Prozent der Achse aus:
 
@@ -453,7 +453,7 @@ in [decisions.md](decisions.md), Punkt 14.
 
 ## 3. Jahrzehnte kommen aus dem Bestand
 
-`d7b0dd5` · Die Datierungsfrage heißt seither „Wann war das?", passend zu „Wo ist das?".
+`c86e1e5` · Die Datierungsfrage heißt seither „Wann war das?", passend zu „Wo ist das?".
 
 **Der eigentliche Fund war eine Fehlablage.** `firstDecade`/`lastDecade` standen in
 `tiles/region.json` — einer Datei, in der jeder andere Schlüssel Geografie beschreibt und die vom
@@ -470,7 +470,7 @@ Er hätte den falschen Ort bequemer erreichbar gemacht, statt ihn zu räumen.)*
 
 ## 4. Der eigene Beitrag wird sofort sichtbar
 
-`b27dd61` · Nach einem Beitrag stellt sich die Ansicht für die Dauer des Dankes (2,2 s) auf dieses
+`459673a` · Nach einem Beitrag stellt sich die Ansicht für die Dauer des Dankes (2,2 s) auf dieses
 Foto ein: Die Karte fährt auf hundert Meter heran, der Zeitraum auf das Jahrzehnt der Angabe —
 oder ganz auf, wenn das Foto undatiert ist. Danach kehren **beide zusammen** zurück. Außerdem
 springt der „Hilf mit"-Bereich bei jedem Wechsel nach oben.
@@ -491,7 +491,7 @@ am Ende ein Jahrzehnt zurück, das er nie eingestellt hat.
 
 ## 5. Fotos am selben Ort
 
-`7e5c13e` · **Die zweite Sackgasse.** Am Gasthof Petersen lagen acht Fotos auf identischen
+`b803fb2` · **Die zweite Sackgasse.** Am Gasthof Petersen lagen acht Fotos auf identischen
 Koordinaten. Ab Zoom 18 fasste supercluster nichts mehr zusammen — aus den acht wurden acht Marker
 exakt übereinander, von denen nur der oberste erreichbar war. Und der Weg dorthin führte ins
 Leere: Ein Tipp auf die „8" zoomte genau in diesen Stapel hinein. **Identische Punkte trennen sich
@@ -511,7 +511,7 @@ Punkt 4 zusammenspielt: Die Karte fährt hin, und das eben ergänzte Foto liegt 
 
 ## 6. Das Foto im Beitragsbereich groß ansehen
 
-`1be6ccd` · Das Vorschaubild im „Hilf mit"-Bereich war ein totes `<img>`. Dabei ist „genauer
+`b8c0905` · Das Vorschaubild im „Hilf mit"-Bereich war ein totes `<img>`. Dabei ist „genauer
 hinsehen" genau das, was jemand tut, **bevor** er sagt, wo das war — auf 160 px ist ein Hof kaum
 zu erkennen. Es öffnet jetzt dieselbe Vollbildansicht wie ein Marker auf der Karte. Ein gesetzter
 Pin bleibt dabei erhalten: Er liegt im Store, nicht in der Ansicht.
@@ -520,37 +520,37 @@ Pin bleibt dabei erhalten: Er liegt im Store, nicht in der Ansicht.
 
 # Teil V — Nachbesserungen an der Besucheransicht
 
-`99cd9e3` … `6eb4c69` · 31. Juli – 2. August 2026. **Ohne Plandokument**, wie Teil III.
+`08fb3ed` … `a3967bb` · 31. Juli – 2. August 2026. **Ohne Plandokument**, wie Teil III.
 
-- **Die Karte fährt schon beim Setzen des Punktes heran** (`99cd9e3`) — sobald über die Ortssuche
+- **Die Karte fährt schon beim Setzen des Punktes heran** (`08fb3ed`) — sobald über die Ortssuche
   eine Straße oder Hausnummer gewählt ist, nicht erst nach dem Bestätigen. Der Besucher sieht, wo
   sein Punkt gelandet ist, bevor er ihn abgibt. Ein selbst auf die Karte getippter oder
   verschobener Pin lässt sie stehen: Dort hat er gerade gezielt.
-- **Hausnummern in zwei Schritten** (`ba561da`) — bei langen Straßen kommt ein **Abschnitt** vor
+- **Hausnummern in zwei Schritten** (`8529d6a`) — bei langen Straßen kommt ein **Abschnitt** vor
   die Nummer („1–13", „15–24"), genau wie das Jahrzehnt vor dem Jahr. Dazu vertritt die Grundzahl
   ihre Buchstabenzusätze. Aus 78 Knöpfen im Mühlenweg werden vier plus zehn. Kurze Straßen
   behalten den einen Schritt.
-- **„Hilf mit:" führt in die Frage** (`08f25c5`) — mit Doppelpunkt, und der Abstand zur Frage
+- **„Hilf mit:" führt in die Frage** (`7a192ea`) — mit Doppelpunkt, und der Abstand zur Frage
   darunter ist derselbe wie zwischen „Bilder aus" und dem Ortsnamen.
-- **Zwei Oberkanten in einer Flucht** (`be24d1d`) — die des Wappens mit der des gewählten
+- **Zwei Oberkanten in einer Flucht** (`e3e6a7b`) — die des Wappens mit der des gewählten
   Zeitraums, die von „Hilf mit:" mit der der Karte.
-- **Kreise zählen Fotos, nicht Stellen** (`d4ba931`) — eine Folge der Stapel-Gruppierung aus
+- **Kreise zählen Fotos, nicht Stellen** (`43e710b`) — eine Folge der Stapel-Gruppierung aus
   Teil IV: Über einem Achterstapel und zwei Einzelbildern stand 3 statt 10. Gelöst über die
   `map`/`reduce`-Aggregation von supercluster.
-- **Titel auf Schieberhöhe, Leerlauf lädt neu** (`8c1f880`) — Wappen und Titel stehen zusammen so
+- **Titel auf Schieberhöhe, Leerlauf lädt neu** (`1cce630`) — Wappen und Titel stehen zusammen so
   hoch wie der Zeitschieber daneben, von seiner ersten Zeile bis zur Jahresskala. Und der Leerlauf
   nach fünf Minuten **lädt die Seite neu**, statt nur den Zustand zurückzusetzen: Im Kiosk gibt es
   keine Browser-Bedienung — kein Reload-Knopf, keine Adressleiste, keine Tastatur —, ein verhakter
   Zustand bliebe sonst bis zum Netzstecker stehen. Dazu ein Knopf „Anzeige neu laden" in der
   Verwaltung, für den Fall, dass jemand danebensteht.
-- **Weniger Beiwerk, wenn nichts mehr fehlt** (`c46fcc6`) — „Weiß ich nicht — nächstes Foto"
+- **Weniger Beiwerk, wenn nichts mehr fehlt** (`73e75c0`) — „Weiß ich nicht — nächstes Foto"
   verschwindet, wenn es die letzte offene Aufgabe ist; es gäbe kein nächstes, dasselbe Foto käme
   zurück. Ist gar nichts mehr zu ergänzen, fällt der Beitragsbereich ganz weg und die **Karte
   nimmt die volle Breite**. Eine Erfolgsmeldung, die monatelang dasteht, ist kein Inhalt — die
   Fotos sind es.
-- **Ein Abstand für waagerecht und senkrecht** (`6221bad`) — eine Variable `--gap` statt zweier
+- **Ein Abstand für waagerecht und senkrecht** (`70bf1ac`) — eine Variable `--gap` statt zweier
   Zahlen, die auseinanderlaufen.
-- **Die Detailansicht auf Fluchtlinien gebaut** (`6eb4c69`) — Bild, Textspalte und
+- **Die Detailansicht auf Fluchtlinien gebaut** (`a3967bb`) — Bild, Textspalte und
   Schließen-Knopf beginnen auf derselben Höhe; die Blätterknöpfe stehen mittig **unter dem Bild**
   statt mittig im Schirm. Viel Text scrollt in seiner Spalte, statt oben den Schließen-Knopf zu
   überlagern und unten aus dem Bild zu laufen. Der Schließen-Knopf verließ dafür die Ecke über dem
@@ -567,7 +567,7 @@ Ab hier keine Blöcke mehr, sondern einzeln aufgegriffene Einträge aus [backlog
 
 ## Verwaltung verlassen lädt die Besucheransicht neu
 
-`1e99559` · 2. August 2026.
+`959c4e7` · 2. August 2026.
 
 „Verwaltung beenden" führte zurück zur Karte, ohne dass die Ansicht ihre Daten neu holte. Wer
 gerade dreißig Fotos importiert oder eine Datierung korrigiert hatte, stand vor dem Bestand von
@@ -585,7 +585,7 @@ trotzdem stehen — wer eine verhakte Anzeige reparieren will, sucht nach „neu
 
 ## Der Bearbeitungsdialog fängt oben an
 
-`9c4889a` · 2. August 2026.
+`a98d4d6` · 2. August 2026.
 
 Wer in der Fotoliste nach unten gescrollt hatte und dann ein Foto öffnete, bekam das Formular an
 derselben Stelle — mittendrin, mit Vorschaubild und Titel oberhalb des Bildschirmrands.
@@ -625,7 +625,7 @@ einen echten Import.*
 
 ## Gleichnamige Straßen werden nicht mehr verschmolzen
 
-`398a8fb` · 2. August 2026.
+`652010a` · 2. August 2026.
 
 Wer bei der Verortung „Hauptstraße" eingab, bekam einen Punkt **2,26 km von Holms Ortsmitte** — auf
 keiner Straße, mitten im Feld. Und der zweite Schritt bot **153 Hausnummern aus siebzehn Dörfern**
@@ -679,7 +679,7 @@ drittes Ziel bekommen. Der Grund ist derselbe wie überall in diesem Projekt: Be
 
 ## Fotos löschen — und ein Datenverlust, der beinahe unbemerkt geblieben wäre
 
-`a63f6bb` · 2. August 2026.
+`3926951` · 2. August 2026.
 
 Aus „Verstecken" wurde „Löschen": derselbe Status unter dem Wort, unter dem das Museumsteam ihn
 sucht. Bedient wird es im Editor und in jeder Zeile der Fotoliste, beide mit Rückfrage; gelöschte
@@ -724,7 +724,7 @@ eingeführt wurden.
 
 ## Abbruch in der Hausnummern-Auswahl
 
-`3ec6099` · 2. August 2026.
+`6e00bcc` · 2. August 2026.
 
 Sobald eine Straße gewählt war, zeigte der Beitragsbereich nur noch das Knopfraster der
 Hausnummern. Zurück führte einzig „Reicht so" — und das ist **keine Abbruchtaste, sondern eine
@@ -752,7 +752,7 @@ behoben wurde, wäre wieder da, ohne dass irgendetwas rot würde.
 
 ## `architecture.md` — was es gibt und wie es ineinandergreift
 
-`cc98623` · 2. August 2026.
+`804e0c9` · 2. August 2026.
 
 Es gab keine Stelle, an der jemand nachlesen konnte, **aus welchen Teilen das System besteht**. Wer
 einstieg, musste sich das aus vier Dateien und dem Code zusammensuchen: `development.md` listete
@@ -897,7 +897,7 @@ realistische Fall.
 
 3. August 2026.
 
-Der Umbau vom 2. August (`6eb4c69`) hatte ihn aus der Ecke in die Kopfzeile der Textspalte geholt.
+Der Umbau vom 2. August (`a3967bb`) hatte ihn aus der Ecke in die Kopfzeile der Textspalte geholt.
 Das fluchtete mit der Oberkante des Bildes — aber es las sich nicht wie ein Schließen-Knopf. Die
 gewohnte Stelle ist oben rechts.
 
@@ -1205,7 +1205,7 @@ geworden, hätte das nächste Archiv wieder eines gebraucht.
 
 ## Sprach- und Namenskonsistenz
 
-`5e5b467` … `e6fd0fa` · 5. August 2026.
+`edc6250` … `f5b9022` · 5. August 2026.
 
 Die Sprachregelung stand seit Stufe 7.5 in CLAUDE.md und galt als geklärt. Der Backlog-Punkt dazu
 forderte etwas anderes: **nachsehen statt annehmen.** Die Messung über alle 108 Quelldateien war
@@ -1273,7 +1273,7 @@ beweist erst einmal nichts über den Code — sie stellt eine Frage an die Probe
 
 ## Zwei Blocker vor der Veröffentlichung
 
-`e43a3e1` … `ebcd793` · 5. August 2026.
+`710b3b3` … `4dfe3bb` · 5. August 2026.
 
 Der Backlog-Punkt zur Veröffentlichung nannte zwei Dinge, die vorher zu klären seien. Beide waren
 schnell geklärt — und beide anders, als die Frage gestellt war.
@@ -1586,7 +1586,7 @@ die Spanne blieb bei vier Jahren.
 ## Der Durchgang über den Backlog
 
 9. August 2026. Zwei Tage nachdem der Backlog seine Ordnung bekommen hatte, kamen zwoelf neue
-Punkte hinzu (`3679353`) — und damit war zu pruefen, ob die Liste noch stimmt. Vier Fragen an jeden
+Punkte hinzu (`0e59a1f`) — und damit war zu pruefen, ob die Liste noch stimmt. Vier Fragen an jeden
 der siebenunddreissig Eintraege: Ueberschneidet er sich mit einem anderen? Will das noch jemand?
 Stimmt seine Einordnung? Und, die ergiebigste: **widerspricht sein Text dem, was inzwischen gebaut
 ist?**
@@ -3316,7 +3316,7 @@ Kreisen sind erreichbar, auch mit einem beruehrten Bild daneben.
 
 Am 19. August 2026 ist der Code geprüft worden — der Punkt, der seit Langem verlangte, dass jemand
 ohne die Vorgeschichte darüberliest, bevor veröffentlicht wird und bevor das Gerät im Museum steht.
-Geprüft wurde Stand `04d4a38`: Backend, Frontend, Deployment, Dokumentation und die Tests selbst.
+Geprüft wurde Stand `eca1dbd`: Backend, Frontend, Deployment, Dokumentation und die Tests selbst.
 
 ### Der Zustand, gemessen und nicht geschätzt
 
@@ -3790,3 +3790,21 @@ Der Git-Verlauf. 177 Commits tragen die alten Fassungen; allein einer der Namen 
 davon. Solange das Repo privat ist, trifft das niemanden — mit der Veröffentlichung wird es
 öffentlich, und danach ist es nicht mehr zu ändern. Die Entscheidung steht im
 [backlog.md](backlog.md), Punkt 64.
+
+### Und der Verlauf gleich mit
+
+Am selben Tag ist `git filter-repo --replace-text --replace-message` über die 180 Commits gelaufen,
+nach zwei Sicherungen und einem Probelauf auf einer Kopie. Der Baum von `HEAD` ist danach
+**byte-gleich** mit dem davor — dieselbe Prüfsumme —, alle Commits sind erhalten, und weder in einer
+Dateifassung noch in einer Commit-Nachricht steht noch einer der Namen.
+
+**Möglich war das ohne Kosten, weil es keinen Remote gibt.** Niemand hatte eine Kopie, die
+unbrauchbar werden konnte. Nach der Veröffentlichung wäre derselbe Lauf ein Bruch für jeden, der
+schon geklont hat — das ist der ganze Grund, warum diese Entscheidung vorher fallen musste.
+
+**Ein Nebeneffekt war einzukalkulieren und fast übersehen worden:** Diese Datei zitiert
+Commit-Kennungen. 146 der 180 Commits haben eine neue bekommen, 29 Zitate zeigten danach ins Leere.
+`filter-repo` schreibt dafür eine Zuordnungstabelle nach `.git/filter-repo/commit-map`; damit liess
+sich jedes einzeln nachziehen. Zwei Kennungen blieben übrig und **durften nicht angefasst werden** —
+sie sind keine Commits, sondern die acht Zeichen eines Foto-Hashes, wie der Kiosk sie unter dem
+Bildnachweis zeigt. Nachgesehen in der Datenbank: Zu beiden gibt es genau ein Foto.

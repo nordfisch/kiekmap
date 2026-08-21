@@ -222,7 +222,7 @@ Punkt da, *weil* jemand sie am Stück angesehen hatte. Genau das soll hier für 
   Oberfläche; zwölf einzeln entschiedene Kleinigkeiten ergeben zwölf Sonderfälle.
 
 **Der erste Eintrag dieser Liste liegt schon vor.** Er stand bis zum 9. August 2026 als eigener
-Punkt 13 hier: Beim Angleichen von „Hilf mit:" an „Bilder aus" (`45ae42d`) wurde aus dem Akzentbraun
+Punkt 13 hier: Beim Angleichen von „Hilf mit:" an „Bilder aus" (`8b33e65`) wurde aus dem Akzentbraun
 eine stille graue Zeile — die bewusste Folge einer bewussten Entscheidung, aber es war zugleich der
 einzige Blickfang der linken Spalte. Als eigener Punkt war das zu klein, um je an die Reihe zu
 kommen, und zu vereinzelt, um richtig entschieden zu werden: Ob der Beitragsbereich seinen Zug aufs
@@ -629,10 +629,11 @@ sofort auf; bei einem Gerät, das offline steht und einmal im Jahr angefasst wir
 Museum auf. Eine Lockdatei (`pip-compile`, `uv lock`) macht aus einer Version eine Zusage — und
 gehört zu dem, was ein Release überhaupt erst zu einem Release macht.
 
-**Und ein Punkt geht vor.** Im Repo stehen echte Namen und Adressen aus dem Holmer Bestand —
-in der Dokumentation, im Quelltext und vor allem in den Tests. Was davon weitergegeben werden
-darf, ist zu entscheiden, **bevor** veröffentlicht wird; danach steht es im Netz und im Verlauf
-jeder gezogenen Kopie. Siehe [Punkt 64](#64--durchsicht-der-dokumentation), Abschnitt 1.
+**Ein Hindernis ist seit dem 21. August 2026 weg.** Im Repo standen echte Namen aus dem Holmer
+Bestand — in der Dokumentation, im Quelltext und vor allem in den Tests. Sie sind durch den
+erfundenen Kader aus `seed/` ersetzt, im aktuellen Stand **und im ganzen Git-Verlauf**. Siehe
+[Punkt 64](#64--durchsicht-der-dokumentation), Abschnitt 1. Von dieser Seite steht einer
+Veröffentlichung nichts mehr entgegen.
 
 ### 64 · Durchsicht der Dokumentation
 
@@ -659,18 +660,14 @@ Die Tests haben die Arbeit geprüft und dabei eine Fundstelle gefangen, die der 
 eine kleingeschriebene Fassung desselben Namens, die belegt, dass eine Beschreibung ihren Titel
 nicht wiederholen darf.
 
-**Offen bleibt allein der Git-Verlauf.** Die alten Fassungen stehen in 177 Commits; allein einer
-der Namen kommt in sechzehn davon vor. Solange das Repo privat ist, trifft das niemanden — mit der
-Veröffentlichung wird es öffentlich, und danach ist es nicht mehr zu ändern. Zwei Wege:
+**Der Git-Verlauf ist mitgezogen.** `git filter-repo --replace-text --replace-message` über
+180 Commits, nach zwei Sicherungen und einem Probelauf auf einer Kopie. Der Baum von `HEAD` ist
+danach byte-gleich mit dem davor — die Prüfsumme stimmt —, alle Commits sind erhalten, und weder in
+einer Dateifassung noch in einer Commit-Nachricht steht noch einer der Namen. Möglich war das ohne
+Kosten, weil es keinen Remote gibt: Niemand hatte eine Kopie, die unbrauchbar werden konnte.
 
-- **Verlauf umschreiben** (`git filter-repo --replace-text` mit derselben Ersetzungsliste). Beim
-  Wappen am 5. August ist genau das gemacht worden. Es macht jede vorher gezogene Kopie
-  unbrauchbar — heute ohne Belang, denn es gibt keinen Remote.
-- **Stehen lassen** und die Veröffentlichung mit einem frischen Verlauf beginnen (ein Commit, oder
-  ab einem Stichtag). Das kostet die Historie, die dieses Repo auszeichnet — und die ist einer der
-  Gründe, es überhaupt zu zeigen.
-
-**Zu entscheiden vor [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes).**
+**Damit ist dieser Abschnitt geschlossen**, und [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)
+ist von dieser Seite nicht mehr blockiert.
 
 #### 2. Redundanzen
 
