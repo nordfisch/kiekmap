@@ -59,6 +59,7 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 20 | [Das Gerät muss einen Stromausfall überstehen](#20--das-gerät-muss-einen-stromausfall-überstehen) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
+| 64 | [Durchsicht der Dokumentation](#64--durchsicht-der-dokumentation) | Aufgabe | wichtig |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
@@ -70,7 +71,7 @@ die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fa
 **Achtundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 23, 24,
 25, 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52,
 53, 55, 56, 57, 58, 59, 60, 61, 62, 63. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
-[history.md](history.md). Der nächste neue Punkt bekommt die **64**.
+[history.md](history.md). Der nächste neue Punkt bekommt die **65**.
 
 ---
 
@@ -628,14 +629,22 @@ sofort auf; bei einem Gerät, das offline steht und einmal im Jahr angefasst wir
 Museum auf. Eine Lockdatei (`pip-compile`, `uv lock`) macht aus einer Version eine Zusage — und
 gehört zu dem, was ein Release überhaupt erst zu einem Release macht.
 
-#### Namen und Adressen im Repo — vor der Veröffentlichung zu entscheiden
+**Und ein Punkt geht vor.** Im Repo stehen echte Namen und Adressen aus dem Holmer Bestand —
+in der Dokumentation, im Quelltext und vor allem in den Tests. Was davon weitergegeben werden
+darf, ist zu entscheiden, **bevor** veröffentlicht wird; danach steht es im Netz und im Verlauf
+jeder gezogenen Kopie. Siehe [Punkt 64](#64--durchsicht-der-dokumentation), Abschnitt 1.
 
-Die Frage kam am 21. August 2026 auf und lautete zuerst: *Sollen die Abschnitte zur Bereinigung des
-Erstbestands aus der [history.md](history.md) heraus? Oder reicht es, personenbezogene und
-konkrete Adressdaten zu entfernen und zusammenzufassen, was getan wurde?*
+### 64 · Durchsicht der Dokumentation
 
-**Nachgezählt sieht die Frage anders aus, als sie gestellt war.** Echte Namen aus dem Holmer
-Bestand — Familien, Hofnamen, Gaststätten, Geber, ein aktueller Eigentümer — stehen an
+Neun Dateien unter `docs/`, dazu `CLAUDE.md`, `README.md` und der `CHANGELOG` — zusammen **9.700
+Zeilen**, gewachsen über vier Monate und nie im Ganzen durchgesehen. Vier Fragen, und die erste
+hat einen Termin.
+
+#### 1. Schützenswerte Angaben — vor der Veröffentlichung
+
+**Diese Hälfte blockiert [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)
+und muss zuerst entschieden werden.** Echte Namen aus dem Holmer Bestand — Familien, Hofnamen,
+Gaststätten, Geber, ein aktueller Eigentümer — stehen an:
 
 | | Zeilen |
 |---|---|
@@ -645,44 +654,73 @@ Bestand — Familien, Hofnamen, Gaststätten, Geber, ein aktueller Eigentümer �
 | Quelltext | 32 |
 | davon in Testdateien | 22 |
 
-**Die Historie ist also der kleinere Teil**, und sie herauszuschneiden löste das Problem nicht. Der
-Schwerpunkt liegt in den Tests, und zwar aus einem guten Grund: CLAUDE.md verlangt dort ausdrücklich
-echte Holmer Daten, *„weil sie den Fall konkret machen"*. Genau diese Regel kollidiert jetzt mit der
-Veröffentlichung.
+Die Frage kam als „sollen die Abschnitte zur Bereinigung des Erstbestands aus der Historie heraus?"
+auf. **Nachgezählt liegt der Schwerpunkt woanders:** in den Tests, und zwar aus einem guten Grund —
+[CLAUDE.md](../CLAUDE.md) verlangt dort ausdrücklich echte Holmer Daten, *„weil sie den Fall konkret
+machen"*. Genau diese Regel kollidiert mit einer Veröffentlichung.
 
-**Die Fälle sind unterschiedlich schwer, und das Zusammenwerfen macht die Entscheidung schwierig:**
+**Fünf unterschiedlich schwere Fälle**, und das Zusammenwerfen macht die Entscheidung schwierig:
 
-1. **Eine lebende, identifizierbare Person an einem Grundstück** — eine Fundstelle, eine
-   Archivnotiz der Form „heute (Jahr) <Name>". Der klarste Fall, weil hier Name, Ort und Gegenwart
-   zusammenkommen.
-2. **Namen von Gebern und Leihgebern** aus dem Herkunftsfeld, drei Fundstellen. Und darin die
-   Ironie: [decisions.md](decisions.md), Punkt 36 erklärt die Herkunft zur *internen* Notiz, die den
-   Kiosk nie erreichen darf — und zitiert in derselben Datei drei davon wörtlich.
-3. **Lange Verstorbene** in historischen Bildunterschriften, etwa zu einem Hof nach einem
-   Bombenangriff. Die DSGVO gilt für Verstorbene nicht; ein Persönlichkeitsrecht wirkt fort.
-4. **Familien- und Firmennamen an einer Hausnummer** — die Masse der Fundstellen, im Ort öffentlich
-   bekannt, einzeln harmlos. In Summe ergeben sie eine Liste, wer wo wohnt.
+1. **Eine lebende, identifizierbare Person an einem Grundstück** — eine Fundstelle, eine Archivnotiz
+   der Form „heute (Jahr) <Name>". Der klarste Fall: Name, Ort und Gegenwart zusammen.
+2. **Namen von Gebern und Leihgebern** aus dem Herkunftsfeld, drei Fundstellen. Darin die Ironie:
+   [decisions.md](decisions.md), Punkt 36 erklärt die Herkunft zur *internen* Notiz, die den Kiosk
+   nie erreichen darf — und zitiert in derselben Datei drei davon wörtlich.
+3. **Lange Verstorbene** in historischen Bildunterschriften. Die DSGVO gilt für Verstorbene nicht;
+   ein Persönlichkeitsrecht wirkt fort.
+4. **Familien- und Firmennamen an einer Hausnummer** — die Masse, im Ort öffentlich bekannt, einzeln
+   harmlos. In Summe ergeben sie eine Liste, wer wo wohnt.
 5. **Eine Bildunterschrift mit Verwandtschaftsangaben und Familienstand**, in einem Test und in
    einem Kommentar. Der schärfste Einzelfund, weil er weit über einen Namen hinausgeht.
 
-**Und die teure Hälfte liegt im Git-Verlauf.** Eine Zeile heute zu ändern nimmt sie aus 177 Commits
-nicht heraus; allein einer der Namen kommt in 16 Commits vor. Das ist derselbe Fall wie beim Wappen
-am 5. August, und dort ist die Historie umgeschrieben worden. **Deshalb muss das vor der
-Veröffentlichung entschieden sein** — danach ist es nicht mehr entscheidbar.
+**Die teure Hälfte liegt im Git-Verlauf.** Eine Zeile heute zu ändern nimmt sie aus 177 Commits
+nicht heraus; allein einer der Namen kommt in 16 davon vor. Derselbe Fall wie beim Wappen am
+5. August, und dort ist die Historie umgeschrieben worden. **Deshalb vor der Veröffentlichung** —
+danach ist es nicht mehr entscheidbar.
 
-**Vorschlag, wenn es aufgegriffen wird:** nicht herausschneiden, sondern **ersetzen**. Der Wert
-dieser Abschnitte liegt im Muster, nie im Wert — dass eine Jahreszahl neben einem Namen der Stand
-des Archivs ist und kein Aufnahmedatum, zeigt ein erfundener Name genauso. Dasselbe gilt für das
-Kodierungsbeispiel, das nur einen Umlaut braucht. Die Regel wäre die, nach der `seed/` schon lebt:
-**Beispiele sind erfunden.** Für die Tests hiesse das, die Sprachregelung in CLAUDE.md um einen Satz
-zu ergänzen — Holmer *Koordinaten* ja, Holmer *Namen* nein.
+**Vorschlag:** nicht herausschneiden, sondern **ersetzen**. Der Wert dieser Abschnitte liegt im
+Muster, nie im Wert — dass eine Jahreszahl neben einem Namen der Archivstand ist und kein
+Aufnahmedatum, zeigt ein erfundener Name genauso; das Kodierungsbeispiel braucht nur einen Umlaut.
+Die Regel wäre die, nach der `seed/` schon lebt: **Beispiele sind erfunden.** Für die Tests hiesse
+das einen Satz mehr in der Sprachregelung — Holmer *Koordinaten* ja, Holmer *Namen* nein.
 
-Zu entscheiden bleiben zwei Dinge, und nur das erste ist billig:
+Zu entscheiden bleiben zwei Dinge, und nur das erste ist billig: **Reicht Ersetzen im aktuellen
+Stand?** (ein Nachmittag an 51 Zeilen) — oder **wird der Git-Verlauf mitgezogen?** (ein
+`filter-repo`-Lauf über 177 Commits, der jede vorher gezogene Kopie unbrauchbar macht).
 
-- **Reicht Ersetzen im aktuellen Stand?** Dann ist es ein Nachmittag Arbeit an 51 Zeilen.
-- **Wird der Git-Verlauf mitgezogen?** Das kostet einen `filter-repo`-Lauf über 177 Commits und
-  macht jede vorher gezogene Kopie unbrauchbar. Beim Wappen war die Antwort ja; dort ging es aber um
-  eine Datei, nicht um Textstellen in achtundvierzig.
+#### 2. Redundanzen
 
-Ein Satz zum Umgang mit dieser Notiz selbst: **Sie nennt bewusst keinen der Namen.** Ein
-Backlogeintrag, der die Fundstellen aufzählt, wäre eine Fundstelle mehr.
+**Gemessen: Ein erledigter Backlogpunkt berührt vier bis neun Doku-Dateien.** Die letzten acht
+Arbeitsschritte lagen bei 1, 9, 7, 5, 6, 4, 5, 5. Jeder erzählt dieselbe Sache in `CHANGELOG`,
+`history.md`, `decisions.md`, im Backlog und im Stand von `CLAUDE.md`.
+
+Ein Teil davon ist begründet und soll bleiben: [index.md](index.md) erklärt, warum `CHANGELOG` und
+`history.md` beide existieren — der eine listet *was*, die andere erzählt *wie und warum*.
+
+**Der Stand in `CLAUDE.md` ist die vierte Erzählung, und über die hat nie jemand entschieden.** Er
+umfasst inzwischen **200 von 377 Zeilen, also 53 % der Datei**, die eigentlich sagen soll, *wie man
+hier arbeitet*. Zu klären: Reicht dort ein Absatz plus Verweis auf die Historie?
+
+#### 3. Aufteilung und Ablage
+
+`history.md` ist mit **3.750 Zeilen** das grösste Ding im Repo und wächst mit jedem Arbeitsschritt.
+Sie ist rein chronologisch angehängt; einen Weg hinein gibt es nicht ausser Lesen. Zu klären, ob das
+ein Problem ist — eine Datei, die niemand von vorn liest, darf lang sein — oder ob eine Aufteilung
+nach Jahr oder Thema hilft, und was sie an Verweisen kostet.
+
+Dazu die kleineren Fragen: Gehört der Beispielbestand (`seed/README.md`) in die Übersicht?
+Steht `adaption.md` an der richtigen Stelle, jetzt wo [licensing.md](licensing.md) danebenliegt?
+
+#### 4. Lücken
+
+**Ein veröffentlichtes Repo hat üblicherweise fünf Dateien, die hier alle fehlen:**
+`CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, Vorlagen für Meldungen, `AUTHORS`. Die
+erste hat Substanz, seit die Lizenz Beiträge regelt (Apache §5) und Mitwirkung erwünscht ist — dort
+gehört auch hin, was jemand erwarten darf, damit eine Veröffentlichung keine stille Zusage wird.
+
+**Und eine Lücke in der eigenen Regel:** Die Sprachregelung sagt, deutsche Prosa in `docs/` werde
+mit Umlauten geschrieben. Die neueren Einträge halten sich nicht daran — gemessen an
+`decisions.md`: 448 Umlaute im ersten Drittel gegen 158 im letzten, bei 303 Zeilen mit `ue`/`oe`/`ae`.
+In `history.md` dasselbe Bild. `tools/language_check.py` sieht nur `.py`, `.ts` und `.tsx`, die
+Dokumentation also nicht. Zu entscheiden: nachziehen und prüfen, oder die Regel an die Praxis
+anpassen.
