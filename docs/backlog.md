@@ -669,18 +669,49 @@ Kosten, weil es keinen Remote gibt: Niemand hatte eine Kopie, die unbrauchbar we
 **Damit ist dieser Abschnitt geschlossen**, und [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)
 ist von dieser Seite nicht mehr blockiert.
 
-#### 2. Redundanzen
+#### 2. Redundanzen — CLAUDE.md ist auf die Hälfte
 
-**Gemessen: Ein erledigter Backlogpunkt berührt vier bis neun Doku-Dateien.** Die letzten acht
-Arbeitsschritte lagen bei 1, 9, 7, 5, 6, 4, 5, 5. Jeder erzählt dieselbe Sache in `CHANGELOG`,
-`history.md`, `decisions.md`, im Backlog und im Stand von `CLAUDE.md`.
+**Erledigt am 21. August 2026.**
 
-Ein Teil davon ist begründet und soll bleiben: [index.md](index.md) erklärt, warum `CHANGELOG` und
-`history.md` beide existieren — der eine listet *was*, die andere erzählt *wie und warum*.
+Zuerst geprüft, ob die Datei technisch überhaupt gebraucht wird: **ja.** Sie wird bei jedem
+Sitzungsstart automatisch und vollständig geladen und ist damit der einzige Projekttext, der
+garantiert im Kontext steht. Alles unter `docs/` kostet einen Werkzeugaufruf — und, wichtiger, das
+Urteil, überhaupt nachzusehen. Ein Querverweis wirkt nur, wenn der Agent schon weiss, dass er ihm
+folgen muss; gewöhnliche Markdown-Links werden nicht mitgeladen, und `@pfad`-Importe landen
+vollständig im Kontext, sparen also nichts.
 
-**Der Stand in `CLAUDE.md` ist die vierte Erzählung, und über die hat nie jemand entschieden.** Er
-umfasst inzwischen **200 von 377 Zeilen, also 53 % der Datei**, die eigentlich sagen soll, *wie man
-hier arbeitet*. Zu klären: Reicht dort ein Absatz plus Verweis auf die Historie?
+**Damit ist inhaltliche Überschneidung mit den Dateien für Menschen in Ordnung — nur Umfang und
+Form nicht.** Die offizielle Empfehlung lautet unter 200 Zeilen, *„longer files consume more
+context and reduce adherence"*, und benennt das Kriterium: weg mit dem, was sich aus dem Code
+ableiten lässt, behalten werden *„pitfalls, rationale, and conventions that differ from tool
+defaults"*.
+
+Gemessen stand die Datei bei **385 Zeilen**, und der Abschnitt „Stand" allein bei **199** — so lang
+wie die Empfehlung für die ganze Datei. Er war Erzählung, und die steht vollständig in
+[history.md](history.md).
+
+| | vorher | nachher |
+|---|---|---|
+| CLAUDE.md gesamt | 385 | **208** |
+| „Stand" | 199 | 31 |
+| „Sprachregelung" | 53 | 36 |
+| „Aufbau" | 19 | 13 |
+
+Was aus dem Stand blieb, ist kein Verlauf, sondern **was man sonst falsch annähme**: dass
+`deploy/pi/` geprüft sei, dass alte Sicherungen noch erkannt werden, dass die Verwaltung ohne PIN
+läuft. Die Sprachregelung behielt die Tabelle und die Faustregel und gab die Begründung an
+[development.md](development.md) ab. Der Verzeichnisbaum wich den vier Sätzen, die man ihm nicht
+ansieht.
+
+Beim Kürzen ging ein Fallstrick verloren und ist zurückgeholt worden: die gemessene
+Qualitätseinstellung in `tools/to_jpeg.py`, die nicht nachjustiert werden darf. Die Gegenprobe lief
+über jede entfernte Kernaussage — jede hat ein Zuhause, in `history.md` oder weiter oben in
+derselben Datei.
+
+**Und eine Regel gegen das Nachwachsen:** Ein erledigter Punkt wird an drei Stellen vermerkt, nicht
+an neun — CHANGELOG, history, backlog, dazu decisions.md, wenn eine Entscheidung herauskam.
+CLAUDE.md gehört nicht dazu. Damit sinkt die gemessene Streuung von vier bis neun Dateien je
+Arbeitsschritt auf drei bis vier.
 
 #### 3. Aufteilung und Ablage
 

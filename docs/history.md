@@ -3808,3 +3808,51 @@ Commit-Kennungen. 146 der 180 Commits haben eine neue bekommen, 29 Zitate zeigte
 sich jedes einzeln nachziehen. Zwei Kennungen blieben übrig und **durften nicht angefasst werden** —
 sie sind keine Commits, sondern die acht Zeichen eines Foto-Hashes, wie der Kiosk sie unter dem
 Bildnachweis zeigt. Nachgesehen in der Datenbank: Zu beiden gibt es genau ein Foto.
+
+## Punkt 64, Abschnitt 2: CLAUDE.md war zur Hälfte ein Tagebuch
+
+Die Frage war, ob Überschneidungen zwischen `CLAUDE.md` und den Dateien für Menschen ein Problem
+sind. Sie hing an einer technischen Vorfrage, die sich nachschlagen liess: **Wird die Datei
+überhaupt gebraucht, oder täte es ein Querverweis?**
+
+Sie wird gebraucht. `CLAUDE.md` wird bei jedem Sitzungsstart automatisch und vollständig geladen
+und ist der einzige Projekttext, der garantiert im Kontext steht. Alles andere kostet einen
+Werkzeugaufruf und — schwerer wiegend — das Urteil, überhaupt nachzusehen. **Ein Querverweis wirkt
+nur, wenn der Leser schon weiss, dass er ihm folgen muss.** Gewöhnliche Links werden nicht
+mitgeladen; `@pfad`-Importe schon, aber vollständig, sie sparen also nichts.
+
+Damit war die Antwort umgekehrt zur Vermutung: Überschneidung ist in Ordnung, **Umfang nicht**. Die
+Empfehlung lautet unter 200 Zeilen, weil längere Dateien nicht nur Kontext kosten, sondern die
+Befolgung senken. Die Datei stand bei 385 — und der Abschnitt „Stand" allein bei 199, so lang wie
+die Empfehlung für das Ganze.
+
+### Der Stand war kein Stand, sondern ein Verlauf
+
+Er erzählte sieben Arbeitstage nach, mit Zahlen, die sich mit jedem Import ändern. Alles davon
+steht in dieser Datei hier. Geblieben sind 31 Zeilen, und ihr Kriterium ist nicht „was ist
+passiert", sondern **„was nähme man sonst falsch an"**: dass `deploy/pi/` geprüft sei, dass alte
+Sicherungen noch erkannt werden, dass die Verwaltung ohne PIN läuft.
+
+Dasselbe Kriterium hat die Sprachregelung von 53 auf 36 Zeilen gebracht — Tabelle und Faustregel
+bleiben, weil sie beim Tippen gelten; die Begründung steht in `development.md`, wo sie gelesen
+wird, wenn jemand sie wissen will. Und der Verzeichnisbaum wich den vier Sätzen, die man ihm nicht
+ansieht: dass `services/` der Ort fürs Denken ist, dass `api/` dünn bleibt, dass die
+Frontend-Typen `schemas.py` spiegeln.
+
+### Beim Kürzen ging etwas verloren, und die Gegenprobe fand es
+
+Die gemessene Qualitätseinstellung in `tools/to_jpeg.py` — nicht nachzujustieren, weil zwei Läufe
+über dieselbe Datei denselben SHA-256 ergeben müssen — stand nur im Stand und wäre mit ihm
+verschwunden. Sie ist jetzt dort, wo sie hingehört: unter „Was man nicht anfassen soll".
+
+Gefunden hat sie eine Gegenprobe über **jede** entfernte Kernaussage: Hat sie anderswo ein Zuhause?
+Vierzig Aussagen, neununddreissig hatten eines. **Wer kürzt, muss nachzählen, was er wegnimmt** —
+sonst kürzt er genau das eine weg, das nirgends sonst steht.
+
+### Und eine Regel gegen das Nachwachsen
+
+Der Stand ist nicht aus Versehen gewachsen, sondern weil jeder erledigte Punkt dort vermerkt wurde.
+Gemessen berührte ein Arbeitsschritt vier bis neun Doku-Dateien. Jetzt sind es drei bis vier, und
+es steht geschrieben: CHANGELOG, history, backlog — dazu decisions.md, wenn eine Entscheidung
+herauskam. **`CLAUDE.md` gehört nicht dazu**, denn sie sagt, wie man arbeitet, nicht was geschehen
+ist.
