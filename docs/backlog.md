@@ -633,3 +633,59 @@ Bestand — in der Dokumentation, im Quelltext und vor allem in den Tests. Sie s
 erfundenen Kader aus `seed/` ersetzt, im aktuellen Stand **und im ganzen Git-Verlauf**. Siehe
 [Punkt 64](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), Abschnitt 1. Von dieser Seite steht einer
 Veröffentlichung nichts mehr entgegen.
+
+#### Die Identität in den Commits — zu klären, und zwar vorher
+
+Dieselbe Bauart wie die Namen im Bestand: etwas steht im Verlauf, und mit der Veröffentlichung
+ist es nicht mehr einzusammeln. **Gemessen am 22. August 2026**, damit beim Aufgreifen nicht noch
+einmal nachgezählt werden muss:
+
+| Identität | Commits | Zeitraum |
+|---|--:|---|
+| Name und Vorname, dazu die **persönliche Mailadresse** | 14 | nur der 28. Juli 2026 |
+| Name und Vorname, dazu eine **aus Benutzer- und Rechnernamen erzeugte** Adresse | 86 | 28. Juli – 5. August |
+| Vorname, dazu eine **zweite erzeugte** Adresse, anderer Rechner | 84 | 8. – 22. August |
+
+**Vier Befunde, die die Fragen erst scharf machen:**
+
+1. **`user.name` und `user.email` sind nirgends gesetzt** — weder im Repo noch global noch über
+   die Umgebung. Git baut die Adresse deshalb aus dem Konto- und dem Rechnernamen des Macs. Das
+   ist kein einmaliges Versehen, sondern **wiederholt sich**: Der Rechnerwechsel Anfang August hat
+   von selbst eine dritte Identität erzeugt, und der nächste täte es wieder.
+2. **Die beiden erzeugten Adressen sind keine Postfächer**, sondern verraten den Kontonamen und
+   je einen Rechnernamen; eine davon zeigt zusätzlich, dass in einem privaten Heimnetz gearbeitet
+   wurde. Ihr Nutzen ist null, ihr Preis ist eine Angabe über die Arbeitsumgebung.
+3. **Kein einziger der 184 Commits ist signiert**, und auf dem Rechner liegt weder ein
+   GPG-Geheimschlüssel noch ein SSH-Schlüssel. Die Frage lautet also nicht „welcher Schlüssel wird
+   verwendet", sondern: soll überhaupt einer verwendet werden, und ab wann.
+4. **GitHub verknüpft einen Commit nur über eine dort hinterlegte Adresse mit einem Konto.**
+   Mit dem heutigen Stand blieben **170 von 184** Commits ohne Zuordnung — sie erschienen unter
+   einem grauen Platzhalter statt unter dem Konto. Das trifft genau das Ziel, das die
+   Veröffentlichung überhaupt trägt: die Nennung.
+
+**Zu entscheiden sind vier Dinge:**
+
+- **Welche Angaben sollen dauerhaft öffentlich sein?** Voller Name oder Vorname; persönliche
+  Adresse, eine eigens angelegte, oder die `noreply`-Adresse, die GitHub je Konto bereitstellt.
+  Für die Nennung im Sinn von [Punkt 23](history.md#punkt-23-die-lizenz-war-die-kleinere-hälfte)
+  zählt, dass die Commits am Konto hängen — nicht, dass eine erreichbare Adresse darinsteht.
+- **Vereinheitlichen: ja, und wie?** Zwei Wege, und sie sind nicht gleichwertig. Eine `.mailmap`
+  ist eine Anzeigehilfe und lässt die alten Angaben im Verlauf stehen. Ein Rewrite mit
+  `git filter-repo --mailmap` schreibt sie wirklich um — das ist in diesem Repo **erprobt**
+  (21. August, mit Sicherung und Probelauf, siehe
+  [history.md](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo)) und heute noch billig,
+  **weil es keinen Remote gibt.** Nach der Veröffentlichung ist es das nicht mehr: Klone, Forks
+  und Archive tragen dann die alte Fassung weiter.
+- **Signieren, und wenn ja womit?** GPG oder SSH; ab jetzt oder rückwirkend. Rückwirkend heißt
+  denselben Rewrite, also fällt die Entscheidung sinnvollerweise mit der vorigen zusammen.
+- **Eine eigene Adresse und ein eigener Schlüssel nur für GitHub?** Zu klären, was dabei üblich
+  ist und was es tatsächlich trennt — und was es kostet, wenn ein Schlüssel oder ein Postfach in
+  fünf Jahren nicht mehr erreichbar ist, das Repo aber noch steht.
+
+**Der Zeitpunkt ist die eigentliche Pointe.** Alle vier Fragen sind heute mit einem Befehl und
+einer Sicherung zu beantworten. Am Tag nach der Veröffentlichung sind sie es nicht mehr — genau
+wie bei den Namen aus dem Bestand, und aus genau demselben Grund.
+
+Nicht Teil dieser Frage, weil bereits entschieden: die Zeile `Co-Authored-By` in 171 Commits.
+Wie das Projekt entstanden ist, steht in [AUTHORS](../AUTHORS) und in
+[licensing.md](licensing.md); verschwiegen wird es nicht.
