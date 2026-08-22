@@ -18,13 +18,13 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 *„Was der Plan nicht wusste"* und sind der eigentliche Grund für diese Datei.
 
-<!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand aendern -->
+<!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand ändern -->
 
 ## Register
 
-91 Eintraege. **Gesucht wird hier meist ein Datum**, nicht ein Titel --
-die Titel sind Merkhilfen. Fuer ein Stichwort ist `grep` das bessere Werkzeug; die
-Datei ist ausfuehrlich genug dafuer.
+92 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
+die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die
+Datei ist ausführlich genug dafür.
 
 | Datum | Abschnitt |
 |---|---|
@@ -61,7 +61,7 @@ Datei ist ausfuehrlich genug dafuer.
 | 31. Juli 2026 | [5. Fotos am selben Ort](#5-fotos-am-selben-ort) |
 | 31. Juli 2026 | [6. Das Foto im Beitragsbereich groß ansehen](#6-das-foto-im-beitragsbereich-groß-ansehen) |
 | 31. Juli – 2. August 2026 | **[Teil V — Nachbesserungen an der Besucheransicht](#teil-v--nachbesserungen-an-der-besucheransicht)** |
-| 2. August – 21. August 2026 | **[Teil VI — Einzelne Punkte aus dem Backlog](#teil-vi--einzelne-punkte-aus-dem-backlog)** |
+| 2. August – 22. August 2026 | **[Teil VI — Einzelne Punkte aus dem Backlog](#teil-vi--einzelne-punkte-aus-dem-backlog)** |
 | 2. August 2026 | [Verwaltung verlassen lädt die Besucheransicht neu](#verwaltung-verlassen-lädt-die-besucheransicht-neu) |
 | 2. August 2026 | [Der Bearbeitungsdialog fängt oben an](#der-bearbeitungsdialog-fängt-oben-an) |
 | 2. August 2026 | [Gleichnamige Straßen werden nicht mehr verschmolzen](#gleichnamige-straßen-werden-nicht-mehr-verschmolzen) |
@@ -85,22 +85,22 @@ Datei ist ausfuehrlich genug dafuer.
 | 9. August 2026 | [Die Kachel, die drei Viertel der Sammlung verschwinden liess](#die-kachel-die-drei-viertel-der-sammlung-verschwinden-liess) |
 | 9. August 2026 | [Die Karte antwortet erst, wenn sie gefragt wird](#die-karte-antwortet-erst-wenn-sie-gefragt-wird) |
 | 9. August 2026 | [Was der Schieber wegnahm, ohne es zu sagen](#was-der-schieber-wegnahm-ohne-es-zu-sagen) |
-| 9. August 2026 | [Die Strassenauswahl in der Adaptionsanleitung](#die-strassenauswahl-in-der-adaptionsanleitung) |
+| 9. August 2026 | [Die Straßenauswahl in der Adaptionsanleitung](#die-straßenauswahl-in-der-adaptionsanleitung) |
 | 9. August 2026 | [Siebenhundertmal „Jahr unbekannt"](#siebenhundertmal-jahr-unbekannt) |
 | 9. August 2026 | [Der kurze Weg vom Foto in seine Bearbeitung](#der-kurze-weg-vom-foto-in-seine-bearbeitung) |
-| 9. August 2026 | [Fuenf Formen, vier Rollen](#fuenf-formen-vier-rollen) |
+| 9. August 2026 | [Fünf Formen, vier Rollen](#fünf-formen-vier-rollen) |
 | 9. August 2026 | [Die Kopfzeile findet ihre Mitte](#die-kopfzeile-findet-ihre-mitte) |
-| 9. und 10. August 2026 | [Nachschaerfen: der Weg vom Ort zur Hausnummer](#nachschaerfen-der-weg-vom-ort-zur-hausnummer) |
-| 10. August 2026 | [Die dritte Frage, die Zahlen auf der Karte und ein Waechter zu viel](#die-dritte-frage-die-zahlen-auf-der-karte-und-ein-waechter-zu-viel) |
+| 9. und 10. August 2026 | [Nachschärfen: der Weg vom Ort zur Hausnummer](#nachschärfen-der-weg-vom-ort-zur-hausnummer) |
+| 10. August 2026 | [Die dritte Frage, die Zahlen auf der Karte und ein Wächter zu viel](#die-dritte-frage-die-zahlen-auf-der-karte-und-ein-wächter-zu-viel) |
 | 11. August 2026 | [Der Erstbestand wird bereinigt — und zwei Regeln drehen sich um](#der-erstbestand-wird-bereinigt--und-zwei-regeln-drehen-sich-um) |
 | 12. August 2026 | [Der Rest von Punkt 41: Text stand in den falschen Feldern](#der-rest-von-punkt-41-text-stand-in-den-falschen-feldern) |
 | 12. August 2026 | [Ein Antwortweg statt zweier -- und ein Fehler, der zwei Tage lief](#ein-antwortweg-statt-zweier----und-ein-fehler-der-zwei-tage-lief) |
 | 12. August 2026 | [Der Titel kommt auf die Karte, und die Beschriftung bekommt einen Mund](#der-titel-kommt-auf-die-karte-und-die-beschriftung-bekommt-einen-mund) |
 | 14. August 2026 | [Der Containerbetrieb ist keine Zusage mehr, sondern gemessen](#der-containerbetrieb-ist-keine-zusage-mehr-sondern-gemessen) |
 | 15. August 2026 | [Aus dem Arbeitsnamen wird Kiekmap](#aus-dem-arbeitsnamen-wird-kiekmap) |
-| 15. August 2026 | [Der Neustart entfaellt: die Wiederherstellung migriert selbst](#der-neustart-entfaellt-die-wiederherstellung-migriert-selbst) |
-| 16. August 2026 | [Der Kopfbereich hoert auf, am Ansichtsfenster zu haengen](#der-kopfbereich-hoert-auf-am-ansichtsfenster-zu-haengen) |
-| 16. August 2026 | [Die Detailansicht: das Bild bekommt Platz, die Knoepfe bekommen einen Ort](#die-detailansicht-das-bild-bekommt-platz-die-knoepfe-bekommen-einen-ort) |
+| 15. August 2026 | [Der Neustart entfällt: die Wiederherstellung migriert selbst](#der-neustart-entfällt-die-wiederherstellung-migriert-selbst) |
+| 16. August 2026 | [Der Kopfbereich hört auf, am Ansichtsfenster zu hängen](#der-kopfbereich-hört-auf-am-ansichtsfenster-zu-hängen) |
+| 16. August 2026 | [Die Detailansicht: das Bild bekommt Platz, die Knöpfe bekommen einen Ort](#die-detailansicht-das-bild-bekommt-platz-die-knöpfe-bekommen-einen-ort) |
 | 16. August 2026 | [Der Knopf, der angeblich am Jahr hing](#der-knopf-der-angeblich-am-jahr-hing) |
 | 16. August 2026 | [Der Diff, der keiner war](#der-diff-der-keiner-war) |
 | 16. August 2026 | [Was auf dem Weg verloren ging](#was-auf-dem-weg-verloren-ging) |
@@ -119,6 +119,7 @@ Datei ist ausfuehrlich genug dafuer.
 | 21. August 2026 | [Punkt 64, Abschnitt 1: die Namen aus dem Repo](#punkt-64-abschnitt-1-die-namen-aus-dem-repo) |
 | 21. August 2026 | [Punkt 64, Abschnitt 2: CLAUDE.md war zur Hälfte ein Tagebuch](#punkt-64-abschnitt-2-claudemd-war-zur-hälfte-ein-tagebuch) |
 | 21. August 2026 | [Punkt 64, Abschnitt 3: die Historie war nicht zu lang, sie hatte keinen Eingang](#punkt-64-abschnitt-3-die-historie-war-nicht-zu-lang-sie-hatte-keinen-eingang) |
+| 22. August 2026 | [Punkt 64, Abschnitt 4: die Regel stand da und wurde nicht geprüft](#punkt-64-abschnitt-4-die-regel-stand-da-und-wurde-nicht-geprüft) |
 
 <!-- register:ende -->
 ---
@@ -1324,7 +1325,7 @@ gewesen.
 Sie verbot Umlaute im Python-Quelltext und gab zwei Absätze weiter ``so that "muhlenweg" finds the
 "Mühlenweg"`` als *erwünschtes* Beispiel — mit Umlaut. Alle fünfzehn gefundenen Stellen waren von
 dieser Art: zitierte Beispiele oder Datenwerte. `"März"` in der Monatsliste von `services/dates.py`
-hat ohnehin keinen Ersatz; ohne Umlaut zeigte der Kiosk „Maerz".
+hat ohnehin keinen Ersatz; ohne Umlaut zeigte der Kiosk „März".
 
 Daraus wurde die Präzisierung: **In deutscher Prosa im Quelltext werden Umlaute umschrieben, in
 Zitaten und Datenwerten bleiben sie.** Das ist keine Ausnahme von der Regel, sondern ihre
@@ -1681,199 +1682,199 @@ die Spanne blieb bei vier Jahren.
 
 ## Der Durchgang über den Backlog
 
-9. August 2026. Zwei Tage nachdem der Backlog seine Ordnung bekommen hatte, kamen zwoelf neue
-Punkte hinzu (`0e59a1f`) — und damit war zu pruefen, ob die Liste noch stimmt. Vier Fragen an jeden
-der siebenunddreissig Eintraege: Ueberschneidet er sich mit einem anderen? Will das noch jemand?
+9. August 2026. Zwei Tage nachdem der Backlog seine Ordnung bekommen hatte, kamen zwölf neue
+Punkte hinzu (`0e59a1f`) — und damit war zu prüfen, ob die Liste noch stimmt. Vier Fragen an jeden
+der siebenunddreißig Einträge: Überschneidet er sich mit einem anderen? Will das noch jemand?
 Stimmt seine Einordnung? Und, die ergiebigste: **widerspricht sein Text dem, was inzwischen gebaut
 ist?**
 
 Die letzte Frage hat am meisten gefunden, und das war zu erwarten: Ein Backlog beschreibt einen
-Zustand, den die Arbeit staendig verlaesst.
+Zustand, den die Arbeit ständig verlässt.
 
 - **Punkt 4 stand auf einer falschen Tatsache.** „Heute sucht die Fotoliste im Verwaltungsbereich
-  nur ueber den Titel" — tatsaechlich deckt das `or_(…)` in `api/admin.py` Titel, Ortsname *und*
-  Dateiname ab. Der Punkt bestand also aus einer Luecke, die es nicht gab. Was von ihm uebrig
+  nur über den Titel" — tatsächlich deckt das `or_(…)` in `api/admin.py` Titel, Ortsname *und*
+  Dateiname ab. Der Punkt bestand also aus einer Lücke, die es nicht gab. Was von ihm übrig
   blieb, ist eine Zeile in Punkt 25.
-- **Punkt 1 nannte 58 straszengenaue Fotos**, waehrend Punkt 30 auf derselben Seite 60 zaehlte.
-  Beide hatten recht, zu verschiedenen Zeitpunkten: Zwei Besucherbeitraege waren dazugekommen.
-- **Punkt 1 nannte die unsinnigen Schlagwoerter, aber nicht die achtzehn Fotos, die
+- **Punkt 1 nannte 58 straßengenaue Fotos**, während Punkt 30 auf derselben Seite 60 zählte.
+  Beide hatten recht, zu verschiedenen Zeitpunkten: Zwei Besucherbeiträge waren dazugekommen.
+- **Punkt 1 nannte die unsinnigen Schlagwörter, aber nicht die achtzehn Fotos, die
   „Intel(R) JPEG Library, version [1.51.12.44]" heiszen.** Von allen Befunden der Durchsicht ist
-  das der einzige, den ein Besucher sofort sieht — er steht als Ueberschrift in der Detailansicht.
-- **Punkt 30 verwies auf Punkt 1**, wo die Schlagwoerter aufgeraeumt wuerden. Das tat inzwischen
+  das der einzige, den ein Besucher sofort sieht — er steht als Überschrift in der Detailansicht.
+- **Punkt 30 verwies auf Punkt 1**, wo die Schlagwörter aufgeräumt würden. Das tat inzwischen
   Punkt 41.
 
 **Sechs Nummern sind dabei vergriffen gegangen.** Vier gingen in einem anderen Punkt auf: 16 („Der
-praktische Teil von Punkt 15" — so begann sein Text buchstaeblich), 12 und 24 wurden zu Pruefungen
+praktische Teil von Punkt 15" — so begann sein Text buchstäblich), 12 und 24 wurden zu Prüfungen
 innerhalb von Punkt 15, und 13 wurde der erste Eintrag der Sammelliste von Punkt 40. Zwei fielen
 weg: Punkt 2 zielte auf den Erstimport, der gelaufen ist, und ging als Warnung in Punkt 41 ein;
-Punkt 4 loeste sich in der oben beschriebenen Fehlannahme auf.
+Punkt 4 löste sich in der oben beschriebenen Fehlannahme auf.
 
 **Und die 24 war doppelt vergeben.** Sie hiesz erst „Backlog ordnen und klassifizieren" und wurde
 am 8. August erledigt; noch am selben Tag bekam der Rest der Tastaturfrage aus Punkt 6 dieselbe
-Nummer. Das verstoeszt gegen die Regel, die drei Absaetze weiter oben in derselben Datei steht —
-und es faellt niemandem auf, solange nicht jemand beide Stellen nebeneinander liest. Die
-Vergabestelle war der Backlog, das Gedaechtnis war diese Datei, und die beiden hatten keinen
-Abgleich. Seitdem fuehrt der Backlog die vergriffenen Nummern **ausdruecklich auf**, direkt unter
-der Uebersichtstabelle. Eine Liste, die man sehen kann, ist die einzige Fassung dieser Regel, die
+Nummer. Das verstößt gegen die Regel, die drei Absätze weiter oben in derselben Datei steht —
+und es fällt niemandem auf, solange nicht jemand beide Stellen nebeneinander liest. Die
+Vergabestelle war der Backlog, das Gedächtnis war diese Datei, und die beiden hatten keinen
+Abgleich. Seitdem führt der Backlog die vergriffenen Nummern **ausdrücklich auf**, direkt unter
+der Übersichtstabelle. Eine Liste, die man sehen kann, ist die einzige Fassung dieser Regel, die
 sich selbst durchsetzt.
 
-Der Backlog fuehrt danach **31 Punkte**, elf Nummern sind vergriffen, die naechste freie ist 43.
+Der Backlog führt danach **31 Punkte**, elf Nummern sind vergriffen, die nächste freie ist 43.
 
 ## Die Kachel, die drei Viertel der Sammlung verschwinden liess
 
 9. August 2026. Punkt 32 des Backlogs war der erste Fehler, den die neue Einordnung als
-*wichtig und dringend* ausgewiesen hatte, und er brauchte am Ende **eine Zeile**. Die Uebersicht
-der Verwaltung meldete fuer den Erstbestand 252 Fotos als „auf der Karte zu sehen"; zu sehen waren
+*wichtig und dringend* ausgewiesen hatte, und er brauchte am Ende **eine Zeile**. Die Übersicht
+der Verwaltung meldete für den Erstbestand 252 Fotos als „auf der Karte zu sehen"; zu sehen waren
 855.
 
-Die Kachel zaehlte Fotos mit Ort **und** Jahr, und der Kommentar darueber gab die Begruendung:
+Die Kachel zählte Fotos mit Ort **und** Jahr, und der Kommentar darüber gab die Begründung:
 „Both are needed for the map: the view filters on place and time at once." Der Satz war einmal
 richtig. Er wurde falsch, als der Kiosk anfing, bei ganz aufgezogenem Schieber **gar keinen**
-Zeitfilter zu schicken — damit haengt `_viewport_filters` die Datumsbedingungen nicht an, und
+Zeitfilter zu schicken — damit hängt `_viewport_filters` die Datumsbedingungen nicht an, und
 undatierte Fotos stehen auf der Karte. Der Regelfall ist genau dieser: Ein Besucher, der nichts
 eingestellt hat, sieht alles.
 
-**Der Schaden war nicht die schiefe Zahl, sondern die Arbeit, die sie ausgeloest haette.** Bei 670
+**Der Schaden war nicht die schiefe Zahl, sondern die Arbeit, die sie ausgelöst hätte.** Bei 670
 Fotos ohne Jahr sagte die Kachel dem Museumsteam, drei Viertel der Sammlung seien unsichtbar. Die
-naheliegende Antwort darauf ist, zu datieren — und zwar Fotos, die laengst auf der Karte liegen.
+naheliegende Antwort darauf ist, zu datieren — und zwar Fotos, die längst auf der Karte liegen.
 Eine falsche Zahl auf einer Startseite ist harmlos; eine falsche Zahl, die einer Handvoll
 Ehrenamtlicher sagt, womit sie ihre Zeit verbringen sollen, ist es nicht.
 
 **Derselbe Fehler steckte in `python -m app.cli stats`** — und dort noch einer dazu: Die
-CLI zaehlte geloeschte Fotos ueberall mit, waehrend die Verwaltung sie ueberall herausnimmt. Die
+CLI zählte gelöschte Fotos überall mit, während die Verwaltung sie überall herausnimmt. Die
 Schlusszeile verglich damit zwei verschiedene Grundgesamtheiten miteinander. Beide Programme
-zaehlen jetzt nach derselben Regel, was die Abnahme erst moeglich machte: CLI und API gaben
-hinterher unabhaengig voneinander dieselbe Zahl aus.
+zählen jetzt nach derselben Regel, was die Abnahme erst möglich machte: CLI und API gaben
+hinterher unabhängig voneinander dieselbe Zahl aus.
 
-**Was der Fall ueber Kommentare sagt.** Der Kommentar hat den Fehler nicht verursacht, aber er hat
-ihn drei Monate lang gedeckt: Wer die Zeile las, fand eine Begruendung und las weiter. Ein
+**Was der Fall über Kommentare sagt.** Der Kommentar hat den Fehler nicht verursacht, aber er hat
+ihn drei Monate lang gedeckt: Wer die Zeile las, fand eine Begründung und las weiter. Ein
 Kommentar, der ein *Warum* behauptet, wird geglaubt — deshalb steht an der Stelle jetzt nicht nur
-die neue Regel, sondern auch, woran sie haengt und wo ihr Gegenstueck liegt
-(`_viewport_filters` in `api/photos.py`). Aendert sich dort etwas, ist hier die Fundstelle.
+die neue Regel, sondern auch, woran sie hängt und wo ihr Gegenstück liegt
+(`_viewport_filters` in `api/photos.py`). Ändert sich dort etwas, ist hier die Fundstelle.
 
 Die beiden Tests dazu beschreiben den Fehlerfall, nicht den Erfolgsfall:
-`test_foto_ohne_jahr_steht_auf_der_karte` und die Gegenprobe ohne Ort. Zurueckgedreht faellt der
-erste sofort — nachgeprueft, bevor der Commit stand.
+`test_foto_ohne_jahr_steht_auf_der_karte` und die Gegenprobe ohne Ort. Zurückgedreht fällt der
+erste sofort — nachgeprüft, bevor der Commit stand.
 
 ## Die Karte antwortet erst, wenn sie gefragt wird
 
 9. August 2026. Punkt 26 des Backlogs. Solange „Wo ist das?" auf dem Schirm stand, war die ganze
-Karte scharf — jeder Tipp auf eine freie Flaeche setzte einen Punkt. Wer nur schauen wollte,
+Karte scharf — jeder Tipp auf eine freie Fläche setzte einen Punkt. Wer nur schauen wollte,
 beantwortete die Frage dabei versehentlich, und weil der Bereich danach **„Hier war das"** anbot,
-brauchte es nur einen zweiten, bestaetigenden Tipp, damit im Bestand eine Verortung stand, die
+brauchte es nur einen zweiten, bestätigenden Tipp, damit im Bestand eine Verortung stand, die
 niemand gemeint hat.
 
 Die Umsetzung war ein Schalter und eine Trennung. **Der Schalter** heiszt „Auf der Karte zeigen"
 und liegt im Store, nicht in der Komponente — das war die eine Entscheidung, die beim Aufschreiben
 des Punktes Arbeit gekostet hat und beim Bauen keine Minute. `LocationTask` wird bei fast jedem
-Fotowechsel abgebaut, ein `useState` faellt dort also von selbst zurueck; nur auf dem einen Weg
-nicht, auf dem `load()` zur urspruenglichen Frage zurueckfaellt, weil die andere leergelaufen ist.
-Genau dieser Weg kommt, wenn eine Art von Luecke abgearbeitet ist. Er ist heute kaum zu treffen und
-waere spaeter schwer zu finden gewesen.
+Fotowechsel abgebaut, ein `useState` fällt dort also von selbst zurück; nur auf dem einen Weg
+nicht, auf dem `load()` zur ursprünglichen Frage zurückfällt, weil die andere leergelaufen ist.
+Genau dieser Weg kommt, wenn eine Art von Lücke abgearbeitet ist. Er ist heute kaum zu treffen und
+wäre später schwer zu finden gewesen.
 
 **Die Trennung** betrifft `PinLayer`: Ob ein Tipp einen Punkt setzt und ob der Punkt gezeichnet und
-gezogen werden kann, sind seitdem zwei Bedingungen. Haette man beides zusammen abgeschaltet, waere
-mit dem scharfen Tipp auch der Punkt verschwunden, den die **Strassenwahl** gesetzt hat — und die
-Zusage „Der Punkt laesst sich auf der Karte noch verschieben" haette nicht mehr gegolten.
+gezogen werden kann, sind seitdem zwei Bedingungen. Hätte man beides zusammen abgeschaltet, wäre
+mit dem scharfen Tipp auch der Punkt verschwunden, den die **Straßenwahl** gesetzt hat — und die
+Zusage „Der Punkt lässt sich auf der Karte noch verschieben" hätte nicht mehr gegolten.
 
-**Beim Pruefen kam der Zusatz, der den Punkt erst rund macht.** Erst stand der Knopf unter der
-Strassenwahl und nur dort. Er gehoert **darueber** — er ist die Alternative *zu* der Liste, nicht
-der letzte Ausweg dahinter — und er gehoert **auch in den Hausnummernschritt**, wo er am meisten
-einbringt: Wer die Strasse kennt, die Nummer aber nicht, zeigt auf das Haus, statt „Reicht so" zu
-druecken. Das ist derselbe Fall, den Punkt 36
-fuer den Bestand loesen will — hier faellt er nebenbei mit ab.
+**Beim Prüfen kam der Zusatz, der den Punkt erst rund macht.** Erst stand der Knopf unter der
+Straßenwahl und nur dort. Er gehört **darüber** — er ist die Alternative *zu* der Liste, nicht
+der letzte Ausweg dahinter — und er gehört **auch in den Hausnummernschritt**, wo er am meisten
+einbringt: Wer die Straße kennt, die Nummer aber nicht, zeigt auf das Haus, statt „Reicht so" zu
+drücken. Das ist derselbe Fall, den Punkt 36
+für den Bestand lösen will — hier fällt er nebenbei mit ab.
 
-### Was die Gegenprobe ueber die eigenen Tests sagte
+### Was die Gegenprobe über die eigenen Tests sagte
 
-Zurueckgedreht wurde einzeln an allen drei Stellen, die den Schalter zuruecksetzen. Zwei fielen,
-eine nicht: `skip()` setzt zwar selbst zurueck, ruft danach aber `load()`, und dessen `set` laeuft
+Zurückgedreht wurde einzeln an allen drei Stellen, die den Schalter zurücksetzen. Zwei fielen,
+eine nicht: `skip()` setzt zwar selbst zurück, ruft danach aber `load()`, und dessen `set` läuft
 noch vor dem ersten `await` — die Zeile ist nachweislich wirkungslos. Sie steht trotzdem, weil
-direkt darueber Punkt, Etikett und Genauigkeit dieselbe Symmetrie haben und eine fehlende Zeile
-dort wie ein Versehen laese.
+direkt darüber Punkt, Etikett und Genauigkeit dieselbe Symmetrie haben und eine fehlende Zeile
+dort wie ein Versehen läse.
 
 Wertvoller war der erste Durchgang der Gegenprobe: Er zeigte, dass **keiner** der neuen Tests die
-Ruecksetzung in `load()` deckte, weil alle ueber `skip()` oder `contribute()` liefen, die je selbst
-zuruecksetzen. `load()` ist aber die Stelle, die jeden Fotowechsel sieht. Der Test dafuer ruft
+Rücksetzung in `load()` deckte, weil alle über `skip()` oder `contribute()` liefen, die je selbst
+zurücksetzen. `load()` ist aber die Stelle, die jeden Fotowechsel sieht. Der Test dafür ruft
 `load()` seitdem unmittelbar auf — geschrieben, weil die Gegenprobe nicht fiel, nicht weil eine
-Luecke aufgefallen waere.
+Lücke aufgefallen wäre.
 
 ## Was der Schieber wegnahm, ohne es zu sagen
 
-9. August 2026. Punkt 33 des Backlogs, und der zweite Teil desselben Missverstaendnisses wie
+9. August 2026. Punkt 33 des Backlogs, und der zweite Teil desselben Missverständnisses wie
 Punkt 32 am selben Tag: „undatiert" und „unsichtbar" sind nicht dasselbe, fallen im Kopf aber
-leicht zusammen. Bei 32 zaehlte deshalb eine Zahl falsch. Hier war es schlimmer — die Zahl stimmte,
+leicht zusammen. Bei 32 zählte deshalb eine Zahl falsch. Hier war es schlimmer — die Zahl stimmte,
 aber der Besucher erfuhr nie, was ihm abhandenkam.
 
-Ein Foto ohne Datum ueberlappt keinen Zeitraum. Es fiel damit aus **jeder** Auswahl heraus, sobald
-jemand den Schieber auch nur ein Stueck zusammenzog: zwei Drittel der Sammlung, lautlos, ohne dass
-irgendwo gestanden haette, dass das passieren wuerde. Am laufenden Bestand nachgemessen — 855 Fotos
+Ein Foto ohne Datum überlappt keinen Zeitraum. Es fiel damit aus **jeder** Auswahl heraus, sobald
+jemand den Schieber auch nur ein Stück zusammenzog: zwei Drittel der Sammlung, lautlos, ohne dass
+irgendwo gestanden hätte, dass das passieren würde. Am laufenden Bestand nachgemessen — 855 Fotos
 ohne Zeitfilter, 3 in der Auswahl 1950 bis 1994.
 
 Aus der Meldung „507 Fotos ohne Jahr" neben dem Schieber ist deshalb ein **Schalter** geworden:
 „507 Fotos ohne Jahr anzeigen", mit Haken. Die Zahl stand ohnehin dort; es kommt kein
 Bedienelement hinzu, ein vorhandenes bekommt einen Zweck.
 
-### Die Frage, an der es haengt, hat der Auftraggeber besser beantwortet als der Vorschlag
+### Die Frage, an der es hängt, hat der Auftraggeber besser beantwortet als der Vorschlag
 
-Der Backlog hatte zwei Moeglichkeiten fuer den Anfangszustand aufgeschrieben und keine gute dabei:
+Der Backlog hatte zwei Möglichkeiten für den Anfangszustand aufgeschrieben und keine gute dabei:
 **an** zeigt beim ersten Blick alles, macht den Schieber aber unehrlich; **aus** macht ihn sofort
 ehrlich und kostet drei Viertel der Karte, bevor jemand etwas getan hat.
 
 Die Antwort war keine von beiden: **an — und beim ersten Zusammenziehen des Zeitraums geht er von
-selbst aus.** Das ist genau der Moment, in dem die Auswahl anfaengt, etwas zu bedeuten. Bis dahin
+selbst aus.** Das ist genau der Moment, in dem die Auswahl anfängt, etwas zu bedeuten. Bis dahin
 hat der Besucher nichts eingestellt und soll alles sehen; ab da hat er etwas eingestellt und soll
 sehen, was das bewirkt.
 
-Beim Bauen kam eine Praezisierung dazu, ohne die der Einfall sich selbst im Weg gestanden haette:
+Beim Bauen kam eine Präzisierung dazu, ohne die der Einfall sich selbst im Weg gestanden hätte:
 **automatisch nur einmal.** Wer den Schalter von Hand wieder einschaltet, bei dem bleibt er an,
-auch beim naechsten Zug am Schieber. Ginge er jedes Mal wieder aus, waere genau die Nebenwirkung
-zurueck, gegen die der ganze Punkt gebaut ist — nur eine Ebene hoeher, und aergerlicher, weil sie
-eine Entscheidung ueberschriebe, die jemand gerade getroffen hat.
+auch beim nächsten Zug am Schieber. Ginge er jedes Mal wieder aus, wäre genau die Nebenwirkung
+zurück, gegen die der ganze Punkt gebaut ist — nur eine Ebene höher, und ärgerlicher, weil sie
+eine Entscheidung überschriebe, die jemand gerade getroffen hat.
 
 Wonach die Automatik greift, ist `queryTimeFilter` — dieselbe Funktion, die entscheidet, ob
-ueberhaupt ein Zeitfilter zum Backend geht. Der Schalter geht damit exakt dort aus, wo sonst Fotos
-anfingen zu verschwinden. Eine eigene Regel dafuer waere eine zweite Wahrheit gewesen.
+überhaupt ein Zeitfilter zum Backend geht. Der Schalter geht damit exakt dort aus, wo sonst Fotos
+anfingen zu verschwinden. Eine eigene Regel dafür wäre eine zweite Wahrheit gewesen.
 
 ### Zwei Fallen, die beim Schreiben der Tests auffielen
 
-**Das Histogramm haette sich selbst abgeschaltet.** Es zaehlt die undatierten Fotos, und diese Zahl
-ist die Beschriftung des Schalters. Haette es `include_undated` mitbeachtet, stuende dort nach dem
-Abschalten eine Null — das Etikett verschwaende, und mit ihm der einzige Weg zurueck. Der Endpunkt
+**Das Histogramm hätte sich selbst abgeschaltet.** Es zählt die undatierten Fotos, und diese Zahl
+ist die Beschriftung des Schalters. Hätte es `include_undated` mitbeachtet, stünde dort nach dem
+Abschalten eine Null — das Etikett verschwände, und mit ihm der einzige Weg zurück. Der Endpunkt
 erzwingt den Wert deshalb, so wie er den Zeitfilter schon immer verworfen hat.
 
-**Ein Test prueft nichts, wenn der Store vorher aussteigt.** Die Gegenprobe lief einzeln gegen alle
-drei Bedingungen der Automatik, und die dritte fiel nicht: Der Test dafuer setzte einen Zeitraum,
-den das Einklemmen an der Achse unveraendert liesz — `setTimeRange` stieg beim Vergleich mit dem
-alten Wert aus, bevor die Logik ueberhaupt erreicht war. Ein gruener Test, der nie an der Stelle
-vorbeikam, die er zu schuetzen vorgibt. Er setzt jetzt einen Zeitraum, der sich wirklich aendert
-und die Spanne trotzdem ueberdeckt: Endgriff von 2030 auf 2026, waehrend das juengste Foto bei 2024
+**Ein Test prüft nichts, wenn der Store vorher aussteigt.** Die Gegenprobe lief einzeln gegen alle
+drei Bedingungen der Automatik, und die dritte fiel nicht: Der Test dafür setzte einen Zeitraum,
+den das Einklemmen an der Achse unverändert liesz — `setTimeRange` stieg beim Vergleich mit dem
+alten Wert aus, bevor die Logik überhaupt erreicht war. Ein grüner Test, der nie an der Stelle
+vorbeikam, die er zu schützen vorgibt. Er setzt jetzt einen Zeitraum, der sich wirklich ändert
+und die Spanne trotzdem überdeckt: Endgriff von 2030 auf 2026, während das jüngste Foto bei 2024
 liegt.
 
-## Die Strassenauswahl in der Adaptionsanleitung
+## Die Straßenauswahl in der Adaptionsanleitung
 
-9. August 2026. Punkt 37, und der guenstigste des Tages: reine Dokumentation. Die
-[adaption.md](adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Strassenauswahl
+9. August 2026. Punkt 37, und der günstigste des Tages: reine Dokumentation. Die
+[adaption.md](adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Straßenauswahl
 kam dort seit dem 8. August nur als eine Zeile zu `streetChoice` vor, obwohl sie inzwischen der
 Hauptweg zur Verortung ist.
 
 Der neue Schritt 3 beantwortet vier Fragen, die sonst beim zweiten Museum noch einmal erarbeitet
-werden muessten: woher die Strassen kommen (`make places` ueber Overpass), wie man nachsieht, was
-der Baum bekommt (`GET /api/places/streets`, mit fertigem Aufruf), wie `streetChoice` zu waehlen
-ist, und was schiefgehen kann — eine zu enge `bbox` laesst Randstrassen fehlen, eine zu weite
-holt Nachbardoerfer herein, die die eigenen aus den naechsten `streetChoice` verdraengen.
+werden müssten: woher die Straßen kommen (`make places` über Overpass), wie man nachsieht, was
+der Baum bekommt (`GET /api/places/streets`, mit fertigem Aufruf), wie `streetChoice` zu wählen
+ist, und was schiefgehen kann — eine zu enge `bbox` lässt Randstraßen fehlen, eine zu weite
+holt Nachbardörfer herein, die die eigenen aus den nächsten `streetChoice` verdrängen.
 
 **Die Zahlen darin sind nachgerechnet, nicht abgeschrieben.** Der Backlog behauptete zehn
 Buchstabengruppen, sieben davon direkt zur Liste; nachgefahren mit `nearby_streets` und
-`groupStreets` gegen den laufenden Ortsindex kam genau das heraus — 80 Strassen, 10 Knoepfe,
+`groupStreets` gegen den laufenden Ortsindex kam genau das heraus — 80 Straßen, 10 Knöpfe,
 7 direkt, und A, H und I mit einem Zwischenschritt. Die Doku nennt die Gruppen jetzt beim Namen,
 damit ein zweites Museum sein eigenes Ergebnis danebenhalten kann.
 
-**Zwei Stellen waren nebenbei veraltet.** Die Pruefliste am Ende fragte noch, ob „die Ortssuche im
-Hilf mit-Bereich lokale Strassennamen findet" — die gibt es dort seit dem 8. August nicht mehr.
+**Zwei Stellen waren nebenbei veraltet.** Die Prüfliste am Ende fragte noch, ob „die Ortssuche im
+Hilf mit-Bereich lokale Straßennamen findet" — die gibt es dort seit dem 8. August nicht mehr.
 Und der Fall ohne Ortsindex sieht seit dem Kartenschalter vom selben Tag anders aus: Der Bereich
-sagt nicht nur, man moege auf die Karte tippen, er schaltet sie auch von sich aus scharf.
+sagt nicht nur, man möge auf die Karte tippen, er schaltet sie auch von sich aus scharf.
 
-`tools/check_anchors.py` prueft die `adaption.md` ab jetzt mit — sie hat seit diesem Punkt
+`tools/check_anchors.py` prüft die `adaption.md` ab jetzt mit — sie hat seit diesem Punkt
 Verweise auf ihre eigenen Abschnitte, und die Abschnitte sind dabei umnummeriert worden.
 
 ## Siebenhundertmal „Jahr unbekannt"
@@ -1883,24 +1884,24 @@ die fertige Datumsangabe — eine Zeile, die an dieser Stelle in beide Richtunge
 den 256 Kameraaufnahmen „22. März 2014", unter den rund 670 undatierten Fotos „Jahr unbekannt",
 siebenhundertmal untereinander.
 
-Jetzt steht dort **Adresse und Jahr**. Die Entscheidung fuer die Adresse statt des Titels hatte der
-Bestand laengst getroffen: Keine der 922 Adressen ist laenger als dreissig Zeichen, 105 Titel sind
-laenger als vierzig, und achtzehn heiszen „Intel(R) JPEG Library". Die Adresse passt immer unter
+Jetzt steht dort **Adresse und Jahr**. Die Entscheidung für die Adresse statt des Titels hatte der
+Bestand längst getroffen: Keine der 922 Adressen ist länger als dreißig Zeichen, 105 Titel sind
+länger als vierzig, und achtzehn heiszen „Intel(R) JPEG Library". Die Adresse passt immer unter
 ein Vorschaubild, der Titel oft nicht.
 
 **Der Stapel war der Fall, den der Backlog nicht bedacht hatte.** Er beschrieb nur „jedes
-Vorschaubild" — aber ein Marker mit einundfuenfzig Fotos ist ein Sonderfall mit einer eigenen
+Vorschaubild" — aber ein Marker mit einundfünfzig Fotos ist ein Sonderfall mit einer eigenen
 Antwort. Die Adresse teilen alle, denn genau deshalb liegen sie auf einem Marker; das Jahr teilen
-sie nicht, und das oberste zu nehmen setzte ein Datum unter fuenfzig Fotos, die es nicht tragen.
+sie nicht, und das oberste zu nehmen setzte ein Datum unter fünfzig Fotos, die es nicht tragen.
 Ein Stapel zeigt seitdem die Adresse und kein Jahr — und die Adresse nur, wenn wirklich **alle**
-seine Fotos sie teilen: Zwei ueber EXIF verortete Aufnahmen koennen auf einen Meter zusammenfallen,
+seine Fotos sie teilen: Zwei über EXIF verortete Aufnahmen können auf einen Meter zusammenfallen,
 ohne miteinander zu tun zu haben. Am laufenden Kiosk stand genau so ein Marker: einer ganz ohne
 Zeile, neben „Wedeler Straße 2" mit zweien und „Bredhornweg 17 — 2017" mit einem.
 
-**Zwei Kleinigkeiten fielen beim Bauen auf.** Die CSS-Klasse hiesz `marker__year` und haette
+**Zwei Kleinigkeiten fielen beim Bauen auf.** Die CSS-Klasse hiesz `marker__year` und hätte
 danach gelogen — sie heiszt jetzt `marker__caption`. Und die Zeile brauchte eine Breitengrenze:
-„Uetersener Straße 12 — 1953" ist gut doppelt so breit wie das Vorschaubild darueber und haette
-sich ueber die Nachbarmarker geschoben. Neun rem, dann zwei Zeilen, dann abgeschnitten; nachgemessen
+„Uetersener Straße 12 — 1953" ist gut doppelt so breit wie das Vorschaubild darüber und hätte
+sich über die Nachbarmarker geschoben. Neun rem, dann zwei Zeilen, dann abgeschnitten; nachgemessen
 am Bestand kommt der breiteste Fall auf 147 px und bleibt darunter.
 
 Die Testfixture `make_photo` kennt seitdem `month`, `day` und `place_name` — ohne die drei liesz
@@ -1908,422 +1909,422 @@ sich der Fall „22. März 2014 wird zu 2014" gar nicht aufschreiben.
 
 ## Der kurze Weg vom Foto in seine Bearbeitung
 
-9. August 2026. Punkt 25, die zweite Tuer aus Entscheidung 26 — und der Punkt, dessen Arbeit an
+9. August 2026. Punkt 25, die zweite Tür aus Entscheidung 26 — und der Punkt, dessen Arbeit an
 einer Stelle lag, die man ihm nicht ansieht. Der Stift neben dem Titel war eine Stunde Arbeit; die
-PIN-Abfrage gab es, den Bearbeiten-Bildschirm auch. **Was fehlte, war die Moeglichkeit, von aussen
-„Verwaltung bei Foto 412 oeffnen" zu sagen.** Die Fotoliste oeffnete ihren Editor ueber eigenen
+PIN-Abfrage gab es, den Bearbeiten-Bildschirm auch. **Was fehlte, war die Möglichkeit, von aussen
+„Verwaltung bei Foto 412 öffnen" zu sagen.** Die Fotoliste öffnete ihren Editor über eigenen
 Zustand, und dieser Zustand war von nirgendwo erreichbar.
 
 Das Ziel reist jetzt durch den Admin-Store, `AdminApp` und die Fotoliste — verwandt mit dem
-`Target`, ueber das die Uebersicht schon in einen Bereich springt.
+`Target`, über das die Übersicht schon in einen Bereich springt.
 
 **Die eigentliche Frage war nicht, wie es hineinkommt, sondern wann es wieder verschwindet.** Ein
-Ziel, das stehen bleibt, legt beim Schliessen des Editors dasselbe Foto wieder vor — und an der
-Fotoliste kaeme niemand mehr vorbei. Es faellt deshalb an vier Stellen zurueck: beim Abbrechen der
-PIN, beim Ende der Sitzung, sobald die Verwaltung es aufgegriffen hat, und beim naechsten Ziel.
-`AdminApp` liest es einmal beim Aufbau in eigenen Zustand und raeumt es sofort weg; die Fotoliste
-oeffnet einmal und merkt sich, dass sie es getan hat. Zwei Riegel, weil einer davon in einem
-`useEffect` sitzt und ein zweiter Lauf sonst genuegt.
+Ziel, das stehen bleibt, legt beim Schließen des Editors dasselbe Foto wieder vor — und an der
+Fotoliste käme niemand mehr vorbei. Es fällt deshalb an vier Stellen zurück: beim Abbrechen der
+PIN, beim Ende der Sitzung, sobald die Verwaltung es aufgegriffen hat, und beim nächsten Ziel.
+`AdminApp` liest es einmal beim Aufbau in eigenen Zustand und räumt es sofort weg; die Fotoliste
+öffnet einmal und merkt sich, dass sie es getan hat. Zwei Riegel, weil einer davon in einem
+`useEffect` sitzt und ein zweiter Lauf sonst genügt.
 
-**Der Typpruefer hat dabei einen Fehler gefunden, den kein Test gefunden haette.** `AdminGate`
+**Der Typprüfer hat dabei einen Fehler gefunden, den kein Test gefunden hätte.** `AdminGate`
 reichte `askPin` direkt als `onClick` durch. Seit die Funktion eine optionale Fotonummer nimmt,
-waere das Klickereignis an deren Stelle angekommen — ein `MouseEvent` als Fotonummer, und die
-Verwaltung haette beim Tippen auf das Wappen versucht, ein Foto zu oeffnen, das es nicht gibt.
+wäre das Klickereignis an deren Stelle angekommen — ein `MouseEvent` als Fotonummer, und die
+Verwaltung hätte beim Tippen auf das Wappen versucht, ein Foto zu öffnen, das es nicht gibt.
 
 ### Die Kennung, und was sie kosten darf
 
 Unter dem Bildnachweis stehen jetzt die ersten acht Zeichen des SHA-256. Acht Hexzeichen sind vier
-Milliarden Moeglichkeiten — kurz genug zum Abschreiben, eindeutig genug fuer einen
-Museumsbestand, dieselbe Laenge, die git aus demselben Grund nimmt.
+Milliarden Möglichkeiten — kurz genug zum Abschreiben, eindeutig genug für einen
+Museumsbestand, dieselbe Länge, die git aus demselben Grund nimmt.
 
 **Sie steht dort nur, weil die Verwaltungssuche sie findet.** Der Backlog hatte das als offene
-Frage notiert, und es war die richtige: Ohne die eine zusaetzliche Zeile im vorhandenen `or_(…)`
-waere das eine Zahl, die sich nirgends nachschlagen laesst — Zierrat statt Auskunft. Sie ersetzt
+Frage notiert, und es war die richtige: Ohne die eine zusätzliche Zeile im vorhandenen `or_(…)`
+wäre das eine Zahl, die sich nirgends nachschlagen lässt — Zierrat statt Auskunft. Sie ersetzt
 den Stift nicht, sondern deckt den Fall ab, den er nicht kann: jemanden, der sich ein Foto notiert
-und spaeter an einem anderen Geraet danach sucht.
+und später an einem anderen Gerät danach sucht.
 
-### Was ungeprueft blieb
+### Was ungeprüft blieb
 
-Die Besucherseite ist am laufenden Kiosk nachgefahren: Stift neben dem Titel, 50 px Flaeche,
+Die Besucherseite ist am laufenden Kiosk nachgefahren: Stift neben dem Titel, 50 px Fläche,
 Kennung `21b56ce1` unter dem Bildnachweis, ein Tipp bringt das Zahlenfeld. **Der Weg dahinter
-nicht** — dafuer braucht es die PIN dieses Geraets, und die gehoert nicht in eine Sitzung wie
+nicht** — dafür braucht es die PIN dieses Geräts, und die gehört nicht in eine Sitzung wie
 diese. Gedeckt ist er durch Tests des Stores und durch die Gegenprobe an allen vier
-Ruecksetzungen; was am Bildschirm noch niemand gesehen hat, ist der Sprung in den
+Rücksetzungen; was am Bildschirm noch niemand gesehen hat, ist der Sprung in den
 Bearbeiten-Bildschirm selbst.
 
-## Fuenf Formen, vier Rollen
+## Fünf Formen, vier Rollen
 
 9. August 2026. Punkt 28, und der erste des Tages, bei dem der Backlog eine Frage stellte statt
-eine Aufgabe zu beschreiben. Die Bestandsaufnahme zuerst: **zwanzig Knoepfe in fuenf Formen**, und
-keine Form sagte, was ihr Knopf tut. Dahinter lagen vier Rollen — auswaehlen, uebernehmen,
-zurueck, ueberspringen —, und die Formen schnitten quer dazu.
+eine Aufgabe zu beschreiben. Die Bestandsaufnahme zuerst: **zwanzig Knöpfe in fünf Formen**, und
+keine Form sagte, was ihr Knopf tut. Dahinter lagen vier Rollen — auswählen, übernehmen,
+zurück, überspringen —, und die Formen schnitten quer dazu.
 
 **Der schlimmste Schnitt lief mitten durch eine Rolle.** Dieselbe leise, randlose Form trug
-„Anderer Buchstabe" und „Weiss ich nicht — naechstes Foto". Das eine geht einen Schritt zurueck und
+„Anderer Buchstabe" und „Weiß ich nicht — nächstes Foto". Das eine geht einen Schritt zurück und
 bleibt beim Foto, das andere legt das Foto weg. Sie sahen gleich aus.
 
 Und die Form selbst war das zweite Problem: grau, ohne Rand, kleiner als alles andere — sie las
-sich als Text. Fuer eine Zielgruppe, die einmal im Jahr vor diesem Geraet steht, ist ein Knopf, der
+sich als Text. Für eine Zielgruppe, die einmal im Jahr vor diesem Gerät steht, ist ein Knopf, der
 nicht nach Knopf aussieht, kein Knopf.
 
 ### Zwei Fragen, die der Auftraggeber entschieden hat
 
-**Wie laut darf „Reicht so — die Strasse genuegt" sein?** Es war ein schlichter weisser Knopf,
-waehrend „Hier war das" und „Ganze 1920er Jahre" gefuellt waren — obwohl alle drei dasselbe tun:
-abschliessen. Dagegen stand die Sorge, ein gefuellter Knopf ziehe den Blick von den Hausnummern
-darueber weg. Entschieden: **genauso laut.** Nicht jedes Haus steht in OpenStreetMap, und wer die
-Nummer nicht kennt, soll das ohne Zoegern sagen koennen; Konkurrenz entsteht nicht, weil in diesem
-Schritt kein zweiter gefuellter Knopf auf dem Schirm steht.
+**Wie laut darf „Reicht so — die Straße genügt" sein?** Es war ein schlichter weißer Knopf,
+während „Hier war das" und „Ganze 1920er Jahre" gefüllt waren — obwohl alle drei dasselbe tun:
+abschließen. Dagegen stand die Sorge, ein gefüllter Knopf ziehe den Blick von den Hausnummern
+darüber weg. Entschieden: **genauso laut.** Nicht jedes Haus steht in OpenStreetMap, und wer die
+Nummer nicht kennt, soll das ohne Zögern sagen können; Konkurrenz entsteht nicht, weil in diesem
+Schritt kein zweiter gefüllter Knopf auf dem Schirm steht.
 
-**Wie setzt sich „Ueberspringen" ab?** Entschieden: dieselbe Knopfform wie die uebrigen — damit es
+**Wie setzt sich „Überspringen" ab?** Entschieden: dieselbe Knopfform wie die übrigen — damit es
 wie ein Knopf aussieht —, getrennt durch eine Linie und deutlichen Abstand, mit einem Pfeil nach
 rechts. Keine eigene Farbe: Die Ansicht kommt mit Papier, Tinte und einem Akzentbraun aus, und das
 soll sie.
 
-Beim Bauen kam eine Kleinigkeit dazu, die nur am Geraet auffaellt: Der Abstand ueber dem Knopf
-gehoert **ausserhalb** von ihm. Als Innenabstand waere er mittippbar gewesen — ein zwei Zentimeter
-hoher Streifen ueber der Beschriftung, der das Foto weglegt.
+Beim Bauen kam eine Kleinigkeit dazu, die nur am Gerät auffällt: Der Abstand über dem Knopf
+gehört **ausserhalb** von ihm. Als Innenabstand wäre er mittippbar gewesen — ein zwei Zentimeter
+hoher Streifen über der Beschriftung, der das Foto weglegt.
 
 ### Die Symbole
 
 Vier: Haken, Pfeil links, Pfeil rechts, Fadenkreuz. **Neben der Beschriftung, nie an ihrer
-Stelle** — ein Piktogramm allein verlangt Vorwissen, neben den Worten muss es nur bestaetigen, was
-gelesen wurde. Und deshalb so wenige: Ein Symbol auf jedem Knopf waere Zierde, und Zierde erklaert
+Stelle** — ein Piktogramm allein verlangt Vorwissen, neben den Worten muss es nur bestätigen, was
+gelesen wurde. Und deshalb so wenige: Ein Symbol auf jedem Knopf wäre Zierde, und Zierde erklärt
 nichts.
 
-Gezeichnet in `kiosk/icons.tsx`, nicht geladen. Kein Symbolzeichensatz, kein CDN — das Geraet ist
-offline, und ein Symbol, das nicht laedt, hinterlaesst einen Knopf, der nichts sagt. Der Stift aus
+Gezeichnet in `kiosk/icons.tsx`, nicht geladen. Kein Symbolzeichensatz, kein CDN — das Gerät ist
+offline, und ein Symbol, das nicht lädt, hinterlässt einen Knopf, der nichts sagt. Der Stift aus
 Punkt 25 ist bei der Gelegenheit dorthin gezogen; er ist das einzige Symbol ohne Beschriftung, und
-das darf er, weil er nicht dem Besucher gehoert.
+das darf er, weil er nicht dem Besucher gehört.
 
-### Was sich dabei nebenbei geloest hat
+### Was sich dabei nebenbei gelöst hat
 
 Punkt 10 wartete auf diesen hier: Sein
-Schliessen-Knopf ist an die Blaetterknoepfe gebunden, damit die Detailansicht *eine* Knopfform
-kennt. Jetzt gibt es vier benannte Rollen — und keine heisst „schliessen". Aus „darf er aus dem
+Schließen-Knopf ist an die Blätterknöpfe gebunden, damit die Detailansicht *eine* Knopfform
+kennt. Jetzt gibt es vier benannte Rollen — und keine heißt „schließen". Aus „darf er aus dem
 Raster?" ist damit „welche Rolle bekommt er?" geworden, und das steht dort jetzt als erster
 Schritt.
 
-Nachgemessen am laufenden Kiosk: fuenf Rollen im Einsatz (die vier plus das Jahresraster),
-Mindesthoehe 54 px, und kein Knopf ausserhalb der Raster ohne Symbol.
+Nachgemessen am laufenden Kiosk: fünf Rollen im Einsatz (die vier plus das Jahresraster),
+Mindesthöhe 54 px, und kein Knopf ausserhalb der Raster ohne Symbol.
 
 ## Die Kopfzeile findet ihre Mitte
 
-9. August 2026. Punkt 29, vier Aenderungen an derselben Zeile — und zwei davon haben eine Rechnung
+9. August 2026. Punkt 29, vier Änderungen an derselben Zeile — und zwei davon haben eine Rechnung
 durch eine Regel ersetzt.
 
-**Die Hoehen.** Wappen, Titel und Zeitschieber standen oben buendig und endeten fast fuenfzig
+**Die Höhen.** Wappen, Titel und Zeitschieber standen oben bündig und endeten fast fünfzig
 Pixel auseinander. Das CSS behauptete an genau dieser Stelle das Gegenteil: Ein Kommentar rechnete
 vor, dass beide Titelzeilen zusammen `--crest` ergeben und „damit genau so hoch wie der Schieber
-nebenan" stehen. Das stimmte einmal — fuer eine Schirmbreite, und bis der Schieber am 9. August
+nebenan" stehen. Das stimmte einmal — für eine Schirmbreite, und bis der Schieber am 9. August
 von 3 auf 3,5 rem wuchs. Drei Rechnungen, die auseinanderlaufen konnten, sind jetzt eine
 gemeinsame Mittellinie: `align-items: center` im Titelfeld, `justify-content: center` im
 Schieberfeld. Nachgemessen liegen alle drei Mitten auf demselben Pixel — 84.
 
 **Und damit hat sich [Punkt 19](backlog.md#19--displayauflösung-und--orientierung-des-museumsgeräts)
-zur Haelfte erledigt**, ohne dass jemand die Frage beantwortet haette. Er stand als Blocker fuer
+zur Hälfte erledigt**, ohne dass jemand die Frage beantwortet hätte. Er stand als Blocker für
 den Kopfbereich, weil dort `--crest` schrumpfte und der Schieber nicht. Eine Mittellinie gilt in
-jeder Breite. Wo eine Abhaengigkeit von einer offenen Frage verschwindet, sobald man die Stelle
-richtig baut, war die Abhaengigkeit vielleicht nie die Frage.
+jeder Breite. Wo eine Abhängigkeit von einer offenen Frage verschwindet, sobald man die Stelle
+richtig baut, war die Abhängigkeit vielleicht nie die Frage.
 
 **Der Griff und sein Boden.** Der Auftrag war knapp: „slider mindestbreite 1 jahrzehnt. kein auge
 symbol." Beides zusammen ist die Antwort auf die Frage, die der Backlog offengelassen hatte — der
-gezeichnete Griff in der Mitte war das, was uebrig blieb, wenn der Zeitraum auf einen Balken
-zusammengeschoben war, und ein Ersatzsymbol waere die Antwort auf ein Problem gewesen, das der
+gezeichnete Griff in der Mitte war das, was übrig blieb, wenn der Zeitraum auf einen Balken
+zusammengeschoben war, und ein Ersatzsymbol wäre die Antwort auf ein Problem gewesen, das der
 Boden gerade abschafft.
 
 Beim Bauen kam eine Entscheidung dazu, die der Auftrag nicht traf: **Was passiert am Boden mit dem
 anderen Ende?** Es mitzuschieben klingt geschmeidiger und ist die Falle — ein Zug am linken Ende
-truege das rechte ueber das Achsenende, wo es geklemmt wuerde, und der Zeitraum kaeme schmaler
-zurueck, als er hineinging. Genau das Schrumpfen, das `shiftRange` an anderer Stelle schon einmal
+trüge das rechte über das Achsenende, wo es geklemmt würde, und der Zeitraum käme schmaler
+zurück, als er hineinging. Genau das Schrumpfen, das `shiftRange` an anderer Stelle schon einmal
 verhindern musste. Das bewegte Ende stoppt also, das andere bleibt.
 
-Am Geraet nachgefahren: 1950 bis 1959, zehn Jahre einschliesslich beider Enden, 65 px
-Greifflaeche. Vom anderen Ende her ruehrt sich nichts mehr.
+Am Gerät nachgefahren: 1950 bis 1959, zehn Jahre einschließlich beider Enden, 65 px
+Greiffläche. Vom anderen Ende her rührt sich nichts mehr.
 
-**Der Rollentausch.** Das Wappen laedt neu und setzt damit alles zurueck; der Titel „Bilder aus
-Holm" ist die Tuer in die Verwaltung. `AdminGate` heisst deshalb jetzt `Crest` und liegt unter
-`kiosk/` — eine Komponente namens „Verwaltungstuer", die eine Seite neu laedt, waere genau die
-Sorte Name, die spaeter jemanden in die Irre fuehrt. Die CSS-Klasse ist mitgezogen und von
+**Der Rollentausch.** Das Wappen lädt neu und setzt damit alles zurück; der Titel „Bilder aus
+Holm" ist die Tür in die Verwaltung. `AdminGate` heißt deshalb jetzt `Crest` und liegt unter
+`kiosk/` — eine Komponente namens „Verwaltungstür", die eine Seite neu lädt, wäre genau die
+Sorte Name, die später jemanden in die Irre führt. Die CSS-Klasse ist mitgezogen und von
 `admin.css` nach `global.css` gewandert.
 
-### Der Fehler beim Aufraeumen der Dokumentation
+### Der Fehler beim Aufräumen der Dokumentation
 
-Beim Herausschneiden des erledigten Punktes aus dem Backlog habe ich zwischen zwei Ueberschriften
-geschnitten, ohne zu pruefen, welche von beiden weiter vorn steht — Punkt 10 lag vor Punkt 29, und
+Beim Herausschneiden des erledigten Punktes aus dem Backlog habe ich zwischen zwei Überschriften
+geschnitten, ohne zu prüfen, welche von beiden weiter vorn steht — Punkt 10 lag vor Punkt 29, und
 `t[:start] + t[end:]` hat den Abschnitt dazwischen **verdoppelt** statt ihn zu entfernen. Aufgefallen
-ist es an der Zaehlung: 23 Zeilen in der Tabelle, 25 Ueberschriften im Text. Dasselbe Muster wie am
-8. August, als derselbe Griff einen Punkt geloescht hat; damals fand es die Ankerpruefung, diesmal
+ist es an der Zählung: 23 Zeilen in der Tabelle, 25 Überschriften im Text. Dasselbe Muster wie am
+8. August, als derselbe Griff einen Punkt gelöscht hat; damals fand es die Ankerprüfung, diesmal
 der Abgleich von Tabelle und Text. Beide Male war die Ursache dieselbe Annahme — dass die
 Reihenfolge im Text der in der Tabelle folgt. Sie tut es nicht.
 
-## Nachschaerfen: der Weg vom Ort zur Hausnummer
+## Nachschärfen: der Weg vom Ort zur Hausnummer
 
 9. und 10. August 2026, Punkt 36. Geplant war eine Frage im Beitragsbereich. Gebaut wurde ein
 Schreibweg, eine dritte Bedingung und ein Nummernraster in der Detailansicht — die Frage im Bereich
-steht noch aus, und das ist kein Rueckstand, sondern das Ergebnis des Nachzaehlens.
+steht noch aus, und das ist kein Rückstand, sondern das Ergebnis des Nachzählens.
 
-**Das Nachzaehlen hat die Antwort umgedreht.** Der Punkt stand seit Wochen mit einer Tabelle im
+**Das Nachzählen hat die Antwort umgedreht.** Der Punkt stand seit Wochen mit einer Tabelle im
 Backlog: 60 Fotos liegen straszengenau, ihr `place_name` verspricht eine Hausnummer, die Koordinate
-haelt sie nicht. Der naheliegende Schluss war, genau diese 60 vorzulegen. Beim zweiten Hinsehen
+hält sie nicht. Der naheliegende Schluss war, genau diese 60 vorzulegen. Beim zweiten Hinsehen
 zerfielen sie in **58 und 2**. Bei den 58 steht die Hausnummer im Namen — bekannt ist sie also,
-fehlen tut die Koordinate. Auf die Rueckfrage „das kann doch gar nicht passieren, wenn die
-Hausnummer bekannt ist" kam die dritte Messung und mit ihr der Grund: **Die Haeuser sind aufgeteilt
+fehlen tut die Koordinate. Auf die Rückfrage „das kann doch gar nicht passieren, wenn die
+Hausnummer bekannt ist" kam die dritte Messung und mit ihr der Grund: **Die Häuser sind aufgeteilt
 oder neu nummeriert worden.** Im Ortsindex steht 2a statt 2, 13a bis 13d statt 13. Bei 55 von 58
 liegt dieselbe Zahl mit anderem Zusatz im Index, bei 3 eine Nachbarnummer, bei **keinem** gar
 nichts.
 
-Damit war der groesste Teil von Punkt 36 kein Besucherfall mehr. Ein Besucher am Kiosk weiss auch
-nicht, wo die fruehere Schulstrasse 2 stand; der Ortsindex weiss es fast immer. Die 58 sind als
-Punkt 41 (a) zur maschinellen Arbeit geworden. Uebrig blieben **2** — und beide stammen von
-Besuchern, die „Reicht so — die Strasse genuegt" gedrueckt haben. Der Fall ist also echt und
-waechst, nur ist er heute klein.
+Damit war der größte Teil von Punkt 36 kein Besucherfall mehr. Ein Besucher am Kiosk weiß auch
+nicht, wo die frühere Schulstraße 2 stand; der Ortsindex weiß es fast immer. Die 58 sind als
+Punkt 41 (a) zur maschinellen Arbeit geworden. Übrig blieben **2** — und beide stammen von
+Besuchern, die „Reicht so — die Straße genügt" gedrückt haben. Der Fall ist also echt und
+wächst, nur ist er heute klein.
 
-**Eine zweite Erkenntnis kam vom Kurator und zeigt, warum die Frage trotzdem gebaut gehoert.** Von
-72 Fotos ohne Ort tragen **64** als Titel exakt einen Strassennamen; sie stammen aus Ordnern, die
-eine Strasse ohne Hausnummer nannten, und `_locate` laesst solche Fotos bewusst unverortet. Die
-Begruendung dafuer stand im Code: Die Strassenmitte „saehe aus wie eine Antwort", und das Foto
-fiele aus „Wo ist das?" heraus. **Mit der dritten Frage faellt es nicht heraus, sondern hinein** —
-die Begruendung ist hinfaellig, und der Widerruf steht in decisions.md, nicht nur im Backlog. Das
-ergibt eine Abhaengigkeit in beide Richtungen: Ohne Punkt 41 (b) hat die Frage 2 Fotos und
-erscheint nie; ohne die Frage verschoebe (b) 64 Fotos in eine Frage, die es nicht gibt.
+**Eine zweite Erkenntnis kam vom Kurator und zeigt, warum die Frage trotzdem gebaut gehört.** Von
+72 Fotos ohne Ort tragen **64** als Titel exakt einen Straßennamen; sie stammen aus Ordnern, die
+eine Straße ohne Hausnummer nannten, und `_locate` lässt solche Fotos bewusst unverortet. Die
+Begründung dafür stand im Code: Die Straßenmitte „sähe aus wie eine Antwort", und das Foto
+fiele aus „Wo ist das?" heraus. **Mit der dritten Frage fällt es nicht heraus, sondern hinein** —
+die Begründung ist hinfällig, und der Widerruf steht in decisions.md, nicht nur im Backlog. Das
+ergibt eine Abhängigkeit in beide Richtungen: Ohne Punkt 41 (b) hat die Frage 2 Fotos und
+erscheint nie; ohne die Frage verschöbe (b) 64 Fotos in eine Frage, die es nicht gibt.
 
-**Die eigene Tuer.** Nachschaerfen heisst, eine vorhandene Angabe zu ersetzen — was decisions.md
-Punkt 5 verbietet, und dieser Punkt ist der Grund, warum Besucherbeitraege ueberhaupt ohne
-Moderation durchgehen duerfen. Die naheliegende Loesung waere gewesen, `_require_empty` um „ausser
-wenn genauer" zu erweitern. Sie faellt aus einem Grund aus, der erst beim Hinsehen sichtbar wird:
+**Die eigene Tür.** Nachschärfen heißt, eine vorhandene Angabe zu ersetzen — was decisions.md
+Punkt 5 verbietet, und dieser Punkt ist der Grund, warum Besucherbeiträge überhaupt ohne
+Moderation durchgehen dürfen. Die naheliegende Lösung wäre gewesen, `_require_empty` um „ausser
+wenn genauer" zu erweitern. Sie fällt aus einem Grund aus, der erst beim Hinsehen sichtbar wird:
 `POST /location` nimmt `accuracy_m` **vom Client** entgegen. Heute ist das harmlos, weil das Feld
-ohnehin leer sein muss. Entschiede die Genauigkeit ueber das Ueberschreiben, waere sie ein
-Schluessel in der Hand dessen, der davon profitiert — ein Aufruf mit `accuracy_m: 1` ersetzte jede
+ohnehin leer sein muss. Entschiede die Genauigkeit über das Überschreiben, wäre sie ein
+Schlüssel in der Hand dessen, der davon profitiert — ein Aufruf mit `accuracy_m: 1` ersetzte jede
 Angabe im Bestand. Also ein eigener Endpunkt, der **keine Koordinate annimmt**: Der Client schickt
-die Nummer der gewaehlten Adresse, alles Uebrige holt der Server aus dem Ortsverzeichnis.
+die Nummer der gewählten Adresse, alles Übrige holt der Server aus dem Ortsverzeichnis.
 
 **Drei Stellen fragen dasselbe, also fragt es jetzt eine.** `needs_location` gab es zweimal — als
-`@property` auf dem Modell und als SQL-Ausdruck im Endpunkt. Zwei Formulierungen, beide fuer sich
-plausibel, und niemand haette gemerkt, wenn sie auseinandergelaufen waeren. Vor der dritten Frage
+`@property` auf dem Modell und als SQL-Ausdruck im Endpunkt. Zwei Formulierungen, beide für sich
+plausibel, und niemand hätte gemerkt, wenn sie auseinandergelaufen wären. Vor der dritten Frage
 sind sie zu `hybrid_property` und `services/needs.py` zusammengefallen. **Die Reihenfolge des
-Tupels `NEEDS` ist die Rangfolge** — „Nachschaerfen kommt zuletzt" steht damit nicht in einer
+Tupels `NEEDS` ist die Rangfolge** — „Nachschärfen kommt zuletzt" steht damit nicht in einer
 Fallunterscheidung, sondern in der Position eines Wortes.
 
 ### Vier Bedingungen, und die dritte war die stille
 
 Wer gefragt wird, entscheidet ein `and_()` aus vier Teilen. Der wichtigste ist der, den man
-weglassen wuerde: **141 der 486 Strassen haben im Ortsindex gar keine Adressen.** Ohne die
-`exists()`-Klausel stuende die Frage „welche Hausnummer?" auf dem Schirm — mit keinem einzigen Knopf
+weglassen würde: **141 der 486 Straßen haben im Ortsindex gar keine Adressen.** Ohne die
+`exists()`-Klausel stünde die Frage „welche Hausnummer?" auf dem Schirm — mit keinem einzigen Knopf
 darunter. Genau deshalb liegt die Bedingung in einem Dienst und nicht auf dem Modell: Ob der
-Ortsindex antworten kann, weiss ein Foto-Objekt ohne Sitzung nicht.
+Ortsindex antworten kann, weiß ein Foto-Objekt ohne Sitzung nicht.
 
 Der Ziffern-Test (`place_name` ohne Ziffer) ist eine Heuristik und irrt zugunsten des Nichtfragens:
-Eine „Strasse des 17. Juni" wuerde nie vorgelegt. Das ist die harmlose Richtung, und der Test haelt
+Eine „Straße des 17. Juni" würde nie vorgelegt. Das ist die harmlose Richtung, und der Test hält
 fest, dass es Absicht ist.
 
 ### Zwei Gegenproben, die zuerst nicht griffen
 
 Bei der Genauigkeitsbedingung ist mir das zweimal hintereinander passiert: Erst war das
 hausgenaue Testfoto „Am Kamp 1" — es fiel schon an der Ziffernregel heraus, nicht an der
-Genauigkeit. Dann „Gasthof Timm" — es fiel an der `exists()`-Klausel heraus. Beide Male haette
-der Test bestanden, waere die Bedingung geloescht worden. Erst „Am Kamp" mit 15 m schliesst wirklich
-nur die Genauigkeit aus. Der Grund steht seitdem im Docstring des Tests, weil die naechste Person
+Genauigkeit. Dann „Gasthof Timm" — es fiel an der `exists()`-Klausel heraus. Beide Male hätte
+der Test bestanden, wäre die Bedingung gelöscht worden. Erst „Am Kamp" mit 15 m schließt wirklich
+nur die Genauigkeit aus. Der Grund steht seitdem im Docstring des Tests, weil die nächste Person
 sonst dieselbe Falle stellt.
 
-### Der Waechter, der nichts bewachte
+### Der Wächter, der nichts bewachte
 
-`_is_newest` sollte verhindern, dass eine Rueckname in falscher Reihenfolge einen laengst ersetzten
-Ort wieder auferstehen laesst. Er verglich Zeitstempel — und traf nie zu. Der Grund ist SQLite:
+`_is_newest` sollte verhindern, dass eine Rückname in falscher Reihenfolge einen längst ersetzten
+Ort wieder auferstehen lässt. Er verglich Zeitstempel — und traf nie zu. Der Grund ist SQLite:
 `server_default=func.now()` schreibt ganze Sekunden (`14:24:37`), ein gebundenes Python-`datetime`
-schreibt Mikrosekunden (`14:24:37.000000`), verglichen wird als Text, und die kuerzere Zeichenkette
+schreibt Mikrosekunden (`14:24:37.000000`), verglichen wird als Text, und die kürzere Zeichenkette
 verliert. Die Bedingung war gebaut, sah richtig aus und tat nichts. Sie vergleicht jetzt
 `Change.id`, und die Falle steht im Docstring.
 
 ### Und ein selbst gemachter Verlust
 
-Nach einer Gegenprobe habe ich die Aenderung mit `git checkout --` zurueckgenommen — und damit
+Nach einer Gegenprobe habe ich die Änderung mit `git checkout --` zurückgenommen — und damit
 nicht nur die Gegenprobe, sondern die ganze, noch nicht committete Store-Methode. Wiederhergestellt
-war sie in zwei Minuten, weil sie im Gespraech stand. Die Lehre ist trotzdem billiger zu haben als
-ein zweites Mal: Eine Gegenprobe wird aus einer Kopie zurueckgeholt, nicht aus HEAD.
+war sie in zwei Minuten, weil sie im Gespräch stand. Die Lehre ist trotzdem billiger zu haben als
+ein zweites Mal: Eine Gegenprobe wird aus einer Kopie zurückgeholt, nicht aus HEAD.
 
-## Die dritte Frage, die Zahlen auf der Karte und ein Waechter zu viel
+## Die dritte Frage, die Zahlen auf der Karte und ein Wächter zu viel
 
-10. August 2026, zweite Lieferung zum Nachschaerfen: die Frage im Beitragsbereich (Punkt 36), die
+10. August 2026, zweite Lieferung zum Nachschärfen: die Frage im Beitragsbereich (Punkt 36), die
 Hausnummern auf der Karte (Punkt 35) und der Stufenwechsel beim Zoomen (Punkt 38). Damit sind alle
 drei Punkte erledigt.
 
 **Die Rangfolge ist ein Array.** Aus dem Hin und Her zwischen zwei Fragen ist eine Liste geworden:
-`NEEDS = ["location", "date", "housenumber"]`, und die Reihenfolge *ist* die Rangfolge. „Nachschaerfen
+`NEEDS = ["location", "date", "housenumber"]`, und die Reihenfolge *ist* die Rangfolge. „Nachschärfen
 kommt zuletzt" steht damit in der Position eines Wortes und nicht in einer Fallunterscheidung.
 Dieselbe Reihenfolge steht im Backend in `services/needs.py`; sie zweimal zu haben ist der Preis
-dafuer, dass Frontend und Backend nicht dieselbe Datei lesen koennen.
+dafür, dass Frontend und Backend nicht dieselbe Datei lesen können.
 
 **Eine Unterscheidung, die beim Bauen erst entstand:** *leergelaufen* und *beantwortet* sind nicht
-dasselbe. Laeuft eine Frage leer, ist jede andere fair; nur eine Antwort kann eine weitere Frage
-ueberfluessig machen. Daraus wurden zwei Funktionen — `nextNeeds` und `nextAfterAnswer` —, und die
-Ausnahme („wer gerade `Reicht so` gedrueckt hat, wird nicht nach der Hausnummer gefragt") haengt
+dasselbe. Läuft eine Frage leer, ist jede andere fair; nur eine Antwort kann eine weitere Frage
+überflüssig machen. Daraus wurden zwei Funktionen — `nextNeeds` und `nextAfterAnswer` —, und die
+Ausnahme („wer gerade `Reicht so` gedrückt hat, wird nicht nach der Hausnummer gefragt") hängt
 allein an der zweiten.
 
 Der erste Anlauf hatte die Ausnahme in `nextNeeds` und damit an der falschen Stelle: Der
-Nachschaerf-Frage war dadurch von der Ortsfrage aus gar nicht mehr beizukommen. Der zweite Anlauf
-setzte sie richtig, und der Test fiel trotzdem — weil `load` sich seinen Rueckfall selbst
+Nachschärf-Frage war dadurch von der Ortsfrage aus gar nicht mehr beizukommen. Der zweite Anlauf
+setzte sie richtig, und der Test fiel trotzdem — weil `load` sich seinen Rückfall selbst
 ausrechnete und die eben beantwortete Frage dabei wieder hereinholte. `load` nimmt jetzt die ganze
-Reihenfolge entgegen, statt sie sich zu denken. **Wer laedt, weiss warum; die Ladefunktion nicht.**
+Reihenfolge entgegen, statt sie sich zu denken. **Wer lädt, weiß warum; die Ladefunktion nicht.**
 
 ### Eine Gegenprobe, die nichts bewachte
 
 Beim Absichern der Rangfolge ist mir derselbe Fehler in neuer Gestalt begegnet. Die Attrappe der
-API-Schicht im Test enthielt `NEEDS` als **abgeschriebene Liste** — mit dem ausdruecklichen
+API-Schicht im Test enthielt `NEEDS` als **abgeschriebene Liste** — mit dem ausdrücklichen
 Kommentar, das sei „der echte Wert". Die Gegenprobe zeigte das Gegenteil: „date" und „housenumber"
 in `client.ts` zu vertauschen liess **keinen einzigen Test** fallen. Zwei Fehler auf einmal, und
 beide ohne Symptom:
 
-1. Die Attrappe war eine zweite Wahrheit. Sie liest jetzt ueber `importOriginal` den echten Wert.
-2. Kein Test unterschied die Reihenfolge. Alle pruefbaren Faelle hatten hoechstens eine Frage mit
-   Vorrat — da entscheidet die Reihenfolge nichts. Erst ein Fall, in dem **beide** liefern koennten,
-   prueft sie wirklich.
+1. Die Attrappe war eine zweite Wahrheit. Sie liest jetzt über `importOriginal` den echten Wert.
+2. Kein Test unterschied die Reihenfolge. Alle prüfbaren Fälle hatten höchstens eine Frage mit
+   Vorrat — da entscheidet die Reihenfolge nichts. Erst ein Fall, in dem **beide** liefern könnten,
+   prüft sie wirklich.
 
 ### Was die Animation zweimal verschluckt hat
 
 Punkt 38 sah nach einer CSS-Regel aus und war eine Messung. Der Wechsel wurde markiert, war aber
-nie zu sehen — zweimal aus verschiedenen Gruenden, und beide fand erst der Blick auf die laufende
+nie zu sehen — zweimal aus verschiedenen Gründen, und beide fand erst der Blick auf die laufende
 Seite:
 
 **Erstens** hing `draw()` an `move` *und* `zoom`. Gemessen: ein Tipp auf „+" ergab 31 `move`- und 30
 `zoom`-Ereignisse, es wurde also alles rund sechzigmal je Zoomstufe neu gebaut. Der als einblendend
-markierte Marker war einen Frame spaeter weg. Noetig war nichts davon: MapLibre haelt Marker selbst
-auf ihren Koordinaten, gezeichnet werden muss nur eine geaenderte *Menge*. Jetzt haengt es an
-`moveend`, und ein Vergleich der gezeichneten Gruppen laesst selbst dann die Arbeit ausfallen, wenn
-sich nichts geaendert hat.
+markierte Marker war einen Frame später weg. Nötig war nichts davon: MapLibre hält Marker selbst
+auf ihren Koordinaten, gezeichnet werden muss nur eine geänderte *Menge*. Jetzt hängt es an
+`moveend`, und ein Vergleich der gezeichneten Gruppen lässt selbst dann die Arbeit ausfallen, wenn
+sich nichts geändert hat.
 
 **Zweitens** ist eine Umgruppierung nicht ein Zeichnen. Direkt nach dem Zoom werden die Fotos des
 neuen Ausschnitts geholt, und wenn sie ankommen, entstehen alle Marker noch einmal — dieser zweite
-Aufbau ist kein Stufenwechsel und nahm die Einblendung wieder mit. Wer waehrend einer laufenden
-Einblendung entsteht, gehoert seitdem dazu (`stillEntering`).
+Aufbau ist kein Stufenwechsel und nahm die Einblendung wieder mit. Wer während einer laufenden
+Einblendung entsteht, gehört seitdem dazu (`stillEntering`).
 
-Beides ist erst am Geraet aufgefallen, nicht im Test. Ein Zaehler in der Konsole hat je zwei
+Beides ist erst am Gerät aufgefallen, nicht im Test. Ein Zähler in der Konsole hat je zwei
 Minuten gekostet und beide Male die Ursache genannt — was hier den Ausschlag gab, war nicht mehr
 Nachdenken, sondern die Bereitschaft, nachzusehen.
 
 ### Und derselbe Griff daneben, ein zweites Mal
 
-`git checkout --` auf eine Datei, um eine Gegenprobe zurueckzunehmen — und damit auch die noch
+`git checkout --` auf eine Datei, um eine Gegenprobe zurückzunehmen — und damit auch die noch
 nicht committete Arbeit darin. Am selben Tag zum zweiten Mal, diesmal `client.ts` und `NEEDS`.
 Wiederhergestellt in zwei Minuten; die Lehre bleibt dieselbe wie am Vormittag und ist zweimal
-teurer bezahlt als noetig: **Eine Gegenprobe wird aus einer Kopie zurueckgeholt, nie aus HEAD.**
+teurer bezahlt als nötig: **Eine Gegenprobe wird aus einer Kopie zurückgeholt, nie aus HEAD.**
 
 ## Der Erstbestand wird bereinigt — und zwei Regeln drehen sich um
 
-*11. August 2026.* Punkt 41 stand als der grosse Posten im Backlog: 929 Fotos, deren Titel die
+*11. August 2026.* Punkt 41 stand als der große Posten im Backlog: 929 Fotos, deren Titel die
 Adresse daneben wiederholten, 77 ohne Ort, 58 mit einer Hausnummer, die es im Ortsindex nicht mehr
 gibt. Vorgesehen war ein Sprachmodell mit einer Vorlage-Ansicht, in der jemand jede Umstellung
-bestaetigt.
+bestätigt.
 
-**Gebaut wurde nichts davon.** Eine halbe Stunde Nachzaehlen am Bestand sagte etwas anderes als
+**Gebaut wurde nichts davon.** Eine halbe Stunde Nachzählen am Bestand sagte etwas anderes als
 die Planung:
 
-- Die 58 „Faelle" waren **neun Adressen**. 38 Fotos hingen an „Schulstrasse 2" allein. Eine
-  Nachbarnummer-Regel mit Vorlage-Liste zu bauen waere Maschinerie fuer neun Zeilen gewesen.
-- Die 632 Komma-Titel („Hauptstrasse 11a, Gasthof Timm") liessen sich **mechanisch** trennen,
-  und der Zusatz stand ohnehin schon als Schlagwort am Foto — nachgezaehlt bei allen 632, ohne eine
-  einzige Ausnahme. Ein Sprachmodell haette nichts gewusst, was nicht schon dastand.
-- Die Jahreszahl im Dateinamen, seit Monaten als eigener Teilpunkt gefuehrt, betraf **null** Fotos.
+- Die 58 „Fälle" waren **neun Adressen**. 38 Fotos hingen an „Schulstraße 2" allein. Eine
+  Nachbarnummer-Regel mit Vorlage-Liste zu bauen wäre Maschinerie für neun Zeilen gewesen.
+- Die 632 Komma-Titel („Hauptstraße 11a, Gasthof Timm") liessen sich **mechanisch** trennen,
+  und der Zusatz stand ohnehin schon als Schlagwort am Foto — nachgezählt bei allen 632, ohne eine
+  einzige Ausnahme. Ein Sprachmodell hätte nichts gewusst, was nicht schon dastand.
+- Die Jahreszahl im Dateinamen, seit Monaten als eigener Teilpunkt geführt, betraf **null** Fotos.
 
 Die Arbeit lief als Einmalaktion an `data/kiekmap.db`, nicht als Werkzeug: Trockenlauf vorlegen,
-schreiben, nachzaehlen. Die Rueckfahrkarte war eine Dateikopie. Was an Code dabei entstand, sind
+schreiben, nachzählen. Die Rückfahrkarte war eine Dateikopie. Was an Code dabei entstand, sind
 drei Regeln in `services/foldermeta.py` und eine Funktion in `services/places.py` — damit der
-naechste Import die Luecken nicht neu erzeugt.
+nächste Import die Lücken nicht neu erzeugt.
 
 ### Die Ursache, die eine Zeile weit weg lag
 
-Drei Fotos hatten keine Herkunftsangabe, und die Vermutung im Backlog lautete, es haenge am nicht
-aufloesbaren Strassennamen. Es hing an einer Zeile: `apply_folder_meta` stieg aus, sobald keine
-Strasse erkannt war — und die Herkunft, die nur am Pfad haengt und gar nicht an der Strasse, wurde
+Drei Fotos hatten keine Herkunftsangabe, und die Vermutung im Backlog lautete, es hänge am nicht
+auflösbaren Straßennamen. Es hing an einer Zeile: `apply_folder_meta` stieg aus, sobald keine
+Straße erkannt war — und die Herkunft, die nur am Pfad hängt und gar nicht an der Straße, wurde
 erst danach gesetzt. Zwei der drei Fotos lagen lose in der Importwurzel, das dritte unter
 „Deelenweg", das zwischen „Deelenweg I" und „Deelenweg II" nicht zu entscheiden ist. Dort arbeitet
-die Eindeutigkeitspruefung genau richtig; sie nahm die Herkunft nur als Nebenschaden mit.
+die Eindeutigkeitsprüfung genau richtig; sie nahm die Herkunft nur als Nebenschaden mit.
 
-### Was das Nachmessen ueber die EXIF-Koordinaten ergab
+### Was das Nachmessen über die EXIF-Koordinaten ergab
 
-Der groesste Posten stand nicht im Backlog. 413 Fotos lagen auf einer EXIF-Koordinate, und
-`_locate` liess sie dort: „EXIF schlaegt den Ordner immer", mit der Begruendung, die Kamera habe
-tatsaechlich dort gestanden. Beim Vorlegen fiel auf, dass 349 dieser Fotos eine im Ortsindex
+Der größte Posten stand nicht im Backlog. 413 Fotos lagen auf einer EXIF-Koordinate, und
+`_locate` liess sie dort: „EXIF schlägt den Ordner immer", mit der Begründung, die Kamera habe
+tatsächlich dort gestanden. Beim Vorlegen fiel auf, dass 349 dieser Fotos eine im Ortsindex
 auffindbare Archivadresse hatten — bis zu 689 m entfernt vom Punkt, auf dem sie lagen.
 
 Die Frage war, welche Seite irrt. Beantwortet hat sie eine Abfrage von drei Zeilen: **278 der 413
-teilen ihre Koordinate mit einem anderen Foto**, an einem Punkt haengen 20 Fotos von vier
-verschiedenen Tagen. Sechs gleiche Nachkommastellen an vier Tagen liefert kein Empfaenger. Die
+teilen ihre Koordinate mit einem anderen Foto**, an einem Punkt hängen 20 Fotos von vier
+verschiedenen Tagen. Sechs gleiche Nachkommastellen an vier Tagen liefert kein Empfänger. Die
 Werte sind eingetragen worden, nicht gemessen — es stand also nie Messung gegen Ablage, sondern
 eine Ablage gegen eine andere. Siehe [decisions.md](decisions.md), Punkt 34.
 
 **Das ist beim Vorlegen aufgefallen, nicht beim Planen.** Der Plan hatte die Zahl 331 und den Satz
 „die GPS-Angabe ist echt"; beides war falsch, und beides stand schon im Plan, bevor jemand
 nachgesehen hatte. Der Trockenlauf vor jedem Schritt hat sich hier ein einziges Mal bezahlt
-gemacht und damit fuer die ganze Aktion.
+gemacht und damit für die ganze Aktion.
 
-### Die Rangfolge war aus dem Gefuehl gebaut
+### Die Rangfolge war aus dem Gefühl gebaut
 
-Nach dem Bereinigen sollte die Nachschaerf-Frage endlich Fotos haben — 71 statt keinem. Am
-laufenden Kiosk kam sie trotzdem nicht: Ueberspringen der Jahresfrage fuehrte zurueck zu „Wo ist
+Nach dem Bereinigen sollte die Nachschärf-Frage endlich Fotos haben — 71 statt keinem. Am
+laufenden Kiosk kam sie trotzdem nicht: Überspringen der Jahresfrage führte zurück zu „Wo ist
 das?".
 
 Der Grund stand in `NEEDS`: `location, date, housenumber`. Eine Frage wird erst erreicht, wenn die
-vor ihr **leer** ist — und 673 undatierte Fotos laufen nie leer. Die dritte Frage waere nie
-gestellt worden, und der ganze Aufwand von Punkt 36 haette brachgelegen. Die Reihenfolge ist
-umgedreht; die Begruendung steht in [decisions.md](decisions.md), Punkt 35.
+vor ihr **leer** ist — und 673 undatierte Fotos laufen nie leer. Die dritte Frage wäre nie
+gestellt worden, und der ganze Aufwand von Punkt 36 hätte brachgelegen. Die Reihenfolge ist
+umgedreht; die Begründung steht in [decisions.md](decisions.md), Punkt 35.
 
 **Und die Reihenfolge liess sich vertauschen, ohne dass im Backend ein Test fiel.** Gemerkt hat es
 allein einer im Frontend, wo dieselbe Liste ein zweites Mal steht — genau die Doppelung, die sonst
-als Schwaeche gilt. Die Luecke ist mit `TestRangfolge` geschlossen, und die Lehre ist dieselbe wie
+als Schwäche gilt. Die Lücke ist mit `TestRangfolge` geschlossen, und die Lehre ist dieselbe wie
 beim Mock, der im Juli seine eigene Kopie von `NEEDS` hielt: **Eine Reihenfolge braucht einen Test,
-der genau sie prueft, nicht nur ihre Wirkung im Normalfall.**
+der genau sie prüft, nicht nur ihre Wirkung im Normalfall.**
 
 ### Was am Ende dastand
 
 924 von 929 Fotos auf der Karte statt 852. Kein Titel mehr, der die Adresse daneben wiederholt.
 Und zwei Fehler, die vorher nicht zu sehen waren, weil der Bestand sie verdeckt hatte: Die
-Marker-Beschriftung zeigt die Adresse, waehrend der Vorlesetext den Titel nennt — identisch,
-solange beide dasselbe waren (Punkt 44). Und bei einer Strasse mit 132 Adressen liegen die
-angebotenen Hausnummern ausserhalb des Kartenausschnitts, weil die Karte zur Strassenmitte faehrt
+Marker-Beschriftung zeigt die Adresse, während der Vorlesetext den Titel nennt — identisch,
+solange beide dasselbe waren (Punkt 44). Und bei einer Straße mit 132 Adressen liegen die
+angebotenen Hausnummern ausserhalb des Kartenausschnitts, weil die Karte zur Straßenmitte fährt
 (Punkt 45). Beide sind erst aufgefallen, als der bereinigte Bestand sie sichtbar machte.
 
 ## Der Rest von Punkt 41: Text stand in den falschen Feldern
 
 *12. August 2026.* Nach der Verortung blieben drei Teilpunkte, die im Backlog nach drei Aufgaben
-aussahen — Titel durchsehen, Schlagwoerter sichten, Beschreibungen ergaenzen. **Nachgemessen war es
-eine:** Beschreibungen standen als Titel, abgeschriebene Fotorueckseiten standen als Schlagwort,
-Archiv-Regalnummern standen als Schlagwort. Und das Feld, in das all das gehoert, war bei 720 von
+aussahen — Titel durchsehen, Schlagwörter sichten, Beschreibungen ergänzen. **Nachgemessen war es
+eine:** Beschreibungen standen als Titel, abgeschriebene Fotorückseiten standen als Schlagwort,
+Archiv-Regalnummern standen als Schlagwort. Und das Feld, in das all das gehört, war bei 720 von
 929 Fotos leer.
 
-Umgeraeumt wurde in vier Zuegen: 23 lange Titel und 39 Notizen in die Beschreibung, 6 Reste einer
+Umgeräumt wurde in vier Zügen: 23 lange Titel und 39 Notizen in die Beschreibung, 6 Reste einer
 Dateibenennung (`dav`, `dig`) geleert, 23 Regalnummern an die Herkunft. Danach hatten 260 Fotos
-eine Beschreibung statt 209, und von 308 Schlagwoertern blieben 253 — alle davon wirklich
-Stichwoerter.
+eine Beschreibung statt 209, und von 308 Schlagwörtern blieben 253 — alle davon wirklich
+Stichwörter.
 
-### Die Regalnummer wollte in die Beschreibung, und das war die falsche Tuer
+### Die Regalnummer wollte in die Beschreibung, und das war die falsche Tür
 
-Die Ansage lautete zuerst, die Signaturen („P 11", „O 40") an die Beschreibung zu haengen, damit
+Die Ansage lautete zuerst, die Signaturen („P 11", „O 40") an die Beschreibung zu hängen, damit
 sie erhalten bleiben. Erhalten bleiben sollten sie — nur steht die Beschreibung im Kiosk unter dem
-Bild. Unter einem Hof des 19. Jahrhunderts haette dann „P 35" gestanden.
+Bild. Unter einem Hof des 19. Jahrhunderts hätte dann „P 35" gestanden.
 
-`provenance` ist das Feld dafuer, und der Grund steht seit Stufe 8 im Docstring von `PhotoDetail`:
-Das oeffentliche Schema hat kein Feld dafuer, *damit* die Angabe nicht auf den Schirm im
-Ausstellungsraum geraet. Nachgeprueft nach dem Umraeumen: `/api/photos/247` liefert 28 Felder, und
-keines davon enthaelt das Wort „Signatur". Siehe [decisions.md](decisions.md), Punkt 36.
+`provenance` ist das Feld dafür, und der Grund steht seit Stufe 8 im Docstring von `PhotoDetail`:
+Das öffentliche Schema hat kein Feld dafür, *damit* die Angabe nicht auf den Schirm im
+Ausstellungsraum gerät. Nachgeprüft nach dem Umräumen: `/api/photos/247` liefert 28 Felder, und
+keines davon enthält das Wort „Signatur". Siehe [decisions.md](decisions.md), Punkt 36.
 
-### Zwei Anlaeufe, das Datieren zu automatisieren, und beide waren falsch
+### Zwei Anläufe, das Datieren zu automatisieren, und beide waren falsch
 
 83 undatierte Fotos trugen eine Jahreszahl im Text. Der erste Anlauf las jede vierstellige Zahl und
-mied eine Liste von Warnwoertern — *vor*, *erbaut*, *abgerissen*. Vorgelegt sah man sofort, was die
-Liste nicht kannte: **bebaut**, **abgebrannt**, **Baujahr**. Jedes davon haette ein Foto auf das
+mied eine Liste von Warnwörtern — *vor*, *erbaut*, *abgerissen*. Vorgelegt sah man sofort, was die
+Liste nicht kannte: **bebaut**, **abgebrannt**, **Baujahr**. Jedes davon hätte ein Foto auf das
 Baujahr des Hauses datiert statt auf die Aufnahme.
 
 Der zweite Anlauf drehte die Richtung um: nicht „ein Jahr ohne Warnwort", sondern **„ein Jahr, dem
 *um*, *ca.*, *im Jahre*, *Herbst*, *Dezember* oder *aus den* vorausgeht"**. Eine Warnwortliste ist
-nie fertig; ein positives Muster ist es. Aus 83 wurden 23 klare Faelle und 46 zweifelhafte — und
-die 46 waren als Liste mit Fundstelle und Begruendung in fuenf Minuten durchzusehen.
+nie fertig; ein positives Muster ist es. Aus 83 wurden 23 klare Fälle und 46 zweifelhafte — und
+die 46 waren als Liste mit Fundstelle und Begründung in fünf Minuten durchzusehen.
 
-Ausserdem verworfen: **zweistellige Kurzformen**. „78" fuer 1978 ist im Bestand ueblich und von
+Ausserdem verworfen: **zweistellige Kurzformen**. „78" für 1978 ist im Bestand üblich und von
 Regalnummern („P 37" -> 1937) und Hausnummern („Friedhofsweg 30" -> 1930) nicht zu unterscheiden.
 62 Fotos hingen daran und bleiben undatiert.
 
-Am Ende: **52 datiert, 17 Vorschlaege verworfen.** Und das Verworfene ist die teurere Haelfte der
+Am Ende: **52 datiert, 17 Vorschläge verworfen.** Und das Verworfene ist die teurere Hälfte der
 Entscheidung — ein verworfener Vorschlag kostet nichts, das Foto bleibt in „Wann war das?". Ein
 angenommener falscher macht das Foto datiert, nimmt es aus der Frage und legt es an die falsche
 Stelle der Zeitleiste, wo es niemand mehr ansieht. Siehe [decisions.md](decisions.md), Punkt 37.
@@ -2331,11 +2332,11 @@ Stelle der Zeitleiste, wo es niemand mehr ansieht. Siehe [decisions.md](decision
 ### Was man am Ende sehen konnte
 
 Der Zeitschieber lief vorher von **2010 bis 2025** — die einzigen datierten Fotos waren die
-Neuaufnahmen. Jetzt laeuft er von **1880 bis 2030**, mit Balken ueber die ganze Spanne. Das
+Neuaufnahmen. Jetzt läuft er von **1880 bis 2030**, mit Balken über die ganze Spanne. Das
 Museum hat zum ersten Mal eine Zeitleiste, und sie war die ganze Zeit im Bestand vorhanden, nur in
 den falschen Feldern.
 
-Nebenbei gefunden und mitgenommen: 59 Beschreibungen trugen Wagenrueckaeufe aus
+Nebenbei gefunden und mitgenommen: 59 Beschreibungen trugen Wagenrückläufe aus
 Windows-Zeilenenden.
 
 ### Punkt 41 ist damit aus dem Backlog gezogen
@@ -2348,23 +2349,23 @@ Was noch von Hand zu tun war, hat **Punkt 1** aufgenommen -- am 18. August 2026 
 damit ebenfalls vergriffen; er steht weiter unten in dieser Datei. Es war genau das,
 was Ortskenntnis braucht: 669 fehlende Beschreibungen, 621 undatierte Fotos ohne Anhalt im Text,
 rund 100 Titel, die eher Notiz als Titel sind, und 5 Fotos ohne Ort. Zwei Fehler, die erst durch
-das Aufraeumen sichtbar wurden, stehen als Punkt 44 und 45 daneben.
+das Aufräumen sichtbar wurden, stehen als Punkt 44 und 45 daneben.
 
 ## Ein Antwortweg statt zweier -- und ein Fehler, der zwei Tage lief
 
 *12. August 2026.* Zwei Punkte, die am selben Tag entstanden waren, als der bereinigte Erstbestand
-sichtbar machte, was der lueckenhafte verdeckt hatte.
+sichtbar machte, was der lückenhafte verdeckt hatte.
 
-### Die Karte folgt jetzt den Nummern, nicht der Strasse
+### Die Karte folgt jetzt den Nummern, nicht der Straße
 
 Punkt 45 war in zwanzig Minuten erledigt und ist trotzdem lehrreich. Die Karte fuhr beim
-Nachschaerfen zum **Strassenpunkt** -- richtig gedacht, und auf einer Strasse mit 132 Adressen
+Nachschärfen zum **Straßenpunkt** -- richtig gedacht, und auf einer Straße mit 132 Adressen
 falsch: Der Punkt liegt in der Mitte, die angebotenen Nummern liegen an einem Ende. Nachgemessen
 lag genau **eine von elf** Beschriftungen im Ausschnitt.
 
-Die Nummern standen laengst im Store (`offeredNumbers`); die Karte sah sie nur nicht an. Jetzt
-haengt der Effekt an ihnen statt am Foto, und damit faehrt die Karte auch beim Wechsel des
-Abschnitts mit -- vorher blieb sie stehen. Am Lehmweg nachgezaehlt: **elf von elf.**
+Die Nummern standen längst im Store (`offeredNumbers`); die Karte sah sie nur nicht an. Jetzt
+hängt der Effekt an ihnen statt am Foto, und damit fährt die Karte auch beim Wechsel des
+Abschnitts mit -- vorher blieb sie stehen. Am Lehmweg nachgezählt: **elf von elf.**
 
 Nebenbei stellte sich heraus, dass `focus` ein `lat` und ein `lon` trug, die **nirgends gelesen**
 wurden; `MapView` benutzt allein `bounds`. Beide sind weg, und `showArea(bounds)` steht neben
@@ -2372,100 +2373,100 @@ wurden; `MapView` benutzt allein `bounds`. Beide sind weg, und `showArea(bounds)
 
 ### Die Detailansicht fragt nicht mehr selbst
 
-Punkt 46 nimmt zurueck, was am 10. August gebaut wurde, und die Begruendung von damals ist dabei
-nicht falsch geworden -- sie ist ueberholt. Die eingebetteten Auswahlraster gab es, **weil der
-Bereich das Nachschaerfen nicht vorlegen konnte**; inzwischen ist es dort die zweite Frage.
+Punkt 46 nimmt zurück, was am 10. August gebaut wurde, und die Begründung von damals ist dabei
+nicht falsch geworden -- sie ist überholt. Die eingebetteten Auswahlraster gab es, **weil der
+Bereich das Nachschärfen nicht vorlegen konnte**; inzwischen ist es dort die zweite Frage.
 
-Was den Ausschlag gab, waren zwei Zahlen: bis zu **37 Schaltflaechen** in der Textspalte, davon
-fuenfzehn Jahrzehnte -- die Datierung des Erstbestands hatte das Problem selbst vergroessert. Und
+Was den Ausschlag gab, waren zwei Zahlen: bis zu **37 Schaltflächen** in der Textspalte, davon
+fünfzehn Jahrzehnte -- die Datierung des Erstbestands hatte das Problem selbst vergrößert. Und
 **null** von drei Fragen zum Ort, weil der die Karte braucht und die unter dem Overlay liegt.
 
-Jetzt stehen dort bis zu drei Knoepfe, und ein Tipp gibt Foto und Frage an den Bereich weiter. Der
-Server lernte dafuer einen `photo_id`-Parameter -- **einen Wunsch, keine Anweisung**: Er prueft ihn
-gegen dieselbe Bedingung wie jedes andere Foto und faellt sonst auf die Zufallswahl zurueck. Alles
-danach ist der gewoehnliche Ablauf; `contribute()` blieb unangetastet. Siehe
+Jetzt stehen dort bis zu drei Knöpfe, und ein Tipp gibt Foto und Frage an den Bereich weiter. Der
+Server lernte dafür einen `photo_id`-Parameter -- **einen Wunsch, keine Anweisung**: Er prüft ihn
+gegen dieselbe Bedingung wie jedes andere Foto und fällt sonst auf die Zufallswahl zurück. Alles
+danach ist der gewöhnliche Ablauf; `contribute()` blieb unangetastet. Siehe
 [decisions.md](decisions.md), Punkt 38.
 
 ### Der Fund beim Abnehmen: seit zwei Tagen ging kein Beitrag mehr durch
 
-Beim Pruefen am laufenden Kiosk antwortete `POST /contribute/67/date` mit **500**:
+Beim Prüfen am laufenden Kiosk antwortete `POST /contribute/67/date` mit **500**:
 
 ```
 sqlite3.OperationalError: table changes has no column named old_source
 ```
 
 Die Alembic-Revision vom 10. August war auf `data/kiekmap.db` nie gelaufen. **Zwei Tage lang
-scheiterte damit jeder Besucherbeitrag** -- und 393 gruene Tests standen daneben, weil sie ihr Schema
-aus den Modellen bauen und eine fehlende Migration grundsaetzlich nicht bemerken koennen.
+scheiterte damit jeder Besucherbeitrag** -- und 393 grüne Tests standen daneben, weil sie ihr Schema
+aus den Modellen bauen und eine fehlende Migration grundsätzlich nicht bemerken können.
 
 **Die Ursache war eine Wiederherstellung, und damit trifft der Fehler das Museum genauso.** In
-`data/` lagen zwei `vorher-…`-Ordner -- die Spur, die eine Wiederherstellung hinterlaesst --, der
-juengste vom 11. August mit demselben Zeitstempel wie die Datenbank. Eingespielt worden war eine
+`data/` lagen zwei `vorher-…`-Ordner -- die Spur, die eine Wiederherstellung hinterlässt --, der
+jüngste vom 11. August mit demselben Zeitstempel wie die Datenbank. Eingespielt worden war eine
 Sicherung vom 5. August, also von vor der Migration. **Eine Sicherung bringt ihr Schema mit:**
-`_swap_in` tauscht `kiekmap.db` im Ganzen aus, `_reopen_database` haengt das laufende Programm nur
+`_swap_in` tauscht `kiekmap.db` im Ganzen aus, `_reopen_database` hängt das laufende Programm nur
 neu an sie. Migrationen laufen beim *Start*, und eine Wiederherstellung ist kein Start.
 
-Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](usermanual.md) als Einschraenkung und
+Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](usermanual.md) als Einschränkung und
 in [operations.md](operations.md) mit Diagnose und Abhilfe -- samt dem umgekehrten, schlimmeren
-Fall: Eine Sicherung, die *neuer* ist als das Programm, laesst das Geraet gar nicht erst hochkommen.
+Fall: Eine Sicherung, die *neuer* ist als das Programm, lässt das Gerät gar nicht erst hochkommen.
 
-Dass es niemandem auffiel, hat einen zweiten Grund, und der ist der unangenehmere: **Alles Pruefen
+Dass es niemandem auffiel, hat einen zweiten Grund, und der ist der unangenehmere: **Alles Prüfen
 der letzten Tage war lesend.** Die Bereinigung des Erstbestands schrieb an der API vorbei; im Kiosk
 wurde nachgesehen, ob Fragen *erscheinen*. Ob eine Antwort ankommt, hat zwei Tage niemand versucht.
 Aufgenommen als Punkt 47 — behoben am 15. August 2026, siehe unten.
 
-**Die Lehre ist aelter als dieser Fehler und hier wieder bezahlt worden:** Ein Durchgang, der nur
-schaut, prueft die Haelfte. Der erste Klick, der etwas *schreibt*, hat gefunden, was zwei Tage
+**Die Lehre ist älter als dieser Fehler und hier wieder bezahlt worden:** Ein Durchgang, der nur
+schaut, prüft die Hälfte. Der erste Klick, der etwas *schreibt*, hat gefunden, was zwei Tage
 Nachdenken und dreihundert Tests nicht fanden.
 
 ## Der Titel kommt auf die Karte, und die Beschriftung bekommt einen Mund
 
-*12. August 2026.* Punkt 44 sah nach einer Zeile aus und war eine Entscheidung ueber den Bestand.
+*12. August 2026.* Punkt 44 sah nach einer Zeile aus und war eine Entscheidung über den Bestand.
 
 Unter dem Vorschaubild stand die Adresse, im `aria-label` desselben Knopfes der Titel. **Der Fehler
 war nicht die falsche Zeile, sondern dass es zwei gab** -- zwei Formulierungen derselben Sache, an
-zwei Stellen. Beide zu berichtigen haette ihn nur vertagt. Es gibt jetzt eine
+zwei Stellen. Beide zu berichtigen hätte ihn nur vertagt. Es gibt jetzt eine
 (`kiosk/mapCaption.ts`), und beide Sinne lesen sie.
 
-### Die Frage, die vorher zu klaeren war
+### Die Frage, die vorher zu klären war
 
-227 Fotos hatten keinen Titel. Der Vorschlag lautete, fuer alle einen zu erzeugen und **in die
-Daten zu schreiben**: aus der Beschreibung, sonst aus Adresse und Jahr. Nachgezaehlt hiess das
+227 Fotos hatten keinen Titel. Der Vorschlag lautete, für alle einen zu erzeugen und **in die
+Daten zu schreiben**: aus der Beschreibung, sonst aus Adresse und Jahr. Nachgezählt hiess das
 89 aus Beschreibungen und 138 aus Adressen -- und die Adresstitel wiederholten sich stark:
 zwanzigmal „Hauptstraße Nr. ?", vierzehnmal „Hörnstraße 9".
 
-**Damit stuende in `title` wieder woertlich das, was in `place_name` daneben steht** -- genau das,
-was einen Tag zuvor fuer 815 Fotos entfernt worden war. Dazu zwei Folgen, die erst beim Aufschreiben
-sichtbar wurden: Ein kopierter Titel veraltet, sobald ein Besucher die Hausnummer nachschaerft. Und
-die Unterscheidung „hat einen Titel" verschwaende -- danach haetten alle 929 einen, und
-[Punkt 1](backlog.md) haette seine Arbeitsgrundlage verloren.
+**Damit stünde in `title` wieder wörtlich das, was in `place_name` daneben steht** -- genau das,
+was einen Tag zuvor für 815 Fotos entfernt worden war. Dazu zwei Folgen, die erst beim Aufschreiben
+sichtbar wurden: Ein kopierter Titel veraltet, sobald ein Besucher die Hausnummer nachschärft. Und
+die Unterscheidung „hat einen Titel" verschwände -- danach hätten alle 929 einen, und
+[Punkt 1](backlog.md) hätte seine Arbeitsgrundlage verloren.
 
-Gebaut wurde deshalb die Haelfte, die Zugewinn ist: **75 Titel aus Beschreibungen geschrieben**,
+Gebaut wurde deshalb die Hälfte, die Zugewinn ist: **75 Titel aus Beschreibungen geschrieben**,
 zusammengefasst statt abgeschnitten -- „Errichtung des Funkmastes" wurde „Funkmast". Die 152
-Adressfaelle werden **abgeleitet**; auf der Karte steht dasselbe, nur veraltet nichts und `title`
+Adressfälle werden **abgeleitet**; auf der Karte steht dasselbe, nur veraltet nichts und `title`
 bleibt ehrlich leer.
 
-14 Beschreibungen taugten nicht: Sie sprechen ueber Besitzer, Rueckseiten oder Ortsvermutungen
-(„2018 Besitzer Dennis Knop", „Text auf der Rückseite: 12.4.63 Holm"), nicht ueber das Motiv.
+14 Beschreibungen taugten nicht: Sie sprechen über Besitzer, Rückseiten oder Ortsvermutungen
+(„2018 Besitzer Dennis Knop", „Text auf der Rückseite: 12.4.63 Holm"), nicht über das Motiv.
 
 ### „Hauptstraße Nr. ?"
 
 Fehlt die Hausnummer, steht sie als Fragezeichen da. Das ist dieselbe Haltung wie beim Nichtstreuen
 der Stapel (decisions.md, Punkt 33): Die Ungenauigkeit soll **sichtbar** bleiben, damit jemand sie
-behebt. Auf 82 Markern steht jetzt genau die Luecke, nach der der Beitragsbereich fragt.
+behebt. Auf 82 Markern steht jetzt genau die Lücke, nach der der Beitragsbereich fragt.
 
 ### Was der Plan nicht wusste
 
-**Es sind 75 Titel, nicht 60.** Beim Vorlegen hatte ich die *verschiedenen* Titel gezaehlt (53) und
+**Es sind 75 Titel, nicht 60.** Beim Vorlegen hatte ich die *verschiedenen* Titel gezählt (53) und
 daraus eine Fotozahl gemacht. Aufgefallen ist es erst, als das Skript die Zuordnung gegen den
-Bestand prueft -- 75 zugeordnet, 14 offen, zusammen die 89. Dieselbe Pruefung haette auch eine
+Bestand prüft -- 75 zugeordnet, 14 offen, zusammen die 89. Dieselbe Prüfung hätte auch eine
 falsche id gefunden; sie stand aus einem anderen Grund darin und hat einen anderen Fehler
 gefangen.
 
-**Und die Abschnittsueberschrift ist zum zweiten Mal an derselben Stelle verschwunden.** Wer einen
-Backlog-Punkt entfernt, sucht „bis zum naechsten `###`" -- steht der Punkt als letzter in seinem
-Bereich, liegt zwischen ihm und dem naechsten `###` die Trennlinie und ein `##`. Beim ersten Mal
-(Punkt 45/46) fiel es durch die Anker-Pruefung auf, beim zweiten Mal beim Nachzaehlen der
+**Und die Abschnittsüberschrift ist zum zweiten Mal an derselben Stelle verschwunden.** Wer einen
+Backlog-Punkt entfernt, sucht „bis zum nächsten `###`" -- steht der Punkt als letzter in seinem
+Bereich, liegt zwischen ihm und dem nächsten `###` die Trennlinie und ein `##`. Beim ersten Mal
+(Punkt 45/46) fiel es durch die Anker-Prüfung auf, beim zweiten Mal beim Nachzählen der
 Abschnitte. **Das Suchmuster muss bei `##` genauso halten wie bei `###`.**
 
 ---
@@ -2473,54 +2474,54 @@ Abschnitte. **Das Suchmuster muss bei `##` genauso halten wie bei `###`.**
 ## Der Containerbetrieb ist keine Zusage mehr, sondern gemessen
 
 *14. August 2026.* Punkt 17. `make prod` war nie gelaufen -- beim Bauen stand kein Docker zur
-Verfuegung. Auf dem Pi ist das der einzige Betriebsmodus, und
-[Punkt 21](backlog.md) begruendete sich ausdruecklich mit „es laeuft schon in Containern": genau
-der Satz, den niemand geprueft hatte.
+Verfügung. Auf dem Pi ist das der einzige Betriebsmodus, und
+[Punkt 21](backlog.md) begründete sich ausdrücklich mit „es läuft schon in Containern": genau
+der Satz, den niemand geprüft hatte.
 
-Der Entwicklungsmac taugte dafuer besser als erwartet. Docker Server 27.4 auf `linux/arm64` ist
+Der Entwicklungsmac taugte dafür besser als erwartet. Docker Server 27.4 auf `linux/arm64` ist
 dieselbe Architektur wie ein 64-Bit-Pi, die Abbilder bauen also nativ. **Beide bauten auf Anhieb**
 -- `npm ci` und `pip install` zum ersten Mal gegen eine reine Umgebung, was der eigentliche Zweck
-dieser Pruefung war. nginx liefert die Kartendatei mit **206 Partial Content** und ohne gzip aus,
+dieser Prüfung war. nginx liefert die Kartendatei mit **206 Partial Content** und ohne gzip aus,
 die Schriften kommen aus dem Abbild, ein tiefer Link auf `/admin` landet bei der Einzelseite, und
-die Seite fragt **null fremde Herkuenfte** an. Der Entrypoint zieht den Schemastand nach.
+die Seite fragt **null fremde Herkünfte** an. Der Entrypoint zieht den Schemastand nach.
 
-### Der Fund: die `.env` erreichte den Container nur zur Haelfte
+### Der Fund: die `.env` erreichte den Container nur zur Hälfte
 
-Der `environment:`-Block nannte vier Variablen. Die uebrigen fielen im Container still auf ihre
-Vorgaben zurueck, und das traf den Import: **kein Schlagwort, kein Bildnachweis, keine Herkunft.**
+Der `environment:`-Block nannte vier Variablen. Die übrigen fielen im Container still auf ihre
+Vorgaben zurück, und das traf den Import: **kein Schlagwort, kein Bildnachweis, keine Herkunft.**
 Nichts schlug fehl, nichts stand im Protokoll -- die Fotos kamen an, nur ohne ihre Zuschreibung.
 
-Behoben mit `env_file: ../.env` statt einer Aufzaehlung. Die vier Container-Wahrheiten
+Behoben mit `env_file: ../.env` statt einer Aufzählung. Die vier Container-Wahrheiten
 (`DATA_DIR`, `MEDIA_DIR`, `CORS_ORIGINS`, der PIN-Hash) stehen weiter unter `environment:` und
 gewinnen dort -- die Gegenprobe steht in den Daten: Die `.env` des Macs sagt
-`KIEKMAP_MEDIA_DIR=/Volumes`, im Container steht `/media`. Wer kuenftig eine Einstellung
-einfuehrt, muss nichts weiter tun.
+`KIEKMAP_MEDIA_DIR=/Volumes`, im Container steht `/media`. Wer künftig eine Einstellung
+einführt, muss nichts weiter tun.
 
-### Beinahe haette die Messung gelogen
+### Beinahe hätte die Messung gelogen
 
-Die erste Probe war ein Foto aus dem Bestand mit geaendertem Hash. Es kam mit dem Schlagwort
+Die erste Probe war ein Foto aus dem Bestand mit geändertem Hash. Es kam mit dem Schlagwort
 „Gebäude" an -- **und das sah wie ein Beweis aus, dass die Einstellung ankommt.** Sie kam aus den
 Metadaten der Datei selbst. Erst der Blick in `docker exec … env` zeigte, dass
 `import_tags` im Container leer war; der saubere Zeuge war die Herkunft, die schlicht `None` blieb.
 **Ein Fund, der aus zwei Quellen stammen kann, ist kein Fund, bevor man die Quellen getrennt hat.**
 
-### Was auf dem Mac nicht zu pruefen war
+### Was auf dem Mac nicht zu prüfen war
 
 `/media` gibt es unter macOS nicht, und `rshared` ist eine Mount-Propagierung des Linux-Kerns, die
-ueber die Dateifreigabe von Docker Desktop nicht durchgeht. Dafuer gibt es jetzt
-`deploy/docker-compose.mac.yml`, das genau diese beiden Einhaengungen ersetzt und sonst nichts.
-**Der USB-Weg der Sicherung bleibt damit ungeprueft** -- gerade der Fall, den `rshared` loesen
-soll, naemlich ein erst nach dem Start eingesteckter Stick. Er ist nach
+über die Dateifreigabe von Docker Desktop nicht durchgeht. Dafür gibt es jetzt
+`deploy/docker-compose.mac.yml`, das genau diese beiden Einhängungen ersetzt und sonst nichts.
+**Der USB-Weg der Sicherung bleibt damit ungeprüft** -- gerade der Fall, den `rshared` lösen
+soll, nämlich ein erst nach dem Start eingesteckter Stick. Er ist nach
 [Punkt 18](backlog.md) gewandert, das Verhalten nach Stromausfall und Neustart nach
-[Punkt 15](backlog.md). Wer spaeter „Container sind geprueft" zitiert, soll die zwei Luecken
+[Punkt 15](backlog.md). Wer später „Container sind geprüft" zitiert, soll die zwei Lücken
 mitlesen.
 
 ### Und ein Fehler von mir, der lehrreicher war als das Ergebnis
 
-Fuer den Durchgang habe ich den Bestand kopiert -- Datenbank, Fotos, Vorschaubilder. Zweimal
+Für den Durchgang habe ich den Bestand kopiert -- Datenbank, Fotos, Vorschaubilder. Zweimal
 danebengegriffen. Erst fehlte die **WAL-Datei**: Ohne sie lag die Kopie beim Stand vom 12. August,
 die 75 Titel waren nicht dabei. Dann fehlte **`region.json`**, und das legte den halben Kiosk
-lahm -- `nearby_streets` gab eine leere Liste zurueck, der Beitragsbereich hatte keine Strassen
+lahm -- `nearby_streets` gab eine leere Liste zurück, der Beitragsbereich hatte keine Straßen
 anzubieten, und die Karte stand auf einem Ausschnitt von 150 Metern. Beides sah nach einem
 Container-Fehler aus und war keiner. **Die Sicherung des Programms nimmt `region.json` und
 `places.json` von sich aus mit** (`LOOSE_FILES` in `services/backup.py`) -- von Hand kopieren tut
@@ -2528,69 +2529,69 @@ das niemand.
 
 ### Nachtrag: ein Symlink liess die Sicherung ins eigene Verzeichnis laufen
 
-Noch am selben Abend, und gefunden, weil Kalle die eine Zeile der Pruefliste nachholte, die ich
-nicht selbst machen konnte: die Sicherung. Sie lief durch -- **auf einen Datentraeger, der keiner
+Noch am selben Abend, und gefunden, weil Kalle die eine Zeile der Prüfliste nachholte, die ich
+nicht selbst machen konnte: die Sicherung. Sie lief durch -- **auf einen Datenträger, der keiner
 war.**
 
-Die Ueberlagerung haengt `/Volumes` als `/media` ein, und dort liegt auf **jedem** Mac ein
-Symlink auf `/`, benannt nach dem internen Volume -- das war spaeter die wichtigste Berichtigung an
-diesem Eintrag: kein Zufall dieser Maschine, sondern der Normalfall fuer alle, die der
+Die Überlagerung hängt `/Volumes` als `/media` ein, und dort liegt auf **jedem** Mac ein
+Symlink auf `/`, benannt nach dem internen Volume -- das war später die wichtigste Berichtigung an
+diesem Eintrag: kein Zufall dieser Maschine, sondern der Normalfall für alle, die der
 `operations.md` folgen und zum Entwickeln `KIEKMAP_MEDIA_DIR=/Volumes` setzen. Aufgefallen war es
-nur nie, weil niemand den Sicherungsknopf auf einem Mac gedrueckt hatte. Weil
-`os.path.ismount` fuer einen Symlink grundsaetzlich `False` sagt, galt er als gewoehnlicher Ordner;
-die Suche stieg eine Ebene hinab -- die Ebene, die es fuer `/media/<benutzer>/<bezeichnung>`
+nur nie, weil niemand den Sicherungsknopf auf einem Mac gedrückt hatte. Weil
+`os.path.ismount` für einen Symlink grundsätzlich `False` sagt, galt er als gewöhnlicher Ordner;
+die Suche stieg eine Ebene hinab -- die Ebene, die es für `/media/<benutzer>/<bezeichnung>`
 braucht -- und folgte ihm bis in die Wurzel. Angeboten wurden zwei „Laufwerke" namens `data` und
 `media`. **931 Fotos und 1,45 GB landeten in dem Ordner, den sie sichern**, mit Handzettel, also
 aussehend wie eine richtige Sicherung.
 
-Der Docstring von `find_drives` benannte diesen Fall bereits als den, den die Einhaengepruefung
+Der Docstring von `find_drives` benannte diesen Fall bereits als den, den die Einhängeprüfung
 verhindern soll. Der Symlink war das Loch darin. Behoben in zwei Zeilen, festgehalten als
 [Punkt 40](decisions.md).
 
 **Zwei Dinge daran sind das Aufschreiben wert.** Erstens: Der Fund kam aus dem Rest, den ich als
-ungeprueft stehengelassen hatte. Eine ehrlich benannte Luecke ist mehr wert als eine, die man
-uebersieht -- und dasselbe galt gleich noch einmal, siehe unten. Zweitens: **Die erste Gegenprobe schlug nicht aus.** Die im Test eingesetzte
-`_is_mounted` vergleicht Pfade woertlich, und woertlich ist `media/Danger/data` nicht
-`anderswo/data` -- der Test war auch ohne die Absicherung gruen und haette nichts bewacht. Er
-vergleicht jetzt aufgeloest, und dann faellt genau einer. Eine Gegenprobe ohne Ausschlag ist ein
+ungeprüft stehengelassen hatte. Eine ehrlich benannte Lücke ist mehr wert als eine, die man
+übersieht -- und dasselbe galt gleich noch einmal, siehe unten. Zweitens: **Die erste Gegenprobe schlug nicht aus.** Die im Test eingesetzte
+`_is_mounted` vergleicht Pfade wörtlich, und wörtlich ist `media/Danger/data` nicht
+`anderswo/data` -- der Test war auch ohne die Absicherung grün und hätte nichts bewacht. Er
+vergleicht jetzt aufgelöst, und dann fällt genau einer. Eine Gegenprobe ohne Ausschlag ist ein
 Ergebnis.
 
 
 ### Nachtrag zum Nachtrag: der Weg, den ich umgangen hatte
 
-Beim Aufschreiben der Pruefliste fiel mir auf, dass ich den Import **ueber den Eingangsordner**
-geprueft hatte -- weil der ohne Anmeldung arbeitet und ich also allein damit durchkam. Der geht
+Beim Aufschreiben der Prüfliste fiel mir auf, dass ich den Import **über den Eingangsordner**
+geprüft hatte -- weil der ohne Anmeldung arbeitet und ich also allein damit durchkam. Der geht
 aber gar nicht durch nginx. Durch den Proxy waren bis dahin lauter GETs gelaufen und **zwei POSTs
 von je ein paar Byte**, beides Anmeldungen. Der Stapel-Upload, also die einzige Stelle, an der
-grosse Datenmengen in die andere Richtung fliessen, war damit ungeprueft -- und mit ihm die Zeile
+große Datenmengen in die andere Richtung fließen, war damit ungeprüft -- und mit ihm die Zeile
 `client_max_body_size 128m`, ohne die nginx bei **einem Megabyte** mit 413 abbricht, bevor das
-Backend die Datei ueberhaupt sieht.
+Backend die Datei überhaupt sieht.
 
 Zwei Fotos mit 3,2 und 3,6 MB gingen durch. Die Zeile greift, und der Bildnachweis stand dran --
 womit die `env_file`-Behebung auch auf dem HTTP-Weg belegt ist und nicht nur beim Eingangsordner.
 Danach wurden beide wieder entfernt, hart: `photos`, `photo_tags`, `changes`, `import_log` und die
 sechs Dateien. Nicht auf `status='deleted'` gesetzt, denn sie sollen nirgends auftauchen, auch
-nicht unter „geloescht".
+nicht unter „gelöscht".
 
 **Bequemlichkeit sucht sich den Weg, der ohne fremde Hilfe geht** -- und genau der war der
-falsche. Wer eine Pruefung allein fahren kann, prueft womoeglich nicht das, worauf es ankommt.
+falsche. Wer eine Prüfung allein fahren kann, prüft womöglich nicht das, worauf es ankommt.
 
-### Ein Waechter fuer die Einstellungen
+### Ein Wächter für die Einstellungen
 
 Auf die Frage, ob die drei Funde denn nun behoben seien, kam beim Nachmessen heraus: zwei ja, und
-einer war nie ein Fehler im Programm gewesen -- der Upload-Weg war nur ungeprueft. **Aber die
-Behebung des ersten war ungeschuetzt.** Wer `env_file: ../.env` aus der Compose-Datei loescht,
-bekommt weiterhin 394 gruene Backend-Tests: Eine Compose-Datei wird von keinem Test angefasst, und
+einer war nie ein Fehler im Programm gewesen -- der Upload-Weg war nur ungeprüft. **Aber die
+Behebung des ersten war ungeschützt.** Wer `env_file: ../.env` aus der Compose-Datei löscht,
+bekommt weiterhin 394 grüne Backend-Tests: Eine Compose-Datei wird von keinem Test angefasst, und
 genau das hatte den Fehler beim ersten Mal so lange am Leben gehalten.
 
-`tools/check_settings.py` schliesst das, als drittes Werkzeug neben `language_check.py` und
+`tools/check_settings.py` schließt das, als drittes Werkzeug neben `language_check.py` und
 `check_anchors.py` -- Skript und nicht Test, weil es Dateien liest, die die Tests nicht kennen. Es
-holt die Feldnamen mit `ast` aus `config.py` (kein Import, also kein venv noetig) und liest die
+holt die Feldnamen mit `ast` aus `config.py` (kein Import, also kein venv nötig) und liest die
 Compose-Datei mit einem gezielten Leser statt mit PyYAML, das im System-Python fehlt.
 
 Drei Fragen, und die zweite und dritte sind so viel wert wie die erste: Erreicht jede Einstellung
-den Container? Steht in `environment:` nur, was es auch gibt? Und dasselbe fuer `.env.example`,
-samt der auskommentierten Zeilen -- es ist die Vorlage, mit der jede neue Einrichtung anfaengt, ein
+den Container? Steht in `environment:` nur, was es auch gibt? Und dasselbe für `.env.example`,
+samt der auskommentierten Zeilen -- es ist die Vorlage, mit der jede neue Einrichtung anfängt, ein
 Tippfehler darin reist also mit.
 
 Drei Gegenproben, jede einzeln gefahren, jede mit eigener Meldung: `env_file` entfernt,
@@ -2609,187 +2610,187 @@ einstellbar. Aufgefallen ist das nicht mir, sondern dem Werkzeug, beim ersten La
 *15. August 2026.* Punkt 48. Der bisherige Name beschrieb, was das Programm tut; **Kiekmap** —
 plattdeutsch *kieken* — sagt, was es ist, und nennt dabei keinen Ort. Warum das keine Geschmacks-,
 sondern eine Bauentscheidung ist, steht als [Punkt 41](decisions.md) daneben: Das zweite Museum
-soll eine eigene `region.json` brauchen und keinen Fork, und ein Ortsname im Paket haette dieser
+soll eine eigene `region.json` brauchen und keinen Fork, und ein Ortsname im Paket hätte dieser
 Zusage widersprochen, lange bevor jemand sie technisch verletzt.
 
 **213 Ersetzungen in 38 versionierten Dateien**, dazu vier umbenannte Dateien unter `deploy/pi/`,
-die Datenbankdatei, die nicht versionierte `.env` und die editierbare Installation im venv. Fuer
-Besucher aendert sich nichts — der Name stand nie in der Oberflaeche, die Seite heisst „Bilder aus
+die Datenbankdatei, die nicht versionierte `.env` und die editierbare Installation im venv. Für
+Besucher ändert sich nichts — der Name stand nie in der Oberfläche, die Seite heißt „Bilder aus
 unserem Ort".
 
-**Der Zeitpunkt war der letzte guenstige.** Kein Pi im Feld, kein Git-Remote, der einzige Bestand
-auf dem Entwicklungsrechner. Einen Tag spaeter im Betrieb haette dasselbe Geraete, Sticks und
+**Der Zeitpunkt war der letzte günstige.** Kein Pi im Feld, kein Git-Remote, der einzige Bestand
+auf dem Entwicklungsrechner. Einen Tag später im Betrieb hätte dasselbe Geräte, Sticks und
 fremde Arbeitskopien betroffen.
 
 ### Die Falle, die diese Umbenennung selbst gestellt hat
 
-Mit dem Praefix aendert sich der Name **jeder** Einstellung. Eine `.env`, die niemand anfasst,
-wird danach gelesen wie Luft: Pydantic kennt die alten Schluessel nicht mehr, ignoriert sie
+Mit dem Präfix ändert sich der Name **jeder** Einstellung. Eine `.env`, die niemand anfasst,
+wird danach gelesen wie Luft: Pydantic kennt die alten Schlüssel nicht mehr, ignoriert sie
 stillschweigend, und die ganze Konfiguration steht auf ihren Vorgaben. Schlagwort, Bildnachweis,
 Herkunft und der PIN-Hash weg — **derselbe Fehler wie am Vortag, nur aus einer anderen Richtung.**
 
-Der Waechter von gestern haette ihn nicht gefangen: Er las die Compose-Datei und die
+Der Wächter von gestern hätte ihn nicht gefangen: Er las die Compose-Datei und die
 `.env.example`, nicht die echte `.env`. Genau die ist aber die einzige Datei im Projekt, die
 niemand je durchsieht, weil sie nicht versioniert ist. `tools/check_settings.py` liest sie jetzt
-mit und stellt zwei Fragen an sie: Steht hier eine Einstellung unter einem Praefix, den es nicht
-mehr gibt? Und traegt ein Schluessel mit richtigem Praefix einen Namen, den es nicht gibt?
+mit und stellt zwei Fragen an sie: Steht hier eine Einstellung unter einem Präfix, den es nicht
+mehr gibt? Und trägt ein Schlüssel mit richtigem Präfix einen Namen, den es nicht gibt?
 
-Die Suche nach dem falschen Praefix ist bewusst eng: Sie schlaegt nur an, wenn der Teil **hinter**
-dem Praefix eine Einstellung benennt, die es wirklich gibt. Eine `.env` darf halten, was ihr
-Besitzer sonst noch hineinschreibt; `…_IMPORT_TAGS` unter fremdem Praefix ist dagegen keine fremde
+Die Suche nach dem falschen Präfix ist bewusst eng: Sie schlägt nur an, wenn der Teil **hinter**
+dem Präfix eine Einstellung benennt, die es wirklich gibt. Eine `.env` darf halten, was ihr
+Besitzer sonst noch hineinschreibt; `…_IMPORT_TAGS` unter fremdem Präfix ist dagegen keine fremde
 Variable, sondern unsere, verschrieben.
 
-Beide Gegenproben gefahren: einmal die ganze `.env` auf den alten Praefix zurueckgedreht (sechs
-Meldungen), einmal ein Buchstabe an einem Schluessel entfernt (eine).
+Beide Gegenproben gefahren: einmal die ganze `.env` auf den alten Präfix zurückgedreht (sechs
+Meldungen), einmal ein Buchstabe an einem Schlüssel entfernt (eine).
 
-### Nebenbei ausgeraeumt
+### Nebenbei ausgeräumt
 
 `backend/*.egg-info/` lag im Repo, obwohl es ein Bauartefakt der editierbaren Installation ist.
 Statt es umzubenennen, ist es herausgeflogen und steht jetzt in der `.gitignore`. Und im venv
 lagen nach dem Neuinstallieren **beide** Verteilungen nebeneinander — die alte ist deinstalliert,
-sonst haette sie bei der naechsten Fehlersuche verwirrt.
+sonst hätte sie bei der nächsten Fehlersuche verwirrt.
 
 ### Was danach gemessen wurde
 
 394 Backend- und 173 Frontend-Tests, alle drei Werkzeuge, und der Containerbetrieb von vorn: Beide
-Abbilder neu gebaut, „Kiekmap: Schemastand pruefen ..." im Startprotokoll, `kiekmap.db` im
-Datenverzeichnis, 929 Fotos, 811 davon im ersten Ausschnitt, **null fremde Herkuenfte**, PIN-Hash
+Abbilder neu gebaut, „Kiekmap: Schemastand prüfen ..." im Startprotokoll, `kiekmap.db` im
+Datenverzeichnis, 929 Fotos, 811 davon im ersten Ausschnitt, **null fremde Herkünfte**, PIN-Hash
 und Import-Einstellungen im Container angekommen.
 
 ---
 
-## Der Neustart entfaellt: die Wiederherstellung migriert selbst
+## Der Neustart entfällt: die Wiederherstellung migriert selbst
 
 *15. August 2026.* Punkt 47, der zweite der beiden offenen Fehler.
 
-Seit dem 12. August stand in beiden Handbuechern, dass man das Geraet nach einer zurueckgespielten
+Seit dem 12. August stand in beiden Handbüchern, dass man das Gerät nach einer zurückgespielten
 Sicherung einmal neu starten muss. Das war richtig und hat den Betrieb abgedeckt — **aber eine
-Anweisung an Menschen ist die schwaechste Stelle, die eine Zusage haben kann.** Befolgen muss sie
-jemand, der ein- bis zweimal im Jahr an dieses Geraet geht; wer sie vergisst, merkt nichts, denn
-der Fehler zeigt sich erst beim naechsten Besucher, der etwas beitragen will.
+Anweisung an Menschen ist die schwächste Stelle, die eine Zusage haben kann.** Befolgen muss sie
+jemand, der ein- bis zweimal im Jahr an dieses Gerät geht; wer sie vergisst, merkt nichts, denn
+der Fehler zeigt sich erst beim nächsten Besucher, der etwas beitragen will.
 
 Jetzt tut es das Programm. `services/schema.py` ist die eine Stelle, an der von aussen mit Alembic
 gesprochen wird, und `backup._swap_in` ruft sie — dort, weil beide Wege (Stick und Archiv) durch
 diese Funktion gehen und ihr Docstring ohnehin sagt, dass hier nichts auseinanderlaufen darf.
 
 **Die Reihenfolge ist der ganze Punkt.** Die Ablehnung einer zu neuen Sicherung kommt **vor** dem
-Tausch, das Migrieren **danach**. Beides ist mit einem eigenen Test belegt, und der dritte prueft
+Tausch, das Migrieren **danach**. Beides ist mit einem eigenen Test belegt, und der dritte prüft
 die Zusage dazwischen: Nach einer Ablehnung liegt kein `vorher-`Ordner da, kein Arbeitsordner, und
 die Fotos von heute sind noch da. Eine Sicherung, die dieses Programm nicht lesen kann, darf das
-Geraet nicht halb ersetzt zuruecklassen.
+Gerät nicht halb ersetzt zurücklassen.
 
 ### Der Test, der gefehlt hat
 
-`test_migrationen_und_modelle_beschreiben_dasselbe_schema` baut das Schema einmal ueber
-`alembic upgrade head` und einmal ueber `create_all` und vergleicht Tabellen und Spaltennamen.
+`test_migrationen_und_modelle_beschreiben_dasselbe_schema` baut das Schema einmal über
+`alembic upgrade head` und einmal über `create_all` und vergleicht Tabellen und Spaltennamen.
 
-**Das ist der Test, dessen Fehlen den Fehler zwei Tage lang unsichtbar hielt:** Alle uebrigen Tests
-bauen ihr Schema aus den Modellen und koennen eine fehlende Migration deshalb grundsaetzlich nicht
-bemerken — 393 gruene Tests standen neben einer Datenbank, an der nichts mehr zu schreiben war.
+**Das ist der Test, dessen Fehlen den Fehler zwei Tage lang unsichtbar hielt:** Alle übrigen Tests
+bauen ihr Schema aus den Modellen und können eine fehlende Migration deshalb grundsätzlich nicht
+bemerken — 393 grüne Tests standen neben einer Datenbank, an der nichts mehr zu schreiben war.
 
 Verglichen werden Namen, nicht Typen und Indizes: Die beiden Wege unterscheiden sich dort in
-Kleinigkeiten, die nichts bedeuten, und ein Test, der daran haengenbleibt, wird abgeschaltet statt
-gelesen. Die Gegenprobe: eine Spalte an ein Modell gehaengt, ohne Migration — genau ein Test faellt.
+Kleinigkeiten, die nichts bedeuten, und ein Test, der daran hängenbleibt, wird abgeschaltet statt
+gelesen. Die Gegenprobe: eine Spalte an ein Modell gehängt, ohne Migration — genau ein Test fällt.
 
 ### Zwei Funde am Rand, beide aus derselben Ecke
 
 **Der Testaufbau war im ersten Anlauf ein Widerspruch.** Um eine Sicherung von vor der Migration
-nachzubilden, hatte ich nur den Stempel zurueckgedreht — die Testdatenbank entsteht aber aus den
-Modellen und traegt die Spalte laengst. Die Migration lief dann gegen eine Spalte, die schon da war.
-Eine Nachbildung, die nur die Haelfte nachbildet, prueft nichts.
+nachzubilden, hatte ich nur den Stempel zurückgedreht — die Testdatenbank entsteht aber aus den
+Modellen und trägt die Spalte längst. Die Migration lief dann gegen eine Spalte, die schon da war.
+Eine Nachbildung, die nur die Hälfte nachbildet, prüft nichts.
 
 **Und `check_anchors.py` sah zwei Drittel der Dokumentation nicht.** `operations.md` und
-`usermanual.md` standen nicht in seiner Liste, und **dateiuebergreifende** Anker
-(`usermanual.md#…`) prueft es bis heute gar nicht — dabei sind genau die es, die still brechen: Wer
+`usermanual.md` standen nicht in seiner Liste, und **dateiübergreifende** Anker
+(`usermanual.md#…`) prüft es bis heute gar nicht — dabei sind genau die es, die still brechen: Wer
 einen Abschnitt umschreibt, liest seine eigene Datei, nicht die drei, die hineinverweisen. Beides
-nachgezogen; der erste Lauf fand sofort drei tote Verweise, einen davon aus einer aelteren Runde.
+nachgezogen; der erste Lauf fand sofort drei tote Verweise, einen davon aus einer älteren Runde.
 
 ### Was danach gemessen wurde
 
-398 Backend-Tests, dazu der ganze Weg im Container gegen ein temporaeres Datenverzeichnis: eine
+398 Backend-Tests, dazu der ganze Weg im Container gegen ein temporäres Datenverzeichnis: eine
 Sicherung auf dem Anfangsschema eingespielt, `old_source` danach wieder da, Stempel auf dem Kopf.
-Und der umgekehrte Fall abgelehnt, mit unveraendertem Bestand. **Der Container war dabei der
-eigentliche Pruefpunkt**, denn dort laeuft uvicorn in `/srv` und nicht in `backend/` — die
+Und der umgekehrte Fall abgelehnt, mit unverändertem Bestand. **Der Container war dabei der
+eigentliche Prüfpunkt**, denn dort läuft uvicorn in `/srv` und nicht in `backend/` — die
 `alembic.ini` nennt ihren Skriptordner relativ, weshalb `schema._config()` ihn absolut setzt.
 
 ---
 
-## Der Kopfbereich hoert auf, am Ansichtsfenster zu haengen
+## Der Kopfbereich hört auf, am Ansichtsfenster zu hängen
 
 *16. August 2026.* Punkt 49, gemeldet mit einem Bildschirmfoto bei 1470 x 956: „Bilder" / „aus" /
 „Holm", dreizeilig untereinander.
 
 **Die erste Ursache war ein Fallstrick, die zweite der eigentliche Fehler.** `--crest` schaltete
 bei `@media (max-width: 85rem)` herunter, und in einer Medienabfrage ist `rem` immer 16 px — die
-Umschaltung griff bei 1360 px statt bei den gedachten 1530. Das allein zu berichtigen waere aber
+Umschaltung griff bei 1360 px statt bei den gedachten 1530. Das allein zu berichtigen wäre aber
 zu kurz gesprungen gewesen: **Nachgerechnet blieben auch oberhalb der Schwelle 0,3 px** zwischen
 dem, was „Bilder aus" braucht, und dem, was die Spalte hergibt. Bei 1470 px brach Safari um und
 Chromium nicht — ein Pixel entschied.
 
 Jetzt messen sich Wappen und Titel an der Breite ihrer eigenen Zelle (`cqi`), nicht am
-Ansichtsfenster. Es gibt keine Schwelle mehr, an der etwas kippen koennte, und ueber den ganzen
+Ansichtsfenster. Es gibt keine Schwelle mehr, an der etwas kippen könnte, und über den ganzen
 Bereich von 1024 bis 2560 px bleiben 25 bis 56 Prozent Luft. Als
 [Punkt 43](decisions.md) festgehalten.
 
-### Der Pruefstein war nicht „Bilder aus", sondern der Ortsname
+### Der Prüfstein war nicht „Bilder aus", sondern der Ortsname
 
-Der Backlog-Eintrag hatte es vorhergesagt, und die Messung bestaetigte es: Die engste Zeile ist der
-**Ortsname** — vier fette Zeichen auf 0,54 der Wappenhoehe sind breiter als zehn magere auf 0,28.
-Und seine Laenge steht nicht fest, sie kommt aus `region.json`.
+Der Backlog-Eintrag hatte es vorhergesagt, und die Messung bestätigte es: Die engste Zeile ist der
+**Ortsname** — vier fette Zeichen auf 0,54 der Wappenhöhe sind breiter als zehn magere auf 0,28.
+Und seine Länge steht nicht fest, sie kommt aus `region.json`.
 
 Nach dem ersten Umbau war „Holm" gerettet und **„Hetlingen" brach immer noch um.** Ein Kopfbereich,
-der nur mit einem vierbuchstabigen Ortsnamen haelt, ist keine Behebung, sondern dieselbe
-Zerbrechlichkeit mit etwas mehr Spielraum — und er widerspraeche der Zusage, dass ein zweites
+der nur mit einem vierbuchstabigen Ortsnamen hält, ist keine Behebung, sondern dieselbe
+Zerbrechlichkeit mit etwas mehr Spielraum — und er widerspräche der Zusage, dass ein zweites
 Museum nur seine `region.json` braucht.
 
 **CSS kann Text nicht messen**, also bekommt es die eine Zahl, die fehlt: `App.tsx` gibt die
-Zeichenzahl des Namens als `--name-length` mit, und die Schriftgroesse ist der kleinere Wert aus
+Zeichenzahl des Namens als `--name-length` mit, und die Schriftgröße ist der kleinere Wert aus
 gewachsener Proportion und „Platz neben dem Wappen, geteilt durch die Zeichen". Danach stand jeder
-geprobte Name einzeilig — bis „Klein Nordende-Lieth" bei **zwoelf Pixeln** landete.
+geprobte Name einzeilig — bis „Klein Nordende-Lieth" bei **zwölf Pixeln** landete.
 
-**Also ein Boden**, und mit ihm endet die Zusage bewusst: nie kleiner als die Zeile darueber. Wo er
+**Also ein Boden**, und mit ihm endet die Zusage bewusst: nie kleiner als die Zeile darüber. Wo er
 greift, bricht der Name um. Das ist die bessere der beiden schlechten Antworten und war auch vorher
-schon die gewaehlte — nur steht jetzt in `docs/adaption.md`, wo die Grenze liegt: bis zwoelf
+schon die gewählte — nur steht jetzt in `docs/adaption.md`, wo die Grenze liegt: bis zwölf
 Zeichen auf jedem Schirm, bis sechzehn auf einem breiten.
 
 ### Was daran zu lernen war
 
-**Zweimal habe ich zu frueh gemessen und mir selbst etwas bestaetigt, das nicht stimmte.** Erst
-zaehlte ich Zeilen mit `getClientRects()` auf dem Element — das zaehlt Bloecke, nicht Zeilen, und
-meldete brav „1". Dann verglich ich die Textbreite mit der Breite ihres Kastens und bekam ueberall
+**Zweimal habe ich zu früh gemessen und mir selbst etwas bestätigt, das nicht stimmte.** Erst
+zählte ich Zeilen mit `getClientRects()` auf dem Element — das zählt Blöcke, nicht Zeilen, und
+meldete brav „1". Dann verglich ich die Textbreite mit der Breite ihres Kastens und bekam überall
 „-1 % Luft"; der Kasten ist ein Flex-Element ohne `flex: 1`, seine Breite **ist** die der
-breitesten Zeile. Erst die dritte Messung — natuerliche Textbreite gegen den wirklich freien Platz
-— sagte etwas ueber die Sache. **Eine Messung, die immer dasselbe antwortet, misst nichts.**
+breitesten Zeile. Erst die dritte Messung — natürliche Textbreite gegen den wirklich freien Platz
+— sagte etwas über die Sache. **Eine Messung, die immer dasselbe antwortet, misst nichts.**
 
 ---
 
-## Die Detailansicht: das Bild bekommt Platz, die Knoepfe bekommen einen Ort
+## Die Detailansicht: das Bild bekommt Platz, die Knöpfe bekommen einen Ort
 
 *16. August 2026.* Punkt 10, der letzte der beiden Masz-Fehler in der Besucheransicht.
 
 ### Der Knopf, der davonlief
 
-Die Blaetterknoepfe standen unmittelbar unter dem Bild und wanderten mit dessen Hoehe.
-Nachgemessen auf 1024 x 768, indem das Seitenverhaeltnis der Reihe nach durchgestellt wurde:
-zwischen 3:2 quer und 2:3 hoch lagen **103 px**. Wer durch einen Stapel blaettert, dessen Fotos
-verschiedene Formate haben, jagt den Knopf ueber den Schirm -- und greift im schlimmsten Fall ins
-Bild, wo eben noch „Naechstes" stand.
+Die Blätterknöpfe standen unmittelbar unter dem Bild und wanderten mit dessen Höhe.
+Nachgemessen auf 1024 x 768, indem das Seitenverhältnis der Reihe nach durchgestellt wurde:
+zwischen 3:2 quer und 2:3 hoch lagen **103 px**. Wer durch einen Stapel blättert, dessen Fotos
+verschiedene Formate haben, jagt den Knopf über den Schirm -- und greift im schlimmsten Fall ins
+Bild, wo eben noch „Nächstes" stand.
 
 Jetzt sind sie senkrecht verankert und stehen waagerecht weiter mittig **unter dem Bild**. Nach dem
-Umbau: **0 px Sprung** bei jedem geprueften Format, und die Mitte der Knopfzeile liegt auf die
+Umbau: **0 px Sprung** bei jedem geprüften Format, und die Mitte der Knopfzeile liegt auf die
 Pixel genau auf der Bildmitte. Als [Punkt 44](decisions.md) festgehalten, samt der Regel dahinter:
 Was der Besucher trifft, steht still; was er ansieht, darf sich bewegen.
 
 Dass Bild und Text weiter **in einer Flucht** anfangen, ist dabei erhalten geblieben -- das war
 eine eigene Entscheidung vom 9. August und hatte keinen Grund zu fallen. Der Block aus Bild und
-Text ruecht jetzt als Ganzes nach unten, wenn das Bild niedrig ist; die Knopfzeile bleibt, wo sie
+Text rückt jetzt als Ganzes nach unten, wenn das Bild niedrig ist; die Knopfzeile bleibt, wo sie
 ist.
 
-### Die Textspalte, die das Bild zerdrueckte
+### Die Textspalte, die das Bild zerdrückte
 
 `--overlay-aside` stand fest auf 24 rem, also 432 px. Auf einem 1024er Panel blieben dem
-querformatigen Scan damit 466 px -- weniger als die Haelfte des Schirms fuer das, was die Ansicht
-zeigen soll. Jetzt waechst die Spalte mit (`clamp(16rem, 28vw, 24rem)`):
+querformatigen Scan damit 466 px -- weniger als die Hälfte des Schirms für das, was die Ansicht
+zeigen soll. Jetzt wächst die Spalte mit (`clamp(16rem, 28vw, 24rem)`):
 
 | Schirm | vorher | nachher | |
 |---|---|---|---|
@@ -2799,24 +2800,24 @@ zeigen soll. Jetzt waechst die Spalte mit (`clamp(16rem, 28vw, 24rem)`):
 | 1920 px | 1362 px | 1362 px | ±0 |
 
 **Genau die Verteilung, die der Backlog-Eintrag vorhergesagt hat:** „Auf 1920 x 1080 ist nichts zu
-tun, auf einem 1024er Panel schon." Die Behebung greift dort, wo der Fehler war, und ruehrt nicht
+tun, auf einem 1024er Panel schon." Die Behebung greift dort, wo der Fehler war, und rührt nicht
 an, was schon stimmte.
 
 **Der zweite Weg aus dem Eintrag -- das Layout dem Bildformat folgen lassen -- ist nicht gebaut**,
 und das war Absicht: Er stellt bei 884 von 929 Fotos die Ansicht um und will auf einem echten
-Geraet beurteilt werden, nicht im Browser. Er bleibt der naechste Schritt, wenn
-[Punkt 19](backlog.md) die Aufloesung geklaert hat.
+Gerät beurteilt werden, nicht im Browser. Er bleibt der nächste Schritt, wenn
+[Punkt 19](backlog.md) die Auflösung geklärt hat.
 
-### Der Schliessen-Knopf und die Rollenfrage
+### Der Schließen-Knopf und die Rollenfrage
 
-Der Eintrag verlangte, vor der Arbeit zu entscheiden, welche Rolle der Knopf bekommt -- fuenfte
+Der Eintrag verlangte, vor der Arbeit zu entscheiden, welche Rolle der Knopf bekommt -- fünfte
 Rolle oder Sonderfall. **Sonderfall.** Die vier Rollen aus Punkt 30 sind die Sprache des
 Beitragsbereichs, wo ein Besucher Fragen beantwortet und die Form sagen muss, was ein Knopf tut;
-Schliessen ist keine davon, und Punkt 30 sagt ausdruecklich „mehr sollen es nicht werden". Dass die
-Detailansicht auf ihrem dunklen Grund ohnehin eine eigene Knopffamilie fuehrt, macht es zur
+Schließen ist keine davon, und Punkt 30 sagt ausdrücklich „mehr sollen es nicht werden". Dass die
+Detailansicht auf ihrem dunklen Grund ohnehin eine eigene Knopffamilie führt, macht es zur
 einfachsten Antwort statt zur Ausnahme.
 
-Er steht jetzt in der Ecke des Schirms -- 45 px von oben und rechts, unabhaengig davon, wie breit
+Er steht jetzt in der Ecke des Schirms -- 45 px von oben und rechts, unabhängig davon, wie breit
 der Inhalt gerade ist.
 
 ---
@@ -2826,56 +2827,56 @@ der Inhalt gerade ist.
 *16. August 2026.* Punkt 53, gemeldet als: In der Detailansicht fehle der Weg zur Hausnummer,
 sobald das Jahr bekannt sei.
 
-**Die Beobachtung stimmte, die Erklaerung nicht.** Weder das Backend noch das Frontend fragen an
-dieser Stelle nach dem Jahr -- die Detailansicht holt die Hausnummern fuer *jedes* geoeffnete Foto
-und zeigt den Knopf, wenn die Liste nicht leer ist. Das Nachzaehlen ergab etwas anderes:
+**Die Beobachtung stimmte, die Erklärung nicht.** Weder das Backend noch das Frontend fragen an
+dieser Stelle nach dem Jahr -- die Detailansicht holt die Hausnummern für *jedes* geöffnete Foto
+und zeigt den Knopf, wenn die Liste nicht leer ist. Das Nachzählen ergab etwas anderes:
 
-| Fotos mit blossem Strassennamen | Anzahl | davon mit Jahr | Knopf? |
+| Fotos mit bloßem Straßennamen | Anzahl | davon mit Jahr | Knopf? |
 |---|---|---|---|
-| strassengenau, vom Kurator | 71 | 13 | ja |
+| straßengenau, vom Kurator | 71 | 13 | ja |
 | **ohne Genauigkeit, aus dem EXIF** | **53** | **35** | **nein** |
 
-Wer sich durchklickt, sieht damit eine saubere Korrelation -- die mit Jahr sind ueberwiegend gerade
-die ohne Knopf -- und schliesst auf die falsche Ursache. **Eine gemeldete Beobachtung ist ein
-Befund, ihre Erklaerung eine Vermutung.**
+Wer sich durchklickt, sieht damit eine saubere Korrelation -- die mit Jahr sind überwiegend gerade
+die ohne Knopf -- und schließt auf die falsche Ursache. **Eine gemeldete Beobachtung ist ein
+Befund, ihre Erklärung eine Vermutung.**
 
 ### Die eigentliche Ursache war eine Annahme, die niemand nachgezogen hat
 
-`_needs_housenumber` verlangte ausdruecklich 150 m Genauigkeit und begruendete das so: „Das Geraet
-weiss, wo der Fotograf stand, nicht was er fotografiert hat." **Dieser Satz war am 12. August
+`_needs_housenumber` verlangte ausdrücklich 150 m Genauigkeit und begründete das so: „Das Gerät
+weiß, wo der Fotograf stand, nicht was er fotografiert hat." **Dieser Satz war am 12. August
 widerlegt worden** -- 278 von 413 EXIF-Koordinaten des Erstbestands teilten sich zwei Fotos, es
 sind eingetragene Werte und keine Messungen. Es steht seitdem in `CLAUDE.md` unter den drei Dingen,
-die man hier falsch machen kann; in `needs.py` stand weiter die alte Begruendung.
+die man hier falsch machen kann; in `needs.py` stand weiter die alte Begründung.
 
-Nachgemessen fuer diese 53: **30 von ihnen teilen ihren Punkt mit einem anderen Foto, sechs haengen
-an einem einzigen.** Eine eingetragene Koordinate an einer benannten Strasse ist genau der Fall,
-fuer den die Frage gebaut wurde.
+Nachgemessen für diese 53: **30 von ihnen teilen ihren Punkt mit einem anderen Foto, sechs hängen
+an einem einzigen.** Eine eingetragene Koordinate an einer benannten Straße ist genau der Fall,
+für den die Frage gebaut wurde.
 
-Die Bedingung nennt jetzt, was sie meint -- auf der Karte, nicht schon hausgenau, Strassenname ohne
-Ziffer, Adressen im Ortsindex. **Die Frage waechst von 70 auf 116 Fotos, 46 kommen dazu, 30 davon
-mit bekanntem Jahr, keines faellt weg.** Als [Punkt 45](decisions.md) festgehalten.
+Die Bedingung nennt jetzt, was sie meint -- auf der Karte, nicht schon hausgenau, Straßenname ohne
+Ziffer, Adressen im Ortsindex. **Die Frage wächst von 70 auf 116 Fotos, 46 kommen dazu, 30 davon
+mit bekanntem Jahr, keines fällt weg.** Als [Punkt 45](decisions.md) festgehalten.
 
 ### Der Test, der seinen eigenen Namen nicht hielt
 
-Es gab einen `test_foto_aus_dem_exif_wird_nicht_vorgelegt`. Er war gruen, und er prueft --
-nichts dergleichen: Sein Foto hatte **gar keinen Strassennamen** und fiel schon an dieser Bedingung
-heraus. Der EXIF-Fall stand zwei Wochen ungeprueft da, waehrend ein Test mit genau diesem Namen
-danebenstand und Sicherheit vortaeuschte.
+Es gab einen `test_foto_aus_dem_exif_wird_nicht_vorgelegt`. Er war grün, und er prüft --
+nichts dergleichen: Sein Foto hatte **gar keinen Straßennamen** und fiel schon an dieser Bedingung
+heraus. Der EXIF-Fall stand zwei Wochen ungeprüft da, während ein Test mit genau diesem Namen
+danebenstand und Sicherheit vortäuschte.
 
-**Ein Test, dessen Name etwas anderes sagt als sein Aufbau, deckt eine Luecke zu, statt sie zu
-schliessen** -- er ist schlimmer als gar keiner, weil er die Frage als beantwortet ausweist. Er
-heisst jetzt nach dem, was er misst, und der EXIF-Fall hat seinen eigenen daneben. Dazu ein dritter
-fuer die neue Bedingung „muss ueberhaupt auf der Karte sein": Ohne sie stuenden in der
-Detailansicht „Wo ist das?" und „Welche Hausnummer?" nebeneinander und baeten darum, dasselbe Foto
+**Ein Test, dessen Name etwas anderes sagt als sein Aufbau, deckt eine Lücke zu, statt sie zu
+schließen** -- er ist schlimmer als gar keiner, weil er die Frage als beantwortet ausweist. Er
+heißt jetzt nach dem, was er misst, und der EXIF-Fall hat seinen eigenen daneben. Dazu ein dritter
+für die neue Bedingung „muss überhaupt auf der Karte sein": Ohne sie stünden in der
+Detailansicht „Wo ist das?" und „Welche Hausnummer?" nebeneinander und bäten darum, dasselbe Foto
 zweimal zu verorten.
 
 ### Und ein Messfehler von mir, im selben Atemzug
 
 Die Gegenrechnung „was kommt dazu" meldete erst **0**, obwohl die Zahlen von 70 auf 116 stiegen.
 `NOT (accuracy == 150)` ist in SQL nicht wahr, wenn `accuracy` NULL ist, sondern NULL -- und genau
-die Fotos ohne Genauigkeit waren die gesuchten. Ueber Mengen gezaehlt statt ueber SQL-Negation kam
-die richtige Antwort. **Zwei Zahlen, die einander widersprechen, sind ein Geschenk**; hier haette
-das Ergebnis sonst „keine Aenderung" gelautet, mitten in einer Aenderung.
+die Fotos ohne Genauigkeit waren die gesuchten. Über Mengen gezählt statt über SQL-Negation kam
+die richtige Antwort. **Zwei Zahlen, die einander widersprechen, sind ein Geschenk**; hier hätte
+das Ergebnis sonst „keine Änderung" gelautet, mitten in einer Änderung.
 
 ## Der Diff, der keiner war
 
@@ -2883,7 +2884,7 @@ das Ergebnis sonst „keine Aenderung" gelautet, mitten in einer Aenderung.
 
 Vom Museum kam ein Ordner mit 619 Bildern, bereits als Differenz geliefert: der heutige Bestand
 des Museums minus dem, was in unseren Erstimport ging. Dazu ein Satz: „Unsere Umwandlung von PNG
-und TIFF nach JPG ist noch nicht erfolgt, diese Dateien duerften doppelt sein -- bitte nachholen."
+und TIFF nach JPG ist noch nicht erfolgt, diese Dateien dürften doppelt sein -- bitte nachholen."
 
 Beides stimmte. Der zweite Satz stimmte weit mehr, als er sollte.
 
@@ -2892,130 +2893,130 @@ Beides stimmte. Der zweite Satz stimmte weit mehr, als er sollte.
 Der Erstbestand war schon umgewandelt angekommen; wie, hatte niemand aufgeschrieben. Im Repo stand
 nichts, im Shell-Verlauf nichts, und `sips` traf es auf Anhieb nicht.
 
-Die Antwort steht in den Dateien. Ein JPEG traegt seine **Quantisierungstabellen** mit sich, und
-die sind ein Fingerabdruck der Einstellung: Wer Pillow mit jeder Qualitaet von 60 bis 100 einmal
-laufen laesst und vergleicht, bekommt eine Zahl. Vier Referenzdateien, viermal dieselbe Antwort --
-**Qualitaet 92**, Subsampling 4:4:4. Mit `optimize=True` kam die erste Datei bitgleich heraus.
+Die Antwort steht in den Dateien. Ein JPEG trägt seine **Quantisierungstabellen** mit sich, und
+die sind ein Fingerabdruck der Einstellung: Wer Pillow mit jeder Qualität von 60 bis 100 einmal
+laufen lässt und vergleicht, bekommt eine Zahl. Vier Referenzdateien, viermal dieselbe Antwort --
+**Qualität 92**, Subsampling 4:4:4. Mit `optimize=True` kam die erste Datei bitgleich heraus.
 
-Gemessen an den 19 Dateien, fuer die beide Fassungen vorliegen: **vier bitgleich, achtzehn
+Gemessen an den 19 Dateien, für die beide Fassungen vorliegen: **vier bitgleich, achtzehn
 pixelgleich.** Die neunzehnte, `Weidenstieg/Straszenauffahrt`, hat jemand von Hand umgewandelt,
-bevor es ein Rezept gab. Die Gegenprobe mit Qualitaet 90 trifft keine einzige.
+bevor es ein Rezept gab. Die Gegenprobe mit Qualität 90 trifft keine einzige.
 
 Das Rezept liegt jetzt als `tools/to_jpeg.py` im Repo, mit sieben Tests -- Punkt 46 in
-`decisions.md` sagt, warum es festgeschraubt gehoert und nicht nachjustiert wird.
+`decisions.md` sagt, warum es festgeschraubt gehört und nicht nachjustiert wird.
 
 **Ein Fallstrick nebenbei**, gefunden vom eigenen Test: Mit `optimize` will libjpeg das ganze Bild
-in einem Block, und Pillow schaetzt diesen Block auf ein Byte je Bildpunkt. Ein Foto bei Qualitaet
+in einem Block, und Pillow schätzt diesen Block auf ein Byte je Bildpunkt. Ein Foto bei Qualität
 92 braucht ein Drittel davon -- die Holmer Scans haben es deshalb nie gemerkt. Ein kleines Bild
-voller feiner Struktur ueberlaeuft die Schaetzung, und das Speichern bricht ab mit „broken data
+voller feiner Struktur überläuft die Schätzung, und das Speichern bricht ab mit „broken data
 stream when writing image file". Ein Testbild aus Pixelrauschen fiel sofort darauf herein, ein
-echtes Foto nie. Der Test heisst jetzt nach dem Fall.
+echtes Foto nie. Der Test heißt jetzt nach dem Fall.
 
 ### Dann die Zahl, mit der niemand gerechnet hatte
 
-Der Import erkennt Dubletten am SHA-256. Eine zweite Umwandlung desselben TIFF traegt andere
-Metadatenbloecke, also greift er dort nicht -- verglichen wurde deshalb der **Bildinhalt**: erst
-pixelgenau bei gleichen Kantenlaengen, das siebt fast alles weg.
+Der Import erkennt Dubletten am SHA-256. Eine zweite Umwandlung desselben TIFF trägt andere
+Metadatenblöcke, also greift er dort nicht -- verglichen wurde deshalb der **Bildinhalt**: erst
+pixelgenau bei gleichen Kantenlängen, das siebt fast alles weg.
 
 Von den 89 umgewandelten Dateien waren 25 Dubletten, 23 davon mit Abweichung exakt 0,00. Nach
-Namen waere das zweimal danebengegangen: `Heimatmuseum Holm (1).tif` hat keinen Namensvetter und
-ist trotzdem eine Dublette, die 51 PNG der Museumsscheune heissen `01.png` bis `51.png` wie ein
+Namen wäre das zweimal danebengegangen: `Heimatmuseum Holm (1).tif` hat keinen Namensvetter und
+ist trotzdem eine Dublette, die 51 PNG der Museumsscheune heißen `01.png` bis `51.png` wie ein
 Dutzend Fotos anderswo und sind trotzdem alle neu.
 
-Und dann derselbe Vergleich ueber **alle 619** statt nur ueber die 89:
+Und dann derselbe Vergleich über **alle 619** statt nur über die 89:
 
 **223 zeigten ein Bild, das schon im Bestand stand.**
 
 Der Grund liegt im XMP: `x:xmptk='Image::ExifTool 11.65'`. Das Museum hat seinen Bestand durch
 ExifTool laufen lassen und dabei die Metadaten neu geschrieben. `P4139301.JPG` liegt alt mit
-1 848 144 Bytes vor, neu mit 1 843 343 -- dieselben Bildpunkte, andere Bytes. **Ein Diff ueber
-Bytes ist kein Diff ueber Bilder** (`decisions.md`, Punkt 47), und damit war die Zusage im Backlog
-hinfaellig, der Abgleich erledige sich ueber den SHA-256 von selbst. Er haette 223 zweite
+1 848 144 Bytes vor, neu mit 1 843 343 -- dieselben Bildpunkte, andere Bytes. **Ein Diff über
+Bytes ist kein Diff über Bilder** (`decisions.md`, Punkt 47), und damit war die Zusage im Backlog
+hinfällig, der Abgleich erledige sich über den SHA-256 von selbst. Er hätte 223 zweite
 Fassungen angelegt.
 
-Ein zweiter, grober Durchgang ueber 32x32-Graustufen fand sechs weitere, die beim Neuausspielen
-auch die Groesse geaendert hatten -- darunter eine **Sporthalle in 3052x2289, die im Bestand nur
+Ein zweiter, grober Durchgang über 32x32-Graustufen fand sechs weitere, die beim Neuausspielen
+auch die Größe geändert hatten -- darunter eine **Sporthalle in 3052x2289, die im Bestand nur
 mit 1024x768 liegt.** Der Abstand zwischen Treffer und Nicht-Treffer war dabei kein Ermessen: 212
-Treffer bei exakt 0,00, der hoechste bei 3,01, der naechste Nicht-Treffer bei 56.
+Treffer bei exakt 0,00, der höchste bei 3,01, der nächste Nicht-Treffer bei 56.
 
 ### Der eigentliche Wert lag woanders
 
-Das Museum hat **katalogisiert**. Aus „Ohlsen Optik" wurde „Betriebsgebaeude der Firma
-Ohlsen-Optik"; ein Foto traegt jetzt „Hof Hinrich Petersen mit Eternitdach nach dem Bombenangriff
+Das Museum hat **katalogisiert**. Aus „Ohlsen Optik" wurde „Betriebsgebäude der Firma
+Ohlsen-Optik"; ein Foto trägt jetzt „Hof Hinrich Petersen mit Eternitdach nach dem Bombenangriff
 1943", wo vorher nichts stand. Und `Im Ort 13` wurde zu `Im Ort 16, Hof Rissler` -- eine
 korrigierte Adresse.
 
-Ein blindes Uebernehmen haette dabei mehr zerstoert als gebracht, und die drei Gruende sind alle
+Ein blindes Übernehmen hätte dabei mehr zerstört als gebracht, und die drei Gründe sind alle
 still:
 
-1. **Das Archiv fuehrt Titel und Beschreibung als dasselbe Feld.** ExifTool hat denselben langen
+1. **Das Archiv führt Titel und Beschreibung als dasselbe Feld.** ExifTool hat denselben langen
    Text in beide geschrieben. Unsere Titel sind kurz und von Hand gesetzt -- 815 davon aus Punkt 41.
-2. **Geraetetexte stehen darin wie Beschreibungen.** „Intel(R) JPEG Library, version [1.51.12.44]"
-   waere **22-mal** zurueckgekommen. Genau das hatte Punkt 41 entfernt.
+2. **Gerätetexte stehen darin wie Beschreibungen.** „Intel(R) JPEG Library, version [1.51.12.44]"
+   wäre **22-mal** zurückgekommen. Genau das hatte Punkt 41 entfernt.
 3. **Die Zeilenenden unterscheiden sich** (`\r\n` gegen `\n`). Ohne Vereinheitlichung sieht
    identischer Text verschieden aus.
 
-Von 79 vermeintlichen Treffern blieben nach diesen drei Filtern **41 Schreibvorgaenge**: 34 leere
-Beschreibungen gefuellt, 4 Titel gesetzt (nur wo Titel *und* Beschreibung leer waren und der Text
-unter 60 Zeichen blieb), 3 Beschreibungen ersetzt. Jede steht im Aenderungsprotokoll und ist
-einzeln zuruecknehmbar.
+Von 79 vermeintlichen Treffern blieben nach diesen drei Filtern **41 Schreibvorgänge**: 34 leere
+Beschreibungen gefüllt, 4 Titel gesetzt (nur wo Titel *und* Beschreibung leer waren und der Text
+unter 60 Zeichen blieb), 3 Beschreibungen ersetzt. Jede steht im Änderungsprotokoll und ist
+einzeln zurücknehmbar.
 
 **Drei Fotos blieben liegen, mit Namen und Grund** -- sie stehen jetzt in Punkt 1. Bei Foto 17
 setzt das Archiv nur die Adresse dagegen, die ohnehin am Foto steht; bei 218 sind wir genauer als
-das Archiv; bei 398 liest das Archiv den Namen anders („Kuncke" statt „Runcke") und haengt eine
-Leihgeberadresse an, die nach Punkt 36 in die Herkunft gehoert.
+das Archiv; bei 398 liest das Archiv den Namen anders („Kuncke" statt „Runcke") und hängt eine
+Leihgeberadresse an, die nach Punkt 36 in die Herkunft gehört.
 
 ### Was der Bestand jetzt ist
 
 395 Fotos aufgenommen, 0 abgewiesen. **1324 Fotos, 1320 auf der Karte** -- alle 395 neuen sind
-verortet, 221 hausgenau. Der Zeitschieber laeuft von 1884 bis 2024.
+verortet, 221 hausgenau. Der Zeitschieber läuft von 1884 bis 2024.
 
 Die Zusage, dass der Import nur anlegt und nichts Bestehendes anfasst, ist **nachgemessen und
-nicht geglaubt**: die 929 alten Zeilen aus der Sicherung Spalte fuer Spalte gegen die Datenbank
-gehalten, null Unterschiede, null verschwundene Fotos, null veraenderte Schlagwortzuordnungen.
+nicht geglaubt**: die 929 alten Zeilen aus der Sicherung Spalte für Spalte gegen die Datenbank
+gehalten, null Unterschiede, null verschwundene Fotos, null veränderte Schlagwortzuordnungen.
 
 Nebenbei fiel `Lehmweg/00 div/` auf. Als Hausnummer gelesen wird daraus **„Lehmweg 0"** -- eine
-Adresse, die es nirgends gibt, und weil in dem Namen eine Ziffer steht, haette der
+Adresse, die es nirgends gibt, und weil in dem Namen eine Ziffer steht, hätte der
 „Hilf mit"-Bereich nie angeboten, sie richtigzustellen. „00" ist der Ablagekorb des Archivs;
-`split_housenumber` weiss das jetzt.
+`split_housenumber` weiß das jetzt.
 
-**Was der Stand noch enthaelt, ist ungehoben:** 251 der 395 neuen Dateien tragen einen Ort im XMP,
-und `services/exif.py` liest kein XMP. Bei 40 der zurueckgestellten weicht er von unserem
+**Was der Stand noch enthält, ist ungehoben:** 251 der 395 neuen Dateien tragen einen Ort im XMP,
+und `services/exif.py` liest kein XMP. Bei 40 der zurückgestellten weicht er von unserem
 Ortsnamen ab, oft um eine Hausnummer, die uns fehlt. Das ist der neue Punkt 55.
 
 ### Und dann standen die langen Titel da
 
-*Noch am 16. August, unmittelbar danach.* Die Rueckmeldung kam sofort: „Jetzt sind ein paar sehr
+*Noch am 16. August, unmittelbar danach.* Die Rückmeldung kam sofort: „Jetzt sind ein paar sehr
 lange Titel hinzugekommen, teilweise auch mit Jahreszahl im Titel." Die Frage dahinter war, welche
 Schritte der Bereinigung von Punkt 41 sich auf die 395 neuen anwenden liessen.
 
-Nachgezaehlt sah es harmlos aus: acht Titel ueber 60 Zeichen, neunzehn mit einer Jahreszahl. Die
+Nachgezählt sah es harmlos aus: acht Titel über 60 Zeichen, neunzehn mit einer Jahreszahl. Die
 Zahl daneben war die eigentliche:
 
 **323 der 395 trugen den Adressabklatsch, den Punkt 41 an 815 Titeln entfernt hatte.**
 
-127 hiessen genau wie ihre Adresse -- „Am Felde 31" ueber „Am Felde 31" --, 196 waren „Adresse,
+127 hiessen genau wie ihre Adresse -- „Am Felde 31" über „Am Felde 31" --, 196 waren „Adresse,
 Zusatz". Das ist kein Zufall und war kein neuer Fehler: `apply_folder_meta` setzte den Titel
-weiterhin auf `meta.title`, also „Strasse Hausnummer, Zusatz". Punkt 41 hatte den Bestand
-aufgeraeumt und die Ursache stehen lassen; die naechste Lieferung war damit die naechste
+weiterhin auf `meta.title`, also „Straße Hausnummer, Zusatz". Punkt 41 hatte den Bestand
+aufgeräumt und die Ursache stehen lassen; die nächste Lieferung war damit die nächste
 Bereinigung. `decisions.md`, Punkt 48.
 
 Drei Regeln sind deshalb in den Import gewandert, jede mit Test und Gegenprobe:
 
 - **Der Ordnertitel ist der Zusatz**, nicht die Adresse davor. Nennt der Ordner nur eine Nummer,
   bleibt der Titel leer.
-- **`TITLE_MAX` faellt von 120 auf 60.** Die Zahl ist gemessen: Von den 781 Titeln, die das Museum
-  von Hand gesetzt hat, ueberschreitet **keiner 58 Zeichen**, der Mittelwert liegt bei 13.
+- **`TITLE_MAX` fällt von 120 auf 60.** Die Zahl ist gemessen: Von den 781 Titeln, die das Museum
+  von Hand gesetzt hat, überschreitet **keiner 58 Zeichen**, der Mittelwert liegt bei 13.
 - **Der Name der Scannersoftware landet in keinem der beiden Felder.** „Intel(R) JPEG Library,
   version [1.51.12.44]" kam als Titel von 35 Fotos. Anders als eine zu lange Bildunterschrift darf
-  er auch nicht in die Beschreibung ausweichen -- das schoebe denselben Unsinn eine Zeile tiefer,
+  er auch nicht in die Beschreibung ausweichen -- das schöbe denselben Unsinn eine Zeile tiefer,
   wo er im Kiosk unter dem Bild steht.
 
-Dazu die Einmalaktion ueber die 395: **423 Felder**, in sechs Schritten, jeder Schritt der Reihe
+Dazu die Einmalaktion über die 395: **423 Felder**, in sechs Schritten, jeder Schritt der Reihe
 nach, weil erst nach dem Abschneiden des Adressvorsatzes feststeht, welcher Titel wirklich zu lang
 ist. Nichts ging dabei verloren -- was aus einem Feld verschwand, stand danach entweder woanders am
-Foto oder war nie eine Aussage ueber das Foto, und jede Aenderung steht mit ihrem alten Wert im
-Aenderungsprotokoll.
+Foto oder war nie eine Aussage über das Foto, und jede Änderung steht mit ihrem alten Wert im
+Änderungsprotokoll.
 
 ### Der Trockenlauf hat den teuersten Fehler gefangen
 
@@ -3025,34 +3026,34 @@ Er meldete 13 Fotos. Zwei davon lauteten:
     ca. 1970 wurde dieses Haus abgerissen und durch ein Mehrfamilienhaus ersetzt
 
 Das Datumswort steht sauber davor. Nur datiert die Zahl den **Abriss**, und die Aufnahme liegt
-zwingend davor -- sonst gaebe es das Haus auf dem Bild nicht. Zwei Fotos waeren auf das Jahr ihres
+zwingend davor -- sonst gäbe es das Haus auf dem Bild nicht. Zwei Fotos wären auf das Jahr ihres
 eigenen Verschwindens datiert worden und danach nie wieder gefragt worden.
 
 Punkt 37 hatte die Warnwortliste zugunsten des positiven Musters verworfen, weil eine Warnwortliste
 nie fertig wird. Das stimmt -- gebraucht werden trotzdem beide, und sie tun Verschiedenes: Das Wort
 davor sagt, *dass* eine Zahl ein Datum ist, das Wort dahinter, *wovon*. Und der alte Einwand trifft
-nur eine Richtung: **Eine Liste, die ausschliesslich ablehnt, darf unvollstaendig sein.**
+nur eine Richtung: **Eine Liste, die ausschließlich ablehnt, darf unvollständig sein.**
 `decisions.md`, Punkt 49.
 
-Beim ersten Anlauf griff der neue Waechter nicht, und auch das war lehrreich: Er sah nur das
+Beim ersten Anlauf griff der neue Wächter nicht, und auch das war lehrreich: Er sah nur das
 *erste* Ereignis im Text. Dort stand „1968 wurde der Hof ausgesiedelt, ca. 1970 abgerissen" -- eine
-andere Jahreszahl, also kein Treffer. Ueber alle Ereignisse gesucht, fiel es.
+andere Jahreszahl, also kein Treffer. Über alle Ereignisse gesucht, fiel es.
 
 ### Was am Ende dastand
 
-**Kein Titel im Bestand ist laenger als 58 Zeichen**, ueber alle 1004 hinweg, der mittlere hat 13.
-Null Adressabklatsch, null Geraetetexte. Die Datierung waechst von 160 auf 171, der Zeitschieber
+**Kein Titel im Bestand ist länger als 58 Zeichen**, über alle 1004 hinweg, der mittlere hat 13.
+Null Adressabklatsch, null Gerätetexte. Die Datierung wächst von 160 auf 171, der Zeitschieber
 reicht bis 2025.
 
 Ein Schritt der Liste lief ins Leere, und die Zahl davor war falsch gemessen: „13 Hausnummern, die
-der Ortsindex nicht kennt" zaehlte auf exakte Uebereinstimmung und uebersah, dass der Import laengst
+der Ortsindex nicht kennt" zählte auf exakte Übereinstimmung und übersah, dass der Import längst
 `address_near` benutzt -- die Nachbarnummer-Regel aus Punkt 41. **Alle 221 Fotos mit Hausnummer
-liegen hausgenau**, es war nichts nachzuschaerfen.
+liegen hausgenau**, es war nichts nachzuschärfen.
 
 ### Zwei Meldungen aus dem Museum, und beide zeigten auf dieselbe Zeile
 
 *Ebenfalls 16. August 2026.* „Du hast den Pfad an einigen Stellen nicht in die Herkunft
-uebernommen" -- mit einem Beispiel, `ee44c8ae`, und der Angabe, wie es lauten soll.
+übernommen" -- mit einem Beispiel, `ee44c8ae`, und der Angabe, wie es lauten soll.
 
 Es waren **265 Fotos**, und sie hatten alle dasselbe gemeinsam: Ihre Datei nannte selbst eine
 Herkunft. `apply_folder_meta` schrieb den Archivpfad nur in ein *leeres* Feld und stand damit vor
@@ -3061,11 +3062,11 @@ jeder Angabe, die jemand schon gemacht hatte -- „Familie Boysen", „Sammlung 
 
 **Die Regel war genau falsch herum.** Wer ein Foto geliehen hat, steht in der Datei und ist
 gesichert. Wo es im Archiv lag, steht nur im Pfad -- und der geht beim Import verloren, denn im
-Bestand heisst die Datei nach ihrem SHA-256. Von den beiden Angaben fehlte die, die sich nie
-wiederherstellen laesst. `decisions.md`, Punkt 50.
+Bestand heißt die Datei nach ihrem SHA-256. Von den beiden Angaben fehlte die, die sich nie
+wiederherstellen lässt. `decisions.md`, Punkt 50.
 
-Zugeordnet wurden die 265 ueber genau diesen SHA-256: beide Archivordner liegen noch auf der
-Platte, jede Datei einmal gehasht, **265 von 265 gefunden**. Die Regel im Import haengt den Pfad
+Zugeordnet wurden die 265 über genau diesen SHA-256: beide Archivordner liegen noch auf der
+Platte, jede Datei einmal gehasht, **265 von 265 gefunden**. Die Regel im Import hängt den Pfad
 jetzt an, statt zu schweigen; ein Test und seine Gegenprobe halten das fest.
 
 ### Und der Bildnachweis, der an einer runden Zahl endete
@@ -3074,29 +3075,29 @@ Die zweite Meldung: „Der Bildnachweis ist bei einigen kaputt, da steht ‚För
 Brauc'."
 
 Das sieht nach einem Tippfehler aus und ist keiner. **Die Zeichenkette ist genau 32 Zeichen lang**,
-und 32 ist die Laengengrenze des IPTC-Feldes 2:80. Nicht wir haben gekuerzt -- das Programm, das
-die Datei beschriftet hat, hat an seiner Feldgrenze aufgehoert, und wir haben es unbesehen
-uebernommen. 19 Fotos, ersetzt durch den vollen Namen.
+und 32 ist die Längengrenze des IPTC-Feldes 2:80. Nicht wir haben gekürzt -- das Programm, das
+die Datei beschriftet hat, hat an seiner Feldgrenze aufgehört, und wir haben es unbesehen
+übernommen. 19 Fotos, ersetzt durch den vollen Namen.
 
-**Beim Nachzaehlen fiel die Probe fuer den ganzen Fall gleich mit an:** Ein Blick auf Zeichen- und
-Bytelaenge der haeufigsten Werte eines Textfeldes zeigt so etwas sofort. Es war der einzige;
-„August" bei neun Fotos ist mit sechs Zeichen keine Feldgrenze, sondern eine unvollstaendige
-Eingabe und gehoert zu Punkt 1. `decisions.md`, Punkt 51.
+**Beim Nachzählen fiel die Probe für den ganzen Fall gleich mit an:** Ein Blick auf Zeichen- und
+Bytelänge der häufigsten Werte eines Textfeldes zeigt so etwas sofort. Es war der einzige;
+„August" bei neun Fotos ist mit sechs Zeichen keine Feldgrenze, sondern eine unvollständige
+Eingabe und gehört zu Punkt 1. `decisions.md`, Punkt 51.
 
 ## Was auf dem Weg verloren ging
 
-*16. August 2026, nach vier Rueckfragen des Museums.* Die erste lautete: „Hast du bei der
+*16. August 2026, nach vier Rückfragen des Museums.* Die erste lautete: „Hast du bei der
 Umwandlung nach JPG die Metadaten mitgenommen?"
 
-**Nein.** Farbprofil und Aufloesung ja, EXIF, IPTC und XMP nicht -- Pillow schreibt diese Bloecke
-nur, wenn man sie ausdruecklich uebergibt. Nachgezaehlt: 12 der 89 umgewandelten Dateien trugen
+**Nein.** Farbprofil und Auflösung ja, EXIF, IPTC und XMP nicht -- Pillow schreibt diese Blöcke
+nur, wenn man sie ausdrücklich übergibt. Nachgezählt: 12 der 89 umgewandelten Dateien trugen
 Metadaten, alle 12 sind importiert.
 
 **Der Ausfall war unsichtbar, und das ist der Kern.** Der Import setzt
 ``credit=info.credit or settings.import_credit`` -- die Vorgabe aus der ``.env`` springt ein, wenn
-die Datei nichts sagt. Fuenf Fotos trugen danach „Sammlung Heimatmuseum Holm", wo „Hubert Wulf"
-haette stehen muessen. Kein leeres Feld, keine Meldung, nichts zu sehen: **wo eine Vorgabe die
-Luecke fuellt, wird aus einem Verlust eine Behauptung.** `decisions.md`, Punkt 52.
+die Datei nichts sagt. Fünf Fotos trugen danach „Sammlung Heimatmuseum Holm", wo „Hubert Wulf"
+hätte stehen müssen. Kein leeres Feld, keine Meldung, nichts zu sehen: **wo eine Vorgabe die
+Lücke füllt, wird aus einem Verlust eine Behauptung.** `decisions.md`, Punkt 52.
 
 Dazu verloren: eine Beschreibung („Collage von verschiedenen Häusern in der Niederstraße"), vier
 Herkunftsangaben („CD Niederstraße Holm - alte Häuser - FW -2002") und, in einer nicht importierten
@@ -3106,87 +3107,87 @@ Datei, eine **GPS-Koordinate**.
 
 Die erste: das IPTC eines TIFF liege im Photoshop-Block, Tag 34377. Bei 25 Dateien stimmt das --
 bei `Heimatmuseum Holm (1).tif` sind darin aber nur 28 Byte, und die IPTC-Felder stehen in Tag
-33723. Pillows eigener Leser holt sie von dort, und zwar **an seinem eigenen verstuemmelten Wert
+33723. Pillows eigener Leser holt sie von dort, und zwar **an seinem eigenen verstümmelten Wert
 vorbei**, direkt aus den Rohbytes.
 
-Daraus wurde die Loesung: Der Block wird nicht kopiert, sondern **aus dem zurueckgeschrieben, was
-``getiptcinfo`` liefert** -- dieselbe Funktion, mit der der Import die Datei spaeter liest. Damit
+Daraus wurde die Lösung: Der Block wird nicht kopiert, sondern **aus dem zurückgeschrieben, was
+``getiptcinfo`` liefert** -- dieselbe Funktion, mit der der Import die Datei später liest. Damit
 ist der Rundlauf per Konstruktion wahr und nicht per Hoffnung.
 
-Die zweite Annahme: man koenne das EXIF eines TIFF einfach uebernehmen. Kann man nicht -- dessen
+Die zweite Annahme: man könne das EXIF eines TIFF einfach übernehmen. Kann man nicht -- dessen
 erstes Verzeichnis ist Struktur (`StripOffsets`, `RowsPerStrip`), und `tobytes()` scheitert an
-einer der Holmer Dateien. Es wird deshalb aus einer Liste neu gebaut: die neun Tags, die etwas ueber
-das Bild sagen, plus die beiden Unterverzeichnisse fuer EXIF und GPS.
+einer der Holmer Dateien. Es wird deshalb aus einer Liste neu gebaut: die neun Tags, die etwas über
+das Bild sagen, plus die beiden Unterverzeichnisse für EXIF und GPS.
 
-### Die Probe, die zaehlt
+### Die Probe, die zählt
 
 Nicht „sind die Bytes mitgekommen", sondern **„liest unser eigener Leser aus der Kopie dasselbe wie
-aus der Quelle"**. Ueber alle 89 Dateien: **64 von 64 lesbaren kommen unveraendert durch**, und zwei
-Laeufe geben denselben SHA-256.
+aus der Quelle"**. Über alle 89 Dateien: **64 von 64 lesbaren kommen unverändert durch**, und zwei
+Läufe geben denselben SHA-256.
 
-Die uebrigen 25 waren nicht lesbar, und das war der zweite Fund des Tages.
+Die übrigen 25 waren nicht lesbar, und das war der zweite Fund des Tages.
 
-### Ein TIFF, das den ganzen Importlauf beendet haette
+### Ein TIFF, das den ganzen Importlauf beendet hätte
 
 `read_image_info` warf bei 25 der Archivscans einen `TypeError`: Ihr XMP-Paket liegt in einem
-Zahlen-Tag, Pillow gibt Zahlen zurueck, und jeder spaetere `getexif()` jagt einen regulaeren
-Ausdruck darueber.
+Zahlen-Tag, Pillow gibt Zahlen zurück, und jeder spätere `getexif()` jagt einen regulären
+Ausdruck darüber.
 
-``import_file`` faengt `OSError` und `ValueError`. **Einen `TypeError` faengt es nicht** -- eine
-einzige solche Datei haette also nicht sich selbst, sondern den ganzen Lauf beendet. Und TIFF ist
+``import_file`` fängt `OSError` und `ValueError`. **Einen `TypeError` fängt es nicht** -- eine
+einzige solche Datei hätte also nicht sich selbst, sondern den ganzen Lauf beendet. Und TIFF ist
 ein erlaubtes Format; der Ordner am Stick darf eines enthalten.
 
-Entschaerft wird es jetzt in `exif.open_image`, durch das **jeder** Leser geht: `thumbnails` lief
-ueber `ImageOps.exif_transpose` in dieselbe Falle, einen Schritt weiter. Der Test baut das TIFF
+Entschärft wird es jetzt in `exif.open_image`, durch das **jeder** Leser geht: `thumbnails` lief
+über `ImageOps.exif_transpose` in dieselbe Falle, einen Schritt weiter. Der Test baut das TIFF
 nach, statt eine Fixture einzuchecken.
 
 ## Punkt 55, beantwortet mit Nein
 
-*16. August 2026, nachdem der Gesamtbestand vorlag.* Das Vorgehen sah fuenf Schritte vor, und der
+*16. August 2026, nachdem der Gesamtbestand vorlag.* Das Vorgehen sah fünf Schritte vor, und der
 dritte hiess **„erst messen, dann bauen"**: Bevor `services/exif.py` XMP lesen lernt, sollte
 feststehen, ob es sich lohnt. Es hat sich nicht gelohnt -- und das ist der Wert des Schritts.
 
-### Zuerst: der gelieferte Diff war vollstaendig
+### Zuerst: der gelieferte Diff war vollständig
 
-`01 Orte/Straßen` enthaelt 1322 Bilddateien. 1034 liegen byte-identisch bei uns. Die uebrigen 288
-sind **restlos erklaert**: 199 sind die zurueckgestellten Dubletten -- neuere Byte-Fassungen von
+`01 Orte/Straßen` enthält 1322 Bilddateien. 1034 liegen byte-identisch bei uns. Die übrigen 288
+sind **restlos erklärt**: 199 sind die zurückgestellten Dubletten -- neuere Byte-Fassungen von
 Fotos, die wir haben --, 89 sind die TIFF, PNG und WEBP, aus denen wir JPEG gemacht haben. **Null
 Dateien in keinem von beiden.**
 
-Damit war die grosse Sorge vom Tag zuvor ausgeraeumt: Der Diff des Museums war ueber Hashes
-gerechnet und hat nichts uebersehen. Es versteckt sich kein zweiter Import.
+Damit war die große Sorge vom Tag zuvor ausgeräumt: Der Diff des Museums war über Hashes
+gerechnet und hat nichts übersehen. Es versteckt sich kein zweiter Import.
 
 ### Dann: was im XMP wirklich steht
 
 1189 der 1322 Dateien tragen XMP. Die Felder klangen vielversprechend -- 874 Ortsangaben, 534
 Beschreibungen, 410 Fotografen. Angesehen sind es andere Dinge:
 
-* `dc:creator`: **„unbekannt"** und **„Winter"**. Fuer „unbekannt" gibt es die Regel seit dem
-  Erstimport, 82 Fotos trugen es woertlich.
+* `dc:creator`: **„unbekannt"** und **„Winter"**. Für „unbekannt" gibt es die Regel seit dem
+  Erstimport, 82 Fotos trugen es wörtlich.
 * `dc:description`: **„Gebäude"**, **„Abriss & Neubau"**, **„Winterspaziergang"** -- das Archiv
-  nutzt das Beschreibungsfeld als Kategorie. Die 352 Faelle, die ein leeres Feld gefuellt haetten,
-  waeren zum grossen Teil Kategoriewoerter unter dem Bild gewesen.
+  nutzt das Beschreibungsfeld als Kategorie. Die 352 Fälle, die ein leeres Feld gefüllt hätten,
+  wären zum großen Teil Kategoriewörter unter dem Bild gewesen.
 * `Iptc4xmpCore:Location`: **515-mal genau das, was der Ordner schon sagt.**
 
-Beim Ort, dem staerksten Feld, bleiben nach Abzug des Bekannten **26 Fotos, die eine Hausnummer
-gewinnen koennten**. Neun davon tragen denselben Wert „Am Felde 5" -- derselbe Stapelwert, der als
+Beim Ort, dem stärksten Feld, bleiben nach Abzug des Bekannten **26 Fotos, die eine Hausnummer
+gewinnen könnten**. Neun davon tragen denselben Wert „Am Felde 5" -- derselbe Stapelwert, der als
 veraltete `photoshop:Location` auch auf Fotos unter den Nummern 9, 10, 16 und 31 klebt. Zwei
 widersprechen dem Ordner, einer nennt statt einer Nummer „Am Sportzentrum Geräteraum".
 
-**Uebrig bleibt eine Handvoll.** Dafuer den Leser umbauen, zwei widerspruechliche Ortsfelder
+**Übrig bleibt eine Handvoll.** Dafür den Leser umbauen, zwei widersprüchliche Ortsfelder
 gegeneinander entscheiden und 259 Konflikte vorlegen -- nein. `decisions.md`, Punkt 53; Punkt 55
-ist aufgeloest und seine Nummer vergriffen.
+ist aufgelöst und seine Nummer vergriffen.
 
 ### Und wieder war der Nebenfund der Ertrag
 
 Beim Vergleich der Ortsangaben mit den Ordnernamen fiel **`Hörnstraße/Hörnstraße 14`** auf: ein
-Ordner, der seine Strasse wiederholt. `split_housenumber` sieht keine fuehrende Ziffer, macht
-daraus einen *Namen*, und das Foto hiess **„Hörnstraße 14" ueber der Zeile „Hörnstraße"** -- genau
+Ordner, der seine Straße wiederholt. `split_housenumber` sieht keine führende Ziffer, macht
+daraus einen *Namen*, und das Foto hiess **„Hörnstraße 14" über der Zeile „Hörnstraße"** -- genau
 der Adressabklatsch, den Punkt 48 zwei Stunden vorher abgeschafft hatte.
 
 Ein Ordner, ein Foto. Die Regel trotzdem in den Code, weil sie zwei Zeilen kostet und dieselbe ist:
-Wiederholt der Unterordner die Strasse, wird sie abgeschnitten -- **aber nur, wenn dahinter
-wirklich eine Hausnummer steht.** Sonst waere aus „Twietenhof" unter „Twiete" ein „nhof" geworden;
+Wiederholt der Unterordner die Straße, wird sie abgeschnitten -- **aber nur, wenn dahinter
+wirklich eine Hausnummer steht.** Sonst wäre aus „Twietenhof" unter „Twiete" ein „nhof" geworden;
 der Vorsatz allein ist zu lose als Grund. Das Foto steht jetzt hausgenau, 15 m von seiner
 EXIF-Koordinate entfernt.
 
@@ -3195,58 +3196,58 @@ EXIF-Koordinate entfernt.
 Der erste Durchgang fand **null** solcher Ordner. Der Grund lag nicht in den Daten: macOS liefert
 Dateinamen in zerlegter Unicode-Form, „Hörnstraße" aus dem Dateisystem ist also nicht dieselbe
 Zeichenkette wie „Hörnstraße" aus dem Ortsindex, und `startswith` sagte nein. `place_service.normalize`
-faengt das ab -- mein Vergleichsskript daneben tat es nicht.
+fängt das ab -- mein Vergleichsskript daneben tat es nicht.
 
 ## Punkt 42: 44 Gruppen, und die Maschine durfte nicht entscheiden
 
 *16. August 2026.* Der letzte Schritt des Vorgehens, und der einzige, bei dem die Zahl kleiner war
-als befuerchtet.
+als befürchtet.
 
 Der SHA-256 erkennt eine Kopie der Datei, nicht denselben Papierabzug zweimal gescannt. Gesucht
-wurde deshalb mit einem **Differenzhash ueber 256 Bit** auf den 240er Vorschaubildern, die ohnehin
+wurde deshalb mit einem **Differenzhash über 256 Bit** auf den 240er Vorschaubildern, die ohnehin
 schon dalagen: 876 000 Paare, ein XOR je Paar, wenige Sekunden.
 
-**44 Gruppen ueber 95 Fotos** -- sieben Prozent des Bestands. 40 Paare, drei Dreier, ein Sechser.
+**44 Gruppen über 95 Fotos** -- sieben Prozent des Bestands. 40 Paare, drei Dreier, ein Sechser.
 
-### Die Schwelle wurde angesehen, nicht gewaehlt
+### Die Schwelle wurde angesehen, nicht gewählt
 
-Sechzig Paare als Kontaktblatt nebeneinandergelegt und durchgeblaettert. Bis Abstand 12 ist es
+Sechzig Paare als Kontaktblatt nebeneinandergelegt und durchgeblättert. Bis Abstand 12 ist es
 zweifelsfrei dasselbe Bild; bis 30 fast immer; und selbst bei 37 bis 40 ist die Mehrheit noch eine
-Dublette. **Das Signal reisst nicht ab, es wird unscharf** -- also eine grosszuegige Vorgabe und
+Dublette. **Das Signal reißt nicht ab, es wird unscharf** -- also eine großzügige Vorgabe und
 ein Mensch am Ende.
 
 ### Drei Gruppen zeigten, warum
 
-* **Dieselbe Grundsteinlegung an zwei Adressen**: Foto 810 auf Schulstrasse 9, Jahr 1971; Foto 580
-  auf Lehmweg 8, Jahr 1968. Eines war falsch abgelegt, und ohne die Dublettensuche haette das
+* **Dieselbe Grundsteinlegung an zwei Adressen**: Foto 810 auf Schulstraße 9, Jahr 1971; Foto 580
+  auf Lehmweg 8, Jahr 1968. Eines war falsch abgelegt, und ohne die Dublettensuche hätte das
   niemand nebeneinander gesehen. Zwei weitere Gruppen ebenso.
-* **Das kleinere Bild traegt den Bildtext** „Dörpshus vor dem Brand", das groessere nicht.
-  Aufloesung ist dort das falsche Kriterium -- genau der Fall, den der Backlog vorausgesagt hatte.
-* **Ein Lastwagen** steht auf einem von drei sonst gleichen Strassenbildern. Zwei Momente.
+* **Das kleinere Bild trägt den Bildtext** „Dörpshus vor dem Brand", das größere nicht.
+  Auflösung ist dort das falsche Kriterium -- genau der Fall, den der Backlog vorausgesagt hatte.
+* **Ein Lastwagen** steht auf einem von drei sonst gleichen Straßenbildern. Zwei Momente.
 
 ### Was daraus wurde
 
-Eine Entscheidungsliste mit 44 Zeilen ans Museum, 36 Vorschlaege und 8 zum Ansehen. Zurueck kamen
+Eine Entscheidungsliste mit 44 Zeilen ans Museum, 36 Vorschläge und 8 zum Ansehen. Zurück kamen
 drei Entscheidungen -- welche Adresse bei zweien richtig ist, und welche der sechs Farbfassungen
 bleibt -- und ein „sonst alle fraglichen Gruppen behalten".
 
-**39 Gruppen zusammengefuehrt, 45 Fotos aus der Ausstellung, 58 Felder und 11 Schlagwoerter
-uebernommen, bevor etwas verschwand.** Der Bestand steht bei 1279 sichtbaren Fotos, 1275 auf der
+**39 Gruppen zusammengeführt, 45 Fotos aus der Ausstellung, 58 Felder und 11 Schlagwörter
+übernommen, bevor etwas verschwand.** Der Bestand steht bei 1279 sichtbaren Fotos, 1275 auf der
 Karte.
 
 Der Finder liegt als `services/similar.py` im Repo, mit `python -m app.cli dubletten`. Er findet
 und schreibt nichts.
 
-### Ein Fehler in genau der Zeile, die es zu koennen glaubte
+### Ein Fehler in genau der Zeile, die es zu können glaubte
 
-Beim ersten Lauf des fertigen Befehls meldete er **eine** Gruppe, wo fuenf stehen mussten. Die
+Beim ersten Lauf des fertigen Befehls meldete er **eine** Gruppe, wo fünf stehen mussten. Die
 Union-Find-Struktur fasst zusammen, indem sie jedem Foto eine Wurzel gibt -- und mein Einsammeln
 nahm nur die Nicht-Wurzeln mit. **Aus jeder Gruppe fiel damit ein Foto**, und ein Paar schrumpfte
-auf eines und verschwand aus der Meldung. Am Bestand haette das ausgesehen wie „keine Dubletten
+auf eines und verschwand aus der Meldung. Am Bestand hätte das ausgesehen wie „keine Dubletten
 gefunden".
 
-Aufgefallen ist es nur, weil ich den Befehl direkt nach dem Zusammenfuehren an den fuenf bewusst
-behaltenen Gruppen ausprobiert habe und die Zahl nicht stimmte. Der Test dazu heisst jetzt
+Aufgefallen ist es nur, weil ich den Befehl direkt nach dem Zusammenführen an den fünf bewusst
+behaltenen Gruppen ausprobiert habe und die Zahl nicht stimmte. Der Test dazu heißt jetzt
 `test_beide_fotos_stehen_in_der_gruppe`.
 
 ## Zwei kleine Punkte, und einer hatte einen Fallstrick
@@ -3254,62 +3255,62 @@ behaltenen Gruppen ausprobiert habe und die Zahl nicht stimmte. Der Test dazu he
 *16. August 2026 -- Punkt 50 und 51.*
 
 **Punkt 51 war eine Zeile.** Unter dem Zahlenfeld stand „Zurück zur Karte" -- das sagt, wohin es
-geht, aber nicht, was passiert. Wer schon Ziffern getippt hat, liest dort keine Abkuerzung zum
+geht, aber nicht, was passiert. Wer schon Ziffern getippt hat, liest dort keine Abkürzung zum
 Verwerfen. Jetzt steht dort **„Abbrechen und zurück"**: erst die Handlung, dann das Ziel. Am
 laufenden Kiosk nachgesehen.
 
-**Punkt 50 sah nach zwei Feldern aus und hatte eine Entscheidung in sich.** Ein Schlagwort fuer den
+**Punkt 50 sah nach zwei Feldern aus und hatte eine Entscheidung in sich.** Ein Schlagwort für den
 ganzen Stapel, durchgereicht bis `add_tags` -- so weit die Aufgabe. Der Fallstrick stand im Backlog
-und hat sich beim Bauen bestaetigt: **Alle anderen Stapelangaben fuellen nur, was leer ist.** Jahr,
-Ort, Bildnachweis, Herkunft geben der Datei den Vortritt, weil jedes dieser Felder einen Wert haelt
-und Fuellen also Entscheiden hiesse.
+und hat sich beim Bauen bestätigt: **Alle anderen Stapelangaben füllen nur, was leer ist.** Jahr,
+Ort, Bildnachweis, Herkunft geben der Datei den Vortritt, weil jedes dieser Felder einen Wert hält
+und Füllen also Entscheiden hiesse.
 
-Eine Schlagwortliste haelt keinen Wert, sondern eine Menge. Wer hundert Fotos aus einem Ordner
-„Feuerwehr" hochlaedt, will nicht entweder das Stapelwort oder das der Datei, sondern beides. Das
+Eine Schlagwortliste hält keinen Wert, sondern eine Menge. Wer hundert Fotos aus einem Ordner
+„Feuerwehr" hochlädt, will nicht entweder das Stapelwort oder das der Datei, sondern beides. Das
 Stapelschlagwort tritt deshalb **neben** das der Datei, statt ihm zu weichen -- und damit gibt es
 drei Quellen, deren Reihenfolge jetzt im Code steht statt in jemandes Kopf. `decisions.md`,
 Punkt 55.
 
-Beides gilt fuer den Upload **und** fuer den Stick, weil der Stick der Weg des Museumsteams ist.
-Vier Tests, zwei Gegenproben: eine gegen das Uebernehmen selbst, eine gegen die Kommazerlegung.
+Beides gilt für den Upload **und** für den Stick, weil der Stick der Weg des Museumsteams ist.
+Vier Tests, zwei Gegenproben: eine gegen das Übernehmen selbst, eine gegen die Kommazerlegung.
 
-Die Liste unter dem Import bekommt **kein** viertes Feld -- der Backlog nannte das ausdruecklich
-eine Frage und keine Aufgabe, und fuer den Einzelfall gibt es den Foto-Editor, der ein
-Schlagwortfeld laengst hat.
+Die Liste unter dem Import bekommt **kein** viertes Feld -- der Backlog nannte das ausdrücklich
+eine Frage und keine Aufgabe, und für den Einzelfall gibt es den Foto-Editor, der ein
+Schlagwortfeld längst hat.
 
 ## Punkt 1: der Erstbestand, in zehn Schritten durchgesehen
 
 *18. August 2026 -- der letzte Punkt, der seit dem ersten Import offenstand.*
 
-Punkt 1 war seit dem Erstimport der aelteste offene Eintrag und zuletzt eine Sammelstelle: Zahlen
-aus drei verschiedenen Monaten, Beobachtungen ohne Auftrag, Faelle, die laengst erledigt waren,
+Punkt 1 war seit dem Erstimport der älteste offene Eintrag und zuletzt eine Sammelstelle: Zahlen
+aus drei verschiedenen Monaten, Beobachtungen ohne Auftrag, Fälle, die längst erledigt waren,
 neben solchen, die nie jemand anfassen konnte. Er wurde erst **geordnet**, dann abgearbeitet.
 
 ### Die Zerlegung war die halbe Arbeit
 
-Der Punkt vermischte zwei Arten Arbeit, und das war der Grund fuer die Unuebersichtlichkeit: Regeln,
-die ein Rechner anwenden und gegenpruefen kann, und Faelle, bei denen jemand das Bild ansehen und
-den Ort kennen muss. Getrennt waren es zehn Schritte -- und **fuenf davon standen vorher gar nicht
+Der Punkt vermischte zwei Arten Arbeit, und das war der Grund für die Unübersichtlichkeit: Regeln,
+die ein Rechner anwenden und gegenprüfen kann, und Fälle, bei denen jemand das Bild ansehen und
+den Ort kennen muss. Getrennt waren es zehn Schritte -- und **fünf davon standen vorher gar nicht
 im Backlog**, sondern kamen beim Nachmessen heraus.
 
 ### Was der Rechner konnte: 1.1 bis 1.5
 
 **1.1 -- 16 Beschreibungen trugen ihren eigenen Text zweimal**, durch eine Leerzeile getrennt. Eine
 Naht aus dem Metadatenabgleich vom 16. August, bei der zwei Quellen desselben Archivs aneinander-
-gehaengt wurden, statt sich zu decken. Auf dem Kiosk stand der Absatz doppelt unter dem Bild.
+gehängt wurden, statt sich zu decken. Auf dem Kiosk stand der Absatz doppelt unter dem Bild.
 
 **1.2 -- 45 Beschreibungen, und die Zahl zeigte in die falsche Richtung.** 137 Beschreibungen
 enthielten den Titel des Fotos; **131 davon sagen mehr als er** -- „Funkmast" im Titel, „Errichtung
-des Funkmastes" in der Beschreibung. Die zu streichen haette Angaben vernichtet. Wortgleich waren
+des Funkmastes" in der Beschreibung. Die zu streichen hätte Angaben vernichtet. Wortgleich waren
 zehn. Von 92 Adress-Echos begannen 37 mit der Adresse; 34 sind abgetrennt, zwei blieben stehen,
-weil ihre Beschreibung „Lehmweg 11 und 11a" sagt und damit mehr weiss als das Ortsfeld, das nur
-eine Hausnummer traegt.
+weil ihre Beschreibung „Lehmweg 11 und 11a" sagt und damit mehr weiß als das Ortsfeld, das nur
+eine Hausnummer trägt.
 
-**1.3 -- 55 Fotos datiert, 14 auf den Monat geschaerft.** Die Bereinigungsrunde vom 11./12. August
+**1.3 -- 55 Fotos datiert, 14 auf den Monat geschärft.** Die Bereinigungsrunde vom 11./12. August
 hatte im Text nach **vierstelligen Jahreszahlen** gesucht. Alles andere, womit Menschen datieren,
 lief ihr durch: „80er Jahre", „in den 1930gern", „Winter 63", „Foto aus der Nachkriegszeit". Das war
-die groessere Haelfte. Die ergiebigste einzelne Fundstelle war eine Ordnernotiz auf achtzehn Fotos.
-50 weitere Funde sind **begruendet nicht** uebernommen: 26 datieren ein Ereignis statt der Aufnahme,
+die größere Hälfte. Die ergiebigste einzelne Fundstelle war eine Ordnernotiz auf achtzehn Fotos.
+50 weitere Funde sind **begründet nicht** übernommen: 26 datieren ein Ereignis statt der Aufnahme,
 15 den Stand des Archivs, eines das Einscannen. `decisions.md`, Punkt 56.
 
 **1.4 -- acht Titel nannten ein Programm statt einer Sache**, zweimal die Scannersoftware, sechsmal
@@ -3317,15 +3318,15 @@ die groessere Haelfte. Die ergiebigste einzelne Fundstelle war eine Ordnernotiz 
 oder aus dem Rest seines eigenen Titels. Dabei kam ein Fehler heraus, den keine Regel findet -- die
 sechs Kartenbilder waren dem gutgeschrieben, der sie eingestellt hat, nicht der Quelle.
 
-**1.5 -- elf Schlagwoerter waren Saetze** aus der Kommazerlegung von Punkt 41. Neun sind **woertlich**
-in die Beschreibung uebernommen, zwei fielen ersatzlos weg, weil sie nur wiederholten, was Ort und
+**1.5 -- elf Schlagwörter waren Sätze** aus der Kommazerlegung von Punkt 41. Neun sind **wörtlich**
+in die Beschreibung übernommen, zwei fielen ersatzlos weg, weil sie nur wiederholten, was Ort und
 Datierung schon sagen.
 
 ### Der Fehler, der die Lehre trug
 
-Mitten in 1.3 fiel auf, dass **„Notiz: Schule 78" undatiert dastand, waehrend „Notiz: 1978" an drei
-Nachbarfotos laengst als Datierung akzeptiert war.** Dieselbe Archivnotiz, dieselbe Aussage, zwei
-Zeichen kuerzer -- und meine Suche kannte das zweistellige Jahr nur hinter einem Jahreszeitwort.
+Mitten in 1.3 fiel auf, dass **„Notiz: Schule 78" undatiert dastand, während „Notiz: 1978" an drei
+Nachbarfotos längst als Datierung akzeptiert war.** Dieselbe Archivnotiz, dieselbe Aussage, zwei
+Zeichen kürzer -- und meine Suche kannte das zweistellige Jahr nur hinter einem Jahreszeitwort.
 Elf Fotos hingen daran.
 
 Das ist derselbe Fehler, den die Runde im August gemacht hatte, eine Ebene tiefer und von mir
@@ -3341,72 +3342,72 @@ nachsehen, ob dieselbe Aussage anderswo in einer Schreibweise steht, die man sch
 | Fotos ohne Jahr | 804 | **749** |
 | monatsgenau datiert | 3 | **17** |
 | jahrzehntgenau datiert | 5 | **35** |
-| Schlagwoerter | 291 | **281** |
+| Schlagwörter | 291 | **281** |
 
 Die Genauigkeit `decade` war vorher praktisch ungenutzt, obwohl das Datenmodell sie von Anfang an
-traegt -- weil niemand nach Jahrzehnten gesucht hatte.
+trägt -- weil niemand nach Jahrzehnten gesucht hatte.
 
 ### Was bleibt, ist Kuratieren, kein Backlogpunkt mehr
 
-942 Fotos ohne Beschreibung, 310 ohne Titel, 4 ohne Ort, drei namentlich vorgemerkte Faelle und die
-Frage, ob die 281 Schlagwoerter als Filter taugen. Das ist keine Aufgabe mit Ende, sondern die
+942 Fotos ohne Beschreibung, 310 ohne Titel, 4 ohne Ort, drei namentlich vorgemerkte Fälle und die
+Frage, ob die 281 Schlagwörter als Filter taugen. Das ist keine Aufgabe mit Ende, sondern die
 laufende Arbeit am Bestand: Wer das Bild ansieht und den Ort kennt, schreibt in einer Minute, was
-keine Regel je finden wird. Die Frage nach den Schlagwoertern entscheidet sich ohnehin erst mit
+keine Regel je finden wird. Die Frage nach den Schlagwörtern entscheidet sich ohnehin erst mit
 Punkt 30, wenn daraus ein Filter wird.
 
 ## Punkt 56: der aufgehende Cluster, und zwei stille Nachbarn
 
 *18. August 2026 -- eine Animation, die aus der Ecke kam, und warum.*
 
-Wer auf einen Kreis mit einer Zahl tippt, zoomt so weit hinein, dass die Gruppe zerfaellt. Was dann
-erschien, **flog aus der oberen linken Ecke der Karte herein**. Gewuenscht war das Gegenteil: aus
-dem Punkt herauswachsen, den der Finger gerade beruehrt hat.
+Wer auf einen Kreis mit einer Zahl tippt, zoomt so weit hinein, dass die Gruppe zerfällt. Was dann
+erschien, **flog aus der oberen linken Ecke der Karte herein**. Gewünscht war das Gegenteil: aus
+dem Punkt herauswachsen, den der Finger gerade berührt hat.
 
 ### Kein Gestaltungsmangel, sondern ein Kaskadenkonflikt
 
 Gemeint war nie ein Flug, sondern ein Aufblenden an Ort und Stelle -- `marker-enter` setzte
 `opacity: 0` und `transform: scale(0.88)`. Nur schreibt MapLibre die Position seiner Marker als
 `transform: translate(...)` in den **Inline-Stil desselben Elements**. Eine Animation steht in der
-Kaskade ueber dem Inline-Stil: fuer 180 ms gewann `scale(0.88)`, die Verschiebung war weg, das
+Kaskade über dem Inline-Stil: für 180 ms gewann `scale(0.88)`, die Verschiebung war weg, das
 Element stand bei `translate(0, 0)` -- der linken oberen Ecke des Kartencontainers.
 
 **Derselbe Konflikt hatte einen zweiten Effekt still ausgeschaltet.** `.marker:hover` setzte
-`transform: scale(1.08)`. Eine gewoehnliche Regel steht in der Kaskade *unter* dem Inline-Stil --
+`transform: scale(1.08)`. Eine gewöhnliche Regel steht in der Kaskade *unter* dem Inline-Stil --
 sie verlor und tat gar nichts, seit es Marker gibt. Zwei Symptome, entgegengesetzte Richtungen,
 eine Ursache: **zwei Ebenen stritten sich um eine Eigenschaft an einem Element.**
 
-Die Loesung ist eine Huelle. Aussen die Verschiebung durch die Karte, innen alles, was das
-Stylesheet will. Darauf laesst sich das Gewuenschte aufsetzen: Beim Antippen ist bekannt, welcher
+Die Lösung ist eine Hülle. Aussen die Verschiebung durch die Karte, innen alles, was das
+Stylesheet will. Darauf lässt sich das Gewünschte aufsetzen: Beim Antippen ist bekannt, welcher
 Kreis gemeint war; sein Ort in Bildschirmpunkten minus der Ort des neuen Markers ergibt den Vektor.
 
 ### Denselben Fehler noch einmal gemacht
 
-Der erste Anlauf legte die Animation auf die Huelle -- also wieder auf genau das Element, das
-MapLibre verschiebt. Der Konflikt bestand unveraendert fort, nur um den Versatz verschoben.
+Der erste Anlauf legte die Animation auf die Hülle -- also wieder auf genau das Element, das
+MapLibre verschiebt. Der Konflikt bestand unverändert fort, nur um den Versatz verschoben.
 Aufgefallen ist es nicht beim Ansehen, sondern beim **Nachmessen**: Die Startpunkte der dreizehn
 Marker lagen 483 Pixel auseinander, statt auf einem Punkt. Nach der Korrektur -- Animation auf den
-Marker, Huelle fuer die Karte -- ist die Streuung **null**, alle siebzehn starten auf `(288, 330)`,
+Marker, Hülle für die Karte -- ist die Streuung **null**, alle siebzehn starten auf `(288, 330)`,
 der Kartenmitte, wo der angetippte Kreis nach dem Heranfahren steht.
 
-**Eine Animation laesst sich nicht durch Hinsehen pruefen.** 320 ms sind zu kurz, um zu erkennen,
+**Eine Animation lässt sich nicht durch Hinsehen prüfen.** 320 ms sind zu kurz, um zu erkennen,
 ob etwas aus einem Punkt kommt oder aus vier benachbarten. Gemessen wurde am Inline-`transform` der
-Huelle, den MapLibre schreibt: Der steht still, waehrend das Innere sich bewegt, und bleibt auch
+Hülle, den MapLibre schreibt: Der steht still, während das Innere sich bewegt, und bleibt auch
 dann lesbar, wenn der Marker inzwischen ersetzt wurde.
 
 ### Und der Kreis, den kein Finger erreicht
 
-Waehrend der Pruefung fiel im Museum auf, dass **ein Vorschaubild einen Kreis verdecken kann**.
-MapLibre haengt die Marker in der Reihenfolge an, in der supercluster sie liefert; ein spaeter
-gebautes Bild liegt also ueber einem frueher gebauten Kreis. Ein verdeckter Kreis ist nicht
+Während der Prüfung fiel im Museum auf, dass **ein Vorschaubild einen Kreis verdecken kann**.
+MapLibre hängt die Marker in der Reihenfolge an, in der supercluster sie liefert; ein später
+gebautes Bild liegt also über einem früher gebauten Kreis. Ein verdeckter Kreis ist nicht
 antippbar, und damit ist der einzige Weg zu den Fotos dahinter zu. Umgekehrt kostet ein verdecktes
-Bild nichts -- der Kreis darueber fuehrt zu denselben Fotos. **Ein Kreis liegt deshalb immer ueber
+Bild nichts -- der Kreis darüber führt zu denselben Fotos. **Ein Kreis liegt deshalb immer über
 einem Bild.**
 
-Der erste Versuch war eine Stufe zu wenig: Wer etwas beruehrt, holt es nach vorn, damit die
-Vergroesserung nicht am Nachbarn abgeschnitten wird -- und ein beruehrtes Vorschaubild stieg damit
-ueber jeden Kreis. Gemessen: zwei gerade befreite Kreise waren wieder zu. Jetzt sind es **zwei
-Baender zu zwei Stufen**: Beruehrtes steigt innerhalb seines eigenen Bandes. Siebzehn von siebzehn
-Kreisen sind erreichbar, auch mit einem beruehrten Bild daneben.
+Der erste Versuch war eine Stufe zu wenig: Wer etwas berührt, holt es nach vorn, damit die
+Vergrößerung nicht am Nachbarn abgeschnitten wird -- und ein berührtes Vorschaubild stieg damit
+über jeden Kreis. Gemessen: zwei gerade befreite Kreise waren wieder zu. Jetzt sind es **zwei
+Bänder zu zwei Stufen**: Berührtes steigt innerhalb seines eigenen Bandes. Siebzehn von siebzehn
+Kreisen sind erreichbar, auch mit einem berührten Bild daneben.
 
 ## Punkt 39: der Durchgang von aussen
 
@@ -3422,7 +3423,7 @@ Geprüft wurde Stand `eca1dbd`: Backend, Frontend, Deployment, Dokumentation und
 | `vitest` | 173 grün, 19 Dateien |
 | `tsc -b --noEmit` | sauber |
 | `prettier --check` | sauber |
-| `tools/language_check.py` | 542 deutsche, 1458 englische Kommentare, kein Verstoss |
+| `tools/language_check.py` | 542 deutsche, 1458 englische Kommentare, kein Verstoß |
 | `tools/check_anchors.py` | kein toter Anker in acht Dateien |
 | `tools/check_settings.py` | acht Einstellungen, alle erreichen den Container |
 
@@ -3466,10 +3467,10 @@ also **bekannt und umgangen, nicht behoben**. Übrig blieben die drei Stellen, d
 rohen Stempel schicken; in der Beitragsliste steht seither an zwölf Besucherbeiträgen eine Uhrzeit,
 die zwei Stunden zu früh ist.
 
-**Ein Fehler beim Rendern hinterlässt einen weissen Bildschirm.** Es gibt keine `ErrorBoundary` —
+**Ein Fehler beim Rendern hinterlässt einen weißen Bildschirm.** Es gibt keine `ErrorBoundary` —
 und der Leerlauf-Neustart, der das Gerät sonst von jedem verfahrenen Zustand heilt, hängt in
 `MapView` und ist mit dem Absturz weg. Auf einem Gerät ohne Tastatur, ohne Adressleiste und ohne
-Reload-Knopf heisst das: die Vitrine steht weiss, bis jemand den Stecker zieht.
+Reload-Knopf heißt das: die Vitrine steht weiß, bis jemand den Stecker zieht.
 
 ### Was der Durchgang über das Umgehen gelernt hat
 
@@ -3671,7 +3672,7 @@ zu bekommen.
 
 Die Buchführung des Backlogs über sich selbst — Struktur statt Prosa, mit einer Zusage, die
 entweder gilt oder nicht: **Jede je vergebene Nummer ist entweder offen oder vergriffen.** Keine
-Lücke, kein Überhang, keine zweimal. Dazu die Übereinstimmung von Tabelle und Fliesstext, der Anker
+Lücke, kein Überhang, keine zweimal. Dazu die Übereinstimmung von Tabelle und Fließtext, der Anker
 jeder Zeile auf ihren *eigenen* Punkt, und das ausgeschriebene Zahlwort vor der Liste
 („Vierundvierzig Nummern sind vergriffen").
 
@@ -3726,7 +3727,7 @@ Im Browser nachgemessen: Bahn von 333 bis 604, gezogen auf 468 — das sind 49,8
 
 ### Wo die Grenze verläuft
 
-Der Gegenfall aus derselben Messung: Die Grösse eines Kreises auf der Karte,
+Der Gegenfall aus derselben Messung: Die Größe eines Kreises auf der Karte,
 `48 + log10(Anzahl) × 26`, bleibt in `PhotoLayer.tsx`. Auch eine Rechnung — aber ein falscher Wert
 ergibt einen Kreis, der falsch *aussieht*. **Sichtbar falsch braucht keinen Test.** Das ist das
 Kriterium, und es ist dasselbe, das die vier wichtigsten Testklassen des Backends ausgewählt hat.
@@ -3735,7 +3736,7 @@ Kein jsdom also: Es wäre ein nachgebauter Browser, und geprüft würde der Nach
 dieses Programms wirklich schiefgehen kann — null fremde Herkünfte offline, ein Kreis unter einem
 Vorschaubild noch mit dem Finger zu treffen, eine Beschriftung im Ausstellungsraum lesbar — prüft
 jsdom ohnehin nicht. Das erste ist ein Einzeiler in den Entwicklerwerkzeugen, das zweite wurde am
-Inline-`transform` nachgemessen, das dritte braucht einen Menschen vor dem Gerät und heisst
+Inline-`transform` nachgemessen, das dritte braucht einen Menschen vor dem Gerät und heißt
 Punkt 14.
 
 `decisions.md`, Punkt 60.
@@ -3754,8 +3755,8 @@ ist?** Neben der Datei liegen 908 Zeilen Testcode. Werden sie mitumgeschrieben, 
 Beweis mehr, sondern eine zweite Behauptung.
 
 Also ein Paket mit einer Tür statt zehn neuer Importpfade: `app/services/backup/__init__.py` reicht
-die zweiunddreissig Namen durch, die der Rest des Programms benutzt. `from app.services import
-backup` heisst weiterhin dasselbe.
+die zweiunddreißig Namen durch, die der Rest des Programms benutzt. `from app.services import
+backup` heißt weiterhin dasselbe.
 
 Nachgezählt am Ende: **sechs geänderte Zeilen** in 1814 Zeilen Testcode, und keine davon eine
 Zusage. Es sind die Stellen, an denen `monkeypatch` `_is_mounted` und `_is_writable` umsetzt —
@@ -3767,7 +3768,7 @@ von aussen angefasst werden, kennt die Bruchstellen, bevor er sie erzeugt.**
 
 ### Was die Trennung ans Licht brachte
 
-Die Wiederherstellung setzte den Grössen-Zwischenspeicher mit `global _size_cache` zurück. Das
+Die Wiederherstellung setzte den Größen-Zwischenspeicher mit `global _size_cache` zurück. Das
 funktioniert nur, solange beide in derselben Datei stehen — in einer Datei sieht man es gar nicht,
 über zwei Module hinweg ist es sofort ein Fehler. Daraus wurde `collection.forget_size()`: aus
 einem stillen Zugriff eine benannte Handlung.
@@ -3891,15 +3892,15 @@ die falsche Kodierung gedreht wurde — brauchte nur einen Umlaut, nicht diesen 
 Von 439 Tests schlug einer fehl: Eine **kleingeschriebene** Fassung desselben Namens war der
 Ersetzung durchgegangen. Sie steht dort, weil sie belegt, dass eine Beschreibung ihren Titel auch
 dann nicht wiederholen darf, wenn sie anders geschrieben ist — und genau diese Eigenschaft machte
-sie unsichtbar für eine Suche, die auf Grossschreibung baute. Zweimal derselbe Fehler an einem
+sie unsichtbar für eine Suche, die auf Großschreibung baute. Zweimal derselbe Fehler an einem
 Nachmittag, auf zwei Ebenen.
 
 ### Was offen bleibt
 
 Der Git-Verlauf. 177 Commits tragen die alten Fassungen; allein einer der Namen steht in sechzehn
 davon. Solange das Repo privat ist, trifft das niemanden — mit der Veröffentlichung wird es
-öffentlich, und danach ist es nicht mehr zu ändern. Die Entscheidung steht im
-[backlog.md](backlog.md), Punkt 64.
+öffentlich, und danach ist es nicht mehr zu ändern. Was daraus wurde, steht im nächsten
+Abschnitt.
 
 ### Und der Verlauf gleich mit
 
@@ -3930,7 +3931,7 @@ sind. Sie hing an einer technischen Vorfrage, die sich nachschlagen liess: **Wir
 Sie wird gebraucht. `CLAUDE.md` wird bei jedem Sitzungsstart automatisch und vollständig geladen
 und ist der einzige Projekttext, der garantiert im Kontext steht. Alles andere kostet einen
 Werkzeugaufruf und — schwerer wiegend — das Urteil, überhaupt nachzusehen. **Ein Querverweis wirkt
-nur, wenn der Leser schon weiss, dass er ihm folgen muss.** Gewöhnliche Links werden nicht
+nur, wenn der Leser schon weiß, dass er ihm folgen muss.** Gewöhnliche Links werden nicht
 mitgeladen; `@pfad`-Importe schon, aber vollständig, sie sparen also nichts.
 
 Damit war die Antwort umgekehrt zur Vermutung: Überschneidung ist in Ordnung, **Umfang nicht**. Die
@@ -3958,7 +3959,7 @@ Die gemessene Qualitätseinstellung in `tools/to_jpeg.py` — nicht nachzujustie
 verschwunden. Sie ist jetzt dort, wo sie hingehört: unter „Was man nicht anfassen soll".
 
 Gefunden hat sie eine Gegenprobe über **jede** entfernte Kernaussage: Hat sie anderswo ein Zuhause?
-Vierzig Aussagen, neununddreissig hatten eines. **Wer kürzt, muss nachzählen, was er wegnimmt** —
+Vierzig Aussagen, neununddreißig hatten eines. **Wer kürzt, muss nachzählen, was er wegnimmt** —
 sonst kürzt er genau das eine weg, das nirgends sonst steht.
 
 ### Und eine Regel gegen das Nachwachsen
@@ -3975,17 +3976,17 @@ ist.
 
 21. August 2026.
 
-Die Frage im Punkt lautete: aufteilen oder nicht? 3.858 Zeilen, die grösste Datei im Repo, rein
+Die Frage im Punkt lautete: aufteilen oder nicht? 3.858 Zeilen, die größte Datei im Repo, rein
 chronologisch angehängt. Die Antwort kam aus dem Messen, und sie war eine andere Frage.
 
 ### Erst messen
 
 90 Abschnitte, der mittlere 55 Zeilen lang. Teil VI allein 3.294 Zeilen — 85 Prozent der Datei
-unter einer Überschrift, die „Einzelne Punkte aus dem Backlog" heisst, also *alles Übrige*. Das sah
+unter einer Überschrift, die „Einzelne Punkte aus dem Backlog" heißt, also *alles Übrige*. Das sah
 zunächst nach dem Befund aus.
 
 War es aber nicht. Die 56 Abschnitte von Teil VI verteilen sich auf zwanzig Arbeitstage, zwei bis
-acht am Tag, gleichmässig gross, streng in der Reihenfolge ihres Entstehens. **Die Datei ist
+acht am Tag, gleichmässig groß, streng in der Reihenfolge ihres Entstehens. **Die Datei ist
 geordnet — sie zeigt ihre Ordnung nur nicht.** Die Datumsangaben lagen in der Prosa, wo nichts
 sie erreicht.
 
@@ -4057,3 +4058,125 @@ hinzufügen, nie welche wegnehmen — was vorher grün war, bleibt grün.
 niemand, der an diesem Gerät weiterbaut, liest sie. Beide richten sich an jemanden, der ein
 **eigenes** aufsetzt. Das ist ein anderer Mensch mit einer anderen Frage, und es ist der
 eigentliche Zweck des Projekts. Die Übersicht hat dafür jetzt „Es übernehmen".
+
+---
+
+## Punkt 64, Abschnitt 4: die Regel stand da und wurde nicht geprüft
+
+22. August 2026.
+
+Der letzte Abschnitt hatte zwei Hälften, die nichts miteinander zu tun schienen: fünf Dateien, die
+ein veröffentlichtes Repo üblicherweise hat und die hier fehlten — und eine Umlaut-Drift in der
+Dokumentation. Beide gehen auf dasselbe zurück: **Etwas war zugesagt, und niemand hat nachgesehen.**
+
+### Die Drift war keine Praxis, sondern zwei Dateien
+
+Der Punkt notierte sie als allgemeines Nachlassen und stellte die Frage, ob die Regel an die
+Praxis anzupassen sei. Gemessen fiel die Frage weg:
+
+| | Umlaute | umschrieben |
+|---|--:|--:|
+| `decisions.md` | 830 | **338** |
+| `history.md` | 1.252 | **568** |
+| die neun übrigen Dateien zusammen | 1.936 | **8** |
+
+**Elf von dreizehn Dateien halten die Regel makellos ein.** Die Regel ist nicht aus der Zeit
+gefallen; zwei Dateien sind es. Und innerhalb von ihnen ist die Drift nicht gleichmäßig: In
+`history.md` steht das erste Drittel bei 713 zu 16, das mittlere bei 192 zu 352. Das ist keine
+Gewohnheit, die nachlässt, sondern eine Strecke Arbeit, in der die Regel für Quelltext auf die
+Dokumentation übergriff.
+
+Dazu dasselbe Bild beim `ß`: 177 Stellen mit `ss`, wo ein `ß` hingehört — `heisst`, `Strasse`,
+`weiss` —, in denselben zwei Dateien, die daneben 268 Mal ein richtiges `ß` tragen. Ein Satz
+schrieb „Die Strasse wird gewählt", der nächste „dann die Straße". Derselbe Fehler, dieselbe
+Ursache, also derselbe Durchgang.
+
+### 900 Ersetzungen, und die Vorsicht lag in der Ausnahmeliste
+
+Eine naive Ersetzung `ue → ü` macht aus „neue" ein „nü", aus „Feuerwehr" ein „Feürwehr", aus
+„Quelle" ein „Qülle". Der Weg war deshalb: **erst alle 547 verschiedenen Wörter mit `ue`, `oe`
+oder `ae` auflisten, dann die echten aussortieren.** Rund dreißig sind echt — `neue`, `bauen`,
+`zuerst`, `Quelle`, `dauert`, `quer`, `genauer`, `schauen`, `streuen`, `Feuerwehr`, `aktuell`,
+`Vertrauen`, `bequem`, dazu zwei Namen: `Uetersener` und `Hauenweg`.
+
+Zwei Fallstricke hat erst der Probelauf gezeigt. Die Ausnahmeliste war
+**groß-klein-empfindlich** — „neue" stand drin, „Neue" nicht, und „Nachbauen" wurde zu
+„Nachbaün". Und sie sperrte **zu viel**: „strassengenauen" trägt beides, ein echtes `aue` aus
+Straße und genau, und ein `ss`, wo ein `ß` hingehört. Die Ausnahme muss also nur die eine
+Ersetzung sperren, nicht die andere.
+
+Vier Wörter fielen ganz durch, weil sie kaputt waren, nicht umschrieben: `ruecht` (statt „rückt"),
+`verstoeszt` und `straszengenaue` (mit `sz` statt `ß`), und `Wagenrueckaeufe` — dem ein `l` fehlte,
+seit es „Wagenrückläufe" heißen sollte. Vier Tippfehler, die jahrelang unentdeckt geblieben
+wären, weil niemand nach ihnen suchte.
+
+**Neun Stellen lagen ausserhalb der beiden Dateien**, in `CHANGELOG`, `development.md` und
+`licensing.md`. Auch sie sind mitgezogen; die drei echten Ausnahmen — OSM-Werte in Codespannen,
+Testnamen, und das Beispiel in CLAUDE.md, das eine umschriebene Meldung *zeigt* — blieben.
+
+### Die Prüfung, die schon versprochen war
+
+Und hier der eigentliche Fund. In [development.md](development.md) steht seit Monaten, direkt
+unter dem Absatz über Umlaute: *„Ob eine Datei sich daran hält, beantwortet
+`tools/language_check.py`."* **Das tat sie nicht.** Das Werkzeug las `.py`, `.ts` und `.tsx` und
+beantwortete eine andere Frage — in welcher Sprache ein Kommentar geschrieben ist. Die Umlautfrage
+hat es nie gestellt, und die Dokumentation hat es nie angesehen.
+
+Jetzt tut es beides. Übersprungen werden drei Dinge, und jedes hat einen Grund: umzäunte Blöcke
+und Codespannen, weil dort Bezeichner und Kommandos stehen und die Umschreibung richtig ist;
+und Zitiertes, weil CLAUDE.md eine umschriebene Meldung als eigenes Beispiel der Regel führt.
+
+Dabei noch ein kleiner Fehler, der zeigt, wie fein die Sache ist: Das Zitat in CLAUDE.md öffnet
+mit `„` und schließt mit `”`. Der vorhandene Zitatfilter erwartete `“`, fand es nicht — und
+paarte das Anführungszeichen stattdessen mit dem **nächsten**, wodurch genau das Zitat unbedeckt
+blieb, das gedeckt sein musste. Die eigene Regel wurde am eigenen Beispiel gemeldet.
+
+**Die Liste der Suchformen ist mit Absicht kurz.** Sie läuft im Commit-Hook, und eine
+Fehlmeldung genügt, damit jemand die Prüfung abschaltet. `neue`, `Quelle`, `dauert` und
+`Feuerwehr` stehen deshalb nicht darin, obwohl sie ein `ue` tragen.
+
+### Und die Gegenprobe zog die Umbenennung nach
+
+Der Ankerprüfer meldete unmittelbar danach einen toten Verweis: Die Überschrift „die Knoepfe
+bekommen einen Ort" heißt jetzt „die Knöpfe", und ein Verweis vom Vortag zeigte noch auf die
+alte Sprungmarke. Genau der Fall, für den die Prüfung am 15. August dazugekommen war — und der
+erste, den sie im laufenden Betrieb gefangen hat.
+
+### Fünf Dateien, und zwei Entscheidungen darin
+
+`CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `AUTHORS` und zwei Meldungsvorlagen unter
+`.github/`. Zwei Dinge daran waren nicht technisch zu entscheiden:
+
+**Die Kontaktadresse.** Eine Adresse im Klartext wird abgegriffen und steht danach in jedem Fork
+und jedem Archiv. Gewählt wurde stattdessen die private Meldung bei GitHub — kein Klartext im
+Repo, und der Weg taugt zugleich als der eine nicht-öffentliche Kanal, den auch der Kodex braucht.
+
+**Der Verhaltenskodex.** Nicht der Contributor Covenant, sondern fünfzehn Zeilen in der Stimme des
+Projekts, mit dem wunden Punkt ausgeschrieben: Es gibt einen Betreuer, und ein Kodex ohne
+jemanden, der ihn durchsetzt, ist eine Zusage ohne Deckung. Der Wechsel zum Covenant steht als
+nächster Schritt darin, falls je eine Gemeinschaft entsteht.
+
+Das Leitmotiv aller fünf ist dasselbe: **eine Veröffentlichung darf keine stille Zusage werden.**
+Deshalb steht in `CONTRIBUTING.md` ausdrücklich, dass eine Meldung Wochen liegen bleiben kann, und
+in `SECURITY.md` eine Liste dessen, was **kein** Fund ist, sondern Entwurf — die Besucheransicht
+ohne Anmeldung, der Beitragsweg ohne Ratenbegrenzung, der unverschlüsselte Bestand.
+
+Eine Vorlage hätte beinahe eine Adresse erfunden, die es nicht gibt: GitHub verlangt für
+Verweise in `config.yml` eine absolute Adresse, und die des Repos steht erst mit
+[Punkt 22](backlog.md) fest. Der Verweis ist weggeblieben, mit einem Kommentar an seiner Stelle.
+
+### Und der CHANGELOG sortierte seit zwei Wochen alles unter „Behoben"
+
+Beim Nachtragen aufgefallen, weil der eigene Eintrag an einer sichtbar falschen Stelle landete:
+**25 Einträge standen unter dem letzten `### Behoben`, und nur acht davon waren Behebungen.** Die
+Apache-Lizenz, das Register, `licensing.md`, die fünf neuen Dateien — alles Hinzugefügtes, alles
+unter „Behoben". Die Überschrift war einmal richtig und ist dann einfach stehen geblieben, während
+darunter weitergeschrieben wurde.
+
+Der Kopf der Datei sagt *„Format nach Keep a Changelog"*. Wieder eine Zusage, die niemand
+nachrechnet — dieselbe Sorte Fund wie die Umlautregel und aus demselben Grund gefunden: nicht
+durch Suchen, sondern durch Hinschreiben. Die 25 sind auf neun Behebungen, sieben Änderungen und
+neun Hinzufügungen verteilt.
+
+**Damit ist Punkt 64 vollständig** und aus dem Backlog gezogen. Was von der Durchsicht bleibt, ist
+kein Punkt mehr, sondern eine Prüfung mehr in `make check`.

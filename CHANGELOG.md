@@ -522,7 +522,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Geändert
 
-- **Die Strasse wird im „Hilf mit"-Bereich gewählt statt getippt.** Erst der Anfangsbuchstabe, dann
+- **Die Straße wird im „Hilf mit"-Bereich gewählt statt getippt.** Erst der Anfangsbuchstabe, dann
   die Straße, dann die Hausnummer — dieselbe Bauform wie Jahrzehnt und Jahr. Damit hat die
   Besucheransicht **kein einziges Eingabefeld mehr** und braucht keine Tastatur; das Suchfeld war
   ohne eine nicht zu bedienen und sah aus wie ein defektes Bedienelement. Die Gruppen werden aus
@@ -539,7 +539,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Die Mengenanzeige des Zeitschiebers zeigte die Menge nicht.** Die Balken bündelten fest nach
   Jahrzehnten und skalierten linear gegen das hoechste — im Erstbestand mit seinen 256 taggenauen
   Aufnahmen aus 2010 bis 2024 waren das **zwei** Balken, einer voll und einer auf dem Sockel, auf
-  dem auch ein Jahrzehnt mit einem einzigen Foto gelandet waere. Jetzt richtet sich die Bündelung
+  dem auch ein Jahrzehnt mit einem einzigen Foto gelandet wäre. Jetzt richtet sich die Bündelung
   nach dem Bestand: nie feiner als die gröbste Datierung darin, und so breit, dass die Spanne in
   dreißig Balken passt. Die Höhe folgt der Wurzel statt der geraden Linie, ein leerer Balken bleibt
   leer. Siehe [docs/decisions.md](docs/decisions.md) Punkt 25
@@ -739,7 +739,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Geändert
 
-- **Das Projekt heißt Kiekmap.** Nach aussen mit grossem K, im Quelltext und in Pfaden klein,
+- **Das Projekt heißt Kiekmap.** Nach außen mit großem K, im Quelltext und in Pfaden klein,
   `KIEKMAP_` als Präfix der Einstellungen. Für Besucher ändert sich nichts — der Name stand nie in
   der Oberfläche. **Sicherungen aus der Zeit davor werden nicht mehr erkannt**, weil der Name im
   Ordner und im Dateinamen des Archivs steht; einmal neu sichern genügt
@@ -913,7 +913,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Ein Kreis liegt immer über einem Vorschaubild** und ist damit erreichbar. Verdeckt war er
   vorher nicht antippbar, und das ist der einzige Weg zu den Fotos dahinter; ein verdecktes Bild
   kostet dagegen nichts, weil der Kreis darüber zu denselben Fotos führt
-- **Ein Absturz der Oberfläche lässt das Gerät nicht mehr weiss stehen.** Ein Fehler beim Rendern
+- **Ein Absturz der Oberfläche lässt das Gerät nicht mehr weiß stehen.** Ein Fehler beim Rendern
   riss die ganze Seite ab, und der Leerlauf-Neustart, der sonst jeden verfahrenen Zustand heilt,
   ging mit unter — ohne Tastatur und Adressleiste war die Vitrine damit tot. Jetzt steht ein
   deutscher Satz da, die Seite lädt sich nach acht Sekunden selbst neu, und ein Knopf tut es
@@ -930,43 +930,56 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   wäre umgerechnet um zwei Stunden falsch
 - Der Name des heruntergeladenen Archivs trägt das Datum der Ortszeit, wie der Ordner
   `vorher-…` daneben. Eine Sicherung um halb eins nachts hiess vorher nach gestern
+- Die Lizenz der Kartensymbole wird von `make tiles` mitgeholt, bisher blieb sie im
+  Temporaerverzeichnis liegen
 - Die Zuordnung von MIME-Typ zu Dateiendung steht nur noch an einer Stelle (`suffix_for_mime`).
   Ein Foto mit einem Typ, den dieses Programm nie geschrieben hat — denkbar aus einer
   zurückgespielten Sicherung —, ergab vorher stillschweigend einen Pfad, den es nicht gibt; jetzt
   steht im Protokoll, woran es lag
+
+### Geändert
+
 - Die drei Datumsformate des Verwaltungsbereichs liegen zusammen in `admin/format.ts`, mit dem
   Grund dabei, warum sie sich unterscheiden. Sichtbar ändert sich nichts
-- `make check` prüft alles, was vor einem Commit laufen soll: Stil, die vier Prüfungen neben den
+- `services/backup.py` ist ein Paket aus zehn Modulen geworden — Laufwerke, Bestand, Schreiben,
+  Archiv, Wiederherstellen, Zustand, Auftrag. `from app.services import backup` heißt weiterhin
+  dasselbe, und am Programm ändert sich nichts
+- `docs/history.md` hat ein **Register** bekommen: eine Zeile je Abschnitt mit Datum und
+  Sprungmarke, erzeugt von `tools/build_register.py` und von `make check` nachgeprüft. Die Datei
+  bleibt eine — geteilt hätte sie ihre Reihenfolge verloren, und die ist ihr eigentlicher Inhalt
+- `tools/check_anchors.py` erkennt Überschriften der ersten Ebene als Sprungmarken und prüft auch
+  `docs/architecture.md`, die bis dahin fehlte
+- Die Übersicht in `docs/index.md` hat eine Gruppe „Es übernehmen" für `adaption.md` und
+  `licensing.md` — beide richten sich an ein zweites Museum, nicht an Entwickler dieses Geräts
+- Acht Verweise auf `history.md` zeigen jetzt auf die Stelle, die sie meinen, statt auf die Datei
+- `tools/language_check.py` prüft jetzt auch, ob die Dokumentation ihre Umlaute schreibt statt
+  sie zu umschreiben. Die Regel stand seit Monaten in `development.md`, mit dem Satz, dieses
+  Werkzeug beantworte sie — es las aber nur `.py`, `.ts` und `.tsx`. Rund 900 Stellen in
+  `decisions.md` und `history.md` sind nachgezogen, dazu 177 Stellen mit `ss` statt `ß`
+
+### Hinzugefügt
+
+- `make check` prüft alles, was vor einem Commit laufen soll: Stil, die fünf Prüfungen neben den
   Tests, und die Tests selbst — die schnellen zuerst. Dazu `make docs-check` für die Prüfungen
   allein und ein Git-Hook unter `.githooks/pre-commit`, der nur sie ausführt (unter einer Sekunde,
   einzuschalten mit `git config core.hooksPath .githooks`)
 - `tools/check_numbers.py` rechnet die Buchführung des Backlogs über seine eigenen Nummern nach:
   Jede je vergebene Nummer ist entweder offen oder vergriffen, die Übersichtstabelle deckt sich
   mit dem Fliesstext, und jede Zeile verweist auf ihren eigenen Punkt
-- `services/backup.py` ist ein Paket aus zehn Modulen geworden — Laufwerke, Bestand, Schreiben,
-  Archiv, Wiederherstellen, Zustand, Auftrag. `from app.services import backup` heisst weiterhin
-  dasselbe, und am Programm ändert sich nichts
 - **Das Projekt steht unter der Apache-Lizenz 2.0**, Copyright 2026 Kalle Erlhoff — `LICENSE` und
   `NOTICE` liegen an der Wurzel und gelten für Code, Dokumentation und die Beispielbilder. Der
   Fotobestand des Museums ist ausdrücklich nicht erfasst: Eine Softwarelizenz lizenziert das
   Programm, nicht die Daten
 - **Die Lizenzhinweise der mitgelieferten Pakete reisen jetzt mit.** `make notices` erzeugt zu
   jedem Artefakt eine `THIRD-PARTY.txt` mit den vollen Lizenztexten — 37 Pakete im Frontend, 26 im
-  Backend. Das Bundle trug vorher zwei Hinweise für siebenunddreissig Pakete
+  Backend. Das Bundle trug vorher zwei Hinweise für siebenunddreißig Pakete
 - Die Karte nennt neben OpenStreetMap auch die Datenlizenz: „© OpenStreetMap-Mitwirkende, ODbL"
-- Die Lizenz der Kartensymbole wird von `make tiles` mitgeholt, bisher blieb sie im
-  Temporaerverzeichnis liegen
 - `docs/licensing.md` beantwortet als neunte Datei, was weitergegeben werden darf und unter welchen
   Bedingungen
 - Beispiele in Tests, Kommentaren und Dokumentation nennen keine Namen aus dem Holmer Bestand
   mehr, sondern den erfundenen Kader aus `seed/`. Am Programm ändert sich nichts
-- `docs/history.md` hat ein **Register** bekommen: eine Zeile je Abschnitt mit Datum und
-  Sprungmarke, erzeugt von `tools/build_register.py` und von `make check` nachgeprüft. Die Datei
-  bleibt eine — geteilt hätte sie ihre Reihenfolge verloren, und die ist ihr eigentlicher Inhalt
 - Jeder Abschnitt der Historie nennt sein Datum in den ersten Zeilen darunter; die Prüfung bricht
   ab, wenn einer es nicht tut. Neun hatten es vergessen
-- Acht Verweise auf `history.md` zeigen jetzt auf die Stelle, die sie meinen, statt auf die Datei
-- `tools/check_anchors.py` erkennt Überschriften der ersten Ebene als Sprungmarken und prüft auch
-  `docs/architecture.md`, die bis dahin fehlte
-- Die Übersicht in `docs/index.md` hat eine Gruppe „Es übernehmen" für `adaption.md` und
-  `licensing.md` — beide richten sich an ein zweites Museum, nicht an Entwickler dieses Geräts
+- `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `AUTHORS` und Meldungsvorlagen unter
+  `.github/` — die fünf Dateien, die ein veröffentlichtes Repo hat. Sicherheitsmeldungen laufen
+  über die private Meldung bei GitHub, damit keine Adresse im Klartext im Repo steht

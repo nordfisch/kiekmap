@@ -40,7 +40,7 @@ from check_anchors import slug
 ROOT = Path(__file__).resolve().parent.parent
 HISTORY = ROOT / "docs" / "history.md"
 
-BEGIN = "<!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand aendern -->"
+BEGIN = "<!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand ändern -->"
 END = "<!-- register:ende -->"
 
 MONTHS = {
@@ -175,9 +175,9 @@ def register(text: str) -> str:
             "",
             "## Register",
             "",
-            f"{len(rows)} Eintraege. **Gesucht wird hier meist ein Datum**, nicht ein Titel --",
-            "die Titel sind Merkhilfen. Fuer ein Stichwort ist `grep` das bessere Werkzeug; die",
-            "Datei ist ausfuehrlich genug dafuer.",
+            f"{len(rows)} Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —",
+            "die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die",
+            "Datei ist ausführlich genug dafür.",
             "",
             "| Datum | Abschnitt |",
             "|---|---|",

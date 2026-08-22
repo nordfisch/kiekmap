@@ -115,14 +115,14 @@ Auswahl-, Anordnungs- und Bearbeitungsleistung. Die liegt in diesem Repo offen z
 [decisions.md](decisions.md) stehen die Entscheidungen mit ihren Begründungen, in
 [history.md](history.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
 
-Praktisch heisst das nur eines: **den Anspruch nicht übertreiben.** Die Copyright-Zeile ist
+Praktisch heißt das nur eines: **den Anspruch nicht übertreiben.** Die Copyright-Zeile ist
 richtig; ein Satz, jede Zeile sei eigenes Werk, wäre es nicht. Wo einzelne Zeilen keine
 Schöpfungshöhe erreichen — was für Standardcode ohnehin gilt, mit oder ohne Modell —, hängt an
 ihnen keine Lizenz. Sie sind dann freier als der Rest, nicht ungültig.
 
 ## Haftung
 
-Abschnitt 7 und 8 der Lizenz schliessen Gewährleistung und Haftung aus, so weit das geht. Weiter
+Abschnitt 7 und 8 der Lizenz schließen Gewährleistung und Haftung aus, so weit das geht. Weiter
 als das Recht erlaubt, geht keine Lizenz: § 276 Abs. 3 BGB lässt einen Erlass der Haftung für
 Vorsatz nicht zu, und § 309 Nr. 7 BGB begrenzt Freizeichnungen.
 

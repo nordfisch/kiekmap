@@ -59,7 +59,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 20 | [Das Gerät muss einen Stromausfall überstehen](#20--das-gerät-muss-einen-stromausfall-überstehen) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
-| 64 | [Durchsicht der Dokumentation](#64--durchsicht-der-dokumentation) | Aufgabe | wichtig |
 | 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
@@ -68,9 +67,9 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Achtundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 23, 24,
+**Neunundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 23, 24,
 25, 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52,
-53, 55, 56, 57, 58, 59, 60, 61, 62, 63. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **65**.
 
 ---
@@ -303,7 +302,7 @@ er wegwirft, hat niemand weggeworfen.
 **Der Rest von Punkt 10**, der am 16. August 2026 bewusst liegen geblieben ist. Behoben sind dort
 die drei pragmatischen Teile: Die Textspalte wächst mit statt fest zu stehen (auf 1024 px bekommt
 das Bild 610 statt 466 px), die Blätterknöpfe stehen fest am unteren Rand, und der Schließen-Knopf
-sitzt in der Ecke des Schirms. Siehe [history.md](history.md#die-detailansicht-das-bild-bekommt-platz-die-knoepfe-bekommen-einen-ort) und
+sitzt in der Ecke des Schirms. Siehe [history.md](history.md#die-detailansicht-das-bild-bekommt-platz-die-knöpfe-bekommen-einen-ort) und
 [decisions.md](decisions.md), Punkt 44.
 
 **Was offen bleibt, ist der Weg an die Ursache:** Ein Querformat braucht Breite und hat Höhe übrig
@@ -632,135 +631,5 @@ gehört zu dem, was ein Release überhaupt erst zu einem Release macht.
 **Ein Hindernis ist seit dem 21. August 2026 weg.** Im Repo standen echte Namen aus dem Holmer
 Bestand — in der Dokumentation, im Quelltext und vor allem in den Tests. Sie sind durch den
 erfundenen Kader aus `seed/` ersetzt, im aktuellen Stand **und im ganzen Git-Verlauf**. Siehe
-[Punkt 64](#64--durchsicht-der-dokumentation), Abschnitt 1. Von dieser Seite steht einer
+[Punkt 64](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), Abschnitt 1. Von dieser Seite steht einer
 Veröffentlichung nichts mehr entgegen.
-
-### 64 · Durchsicht der Dokumentation
-
-Neun Dateien unter `docs/`, dazu `CLAUDE.md`, `README.md` und der `CHANGELOG` — zusammen **9.700
-Zeilen**, gewachsen über vier Monate und nie im Ganzen durchgesehen. Vier Fragen, und die erste
-hat einen Termin.
-
-#### 1. Schützenswerte Angaben — der aktuelle Stand ist bereinigt
-
-**Erledigt am 21. August 2026, mit einer offenen Frage am Ende.**
-
-Gesucht wurde nicht nach Verdacht, sondern nach Befund: Aus `data/kiekmap.db` liessen sich die
-Namen ziehen, die im Bestand tatsächlich vorkommen, und mit dieser Liste wurde das Repo
-durchsucht. Das förderte einen Namen zutage, den die erste Zählung übersehen hatte — er stand
-sogar im Produktivcode (`kiosk/mapCaption.ts`).
-
-**87 Fundstellen in 15 Dateien**, ersetzt statt gestrichen. Der Beispielbestand hatte den Kader
-längst: Gasthof Petersen liegt dort an derselben Hausnummer wie das Gasthaus, das er ersetzt.
-Kein Beispiel hat dabei an Schärfe verloren — die Regel steht jetzt in
-[development.md](development.md) und in [CLAUDE.md](../CLAUDE.md): **Holmer Koordinaten ja,
-Holmer Namen nein.**
-
-Die Tests haben die Arbeit geprüft und dabei eine Fundstelle gefangen, die der Ersetzung durchging:
-eine kleingeschriebene Fassung desselben Namens, die belegt, dass eine Beschreibung ihren Titel
-nicht wiederholen darf.
-
-**Der Git-Verlauf ist mitgezogen.** `git filter-repo --replace-text --replace-message` über
-180 Commits, nach zwei Sicherungen und einem Probelauf auf einer Kopie. Der Baum von `HEAD` ist
-danach byte-gleich mit dem davor — die Prüfsumme stimmt —, alle Commits sind erhalten, und weder in
-einer Dateifassung noch in einer Commit-Nachricht steht noch einer der Namen. Möglich war das ohne
-Kosten, weil es keinen Remote gibt: Niemand hatte eine Kopie, die unbrauchbar werden konnte.
-
-**Damit ist dieser Abschnitt geschlossen**, und [Punkt 22](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes)
-ist von dieser Seite nicht mehr blockiert.
-
-#### 2. Redundanzen — CLAUDE.md ist auf die Hälfte
-
-**Erledigt am 21. August 2026.**
-
-Zuerst geprüft, ob die Datei technisch überhaupt gebraucht wird: **ja.** Sie wird bei jedem
-Sitzungsstart automatisch und vollständig geladen und ist damit der einzige Projekttext, der
-garantiert im Kontext steht. Alles unter `docs/` kostet einen Werkzeugaufruf — und, wichtiger, das
-Urteil, überhaupt nachzusehen. Ein Querverweis wirkt nur, wenn der Agent schon weiss, dass er ihm
-folgen muss; gewöhnliche Markdown-Links werden nicht mitgeladen, und `@pfad`-Importe landen
-vollständig im Kontext, sparen also nichts.
-
-**Damit ist inhaltliche Überschneidung mit den Dateien für Menschen in Ordnung — nur Umfang und
-Form nicht.** Die offizielle Empfehlung lautet unter 200 Zeilen, *„longer files consume more
-context and reduce adherence"*, und benennt das Kriterium: weg mit dem, was sich aus dem Code
-ableiten lässt, behalten werden *„pitfalls, rationale, and conventions that differ from tool
-defaults"*.
-
-Gemessen stand die Datei bei **385 Zeilen**, und der Abschnitt „Stand" allein bei **199** — so lang
-wie die Empfehlung für die ganze Datei. Er war Erzählung, und die steht vollständig in
-[history.md](history.md).
-
-| | vorher | nachher |
-|---|---|---|
-| CLAUDE.md gesamt | 385 | **208** |
-| „Stand" | 199 | 31 |
-| „Sprachregelung" | 53 | 36 |
-| „Aufbau" | 19 | 13 |
-
-Was aus dem Stand blieb, ist kein Verlauf, sondern **was man sonst falsch annähme**: dass
-`deploy/pi/` geprüft sei, dass alte Sicherungen noch erkannt werden, dass die Verwaltung ohne PIN
-läuft. Die Sprachregelung behielt die Tabelle und die Faustregel und gab die Begründung an
-[development.md](development.md) ab. Der Verzeichnisbaum wich den vier Sätzen, die man ihm nicht
-ansieht.
-
-Beim Kürzen ging ein Fallstrick verloren und ist zurückgeholt worden: die gemessene
-Qualitätseinstellung in `tools/to_jpeg.py`, die nicht nachjustiert werden darf. Die Gegenprobe lief
-über jede entfernte Kernaussage — jede hat ein Zuhause, in `history.md` oder weiter oben in
-derselben Datei.
-
-**Und eine Regel gegen das Nachwachsen:** Ein erledigter Punkt wird an drei Stellen vermerkt, nicht
-an neun — CHANGELOG, history, backlog, dazu decisions.md, wenn eine Entscheidung herauskam.
-CLAUDE.md gehört nicht dazu. Damit sinkt die gemessene Streuung von vier bis neun Dateien je
-Arbeitsschritt auf drei bis vier.
-
-#### 3. Aufteilung und Ablage — nicht zerteilt, sondern erschlossen
-
-**Erledigt am 21. August 2026.**
-
-`history.md` stand bei **3.858 Zeilen** und wächst mit jedem Arbeitsschritt. Zu klären war, ob eine
-Aufteilung hilft. **Nachgemessen war die Länge nicht das Problem:** 90 Abschnitte, der mittlere
-55 Zeilen lang, in einer Reihenfolge, die nie umsortiert wird. Ein Schnitt nach Jahr wäre bei einem
-vier Monate alten Projekt gegenstandslos, einer nach Thema würde zerstören, was die Datei allein
-kann — die Reihenfolge —, und brächte bei jedem Anhängen die Frage *„in welche Datei?"* mit, deren
-falsche Antwort niemandem auffällt.
-
-**Das Problem lag woanders und war zählbar:** 31 Verweise aus anderen Dateien zeigten hierher,
-**30 davon ohne Anker**, also auf 3.858 Zeilen. Und die Datei hatte keinen Eingang.
-
-Also erschlossen: ein **Register** am Anfang, eine Zeile je Abschnitt mit Datum und Sprungmarke,
-erzeugt von `tools/build_register.py` und von `make check` nachgeprüft. Es ersetzt die Tabelle der
-Arbeitsblöcke, die eine Commit-Spanne nannte und seit fünfzig Abschnitten falsch war. Die acht
-Verweise, die eine bestimmte Stelle meinten, zeigen jetzt dorthin; die übrigen meinen wirklich die
-ganze Datei.
-
-**Der Eingang ist das Datum, nicht der Titel** — gesucht wird ein Tag, selten eine Überschrift.
-Daraus wurde eine Zusage mit Sperre: *Jeder Abschnitt nennt sein Datum in den ersten Zeilen
-darunter.* Neun taten das nicht, die neuesten; sie haben es nachgetragen bekommen. Die Begründung
-und die Ausnahmeregel für die Teile I bis V stehen in
-[decisions.md](decisions.md#63-die-historie-wird-nicht-aufgeteilt-sondern-erschlossen--über-ihr-datum).
-
-**Die beiden kleinen Fragen dazu:** `seed/README.md` steht längst in der
-[Übersicht](index.md) — die Frage war schon beantwortet. `adaption.md` stand dagegen falsch:
-zusammen mit `licensing.md` unter „Daran arbeiten", obwohl beide sich nicht an jemanden richten,
-der *dieses* Gerät weiterbaut, sondern an jemanden, der ein **eigenes** aufsetzt. Die Übersicht hat
-dafür jetzt eine eigene Gruppe, „Es übernehmen".
-
-**Nebenbei gefunden:** `architecture.md` fehlte in der Liste von `tools/check_anchors.py`. Kein
-Vorsatz, ein Versehen — und unbemerkt geblieben, weil bis dahin niemand mit einem Anker in die
-Datei oder aus ihr heraus verwiesen hatte. Sie steht jetzt drin. Ebenso hat der Ankerprüfer
-gelernt, dass eine Überschrift der ersten Ebene auch eine Sprungmarke ist: Die sechs Teile der
-Historie galten ihm zunächst als tote Verweise.
-
-#### 4. Lücken
-
-**Ein veröffentlichtes Repo hat üblicherweise fünf Dateien, die hier alle fehlen:**
-`CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, Vorlagen für Meldungen, `AUTHORS`. Die
-erste hat Substanz, seit die Lizenz Beiträge regelt (Apache §5) und Mitwirkung erwünscht ist — dort
-gehört auch hin, was jemand erwarten darf, damit eine Veröffentlichung keine stille Zusage wird.
-
-**Und eine Lücke in der eigenen Regel:** Die Sprachregelung sagt, deutsche Prosa in `docs/` werde
-mit Umlauten geschrieben. Die neueren Einträge halten sich nicht daran — gemessen an
-`decisions.md`: 448 Umlaute im ersten Drittel gegen 158 im letzten, bei 303 Zeilen mit `ue`/`oe`/`ae`.
-In `history.md` dasselbe Bild. `tools/language_check.py` sieht nur `.py`, `.ts` und `.tsx`, die
-Dokumentation also nicht. Zu entscheiden: nachziehen und prüfen, oder die Regel an die Praxis
-anpassen.

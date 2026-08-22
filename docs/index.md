@@ -59,6 +59,11 @@ Bedienung, `operations.md` die Technik dahinter.
 | [../CHANGELOG.md](../CHANGELOG.md) | Was das Programm kann, nach Keep a Changelog sortiert |
 | [../CLAUDE.md](../CLAUDE.md) | Die Regeln dieses Repos, für Coding-Agents |
 | [../seed/README.md](../seed/README.md) | Der Beispielbestand: was `make seed` herstellt und warum seine Lücken Absicht sind |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md) | Wie man mitwirkt — und was man erwarten darf, und was nicht |
+| [../SECURITY.md](../SECURITY.md) | Was hier eine Schwachstelle ist, was Entwurf, und wohin damit |
+| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Der Umgangston, kurz gehalten |
+| [../AUTHORS](../AUTHORS) | Wer daran gebaut hat — und wie das Projekt entstanden ist |
+| [../LICENSE](../LICENSE), [../NOTICE](../NOTICE) | Apache-2.0 im Wortlaut, und die Namensnennung, die mitreist |
 
 `CHANGELOG.md` und `history.md` beschreiben beide Gebautes und sind trotzdem beide da: Der eine
 listet **was**, die andere erzählt **wie und warum**. Wer sucht, ob eine Funktion existiert, nimmt

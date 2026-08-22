@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Kalle Erlhoff
 # SPDX-License-Identifier: Apache-2.0
 
-"""Which comments are written in which language.
+"""Which comments are written in which language -- and whether the prose spells its umlauts.
 
 The rule is in CLAUDE.md: identifiers and comments in English, test files entirely in German.
 Held only in part for a long time -- 338 German comments sat in 52 production files next to 687
@@ -13,6 +13,10 @@ at all. Run it when you want an answer:
 
     python tools/language_check.py           only what breaks the rule
     python tools/language_check.py --all     every file with its counts
+
+The second question is the same rule's other half, and it went unwatched far longer: umlauts are
+written out in texts for people and transcribed in code. Nothing read the documentation, so
+nothing noticed when two files drifted to 900 transcribed words. See ``transcribed_in_prose``.
 """
 
 import argparse
@@ -98,6 +102,59 @@ def is_test(path: str) -> bool:
     return "/tests/" in path or ".test." in path or Path(path).name.startswith("test_")
 
 
+#: Transcriptions that are never a German word in their own right. Deliberately short: the
+#: checker runs in the commit hook, and one false alarm is enough for somebody to switch it off.
+#: "neue", "Quelle", "dauert", "Feuerwehr" carry a real ``ue`` and are not in here.
+TRANSCRIBED = re.compile(
+    r"\b\w*(fuer|ueber|waere|haette|koenn|moeglich|naechst|zurueck|gehoert|laeuft|laesst"
+    r"|muess|duerf|schliess|heisst|weiss|gross|groess|strass|dreissig|zaehl|aender|waehrend"
+    r"|faellt|haeng|spaet|erklaer|vollstaendig|gemaess|pruef|fuenf|zurueck)\w*",
+    re.I,
+)
+
+#: Where German prose for humans lives: ``docs/``, the files at the root that a reader opens, and
+#: the issue templates, which are the first German a stranger reads.
+PROSE = (
+    "docs/",
+    ".github/",
+    "README.md",
+    "CHANGELOG.md",
+    "CLAUDE.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "CODE_OF_CONDUCT.md",
+    "AUTHORS",
+)
+
+
+def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:
+    """Lines of German prose that spell an umlaut out -- ``ue`` where ``ü`` belongs.
+
+    The rule (CLAUDE.md): umlauts are written normally in texts for people, transcribed in source
+    code, shell scripts and commit messages. Documentation is a text for people, and this used to
+    be nobody's job to check -- by 21 August 2026, ``decisions.md`` and ``history.md`` had drifted
+    to 900 transcribed words between them while every other file stayed clean.
+
+    Three things are not prose and are skipped: fenced blocks and inline code, where identifiers
+    and commands live and the transcription is correct; and quoted material, because CLAUDE.md
+    quotes a transcribed message as its own example of the rule.
+    """
+    hits, fenced = [], False
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
+        bare = re.sub(r"`[^`]*`", " ", line)
+        # Before QUOTED, not after: it expects „…“, and a „…" closed with a straight mark would
+        # otherwise let QUOTED pair that mark with the *next* one and leave the quote itself bare.
+        bare = QUOTED.sub(" ", re.sub('„[^“”"]*[“”"]', " ", bare))
+        if found := TRANSCRIBED.findall(bare):
+            hits.append((number, ", ".join(sorted({f for f in found}))))
+    return hits
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -134,14 +191,37 @@ def main() -> int:
         print()
     print(f"Kommentare insgesamt: {total['de']} deutsch, {total['en']} englisch")
 
-    if not breaks:
+    umschrieben = [
+        (name, hits)
+        for name in sorted(
+            f for f in listed if f.startswith(PROSE) and f.endswith((".md", ".yml", "AUTHORS"))
+        )
+        if (ROOT / name).is_file() and (hits := transcribed_in_prose(ROOT / name))
+    ]
+
+    if not breaks and not umschrieben:
         print("Keine Datei bricht die Sprachregelung.")
         return 0
 
-    print(f"\n{len(breaks)} Dateien brechen die Regel ({sum(b[1] for b in breaks)} Kommentare):")
-    for name, wrong, all_of_them in sorted(breaks, key=lambda b: -b[1]):
-        richtung = "englisch in einer Testdatei" if is_test(name) else "deutsch im Produktivcode"
-        print(f"  {name:56} {wrong:4} von {all_of_them:4}   {richtung}")
+    if breaks:
+        kommentare = sum(b[1] for b in breaks)
+        print(f"\n{len(breaks)} Dateien brechen die Regel ({kommentare} Kommentare):")
+        for name, wrong, all_of_them in sorted(breaks, key=lambda b: -b[1]):
+            richtung = (
+                "englisch in einer Testdatei" if is_test(name) else "deutsch im Produktivcode"
+            )
+            print(f"  {name:56} {wrong:4} von {all_of_them:4}   {richtung}")
+
+    if umschrieben:
+        zeilen = sum(len(h) for _, h in umschrieben)
+        print(f"\n{zeilen} Zeilen Prosa schreiben einen Umlaut aus, in {len(umschrieben)} Dateien:")
+        for name, hits in umschrieben:
+            for number, woerter in hits[:5]:
+                print(f"  {name}:{number}  {woerter}")
+            if len(hits) > 5:
+                print(f"  {name}  … und {len(hits) - 5} weitere Zeilen")
+        print("\n  In docs/ werden Umlaute geschrieben, nicht umschrieben -- das sind Texte fuer")
+        print("  Menschen. Code, Bezeichner und Zitate sind ausgenommen und werden uebersprungen.")
     return 1
 
 

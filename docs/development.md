@@ -104,7 +104,8 @@ hier ein.
 zeigt ein erfundener Name genauso: Dass eine Jahreszahl neben einem Namen der Archivstand ist
 und kein Aufnahmedatum, hängt nicht daran, wer der Mensch war. Am 21. August 2026 sind so 87
 Fundstellen in 15 Dateien ersetzt worden, ohne dass ein einziges Beispiel an Schärfe verlor.
-Der Anlass steht in [backlog.md](backlog.md), Punkt 64.
+Der Anlass steht in der
+[history.md](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), Punkt 64, Abschnitt 1.
 
 ## Der Kopf jeder Quelldatei
 
@@ -198,7 +199,7 @@ das Rendern bekommt keinen.* Wo die Funktion wohnt, ist gleichgültig; `PhotoLay
 
 Der Grund ist derselbe wie oben: Eine falsch gezeichnete Schaltfläche sieht falsch aus, dafür
 braucht es einen Blick und keinen Test. Ein falsch gerundetes Jahr sieht nach nichts aus — die
-Karte zeigt einfach etwas anderes. Beim Bauen heisst das: Sobald in einer Komponente gerechnet,
+Karte zeigt einfach etwas anderes. Beim Bauen heißt das: Sobald in einer Komponente gerechnet,
 sortiert oder entschieden wird, gehört das in ein Modul daneben. Kein jsdom, keine Testing
 Library; warum, steht in [decisions.md](decisions.md), Punkt 60.
 

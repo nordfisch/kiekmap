@@ -85,6 +85,16 @@ Woraus das System besteht und wie die Teile zusammenspielen, steht in
 [docs/history.md](docs/history.md). Was noch offen ist, im [docs/backlog.md](docs/backlog.md).
 Welche Datei welche Frage beantwortet, sagt [docs/index.md](docs/index.md).
 
+## Mitwirken
+
+Wie man einsteigt, welche Regeln hier gelten und was man erwarten darf — ein Betreuer, nebenher,
+ohne zugesagte Antwortzeit —, steht in [CONTRIBUTING.md](CONTRIBUTING.md). Zum Umgangston:
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Eine Sicherheitslücke gehört **nicht** in eine
+öffentliche Meldung; der Weg steht in [SECURITY.md](SECURITY.md).
+
+**Am meisten hilft ein zweites Museum, das es aufsetzt und berichtet.** Die Anleitung dafür ist
+ohne Gerät geschrieben worden; jeder Stolperstein daraus ist wertvoller als jede neue Funktion.
+
 ## Lizenz
 
 Copyright 2026 Kalle Erlhoff, lizenziert unter der **Apache-Lizenz 2.0** (`SPDX-License-Identifier:
