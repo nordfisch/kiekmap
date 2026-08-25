@@ -149,6 +149,9 @@ python3 tools/set_version.py --check      # nennen alle fünf Stellen dieselbe V
 ```
 
 Sie brauchen weder `venv` noch `node_modules` — reine Leser, `python3` aus dem System genügt.
+**`tools/build_notices.py` gehört ausdrücklich nicht dazu:** Es liest die Metadaten der
+installierten Pakete und wertet ihre Umgebungsmarker mit `packaging` aus, läuft also mit dem
+Python des venv. `make notices` und `make check` wissen das.
 
 **Und sie hängen im Git-Hook**, weil „von Hand" in der Praxis „gar nicht" hiess. `.githooks/pre-commit`
 führt genau diese fünf aus, **nicht** die Testreihe: Die läuft ohnehin, vergessen wurden diese fünf,

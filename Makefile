@@ -155,8 +155,13 @@ version:  ## Version zeigen, oder setzen: make version v=0.8.0
 #
 # Erzeugt statt gepflegt, aber eingecheckt: Jeder Docker-Kontext bleibt fuer sich vollstaendig, und
 # eine neue Abhaengigkeit taucht im Diff auf, wo sie jemand sieht. Siehe docs/licensing.md.
+# Mit dem Python des venv, nicht dem des Systems -- als einziges der Werkzeuge. Die sechs
+# Pruefungen sind reine Leser und kommen mit der Standardbibliothek aus; dieses hier liest die
+# Metadaten der installierten Pakete und wertet ihre Umgebungsmarker mit `packaging` aus. Es
+# braucht das venv also ohnehin. Auf einem Rechner, dessen System-Python zufaellig `packaging`
+# mitbringt, faellt das nicht auf -- in einer frischen CI schon.
 notices: deps  ## Lizenzhinweise der mitgelieferten Pakete erzeugen
-	@python3 tools/build_notices.py
+	@$(VENV)/bin/python tools/build_notices.py
 
 # Festgenagelte Backend-Abhaengigkeiten fuer das Abbild. pyproject.toml nennt nur untere Schranken;
 # ohne diese Datei zoege ein Neubau in einem Jahr andere Versionen. --universal, weil hier auf einem
@@ -177,7 +182,7 @@ lock:  ## backend/requirements.lock neu aufloesen (braucht uv)
 	    -o backend/requirements.lock backend/pyproject.toml
 
 notices-check: deps
-	@python3 tools/build_notices.py --check
+	@$(VENV)/bin/python tools/build_notices.py --check
 
 # Das Ziel vor einem Commit. Die schnellen zuerst: Wer den Stil verletzt hat, soll das nach zwei
 # Sekunden erfahren und nicht nach zehn.
