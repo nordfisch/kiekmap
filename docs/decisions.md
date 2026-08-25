@@ -2038,7 +2038,11 @@ zusammen brauchen sie unter einer Sekunde. Ein Hook, den man merkt, wird abgesch
 Klon einzuschalten (`git config core.hooksPath .githooks`) — versioniert, aber nicht aufgedrängt.
 
 Eine CI wäre der nächste Schritt und ist bewusst keiner: Sie setzt voraus, dass
-[Punkt 22](backlog.md) entschieden ist. Ohne ein öffentliches Repo gibt es keinen Ort dafür.
+[Punkt 22](history.md#punkt-22-der-weg-nach-draussen-an-einem-tag) entschieden ist. Ohne ein Repo bei GitHub gibt es keinen Ort dafür.
+
+*Nachgetragen am 25. August 2026:* Es gibt jetzt einen. `.github/workflows/check.yml` führt
+`make check` bei jedem Pull Request aus, und in seiner ersten Stunde hat es zwei Fehler gefunden,
+die auf dem Entwicklungsrechner unsichtbar waren.
 
 ## 60. Getestet wird, was still falsch sein kann — gerendert wird, was man sieht
 
@@ -2279,8 +2283,10 @@ genügt, damit jemand die Prüfung abschaltet.
 jedem Fork und jedem Archiv, auch wenn sie hier längst gelöscht ist. Sicherheitsmeldungen laufen
 deshalb über die private Meldung bei GitHub. Das kostet nichts — der Weg ist nicht öffentlich,
 geht nur an den Betreuer, und er taugt zugleich als der eine vertrauliche Kanal, den auch der
-Verhaltenskodex braucht. Er setzt voraus, dass das Repo bei GitHub liegt, was
-[Punkt 22](backlog.md) ohnehin plant.
+Verhaltenskodex braucht. Er setzt voraus, dass das Repo bei GitHub liegt — seit dem
+25. August 2026 tut es das ([Punkt 22](history.md#punkt-22-der-weg-nach-draussen-an-einem-tag)). **Den Schalter dafür gibt es allerdings nur auf
+öffentlichen Repos**; solange es privat ist, zeigt der Meldeweg ins Leere. Er steht deshalb ganz
+oben auf der Liste in [Punkt 65](backlog.md#65--den-code-veröffentlichen).
 
 **Kein Contributor Covenant, sondern fünfzehn Zeilen in der Stimme des Projekts.** Der Covenant
 ist der erkannte Standard, und der Wechsel steht als nächster Schritt im Kodex — aber heute gibt
@@ -2344,3 +2350,43 @@ Also: **beide Richtungen als Merge-Commit**, `feature/*` → `develop` und `deve
 
 **Vorgabe-Branch ist `develop`**, damit Pull Requests von selbst dorthin zielen. Dass `main`
 dadurch monatelang hinterherhinkt, ist kein Mangel, sondern die Aussage.
+
+---
+
+## 67. Eine Identität in allen Commits, und alle signiert
+
+*Entschieden am 25. August 2026 — Backlogpunkt 22.*
+
+**Der Befund war ein Versehen, das sich wiederholte.** `user.name` und `user.email` waren nirgends
+gesetzt — nicht lokal, nicht global, nicht in der Umgebung. Git baute die Adresse deshalb aus dem
+Konto- und dem Rechnernamen des Macs, und der Rechnerwechsel Anfang August erzeugte von selbst
+eine dritte Identität. 185 Commits in drei Fassungen, zwei davon mit Adressen, die keine
+Postfächer sind, sondern den Kontonamen und je einen Rechnernamen verraten.
+
+**Gewählt wurde eine eigene Projektadresse**, nicht die persönliche und nicht die
+`noreply`-Adresse von GitHub. Die persönliche stünde dauerhaft in jedem Klon und jedem Archiv; die
+`noreply`-Adresse enthält eine Konto-Kennung, die es vor dem Konto nicht gibt — und hätte den
+unumkehrbaren Schritt an das Anlegen des Kontos gebunden. Eine eigene Adresse steht sofort fest und
+lässt sich abschalten, ohne ein Konto zu verlieren.
+
+**Signiert wird alles, auch rückwirkend** — das ist unüblich, und die Abwägung gehört deshalb
+aufgeschrieben. Der naheliegendste Einwand trägt nicht: Eine SSH-Signatur hat **keinen eigenen
+Zeitstempel**; im Commit stehen nur Schlüssel, Namensraum, Hashverfahren und Signatur.
+Rückwirkend zu signieren behauptet also nichts nachweisbar Falsches.
+
+**Ein Preis bleibt und ist zu kennen:** `allowed_signers` kennt `valid-after=`, und Git prüft eine
+Signatur gegen den Zeitpunkt *ihrer Entstehung*, also gegen das Commit-Datum. Wer diesem Schlüssel
+je eine Gültigkeitsspanne ab dem 25. August 2026 gibt, bekommt alles davor als ungültig gemeldet.
+Wer den Schlüssel wechselt, trägt den alten also **ohne** `valid-after` weiter ein.
+
+**Der Zeitpunkt war die eigentliche Entscheidung.** Beides — Vereinheitlichen und Signieren —
+kostete einen Rewrite, und ein Rewrite ist gratis, solange es keinen Remote gibt. Am Tag danach
+tragen Klone, Forks und Archive die alte Fassung weiter. Dieselbe Überlegung wie bei den Namen aus
+dem Bestand vier Tage zuvor, und aus demselben Grund.
+
+**Was es kostete, war nicht der Rewrite, sondern sein Nachlauf.** Zweimal an einem Tag mussten 84
+zitierte Kurz-Hashes in der Dokumentation nachgezogen werden. Beim ersten Mal lieferte
+`git filter-repo` eine Zuordnungstabelle; beim zweiten, einem `git rebase --root --exec`, gab es
+keine — die Zuordnung entstand aus der Reihenfolge, gegengeprüft über Betreff, Autor-Datum und
+Baum jedes einzelnen Commits. **Das ist die Rechnung, die auch gegen Squash-Merge spricht**
+(Punkt 66): Ein Squash liefert ebenfalls keine Tabelle.
