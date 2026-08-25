@@ -10,9 +10,17 @@ WORKDIR /srv
 
 # Abhaengigkeiten zuerst, damit Codeaenderungen die Installationsschicht nicht ungueltig machen.
 # Auf dem Pi ist das der Unterschied zwischen Sekunden und Minuten pro Neubau.
-COPY pyproject.toml ./
+#
+# Aus der Lockdatei, nicht aus pyproject.toml: Dort stehen nur untere Schranken, und ein Neubau in
+# einem Jahr zoege andere Versionen als der heutige. Bei einem Geraet, das offline steht und einmal
+# im Jahr angefasst wird, faellt so etwas erst im Museum auf. Erzeugt mit `make lock`.
+#
+# `pip install .` stand hier vorher und tat weniger, als es aussieht: `app/` wird erst weiter unten
+# kopiert, die Paketsuche fand also nichts und installierte eine Distribution ohne Inhalt. Gezogen
+# wurden immer nur die Abhaengigkeiten -- genau das tut die Zeile jetzt, nur nachvollziehbar.
+COPY requirements.lock ./
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip && pip install .
+    pip install --upgrade pip && pip install -r requirements.lock
 
 # Die Lizenzhinweise gehoeren ins Abbild, nicht nur ins Repo: Sie muessen mit jeder Kopie
 # mitgehen. Erzeugt von tools/build_notices.py, eingecheckt, damit dieser Kontext fuer sich

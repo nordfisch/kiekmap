@@ -364,6 +364,29 @@ Das vollständige Vorgehen — Bounding Box ausrechnen, Zoomstufen bestimmen, Ka
 bauen, prüfen — steht in [adaption.md](adaption.md). Dort auch, was eine zweite Sprache kosten
 würde und ab wann sich Modularisierung lohnt.
 
+## Die Abhängigkeiten sind festgenagelt
+
+`backend/pyproject.toml` nennt nur untere Schranken (`fastapi>=0.115`); das Abbild installiert
+stattdessen aus `backend/requirements.lock`. Ohne sie zöge ein Neubau in einem Jahr andere
+Versionen als der heutige — und bei einem Gerät, das offline steht und einmal im Jahr angefasst
+wird, fällt so etwas erst im Museum auf.
+
+```bash
+make lock        # die Lockdatei neu aufloesen (nach einer Aenderung an pyproject.toml)
+make deps-lock   # das eigene venv auf diesen Stand bringen
+```
+
+**Die beiden gehören zusammen, und `make check` erzwingt das.** `tools/build_notices.py` liest
+die Namen und Versionen aus der Lockdatei — sie *ist* die Liste dessen, was ins Abbild kommt —,
+die Lizenztexte aber aus dem venv, denn nur ein installiertes Paket hat seine `LICENSE` auf der
+Platte. Weichen die beiden ab, bricht der Lauf ab. Eine Hinweisdatei, die eine Version nennt, die
+im Abbild nicht liegt, ist schlimmer als keine.
+
+**`make deps-lock` entfernt dabei die Umgebungsmarker.** `greenlet` kommt über SQLAlchemy ins
+Abbild, auf einem Mac aber nie — ohne die lokal installierte Lizenzdatei liesse sich der Hinweis
+nicht schreiben. Umgekehrt wird `colorama` zwar mitinstalliert, erscheint aber in keiner
+Hinweisdatei: Sein Marker gilt nur für Windows, und das Abbild ist Linux.
+
 ## Branches und Merges
 
 Zwei langlebige Branches, und `main` bedeutet etwas Bestimmtes:
