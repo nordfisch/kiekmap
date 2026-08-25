@@ -187,8 +187,10 @@ lief als geplant, [docs/history.md](docs/history.md); was offen ist,
 [docs/backlog.md](docs/backlog.md). Hier steht nur, was man beim Arbeiten **falsch annehmen
 würde**, wenn es nicht dastünde.
 
-**Stufe 0 bis 10 ist fertig** und im Museum im Einsatz — Backend, Karte, Zeitschieber, „Hilf mit",
-Verwaltung, Sicherung, Kiosk-Betrieb. Der Erstbestand ist eingelesen, bereinigt und durchgesehen.
+**Stufe 0 bis 10 ist gebaut** — Backend, Karte, Zeitschieber, „Hilf mit", Verwaltung, Sicherung,
+Kiosk-Betrieb. Der Erstbestand ist eingelesen, bereinigt und durchgesehen. **Gelaufen ist das
+bisher nur lokal**, als Entwicklungsserver und in Containern auf einem Mac; im Museum steht noch
+nichts.
 
 **Aber: Alles unter `deploy/pi/` ist ungeprüft.** Es wurde ohne Gerät gebaut; die Syntax stimmt,
 gelaufen ist nichts. Der erste Pi ist zugleich die Abnahme. Ungeprüft sind aus demselben Grund der

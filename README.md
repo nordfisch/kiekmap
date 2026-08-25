@@ -1,10 +1,26 @@
 # Kiekmap
 
 Historische Ortsfotos auf einer Karte entdecken, Jahrzehnt für Jahrzehnt. Ein Touchscreen-Kiosk
-fürs Heimatmuseum — und ein Weg, das Wissen der Besucher einzusammeln.
+fürs Heimatmuseum: Läuft offline auf einem Raspberry Pi, lässt sich an jeden Ort anpassen, und die
+Besucher ergänzen, was fehlt. Ein Freizeitprojekt von Kalle Erlhoff für das Heimatmuseum Holm,
+erstellt in Zusammenarbeit mit Anthropic Claude Code.
 
-Das Gerät steht im Museum, läuft **vollständig offline** im Kiosk-Modus und wird gesichert, indem
-man einen USB-Stick einsteckt und einen Knopf drückt.
+> **Achtung: Arbeitsstand.** Was hier liegt, ist der Stand, der beim **Aufbau des Erstbestands**
+> entstanden ist — 929 historische Fotos, eingelesen, bereinigt und durchgesehen. Gelaufen ist das
+> bisher **ausschließlich lokal**: als Entwicklungsserver und in Containern, beides auf einem Mac.
+>
+> **Auf einem Raspberry Pi oder einem Webserver wurde es bisher noch nicht installiert.** Alles
+> unter `deploy/pi/` ist ohne Gerät geschrieben — die Syntax stimmt, ausgeführt wurde nichts.
+> Ungeprüft sind damit der Kiosk-Betrieb, der USB-Weg der Sicherung und das Verhalten nach
+> Neustart und Stromausfall. Der erste echte Aufbau ist zugleich die Abnahme:
+> [Punkt 15](docs/backlog.md#15--abnahme-auf-dem-ersten-pi) und
+> [Punkt 21](docs/backlog.md#21--deployment-auf-einem-webserver-evaluieren) im Backlog.
+>
+> Geprüft ist, was sich ohne Gerät prüfen lässt: Die Container bauen und laufen, die Seite fragt
+> nichts Fremdes an, und 647 Tests laufen durch.
+
+Das Gerät soll im Museum stehen, **vollständig offline** im Kiosk-Modus laufen und gesichert
+werden, indem man einen USB-Stick einsteckt und einen Knopf drückt.
 
 ## Was der Besucher sieht
 

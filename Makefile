@@ -25,15 +25,21 @@ venv: $(VENV)  ## Python-Umgebung anlegen
 # Vite 6 laeuft ab Node 18. Node 18 wird allerdings nicht mehr gepflegt, daher der Hinweis --
 # ohne die Pruefung scheitert ein zu altes Node mit einer Syntaxmeldung, der man nicht ansieht,
 # dass nur die Version das Problem ist.
+# Die Fortsetzungszeilen stehen ausserhalb der Anfuehrungszeichen, und das ist kein Stil, sondern
+# noetig: Innerhalb einfacher Anfuehrungszeichen entfernt die Shell ein Backslash-Zeilenende nicht,
+# node bekommt also einen echten Backslash. Node 18 hat den verziehen, Node 22 wertet -e durch
+# einen TypeScript-faehigen Parser aus und bricht ab -- ausgerechnet bei der Fassung, zu der diese
+# Pruefung selbst raet. Gefunden vom ersten CI-Lauf am 25. August 2026.
 node-check:
-	@node -e 'const v=+process.versions.node.split(".")[0]; \
-		if (v < 18) { \
-			console.error("\033[31mNode " + process.versions.node + " ist zu alt, gebraucht wird 18 oder neuer.\033[0m"); \
-			console.error("  nvm install 22 && nvm alias default 22"); \
-			process.exit(1); \
-		} else if (v < 20) { \
-			console.error("\033[33mHinweis: Node " + process.versions.node + " wird nicht mehr gepflegt. Empfohlen: nvm install 22\033[0m"); \
-		}'
+	@v=$$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null) || \
+		{ echo "Node fehlt -- gebraucht wird 18 oder neuer."; exit 1; }; \
+	if [ "$$v" -lt 18 ]; then \
+		printf '\033[31mNode %s ist zu alt, gebraucht wird 18 oder neuer.\033[0m\n' "$$(node -v)"; \
+		echo "  nvm install 22 && nvm alias default 22"; \
+		exit 1; \
+	elif [ "$$v" -lt 20 ]; then \
+		printf '\033[33mHinweis: Node %s wird nicht mehr gepflegt. Empfohlen: nvm install 22\033[0m\n' "$$(node -v)"; \
+	fi
 
 frontend/node_modules: frontend/package.json | node-check
 	cd frontend && npm install --no-audit --no-fund
@@ -125,32 +131,67 @@ lint: $(VENV)  ## Code-Stil pruefen
 # Reine Leser, deshalb ohne venv und ohne node_modules -- python3 aus dem System genuegt. Zusammen
 # brauchen sie unter einer Sekunde, und genau deshalb haengen sie auch im Git-Hook unter
 # .githooks/. Warum es sie ueberhaupt braucht: docs/decisions.md, Punkt 59.
-docs-check:  ## Sprachregelung, Verweise, Einstellungen, Nummern, Register
+docs-check:  ## Sprachregelung, Verweise, Einstellungen, Nummern, Register, Version
 	@python3 tools/language_check.py
 	@python3 tools/check_anchors.py
 	@python3 tools/check_settings.py
 	@python3 tools/check_numbers.py
 	@python3 tools/build_register.py --check
+	@python3 tools/set_version.py --check
 
 # Das Register am Anfang von docs/history.md. Erzeugt statt gepflegt, aus demselben Grund wie die
 # Lizenzhinweise: neunzig Zeilen von Hand sind in einem Monat falsch. Siehe docs/decisions.md.
 register:  ## Register in docs/history.md neu schreiben
 	@python3 tools/build_register.py
 
+# Eine Zahl, zwei Dateien. Der Tag ist nicht die Quelle, sondern muss dazu passen -- eine Pruefung
+# gegen `git describe` waere in dem Fenster rot, in dem die Version schon erhoeht, der Tag aber
+# noch nicht gesetzt ist. Und genau dort laeuft der Commit-Hook.
+version:  ## Version zeigen, oder setzen: make version v=0.8.0
+	@if [ -n "$(v)" ]; then python3 tools/set_version.py "$(v)"; else python3 tools/set_version.py; fi
+
 # Die Lizenzhinweise, die mit jedem Artefakt mitgehen muessen -- MIT und BSD verlangen den
 # Copyright-Vermerk in *jeder* Kopie, und ein gebuendeltes index-*.js ist eine Kopie.
 #
 # Erzeugt statt gepflegt, aber eingecheckt: Jeder Docker-Kontext bleibt fuer sich vollstaendig, und
 # eine neue Abhaengigkeit taucht im Diff auf, wo sie jemand sieht. Siehe docs/licensing.md.
+# Mit dem Python des venv, nicht dem des Systems -- als einziges der Werkzeuge. Die sechs
+# Pruefungen sind reine Leser und kommen mit der Standardbibliothek aus; dieses hier liest die
+# Metadaten der installierten Pakete und wertet ihre Umgebungsmarker mit `packaging` aus. Es
+# braucht das venv also ohnehin. Auf einem Rechner, dessen System-Python zufaellig `packaging`
+# mitbringt, faellt das nicht auf -- in einer frischen CI schon.
 notices: deps  ## Lizenzhinweise der mitgelieferten Pakete erzeugen
-	@python3 tools/build_notices.py
+	@$(VENV)/bin/python tools/build_notices.py
+
+# Festgenagelte Backend-Abhaengigkeiten fuer das Abbild. pyproject.toml nennt nur untere Schranken;
+# ohne diese Datei zoege ein Neubau in einem Jahr andere Versionen. --universal, weil hier auf einem
+# Mac erzeugt und im Abbild auf Linux installiert wird.
+# Das venv auf den Stand der Lockdatei bringen. Die Marker werden dabei entfernt: greenlet kommt
+# im Abbild vor, auf einem Mac aber nie -- und ohne die installierte Lizenzdatei kann
+# tools/build_notices.py den Hinweis nicht schreiben.
+deps-lock: $(VENV)  ## Das venv auf die Versionen der Lockdatei bringen
+	@command -v uv >/dev/null || { echo "uv fehlt: brew install uv"; exit 1; }
+	@sed 's/ ;.*//' backend/requirements.lock > /tmp/kiekmap-lock-ohne-marker.txt
+	VIRTUAL_ENV=backend/.venv uv pip install -q -r /tmp/kiekmap-lock-ohne-marker.txt
+	@rm -f /tmp/kiekmap-lock-ohne-marker.txt
+	@echo "  venv auf dem Stand der Lockdatei."
+
+lock:  ## backend/requirements.lock neu aufloesen (braucht uv)
+	@command -v uv >/dev/null || { echo "uv fehlt: brew install uv"; exit 1; }
+	uv pip compile --universal --python-version 3.12 --no-header \
+	    -o backend/requirements.lock backend/pyproject.toml
 
 notices-check: deps
-	@python3 tools/build_notices.py --check
+	@$(VENV)/bin/python tools/build_notices.py --check
 
 # Das Ziel vor einem Commit. Die schnellen zuerst: Wer den Stil verletzt hat, soll das nach zwei
 # Sekunden erfahren und nicht nach zehn.
 check: lint docs-check notices-check test  ## Alles pruefen, was vor einem Commit laufen soll
+
+# Der Ordner, den deploy/pi/update.sh erwartet. Bricht ab bei schmutzigem Arbeitsbaum oder
+# fehlendem Tag: Ein Stick, der zu keinem Commit gehoert, ist spaeter nicht mehr zuzuordnen.
+release:  ## Update-Stick bauen: make release [nach=/Volumes/STICK/kiekmap-update] [karte=1]
+	@python3 tools/build_release.py $(if $(nach),--nach "$(nach)") $(if $(karte),--mit-karte)
 
 build: frontend/node_modules notices  ## Frontend-Bundle bauen (Ergebnis in frontend/dist)
 	cd frontend && npm run build

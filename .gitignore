@@ -30,6 +30,7 @@ htmlcov/
 # Node
 node_modules/
 /frontend/dist/
+/release/
 *.tsbuildinfo
 
 # Konfiguration mit Geheimnissen (PIN-Hash o. ae.)

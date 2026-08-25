@@ -1,0 +1,64 @@
+# Was vor jedem Commit ohnehin laufen soll -- nur an einem Ort, an dem niemand es vergessen kann.
+#
+# Der Hook unter .githooks/ nimmt einem die sechs schnellen Pruefungen ab, aber nur, wer ihn
+# eingeschaltet hat. Und `make check` sagt heute nur, dass es bei *mir* gruen war; hier steht es
+# am Pull Request.
+#
+# Es beantwortet nebenbei die Frage aus Punkt 22, was mit THIRD-PARTY.txt passiert: Sie ist
+# erzeugt und eingecheckt, also aktuell -- aber nur, solange jemand `make check` laufen laesst.
+name: check
+
+on:
+  # Auf Feature-Zweigen greift der Pull Request; doppelt laufen muss nichts.
+  push:
+    branches: [main, develop]
+  pull_request:
+
+# Der Ablauf liest nur. Ein Marker, der nichts schreiben darf, kann auch nichts anrichten.
+permissions:
+  contents: read
+
+# Ein neuer Push loest den vorigen Lauf ab. Auf einem privaten Repo sind das gesparte Freiminuten.
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 3.12 wie in backend/pyproject.toml, 22 wie im Frontend-Abbild. Beides festgeschrieben:
+      # "neueste" waere eine Fassung, die sich unter der Hand aendert.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: astral-sh/setup-uv@v5
+
+      # npm ci statt npm install: Es haelt sich an package-lock.json, statt sie fortzuschreiben.
+      # Das touch bringt make dazu, das Verzeichnis als fertig anzusehen.
+      - name: Frontend-Pakete
+        run: |
+          cd frontend
+          npm ci --no-audit --no-fund
+          touch node_modules
+
+      # deps-lock nach venv, und die Reihenfolge ist der Punkt: venv installiert aus
+      # pyproject.toml, also unpinned; deps-lock zieht die Versionen der Lockdatei darueber.
+      # Ohne das bricht build_notices.py ab -- und genau so soll es sein, denn dann waeren die
+      # Lizenzhinweise nicht die des Abbilds.
+      - name: Python-Umgebung
+        run: |
+          make venv
+          make deps-lock
+
+      - name: make check
+        run: make check

@@ -2326,8 +2326,21 @@ vieler Projekte fasst die Commits eines Zweigs beim Merge zusammen. Hier richtet
 genau die. Wie teuer das ist, weiß dieses Projekt genau: Zweimal, am 21. und am 25. August, hat
 ein Rewrite alle Kurz-Hashes ungültig gemacht, und beide Male war der Nachlauf über die
 Zuordnungstabelle die halbe Arbeit. Ein Squash-Merge liefert dafür **keine** Zuordnungstabelle.
-Also: `feature/*` → `develop` per Rebase, `develop` → `main` als echter Merge-Commit, der das
-Release-Ereignis festhält.
+**Gemerged wird mit einem Merge-Commit, nicht per Rebase** — und das stand hier zunächst anders.
+Das Argument oben spricht gegen Squash, nicht für Rebase: **Ein gewöhnlicher Merge erhält jeden
+Commit genauso einzeln.** Rebase liefert obendrauf nur eine gerade Linie im Graphen, eine
+Geschmacksfrage, die als Voreinstellung übernommen und nicht an diesem Projekt geprüft worden war.
+
+**Beim ersten Pull Request hat sich der Preis gezeigt.** Ein Rebase erzeugt die Commits neu; die
+drei, die dabei entstanden, waren **unsigniert** — GitHub baut sie auf dem Server, und dort liegt
+kein Schlüssel. 190 signierte Commits und drei Löcher. Dazu ändern sich die Hashes, und was das
+kostet, weiß dieses Repo aus zwei Rewrites an einem Tag.
+
+Ein Merge lässt seine Eltern unangetastet: **Signaturen bleiben, Hashes bleiben, jeder Commit
+bleibt einzeln sichtbar.** Der Preis sind Verzweigungen im Graphen — bei einem Betreuer mit
+kurzlebigen Zweigen kaum sichtbar, und `git log --first-parent` blendet sie ohnehin aus.
+
+Also: **beide Richtungen als Merge-Commit**, `feature/*` → `develop` und `develop` → `main`.
 
 **Vorgabe-Branch ist `develop`**, damit Pull Requests von selbst dorthin zielen. Dass `main`
 dadurch monatelang hinterherhinkt, ist kein Mangel, sondern die Aussage.

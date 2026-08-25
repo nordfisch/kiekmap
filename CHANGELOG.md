@@ -4,6 +4,18 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unveröffentlicht]
 
+Noch nichts.
+
+## [0.8.0] — 2026-08-25
+
+Die erste bezifferte Fassung. Sie ist **kein Meilenstein der Funktion**, sondern der Punkt, an dem
+das Projekt sich selbst festhalten kann: eine Versionsnummer an einem Ort, festgenagelte
+Abhängigkeiten, ein Releaseprozess, geprüfte Herkunft jedes Commits.
+
+**Warum 0.8 und nicht 1.0:** `1.0.0` sagt unter SemVer eine stabile öffentliche Schnittstelle zu.
+Alles unter `deploy/pi/` ist bis heute ungeprüft, und die Abnahme auf dem ersten Gerät steht aus.
+Die `1.0.0` wird danach vergeben — siehe [Punkt 15](docs/backlog.md).
+
 ### Hinzugefügt
 
 - Projektgerüst: Ordnerstruktur, Git-Repo, README
@@ -996,3 +1008,32 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   kurzlebige `feature/`- und `fix/`-Branches. **Squash-Merge ist abgeschaltet** — die
   Dokumentation zitiert Commits einzeln mit Hash, und ein Squash vernichtet genau die
 - `.github/pull_request_template.md` mit der Prüfliste vor dem Absenden
+- **Eine Versionsnummer an einem Ort.** `make version v=0.8.0` schreibt sie an alle fünf Stellen,
+  `make check` meldet, wenn eine ausschert. Bisher standen sie alle auf `0.1.0` — darunter
+  `__version__`, das `/api/health` meldet: Das Gerät hätte dauerhaft die falsche Version von sich
+  behauptet, während der Image-Tag weiterzählt
+- **Die Backend-Abhängigkeiten sind festgenagelt.** `backend/requirements.lock` nennt 28 Pakete
+  mit genauer Version, das Abbild installiert daraus statt aus den unteren Schranken in
+  `pyproject.toml`. `make lock` löst sie neu auf, `make deps-lock` bringt das eigene venv auf
+  denselben Stand
+- **`greenlet` fehlte in den Lizenzhinweisen des Backends.** SQLAlchemy bringt es auf Linux mit,
+  auf dem Entwicklungs-Mac wird es nie installiert — und weil die Hinweise vom venv abgelesen
+  wurden, tauchte es nirgends auf. Die Marker der Lockdatei werden jetzt gegen beide
+  Zielplattformen ausgewertet; drei weitere Versionsangaben waren ebenfalls falsch
+- **`make release` baut den Update-Stick.** Beide Abbilder, `abbilder.tar`, die `version`-Datei
+  und auf Wunsch Karte und Ortsindex — der Ordner, den `deploy/pi/update.sh` erwartet. Bisher
+  waren das vier von Hand getippte Befehle, und der vergessene war die `version`-Datei: Ohne sie
+  zieht der Pi beim nächsten Start das alte Abbild wieder hoch. Bricht ab bei schmutzigem
+  Arbeitsbaum oder fehlendem Tag
+- Gemerged wird mit einem **Merge-Commit**, nicht per Rebase. Ein Rebase erzeugt die Commits auf
+  GitHubs Server neu, wo kein Schlüssel liegt — sie kommen unsigniert heraus. Der erste Pull
+  Request hat das vorgeführt: 190 signierte Commits und drei Löcher. Rebase-Merge ist in den
+  Repo-Einstellungen jetzt ebenfalls abgeschaltet
+- **`make check` läuft bei jedem Pull Request**, als GitHub-Actions-Ablauf. Der Commit-Hook nimmt
+  einem die sechs schnellen Prüfungen ab, aber nur, wer ihn eingeschaltet hat — und ein grünes
+  `make check` auf dem eigenen Rechner sagt nur, dass es dort grün war
+- **`make check` wäre unter Node 22 gebrochen**, also genau bei der Fassung, zu der das Makefile
+  selbst rät. Die Node-Versionsprüfung trug Backslash-Zeilenenden innerhalb einfacher
+  Anführungszeichen, wo die Shell sie nicht entfernt; Node 18 verzieh das, Node 22 wertet `-e`
+  strenger aus. Der erste CI-Lauf hat es gefunden — am Tag, an dem es die CI gab
+

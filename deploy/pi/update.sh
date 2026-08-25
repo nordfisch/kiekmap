@@ -8,8 +8,7 @@
 #
 # Erzeugt wird so ein Ordner auf dem Entwicklungsrechner mit:
 #
-#     docker save kiekmap-backend:v1.2 kiekmap-frontend:v1.2 -o abbilder.tar
-#     cp -r frontend/public/tiles data/places.json <Stick>/kiekmap-update/
+#     make release nach=/Volumes/STICK/kiekmap-update
 #
 # Der Bestand wird dabei nicht angefasst. Wer Fotos zurueckholen will, nimmt die Sicherung im
 # Admin-Bereich -- das hier tauscht nur die Software.

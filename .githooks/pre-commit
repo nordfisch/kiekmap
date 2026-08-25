@@ -1,11 +1,11 @@
 #!/bin/sh
 #
-# Die fuenf Pruefungen, die kein Test je ausfuehrt -- Sprachregelung, Verweise in docs/, der Weg
+# Die sechs Pruefungen, die kein Test je ausfuehrt -- Sprachregelung, Verweise in docs/, der Weg
 # jeder Einstellung in den Container, die Buchfuehrung des Backlogs ueber seine Nummern, und das
-# Register der Historie.
+# Register der Historie, und die eine Versionsnummer in ihren zwei Dateien.
 #
 # Absichtlich **ohne** die Testreihe: Die laeuft ohnehin, weil `make test` und `make check` sie
-# ausfuehren und niemand sie vergisst. Vergessen werden die fuenf hier, und die sind zusammen unter
+# ausfuehren und niemand sie vergisst. Vergessen werden die sechs hier, und die sind zusammen unter
 # einer Sekunde durch -- ein Hook, den man merkt, wird abgeschaltet.
 #
 # Eingeschaltet wird er einmal je Klon:
@@ -20,7 +20,7 @@ set -e
 cd "$(git rev-parse --show-toplevel)"
 
 if ! command -v python3 >/dev/null 2>&1; then
-    echo "Hinweis: python3 fehlt, die fuenf Pruefungen entfallen." >&2
+    echo "Hinweis: python3 fehlt, die sechs Pruefungen entfallen." >&2
     exit 0
 fi
 
@@ -44,3 +44,4 @@ pruefe check_anchors
 pruefe check_settings
 pruefe check_numbers
 pruefe build_register --check
+pruefe set_version --check

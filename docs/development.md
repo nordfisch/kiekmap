@@ -83,7 +83,8 @@ Docstring darunter trägt das Warum. Übersetzt verlöre das an Schärfe, und ge
 die wertvollste Dokumentation im Repo.
 
 Umlaute werden in deutscher Prosa im Quelltext, in Shell-Skripten und in Commit-Nachrichten
-umschrieben (`ue`, `oe`, `ae`, `ss`); in Texten für Menschen normal geschrieben. **Zitate und
+umschrieben (`ue`, `oe`, `ae`, `ss`); in Texten für Menschen normal geschrieben. **Ein
+GitHub-Workflow zählt zum Quelltext**, die Meldungsvorlagen daneben zu den Texten für Menschen. **Zitate und
 Datenwerte behalten sie**: `"Mühlenweg"` als Beispiel in einem Kommentar, `["Gebäude"]` als
 Einstellungswert, `"März"` in der Monatsliste — ohne Umlaut wären sie schlicht falsch.
 
@@ -144,9 +145,13 @@ python3 tools/check_anchors.py    # zeigen die Verweise in docs/ noch irgendwohi
 python3 tools/check_settings.py   # erreicht jede Einstellung den Container?
 python3 tools/check_numbers.py    # stimmt die Buchführung des Backlogs über seine Nummern?
 python3 tools/build_register.py --check   # ist das Register der Historie noch vollständig?
+python3 tools/set_version.py --check      # nennen alle fünf Stellen dieselbe Version?
 ```
 
 Sie brauchen weder `venv` noch `node_modules` — reine Leser, `python3` aus dem System genügt.
+**`tools/build_notices.py` gehört ausdrücklich nicht dazu:** Es liest die Metadaten der
+installierten Pakete und wertet ihre Umgebungsmarker mit `packaging` aus, läuft also mit dem
+Python des venv. `make notices` und `make check` wissen das.
 
 **Und sie hängen im Git-Hook**, weil „von Hand" in der Praxis „gar nicht" hiess. `.githooks/pre-commit`
 führt genau diese fünf aus, **nicht** die Testreihe: Die läuft ohnehin, vergessen wurden diese fünf,
@@ -364,6 +369,66 @@ Das vollständige Vorgehen — Bounding Box ausrechnen, Zoomstufen bestimmen, Ka
 bauen, prüfen — steht in [adaption.md](adaption.md). Dort auch, was eine zweite Sprache kosten
 würde und ab wann sich Modularisierung lohnt.
 
+## Die Abhängigkeiten sind festgenagelt
+
+`backend/pyproject.toml` nennt nur untere Schranken (`fastapi>=0.115`); das Abbild installiert
+stattdessen aus `backend/requirements.lock`. Ohne sie zöge ein Neubau in einem Jahr andere
+Versionen als der heutige — und bei einem Gerät, das offline steht und einmal im Jahr angefasst
+wird, fällt so etwas erst im Museum auf.
+
+```bash
+make lock        # die Lockdatei neu aufloesen (nach einer Aenderung an pyproject.toml)
+make deps-lock   # das eigene venv auf diesen Stand bringen
+```
+
+**Die beiden gehören zusammen, und `make check` erzwingt das.** `tools/build_notices.py` liest
+die Namen und Versionen aus der Lockdatei — sie *ist* die Liste dessen, was ins Abbild kommt —,
+die Lizenztexte aber aus dem venv, denn nur ein installiertes Paket hat seine `LICENSE` auf der
+Platte. Weichen die beiden ab, bricht der Lauf ab. Eine Hinweisdatei, die eine Version nennt, die
+im Abbild nicht liegt, ist schlimmer als keine.
+
+**`make deps-lock` entfernt dabei die Umgebungsmarker.** `greenlet` kommt über SQLAlchemy ins
+Abbild, auf einem Mac aber nie — ohne die lokal installierte Lizenzdatei liesse sich der Hinweis
+nicht schreiben. Umgekehrt wird `colorama` zwar mitinstalliert, erscheint aber in keiner
+Hinweisdatei: Sein Marker gilt nur für Windows, und das Abbild ist Linux.
+
+## Die Prüfungen laufen auch ohne dich
+
+`.github/workflows/check.yml` führt `make check` bei jedem Pull Request aus und bei jedem Push
+nach `main` oder `develop`. Auf Feature-Zweigen greift der Pull Request; doppelt laufen muss
+nichts.
+
+**Warum, obwohl es den Commit-Hook gibt:** Der Hook nimmt einem die sechs schnellen Prüfungen ab —
+aber nur, wer ihn eingeschaltet hat (`git config core.hooksPath .githooks`, einmal je Klon). Und
+`make check` auf dem eigenen Rechner sagt nur, dass es *dort* grün war. Am Pull Request steht es
+für alle.
+
+Die Reihenfolge im Ablauf hat einen Grund: `make venv` installiert aus `pyproject.toml`, also
+ohne feste Versionen; `make deps-lock` zieht die der Lockdatei darüber. Ohne den zweiten Schritt
+bricht `tools/build_notices.py` ab — **und genau so soll es sein**, denn dann wären die
+Lizenzhinweise nicht die des Abbilds.
+
+## Ein Release bauen
+
+```bash
+make version v=0.9.0                 # die Zahl setzen
+git commit -am "chore: Version 0.9.0"
+git tag -s v0.9.0 -m v0.9.0          # signiert, tag.gpgsign steht
+make release nach=/Volumes/STICK/kiekmap-update
+```
+
+`tools/build_release.py` baut beide Abbilder, sichert sie als `abbilder.tar`, schreibt die
+`version`-Datei daneben und nimmt auf Wunsch (`karte=1`) Kartendatei und Ortsindex mit — genau
+den Ordner, den `deploy/pi/update.sh` erwartet.
+
+**Es bricht ab bei schmutzigem Arbeitsbaum oder fehlendem Tag**, und dagegen gibt es kein
+`--force`: Ein Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen — und
+genau ein Jahr ist der Abstand, in dem so ein Gerät angefasst wird.
+
+**Die `version`-Datei ist die Zeile, die von Hand vergessen wird.** Ohne sie bleibt
+`KIEKMAP_VERSION` in der `.env` des Pi stehen, der nächste Start zieht das alte Abbild wieder
+hoch, und das Gerät läuft mit der alten Software, ohne es irgendwo zu sagen.
+
 ## Branches und Merges
 
 Zwei langlebige Branches, und `main` bedeutet etwas Bestimmtes:
@@ -391,14 +456,38 @@ fasst die Commits eines Zweigs zusammen und vernichtet damit genau die, auf die 
 zeigt. Das ist kein Stilproblem, sondern ein Datenverlust in einer Datei, deren Wert an diesen
 Verweisen hängt.
 
-- `feature/*` → `develop`: **Rebase.** Linear, und jeder Commit bleibt einzeln erhalten.
-- `develop` → `main`: **echter Merge-Commit.** Er hält das Release-Ereignis fest.
+**Gemerged wird in beide Richtungen mit einem Merge-Commit**, nicht per Rebase. Ein Rebase
+erzeugt die Commits neu — GitHub baut sie auf dem Server, wo kein Schlüssel liegt, und sie kommen
+**unsigniert** heraus. Der erste Pull Request hat das vorgeführt. Ein Merge lässt seine Eltern
+unangetastet: Signaturen bleiben, Hashes bleiben, jeder Commit bleibt einzeln sichtbar.
+
+Die Verzweigungen im Graphen sind der Preis; `git log --first-parent` blendet sie aus.
 
 ## Veröffentlichen
 
 SemVer-Tags, Conventional Commits, ein gemeinsames Repo für Front- und Backend. Frontend und
 Backend werden zusammen versioniert — bei einem Ein-Geräte-System ist getrennte Versionierung nur
 Ballast, und die API-Kompatibilität ist dadurch garantiert.
+
+### Eine Zahl, fünf Stellen
+
+```bash
+make version            # zeigt sie
+make version v=0.8.0    # setzt sie ueberall
+```
+
+`tools/set_version.py` schreibt sie nach `frontend/package.json`, zweimal nach
+`frontend/package-lock.json` (Wurzelpaket), nach `backend/pyproject.toml` und nach
+`backend/app/__init__.py`. `make check` meldet, wenn eine davon ausschert.
+
+**Die vierte ist die wichtigste und wäre am ehesten liegengeblieben:** `__version__` ist das, was
+`/api/health` antwortet und was in der OpenAPI-Beschreibung steht — also die Version, die das
+Gerät im Museum von sich behauptet. Stünde sie still, während der Image-Tag weiterzählt, gäbe die
+API auf die eine Frage, für die es sie gibt, die falsche Antwort.
+
+**Der Tag ist nicht die Quelle, die Dateien sind es.** Eine Prüfung gegen `git describe` wäre
+genau in dem Fenster rot, in dem die Version schon erhöht, der Tag aber noch nicht gesetzt ist —
+und dort läuft der Commit-Hook. Der Tag muss stattdessen passen.
 
 **Alle Commits sind signiert** (SSH, nicht GPG), Tags ebenso — auch die 185 aus der Zeit vor dem
 Schlüssel, rückwirkend am 25. August 2026 nachgeholt. Das ist ungewöhnlich, und die Abwägung
