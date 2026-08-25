@@ -667,7 +667,7 @@ zu ersetzen. Dazu kommt, dass die beiden Fälle verschieden sind:
 | Ein öffentliches Repo enthält die Datei | gibt sie an jeden weiter, der klont |
 
 Eine Erlaubnis für den einen Fall ist keine für den anderen. Und weil ein Repo seine Historie
-mitliefert, hätte auch ein späteres Löschen nichts geholfen: Die Datei lag seit `06be184` in jedem
+mitliefert, hätte auch ein späteres Löschen nichts geholfen: Die Datei lag seit `7e6d0d1` in jedem
 Commit-Baum. Sie ist deshalb am 5. August 2026 aus der gesamten Historie entfernt worden — solange
 das Repo noch keinen Remote hatte und der Schnitt nur die eigene Arbeitskopie kostete.
 

@@ -384,7 +384,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Er läuft jetzt gegen eine Probe-Migration ohne feste Revision, deren Umgebung die echte
   `alembic/env.py` ausführt
 
-- **Der Schließen-Knopf der Detailansicht steht wieder oben rechts.** Er saß seit `fe0c95f` in der
+- **Der Schließen-Knopf der Detailansicht steht wieder oben rechts.** Er saß seit `8581be2` in der
   Kopfzeile der Textspalte — in der Flucht, aber nicht dort, wo man ihn sucht. Die Ansicht hat
   jetzt eine eigene Kopfzeile über beiden Spalten; damit sitzt der Knopf am rechten Rand der ganzen
   Ansicht statt am rechten Rand einer Spalte. Die Fußzeile mit den Blätterknöpfen kostet weiterhin
@@ -960,10 +960,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Alle 185 Commits tragen eine Identität**, `Kalle Erlhoff <kiekmap@erlhoff.de>`. Vorher waren
   es drei, zwei davon von Git aus Konto- und Rechnernamen erzeugt, weil `user.email` nirgends
   gesetzt war. Der Baum ist dabei byte-gleich geblieben
-- Commits und Tags werden **signiert** (SSH). Die Commits vor dem 25. August 2026 bleiben
-  unsigniert: Bis dahin gab es keinen Remote, also nichts, wogegen eine Signatur geschützt hätte —
-  und rückwirkend signiert würden sie unbrauchbar, sobald `allowed_signers` je eine
-  Gültigkeitsspanne für den Schlüssel bekommt
+- **Alle 188 Commits sind signiert** (SSH), Tags ebenso — auch die 185 aus der Zeit vor dem
+  Schlüssel. Bäume, Betreffzeilen und Autor-Daten sind dabei unverändert geblieben, jedes einzeln
+  nachgeprüft
 - Das README beginnt mit demselben Satz wie die Beschreibung des Repos; es sind die zwei Texte,
   die ein Besucher zuerst sieht, und sie standen in verschiedenen Tönen
 
