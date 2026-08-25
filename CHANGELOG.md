@@ -1008,4 +1008,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   auf dem Entwicklungs-Mac wird es nie installiert — und weil die Hinweise vom venv abgelesen
   wurden, tauchte es nirgends auf. Die Marker der Lockdatei werden jetzt gegen beide
   Zielplattformen ausgewertet; drei weitere Versionsangaben waren ebenfalls falsch
+- **`make release` baut den Update-Stick.** Beide Abbilder, `abbilder.tar`, die `version`-Datei
+  und auf Wunsch Karte und Ortsindex — der Ordner, den `deploy/pi/update.sh` erwartet. Bisher
+  waren das vier von Hand getippte Befehle, und der vergessene war die `version`-Datei: Ohne sie
+  zieht der Pi beim nächsten Start das alte Abbild wieder hoch. Bricht ab bei schmutzigem
+  Arbeitsbaum oder fehlendem Tag
 

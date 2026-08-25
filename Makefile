@@ -177,6 +177,11 @@ notices-check: deps
 # Sekunden erfahren und nicht nach zehn.
 check: lint docs-check notices-check test  ## Alles pruefen, was vor einem Commit laufen soll
 
+# Der Ordner, den deploy/pi/update.sh erwartet. Bricht ab bei schmutzigem Arbeitsbaum oder
+# fehlendem Tag: Ein Stick, der zu keinem Commit gehoert, ist spaeter nicht mehr zuzuordnen.
+release:  ## Update-Stick bauen: make release [nach=/Volumes/STICK/kiekmap-update] [karte=1]
+	@python3 tools/build_release.py $(if $(nach),--nach "$(nach)") $(if $(karte),--mit-karte)
+
 build: frontend/node_modules notices  ## Frontend-Bundle bauen (Ergebnis in frontend/dist)
 	cd frontend && npm run build
 
