@@ -59,7 +59,8 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 20 | [Das Gerät muss einen Stromausfall überstehen](#20--das-gerät-muss-einen-stromausfall-überstehen) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
-| 22 | [Versionierung, Releaseprozess und Veröffentlichung des Codes](#22--versionierung-releaseprozess-und-veröffentlichung-des-codes) | Frage | wichtig |
+| 65 | [Den Code veröffentlichen](#65--den-code-veröffentlichen) | Aufgabe | wichtig |
+| 66 | [Vitest 2 zieht verwundbare Kopien mit](#66--vitest-2-zieht-verwundbare-kopien-mit) | Aufgabe | wichtig |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
 dem Durchgang über den Code vom 19. August 2026
@@ -67,10 +68,10 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Neunundvierzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 23, 24,
+**Fünfzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 22, 23, 24,
 25, 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52,
 53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
-[history.md](history.md). Der nächste neue Punkt bekommt die **65**.
+[history.md](history.md). Der nächste neue Punkt bekommt die **67**.
 
 ---
 
@@ -582,110 +583,66 @@ das Gerät allein steht, trifft das niemanden; es gehört zu [Punkt 15](#15--abn
 gefragt, wie das Museumsnetz aussieht. Die Gegenmassnahme wäre eine Zeile (`127.0.0.1:80:80`) und
 kostet den Zugriff vom Nebenrechner, den das Team vielleicht will.
 
-### 22 · Versionierung, Releaseprozess und Veröffentlichung des Codes
+### 65 · Den Code veröffentlichen
 
-**Stand:** `development.md` kündigt SemVer-Tags und Conventional Commits an, beides zusammen
-versioniert. Tatsächlich gibt es nach 99 Commits **keinen einzigen Tag**; `package.json` und
-`pyproject.toml` stehen beide auf `0.1.0`, und `deploy/docker-compose.yml` baut Images mit
-`${KIEKMAP_VERSION:-dev}`. Es fehlt also nicht die Entscheidung, sondern ihre Umsetzung: Was löst
-eine Version aus, wer setzt den Tag, und wie kommt die Nummer in die beiden Dateien und in das
-Image?
+Der letzte Teil von [Punkt 22](history.md#punkt-22-der-weg-nach-draussen-an-einem-tag), der
+selbst am 25. August 2026 erledigt ist: Branch-Modell, Versionierung, Releaseprozess und CI
+stehen, das Repo liegt **privat** bei GitHub und trägt den Tag `v0.8.0`. Was bleibt, ist keine
+Arbeit, sondern eine Entscheidung — und danach eine kurze Liste.
 
-Daran hängt der Updateweg auf den Pi, der schon gebaut ist (`deploy/pi/update.sh` spielt ein
-Update vom Stick ein) — er braucht etwas, das er einspielen kann.
+**Die Frage „wie öffentlich" ist praktisch beantwortet.** Der Verlauf ist eigens von den Namen aus
+dem Bestand befreit worden, damit er veröffentlicht werden kann; `history.md` und `decisions.md`
+sind das, was dieses Projekt von anderen unterscheidet, und sie leben von den Commits, auf die sie
+verweisen. Ein reines Release-Repo würde genau das wegwerfen. Also alles öffentlich, von der ersten
+Zeile an.
 
-**Die zweite, größere Frage: Wie öffentlich wird das Repo?** Zu recherchieren sind die üblichen
-Vorgehensweisen und ihre Vor- und Nachteile. Die Bandbreite reicht von „alles öffentlich, von der
-ersten Zeile an" bis „privates Arbeitsrepo, öffentlich nur die Release-Stände". Kurz gefasst:
-Vollständige Offenheit ist die übliche und die ehrlichste Form, sie macht aber jede Zwischenstufe
-und jeden Fehlversuch dauerhaft sichtbar; ein reines Release-Repo schützt davor, verliert aber die
-Historie, die dieses Projekt gerade auszeichnet — die Commit-Nachrichten hier tragen die
-Begründungen.
+**Beim Umschalten, der Reihe nach:**
 
-**Die beiden Blocker davor sind erledigt** (5. August 2026): das Wappen ist aus Repo und Historie
-verschwunden, der Beispielbestand ist erfunden und mitgeliefert. Wie das ausging und was dabei
-anders kam als geplant, steht in [history.md](history.md#zwei-blocker-vor-der-veröffentlichung). **Offen bleibt der Releaseprozess
-selbst.**
+1. **„Private vulnerability reporting" einschalten.** `SECURITY.md` und `CODE_OF_CONDUCT.md`
+   verweisen beide ausdrücklich darauf, und es gibt den Schalter **nur auf öffentlichen Repos**.
+   Solange das Repo privat war, zeigte der Meldeweg ins Leere.
+2. **Branch-Schutz.** Auf einem privaten Repo im Gratistarif nicht verfügbar — beide Wege
+   antworten mit `403 Upgrade to GitHub Pro or make this repository public`, der klassische
+   *und* der über Rulesets. Gemessen am 25. August 2026. Vorschlag, an einem Betreuer
+   ausgerichtet: beide Zweige ohne Force-Push und ohne Löschen; `main` zusätzlich mit Pull Request
+   und null Freigaben; `develop` ohne PR-Zwang, denn der träfe nur den Betreuer — Mitwirkende
+   forken und können ohnehin nichts anderes schicken. Dazu `make check` als Pflicht-Prüfung.
+3. **Ein CI-Abzeichen ins README.** Es kann erst auf einem öffentlichen Repo etwas anzeigen.
+4. **Ein GitHub-Release zu `v0.8.0`** — mit **Quelltext, keinen gebauten Abbildern**. Ein Abbild
+   aus `python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes Userland, und wer es
+   weitergibt, übernimmt dessen Pflichten. Siehe [licensing.md](licensing.md).
+5. **Vorher [Punkt 66](#66--vitest-2-zieht-verwundbare-kopien-mit)**, damit am ersten Tag keine
+   rote Fahne am Repo hängt.
 
-**Die Lizenzfrage ist seit dem 20. August 2026 beantwortet** (Punkt 23): Apache-2.0, Copyright
-Kalle Erlhoff, `LICENSE` und `NOTICE` liegen an der Wurzel. Was daraus für ein Release folgt, steht
-in [licensing.md](licensing.md) — und ein Satz daraus gehört hierher, weil er den Releaseprozess
-festlegt: **Dockerfiles veröffentlichen, keine gebauten Abbilder.** Ein Abbild aus
-`python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes Debian- bzw. Alpine-Userland;
-wer es weitergibt, übernimmt dessen Pflichten. Wer nur die Dockerfiles veröffentlicht, lässt sie
-dort, wo sie hingehören. Der Weg über `abbilder.tar` in `deploy/pi/update.sh` bleibt für das eigene
-Gerät richtig.
+**Eine Kleinigkeit, die nur du entscheiden kannst:** Der Anzeigename des Kontos steht auf „Kalle",
+alles andere — Commits, `NOTICE`, `AUTHORS`, Repo-Beschreibung — auf „Kalle Erlhoff". Rechtlich
+folgenlos, für die Wiedererkennbarkeit nicht.
 
-Dazu die Frage, die ein Release erst auslöst: Was passiert mit `THIRD-PARTY.txt`? Sie wird erzeugt
-und ist eingecheckt, also aktuell — aber nur, solange `make check` läuft. In einer CI
-([Punkt 62](history.md#punkt-62-die-vierte-prüfung-prüft-etwas-anderes-als-geplant)) wäre das automatisch.
+### 66 · Vitest 2 zieht verwundbare Kopien mit
 
-**Dazu gehört das Festnageln der Abhängigkeiten**, nachgetragen am 19. August 2026. Das Frontend
-hat eine `package-lock.json`; `backend/pyproject.toml` nennt nur untere Schranken (`fastapi>=0.115`,
-`pillow>=11.0` …) und es gibt keine Lockdatei. Ein Neubau des Abbilds in einem Jahr zieht damit
-andere Versionen als der heutige. Bei einem Dienst, der wöchentlich neu gebaut wird, fällt das
-sofort auf; bei einem Gerät, das offline steht und einmal im Jahr angefasst wird, fällt es im
-Museum auf. Eine Lockdatei (`pip-compile`, `uv lock`) macht aus einer Version eine Zusage — und
-gehört zu dem, was ein Release überhaupt erst zu einem Release macht.
+Dependabot meldet **sechs Schwachstellen**, eine davon als kritisch eingestuft. Nachgesehen hängen
+alle sechs an einem einzigen Paket.
 
-**Ein Hindernis ist seit dem 21. August 2026 weg.** Im Repo standen echte Namen aus dem Holmer
-Bestand — in der Dokumentation, im Quelltext und vor allem in den Tests. Sie sind durch den
-erfundenen Kader aus `seed/` ersetzt, im aktuellen Stand **und im ganzen Git-Verlauf**. Siehe
-[Punkt 64](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), Abschnitt 1. Von dieser Seite steht einer
-Veröffentlichung nichts mehr entgegen.
+**Was ausgeliefert wird, ist nicht betroffen:** `npm audit --omit=dev` meldet **null**. Alle sechs
+sind `devDependencies`, keines steht in `frontend/public/THIRD-PARTY.txt`. Auf dem Pi läuft nginx
+mit dem gebauten Bundle; vite, vitest und esbuild sind Werkzeug, nicht Ware.
 
-#### Die Identität in den Commits — zu klären, und zwar vorher
+**Die kritische betrifft die Vitest-Oberfläche** — *„when Vitest UI server is listening, arbitrary
+file can be read"*. Hier läuft `vitest run`, headless; `@vitest/ui` ist nicht einmal installiert.
+Der verwundbare Dienst wird nie gestartet.
 
-Dieselbe Bauart wie die Namen im Bestand: etwas steht im Verlauf, und mit der Veröffentlichung
-ist es nicht mehr einzusammeln. **Gemessen am 22. August 2026**, damit beim Aufgreifen nicht noch
-einmal nachgezählt werden muss:
+**Der Haken ist Vitest 2.1.9.** Direkt installiert sind `vite 6.4.3` und `esbuild 0.25.12`, beide
+längst gepatcht. Die Meldungen kommen aus einer zweiten Ebene:
 
-| Identität | Commits | Zeitraum |
-|---|--:|---|
-| Name und Vorname, dazu die **persönliche Mailadresse** | 14 | nur der 28. Juli 2026 |
-| Name und Vorname, dazu eine **aus Benutzer- und Rechnernamen erzeugte** Adresse | 86 | 28. Juli – 5. August |
-| Vorname, dazu eine **zweite erzeugte** Adresse, anderer Rechner | 84 | 8. – 22. August |
+```
+node_modules/vitest/node_modules/vite      5.4.21
+node_modules/vitest/node_modules/esbuild   0.21.5
+```
 
-**Vier Befunde, die die Fragen erst scharf machen:**
+Vitest bringt seine eigenen, alten Kopien mit. Nötig wäre **3.2.6** — ein Hauptversionssprung, kein
+`npm audit fix`, und er kann die 189 Tests treffen.
 
-1. **`user.name` und `user.email` sind nirgends gesetzt** — weder im Repo noch global noch über
-   die Umgebung. Git baut die Adresse deshalb aus dem Konto- und dem Rechnernamen des Macs. Das
-   ist kein einmaliges Versehen, sondern **wiederholt sich**: Der Rechnerwechsel Anfang August hat
-   von selbst eine dritte Identität erzeugt, und der nächste täte es wieder.
-2. **Die beiden erzeugten Adressen sind keine Postfächer**, sondern verraten den Kontonamen und
-   je einen Rechnernamen; eine davon zeigt zusätzlich, dass in einem privaten Heimnetz gearbeitet
-   wurde. Ihr Nutzen ist null, ihr Preis ist eine Angabe über die Arbeitsumgebung.
-3. **Kein einziger der 184 Commits ist signiert**, und auf dem Rechner liegt weder ein
-   GPG-Geheimschlüssel noch ein SSH-Schlüssel. Die Frage lautet also nicht „welcher Schlüssel wird
-   verwendet", sondern: soll überhaupt einer verwendet werden, und ab wann.
-4. **GitHub verknüpft einen Commit nur über eine dort hinterlegte Adresse mit einem Konto.**
-   Mit dem heutigen Stand blieben **170 von 184** Commits ohne Zuordnung — sie erschienen unter
-   einem grauen Platzhalter statt unter dem Konto. Das trifft genau das Ziel, das die
-   Veröffentlichung überhaupt trägt: die Nennung.
-
-**Zu entscheiden sind vier Dinge:**
-
-- **Welche Angaben sollen dauerhaft öffentlich sein?** Voller Name oder Vorname; persönliche
-  Adresse, eine eigens angelegte, oder die `noreply`-Adresse, die GitHub je Konto bereitstellt.
-  Für die Nennung im Sinn von [Punkt 23](history.md#punkt-23-die-lizenz-war-die-kleinere-hälfte)
-  zählt, dass die Commits am Konto hängen — nicht, dass eine erreichbare Adresse darinsteht.
-- **Vereinheitlichen: ja, und wie?** Zwei Wege, und sie sind nicht gleichwertig. Eine `.mailmap`
-  ist eine Anzeigehilfe und lässt die alten Angaben im Verlauf stehen. Ein Rewrite mit
-  `git filter-repo --mailmap` schreibt sie wirklich um — das ist in diesem Repo **erprobt**
-  (21. August, mit Sicherung und Probelauf, siehe
-  [history.md](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo)) und heute noch billig,
-  **weil es keinen Remote gibt.** Nach der Veröffentlichung ist es das nicht mehr: Klone, Forks
-  und Archive tragen dann die alte Fassung weiter.
-- **Signieren, und wenn ja womit?** GPG oder SSH; ab jetzt oder rückwirkend. Rückwirkend heißt
-  denselben Rewrite, also fällt die Entscheidung sinnvollerweise mit der vorigen zusammen.
-- **Eine eigene Adresse und ein eigener Schlüssel nur für GitHub?** Zu klären, was dabei üblich
-  ist und was es tatsächlich trennt — und was es kostet, wenn ein Schlüssel oder ein Postfach in
-  fünf Jahren nicht mehr erreichbar ist, das Repo aber noch steht.
-
-**Der Zeitpunkt ist die eigentliche Pointe.** Alle vier Fragen sind heute mit einem Befehl und
-einer Sicherung zu beantworten. Am Tag nach der Veröffentlichung sind sie es nicht mehr — genau
-wie bei den Namen aus dem Bestand, und aus genau demselben Grund.
-
-Nicht Teil dieser Frage, weil bereits entschieden: die Zeile `Co-Authored-By` in 171 Commits.
-Wie das Projekt entstanden ist, steht in [AUTHORS](../AUTHORS) und in
-[licensing.md](licensing.md); verschwiegen wird es nicht.
+**Warum es trotzdem vor der Veröffentlichung gehört:** nicht wegen des Risikos, das auf einem
+Entwicklungsrechner praktisch null ist, sondern weil ein frisch veröffentlichtes Repo mit einer
+roten „1 critical"-Fahne Fragen aufwirft, die die Antwort nicht wert sind. Ein Zweig von Dependabot
+wartet bereits.

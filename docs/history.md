@@ -22,7 +22,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 
 ## Register
 
-92 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
+93 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
 die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die
 Datei ist ausführlich genug dafür.
 
@@ -61,7 +61,7 @@ Datei ist ausführlich genug dafür.
 | 31. Juli 2026 | [5. Fotos am selben Ort](#5-fotos-am-selben-ort) |
 | 31. Juli 2026 | [6. Das Foto im Beitragsbereich groß ansehen](#6-das-foto-im-beitragsbereich-groß-ansehen) |
 | 31. Juli – 2. August 2026 | **[Teil V — Nachbesserungen an der Besucheransicht](#teil-v--nachbesserungen-an-der-besucheransicht)** |
-| 2. August – 22. August 2026 | **[Teil VI — Einzelne Punkte aus dem Backlog](#teil-vi--einzelne-punkte-aus-dem-backlog)** |
+| 2. August – 25. August 2026 | **[Teil VI — Einzelne Punkte aus dem Backlog](#teil-vi--einzelne-punkte-aus-dem-backlog)** |
 | 2. August 2026 | [Verwaltung verlassen lädt die Besucheransicht neu](#verwaltung-verlassen-lädt-die-besucheransicht-neu) |
 | 2. August 2026 | [Der Bearbeitungsdialog fängt oben an](#der-bearbeitungsdialog-fängt-oben-an) |
 | 2. August 2026 | [Gleichnamige Straßen werden nicht mehr verschmolzen](#gleichnamige-straßen-werden-nicht-mehr-verschmolzen) |
@@ -120,6 +120,7 @@ Datei ist ausführlich genug dafür.
 | 21. August 2026 | [Punkt 64, Abschnitt 2: CLAUDE.md war zur Hälfte ein Tagebuch](#punkt-64-abschnitt-2-claudemd-war-zur-hälfte-ein-tagebuch) |
 | 21. August 2026 | [Punkt 64, Abschnitt 3: die Historie war nicht zu lang, sie hatte keinen Eingang](#punkt-64-abschnitt-3-die-historie-war-nicht-zu-lang-sie-hatte-keinen-eingang) |
 | 22. August 2026 | [Punkt 64, Abschnitt 4: die Regel stand da und wurde nicht geprüft](#punkt-64-abschnitt-4-die-regel-stand-da-und-wurde-nicht-geprüft) |
+| 25. August 2026 | [Punkt 22: der Weg nach draussen, an einem Tag](#punkt-22-der-weg-nach-draussen-an-einem-tag) |
 
 <!-- register:ende -->
 ---
@@ -4180,3 +4181,125 @@ neun Hinzufügungen verteilt.
 
 **Damit ist Punkt 64 vollständig** und aus dem Backlog gezogen. Was von der Durchsicht bleibt, ist
 kein Punkt mehr, sondern eine Prüfung mehr in `make check`.
+
+---
+
+## Punkt 22: der Weg nach draussen, an einem Tag
+
+`eb98f12` · 25. August 2026.
+
+Punkt 22 hiess „Versionierung, Releaseprozess und Veröffentlichung" und war der letzte offene
+Punkt vor dem Schritt nach draussen. Vier seiner fünf Teile sind an diesem Tag gebaut worden; der
+fünfte, die Veröffentlichung selbst, ist keine Arbeit, sondern eine Entscheidung und zieht als
+[Punkt 65](backlog.md) weiter.
+
+### Erst die Frist, dann alles andere
+
+Die Reihenfolge kam nicht aus der Grösse der Teile, sondern aus ihrer Umkehrbarkeit. **Genau ein
+Schritt hatte eine Frist:** Solange es keinen Remote gibt, kostet ein Umschreiben des Verlaufs
+nichts.
+
+Gemessen trugen 185 Commits **drei** Identitäten. `user.name` und `user.email` waren nirgends
+gesetzt, also baute Git die Adresse aus Konto- und Rechnernamen — und der Rechnerwechsel Anfang
+August erzeugte von selbst eine dritte. Zwei der drei Adressen waren keine Postfächer, sondern
+Auskunft über die Arbeitsumgebung. Kein Commit war signiert, kein Schlüssel lag vor.
+
+Beides ist an diesem Tag bereinigt worden, in zwei Rewrites: eine Identität für alle, und alle 188
+signiert, auch die aus der Zeit vor dem Schlüssel. Die Begründung dafür steht in
+[decisions.md](decisions.md), Punkt 67 — samt des Preises, den man kennen muss.
+
+### Der Rewrite hing nicht an der Dauer, sondern an einer Rückfrage
+
+Der erste Versuch lief zwei Minuten in ein Zeitlimit. Der Verdacht fiel auf die 3,2 GB
+unversionierter Fotos im Arbeitsbaum, durch die Git beim Aufräumen läuft. Tatsächlich fragte
+`filter-repo` wegen des Laufs vom 21. August **interaktiv** nach — *„Treat this run as a
+continuation (Y/N)?"* —, und `--force` deckt diese Frage nicht ab. Nach dem Beiseitelegen des alten
+Datensatzes: 0,28 Sekunden.
+
+### Ein Verweis war schon vorher kaputt
+
+Der Nachlauf über die zitierten Kurz-Hashes förderte einen zutage, der keinen Commit mehr traf:
+`6eb4c69` im CHANGELOG. Er stammte aus der Zeit **vor** dem Rewrite vom 21. August, und dessen
+Nachlauf hatte nur `docs/` geprüft. Über beide Zuordnungstabellen liess er sich verketten. Die
+Gegenprobe läuft seither über jeden siebenstelligen Hash in `docs/`, `CHANGELOG`, `README` und
+`CLAUDE.md`.
+
+### Das Branch-Modell, und eine Korrektur nach einer Stunde
+
+Zwei langlebige Zweige: `develop` für den Alltag, `main` für den Stand, der ausgeliefert ist. Das
+ist **nicht** GitHub Flow, auch wenn es so aussieht — die Begründung steht in
+[decisions.md](decisions.md), Punkt 66.
+
+Darin stand zunächst „`feature/*` → `develop` per Rebase". **Der erste Pull Request hat das
+widerlegt.** Ein Rebase erzeugt die Commits neu, GitHub baut sie auf dem Server, und dort liegt
+kein Schlüssel: Die drei Commits kamen **unsigniert** heraus. 190 signierte und drei Löcher.
+
+Das Argument im Punkt sprach gegen *Squash*, nicht für Rebase — ein gewöhnlicher Merge erhält jeden
+Commit genauso einzeln. Rebase war eine Voreinstellung, die ich mitgebracht und nicht am Projekt
+geprüft hatte. Seither: Merge-Commit in beide Richtungen, und Rebase-Merge ist auch in den
+Repo-Einstellungen abgeschaltet. Die drei Löcher sind nachsigniert.
+
+### Was ein Release erst zu einem Release macht
+
+**Die Versionsnummer stand an fünf Stellen, nicht an zwei.** Die fünfte war die wichtigste und
+wäre am ehesten liegengeblieben: `__version__` in `app/__init__.py` ist das, was `/api/health`
+antwortet. Alle fünf standen auf `0.1.0`. Das Gerät hätte dauerhaft die falsche Fassung von sich
+behauptet, während der Image-Tag weiterzählt — und die eine Frage, für die es die Gesundheitsabfrage
+gibt, hätte eine falsche Antwort bekommen.
+
+**Die Abhängigkeiten sind festgenagelt**, und dabei fiel eine Lizenzlücke auf, die still offen war:
+`build_notices.py` las die Paketliste vom Entwicklungs-venv ab. `greenlet`, das SQLAlchemy auf
+Linux mitbringt, wird auf einem Mac nie installiert und fehlte deshalb in `THIRD-PARTY.txt`. Jetzt
+kommt die Liste aus der Lockdatei — sie *ist* die Liste dessen, was ins Abbild kommt — und die
+Umgebungsmarker werden gegen beide Zielplattformen ausgewertet. Der laufende Container hat es
+bestätigt.
+
+Nebenbei: **`pip install .` im Dockerfile tat nie, was es aussieht.** `app/` wird erst danach
+kopiert, die Paketsuche fand also nichts und installierte eine Distribution ohne Inhalt. Gezogen
+wurden immer nur die Abhängigkeiten.
+
+**`make release`** baut den Ordner, den `deploy/pi/update.sh` erwartet. Von Hand waren das vier
+Befehle aus `operations.md`, und der vergessene ist die `version`-Datei: Ohne sie bleibt
+`KIEKMAP_VERSION` in der `.env` des Pi stehen, und der nächste Start zieht das **alte** Abbild
+wieder hoch. Das Gerät liefe dann mit der alten Software und sagte es nirgends. Geprüft wurde nicht
+nur der Bau, sondern der Weg, den der Pi geht: bauen, sichern, Abbilder lokal löschen, laden,
+starten — `{"status":"bereit","version":"0.8.0"}`.
+
+### Die CI hat sich in ihrer ersten Stunde bezahlt gemacht
+
+Drei Läufe, zwei echte Fehler, beide unsichtbar auf dem Entwicklungsrechner:
+
+**`make check` wäre unter Node 22 gebrochen** — also bei der Fassung, zu der das Makefile selbst
+rät. Die Node-Versionsprüfung trug Backslash-Zeilenenden innerhalb einfacher Anführungszeichen, wo
+die Shell sie nicht entfernt. Node 18 verzieh den durchgereichten Backslash, Node 22 wertet `-e`
+durch einen TypeScript-fähigen Parser aus und bricht ab.
+
+**`build_notices.py` importiert seit der Marker-Auswertung `packaging`**, wurde aber mit dem
+System-Python aufgerufen. Der Entwicklungsrechner bringt es zufällig mit, eine frische Umgebung
+nicht. Es läuft jetzt mit dem Python des venv — als einziges der sieben Werkzeuge, und das ist
+keine Notlösung: Die sechs Prüfungen daneben sind reine Leser, dieses hier liest Paket-Metadaten
+und braucht das venv ohnehin. Es hatte nur so getan, als bräuchte es keins.
+
+Dazu ein Grenzfall, den die Umlautprüfung an sich selbst fand: `.github/` stand als Ganzes in ihrer
+Prosa-Liste. **Ein Workflow ist Quelltext**, näher an einem Shell-Skript als an einer Anleitung.
+
+### Zwei Hürden, die nicht im Drehbuch standen
+
+**GitHub lehnte den Push ab** — `GH007: Your push would publish a private email address`. Der
+Schutz bewachte genau die Entscheidung, die bewusst gefallen war: eine dedizierte Adresse, die in
+den Commits stehen *darf*. Er ist abgeschaltet.
+
+**Branch-Schutz gibt es auf einem privaten Repo im Gratistarif nicht.** Beide Wege antworten mit
+`403 Upgrade to GitHub Pro or make this repository public` — der klassische und der neuere über
+Rulesets. Er zieht damit in die Veröffentlichung um.
+
+### Und der Tag
+
+`develop` → `main` als Merge-Commit, **lokal gemacht statt über den Knopf**: GitHubs Nachricht
+hiesse „Merge pull request #6 from kerlhoff/develop", und für den einen Commit, auf den `main`
+zeigt und an dem der Tag hängt, ist das zu wenig. Danach `v0.8.0`, signiert.
+
+**Nicht `1.0.0`**, weil das unter SemVer eine stabile öffentliche Schnittstelle zusagt: Alles unter
+`deploy/pi/` ist ungeprüft, die Abnahme auf dem ersten Gerät steht aus. Die `1.0.0` wird nach
+[Punkt 15](backlog.md) vergeben — das macht aus ihm einen Meilenstein statt einer Fussnote.
+
