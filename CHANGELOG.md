@@ -1013,4 +1013,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   waren das vier von Hand getippte Befehle, und der vergessene war die `version`-Datei: Ohne sie
   zieht der Pi beim nächsten Start das alte Abbild wieder hoch. Bricht ab bei schmutzigem
   Arbeitsbaum oder fehlendem Tag
+- Gemerged wird mit einem **Merge-Commit**, nicht per Rebase. Ein Rebase erzeugt die Commits auf
+  GitHubs Server neu, wo kein Schlüssel liegt — sie kommen unsigniert heraus. Der erste Pull
+  Request hat das vorgeführt: 190 signierte Commits und drei Löcher. Rebase-Merge ist in den
+  Repo-Einstellungen jetzt ebenfalls abgeschaltet
 

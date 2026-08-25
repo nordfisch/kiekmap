@@ -435,8 +435,12 @@ fasst die Commits eines Zweigs zusammen und vernichtet damit genau die, auf die 
 zeigt. Das ist kein Stilproblem, sondern ein Datenverlust in einer Datei, deren Wert an diesen
 Verweisen hängt.
 
-- `feature/*` → `develop`: **Rebase.** Linear, und jeder Commit bleibt einzeln erhalten.
-- `develop` → `main`: **echter Merge-Commit.** Er hält das Release-Ereignis fest.
+**Gemerged wird in beide Richtungen mit einem Merge-Commit**, nicht per Rebase. Ein Rebase
+erzeugt die Commits neu — GitHub baut sie auf dem Server, wo kein Schlüssel liegt, und sie kommen
+**unsigniert** heraus. Der erste Pull Request hat das vorgeführt. Ein Merge lässt seine Eltern
+unangetastet: Signaturen bleiben, Hashes bleiben, jeder Commit bleibt einzeln sichtbar.
+
+Die Verzweigungen im Graphen sind der Preis; `git log --first-parent` blendet sie aus.
 
 ## Veröffentlichen
 
