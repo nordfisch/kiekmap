@@ -961,7 +961,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   es drei, zwei davon von Git aus Konto- und Rechnernamen erzeugt, weil `user.email` nirgends
   gesetzt war. Der Baum ist dabei byte-gleich geblieben
 - Commits und Tags werden **signiert** (SSH). Die Commits vor dem 25. August 2026 bleiben
-  unsigniert — eine Signatur vom Juli mit einem Schlüssel vom August behauptete etwas Falsches
+  unsigniert: Bis dahin gab es keinen Remote, also nichts, wogegen eine Signatur geschützt hätte —
+  und rückwirkend signiert würden sie unbrauchbar, sobald `allowed_signers` je eine
+  Gültigkeitsspanne für den Schlüssel bekommt
 - Das README beginnt mit demselben Satz wie die Beschreibung des Repos; es sind die zwei Texte,
   die ein Besucher zuerst sieht, und sie standen in verschiedenen Tönen
 

@@ -401,8 +401,28 @@ Backend werden zusammen versioniert — bei einem Ein-Geräte-System ist getrenn
 Ballast, und die API-Kompatibilität ist dadurch garantiert.
 
 **Commits werden signiert** (SSH, nicht GPG), Tags ebenso. Die 185 Commits vor dem 25. August 2026
-sind unsigniert und bleiben es: Eine Signatur vom Juli mit einem Schlüssel vom August behauptete
-etwas, das nicht stimmt.
+sind unsigniert und bleiben es — aus drei Gründen, von denen der naheliegendste **nicht** dazu
+gehört:
+
+Eine SSH-Signatur trägt **keinen eigenen Zeitstempel**; im Commit stehen nur Schlüssel,
+Namensraum `git`, Hashverfahren und die Signatur selbst. Rückwirkend zu signieren behauptet also
+nichts nachweisbar Falsches. Was dagegen spricht:
+
+1. **Es gäbe nichts zu schützen.** Eine Signatur beantwortet *„kommt das wirklich von dem, der
+   draufsteht?"* — eine Frage, die sich stellt, wenn jemand fremden Code zu sich holt. Bis zum
+   25. August 2026 gab es keinen Remote; die Commits lagen auf einem Rechner. Eine Signatur darauf
+   verteidigte gegen eine Fälschung, die nie möglich war.
+2. **Sie wäre eine Falle für eine spätere Hygienemassnahme.** `allowed_signers` kennt
+   `valid-after=`, und Git prüft eine Signatur ausdrücklich gegen den Zeitpunkt *ihrer Entstehung*
+   — also gegen das Commit-Datum. Wer den Schlüssel je wechselt und die alte Gültigkeit begrenzt,
+   bekäme jeden rückwirkend signierten Commit als ungültig gemeldet. Genau dafür gibt es den
+   Mechanismus.
+3. **Es ist die verbreitete Praxis**, ab dem Schlüssel zu signieren, und ein durchsignierter
+   Altbestand fällt jedem auf, der hinsieht.
+
+Nachholbar wäre es: `git rebase --root --exec 'git commit --amend --no-edit -S'` — `filter-repo`
+selbst signiert nicht. Es kostet einen weiteren Rewrite mit allen Folgen (jeder Hash ändert sich,
+die zitierten Kurz-Hashes in der Dokumentation brechen erneut).
 
 Das Museumsgerät ist offline. Der Updateweg dorthin (Image-Tarball auf einen USB-Stick) steht in
 [operations.md](operations.md).
