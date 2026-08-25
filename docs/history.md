@@ -22,7 +22,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 
 ## Register
 
-93 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
+94 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
 die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die
 Datei ist ausführlich genug dafür.
 
@@ -121,6 +121,7 @@ Datei ist ausführlich genug dafür.
 | 21. August 2026 | [Punkt 64, Abschnitt 3: die Historie war nicht zu lang, sie hatte keinen Eingang](#punkt-64-abschnitt-3-die-historie-war-nicht-zu-lang-sie-hatte-keinen-eingang) |
 | 22. August 2026 | [Punkt 64, Abschnitt 4: die Regel stand da und wurde nicht geprüft](#punkt-64-abschnitt-4-die-regel-stand-da-und-wurde-nicht-geprüft) |
 | 25. August 2026 | [Punkt 22: der Weg nach draussen, an einem Tag](#punkt-22-der-weg-nach-draussen-an-einem-tag) |
+| 25. August 2026 | [Punkt 66: sechs Meldungen, ein Haken](#punkt-66-sechs-meldungen-ein-haken) |
 
 <!-- register:ende -->
 ---
@@ -4302,4 +4303,59 @@ zeigt und an dem der Tag hängt, ist das zu wenig. Danach `v0.8.0`, signiert.
 **Nicht `1.0.0`**, weil das unter SemVer eine stabile öffentliche Schnittstelle zusagt: Alles unter
 `deploy/pi/` ist ungeprüft, die Abnahme auf dem ersten Gerät steht aus. Die `1.0.0` wird nach
 [Punkt 15](backlog.md) vergeben — das macht aus ihm einen Meilenstein statt einer Fussnote.
+
+---
+
+## Punkt 66: sechs Meldungen, ein Haken
+
+25. August 2026.
+
+Der erste Push nach GitHub brachte eine Beigabe mit: **sechs Schwachstellen, eine als kritisch
+eingestuft.** Der Reflex wäre gewesen, sie der Reihe nach abzuarbeiten. Nachgezählt hingen alle
+sechs an **einem** Paket.
+
+### Erst messen, wieder einmal
+
+`npm audit --omit=dev` meldete **null**. Alle sechs waren `devDependencies`, keine stand in
+`frontend/public/THIRD-PARTY.txt` — auf dem Pi läuft nginx mit dem gebauten Bundle, vite, vitest
+und esbuild sind Werkzeug und keine Ware.
+
+Die kritische betraf die Vitest-Oberfläche, *„when Vitest UI server is listening"*. Hier läuft
+`vitest run`, headless; `@vitest/ui` war nicht einmal installiert. Der verwundbare Dienst wird nie
+gestartet.
+
+**Und die übrigen kamen aus einer zweiten Ebene.** Direkt installiert waren `vite 6.4.3` und
+`esbuild 0.25.12`, beide längst gepatcht. Daneben lagen:
+
+```
+node_modules/vitest/node_modules/vite      5.4.21
+node_modules/vitest/node_modules/esbuild   0.21.5
+```
+
+Vitest 2 brachte seine eigenen alten Kopien mit. Ein Hauptversionssprung war also nicht die
+gründlichere von mehreren Möglichkeiten, sondern die einzige.
+
+### Der Sprung kostete nichts
+
+Der beste Fall für einen Hauptversionswechsel: **keine Testkonfiguration**, reine Logiktests, kein
+jsdom — die Angriffsfläche war klein. Nach `vitest@^3` liefen 189 von 189 Tests, der Typprüfer war
+still, das Bundle baute. Im Baum liegt jetzt je ein `vite` und ein `esbuild`; die Sperrdatei ist
+dabei um rund neunhundert Zeilen geschrumpft.
+
+Übrig blieb eine Meldung, `nanoid` über `vite → postcss`, und die war mit `npm audit fix` erledigt.
+**Null.**
+
+### Zwei Dinge nebenbei
+
+Beim Neuberechnen des Baums meldete npm, ein Paket verlange Node ≥ 22, während hier 18 läuft.
+Nachgesehen war es `@mapbox/jsonlint-lines-primitives`, eine transitive Abhängigkeit von
+**maplibre-gl** — vorbestanden, nur durch die Neuberechnung sichtbar geworden, und nichts, was der
+Sprung verursacht hätte.
+
+Und `THIRD-PARTY.txt` blieb auf beiden Seiten **unverändert**. Das ist die Gegenprobe zur ganzen
+Einschätzung: Was sich hier bewegt hat, wird nicht ausgeliefert.
+
+**Der Grund, es trotzdem vor der Veröffentlichung zu tun**, war nie das Risiko. Es war die rote
+Fahne, die sonst am ersten Tag am Repo gehangen hätte — und die Fragen aufwirft, die die Antwort
+nicht wert sind.
 
