@@ -1017,4 +1017,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   GitHubs Server neu, wo kein Schlüssel liegt — sie kommen unsigniert heraus. Der erste Pull
   Request hat das vorgeführt: 190 signierte Commits und drei Löcher. Rebase-Merge ist in den
   Repo-Einstellungen jetzt ebenfalls abgeschaltet
+- **`make check` läuft bei jedem Pull Request**, als GitHub-Actions-Ablauf. Der Commit-Hook nimmt
+  einem die sechs schnellen Prüfungen ab, aber nur, wer ihn eingeschaltet hat — und ein grünes
+  `make check` auf dem eigenen Rechner sagt nur, dass es dort grün war
+- **`make check` wäre unter Node 22 gebrochen**, also genau bei der Fassung, zu der das Makefile
+  selbst rät. Die Node-Versionsprüfung trug Backslash-Zeilenenden innerhalb einfacher
+  Anführungszeichen, wo die Shell sie nicht entfernt; Node 18 verzieh das, Node 22 wertet `-e`
+  strenger aus. Der erste CI-Lauf hat es gefunden — am Tag, an dem es die CI gab
 

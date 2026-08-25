@@ -25,15 +25,21 @@ venv: $(VENV)  ## Python-Umgebung anlegen
 # Vite 6 laeuft ab Node 18. Node 18 wird allerdings nicht mehr gepflegt, daher der Hinweis --
 # ohne die Pruefung scheitert ein zu altes Node mit einer Syntaxmeldung, der man nicht ansieht,
 # dass nur die Version das Problem ist.
+# Die Fortsetzungszeilen stehen ausserhalb der Anfuehrungszeichen, und das ist kein Stil, sondern
+# noetig: Innerhalb einfacher Anfuehrungszeichen entfernt die Shell ein Backslash-Zeilenende nicht,
+# node bekommt also einen echten Backslash. Node 18 hat den verziehen, Node 22 wertet -e durch
+# einen TypeScript-faehigen Parser aus und bricht ab -- ausgerechnet bei der Fassung, zu der diese
+# Pruefung selbst raet. Gefunden vom ersten CI-Lauf am 25. August 2026.
 node-check:
-	@node -e 'const v=+process.versions.node.split(".")[0]; \
-		if (v < 18) { \
-			console.error("\033[31mNode " + process.versions.node + " ist zu alt, gebraucht wird 18 oder neuer.\033[0m"); \
-			console.error("  nvm install 22 && nvm alias default 22"); \
-			process.exit(1); \
-		} else if (v < 20) { \
-			console.error("\033[33mHinweis: Node " + process.versions.node + " wird nicht mehr gepflegt. Empfohlen: nvm install 22\033[0m"); \
-		}'
+	@v=$$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null) || \
+		{ echo "Node fehlt -- gebraucht wird 18 oder neuer."; exit 1; }; \
+	if [ "$$v" -lt 18 ]; then \
+		printf '\033[31mNode %s ist zu alt, gebraucht wird 18 oder neuer.\033[0m\n' "$$(node -v)"; \
+		echo "  nvm install 22 && nvm alias default 22"; \
+		exit 1; \
+	elif [ "$$v" -lt 20 ]; then \
+		printf '\033[33mHinweis: Node %s wird nicht mehr gepflegt. Empfohlen: nvm install 22\033[0m\n' "$$(node -v)"; \
+	fi
 
 frontend/node_modules: frontend/package.json | node-check
 	cd frontend && npm install --no-audit --no-fund
@@ -149,8 +155,13 @@ version:  ## Version zeigen, oder setzen: make version v=0.8.0
 #
 # Erzeugt statt gepflegt, aber eingecheckt: Jeder Docker-Kontext bleibt fuer sich vollstaendig, und
 # eine neue Abhaengigkeit taucht im Diff auf, wo sie jemand sieht. Siehe docs/licensing.md.
+# Mit dem Python des venv, nicht dem des Systems -- als einziges der Werkzeuge. Die sechs
+# Pruefungen sind reine Leser und kommen mit der Standardbibliothek aus; dieses hier liest die
+# Metadaten der installierten Pakete und wertet ihre Umgebungsmarker mit `packaging` aus. Es
+# braucht das venv also ohnehin. Auf einem Rechner, dessen System-Python zufaellig `packaging`
+# mitbringt, faellt das nicht auf -- in einer frischen CI schon.
 notices: deps  ## Lizenzhinweise der mitgelieferten Pakete erzeugen
-	@python3 tools/build_notices.py
+	@$(VENV)/bin/python tools/build_notices.py
 
 # Festgenagelte Backend-Abhaengigkeiten fuer das Abbild. pyproject.toml nennt nur untere Schranken;
 # ohne diese Datei zoege ein Neubau in einem Jahr andere Versionen. --universal, weil hier auf einem
@@ -171,7 +182,7 @@ lock:  ## backend/requirements.lock neu aufloesen (braucht uv)
 	    -o backend/requirements.lock backend/pyproject.toml
 
 notices-check: deps
-	@python3 tools/build_notices.py --check
+	@$(VENV)/bin/python tools/build_notices.py --check
 
 # Das Ziel vor einem Commit. Die schnellen zuerst: Wer den Stil verletzt hat, soll das nach zwei
 # Sekunden erfahren und nicht nach zehn.

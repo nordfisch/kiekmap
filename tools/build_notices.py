@@ -5,8 +5,13 @@
 
 """Build the notice files that have to travel with each built artefact.
 
-    python3 tools/build_notices.py          write them
-    python3 tools/build_notices.py --check  fail if they are out of date
+    backend/.venv/bin/python tools/build_notices.py          write them
+    backend/.venv/bin/python tools/build_notices.py --check  fail if they are out of date
+
+Run with the venv's Python, not the system one -- unlike its six neighbours in this folder, which
+are pure readers and get by on the standard library. This one reads the metadata of the installed
+packages and evaluates their environment markers with ``packaging``; it needs the venv anyway.
+``make notices`` and ``make check`` do that for you.
 
 MIT and BSD ask for the same thing in almost the same words: the copyright notice and the licence
 text go along with *every* copy, source or binary. A bundled ``index-*.js`` is a copy, and so is a
