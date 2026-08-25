@@ -4,7 +4,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unveröffentlicht]
 
-Noch nichts.
+### Geändert
+
+- **Vitest von 2 auf 3.** Nicht wegen einer neuen Funktion, sondern weil Vitest 2 seine eigenen,
+  alten Kopien von `vite` und `esbuild` mitbrachte — daran hingen fünf von sechs
+  Dependabot-Meldungen. Im Baum liegt jetzt je eine Fassung. Ausgeliefert war nichts davon; die
+  189 Tests laufen unverändert
 
 ## [0.8.0] — 2026-08-25
 

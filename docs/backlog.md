@@ -60,7 +60,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
 | 65 | [Den Code veröffentlichen](#65--den-code-veröffentlichen) | Aufgabe | wichtig |
-| 66 | [Vitest 2 zieht verwundbare Kopien mit](#66--vitest-2-zieht-verwundbare-kopien-mit) | Aufgabe | wichtig |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
 dem Durchgang über den Code vom 19. August 2026
@@ -68,9 +67,9 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Fünfzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 22, 23, 24,
+**Einundfünfzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 22, 23, 24,
 25, 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52,
-53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **67**.
 
 ---
@@ -611,38 +610,11 @@ Zeile an.
 4. **Ein GitHub-Release zu `v0.8.0`** — mit **Quelltext, keinen gebauten Abbildern**. Ein Abbild
    aus `python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes Userland, und wer es
    weitergibt, übernimmt dessen Pflichten. Siehe [licensing.md](licensing.md).
-5. **Vorher [Punkt 66](#66--vitest-2-zieht-verwundbare-kopien-mit)**, damit am ersten Tag keine
-   rote Fahne am Repo hängt.
+5. ~~Vorher Punkt 66~~ — **erledigt am 25. August 2026.** Vitest 2 brachte eigene alte Kopien von
+   `vite` und `esbuild` mit; daran hingen fünf der sechs Meldungen. Nach dem Sprung auf Vitest 3
+   und einem `npm audit fix`: null. Siehe
+   [history.md](history.md#punkt-66-sechs-meldungen-ein-haken).
 
 **Eine Kleinigkeit, die nur du entscheiden kannst:** Der Anzeigename des Kontos steht auf „Kalle",
 alles andere — Commits, `NOTICE`, `AUTHORS`, Repo-Beschreibung — auf „Kalle Erlhoff". Rechtlich
 folgenlos, für die Wiedererkennbarkeit nicht.
-
-### 66 · Vitest 2 zieht verwundbare Kopien mit
-
-Dependabot meldet **sechs Schwachstellen**, eine davon als kritisch eingestuft. Nachgesehen hängen
-alle sechs an einem einzigen Paket.
-
-**Was ausgeliefert wird, ist nicht betroffen:** `npm audit --omit=dev` meldet **null**. Alle sechs
-sind `devDependencies`, keines steht in `frontend/public/THIRD-PARTY.txt`. Auf dem Pi läuft nginx
-mit dem gebauten Bundle; vite, vitest und esbuild sind Werkzeug, nicht Ware.
-
-**Die kritische betrifft die Vitest-Oberfläche** — *„when Vitest UI server is listening, arbitrary
-file can be read"*. Hier läuft `vitest run`, headless; `@vitest/ui` ist nicht einmal installiert.
-Der verwundbare Dienst wird nie gestartet.
-
-**Der Haken ist Vitest 2.1.9.** Direkt installiert sind `vite 6.4.3` und `esbuild 0.25.12`, beide
-längst gepatcht. Die Meldungen kommen aus einer zweiten Ebene:
-
-```
-node_modules/vitest/node_modules/vite      5.4.21
-node_modules/vitest/node_modules/esbuild   0.21.5
-```
-
-Vitest bringt seine eigenen, alten Kopien mit. Nötig wäre **3.2.6** — ein Hauptversionssprung, kein
-`npm audit fix`, und er kann die 189 Tests treffen.
-
-**Warum es trotzdem vor der Veröffentlichung gehört:** nicht wegen des Risikos, das auf einem
-Entwicklungsrechner praktisch null ist, sondern weil ein frisch veröffentlichtes Repo mit einer
-roten „1 critical"-Fahne Fragen aufwirft, die die Antwort nicht wert sind. Ein Zweig von Dependabot
-wartet bereits.
