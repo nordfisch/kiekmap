@@ -29,9 +29,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+from packaging.markers import Marker
+
 ROOT = Path(__file__).resolve().parent.parent
 FRONTEND = ROOT / "frontend"
 BACKEND = ROOT / "backend"
+LOCKFILE = BACKEND / "requirements.lock"
 
 TARGETS = {
     "Frontend": FRONTEND / "public" / "THIRD-PARTY.txt",
@@ -175,11 +178,57 @@ def metadata_of(dist_info: Path) -> dict:
     return fields
 
 
-def python_packages() -> list[tuple[str, str, str, Path]]:
-    """Everything the backend image installs -- runtime dependencies, transitively.
+#: The environments the backend image actually runs in. A lock entry ships when its marker holds
+#: in **either** -- the Pi is aarch64, the container on the development Mac is x86_64, and a
+#: package that ships in one of them needs its licence carried.
+#:
+#: Evaluating the marker against *this* machine would be the obvious mistake: ``greenlet`` ships
+#: on both targets and on no Mac, and it was quietly absent from the notices before this existed.
+IMAGE_ENVIRONMENTS = (
+    {
+        "sys_platform": "linux",
+        "platform_system": "Linux",
+        "os_name": "posix",
+        "platform_machine": "aarch64",
+        "platform_python_implementation": "CPython",
+        "python_version": "3.12",
+        "python_full_version": "3.12.0",
+        "implementation_name": "cpython",
+    },
+    {
+        "sys_platform": "linux",
+        "platform_system": "Linux",
+        "os_name": "posix",
+        "platform_machine": "x86_64",
+        "platform_python_implementation": "CPython",
+        "python_version": "3.12",
+        "python_full_version": "3.12.0",
+        "implementation_name": "cpython",
+    },
+)
 
-    Walked from ``pyproject.toml`` rather than read off the venv, which also holds pytest and
-    ruff. The image runs ``pip install .``, so only what that pulls in may appear here.
+
+def ships(marker: str | None) -> bool:
+    """Does a lock entry with this marker end up in the image?"""
+    if not marker:
+        return True
+    parsed = Marker(marker)
+    return any(parsed.evaluate(environment) for environment in IMAGE_ENVIRONMENTS)
+
+
+def python_packages() -> list[tuple[str, str, str, Path]]:
+    """Everything the backend image installs -- read off the lock, which *is* that list.
+
+    The image runs ``pip install -r requirements.lock``, so the lock is not an approximation of
+    what ships; it is the thing itself, resolved transitively by a resolver. Until 25 August 2026
+    this function walked ``pyproject.toml`` by hand and carried a hard-coded list of what
+    ``uvicorn[standard]`` pulls in -- a resolver reimplemented badly, and one that would have gone
+    stale without a sound.
+
+    **Versions come from the lock, licence texts from the venv**, because only an installed
+    package has its LICENSE file on disk. That makes the two have to agree, and the abort below
+    is where they are held to it: a notice file that names a version the image does not install
+    is worse than none.
     """
     installed = {}
     for folder in site_packages().glob("*.dist-info"):
@@ -187,32 +236,34 @@ def python_packages() -> list[tuple[str, str, str, Path]]:
         name = fields["Name"][0]
         installed[name.lower().replace("_", "-")] = (name, fields, folder)
 
-    text = (BACKEND / "pyproject.toml").read_text(encoding="utf-8")
-    # Up to the ``]`` that starts a line -- not the first one anywhere. The first ``]`` in the
-    # block sits inside ``uvicorn[standard]``, and cutting there left the list one entry long.
-    block = re.search(r"^dependencies = \[(.*?)^\]", text, re.S | re.M).group(1)
-    # The quoted entries, not the commas: "uvicorn[standard]>=0.32" carries a bracket and a
-    # comparison, and splitting the block on commas leaves the quotes attached to the name.
-    pending = [requirement_name(entry) for entry in re.findall(r'"([^"]+)"', block)]
-    # uvicorn[standard] pulls these in; the extra marker hides them from Requires-Dist below.
-    pending += ["uvloop", "httptools", "websockets", "python-dotenv", "watchfiles", "PyYAML"]
-
-    seen, found = set(), []
-    while pending:
-        key = pending.pop().lower().replace("_", "-")
-        if not key or key in seen or key not in installed:
+    found, missing, mismatched = [], [], []
+    for line in LOCKFILE.read_text(encoding="utf-8").splitlines():
+        match = re.match(r"^([A-Za-z0-9._-]+)==([^\s;]+)(?:\s*;\s*(.+))?$", line)
+        if not match:
             continue
-        seen.add(key)
+        wanted, version, marker = match.group(1), match.group(2), match.group(3)
+        if not ships(marker):
+            continue
+        key = wanted.lower().replace("_", "-")
+        if key not in installed:
+            missing.append(f"{wanted}=={version}")
+            continue
         name, fields, folder = installed[key]
+        if fields["Version"][0] != version:
+            mismatched.append(f"{wanted}: Lock {version}, venv {fields['Version'][0]}")
         spdx = (fields.get("License-Expression") or fields.get("License") or [""])[0]
         if not spdx or len(spdx) > 60:
             klass = [c for c in fields.get("Classifier", []) if c.startswith("License ::")]
             spdx = "; ".join(k.split(":: ")[-1] for k in klass) or spdx[:60]
-        found.append((name, fields["Version"][0], spdx, folder))
-        for req in fields.get("Requires-Dist", []):
-            if ";" in req and "extra" in req.split(";", 1)[1]:
-                continue
-            pending.append(requirement_name(req))
+        found.append((name, version, spdx, folder))
+
+    if missing or mismatched:
+        raise SystemExit(
+            "Die Lockdatei und das Entwicklungs-venv sind sich nicht einig.\n"
+            + "".join(f"  fehlt im venv:  {m}\n" for m in missing)
+            + "".join(f"  andere Version: {m}\n" for m in mismatched)
+            + "\n  Gleichziehen mit: make deps-lock"
+        )
     return sorted(found, key=lambda row: row[0].lower())
 
 
