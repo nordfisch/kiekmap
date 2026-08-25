@@ -83,7 +83,8 @@ Docstring darunter trägt das Warum. Übersetzt verlöre das an Schärfe, und ge
 die wertvollste Dokumentation im Repo.
 
 Umlaute werden in deutscher Prosa im Quelltext, in Shell-Skripten und in Commit-Nachrichten
-umschrieben (`ue`, `oe`, `ae`, `ss`); in Texten für Menschen normal geschrieben. **Zitate und
+umschrieben (`ue`, `oe`, `ae`, `ss`); in Texten für Menschen normal geschrieben. **Ein
+GitHub-Workflow zählt zum Quelltext**, die Meldungsvorlagen daneben zu den Texten für Menschen. **Zitate und
 Datenwerte behalten sie**: `"Mühlenweg"` als Beispiel in einem Kommentar, `["Gebäude"]` als
 Einstellungswert, `"März"` in der Monatsliste — ohne Umlaut wären sie schlicht falsch.
 
@@ -144,6 +145,7 @@ python3 tools/check_anchors.py    # zeigen die Verweise in docs/ noch irgendwohi
 python3 tools/check_settings.py   # erreicht jede Einstellung den Container?
 python3 tools/check_numbers.py    # stimmt die Buchführung des Backlogs über seine Nummern?
 python3 tools/build_register.py --check   # ist das Register der Historie noch vollständig?
+python3 tools/set_version.py --check      # nennen alle fünf Stellen dieselbe Version?
 ```
 
 Sie brauchen weder `venv` noch `node_modules` — reine Leser, `python3` aus dem System genügt.
@@ -386,6 +388,22 @@ im Abbild nicht liegt, ist schlimmer als keine.
 Abbild, auf einem Mac aber nie — ohne die lokal installierte Lizenzdatei liesse sich der Hinweis
 nicht schreiben. Umgekehrt wird `colorama` zwar mitinstalliert, erscheint aber in keiner
 Hinweisdatei: Sein Marker gilt nur für Windows, und das Abbild ist Linux.
+
+## Die Prüfungen laufen auch ohne dich
+
+`.github/workflows/check.yml` führt `make check` bei jedem Pull Request aus und bei jedem Push
+nach `main` oder `develop`. Auf Feature-Zweigen greift der Pull Request; doppelt laufen muss
+nichts.
+
+**Warum, obwohl es den Commit-Hook gibt:** Der Hook nimmt einem die sechs schnellen Prüfungen ab —
+aber nur, wer ihn eingeschaltet hat (`git config core.hooksPath .githooks`, einmal je Klon). Und
+`make check` auf dem eigenen Rechner sagt nur, dass es *dort* grün war. Am Pull Request steht es
+für alle.
+
+Die Reihenfolge im Ablauf hat einen Grund: `make venv` installiert aus `pyproject.toml`, also
+ohne feste Versionen; `make deps-lock` zieht die der Lockdatei darüber. Ohne den zweiten Schritt
+bricht `tools/build_notices.py` ab — **und genau so soll es sein**, denn dann wären die
+Lizenzhinweise nicht die des Abbilds.
 
 ## Ein Release bauen
 

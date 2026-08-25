@@ -1017,4 +1017,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   GitHubs Server neu, wo kein Schlüssel liegt — sie kommen unsigniert heraus. Der erste Pull
   Request hat das vorgeführt: 190 signierte Commits und drei Löcher. Rebase-Merge ist in den
   Repo-Einstellungen jetzt ebenfalls abgeschaltet
+- **`make check` läuft bei jedem Pull Request**, als GitHub-Actions-Ablauf. Der Commit-Hook nimmt
+  einem die sechs schnellen Prüfungen ab, aber nur, wer ihn eingeschaltet hat — und ein grünes
+  `make check` auf dem eigenen Rechner sagt nur, dass es dort grün war
 

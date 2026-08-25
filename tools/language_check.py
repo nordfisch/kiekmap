@@ -113,10 +113,15 @@ TRANSCRIBED = re.compile(
 )
 
 #: Where German prose for humans lives: ``docs/``, the files at the root that a reader opens, and
-#: the issue templates, which are the first German a stranger reads.
+#: the templates under ``.github/``, which are the first German a stranger reads.
+#:
+#: **Not** ``.github/workflows/``. A workflow is closer to a shell script than to a manual -- and
+#: shell scripts transcribe their umlauts. ``.github/`` as a whole stood here until the first
+#: workflow arrived and the checker rightly complained about it.
 PROSE = (
     "docs/",
-    ".github/",
+    ".github/ISSUE_TEMPLATE/",
+    ".github/pull_request_template.md",
     "README.md",
     "CHANGELOG.md",
     "CLAUDE.md",
