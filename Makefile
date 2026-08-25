@@ -125,17 +125,24 @@ lint: $(VENV)  ## Code-Stil pruefen
 # Reine Leser, deshalb ohne venv und ohne node_modules -- python3 aus dem System genuegt. Zusammen
 # brauchen sie unter einer Sekunde, und genau deshalb haengen sie auch im Git-Hook unter
 # .githooks/. Warum es sie ueberhaupt braucht: docs/decisions.md, Punkt 59.
-docs-check:  ## Sprachregelung, Verweise, Einstellungen, Nummern, Register
+docs-check:  ## Sprachregelung, Verweise, Einstellungen, Nummern, Register, Version
 	@python3 tools/language_check.py
 	@python3 tools/check_anchors.py
 	@python3 tools/check_settings.py
 	@python3 tools/check_numbers.py
 	@python3 tools/build_register.py --check
+	@python3 tools/set_version.py --check
 
 # Das Register am Anfang von docs/history.md. Erzeugt statt gepflegt, aus demselben Grund wie die
 # Lizenzhinweise: neunzig Zeilen von Hand sind in einem Monat falsch. Siehe docs/decisions.md.
 register:  ## Register in docs/history.md neu schreiben
 	@python3 tools/build_register.py
+
+# Eine Zahl, zwei Dateien. Der Tag ist nicht die Quelle, sondern muss dazu passen -- eine Pruefung
+# gegen `git describe` waere in dem Fenster rot, in dem die Version schon erhoeht, der Tag aber
+# noch nicht gesetzt ist. Und genau dort laeuft der Commit-Hook.
+version:  ## Version zeigen, oder setzen: make version v=0.8.0
+	@if [ -n "$(v)" ]; then python3 tools/set_version.py "$(v)"; else python3 tools/set_version.py; fi
 
 # Die Lizenzhinweise, die mit jedem Artefakt mitgehen muessen -- MIT und BSD verlangen den
 # Copyright-Vermerk in *jeder* Kopie, und ein gebuendeltes index-*.js ist eine Kopie.
