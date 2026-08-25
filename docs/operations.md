@@ -91,11 +91,19 @@ hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
 Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
 
 ```bash
-docker save kiekmap-backend:v1.2 kiekmap-frontend:v1.2 -o /Volumes/STICK/kiekmap-update/abbilder.tar
-echo v1.2 > /Volumes/STICK/kiekmap-update/version
-# nur falls sich die Region geändert hat:
-cp -r frontend/public/tiles data/places.json /Volumes/STICK/kiekmap-update/
+make release nach=/Volumes/STICK/kiekmap-update
+make release nach=/Volumes/STICK/kiekmap-update karte=1   # falls sich die Region geändert hat
 ```
+
+Das Ziel baut beide Abbilder, sichert sie als `abbilder.tar` und schreibt die `version`-Datei
+daneben. **Es bricht ab, wenn der Arbeitsbaum nicht sauber ist oder der passende Tag fehlt** — ein
+Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen.
+
+Vorher also: `make version v=0.9.0`, committen, `git tag -s v0.9.0 -m v0.9.0`.
+
+Von Hand war das vier Befehle, und der, den man vergisst, ist die `version`-Datei: Die Abbilder
+laden, `KIEKMAP_VERSION` bleibt in der `.env` stehen, und der nächste Start zieht das **alte**
+Abbild wieder hoch. Das Gerät läuft dann mit der alten Software und sagt es nirgends.
 
 Am Pi:
 

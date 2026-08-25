@@ -387,6 +387,27 @@ Abbild, auf einem Mac aber nie — ohne die lokal installierte Lizenzdatei liess
 nicht schreiben. Umgekehrt wird `colorama` zwar mitinstalliert, erscheint aber in keiner
 Hinweisdatei: Sein Marker gilt nur für Windows, und das Abbild ist Linux.
 
+## Ein Release bauen
+
+```bash
+make version v=0.9.0                 # die Zahl setzen
+git commit -am "chore: Version 0.9.0"
+git tag -s v0.9.0 -m v0.9.0          # signiert, tag.gpgsign steht
+make release nach=/Volumes/STICK/kiekmap-update
+```
+
+`tools/build_release.py` baut beide Abbilder, sichert sie als `abbilder.tar`, schreibt die
+`version`-Datei daneben und nimmt auf Wunsch (`karte=1`) Kartendatei und Ortsindex mit — genau
+den Ordner, den `deploy/pi/update.sh` erwartet.
+
+**Es bricht ab bei schmutzigem Arbeitsbaum oder fehlendem Tag**, und dagegen gibt es kein
+`--force`: Ein Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen — und
+genau ein Jahr ist der Abstand, in dem so ein Gerät angefasst wird.
+
+**Die `version`-Datei ist die Zeile, die von Hand vergessen wird.** Ohne sie bleibt
+`KIEKMAP_VERSION` in der `.env` des Pi stehen, der nächste Start zieht das alte Abbild wieder
+hoch, und das Gerät läuft mit der alten Software, ohne es irgendwo zu sagen.
+
 ## Branches und Merges
 
 Zwei langlebige Branches, und `main` bedeutet etwas Bestimmtes:
