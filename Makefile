@@ -152,6 +152,24 @@ version:  ## Version zeigen, oder setzen: make version v=0.8.0
 notices: deps  ## Lizenzhinweise der mitgelieferten Pakete erzeugen
 	@python3 tools/build_notices.py
 
+# Festgenagelte Backend-Abhaengigkeiten fuer das Abbild. pyproject.toml nennt nur untere Schranken;
+# ohne diese Datei zoege ein Neubau in einem Jahr andere Versionen. --universal, weil hier auf einem
+# Mac erzeugt und im Abbild auf Linux installiert wird.
+# Das venv auf den Stand der Lockdatei bringen. Die Marker werden dabei entfernt: greenlet kommt
+# im Abbild vor, auf einem Mac aber nie -- und ohne die installierte Lizenzdatei kann
+# tools/build_notices.py den Hinweis nicht schreiben.
+deps-lock: $(VENV)  ## Das venv auf die Versionen der Lockdatei bringen
+	@command -v uv >/dev/null || { echo "uv fehlt: brew install uv"; exit 1; }
+	@sed 's/ ;.*//' backend/requirements.lock > /tmp/kiekmap-lock-ohne-marker.txt
+	VIRTUAL_ENV=backend/.venv uv pip install -q -r /tmp/kiekmap-lock-ohne-marker.txt
+	@rm -f /tmp/kiekmap-lock-ohne-marker.txt
+	@echo "  venv auf dem Stand der Lockdatei."
+
+lock:  ## backend/requirements.lock neu aufloesen (braucht uv)
+	@command -v uv >/dev/null || { echo "uv fehlt: brew install uv"; exit 1; }
+	uv pip compile --universal --python-version 3.12 --no-header \
+	    -o backend/requirements.lock backend/pyproject.toml
+
 notices-check: deps
 	@python3 tools/build_notices.py --check
 

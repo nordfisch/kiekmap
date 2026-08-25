@@ -1000,4 +1000,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   `make check` meldet, wenn eine ausschert. Bisher standen sie alle auf `0.1.0` — darunter
   `__version__`, das `/api/health` meldet: Das Gerät hätte dauerhaft die falsche Version von sich
   behauptet, während der Image-Tag weiterzählt
+- **Die Backend-Abhängigkeiten sind festgenagelt.** `backend/requirements.lock` nennt 28 Pakete
+  mit genauer Version, das Abbild installiert daraus statt aus den unteren Schranken in
+  `pyproject.toml`. `make lock` löst sie neu auf, `make deps-lock` bringt das eigene venv auf
+  denselben Stand
+- **`greenlet` fehlte in den Lizenzhinweisen des Backends.** SQLAlchemy bringt es auf Linux mit,
+  auf dem Entwicklungs-Mac wird es nie installiert — und weil die Hinweise vom venv abgelesen
+  wurden, tauchte es nirgends auf. Die Marker der Lockdatei werden jetzt gegen beide
+  Zielplattformen ausgewertet; drei weitere Versionsangaben waren ebenfalls falsch
 

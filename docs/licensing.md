@@ -51,6 +51,14 @@ erzeugt und nicht gepflegt: Eine handgeschriebene Liste ist in drei Monaten fals
 Richtung, die niemand prüft. `make notices` schreibt sie, `make check` merkt, wenn sie veraltet
 ist.
 
+**Für das Backend kommt die Liste seit dem 25. August 2026 aus `backend/requirements.lock`**, weil
+das Abbild genau daraus installiert. Vorher lief das Werkzeug die Abhängigkeiten von
+`pyproject.toml` aus selbst ab, mit einer handgeschriebenen Ergänzung für das, was
+`uvicorn[standard]` nachzieht — ein nachgebauter Auflöser, der still veraltet wäre. **Er hatte
+schon ein Loch:** `greenlet`, das SQLAlchemy auf Linux mitbringt, war in keiner Hinweisdatei, weil
+es auf dem Entwicklungs-Mac gar nicht installiert wird. Die Umgebungsmarker der Lockdatei werden
+jetzt gegen **beide Zielplattformen** ausgewertet, aarch64 und x86_64.
+
 Drei npm-Pakete nennen ihre Lizenz nur in der `package.json` und legen keinen Text bei
 (`@protomaps/basemaps`, `pmtiles`, `murmurhash-js`). Sie bekommen die Standardfassung ihrer
 Kennung, **mit einem Vermerk, dass der Text nicht aus dem Paket stammt**. Ein Paket ganz ohne
