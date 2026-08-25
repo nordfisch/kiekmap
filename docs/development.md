@@ -400,6 +400,26 @@ SemVer-Tags, Conventional Commits, ein gemeinsames Repo für Front- und Backend.
 Backend werden zusammen versioniert — bei einem Ein-Geräte-System ist getrennte Versionierung nur
 Ballast, und die API-Kompatibilität ist dadurch garantiert.
 
+### Eine Zahl, fünf Stellen
+
+```bash
+make version            # zeigt sie
+make version v=0.8.0    # setzt sie ueberall
+```
+
+`tools/set_version.py` schreibt sie nach `frontend/package.json`, zweimal nach
+`frontend/package-lock.json` (Wurzelpaket), nach `backend/pyproject.toml` und nach
+`backend/app/__init__.py`. `make check` meldet, wenn eine davon ausschert.
+
+**Die vierte ist die wichtigste und wäre am ehesten liegengeblieben:** `__version__` ist das, was
+`/api/health` antwortet und was in der OpenAPI-Beschreibung steht — also die Version, die das
+Gerät im Museum von sich behauptet. Stünde sie still, während der Image-Tag weiterzählt, gäbe die
+API auf die eine Frage, für die es sie gibt, die falsche Antwort.
+
+**Der Tag ist nicht die Quelle, die Dateien sind es.** Eine Prüfung gegen `git describe` wäre
+genau in dem Fenster rot, in dem die Version schon erhöht, der Tag aber noch nicht gesetzt ist —
+und dort läuft der Commit-Hook. Der Tag muss stattdessen passen.
+
 **Alle Commits sind signiert** (SSH, nicht GPG), Tags ebenso — auch die 185 aus der Zeit vor dem
 Schlüssel, rückwirkend am 25. August 2026 nachgeholt. Das ist ungewöhnlich, und die Abwägung
 gehört deshalb aufgeschrieben.

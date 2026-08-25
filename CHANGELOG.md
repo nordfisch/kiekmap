@@ -996,3 +996,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   kurzlebige `feature/`- und `fix/`-Branches. **Squash-Merge ist abgeschaltet** — die
   Dokumentation zitiert Commits einzeln mit Hash, und ein Squash vernichtet genau die
 - `.github/pull_request_template.md` mit der Prüfliste vor dem Absenden
+- **Eine Versionsnummer an einem Ort.** `make version v=0.8.0` schreibt sie an alle fünf Stellen,
+  `make check` meldet, wenn eine ausschert. Bisher standen sie alle auf `0.1.0` — darunter
+  `__version__`, das `/api/health` meldet: Das Gerät hätte dauerhaft die falsche Version von sich
+  behauptet, während der Image-Tag weiterzählt
+
