@@ -4,6 +4,18 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unveröffentlicht]
 
+Noch nichts.
+
+## [0.8.0] — 2026-08-25
+
+Die erste bezifferte Fassung. Sie ist **kein Meilenstein der Funktion**, sondern der Punkt, an dem
+das Projekt sich selbst festhalten kann: eine Versionsnummer an einem Ort, festgenagelte
+Abhängigkeiten, ein Releaseprozess, geprüfte Herkunft jedes Commits.
+
+**Warum 0.8 und nicht 1.0:** `1.0.0` sagt unter SemVer eine stabile öffentliche Schnittstelle zu.
+Alles unter `deploy/pi/` ist bis heute ungeprüft, und die Abnahme auf dem ersten Gerät steht aus.
+Die `1.0.0` wird danach vergeben — siehe [Punkt 15](docs/backlog.md).
+
 ### Hinzugefügt
 
 - Projektgerüst: Ordnerstruktur, Git-Repo, README
