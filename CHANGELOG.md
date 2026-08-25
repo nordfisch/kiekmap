@@ -384,7 +384,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Er läuft jetzt gegen eine Probe-Migration ohne feste Revision, deren Umgebung die echte
   `alembic/env.py` ausführt
 
-- **Der Schließen-Knopf der Detailansicht steht wieder oben rechts.** Er saß seit `6eb4c69` in der
+- **Der Schließen-Knopf der Detailansicht steht wieder oben rechts.** Er saß seit `fe0c95f` in der
   Kopfzeile der Textspalte — in der Flucht, aber nicht dort, wo man ihn sucht. Die Ansicht hat
   jetzt eine eigene Kopfzeile über beiden Spalten; damit sitzt der Knopf am rechten Rand der ganzen
   Ansicht statt am rechten Rand einer Spalte. Die Fußzeile mit den Blätterknöpfen kostet weiterhin

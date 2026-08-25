@@ -221,7 +221,7 @@ Punkt da, *weil* jemand sie am Stück angesehen hatte. Genau das soll hier für 
   Oberfläche; zwölf einzeln entschiedene Kleinigkeiten ergeben zwölf Sonderfälle.
 
 **Der erste Eintrag dieser Liste liegt schon vor.** Er stand bis zum 9. August 2026 als eigener
-Punkt 13 hier: Beim Angleichen von „Hilf mit:" an „Bilder aus" (`8b33e65`) wurde aus dem Akzentbraun
+Punkt 13 hier: Beim Angleichen von „Hilf mit:" an „Bilder aus" (`9b64b2e`) wurde aus dem Akzentbraun
 eine stille graue Zeile — die bewusste Folge einer bewussten Entscheidung, aber es war zugleich der
 einzige Blickfang der linken Spalte. Als eigener Punkt war das zu klein, um je an die Reihe zu
 kommen, und zu vereinzelt, um richtig entschieden zu werden: Ob der Beitragsbereich seinen Zug aufs
@@ -260,7 +260,7 @@ kein Ersatz.
   es im zweistelligen Megabyte-Bereich bleiben, das ist zu messen.
 
 *Der billige Teil ist bereits gebaut: der Kartenstil „Papier" in den Farben der Oberfläche
-(`2e648f6`).*
+(`5a7b74b`).*
 
 ### 9 · Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode
 
