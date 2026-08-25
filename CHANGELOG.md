@@ -957,6 +957,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Werkzeug beantworte sie — es las aber nur `.py`, `.ts` und `.tsx`. Rund 900 Stellen in
   `decisions.md` und `history.md` sind nachgezogen, dazu 177 Stellen mit `ss` statt `ß`
 
+- **Alle 185 Commits tragen eine Identität**, `Kalle Erlhoff <kiekmap@erlhoff.de>`. Vorher waren
+  es drei, zwei davon von Git aus Konto- und Rechnernamen erzeugt, weil `user.email` nirgends
+  gesetzt war. Der Baum ist dabei byte-gleich geblieben
+- Commits und Tags werden **signiert** (SSH). Die Commits vor dem 25. August 2026 bleiben
+  unsigniert — eine Signatur vom Juli mit einem Schlüssel vom August behauptete etwas Falsches
+- Das README beginnt mit demselben Satz wie die Beschreibung des Repos; es sind die zwei Texte,
+  die ein Besucher zuerst sieht, und sie standen in verschiedenen Tönen
+
 ### Hinzugefügt
 
 - `make check` prüft alles, was vor einem Commit laufen soll: Stil, die fünf Prüfungen neben den
@@ -983,3 +991,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `AUTHORS` und Meldungsvorlagen unter
   `.github/` — die fünf Dateien, die ein veröffentlichtes Repo hat. Sicherheitsmeldungen laufen
   über die private Meldung bei GitHub, damit keine Adresse im Klartext im Repo steht
+- **Ein Branch-Modell:** `develop` für den Alltag, `main` für den Stand, der im Museum läuft, dazu
+  kurzlebige `feature/`- und `fix/`-Branches. **Squash-Merge ist abgeschaltet** — die
+  Dokumentation zitiert Commits einzeln mit Hash, und ein Squash vernichtet genau die
+- `.github/pull_request_template.md` mit der Prüfliste vor dem Absenden

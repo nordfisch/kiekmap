@@ -60,6 +60,16 @@ aufmachen; die Vorlagen fragen nach dem Nötigen.
 **Backlogpunkte tragen feste Nummern**, unter denen sie zitiert werden („Punkt 15"). Nummern
 werden nie neu vergeben, auch nicht nach dem Erledigen. `tools/check_numbers.py` rechnet das nach.
 
+## Der Weg eines Beitrags
+
+1. **Fork**, dann ein Branch pro Thema: `feature/kurzer-name` oder `fix/kurzer-name`.
+2. Arbeiten, `make check` grün bekommen. Conventional Commits (`feat:`, `fix:`, `docs:` …) —
+   daran halten sich hier über 99 Prozent der Commits.
+3. **Pull Request gegen `develop`**, nicht gegen `main`. `main` ist der Stand, der im Museum läuft,
+   und bekommt nur Merges aus `develop`. Näheres in [development.md](docs/development.md).
+4. Gemerged wird per **Rebase**, nicht per Squash — die Dokumentation zitiert einzelne Commits mit
+   Hash, und ein Squash würde genau die vernichten.
+
 ## Lizenz der Beiträge
 
 Das Projekt steht unter der [Apache-Lizenz 2.0](LICENSE). Nach ihrem **§5** steht jeder Beitrag,

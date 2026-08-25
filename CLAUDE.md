@@ -121,6 +121,11 @@ passieren würden. **Vor jedem Commit `make check`.**
 mit `python3`, ohne venv; `make check` und der Hook unter `.githooks/` führen sie aus. Näheres
 in [docs/development.md](docs/development.md).
 
+**Gearbeitet wird auf `develop`**, nie auf `main` — dort steht der Stand, der im Museum läuft, und
+er bekommt nur Merges. Ein eigenes Thema bekommt einen `feature/`- oder `fix/`-Branch. **Nie
+squashen:** Die Dokumentation zitiert Commits einzeln mit Hash. Näheres in
+[docs/development.md](docs/development.md).
+
 **Kommentare** erklären das *Warum*, nicht das *Was*. Ein Kommentar, der nur wiederholt, was der
 Code sagt, wird gelöscht. Ein Kommentar, der einen Fallstrick benennt, ist Gold — davon gibt es
 hier einige (`rshared`-Mount, Sprite-URL muss absolut sein, SQLite `+` ist Addition).

@@ -364,11 +364,45 @@ Das vollständige Vorgehen — Bounding Box ausrechnen, Zoomstufen bestimmen, Ka
 bauen, prüfen — steht in [adaption.md](adaption.md). Dort auch, was eine zweite Sprache kosten
 würde und ab wann sich Modularisierung lohnt.
 
+## Branches und Merges
+
+Zwei langlebige Branches, und `main` bedeutet etwas Bestimmtes:
+
+| Branch | Bedeutung | Wer schreibt hinein |
+|---|---|---|
+| `main` | **Was im Museum läuft.** Jeder Commit darauf trägt einen Tag. | nur Merges aus `develop` |
+| `develop` | Der Alltag. Vorgabe-Branch. | Merges aus `feature/*` und `fix/*` |
+| `feature/<kurz>`, `fix/<kurz>` | kurzlebig, ein Thema | per Pull Request nach `develop`, danach gelöscht |
+
+**Das ist nicht GitHub Flow**, auch wenn es so aussieht. GitHub Flow hat genau einen langlebigen
+Branch und ist für Dienste gebaut, die mehrmals täglich ausliefern. Dieses Gerät steht offline und
+wird ein- bis zweimal im Jahr vom Stick aktualisiert; da beantwortet ein eigener `main` eine Frage,
+die im Museum wirklich gestellt wird: *Was läuft eigentlich auf dem Gerät?* Die Begründung steht in
+[decisions.md](decisions.md).
+
+**Kein `release/*`, kein `hotfix/*`.** Bei einem Betreuer ist das Ballast. Ein dringender Fehler
+wird ein `fix/`-Branch, geht nach `develop` und von dort sofort nach `main` — dieselbe Straße,
+nur schneller befahren.
+
+### Squash-Merge ist hier abgeschaltet, und das hat einen Grund
+
+`history.md` zitiert **Commits einzeln, mit Hash** — über achtzig Fundstellen. Ein Squash-Merge
+fasst die Commits eines Zweigs zusammen und vernichtet damit genau die, auf die die Dokumentation
+zeigt. Das ist kein Stilproblem, sondern ein Datenverlust in einer Datei, deren Wert an diesen
+Verweisen hängt.
+
+- `feature/*` → `develop`: **Rebase.** Linear, und jeder Commit bleibt einzeln erhalten.
+- `develop` → `main`: **echter Merge-Commit.** Er hält das Release-Ereignis fest.
+
 ## Veröffentlichen
 
 SemVer-Tags, Conventional Commits, ein gemeinsames Repo für Front- und Backend. Frontend und
 Backend werden zusammen versioniert — bei einem Ein-Geräte-System ist getrennte Versionierung nur
 Ballast, und die API-Kompatibilität ist dadurch garantiert.
+
+**Commits werden signiert** (SSH, nicht GPG), Tags ebenso. Die 185 Commits vor dem 25. August 2026
+sind unsigniert und bleiben es: Eine Signatur vom Juli mit einem Schlüssel vom August behauptete
+etwas, das nicht stimmt.
 
 Das Museumsgerät ist offline. Der Updateweg dorthin (Image-Tarball auf einen USB-Stick) steht in
 [operations.md](operations.md).

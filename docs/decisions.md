@@ -2295,3 +2295,39 @@ kann, und in `SECURITY.md` eine Liste dessen, was **kein** Fund ist, sondern Ent
 Besucheransicht ohne Anmeldung, der Beitragsweg ohne Ratenbegrenzung, der unverschlüsselte
 Bestand. Wer das liest, weiß, worauf er sich einlässt — und das ist mehr wert als der Eindruck
 eines gepflegten Projekts.
+
+---
+
+## 66. Zwei Branches — `main` sagt, was im Museum läuft
+
+*Entschieden am 25. August 2026 — Backlogpunkt 22.*
+
+Zur Wahl stand **GitHub Flow**: genau ein langlebiger Branch, `main` jederzeit auslieferbar,
+Releases als Tags darauf. Es ist die verbreitetste Form und die einfachste.
+
+**Gewählt wurde stattdessen ein zweiter langlebiger Branch**, `develop` für den Alltag und `main`
+für den ausgelieferten Stand — der Kern von Git Flow ohne dessen `release/*`- und
+`hotfix/*`-Zweige.
+
+**Der Grund liegt im Gerät, nicht im Geschmack.** GitHub Flow ist für Dienste gebaut, die mehrmals
+täglich ausliefern; dort ist „`main` ist jederzeit auslieferbar" eine Zusage, die täglich eingelöst
+wird. Dieses Gerät steht **offline** in einem Museumsraum und wird ein- bis zweimal im Jahr von
+Hand vom USB-Stick aktualisiert. Zwischen zwei Aktualisierungen liegen Monate Arbeit. Ein eigener
+`main` beantwortet damit eine Frage, die im Museum wirklich gestellt wird — *was läuft eigentlich
+auf dem Gerät?* —, und zwar als Branch, gegen den sich diffen lässt, statt als Tag, den man erst
+kennen muss.
+
+**Kein `release/*`, kein `hotfix/*`.** Bei einem Betreuer ist das Ballast. Ein dringender Fehler
+wird ein `fix/`-Branch, geht nach `develop` und von dort sofort nach `main`.
+
+**Squash-Merge ist abgeschaltet, und das ist die eigentliche Entscheidung.** Die Voreinstellung
+vieler Projekte fasst die Commits eines Zweigs beim Merge zusammen. Hier richtete das Schaden an:
+`history.md` zitiert **Commits einzeln, mit Hash**, über achtzig Fundstellen — ein Squash vernichtet
+genau die. Wie teuer das ist, weiß dieses Projekt genau: Zweimal, am 21. und am 25. August, hat
+ein Rewrite alle Kurz-Hashes ungültig gemacht, und beide Male war der Nachlauf über die
+Zuordnungstabelle die halbe Arbeit. Ein Squash-Merge liefert dafür **keine** Zuordnungstabelle.
+Also: `feature/*` → `develop` per Rebase, `develop` → `main` als echter Merge-Commit, der das
+Release-Ereignis festhält.
+
+**Vorgabe-Branch ist `develop`**, damit Pull Requests von selbst dorthin zielen. Dass `main`
+dadurch monatelang hinterherhinkt, ist kein Mangel, sondern die Aussage.

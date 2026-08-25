@@ -1,7 +1,7 @@
 # Kiekmap
 
-Interaktive Bilddatenbank für ein Heimatmuseum: historische Ortsfotos, räumlich und zeitlich
-erkundbar an einem Touchscreen — und ein Weg, das Wissen der Besucher einzusammeln.
+Historische Ortsfotos auf einer Karte entdecken, Jahrzehnt für Jahrzehnt. Ein Touchscreen-Kiosk
+fürs Heimatmuseum — und ein Weg, das Wissen der Besucher einzusammeln.
 
 Das Gerät steht im Museum, läuft **vollständig offline** im Kiosk-Modus und wird gesichert, indem
 man einen USB-Stick einsteckt und einen Knopf drückt.
