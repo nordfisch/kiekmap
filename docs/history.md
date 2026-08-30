@@ -3908,8 +3908,17 @@ Abschnitt.
 
 Am selben Tag ist `git filter-repo --replace-text --replace-message` über die 180 Commits gelaufen,
 nach zwei Sicherungen und einem Probelauf auf einer Kopie. Der Baum von `HEAD` ist danach
-**byte-gleich** mit dem davor — dieselbe Prüfsumme —, alle Commits sind erhalten, und weder in einer
-Dateifassung noch in einer Commit-Nachricht steht noch einer der Namen.
+**byte-gleich** mit dem davor — dieselbe Prüfsumme —, alle Commits sind erhalten, und keiner der
+gefundenen Namen steht noch in einer Dateifassung oder einer Commit-Nachricht.
+
+> **Nachtrag vom 25. August 2026.** *„Der gefundenen"* ist die richtige Einschränkung, und sie war
+> beim Schreiben nicht gemeint. Ein letzter Durchgang vor der Veröffentlichung fand **drei
+> weitere** — ein Nachname, ein Hausname, ein Fototitel. Der Lauf vom 21. August suchte nach Namen,
+> die die Datenbank als Namen kennt; diese drei standen in **Prosa**, in Beispielen, nicht in
+> Datenfeldern. Im Arbeitsbaum sind sie ersetzt. **Im Verlauf bleiben sie stehen** — bewusst: Ein
+> vierter Rewrite an einem Tag hätte alle Hashes erneut verschoben, die zitierten Kennungen erneut
+> nachzuziehen verlangt und den Tag `v0.8.0` gekostet, und das für drei Namen, die nur in
+> Beispielsätzen alter Commits stehen und die kein Leser der aktuellen Dateien je zu sehen bekommt.
 
 **Möglich war das ohne Kosten, weil es keinen Remote gibt.** Niemand hatte eine Kopie, die
 unbrauchbar werden konnte. Nach der Veröffentlichung wäre derselbe Lauf ein Bruch für jeden, der

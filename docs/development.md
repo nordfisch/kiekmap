@@ -116,6 +116,12 @@ als solche kennt; diese drei standen in Prosa, nicht in einem Namensfeld. Die Ge
 Veröffentlichung greift deshalb die Muster ab, in denen Namen im Bestand vorkommen — *Familie X*,
 *Hof X*, *A. Nachname*, norddeutsche Endungen —, nicht nur die Felder.
 
+**Im Git-Verlauf stehen diese drei weiterhin**, und das ist entschieden, nicht übersehen: Ein
+vierter Rewrite an einem Tag hätte alle Hashes erneut verschoben, die zitierten Kennungen erneut
+nachzuziehen verlangt und den Tag `v0.8.0` gekostet — für drei Namen in Beispielsätzen alter
+Commits, die niemand sieht, der die heutigen Dateien liest. **Die Zusage lautet damit genau:** Der
+aktuelle Stand nennt keine Namen aus dem Bestand; der Verlauf vor dem 25. August 2026 nennt drei.
+
 ## Der Kopf jeder Quelldatei
 
 Zwei Zeilen, über dem Docstring, unter einer etwaigen Shebang-Zeile:
