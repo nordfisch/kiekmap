@@ -146,10 +146,9 @@ GERMAN_PROSE = (
     "CONTRIBUTING.md",
 )
 
-#: Empty until the first document is translated, and that is not an oversight worth removing: one
-#: list with a flag would not do. An English file passes the German check for the wrong reason --
-#: it has no transcription because it has no German -- so silence there proves nothing.
-ENGLISH_PROSE: tuple[str, ...] = ()
+#: One list with a flag would not do here: an English file passes the German check for the wrong
+#: reason -- it has no transcription because it has no German -- so silence there proves nothing.
+ENGLISH_PROSE: tuple[str, ...] = ("docs/lessons.md",)
 
 
 def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:

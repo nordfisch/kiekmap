@@ -52,6 +52,8 @@ nicht die Sprache.
 | Doku für Museum und Betrieb: `usermanual`, `operations`, `adaption`, README, CHANGELOG, `backlog` | Deutsch |
 | Doku für Entwickler: `architecture`, `development`, `decisions`, `CONTRIBUTING`, diese Datei | Englisch |
 | `docs/history.md` bis v0.8.0 | Deutsch, eingefroren |
+| `docs/lessons.md` — was der Plan nicht wusste | Englisch |
+| Titel und Text eines Pull Request | Englisch |
 | GitHub-Issues | Deutsch |
 | Commit-Nachrichten ab dem 30. August 2026 | **Englisch** |
 | Werte in der Datenbank, die aus OSM stammen (`kind`: `strasse`, `flur` …) | Deutsch, wie geliefert |
@@ -107,10 +109,10 @@ nicht ansieht:
 
 ```bash
 make dev          # Backend (8000) und Frontend (5173) mit Hot Reload
-make check        # alles vor einem Commit: Stil, die sechs Prüfungen, alle Tests
+make check        # alles vor einem Commit: Stil, Prüfungen, Tests
 make test         # nur die Tests -- pytest und vitest
 make lint         # ruff check und format --check
-make docs-check   # nur die sechs Prüfungen
+make docs-check   # nur die Prüfungen, ohne die Tests
 make tiles        # Offline-Karte, Schriften, Symbole für die Region
 make places       # Ortsindex bauen und einlesen
 make seed         # Beispielbestand aus seed/ herstellen (löscht den vorhandenen!)
@@ -128,7 +130,7 @@ nur den Erfolgsfall. Die wertvollsten Tests hier heißen `test_jahrzehnt_erschei
 mittendrin` und `test_scandatum_datiert_das_foto_nicht` — beide decken Fehler ab, die still
 passieren würden. **Vor jedem Commit `make check`.**
 
-**Sechs Prüfungen laufen neben den Tests**, weil sie Dateien lesen, die kein Test je sieht:
+**Diese Prüfungen laufen neben den Tests**, weil sie Dateien lesen, die kein Test je sieht:
 `tools/language_check.py` (Sprachregelung), `tools/check_anchors.py` (Verweise in `docs/`),
 `tools/check_settings.py` (erreicht jede Einstellung den Container?),
 `tools/check_numbers.py` (stimmt die Buchführung des Backlogs über seine Nummern?) und

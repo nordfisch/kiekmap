@@ -37,8 +37,8 @@ PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die Zeile für die 
 Sie stehen vollständig in [CLAUDE.md](CLAUDE.md) und in [development.md](docs/development.md).
 Das Wichtigste:
 
-- **`make check` vor jedem Commit.** Stil, sechs Prüfungen, alle Tests. Der Hook unter `.githooks/`
-  nimmt einem die schnellen davon ab: `git config core.hooksPath .githooks`.
+- **`make check` vor jedem Commit.** Stil, Prüfungen, Tests. Der Hook unter `.githooks/` nimmt
+  einem die schnellen davon ab: `git config core.hooksPath .githooks`.
 - **Sprachregelung nach Publikum.** Jeder Text existiert einmal, in der Sprache seiner Leser.
   Deutsch: Oberfläche, CLI, Doku für Museum und Betrieb, Issues, Testdateien. Englisch:
   Bezeichner, Kommentare, Entwicklerdoku und Commit-Nachrichten. Umlaute in deutschen Texten für

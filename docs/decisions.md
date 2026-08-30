@@ -2186,7 +2186,9 @@ lizenziert das Programm, nicht die Daten. Das steht samt der ODbL-Frage beim Ort
 
 ## 63. Die Historie wird nicht aufgeteilt, sondern erschlossen — über ihr Datum
 
-*Entschieden am 21. August 2026 — Backlogpunkt 64, Abschnitt 3.*
+*Entschieden am 21. August 2026 — Backlogpunkt 64, Abschnitt 3.* **Ergänzt durch Punkt 68:** Die
+Datei ist seit dem 30. August 2026 abgeschlossen. Aufgeteilt wurde sie weiterhin nicht; sie wächst
+nur nicht mehr.
 
 `history.md` ist mit 3.858 Zeilen die größte Datei im Repo und wächst mit jedem Arbeitsschritt.
 Die Frage war, ob sie aufzuteilen ist — nach Jahr, nach Thema — oder ob eine Datei, die niemand von

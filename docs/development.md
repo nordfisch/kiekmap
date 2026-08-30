@@ -68,6 +68,8 @@ Die Achse ist das Publikum, nicht die Sprache:
 | [architecture.md](architecture.md), diese Datei, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | Englisch | Entwickler |
 | Commit-Nachrichten ab dem 30. August 2026 | Englisch | Entwickler |
 | [history.md](history.md) bis v0.8.0 | Deutsch, eingefroren | ein Bericht bleibt in seiner Sprache |
+| [lessons.md](lessons.md) | Englisch | Entwickler; Nachfolger der Historie |
+| Titel und Text eines Pull Request | Englisch | dieselben Leser wie die Commits, die er zusammenfasst |
 
 **Warum der Entwicklerteil englisch ist:** `def zeitraum(...) -> DatePrecision` erzeugt an jeder
 Grenze zwischen eigenem Code und einer Bibliothek einen Bruch. Coding-Agents und spätere
@@ -187,15 +189,15 @@ Schaden klein.
 ## Testen
 
 ```bash
-make check         # alles: Stil, die sechs Pruefungen, alle Tests -- das Ziel vor einem Commit
+make check         # alles: Stil, Pruefungen, Tests -- das Ziel vor einem Commit
 make test          # nur die Tests
 make test-backend  # pytest
 make test-frontend # Typecheck und vitest
 make lint          # ruff
-make docs-check    # nur die sechs Pruefungen unten
+make docs-check    # nur die Pruefungen unten
 ```
 
-**Sechs Prüfungen laufen neben den Tests, weil sie Dateien lesen, die kein Test je sieht:**
+**Diese Prüfungen laufen neben den Tests, weil sie Dateien lesen, die kein Test je sieht:**
 
 ```bash
 python3 tools/language_check.py   # hält sich der Quelltext an die Sprachregelung?
@@ -457,7 +459,7 @@ Hinweisdatei: Sein Marker gilt nur für Windows, und das Abbild ist Linux.
 nach `main` oder `develop`. Auf Feature-Zweigen greift der Pull Request; doppelt laufen muss
 nichts.
 
-**Warum, obwohl es den Commit-Hook gibt:** Der Hook nimmt einem die sechs schnellen Prüfungen ab —
+**Warum, obwohl es den Commit-Hook gibt:** Der Hook nimmt einem die schnellen Prüfungen ab —
 aber nur, wer ihn eingeschaltet hat (`git config core.hooksPath .githooks`, einmal je Klon). Und
 `make check` auf dem eigenen Rechner sagt nur, dass es *dort* grün war. Am Pull Request steht es
 für alle.

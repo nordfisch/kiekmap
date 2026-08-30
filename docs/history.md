@@ -13,10 +13,26 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 | [decisions.md](decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
 | [architecture.md](architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
 | **history.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
+| [lessons.md](lessons.md) | *Was der Plan nicht wusste?* — fortgeführt, englisch |
 | [backlog.md](backlog.md) | *Was fehlt noch?* |
 
 Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 *„Was der Plan nicht wusste"* und sind der eigentliche Grund für diese Datei.
+
+## Diese Datei ist abgeschlossen
+
+Sie endet am 25. August 2026 mit der Veröffentlichung und der Fassung v0.8.0. Was danach kam, steht
+in den Commits, in den Pull Requests und in den geschlossenen Issues — dort entsteht es ohnehin.
+
+**Sie bleibt deutsch.** Übersetzt wäre sie eine zweite Fassung, die veraltet, und ihr Wert liegt in
+der Nuance. Vier Monate Arbeitstagebuch bleiben also, wie sie sind.
+
+**Fortgeführt wird sie in [lessons.md](lessons.md)**, englisch und deutlich schmaler. Diese Datei
+hielt jeden Schritt fest; die andere hält nur fest, was sonst ein zweites Mal passieren würde.
+
+Ein neuer Abschnitt hier macht `python3 tools/build_register.py --check` rot, weil das Register
+dann nicht mehr stimmt. Das ist die beabsichtigte Reibung. Eine Änderung an vorhandener Prosa
+fängt das Werkzeug nicht — dafür gibt es das Review.
 
 <!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand ändern -->
 
