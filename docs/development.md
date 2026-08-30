@@ -51,15 +51,34 @@ Einstellungen: Interpreter auf `backend/.venv/bin/python`, `backend` als Sources
 
 ## Sprachregelung
 
-**Bezeichner und Code-Kommentare auf Englisch. Alles Menschenlesbare auf Deutsch.**
+**Jeder Text existiert genau einmal, in der Sprache seiner Leser.** Nicht übersetzen, sondern
+trennen. Doppelter Inhalt in zwei Sprachen ist die teure Fehlerart: Die zweite Fassung veraltet,
+und niemand merkt es.
 
-Der Grund ist nicht Konvention um ihrer selbst willen: `def zeitraum(...) -> DatePrecision` erzeugt
-an jeder Grenze zwischen eigenem Code und einer Bibliothek einen Bruch. Und Coding-Agents wie
-spätere Mitstreiter stolpern über gemischten Code messbar häufiger.
+Die Achse ist das Publikum, nicht die Sprache:
 
-Deutsch bleibt für: Oberflächentexte (`frontend/src/text/de.ts`), Meldungen an Besucher und
-Kuratoren, CLI-Ausgaben, Dokumentation, Commit-Nachrichten. Deutsche Beispiele in englischen
-Kommentaren sind erwünscht, wo sie den Fall erklären.
+| Was | Sprache | Leser |
+|---|---|---|
+| Oberfläche, CLI, Meldungen im Kiosk und in der Verwaltung | Deutsch | Besucher, Ehrenamtliche |
+| [usermanual.md](usermanual.md), [operations.md](operations.md), [adaption.md](adaption.md) | Deutsch | Museumsteam, zweites Museum |
+| [README](../README.md), [CHANGELOG](../CHANGELOG.md) | Deutsch | Betreiber |
+| [backlog.md](backlog.md), GitHub-Issues | Deutsch | wer hier plant |
+| Testdateien — Name, Docstring, Kommentar | Deutsch | siehe unten |
+| Bezeichner, Code-Kommentare, Docstrings | Englisch | Entwickler |
+| [architecture.md](architecture.md), diese Datei, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | Englisch | Entwickler |
+| Commit-Nachrichten ab dem 30. August 2026 | Englisch | Entwickler |
+| [history.md](history.md) bis v0.8.0 | Deutsch, eingefroren | ein Bericht bleibt in seiner Sprache |
+
+**Warum der Entwicklerteil englisch ist:** `def zeitraum(...) -> DatePrecision` erzeugt an jeder
+Grenze zwischen eigenem Code und einer Bibliothek einen Bruch. Coding-Agents und spätere
+Mitstreiter stolpern über gemischten Code messbar häufiger.
+
+**Warum das Produkt deutsch bleibt:** Oberfläche, CLI und Verwaltung sind für Menschen in Holm
+gebaut. Ein nicht deutschsprachiges Museum kann Kiekmap heute ohnehin nicht betreiben; die
+Museumsdoku hat also kein englisches Publikum.
+
+**Deutsche Beispiele in englischen Texten sind erwünscht**, wo sie den Fall erklären. Sie sind der
+Gegenstand, über den der Text spricht, nicht die Prosa.
 
 **Für Meldungen gilt eine Faustregel:** *Kann sie im Kiosk oder im Admin-Bereich erscheinen? Dann
 Deutsch, sonst Englisch.*
@@ -76,19 +95,45 @@ Deutsch, sonst Englisch.*
 Die CLI ist die Ausnahme von der Ausnahme: `python -m app.cli import` führt beim Erstbefüllen auch
 das Museumsteam aus, deshalb bleiben ihre Ausgaben deutsch.
 
-**Testdateien sind die Ausnahme und bleiben ganz deutsch** — Name, Docstring, Kommentar. Ein
-Testname ist kein Bezeichner im üblichen Sinn, sondern ein Spezifikationssatz:
-`test_scandatum_datiert_das_foto_nicht` sagt sofort, welche Zusage der Test schützt, und der
-Docstring darunter trägt das Warum. Übersetzt verlöre das an Schärfe, und gerade diese Sätze sind
-die wertvollste Dokumentation im Repo.
+**Testdateien bleiben ganz deutsch** — Name, Docstring, Kommentar. Ein Testname ist kein Bezeichner
+im üblichen Sinn, sondern ein Spezifikationssatz: `test_scandatum_datiert_das_foto_nicht` sagt
+sofort, welche Zusage der Test schützt, und der Docstring darunter trägt das Warum. Übersetzt
+verlöre das an Schärfe. Dazu haben die Fachbegriffe — Flurname, Hausnummer, Ortsteil — kein gutes
+englisches Äquivalent.
 
-Umlaute werden in deutscher Prosa im Quelltext, in Shell-Skripten und in Commit-Nachrichten
-umschrieben (`ue`, `oe`, `ae`, `ss`); in Texten für Menschen normal geschrieben. **Ein
-GitHub-Workflow zählt zum Quelltext**, die Meldungsvorlagen daneben zu den Texten für Menschen. **Zitate und
-Datenwerte behalten sie**: `"Mühlenweg"` als Beispiel in einem Kommentar, `["Gebäude"]` als
-Einstellungswert, `"März"` in der Monatsliste — ohne Umlaut wären sie schlicht falsch.
+Umlaute werden in deutscher Prosa im Quelltext und in Shell-Skripten umschrieben (`ue`, `oe`, `ae`,
+`ss`); in Texten für Menschen normal geschrieben. **Ein GitHub-Workflow zählt zum Quelltext**, die
+Meldungsvorlagen daneben zu den Texten für Menschen. **Zitate und Datenwerte behalten sie**:
+`"Mühlenweg"` als Beispiel in einem Kommentar, `["Gebäude"]` als Einstellungswert, `"März"` in der
+Monatsliste — ohne Umlaut wären sie schlicht falsch. Für Commit-Nachrichten ist die Regel seit der
+Umstellung auf Englisch gegenstandslos.
 
-Ob eine Datei sich daran hält, beantwortet `python tools/language_check.py`.
+`python3 tools/language_check.py` prüft beide Seiten: umschriebene Umlaute in deutscher Doku,
+deutsche Absätze in englischer. Eine Datei, die gerade übersetzt wird, steht in keiner der beiden
+Listen — sie ist halb das eine und halb das andere, und beide Prüfungen hätten recht.
+
+## Schreibregeln
+
+Sie gelten für jede Dokumentation, deutsch wie englisch. Es sind Stilregeln, keine Sprachregeln.
+
+> So einfach wie möglich, so komplex wie nötig. Nüchtern und sachlich, kein werblicher oder
+> erzählerischer Ton.
+>
+> 1. Ein Gedanke pro Satz. Kein Schachteln mit mehr als einem Nebensatz.
+> 2. Aktiv statt Passiv, wo es den Satz kürzt oder klarer macht.
+> 3. Keine Anteaser, keine rhetorischen Fragen, keine Einleitungsfloskeln.
+> 4. Keine Füllwörter und kein Hedging (Konjunktiv, „eigentlich", „im Grunde") ohne
+>    inhaltlichen Grund.
+> 5. Keine Redundanz: Inhalte nicht mehrfach in anderen Worten wiederholen.
+> 6. Reihenfolge nach Relevanz und logischem Ablauf, nicht nach Schreibprozess.
+> 7. Streichtest: Jeder Satz muss eine sachliche Funktion erfüllen. Fällt er ohne
+>    Informationsverlust weg, kommt er weg.
+> 8. Keine Metaphern, keine Bildsprache, keine Übertreibungen.
+
+**Zwei Ausnahmen:** [history.md](history.md) ist eingefroren und behält ihren Ton. Testnamen bleiben
+lang, wenn Genauigkeit das verlangt.
+
+Kein Werkzeug prüft diese Regeln. Sie wirken beim Schreiben und beim Review.
 
 ## Beispiele sind erfunden
 
@@ -142,15 +187,15 @@ Schaden klein.
 ## Testen
 
 ```bash
-make check         # alles: Stil, die fuenf Pruefungen, alle Tests -- das Ziel vor einem Commit
+make check         # alles: Stil, die sechs Pruefungen, alle Tests -- das Ziel vor einem Commit
 make test          # nur die Tests
 make test-backend  # pytest
 make test-frontend # Typecheck und vitest
 make lint          # ruff
-make docs-check    # nur die fuenf Pruefungen unten
+make docs-check    # nur die sechs Pruefungen unten
 ```
 
-**Fünf Prüfungen laufen neben den Tests, weil sie Dateien lesen, die kein Test je sieht:**
+**Sechs Prüfungen laufen neben den Tests, weil sie Dateien lesen, die kein Test je sieht:**
 
 ```bash
 python3 tools/language_check.py   # hält sich der Quelltext an die Sprachregelung?
@@ -476,6 +521,15 @@ erzeugt die Commits neu — GitHub baut sie auf dem Server, wo kein Schlüssel l
 unangetastet: Signaturen bleiben, Hashes bleiben, jeder Commit bleibt einzeln sichtbar.
 
 Die Verzweigungen im Graphen sind der Preis; `git log --first-parent` blendet sie aus.
+
+### Commit-Nachrichten sind englisch
+
+Seit dem 30. August 2026. Die 211 Commits davor sind deutsch und bleiben es: Ein Rewrite würde
+jeden Hash verschieben, den die Dokumentation zitiert, und das hat dieses Projekt im August zweimal
+gemacht — beide Male war der Nachlauf die halbe Arbeit.
+
+Die Präfixe der Conventional Commits gelten unverändert (`feat:`, `fix:`, `docs:` …). Umlaute
+umschreiben entfällt für neue Nachrichten.
 
 ## Veröffentlichen
 

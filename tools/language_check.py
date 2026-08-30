@@ -14,9 +14,10 @@ at all. Run it when you want an answer:
     python tools/language_check.py           only what breaks the rule
     python tools/language_check.py --all     every file with its counts
 
-The second question is the same rule's other half, and it went unwatched far longer: umlauts are
-written out in texts for people and transcribed in code. Nothing read the documentation, so
-nothing noticed when two files drifted to 900 transcribed words. See ``transcribed_in_prose``.
+Two more questions concern the prose, and both went unwatched far longer. German documentation
+writes its umlauts out; nothing read the documentation, so nothing noticed when two files drifted
+to 900 transcribed words. English documentation must be free of German left over from the switch
+of August 2026. See ``transcribed_in_prose`` and ``german_in_english_prose``.
 """
 
 import argparse
@@ -112,24 +113,43 @@ TRANSCRIBED = re.compile(
     re.I,
 )
 
-#: Where German prose for humans lives: ``docs/``, the files at the root that a reader opens, and
-#: the templates under ``.github/``, which are the first German a stranger reads.
+#: Prose for people, split by its readers: German for visitors, the museum team and operators,
+#: English for developers. Each side needs a different check -- transcribed umlauts on the German
+#: side, leftover German on the English side.
 #:
 #: **Not** ``.github/workflows/``. A workflow is closer to a shell script than to a manual -- and
 #: shell scripts transcribe their umlauts. ``.github/`` as a whole stood here until the first
 #: workflow arrived and the checker rightly complained about it.
-PROSE = (
-    "docs/",
+#:
+#: The five developer documents at the end move to ``ENGLISH_PROSE`` once they are translated. A
+#: file being converted right now belongs in neither list: it is half of each, and both checks
+#: would be right to complain.
+GERMAN_PROSE = (
+    "docs/adaption.md",
+    "docs/backlog.md",
+    "docs/history.md",
+    "docs/index.md",
+    "docs/licensing.md",
+    "docs/operations.md",
+    "docs/usermanual.md",
     ".github/ISSUE_TEMPLATE/",
     ".github/pull_request_template.md",
     "README.md",
     "CHANGELOG.md",
-    "CLAUDE.md",
-    "CONTRIBUTING.md",
     "SECURITY.md",
     "CODE_OF_CONDUCT.md",
     "AUTHORS",
+    "docs/architecture.md",
+    "docs/decisions.md",
+    "docs/development.md",
+    "CLAUDE.md",
+    "CONTRIBUTING.md",
 )
+
+#: Empty until the first document is translated, and that is not an oversight worth removing: one
+#: list with a flag would not do. An English file passes the German check for the wrong reason --
+#: it has no transcription because it has no German -- so silence there proves nothing.
+ENGLISH_PROSE: tuple[str, ...] = ()
 
 
 def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:
@@ -157,6 +177,40 @@ def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:
         bare = QUOTED.sub(" ", re.sub('„[^“”"]*[“”"]', " ", bare))
         if found := TRANSCRIBED.findall(bare):
             hits.append((number, ", ".join(sorted({f for f in found}))))
+    return hits
+
+
+def german_in_english_prose(path: Path) -> list[tuple[int, str]]:
+    """Paragraphs of an English document that are still German -- a leftover of the switch.
+
+    The other half of the language map, and the reason ``GERMAN_PROSE`` and ``ENGLISH_PROSE`` are
+    two lists. Judged per paragraph, not per line: one line rarely carries enough function words
+    to tell the languages apart, and ``language`` returns None on a tie.
+
+    Fenced blocks, inline code and quoted material are skipped for the same reason as above --
+    a German example inside an English text is the subject, not the prose.
+    """
+    text = path.read_text(encoding="utf-8")
+    hits: list[tuple[int, str]] = []
+    paragraph: list[str] = []
+    fenced, start = False, 0
+
+    def flush() -> None:
+        if paragraph and language(" ".join(paragraph)) == "de":
+            hits.append((start, " ".join(paragraph)[:60].strip()))
+        paragraph.clear()
+
+    # The trailing empty line closes the last paragraph without repeating the flush after the loop.
+    for number, line in enumerate(text.splitlines() + [""], 1):
+        if line.lstrip().startswith("```"):
+            flush()
+            fenced = not fenced
+        elif fenced or not line.strip():
+            flush()
+        else:
+            if not paragraph:
+                start = number
+            paragraph.append(re.sub(r"`[^`]*`", " ", line))
     return hits
 
 
@@ -199,12 +253,20 @@ def main() -> int:
     umschrieben = [
         (name, hits)
         for name in sorted(
-            f for f in listed if f.startswith(PROSE) and f.endswith((".md", ".yml", "AUTHORS"))
+            f
+            for f in listed
+            if f.startswith(GERMAN_PROSE) and f.endswith((".md", ".yml", "AUTHORS"))
         )
         if (ROOT / name).is_file() and (hits := transcribed_in_prose(ROOT / name))
     ]
 
-    if not breaks and not umschrieben:
+    deutsch_geblieben = [
+        (name, hits)
+        for name in sorted(f for f in listed if f.startswith(ENGLISH_PROSE) and f.endswith(".md"))
+        if (ROOT / name).is_file() and (hits := german_in_english_prose(ROOT / name))
+    ]
+
+    if not breaks and not umschrieben and not deutsch_geblieben:
         print("Keine Datei bricht die Sprachregelung.")
         return 0
 
@@ -225,8 +287,22 @@ def main() -> int:
                 print(f"  {name}:{number}  {woerter}")
             if len(hits) > 5:
                 print(f"  {name}  … und {len(hits) - 5} weitere Zeilen")
-        print("\n  In docs/ werden Umlaute geschrieben, nicht umschrieben -- das sind Texte fuer")
-        print("  Menschen. Code, Bezeichner und Zitate sind ausgenommen und werden uebersprungen.")
+        print("\n  In deutscher Doku werden Umlaute geschrieben, nicht umschrieben -- das")
+        print("  sind Texte fuer Menschen. Code, Bezeichner und Zitate sind ausgenommen.")
+
+    if deutsch_geblieben:
+        absaetze = sum(len(h) for _, h in deutsch_geblieben)
+        print(
+            f"\n{absaetze} Absaetze stehen deutsch in einer englischen Datei, in "
+            f"{len(deutsch_geblieben)} Dateien:"
+        )
+        for name, hits in deutsch_geblieben:
+            for number, anfang in hits[:5]:
+                print(f"  {name}:{number}  {anfang} …")
+            if len(hits) > 5:
+                print(f"  {name}  … und {len(hits) - 5} weitere Absaetze")
+        print("\n  Entwicklerdoku ist englisch, Doku fuer Museum und Betrieb deutsch. Was hier")
+        print("  steht, ist ein Rest der Umstellung.")
     return 1
 
 

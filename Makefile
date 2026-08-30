@@ -124,7 +124,7 @@ lint: $(VENV)  ## Code-Stil pruefen
 	$(VENV)/bin/ruff check backend tiles tools
 	$(VENV)/bin/ruff format --check backend tiles tools
 
-# Die fuenf Pruefungen, die Dateien lesen, die kein Test je sieht: Sprachregelung, Verweise in
+# Die sechs Pruefungen, die Dateien lesen, die kein Test je sieht: Sprachregelung, Verweise in
 # docs/, der Weg jeder Einstellung in den Container, und die Buchfuehrung des Backlogs ueber
 # seine eigenen Nummern.
 #
