@@ -1,5 +1,8 @@
 # Kiekmap
 
+[![check](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml/badge.svg?branch=develop)](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml)
+[![Lizenz: Apache 2.0](https://img.shields.io/badge/Lizenz-Apache%202.0-blue.svg)](LICENSE)
+
 Historische Ortsfotos auf einer Karte entdecken, Jahrzehnt für Jahrzehnt. Ein Touchscreen-Kiosk
 fürs Heimatmuseum: Läuft offline auf einem Raspberry Pi, lässt sich an jeden Ort anpassen, und die
 Besucher ergänzen, was fehlt. Ein Freizeitprojekt von Kalle Erlhoff für das Heimatmuseum Holm,
