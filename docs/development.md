@@ -116,26 +116,9 @@ Listen — sie ist halb das eine und halb das andere, und beide Prüfungen hätt
 
 ## Schreibregeln
 
-Sie gelten für jede Dokumentation, deutsch wie englisch. Es sind Stilregeln, keine Sprachregeln.
-
-> So einfach wie möglich, so komplex wie nötig. Nüchtern und sachlich, kein werblicher oder
-> erzählerischer Ton.
->
-> 1. Ein Gedanke pro Satz. Kein Schachteln mit mehr als einem Nebensatz.
-> 2. Aktiv statt Passiv, wo es den Satz kürzt oder klarer macht.
-> 3. Keine Anteaser, keine rhetorischen Fragen, keine Einleitungsfloskeln.
-> 4. Keine Füllwörter und kein Hedging (Konjunktiv, „eigentlich", „im Grunde") ohne
->    inhaltlichen Grund.
-> 5. Keine Redundanz: Inhalte nicht mehrfach in anderen Worten wiederholen.
-> 6. Reihenfolge nach Relevanz und logischem Ablauf, nicht nach Schreibprozess.
-> 7. Streichtest: Jeder Satz muss eine sachliche Funktion erfüllen. Fällt er ohne
->    Informationsverlust weg, kommt er weg.
-> 8. Keine Metaphern, keine Bildsprache, keine Übertreibungen.
-
-**Zwei Ausnahmen:** [history.md](history.md) ist eingefroren und behält ihren Ton. Testnamen bleiben
-lang, wenn Genauigkeit das verlangt.
-
-Kein Werkzeug prüft diese Regeln. Sie wirken beim Schreiben und beim Review.
+Wie ein Text hier geschrieben wird — deutsch wie englisch —, steht in
+[CLAUDE.md](../CLAUDE.md#schreibregeln). Acht Regeln, an einer Stelle, weil sie beim Schreiben
+gelten und nicht beim Nachschlagen.
 
 ## Beispiele sind erfunden
 

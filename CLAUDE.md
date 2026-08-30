@@ -83,14 +83,32 @@ Prosa, sondern der Gegenstand, über den der Text spricht; ohne Umlaut wäre es 
 **`tiles/` gilt mit**, und `tools/` auch. Beide laufen nur auf dem Entwicklungsrechner, sind aber
 gewöhnlicher Quelltext dieses Repos.
 
-**Schreibregeln für Dokumentation** — deutsch wie englisch: ein Gedanke pro Satz, Aktiv statt
-Passiv, keine Floskeln, kein Hedging, keine Redundanz, keine Bildsprache. Jeder Satz muss eine
-sachliche Funktion erfüllen. Die vollständige Liste steht in
-[docs/development.md](docs/development.md).
-
 Warum die Regel so lautet und wo ihre Grenzfälle liegen, steht ausführlich in
 [docs/development.md](docs/development.md). Ob eine Datei sich daran hält, beantwortet
 `python3 tools/language_check.py` — es prüft beide Seiten.
+
+## Schreibregeln
+
+Für jede Dokumentation, deutsch wie englisch. Es sind Stilregeln, keine Sprachregeln.
+
+**So einfach wie möglich, so komplex wie nötig. Nüchtern und sachlich, kein werblicher oder
+erzählerischer Ton.**
+
+1. Ein Gedanke pro Satz. Kein Schachteln mit mehr als einem Nebensatz.
+2. Aktiv statt Passiv, wo es den Satz kürzt oder klarer macht.
+3. Keine Anteaser, keine rhetorischen Fragen, keine Einleitungsfloskeln.
+4. Keine Füllwörter und kein Hedging (Konjunktiv, „eigentlich", „im Grunde") ohne inhaltlichen
+   Grund.
+5. Keine Redundanz: Inhalte nicht mehrfach in anderen Worten wiederholen.
+6. Reihenfolge nach Relevanz und logischem Ablauf, nicht nach Schreibprozess.
+7. Streichtest: Jeder Satz muss eine sachliche Funktion erfüllen. Fällt er ohne
+   Informationsverlust weg, kommt er weg.
+8. Keine Metaphern, keine Bildsprache, keine Übertreibungen.
+
+**Zwei Ausnahmen:** [docs/history.md](docs/history.md) ist abgeschlossen und behält ihren Ton.
+Testnamen bleiben lang, wenn Genauigkeit das verlangt.
+
+Kein Werkzeug prüft diese Regeln. Sie wirken beim Schreiben und beim Review.
 
 ## Aufbau
 

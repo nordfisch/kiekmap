@@ -2431,7 +2431,7 @@ dass Code, Commits und Entwicklerdoku englisch sind. Ungewöhnlich, aber kohäre
 für Wartungsanleitungen gebaut und schneidet genau die Nuance ab, die
 [decisions.md](decisions.md) und [development.md](development.md) tragen. Stattdessen gelten
 Schreibregeln für beide Sprachen — ein Gedanke pro Satz, Aktiv, kein Hedging, keine Bildsprache.
-Sie stehen in [development.md](development.md#schreibregeln).
+Sie stehen in [CLAUDE.md](../CLAUDE.md#schreibregeln).
 
 **Was die Regel prüfbar macht:** `tools/language_check.py` hat statt einer Prosaliste zwei,
 `GERMAN_PROSE` und `ENGLISH_PROSE`. Die deutsche Hälfte wird auf umschriebene Umlaute geprüft, die

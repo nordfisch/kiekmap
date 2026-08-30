@@ -32,7 +32,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   [lessons.md](docs/lessons.md)
 - **`tools/language_check.py` prüft beide Seiten.** Statt einer Prosaliste zwei: deutsche Doku wird
   auf umschriebene Umlaute geprüft, englische auf deutsche Absätze. Dazu Schreibregeln für
-  Dokumentation in beiden Sprachen, in [development.md](docs/development.md)
+  Dokumentation in beiden Sprachen, in [CLAUDE.md](CLAUDE.md)
+- **`tools/check_anchors.py` liest auch `CLAUDE.md`, `CONTRIBUTING.md` und `lessons.md`.** Drei
+  Dateien, in die andere hineinverweisen und deren Überschriften bis dahin niemand nachhielt
 - **Vitest von 2 auf 3.** Nicht wegen einer neuen Funktion, sondern weil Vitest 2 seine eigenen,
   alten Kopien von `vite` und `esbuild` mitbrachte — daran hingen fünf von sechs
   Dependabot-Meldungen. Im Baum liegt jetzt je eine Fassung. Ausgeliefert war nichts davon; die
