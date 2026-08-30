@@ -139,16 +139,18 @@ GERMAN_PROSE = (
     "SECURITY.md",
     "CODE_OF_CONDUCT.md",
     "AUTHORS",
-    "docs/architecture.md",
     "docs/decisions.md",
-    "docs/development.md",
-    "CLAUDE.md",
-    "CONTRIBUTING.md",
 )
 
 #: One list with a flag would not do here: an English file passes the German check for the wrong
 #: reason -- it has no transcription because it has no German -- so silence there proves nothing.
-ENGLISH_PROSE: tuple[str, ...] = ("docs/lessons.md",)
+ENGLISH_PROSE: tuple[str, ...] = (
+    "docs/architecture.md",
+    "docs/development.md",
+    "docs/lessons.md",
+    "CLAUDE.md",
+    "CONTRIBUTING.md",
+)
 
 
 def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:

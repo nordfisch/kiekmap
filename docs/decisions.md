@@ -2406,7 +2406,7 @@ Rückstand: Jede Datei bekam ihre Sprache, als sie entstand.
 
 **Die Regel lautet jetzt: Jeder Text existiert genau einmal, in der Sprache seiner Leser.** Nicht
 übersetzen, sondern trennen. Die Sprachkarte steht in
-[development.md](development.md#sprachregelung).
+[development.md](development.md#language).
 
 **Warum nicht zweisprachig.** Doppelter Inhalt in zwei Sprachen ist die teure Fehlerart: Die
 zweite Fassung veraltet, und niemand merkt es. Bei einem Betreuer nebenher ist das keine Prognose,
@@ -2431,7 +2431,7 @@ dass Code, Commits und Entwicklerdoku englisch sind. Ungewöhnlich, aber kohäre
 für Wartungsanleitungen gebaut und schneidet genau die Nuance ab, die
 [decisions.md](decisions.md) und [development.md](development.md) tragen. Stattdessen gelten
 Schreibregeln für beide Sprachen — ein Gedanke pro Satz, Aktiv, kein Hedging, keine Bildsprache.
-Sie stehen in [CLAUDE.md](../CLAUDE.md#schreibregeln).
+Sie stehen in [CLAUDE.md](../CLAUDE.md#writing-rules).
 
 **Was die Regel prüfbar macht:** `tools/language_check.py` hat statt einer Prosaliste zwei,
 `GERMAN_PROSE` und `ENGLISH_PROSE`. Die deutsche Hälfte wird auf umschriebene Umlaute geprüft, die

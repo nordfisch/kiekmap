@@ -1,249 +1,246 @@
-# Aufbau
+# Architecture
 
-Woraus das System besteht und wie die Teile ineinandergreifen. Diese Datei beantwortet **was gibt
-es** — nicht *warum so* und nicht *wie arbeitet man daran*:
+What the system is made of, and how the parts fit together. This file answers **what is there** —
+not *why it is like this*, and not *how to work on it*:
 
-| Datei | Frage |
+| File | Question |
 |---|---|
-| **architecture.md** | *Was* gibt es, und wie greift es ineinander? |
-| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? |
-| [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Tests, Konventionen |
-| [history.md](history.md) | *Wie* ist es dazu gekommen? |
-| [operations.md](operations.md) | Wie läuft das Gerät im Museum? |
+| **architecture.md** | *What* is there, and how does it fit together? |
+| [decisions.md](decisions.md) | *Why* is it this way and not another? |
+| [development.md](development.md) | *How* do you work on it? — setup, tests, conventions |
+| [history.md](history.md) | *How* did it come about? |
+| [operations.md](operations.md) | How does the device run in the museum? |
 
-Die vollständige Übersicht steht in [index.md](index.md).
+The full overview is in [index.md](index.md).
 
-Wo hier eine Entscheidung nur benannt wird, steht ihre Begründung in `decisions.md`. Die Ordner
-listet `development.md` auf; hier stehen die Zusammenhänge.
+Where this file only names a decision, its reasoning is in `decisions.md`. The directory tree is
+in `development.md`; the connections are here.
 
 ---
 
-## Das Ganze auf einen Blick
+## The whole thing at a glance
 
 ```
-   ENTWICKLUNGSRECHNER (mit Internet)          MUSEUMSGERÄT (offline)
+   DEVELOPMENT MACHINE (online)                MUSEUM DEVICE (offline)
    ───────────────────────────────────         ──────────────────────────────────────────
 
    tiles/region.json                                    ┌──────────────┐
-        │                                               │   Chromium   │  kein Container
-        ├──► build-tiles.sh ──► map.pmtiles ────────┐   │  unter cage  │
+        │                                               │   Chromium   │  no container
+        ├──► build-tiles.sh ──► map.pmtiles ────────┐   │  under cage  │
         │      (OpenStreetMap)   basemaps/          │   └──────┬───────┘
-        │                                           │          │ Port 80
+        │                                           │          │ port 80
         └──► build-places.py ──► places.json ───┐   │          ▼
                (Overpass)                       │   │   ┌──────────────┐
-                                                │   └──►│    nginx     │  Container 1
-                                                │       │  + Frontend  │
+                                                │   └──►│    nginx     │  container 1
+                                                │       │  + frontend  │
                                                 │       └──┬────────┬──┘
-                                                │          │        │ /api → Proxy
-                                                │   Karte, │        ▼
-                                                │   Seite  │  ┌──────────────┐
-                                                └──────────┼─►│   FastAPI    │  Container 2
-                                                           │  │  + Watcher   │
+                                                │          │        │ /api → proxy
+                                                │   map,   │        ▼
+                                                │   page   │  ┌──────────────┐
+                                                └──────────┼─►│   FastAPI    │  container 2
+                                                           │  │  + watcher   │
                                                            │  └──────┬───────┘
                                                            │         │
                                                            │         ▼
-                                                           │   data/  (auf der SD-Karte)
+                                                           │   data/  (on the SD card)
                                                            │   ├── kiekmap.db   SQLite
-                                                           │   ├── photos/       Originale
-                                                           │   ├── thumbs/       Vorschauen
-                                                           │   └── places.json ──┘ einmal eingelesen
+                                                           │   ├── photos/      originals
+                                                           │   ├── thumbs/      thumbnails
+                                                           │   └── places.json ──┘ read in once
 ```
 
-Drei Prozesse, zwei davon in Containern. **Chromium ist bewusst keiner** — er läuft als
-gewöhnliches Programm auf dem Pi und zeigt nur an, was die beiden anderen ausliefern.
+Three processes, two of them in containers. **Chromium is deliberately not one** — it runs as an
+ordinary program on the Pi and only displays what the other two serve.
 
 ---
 
-## Die Bausteine
+## The parts
 
-### Backend — FastAPI und SQLite
+### Backend — FastAPI and SQLite
 
-Der einzige Weg zu den Daten. Es hält die Datenbank, die Bilddateien und alle Regeln; das Frontend
-kennt keine Datei und keine Tabelle, nur die API unter `/api`.
+The only way to the data. It holds the database, the image files and every rule; the frontend
+knows no file and no table, only the API under `/api`.
 
-Innerhalb des Backends gilt eine Trennung, die die Testbarkeit trägt: `app/api/` prüft Parameter,
-ruft einen Dienst und gibt ein Schema zurück — dünn. `app/services/` hält die Fachlogik **ohne
-HTTP-Bezug**, und dort gehört das Denken hin. Alles, was sich ohne HTTP testen lässt, gehört
-dorthin.
+Inside the backend one separation carries the testability: `app/api/` validates parameters, calls
+a service and returns a schema — thin. `app/services/` holds the domain logic **without any HTTP
+context**, and that is where the thinking belongs. Anything that can be tested without HTTP goes
+there.
 
-Beim Start (`lifespan` in `app/main.py`) geschehen zwei Dinge: Der Ortsindex wird eingelesen,
-falls die Tabelle leer ist, und der **Eingangs-Watcher** beginnt zu laufen. Er ist ein Faden im
-selben Prozess, kein eigener Dienst.
+Two things happen at startup (`lifespan` in `app/main.py`): the place index is read in if the
+table is empty, and the **incoming watcher** starts. It is a thread in the same process, not a
+service of its own.
 
-### Frontend — React, MapLibre und nginx
+### Frontend — React, MapLibre and nginx
 
-Eine Einzelseite mit zwei Ansichten. Es gibt **keinen Router**: `App.tsx` entscheidet anhand des
-Zustands im `useAdmin`-Store, ob die Besucheransicht (`src/kiosk/`), das Zahlenfeld oder der
-Verwaltungsbereich (`src/admin/`) gerendert wird. Für ein Gerät ohne Adressleiste wäre ein Router
-Ballast — und eine URL, die jemand versehentlich stehen lässt, ein Risiko.
+A single page with two views. **The device as a whole is the kiosk**; inside it there are exactly
+two views, the visitor view and the admin view. There is **no router**: `App.tsx` decides from the
+state in the `useAdmin` store whether to render the visitor view (`src/kiosk/`), the PIN pad or the
+admin view (`src/admin/`). On a device without an address bar a router would be ballast — and a URL
+somebody leaves behind by accident would be a risk.
 
-Im Betrieb liefert **nginx** die gebaute Seite aus und leitet `/api` an das Backend weiter. Beide
-kommen damit von derselben Herkunft; die CORS-Einstellung im Backend ist nur für den
-Vite-Entwicklungsserver da und greift auf dem Pi nie.
+In production **nginx** serves the built page and proxies `/api` to the backend. Both therefore
+come from the same origin; the CORS setting in the backend exists for the Vite development server
+and never applies on the Pi.
 
-nginx tut hier aber mehr als ausliefern: Es beantwortet **HTTP-Range-Requests** auf die
-Kartendatei. Genau deshalb braucht das Projekt keinen Tileserver — MapLibre liest über
-`pmtiles://` einzelne Kachelbereiche aus einer statischen Datei. Die Konfiguration schaltet dafür
-`gzip` an dieser Stelle ab; ein komprimierender oder puffernder Zwischenschritt würde das
-zerstören.
+nginx does more here than serve files: it answers **HTTP range requests** on the map file. That is
+exactly why the project needs no tile server — MapLibre reads single tile ranges out of a static
+file over `pmtiles://`. The configuration turns `gzip` off at that location; a compressing or
+buffering step in between would destroy it.
 
-### Kacheln und Ortsindex — gebaute Artefakte
+### Tiles and place index — build artifacts
 
-Beide entstehen auf dem Entwicklungsrechner mit Internet und liegen **nicht** im Repo. Sie gehen
-danach getrennte Wege, und das ist der Punkt, an dem sich die beiden Skripte unterscheiden:
+Both are produced on the development machine with internet access and are **not** in the
+repository. From there they take separate paths, and that is where the two scripts differ:
 
-| | erzeugt | landet in | Weg zur Laufzeit |
+| | produces | ends up in | path at runtime |
 |---|---|---|---|
-| `tiles/build-tiles.sh` | `map.pmtiles`, Schriften, Symbole | `frontend/public/` | wandert ins Frontend-Image, wird von nginx ausgeliefert |
-| `tiles/build-places.py` | `places.json` | `data/` | wird vom Backend in die Tabelle `places` eingelesen |
+| `tiles/build-tiles.sh` | `map.pmtiles`, fonts, sprites | `frontend/public/` | goes into the frontend image, served by nginx |
+| `tiles/build-places.py` | `places.json` | `data/` | read by the backend into the `places` table |
 
-Der Kartenstil verweist standardmäßig auf ein CDN. Schriften und Symbole werden deshalb
-mitgeladen und liegen unter `frontend/public/basemaps/` — sonst hätte die Karte offline Flächen,
-aber keine Beschriftung.
+The map style points at a CDN by default. Fonts and sprites are therefore downloaded along with
+the tiles and live under `frontend/public/basemaps/` — otherwise the map would have areas offline
+but no labels.
 
-### Kiosk-Schicht auf dem Pi
+### Kiosk layer on the Pi
 
-Alles unter `deploy/pi/`, und alles davon **ungeprüft** (siehe [backlog.md](backlog.md)):
-`setup-pi.sh` richtet ein frisches Gerät ein, `kiekmap-kiosk.service` wartet auf `/api/health`
-und startet dann `cage` mit Chromium im Vollbild, `update.sh` spielt ein Update vom Stick ein, und
-eine udev-Regel hängt USB-Sticks ein — auf Pi OS Lite gibt es keinen Automounter.
-
----
-
-## Was wann entsteht
-
-Die wichtigste Unterscheidung im ganzen Aufbau, weil sie festlegt, was ein zweites Museum tun muss
-und was von selbst geschieht:
-
-**Zur Bauzeit** (Entwicklungsrechner, Internet nötig): Kartendatei, Schriften, Symbole und
-Ortsindex aus `tiles/region.json`. Dazu das Frontend-Bundle.
-
-**Zur Laufzeit** (Gerät, offline): alles andere. Der Ausschnitt der Karte, der Ortsname im Titel
-und die Zoomstufen werden **nicht** ins Bundle gebacken, sondern beim Start aus
-`/tiles/region.json` geholt. Dieselbe Datei dient also zwei Zwecken: Sie steuert den Bau, und sie
-konfiguriert die laufende Ansicht.
-
-Daraus folgt die Eigenschaft, die das Projekt zusammenhält: **Nichts Ortsspezifisches steht im
-Code.** Ein zweites Museum braucht keinen Fork, sondern eine eigene `region.json` und `.env`. Das
-Vorgehen steht in [adaption.md](adaption.md).
+Everything under `deploy/pi/`, and all of it **unverified** (see [backlog.md](backlog.md)):
+`setup-pi.sh` sets up a fresh device, `kiekmap-kiosk.service` waits for `/api/health` and then
+starts `cage` with Chromium in full screen, `update.sh` applies an update from a USB stick, and a
+udev rule mounts USB sticks — Pi OS Lite has no automounter.
 
 ---
 
-## Wo der Zustand liegt
+## What is produced when
 
-An drei Stellen, jede mit einer eigenen Aufgabe:
+The most important distinction in the whole architecture, because it settles what a second museum
+has to do and what happens on its own:
 
-**SQLite** (`data/kiekmap.db`) hält alle Angaben — Fotos, Datierungen, Orte, Schlagwörter, das
-Änderungsprotokoll, das Import-Protokoll und den Ortsindex. Im WAL-Modus, damit ein Stromausfall
-höchstens die letzte Transaktion kostet. Schemaänderungen laufen über Alembic und werden beim
-Containerstart angewendet.
+**At build time** (development machine, internet required): map file, fonts, sprites and place
+index, all from `tiles/region.json`. Plus the frontend bundle.
 
-**Das Dateisystem** (`data/photos/`, `data/thumbs/`) hält die Bilder. Der Dateiname ist der
-**SHA-256 des Bildinhalts** — daran hängen gleich drei Dinge: die Dublettenerkennung beim Import,
-die Cache-Header bei der Auslieferung und die inkrementelle Sicherung. Ein gleicher Name ist
-dasselbe Bild, überall.
+**At runtime** (device, offline): everything else. The map extent, the place name in the title and
+the zoom levels are **not** baked into the bundle; they are fetched from `/tiles/region.json` at
+startup. The same file therefore serves two purposes: it drives the build, and it configures the
+running view.
 
-**Der Browser** hält nur das Admin-Token, in `sessionStorage`. Es stirbt mit dem Tab, auf dem Pi
-also spätestens beim morgendlichen Neustart. Alles andere im Frontend ist flüchtiger Zustand in
-Zustand-Stores (`src/store/`), einer je Bereich.
-
-Daneben steht **`seed/`**, und es gehört ausdrücklich *nicht* zum Zustand des Geräts: ein
-Beispielbestand für die Entwicklung, den `make seed` in `data/` verwandelt und `make seed-save`
-zurückschreibt. Bilddateien plus eine `seed.json`, damit eine neue Spalte ihn nicht wertlos macht;
-auf dem Pi kommt er nie vor. Siehe [decisions.md](decisions.md), Punkt 18.
+From this follows the property that holds the project together: **nothing place-specific is in the
+code.** A second museum needs no fork, only its own `region.json` and `.env`. The procedure is in
+[adaption.md](adaption.md).
 
 ---
 
-## Die Wege durch das System
+## Where the state lives
 
-### Ein Foto kommt herein
+In three places, each with a job of its own:
 
-Vier Wege, ein Ziel — sie laufen alle durch `import_file()` in `app/services/importer.py`, und die
-schreibt immer einen Eintrag ins Import-Protokoll:
+**SQLite** (`data/kiekmap.db`) holds every piece of data — photos, datings, places, tags, the
+change log, the import log and the place index. In WAL mode, so that a power cut costs at most the
+last transaction. Schema changes go through Alembic and are applied when the container starts.
 
-1. **Überwachter Eingangsordner** — der Watcher nimmt auf, sobald eine Datei fertig geschrieben
-   ist, und räumt sie danach nach `_erledigt/` oder `_problem/`. Gelöscht wird nie. **Eine
-   Ausnahme: ZIP-Dateien mit dem Namen einer Sicherung lässt er liegen** — sie sind kein Foto,
-   sondern eine ganze Sammlung, und werden erst nach Rückfrage eingespielt.
-2. **Hochladen im Verwaltungsbereich** — der Weg für vierzig ausgesuchte Dateien.
-3. **USB-Stick im Verwaltungsbereich** — der Weg für einen Ordner mit zweihundert Scans, Unter-
-   ordner eingeschlossen. **Auf dem Stick wird nichts verschoben und nichts gelöscht**, anders
-   als im eigenen Eingangsordner.
-4. **`python -m app.cli import`** — für den Erstbestand.
+**The file system** (`data/photos/`, `data/thumbs/`) holds the images. The file name is the
+**SHA-256 of the image content**, and three things hang on that: duplicate detection on import,
+the cache headers when serving, and the incremental backup. The same name is the same image,
+everywhere.
 
-Der Import berechnet den Hash, legt Original und zwei Vorschaugrößen ab und liest dann in **zwei
-Schichten** aus, was schon dasteht (Begründung in [decisions.md](decisions.md) Punkt 20):
+**The browser** holds only the admin token, in `sessionStorage`. It dies with the tab, so on the
+Pi at the latest with the morning restart. Everything else in the frontend is transient state in
+Zustand stores (`src/store/`), one per area.
 
-| Schicht | Wo | Gilt für | Was sie liest |
+Next to these sits **`seed/`**, and it is explicitly *not* part of the device state: a sample
+collection for development, which `make seed` turns into `data/` and `make seed-save` writes back.
+Image files plus a `seed.json`, so that a new column does not make it worthless; it never appears
+on the Pi. See [decisions.md](decisions.md), point 18.
+
+---
+
+## The paths through the system
+
+### A photo comes in
+
+Four ways, one destination — they all run through `import_file()` in
+`app/services/importer.py`, which always writes a row to the import log:
+
+1. **Watched incoming folder** — the watcher takes a file once it is fully written, then moves it
+   to `_erledigt/` or `_problem/`. Nothing is ever deleted. **One exception: it leaves ZIP files
+   named like a backup alone** — those are not a photo but a whole collection, and they are only
+   restored after a confirmation.
+2. **Upload in the admin view** — the way for forty selected files.
+3. **USB stick in the admin view** — the way for a folder of two hundred scans, subfolders
+   included. **Nothing on the stick is moved and nothing is deleted**, unlike in the incoming
+   folder.
+4. **`python -m app.cli import`** — for the initial collection.
+
+The import computes the hash, stores the original and two thumbnail sizes, and then reads what is
+already there in **two layers** (reasoning in [decisions.md](decisions.md), point 20):
+
+| Layer | Where | Applies to | What it reads |
 |---|---|---|---|
-| **Metadaten** | `import_file()` | alle vier Wege | Datum, GPS, Titel, Beschreibung, Bildnachweis, Herkunft, Schlagwörter aus EXIF/IPTC |
-| **Pfad** | `foldermeta.py` | 1, 3, 4 | Straße und Hausnummer aus den Ordnernamen |
+| **Metadata** | `import_file()` | all four ways | date, GPS, title, description, credit, provenance, tags from EXIF/IPTC |
+| **Path** | `foldermeta.py` | 1, 3, 4 | street and house number from the folder names |
 
-Angeschaltet wird die zweite über den `root`-Parameter von `import_file()` — den Ordner, auf dem
-der Import gestartet wurde. Dass die Entscheidung dort sitzt und nicht beim Aufrufer, ist keine
-Geschmacksfrage: Sie hing eine Zeit lang am Aufrufer, und der Eingangsordner hatte sie nicht.
+The second layer is switched on through the `root` parameter of `import_file()` — the folder the
+import was started on. That the decision sits there and not with the caller is not a matter of
+taste: it hung on the caller for a while, and the incoming folder did not have it.
 
-Beim Hochladen gibt es keinen Pfad — dort greift nur die erste Schicht, und die gemeinsamen
-Angaben kommen wie bisher aus der Maske. Die zweite ist ein reines Modul ohne HTTP-Bezug: Sie
-bekommt die Pfadteile und den Ortsindex und gibt zurück, welche Straße und welche Hausnummer
-darin stehen. **Die Straße erkennt der Ortsindex**, nicht ein Ordner namens „Straßen" — deshalb
-steht trotz dieser Auswertung nichts Ortsspezifisches im Code.
+An upload has no path, so only the first layer applies there, and the shared values come from the
+form as before. The second layer is a pure module with no HTTP context: it receives the path
+segments and the place index and returns which street and which house number are in them. **The
+place index recognises the street**, not a folder called „Straßen" — which is why nothing
+place-specific is in the code despite this parsing.
 
-Zwei Vorrangregeln halten das zusammen: Eine Koordinate aus der Datei schlägt den Ordner, und die
-Pfad-Schicht setzt **nur leere Felder**.
+Two precedence rules hold it together: a coordinate from the file beats the folder, and the path
+layer fills **empty fields only**.
 
-Ob ein EXIF-Datum das Foto datiert, entscheidet zuerst das **Gerät**: Ein Scanner datiert nichts,
-eine Kamera datiert auch nach 1990, und wo kein Gerät genannt ist, gilt weiterhin
-`exif_date_max_year`. Ohne diese Regeln läge ein Foto von 1932 auf der Zeitleiste beim Datum des
-Scanlaufs und käme nie zur Korrektur — und die echten Aufnahmen von 2014 kämen undatiert an.
+Whether an EXIF date dates the photo is decided first by the **device**: a scanner dates nothing,
+a camera dates even after 1990, and where no device is named, `exif_date_max_year` still decides.
+Without these rules a photo from 1932 would sit on the timeline at the date of the scanning run
+and never come up for correction — and the genuine 2014 shots would arrive undated.
 
-### Ein Besucher trägt etwas bei
+### A visitor contributes something
 
-Der „Hilf mit"-Bereich holt sich über `/api/contribute/next` ein Foto, dem Ort oder Jahr fehlt.
-Der Beitrag geht direkt in den Bestand — aber **nur in leere Felder**: Was ein Kurator eingetragen
-hat, ist unantastbar, und Koordinaten außerhalb der Region werden abgewiesen. Jeder Beitrag
-landet zugleich als Zeile in `changes` und lässt sich einzeln zurücknehmen, solange niemand das
-Feld inzwischen von Hand bearbeitet hat.
+The contribution panel fetches a photo that is missing a place or a year through
+`/api/contribute/next`. The contribution goes straight into the collection — but **into empty
+fields only**: what a curator entered is untouchable, and coordinates outside the region are
+rejected. Every contribution also lands as a row in `changes` and can be taken back one by one,
+as long as nobody has edited the field by hand in the meantime.
 
-Nach dem Beitrag stellt sich die Ansicht für die Dauer des Dankes auf dieses eine Foto ein — Karte
-und Zeitschieber zusammen, gesteuert über ein Fokus-Signal im Kiosk-Store.
+After a contribution the view settles on that one photo for the length of the thank-you — map and
+time slider together, driven by a focus signal in the kiosk store.
 
-### Die Karte fragt Fotos ab
+### The map queries photos
 
-`/api/photos` nimmt einen Kartenausschnitt und optional einen Zeitraum. Zwei Dinge daran sind
-nicht offensichtlich:
+`/api/photos` takes a map extent and optionally a time range. Two things about it are not obvious.
 
-Der Zeitfilter fragt auf **Überlappung** der Intervalle ab, nicht auf Enthaltensein — ein auf
-„1920er" datiertes Foto muss bei der Auswahl 1925–1930 erscheinen. Und die Antwort ist bewusst
-schmal gehalten: Beschreibung, Schlagwörter und Herkunftsfelder kommen erst, wenn ein Foto
-angetippt wird.
+The time filter queries for **overlap** of the intervals, not for containment — a photo dated
+„1920er" has to appear for the selection 1925–1930. And the answer is deliberately narrow:
+description, tags and provenance fields come only when a photo is tapped.
 
-Im Frontend werden Fotos auf **derselben Stelle** vor dem Clustern zu einem Marker
-zusammengefasst; supercluster sieht die Dubletten gar nicht. Ohne das lägen acht Fotos exakt
-übereinander und nur das oberste wäre erreichbar.
+In the frontend, photos at **the same spot** are merged into one marker before clustering;
+supercluster never sees the duplicates. Without that, eight photos would lie exactly on top of
+each other and only the topmost would be reachable.
 
-### Sicherung, Wiederherstellung, Stick-Import
+### Backup, restore, stick import
 
-Diese drei teilen sich **einen** Auftrag (`Job` in `app/services/backup/job.py`). Sie laufen im Faden,
-melden ihren Fortschritt, und es kann immer nur einer laufen — zwei gleichzeitige Schreibläufe auf
-dieselbe SQLite-Datei wären eine Fehlerquelle ohne Not. Das Frontend fragt den Status im
-Sekundentakt ab.
+These three share **one** job (`Job` in `app/services/backup/job.py`). They run in a thread,
+report their progress, and only one can run at a time — two concurrent write runs against the same
+SQLite file would be a source of errors for no gain. The frontend polls the status once a second.
 
 ---
 
-## Was an den Rändern zu wissen ist
+## What to know at the edges
 
-**Die Offline-Zusage ist prüfbar und wird geprüft.** Die Seite darf **null** Anfragen an eine
-fremde Herkunft absetzen. Der Einzeiler dafür steht in [development.md](development.md).
+**The offline promise is testable, and it is tested.** The page must make **zero** requests to a
+foreign origin. The one-liner for it is in [development.md](development.md).
 
-**Fremdschlüssel und Migrationen vertragen sich in SQLite schlecht.** Ein Tabellenneubau löscht
-das Original, und mit eingeschalteter Prüfung räumt das ab, was daran hängt. `alembic/env.py`
-schaltet sie deshalb für die Dauer einer Migration ab — im Betrieb bleibt sie an. Ein Test hält
-das fest; die Geschichte dazu steht in [history.md](history.md#fotos-löschen--und-ein-datenverlust-der-beinahe-unbemerkt-geblieben-wäre).
+**Foreign keys and migrations get along badly in SQLite.** Rebuilding a table drops the original,
+and with the check switched on that clears out whatever hangs off it. `alembic/env.py` therefore
+turns it off for the duration of a migration; in production it stays on. A test pins this down,
+and the story is in
+[history.md](history.md#fotos-löschen--und-ein-datenverlust-der-beinahe-unbemerkt-geblieben-wäre).
 
-**Der Pi hat keine Browser-Bedienung.** Kein Reload-Knopf, keine Adressleiste, keine Tastatur.
-Deshalb lädt der Leerlauf nach fünf Minuten die Seite neu, statt nur den Zustand zurückzusetzen,
-und deshalb lädt auch das Verlassen des Verwaltungsbereichs neu.
+**The Pi has no browser controls.** No reload button, no address bar, no keyboard. That is why the
+idle reset after five minutes reloads the page instead of only resetting the state, and why
+leaving the admin view reloads as well.
 
-**Der Ortsindex kennt nur Straßen und Hausnummern.** Gebäude, Gewässer und Fluren stehen nicht
-darin — für sie gibt es den Pin auf der Karte.
+**The place index knows only streets and house numbers.** Buildings, water and fields are not in
+it — for those there is the pin on the map.

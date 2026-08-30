@@ -5,11 +5,14 @@
  * Every piece of text that reaches a visitor's eyes.
  *
  * Kept in one place rather than inline, for two reasons: the museum team can have wording changed
- * without anyone hunting through components, and a second language would later be one more file
- * instead of a refactoring.
+ * without anyone hunting through components, and a second language stays a small job rather than a
+ * refactoring.
  *
- * One caveat for that second language: date labels ("1920er", "Juni 1955") are formatted on the
- * server. Making the kiosk bilingual would mean moving that formatting to the client.
+ * **Small, not free.** Two things come with it. The 29 files that use `t` import this module by
+ * name, so a second language also needs an `index.ts` that hands out one or the other. And date
+ * labels ("1920er", "Juni 1955") are formatted on the server, in `services/dates.py`; a bilingual
+ * kiosk has to move that formatting to the client. Both steps are written out in
+ * `docs/adaption.md`.
  */
 
 // The only import here, and type-only: it is what makes the compiler insist that every question
