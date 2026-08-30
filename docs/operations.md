@@ -287,8 +287,10 @@ docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/d
 docker compose exec backend alembic heads
 ```
 
-Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand — bei Schreibfehlern im
-Betrieb der erste Blick. Auf dem Entwicklungsrechner dasselbe ohne Container:
+Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand. Das ist bei
+Schreibfehlern im Betrieb der erste Blick, und der Zustand ist von aussen nicht zu sehen: Die
+Ausstellung zeigt Fotos, Karte und Zeitleiste wie immer, nur **jeder Schreibzugriff** scheitert
+mit HTTP 500. Auf dem Entwicklungsrechner dasselbe ohne Container:
 
 ```bash
 sqlite3 data/kiekmap.db "select * from alembic_version;"
@@ -300,13 +302,6 @@ Und die Reparatur von Hand:
 ```bash
 make migrate
 ```
-
-**Was der alte Fehler war**, weil er in Protokollen von vor dem 15. August 2026 auftaucht: Fehlte
-dem Schema eine Spalte, die das heutige Programm schreiben will, sah die Ausstellung völlig normal
-aus — Fotos, Karte, Zeitleiste —, aber **jeder Schreibzugriff** scheiterte mit HTTP 500 und im
-Protokoll stand `sqlite3.OperationalError: table changes has no column named old_source`. Ein
-Neustart behob es. Dass ein solcher Zustand überhaupt entstehen konnte, war
-[Punkt 47](backlog.md).
 
 ## Wo die Sicherung liegt
 

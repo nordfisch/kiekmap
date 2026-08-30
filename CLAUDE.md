@@ -232,9 +232,6 @@ gelaufen ist nichts. Der erste Pi ist zugleich die Abnahme. Ungeprüft sind aus 
 **USB-Weg der Sicherung** und das Verhalten nach **Neustart und Stromausfall** — beides ist auf
 einem Mac nicht zu prüfen. Die Container dagegen sind geprüft, wenn auch nur dort.
 
-**Sicherungen von vor dem 15. August 2026 werden nicht erkannt.** Der Projektname steckt im
-Ordner- und Archivnamen, und das Projekt hiess vorher anders.
-
 **Zum Entwickeln auf dem Mac** `KIEKMAP_MEDIA_DIR=/Volumes` setzen und ein Prüfvolumen mit
 `hdiutil` anlegen — siehe [docs/operations.md](docs/operations.md). Den Containerbetrieb fährt dort
 `make prod-mac`.
