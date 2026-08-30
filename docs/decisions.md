@@ -2391,3 +2391,59 @@ zitierte Kurz-Hashes in der Dokumentation nachgezogen werden. Beim ersten Mal li
 keine — die Zuordnung entstand aus der Reihenfolge, gegengeprüft über Betreff, Autor-Datum und
 Baum jedes einzelnen Commits. **Das ist die Rechnung, die auch gegen Squash-Merge spricht**
 (Punkt 66): Ein Squash liefert ebenfalls keine Tabelle.
+
+---
+
+## 68. Die Sprachgrenze verläuft nach Publikum, nicht nach Dateityp
+
+*Entschieden am 30. August 2026.*
+
+Nach vier Monaten stand deutsche Dokumentation neben englischen Bezeichnern, deutschen Tests,
+deutschen Commits und einer englischen Repo-Beschreibung. Der Mix war kein Konzept, sondern ein
+Rückstand: Jede Datei bekam ihre Sprache, als sie entstand.
+
+**Die Regel lautet jetzt: Jeder Text existiert genau einmal, in der Sprache seiner Leser.** Nicht
+übersetzen, sondern trennen. Die Sprachkarte steht in
+[development.md](development.md#sprachregelung).
+
+**Warum nicht zweisprachig.** Doppelter Inhalt in zwei Sprachen ist die teure Fehlerart: Die
+zweite Fassung veraltet, und niemand merkt es. Bei einem Betreuer nebenher ist das keine Prognose,
+sondern eine Gewissheit. Genau daran scheitern mehrsprachige Wikis, und das war der Anlass der
+Frage.
+
+**Warum die Museumsdoku deutsch bleibt.** Das Produkt ist deutsch — Oberfläche, CLI, Verwaltung.
+Ein nicht deutschsprachiges Museum kann Kiekmap heute nicht betreiben; `usermanual`, `operations`
+und `adaption` haben also kein englisches Publikum. Englisch im Entwicklerteil macht das Projekt
+nicht international. Es macht es lesbar für die, die den Code lesen.
+
+**Warum die Tests deutsch bleiben.** Ein Testname ist hier ein Spezifikationssatz, kein
+Bezeichner: `test_scandatum_datiert_das_foto_nicht` sagt in einer Zeile, welche Zusage der Test
+schützt. Dazu haben die Fachbegriffe — Flurname, Hausnummer, Ortsteil — kein gutes englisches
+Äquivalent.
+
+**Warum Issues deutsch werden.** Die Fachlichkeit ist deutsch, und wer hier meldet, meldet aus
+einem deutschen Museum. Das steht so in [CONTRIBUTING](../CONTRIBUTING.md), zusammen mit dem Satz,
+dass Code, Commits und Entwicklerdoku englisch sind. Ungewöhnlich, aber kohärent.
+
+**Kein Simplified Technical English.** Geprüft und verworfen: Sein kontrolliertes Vokabular ist
+für Wartungsanleitungen gebaut und schneidet genau die Nuance ab, die
+[decisions.md](decisions.md) und [development.md](development.md) tragen. Stattdessen gelten
+Schreibregeln für beide Sprachen — ein Gedanke pro Satz, Aktiv, kein Hedging, keine Bildsprache.
+Sie stehen in [development.md](development.md#schreibregeln).
+
+**Was die Regel prüfbar macht:** `tools/language_check.py` hat statt einer Prosaliste zwei,
+`GERMAN_PROSE` und `ENGLISH_PROSE`. Die deutsche Hälfte wird auf umschriebene Umlaute geprüft, die
+englische auf deutsche Absätze. Eine Datei in Umstellung steht in keiner der Listen — sie ist halb
+das eine und halb das andere, und beide Prüfungen hätten recht. Eine Liste mit einem Schalter
+täte es nicht: Eine englische Datei besteht die Umlautprüfung aus dem falschen Grund, weil sie
+nichts Deutsches hat, das umschrieben sein könnte.
+
+**Commit-Nachrichten sind ab heute englisch.** Die 211 davor bleiben deutsch. Sie umzuschreiben
+hieße, jeden Hash zu verschieben, den die Dokumentation zitiert — dieselbe Rechnung wie bei
+Punkt 66, und diesmal ohne Gewinn.
+
+**Was folgt, und was ausdrücklich nicht:** `history.md` wird eingefroren statt übersetzt; ein
+schlanker englischer Nachfolger tritt daneben. `decisions.md` wird erst gekürzt, dann übersetzt.
+Kein GitHub-Wiki: `make check` reicht nicht in ein zweites Repository hinein, und `operations.md`
+beschreibt `deploy/pi/update.sh` Zeile für Zeile — heute ist eine Änderung an beidem ein Commit
+und ein Review.

@@ -37,10 +37,12 @@ PIN: `cd backend && .venv/bin/python -m app.cli pin` erzeugt die Zeile für die 
 Sie stehen vollständig in [CLAUDE.md](CLAUDE.md) und in [development.md](docs/development.md).
 Das Wichtigste:
 
-- **`make check` vor jedem Commit.** Stil, fünf Prüfungen, alle Tests. Der Hook unter `.githooks/`
+- **`make check` vor jedem Commit.** Stil, sechs Prüfungen, alle Tests. Der Hook unter `.githooks/`
   nimmt einem die schnellen davon ab: `git config core.hooksPath .githooks`.
-- **Sprachregelung.** Bezeichner und Kommentare englisch, Testdateien vollständig deutsch,
-  Dokumentation deutsch. Umlaute in Texten für Menschen normal, im Quelltext umschrieben.
+- **Sprachregelung nach Publikum.** Jeder Text existiert einmal, in der Sprache seiner Leser.
+  Deutsch: Oberfläche, CLI, Doku für Museum und Betrieb, Issues, Testdateien. Englisch:
+  Bezeichner, Kommentare, Entwicklerdoku und Commit-Nachrichten. Umlaute in deutschen Texten für
+  Menschen normal, im Quelltext umschrieben.
 - **Jede fachliche Entscheidung bekommt einen Test, der den Fehlerfall beschreibt.** Die
   wertvollsten Tests hier decken Fehler ab, die *still* passieren würden.
 - **Nichts Ortsspezifisches in den Code.** Keine Koordinate, kein Ortsname, keine
@@ -64,11 +66,13 @@ werden nie neu vergeben, auch nicht nach dem Erledigen. `tools/check_numbers.py`
 
 1. **Fork**, dann ein Branch pro Thema: `feature/kurzer-name` oder `fix/kurzer-name`.
 2. Arbeiten, `make check` grün bekommen. Conventional Commits (`feat:`, `fix:`, `docs:` …) —
-   daran halten sich hier über 99 Prozent der Commits.
+   daran halten sich hier über 99 Prozent der Commits. **Neue Commit-Nachrichten sind englisch**;
+   alles vor dem 30. August 2026 ist deutsch und bleibt es.
 3. **Pull Request gegen `develop`**, nicht gegen `main`. `main` ist der Stand, der im Museum läuft,
    und bekommt nur Merges aus `develop`. Näheres in [development.md](docs/development.md).
-4. Gemerged wird per **Rebase**, nicht per Squash — die Dokumentation zitiert einzelne Commits mit
-   Hash, und ein Squash würde genau die vernichten.
+4. Gemerged wird mit einem **Merge-Commit**. Squash und Rebase sind für dieses Repo abgeschaltet:
+   Die Dokumentation zitiert einzelne Commits mit Hash, ein Squash vernichtet sie, und ein Rebase
+   schreibt sie neu und wirft dabei die Signaturen weg.
 
 ## Lizenz der Beiträge
 
