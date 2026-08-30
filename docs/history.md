@@ -2965,7 +2965,7 @@ einzeln zurücknehmbar.
 
 **Drei Fotos blieben liegen, mit Namen und Grund** -- sie stehen jetzt in Punkt 1. Bei Foto 17
 setzt das Archiv nur die Adresse dagegen, die ohnehin am Foto steht; bei 218 sind wir genauer als
-das Archiv; bei 398 liest das Archiv den Namen anders („Kuncke" statt „Runcke") und hängt eine
+das Archiv; bei 398 liest das Archiv den Namen anders („Harmsen" statt „Harms") und hängt eine
 Leihgeberadresse an, die nach Punkt 36 in die Herkunft gehört.
 
 ### Was der Bestand jetzt ist

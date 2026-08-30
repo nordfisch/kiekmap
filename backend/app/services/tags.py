@@ -21,7 +21,7 @@ def add_tags(session: Session, photo: Photo, names: Iterable[str]) -> None:
 
     A new tag is written out right away. The session runs with ``autoflush=False``, so without
     that a tag created for one photo would still be invisible to the query for the next -- and
-    two photos at the same address ("Hauptstraße 26, Tine-Kropp-Haus") would each create their
+    two photos at the same address ("Hauptstraße 26, Hof Sieveking") would each create their
     own, until the unique constraint stopped the whole import.
     """
     present = {tag.name for tag in photo.tags}

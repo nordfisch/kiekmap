@@ -108,6 +108,14 @@ Fundstellen in 15 Dateien ersetzt worden, ohne dass ein einziges Beispiel an Sch
 Der Anlass steht in der
 [history.md](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), Punkt 64, Abschnitt 1.
 
+**Drei sind damals durchgerutscht** und am 25. August 2026 nachgezogen worden: ein Nachname als
+Beispiel für eine falsch gelesene Archivangabe, ein Hausname in einem Kommentar und ein
+Fototitel, der ein Personenname ist. Alle drei standen in Beispielen, die ein erfundener Name
+genauso trägt. **Woran der erste Durchgang sie verlor:** Er suchte nach Namen, die die Datenbank
+als solche kennt; diese drei standen in Prosa, nicht in einem Namensfeld. Die Gegenprobe vor einer
+Veröffentlichung greift deshalb die Muster ab, in denen Namen im Bestand vorkommen — *Familie X*,
+*Hof X*, *A. Nachname*, norddeutsche Endungen —, nicht nur die Felder.
+
 ## Der Kopf jeder Quelldatei
 
 Zwei Zeilen, über dem Docstring, unter einer etwaigen Shebang-Zeile:
