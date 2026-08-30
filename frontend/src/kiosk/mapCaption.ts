@@ -8,7 +8,7 @@
  * `place_name` and the read-aloud label from `title`, in two places. Nobody noticed, because until
  * the first stock was cleaned up the two said the same thing: 815 titles repeated the address
  * beside them. Once the titles became titles, the eye read "Hauenweg 7" while the ear heard
- * "Hermann Berg". Two formulations of the same thing drift apart; one cannot.
+ * "Familie Wendt". Two formulations of the same thing drift apart; one cannot.
  *
  * The chain is **title, then address, then nothing** -- and the year where it is known. The address
  * stood there first (see decisions.md, Punkt 29), and for a good reason that has since expired.

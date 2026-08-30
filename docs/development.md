@@ -108,6 +108,20 @@ Fundstellen in 15 Dateien ersetzt worden, ohne dass ein einziges Beispiel an Sch
 Der Anlass steht in der
 [history.md](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), Punkt 64, Abschnitt 1.
 
+**Drei sind damals durchgerutscht** und am 25. August 2026 nachgezogen worden: ein Nachname als
+Beispiel für eine falsch gelesene Archivangabe, ein Hausname in einem Kommentar und ein
+Fototitel, der ein Personenname ist. Alle drei standen in Beispielen, die ein erfundener Name
+genauso trägt. **Woran der erste Durchgang sie verlor:** Er suchte nach Namen, die die Datenbank
+als solche kennt; diese drei standen in Prosa, nicht in einem Namensfeld. Die Gegenprobe vor einer
+Veröffentlichung greift deshalb die Muster ab, in denen Namen im Bestand vorkommen — *Familie X*,
+*Hof X*, *A. Nachname*, norddeutsche Endungen —, nicht nur die Felder.
+
+**Im Git-Verlauf stehen diese drei weiterhin**, und das ist entschieden, nicht übersehen: Ein
+vierter Rewrite an einem Tag hätte alle Hashes erneut verschoben, die zitierten Kennungen erneut
+nachzuziehen verlangt und den Tag `v0.8.0` gekostet — für drei Namen in Beispielsätzen alter
+Commits, die niemand sieht, der die heutigen Dateien liest. **Die Zusage lautet damit genau:** Der
+aktuelle Stand nennt keine Namen aus dem Bestand; der Verlauf vor dem 25. August 2026 nennt drei.
+
 ## Der Kopf jeder Quelldatei
 
 Zwei Zeilen, über dem Docstring, unter einer etwaigen Shebang-Zeile:

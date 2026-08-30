@@ -1390,7 +1390,7 @@ der Besucher zu langsam gewesen.
 Unter dem Vorschaubild stand die **Adresse**, im `aria-label` desselben Knopfes der **Titel**. Zwei
 Formulierungen derselben Sache, an zwei Stellen im Code. **Monatelang fiel es niemandem auf, weil
 beide dasselbe sagten** — 815 Titel wiederholten die Adresse daneben. Als der Erstbestand
-aufgeräumt war, las das Auge „Hauenweg 7" und das Ohr „Hermann Berg".
+aufgeräumt war, las das Auge „Hauenweg 7" und das Ohr „Familie Wendt".
 
 **Der Fehler war nicht die falsche Zeile, sondern dass es zwei gab.** Beide zu berichtigen hätte
 ihn vertagt: Zwei Formulierungen laufen wieder auseinander, sobald jemand eine davon anfasst. Es
