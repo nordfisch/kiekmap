@@ -4,6 +4,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unveröffentlicht]
 
+### Hinzugefügt
+
+- **Das Repo ist öffentlich** — `github.com/nordfisch/kiekmap`, Apache-2.0. Dazu die private
+  Sicherheitsmeldung, auf die `SECURITY.md` verweist und die es nur auf öffentlichen Repos gibt,
+  Branch-Schutz für `main` und `develop`, Secret-Scanning mit Push-Schutz, und ein Abzeichen im
+  README, das den Zustand der Prüfungen zeigt
+
 ### Geändert
 
 - **Vitest von 2 auf 3.** Nicht wegen einer neuen Funktion, sondern weil Vitest 2 seine eigenen,

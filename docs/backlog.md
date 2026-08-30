@@ -59,7 +59,6 @@ Gleichstand Fehler vor Aufgabe vor Frage vor Idee.
 | 20 | [Das Gerät muss einen Stromausfall überstehen](#20--das-gerät-muss-einen-stromausfall-überstehen) | Frage | wichtig |
 | | **Entwicklung** | | |
 | 21 | [Deployment auf einem Webserver evaluieren](#21--deployment-auf-einem-webserver-evaluieren) | Frage | wichtig · dringend |
-| 65 | [Den Code veröffentlichen](#65--den-code-veröffentlichen) | Aufgabe | wichtig |
 
 **Kein Fehler ist offen.** Was hier steht, ist Arbeit und Frage, nicht Reparatur. Die drei aus
 dem Durchgang über den Code vom 19. August 2026
@@ -67,9 +66,9 @@ dem Durchgang über den Code vom 19. August 2026
 worden — 57, 58 und 59, und keiner von ihnen fiel beim Benutzen auf. Das ist die Eigenschaft,
 die sie gefährlich machte, und der Grund, warum ein Durchgang von aussen sie fand.
 
-**Einundfünfzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 22, 23, 24,
+**Zweiundfünfzig Nummern sind vergriffen** — 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 22, 23, 24,
 25, 26, 27, 10, 28, 29, 32, 33, 35, 36, 37, 38, 39, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52,
-53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
+53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66. Sie sind erledigt, aufgelöst oder gestrichen; was aus jeder wurde, steht in
 [history.md](history.md). Der nächste neue Punkt bekommt die **67**.
 
 ---
@@ -581,40 +580,3 @@ ist der Verwaltungsbereich mit der vierstelligen PIN von jedem Rechner darin err
 das Gerät allein steht, trifft das niemanden; es gehört zu [Punkt 15](#15--abnahme-auf-dem-ersten-pi)
 gefragt, wie das Museumsnetz aussieht. Die Gegenmassnahme wäre eine Zeile (`127.0.0.1:80:80`) und
 kostet den Zugriff vom Nebenrechner, den das Team vielleicht will.
-
-### 65 · Den Code veröffentlichen
-
-Der letzte Teil von [Punkt 22](history.md#punkt-22-der-weg-nach-draussen-an-einem-tag), der
-selbst am 25. August 2026 erledigt ist: Branch-Modell, Versionierung, Releaseprozess und CI
-stehen, das Repo liegt **privat** bei GitHub und trägt den Tag `v0.8.0`. Was bleibt, ist keine
-Arbeit, sondern eine Entscheidung — und danach eine kurze Liste.
-
-**Die Frage „wie öffentlich" ist praktisch beantwortet.** Der Verlauf ist eigens von den Namen aus
-dem Bestand befreit worden, damit er veröffentlicht werden kann; `history.md` und `decisions.md`
-sind das, was dieses Projekt von anderen unterscheidet, und sie leben von den Commits, auf die sie
-verweisen. Ein reines Release-Repo würde genau das wegwerfen. Also alles öffentlich, von der ersten
-Zeile an.
-
-**Beim Umschalten, der Reihe nach:**
-
-1. **„Private vulnerability reporting" einschalten.** `SECURITY.md` und `CODE_OF_CONDUCT.md`
-   verweisen beide ausdrücklich darauf, und es gibt den Schalter **nur auf öffentlichen Repos**.
-   Solange das Repo privat war, zeigte der Meldeweg ins Leere.
-2. **Branch-Schutz.** Auf einem privaten Repo im Gratistarif nicht verfügbar — beide Wege
-   antworten mit `403 Upgrade to GitHub Pro or make this repository public`, der klassische
-   *und* der über Rulesets. Gemessen am 25. August 2026. Vorschlag, an einem Betreuer
-   ausgerichtet: beide Zweige ohne Force-Push und ohne Löschen; `main` zusätzlich mit Pull Request
-   und null Freigaben; `develop` ohne PR-Zwang, denn der träfe nur den Betreuer — Mitwirkende
-   forken und können ohnehin nichts anderes schicken. Dazu `make check` als Pflicht-Prüfung.
-3. **Ein CI-Abzeichen ins README.** Es kann erst auf einem öffentlichen Repo etwas anzeigen.
-4. **Ein GitHub-Release zu `v0.8.0`** — mit **Quelltext, keinen gebauten Abbildern**. Ein Abbild
-   aus `python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes Userland, und wer es
-   weitergibt, übernimmt dessen Pflichten. Siehe [licensing.md](licensing.md).
-5. ~~Vorher Punkt 66~~ — **erledigt am 25. August 2026.** Vitest 2 brachte eigene alte Kopien von
-   `vite` und `esbuild` mit; daran hingen fünf der sechs Meldungen. Nach dem Sprung auf Vitest 3
-   und einem `npm audit fix`: null. Siehe
-   [history.md](history.md#punkt-66-sechs-meldungen-ein-haken).
-
-**Eine Kleinigkeit, die nur du entscheiden kannst:** Der Anzeigename des Kontos steht auf „Kalle",
-alles andere — Commits, `NOTICE`, `AUTHORS`, Repo-Beschreibung — auf „Kalle Erlhoff". Rechtlich
-folgenlos, für die Wiedererkennbarkeit nicht.

@@ -2285,8 +2285,9 @@ deshalb über die private Meldung bei GitHub. Das kostet nichts — der Weg ist 
 geht nur an den Betreuer, und er taugt zugleich als der eine vertrauliche Kanal, den auch der
 Verhaltenskodex braucht. Er setzt voraus, dass das Repo bei GitHub liegt — seit dem
 25. August 2026 tut es das ([Punkt 22](history.md#punkt-22-der-weg-nach-draussen-an-einem-tag)). **Den Schalter dafür gibt es allerdings nur auf
-öffentlichen Repos**; solange es privat ist, zeigt der Meldeweg ins Leere. Er steht deshalb ganz
-oben auf der Liste in [Punkt 65](backlog.md#65--den-code-veröffentlichen).
+öffentlichen Repos**; solange es privat war, zeigte der Meldeweg ins Leere. Er stand deshalb ganz
+oben auf der Liste für die Veröffentlichung — und ist seit dem 25. August 2026 eingeschaltet
+(siehe [history.md](history.md#punkt-65-veröffentlicht)).
 
 **Kein Contributor Covenant, sondern fünfzehn Zeilen in der Stimme des Projekts.** Der Covenant
 ist der erkannte Standard, und der Wechsel steht als nächster Schritt im Kodex — aber heute gibt

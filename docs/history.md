@@ -22,7 +22,7 @@ Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 
 ## Register
 
-94 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
+95 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
 die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die
 Datei ist ausführlich genug dafür.
 
@@ -122,6 +122,7 @@ Datei ist ausführlich genug dafür.
 | 22. August 2026 | [Punkt 64, Abschnitt 4: die Regel stand da und wurde nicht geprüft](#punkt-64-abschnitt-4-die-regel-stand-da-und-wurde-nicht-geprüft) |
 | 25. August 2026 | [Punkt 22: der Weg nach draussen, an einem Tag](#punkt-22-der-weg-nach-draussen-an-einem-tag) |
 | 25. August 2026 | [Punkt 66: sechs Meldungen, ein Haken](#punkt-66-sechs-meldungen-ein-haken) |
+| 25. August 2026 | [Punkt 65: veröffentlicht](#punkt-65-veröffentlicht) |
 
 <!-- register:ende -->
 ---
@@ -4367,4 +4368,51 @@ Einschätzung: Was sich hier bewegt hat, wird nicht ausgeliefert.
 **Der Grund, es trotzdem vor der Veröffentlichung zu tun**, war nie das Risiko. Es war die rote
 Fahne, die sonst am ersten Tag am Repo gehangen hätte — und die Fragen aufwirft, die die Antwort
 nicht wert sind.
+
+---
+
+## Punkt 65: veröffentlicht
+
+25. August 2026.
+
+Das Repo liegt öffentlich unter `github.com/nordfisch/kiekmap`. Der Schritt selbst war ein Schalter;
+was daran hing, war die Liste dahinter — und drei Punkte davon **gab es vorher gar nicht.**
+
+### Was erst öffentlich existiert
+
+**Der Meldeweg aus `SECURITY.md`.** Beide Dateien, `SECURITY.md` und `CODE_OF_CONDUCT.md`,
+verweisen auf die private Sicherheitsmeldung bei GitHub als *den* vertraulichen Kanal. Den Schalter
+dafür gibt es nur auf öffentlichen Repos — solange das Repo privat war, zeigte die Zusage ins Leere.
+Jetzt steht sie.
+
+**Der Branch-Schutz.** Am selben Tag noch mit `403 Upgrade to GitHub Pro or make this repository
+public` abgewiesen, klassisch wie über Rulesets. Jetzt: beide Zweige ohne Force-Push und ohne
+Löschen, `develop` mit `make check` als Pflichtprüfung, `main` mit Pull Request und null Freigaben.
+`enforce_admins` bleibt aus, damit der Release-Merge weiter lokal gemacht werden kann — der eine
+Commit, auf den `main` zeigt, soll die Signatur des Betreuers tragen und keine Nachricht der Form
+„Merge pull request".
+
+**Und das Abzeichen im README**, das vorher nur ein kaputtes Bild gewesen wäre.
+
+### Eine Einstellung, die beim Nachsehen auffiel
+
+`secret_scanning` stand auf `disabled`. Auf öffentlichen Repos ist es kostenlos, und es bewacht
+genau das, was vor der Veröffentlichung von Hand geprüft worden war: Zugangsdaten im Baum und im
+Verlauf. Zusammen mit dem Push-Schutz eingeschaltet — die Handprüfung sagt etwas über einen
+Zeitpunkt, der Scanner über jeden künftigen Push.
+
+### Ein Release ohne Abbilder
+
+`v0.8.0` als GitHub-Release, mit dem Quelltext, den GitHub selbst beilegt, und **ohne gebaute
+Abbilder**. Ein Abbild aus `python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes
+Userland; wer es weitergibt, übernimmt dessen Pflichten. Wer die Dockerfiles veröffentlicht, lässt
+sie dort, wo sie hingehören. Der Weg über `abbilder.tar` bleibt für das eigene Gerät richtig — siehe
+[licensing.md](licensing.md).
+
+### Womit Punkt 22 vollständig ist
+
+Fünf Teile, an einem Tag: Identität und Signatur, Branch-Modell, Versionierung, Releaseprozess,
+CI — und jetzt die Veröffentlichung. Was bleibt, steht in
+[Punkt 15](backlog.md): Das Gerät im Museum fehlt noch, und mit ihm die Abnahme, an der die `1.0.0`
+hängt.
 
