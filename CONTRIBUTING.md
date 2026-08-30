@@ -30,7 +30,7 @@ make dev          # backend on 8000, frontend on 5173, both with hot reload
 make seed         # build the invented sample collection
 ```
 
-In full in [development.md](docs/development.md). The admin area needs a PIN:
+In full in [development.md](docs/development.md). The admin view needs a PIN:
 `cd backend && .venv/bin/python -m app.cli pin` produces the line for the `.env`.
 
 ## The rules of this repository

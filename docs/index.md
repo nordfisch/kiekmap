@@ -28,7 +28,7 @@ Fehler ein zweites Mal passieren würde.
 
 | Datei | Frage | Für wen | Sprache |
 |---|---|---|---|
-| [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler | Deutsch, wird englisch |
+| [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler | Englisch |
 | [backlog.md](backlog.md) | Was fehlt noch? — nach Bereich geordnet, jeder Punkt mit Nummer, Art und Einordnung | wer etwas aufgreifen will | Deutsch |
 
 Für Coding-Agents kommt [../CLAUDE.md](../CLAUDE.md) dazu — dieselben Regeln, auf das Nötigste
@@ -67,7 +67,7 @@ Bedienung, `operations.md` die Technik dahinter.
 |---|---|---|
 | [../README.md](../README.md) | Der Einstieg: was das Ganze ist, wie man es startet | Deutsch |
 | [../CHANGELOG.md](../CHANGELOG.md) | Was das Programm kann, nach Keep a Changelog sortiert | Deutsch |
-| [../CLAUDE.md](../CLAUDE.md) | Die Regeln dieses Repos, für Coding-Agents | Deutsch, wird englisch |
+| [../CLAUDE.md](../CLAUDE.md) | Die Regeln dieses Repos, für Coding-Agents | Englisch |
 | [../seed/README.md](../seed/README.md) | Der Beispielbestand: was `make seed` herstellt und warum seine Lücken Absicht sind | Deutsch |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Wie man mitwirkt — und was man erwarten darf, und was nicht | Englisch |
 | [../SECURITY.md](../SECURITY.md) | Was hier eine Schwachstelle ist, was Entwurf, und wohin damit | Deutsch |

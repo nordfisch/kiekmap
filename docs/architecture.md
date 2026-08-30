@@ -72,10 +72,11 @@ service of its own.
 
 ### Frontend — React, MapLibre and nginx
 
-A single page with two views. There is **no router**: `App.tsx` decides from the state in the
-`useAdmin` store whether to render the kiosk view (`src/kiosk/`), the PIN pad or the admin area
-(`src/admin/`). On a device without an address bar a router would be ballast — and a URL somebody
-leaves behind by accident would be a risk.
+A single page with two views. **The device as a whole is the kiosk**; inside it there are exactly
+two views, the visitor view and the admin view. There is **no router**: `App.tsx` decides from the
+state in the `useAdmin` store whether to render the visitor view (`src/kiosk/`), the PIN pad or the
+admin view (`src/admin/`). On a device without an address bar a router would be ballast — and a URL
+somebody leaves behind by accident would be a risk.
 
 In production **nginx** serves the built page and proxies `/api` to the backend. Both therefore
 come from the same origin; the CORS setting in the backend exists for the Vite development server
@@ -163,8 +164,8 @@ Four ways, one destination — they all run through `import_file()` in
    to `_erledigt/` or `_problem/`. Nothing is ever deleted. **One exception: it leaves ZIP files
    named like a backup alone** — those are not a photo but a whole collection, and they are only
    restored after a confirmation.
-2. **Upload in the admin area** — the way for forty selected files.
-3. **USB stick in the admin area** — the way for a folder of two hundred scans, subfolders
+2. **Upload in the admin view** — the way for forty selected files.
+3. **USB stick in the admin view** — the way for a folder of two hundred scans, subfolders
    included. **Nothing on the stick is moved and nothing is deleted**, unlike in the incoming
    folder.
 4. **`python -m app.cli import`** — for the initial collection.
@@ -197,7 +198,7 @@ and never come up for correction — and the genuine 2014 shots would arrive und
 
 ### A visitor contributes something
 
-The „Hilf mit" panel fetches a photo that is missing a place or a year through
+The contribution panel fetches a photo that is missing a place or a year through
 `/api/contribute/next`. The contribution goes straight into the collection — but **into empty
 fields only**: what a curator entered is untouchable, and coordinates outside the region are
 rejected. Every contribution also lands as a row in `changes` and can be taken back one by one,
@@ -239,7 +240,7 @@ and the story is in
 
 **The Pi has no browser controls.** No reload button, no address bar, no keyboard. That is why the
 idle reset after five minutes reloads the page instead of only resetting the state, and why
-leaving the admin area reloads as well.
+leaving the admin view reloads as well.
 
 **The place index knows only streets and house numbers.** Buildings, water and fields are not in
 it — for those there is the pin on the map.
