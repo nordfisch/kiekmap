@@ -2186,7 +2186,9 @@ lizenziert das Programm, nicht die Daten. Das steht samt der ODbL-Frage beim Ort
 
 ## 63. Die Historie wird nicht aufgeteilt, sondern erschlossen — über ihr Datum
 
-*Entschieden am 21. August 2026 — Backlogpunkt 64, Abschnitt 3.*
+*Entschieden am 21. August 2026 — Backlogpunkt 64, Abschnitt 3.* **Ergänzt durch Punkt 68:** Die
+Datei ist seit dem 30. August 2026 abgeschlossen. Aufgeteilt wurde sie weiterhin nicht; sie wächst
+nur nicht mehr.
 
 `history.md` ist mit 3.858 Zeilen die größte Datei im Repo und wächst mit jedem Arbeitsschritt.
 Die Frage war, ob sie aufzuteilen ist — nach Jahr, nach Thema — oder ob eine Datei, die niemand von
@@ -2429,7 +2431,7 @@ dass Code, Commits und Entwicklerdoku englisch sind. Ungewöhnlich, aber kohäre
 für Wartungsanleitungen gebaut und schneidet genau die Nuance ab, die
 [decisions.md](decisions.md) und [development.md](development.md) tragen. Stattdessen gelten
 Schreibregeln für beide Sprachen — ein Gedanke pro Satz, Aktiv, kein Hedging, keine Bildsprache.
-Sie stehen in [development.md](development.md#schreibregeln).
+Sie stehen in [CLAUDE.md](../CLAUDE.md#schreibregeln).
 
 **Was die Regel prüfbar macht:** `tools/language_check.py` hat statt einer Prosaliste zwei,
 `GERMAN_PROSE` und `ENGLISH_PROSE`. Die deutsche Hälfte wird auf umschriebene Umlaute geprüft, die

@@ -122,9 +122,17 @@ def register(text: str) -> str:
     undated, order = [], []
     part: Entry | None = None
 
+    # Everything above the marker is the way in, not the chronicle: the title, the table of
+    # neighbouring files, and since 30 August 2026 the note that the file is closed. Headings
+    # there carry no date and belong in no register -- a named exception list would have to grow
+    # with every one of them.
+    intro = lines.index(BEGIN)
+
     for index, line in enumerate(lines):
+        if index < intro:
+            continue
         match = re.match(r"^(#{1,2}) (.+)$", line)
-        if not match or match.group(2) in ("Entstehung", "Register"):
+        if not match or match.group(2) == "Register":
             continue
         level, heading = match.group(1), match.group(2)
         date = date_below(lines, index)

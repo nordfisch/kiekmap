@@ -1,6 +1,6 @@
 # Dokumentation
 
-Neun Dateien, jede mit genau einer Frage. Wer hier landet und nicht weiß, wohin: **Die erste
+Zehn Dateien, jede mit genau einer Frage. Wer hier landet und nicht weiß, wohin: **Die erste
 Spalte sagt, was drinsteht, die zweite, für wen.**
 
 ## Das System verstehen
@@ -10,9 +10,14 @@ Spalte sagt, was drinsteht, die zweite, für wen.**
 | [architecture.md](architecture.md) | *Was* gibt es, und wie greift es ineinander? | wer einsteigt |
 | [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will |
 | [history.md](history.md) | *Wie* ist es dazu gekommen? — und was dabei anders kam als geplant | wer wissen will, ob eine Idee schon einmal da war |
+| [lessons.md](lessons.md) | Was der Plan *nicht wusste* — nur das, und auf Englisch | wer etwas Ähnliches vorhat |
 
 `decisions.md` ist die Datei, die man **vor** einer Änderung liest; `history.md` die, die man liest,
 wenn etwas unerklärlich aussieht. Meist steht dort, warum.
+
+`history.md` endet mit v0.8.0 am 25. August 2026 und wird nicht fortgeschrieben. `lessons.md` tritt
+an ihre Stelle und ist absichtlich viel kürzer: Ein Eintrag entsteht nur, wenn ohne ihn derselbe
+Fehler ein zweites Mal passieren würde.
 
 ## Daran arbeiten
 

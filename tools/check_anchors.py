@@ -43,7 +43,10 @@ DOCUMENTS = (
     "docs/licensing.md",
     "docs/operations.md",
     "docs/usermanual.md",
+    "docs/lessons.md",
     "README.md",
+    "CLAUDE.md",
+    "CONTRIBUTING.md",
 )
 
 

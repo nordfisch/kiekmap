@@ -11,17 +11,30 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Branch-Schutz für `main` und `develop`, Secret-Scanning mit Push-Schutz, und ein Abzeichen im
   README, das den Zustand der Prüfungen zeigt
 
+### Hinzugefügt
+
+- **[lessons.md](docs/lessons.md)** — der Nachfolger der Historie, englisch und absichtlich
+  schmal: ein Eintrag entsteht nur, wenn ohne ihn derselbe Fehler ein zweites Mal passieren würde
+
 ### Geändert
 
+- **`docs/history.md` ist abgeschlossen.** Sie endet am 25. August 2026 mit v0.8.0, bleibt deutsch
+  und wird nicht übersetzt. Was danach kam, steht in den Commits, den Pull Requests und den
+  geschlossenen Issues. Ein neuer Abschnitt darin macht `build_register.py --check` rot
 - **Die Sprachgrenze verläuft jetzt nach Publikum, nicht nach Dateityp.** Deutsch bleibt, was
   Besucher, Museumsteam und Betreiber lesen: Oberfläche, CLI, `usermanual`, `operations`,
   `adaption`, README, CHANGELOG, Issues und die Testdateien. Englisch wird, was Entwickler lesen:
   Bezeichner, Kommentare, `architecture`, `development`, `decisions`, `CONTRIBUTING`, `CLAUDE.md`
   und ab dem 30. August 2026 die Commit-Nachrichten. Die Übersetzung folgt schrittweise; die Regel
   gilt ab sofort. Siehe [Punkt 68](docs/decisions.md)
+- **Die Zahl vor den Prüfungen ist weg**, wo direkt darunter die Liste steht. Vier Dateien sagten
+  „fünf" und zählten sechs auf; eine Zahl in Prosa altert still. Siehe
+  [lessons.md](docs/lessons.md)
 - **`tools/language_check.py` prüft beide Seiten.** Statt einer Prosaliste zwei: deutsche Doku wird
   auf umschriebene Umlaute geprüft, englische auf deutsche Absätze. Dazu Schreibregeln für
-  Dokumentation in beiden Sprachen, in [development.md](docs/development.md)
+  Dokumentation in beiden Sprachen, in [CLAUDE.md](CLAUDE.md)
+- **`tools/check_anchors.py` liest auch `CLAUDE.md`, `CONTRIBUTING.md` und `lessons.md`.** Drei
+  Dateien, in die andere hineinverweisen und deren Überschriften bis dahin niemand nachhielt
 - **Vitest von 2 auf 3.** Nicht wegen einer neuen Funktion, sondern weil Vitest 2 seine eigenen,
   alten Kopien von `vite` und `esbuild` mitbrachte — daran hingen fünf von sechs
   Dependabot-Meldungen. Im Baum liegt jetzt je eine Fassung. Ausgeliefert war nichts davon; die
