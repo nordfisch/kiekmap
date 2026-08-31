@@ -50,17 +50,19 @@ important ones:
   the collection — those go into `region.json` or into the settings. Test data is exempt.
 - **No names from the real collection**, not even in a comment. The sample collection provides an
   invented cast; it is listed in [development.md](docs/development.md).
-- **A finished item is recorded in two places**, not nine: the changelog and `backlog.md` — plus
-  `decisions.md` if a decision came out of it. How the work went stays in the commit and the issue.
+- **A finished item is recorded in two places**, not nine: the changelog, and the issue gets
+  closed — plus `decisions.md` if a decision came out of it.
 
 ## An idea or a bug
 
-First check [backlog.md](docs/backlog.md) for an existing item, and [history.md](docs/history.md)
-for whether the thing has been tried before. Then open an issue; the templates ask for what is
-needed. **Issues are written in German** — the subject matter is a German museum.
+First check the [open issues](https://github.com/nordfisch/kiekmap/issues) for the same thing, and
+[history.md](docs/history.md) for whether it has been tried before. Then open an issue; the
+templates ask for what is needed. **Issues are written in German** — the subject matter is a German
+museum.
 
-**Backlog items carry fixed numbers** they are cited by ("Punkt 15"). Numbers are never reissued,
-not even after an item is done. `tools/check_numbers.py` verifies that.
+**The documentation cites older items as „Punkt N".** Those numbers are not issue numbers and
+cannot become them; the number register in
+[history.md](docs/history.md#nummernregister) resolves them.
 
 ## The path of a contribution
 

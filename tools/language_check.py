@@ -136,7 +136,6 @@ TRANSCRIBED = re.compile(
 #: would be right to complain.
 GERMAN_PROSE = (
     "docs/adaption.md",
-    "docs/backlog.md",
     "docs/history.md",
     "docs/index.md",
     "docs/licensing.md",

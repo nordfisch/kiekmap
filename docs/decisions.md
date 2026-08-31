@@ -546,10 +546,9 @@ to a file swap here.
 
 ---
 
-## 22. The backlog gets classified and stays one file
+## 22. The backlog gets classified, and its numbering outlives it
 
-[backlog.md](backlog.md) has a **kind** per item, a **ranking** by importance and urgency, and a
-**number**.
+The backlog gave every item a **kind**, a **ranking** by importance and urgency, and a **number**.
 
 **Four kinds, because there are four different things to do.** *Fehler* (something does not do what
 it promises), *Aufgabe* (clearly bounded, only the work is missing), *Frage* (before the work,
@@ -572,18 +571,17 @@ This file does the same: **point 8 is missing**, because it was absorbed into
 [point 11](#11-backup-is-a-feature-not-a-script).
 
 **Two sequences share one word.** This file numbers its points as well, independently of the
-backlog, and both are cited as „Punkt N". A citation therefore always names its file, as a link —
-`[point 15](backlog.md)` for a backlog item, an anchor for a decision. And whoever writes a new
-point reads the last heading of the file it goes into first: what the other sequence has reached
-says nothing about this one.
+backlog, and both were cited as „Punkt N". A citation therefore always names its target, as a link —
+an anchor for a decision, the issue for open work. And whoever writes a new point reads the last
+heading of the file it goes into first: what the other sequence has reached says nothing about this
+one.
 
 **The ranking stands only in the overview table**, not additionally under each heading. Two places
 for the same value drift apart, and then nobody knows which one is right.
 
-**And it stays one file.** As long as the backlog is a file, it reads in one go, lives in the same
-history as the code it describes, and survives a coding agent losing its context. **The move pays
-off as soon as more than one person works on it, or the order changes more often than the
-contents.**
+**And it stayed one file for as long as that held.** As a file the backlog reads in one go, lives in
+the same history as the code it describes, and survives a coding agent losing its context. What
+ended it is in [point 69](#69-the-backlog-moves-into-issues-and-the-old-numbering-stays-where-it-is).
 
 ---
 
@@ -1775,3 +1773,45 @@ nothing takes its place — what the work teaches becomes a decision here, and h
 the commits and the issues. `decisions.md` is consolidated first and then translated.
 No GitHub wiki: `make check` does not reach into a second repository, and `operations.md` describes
 `deploy/pi/update.sh` line by line — today a change to both is one commit and one review.
+
+---
+
+## 69. The backlog moves into issues, and the old numbering stays where it is
+
+*Supersedes the last paragraph of [point 22](#22-the-backlog-gets-classified-and-its-numbering-outlives-it).*
+
+Point 22 named the condition for moving: more than one person working on the backlog, or the order
+changing more often than the contents. **Neither happened; the reason is a different one.** The
+repository is public. Somebody who finds a bug does not send a pull request against a markdown file,
+they open an issue — and a backlog that lives in a file puts an outside report beside the work
+instead of in it.
+
+**The numbers do not travel with the points.** GitHub shares one counter between issues and pull
+requests, and the low numbers were used up by the first pull requests: „Punkt 15" could never become
+issue #15. The documentation cites points at over three hundred places, and one of the citing files
+is frozen. So the old numbering stays where it is, and
+[history.md](history.md#nummernregister) resolves it: the fourteen open points became issues #15 to
+#28, and every other number is described in that file under its date.
+
+**The register stands in the history, not in a file of its own.** That is where the numbers are
+cited — 186 of the three hundred citations are in `history.md` — and a register in a second file
+would be one more thing to keep in step. It sits above the change register, under the note that the
+file is closed. New work is named by its issue number alone.
+
+**The kinds and the ranking become labels**, so the list can be filtered the way the file was
+ordered. The four areas of the backlog come along as labels as well.
+
+**The labels are English, although the issues are German**, and that is a deliberate exception to
+the language map. Three of them are GitHub's own — `bug`, `enhancement` and `question` carry Fehler,
+Aufgabe and Frage. Somebody filing an issue from outside reaches for `bug`, and a second German
+label beside it would be two truths about the same thing. The rest follow suit rather than mixing
+two languages in one list: `idea`, `important`, `urgent`, and `admin`, `visitor`, `infrastructure`
+and `development` for the areas.
+
+**The fit is exact only for `bug`.** `enhancement` is narrower than Aufgabe, and `question` means a
+request for information where this project means a decision to be taken before the work starts. The
+label descriptions therefore carry this project's definitions, not GitHub's.
+
+**The old number is not in the issue title**, it is in its footer. A title should say what the thing
+is about; the number only matters to somebody following a citation, and for them the footer names
+it.

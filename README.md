@@ -16,8 +16,7 @@ erstellt in Zusammenarbeit mit Anthropic Claude Code.
 > unter `deploy/pi/` ist ohne Gerät geschrieben — die Syntax stimmt, ausgeführt wurde nichts.
 > Ungeprüft sind damit der Kiosk-Betrieb, der USB-Weg der Sicherung und das Verhalten nach
 > Neustart und Stromausfall. Der erste echte Aufbau ist zugleich die Abnahme:
-> [Punkt 15](docs/backlog.md#15--abnahme-auf-dem-ersten-pi) und
-> [Punkt 21](docs/backlog.md#21--deployment-auf-einem-webserver-evaluieren) im Backlog.
+> [Punkt 15](https://github.com/nordfisch/kiekmap/issues/18) und [Punkt 21](https://github.com/nordfisch/kiekmap/issues/22).
 >
 > Geprüft ist, was sich ohne Gerät prüfen lässt: Die Container bauen und laufen, die Seite fragt
 > nichts Fremdes an, und 647 Tests laufen durch.
@@ -101,7 +100,7 @@ ist [docs/usermanual.md](docs/usermanual.md).
 Woraus das System besteht und wie die Teile zusammenspielen, steht in
 [docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in
 [docs/decisions.md](docs/decisions.md); wie es dazu gekommen ist, in
-[docs/history.md](docs/history.md). Was noch offen ist, im [docs/backlog.md](docs/backlog.md).
+[docs/history.md](docs/history.md). Was noch offen ist, in den [Issues](https://github.com/nordfisch/kiekmap/issues).
 Welche Datei welche Frage beantwortet, sagt [docs/index.md](docs/index.md).
 
 ## Mitwirken

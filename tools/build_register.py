@@ -122,17 +122,17 @@ def register(text: str) -> str:
     undated, order = [], []
     part: Entry | None = None
 
-    # Everything above the marker is the way in, not the chronicle: the title, the table of
-    # neighbouring files, and since 30 August 2026 the note that the file is closed. Headings
-    # there carry no date and belong in no register -- a named exception list would have to grow
-    # with every one of them.
-    intro = lines.index(BEGIN)
+    # The chronicle starts after the generated block. Everything before it carries no dates: the
+    # title, the table of neighbouring files, the note that the file is closed, the number register
+    # -- and the block's own heading, which would otherwise count as a section. A list of headings
+    # to exclude by name would have to grow with every one of them.
+    chronicle = lines.index(END)
 
     for index, line in enumerate(lines):
-        if index < intro:
+        if index < chronicle:
             continue
         match = re.match(r"^(#{1,2}) (.+)$", line)
-        if not match or match.group(2) == "Register":
+        if not match:
             continue
         level, heading = match.group(1), match.group(2)
         date = date_below(lines, index)
@@ -181,7 +181,7 @@ def register(text: str) -> str:
         [
             BEGIN,
             "",
-            "## Register",
+            "## Änderungsregister",
             "",
             f"{len(rows)} Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —",
             "die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die",

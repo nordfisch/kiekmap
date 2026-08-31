@@ -3,7 +3,7 @@
 For people who work on Kiekmap. Why things are the way they are is in
 [decisions.md](decisions.md); what the system is made of is in
 [architecture.md](architecture.md); how it came about is in [history.md](history.md); what is
-still open is in [backlog.md](backlog.md); how to work on it is here.
+still open is in the [issues](https://github.com/nordfisch/kiekmap/issues); how to work on it is here.
 
 ## Setup
 
@@ -63,7 +63,8 @@ The axis is the audience, not the language:
 | Interface, CLI, messages in the visitor view and the admin view | German | visitors, volunteers |
 | [usermanual.md](usermanual.md), [operations.md](operations.md), [adaption.md](adaption.md) | German | museum team, a second museum |
 | [README](../README.md), [CHANGELOG](../CHANGELOG.md) | German | operators |
-| [backlog.md](backlog.md), GitHub issues | German | whoever plans here |
+| GitHub issues | German | whoever plans here |
+| Labels on issues and pull requests | English | see [point 69](decisions.md) |
 | Test files — name, docstring, comment | German | see below |
 | Identifiers, code comments, docstrings | English | developers |
 | [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | English | developers |
@@ -212,9 +213,9 @@ exist in `config.py` has no effect and would otherwise never be noticed.
 **`check_numbers.py` joined on 19 August 2026** and has one too. An item moving into the history
 demands four edits in three places — remove the table row, remove the section, add the number to
 the retired list, raise the count in front of it. That happened four times in one day. It verifies
-the promise the backlog makes about itself: every number ever issued is either open or retired —
-no gap, no surplus, none twice. **What it deliberately does not do is count numbers in running
-text**; why that would be wrong is in [decisions.md](decisions.md), point 59.
+the one promise the numbering still makes: the points of `decisions.md` ascend and no number
+occurs twice. **What it deliberately does not do is count numbers in running text**; why that would
+be wrong is in [decisions.md](decisions.md), point 59.
 
 **`build_register.py` joined on 21 August 2026**, together with the register at the top of
 [history.md](history.md). It is really a generator — `make register` writes the table, `--check`

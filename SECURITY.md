@@ -17,7 +17,7 @@ Das ist kein Fund, sondern der Entwurf:
   unantastbar, und jede Änderung steht im Änderungsprotokoll und ist zurücknehmbar.
 - **Es gibt keine Ratenbegrenzung am Beitragsweg.** In einem Raum mit Aufsicht ist das folgenlos.
   Für einen Betrieb im Netz ist es das nicht — deshalb liegt dieser Fall als
-  [Punkt 21](docs/backlog.md) im Backlog, mit einer Anmeldung vor der ganzen Anwendung als Weg.
+  [Punkt 21](https://github.com/nordfisch/kiekmap/issues/22), mit einer Anmeldung vor der ganzen Anwendung als Weg.
 - **Der Fotobestand ist nicht verschlüsselt.** Er liegt als Dateien auf dem Gerät und auf dem
   Sicherungsstick. Ein Museum, das das anders braucht, verschlüsselt den Datenträger.
 

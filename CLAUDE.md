@@ -48,11 +48,12 @@ the language.
 | Messages that only surface when working against the API | English |
 | API paths, query parameters, JSON fields, OpenAPI descriptions | English |
 | Output of the CLI (`python -m app.cli …`) | German |
-| Docs for museum and operation: `usermanual`, `operations`, `adaption`, README, CHANGELOG, `backlog` | German |
+| Docs for museum and operation: `usermanual`, `operations`, `adaption`, README, CHANGELOG | German |
 | Docs for developers: `architecture`, `development`, `decisions`, `CONTRIBUTING`, this file | English |
 | `docs/history.md` up to v0.8.0 | German, frozen |
 | Title and body of a pull request | English |
 | GitHub issues | German |
+| Labels on issues and pull requests | English |
 | Commit messages from 30 August 2026 on | **English** |
 | Values in the database that come from OSM (`kind`: `strasse`, `flur` …) | German, as delivered |
 
@@ -166,10 +167,10 @@ deleted. A comment that names a pitfall is gold, and there are a few here (the `
 sprite URL that has to be absolute, `+` meaning addition in SQLite).
 
 **A finished item is recorded in two places, not nine:** what the program can do now goes into the
-[changelog](CHANGELOG.md), and the item itself comes out of [docs/backlog.md](docs/backlog.md) with
-its number going onto the retired list. If a decision came out of it, that becomes a new point in
-[docs/decisions.md](docs/decisions.md), with a short reason. How the work went is in the commit and
-the closed issue, and nowhere else — `docs/history.md` is closed and takes nothing more.
+[changelog](CHANGELOG.md), and the issue gets closed. If a decision came out of it, that becomes a
+new point in [docs/decisions.md](docs/decisions.md), with a short reason. How the work went is in
+the commit and the closed issue, and nowhere else — `docs/history.md` is closed and takes nothing
+more.
 
 **Keep the audience in mind.** Visitors stand at a touchscreen, often elderly. Controls at least
 48 px. The admin view is used once or twice a year by volunteers — plain wording matters more than
@@ -218,7 +219,8 @@ language would cost and when splitting things up starts to pay off.
 
 What is built is in the [changelog](CHANGELOG.md); how it came about and what turned out differently
 from the plan is in [docs/history.md](docs/history.md); what is open is in
-[docs/backlog.md](docs/backlog.md). Only what you would **assume wrongly** while working is here.
+the [issues](https://github.com/nordfisch/kiekmap/issues). Only what you would **assume wrongly**
+while working is here.
 
 **Stages 0 to 10 are built** — backend, map, time slider, contribution panel, admin view, backup,
 kiosk operation. The initial collection is imported, cleaned and reviewed. **All of that has run
@@ -236,9 +238,11 @@ see [docs/operations.md](docs/operations.md). Container operation runs there wit
 **The admin view needs a PIN:** `cd backend && .venv/bin/python -m app.cli pin` produces the line
 for the `.env`. Without it the login says so in plain words instead of rejecting every attempt.
 
-**Every backlog item carries a fixed number** it is cited by ("Punkt 15"). **Numbers are never
-reissued** — finished and dissolved ones stay retired, so that a citation in an old note does not
-point at something else. `tools/check_numbers.py` verifies that.
+**Open work lives in the [issues](https://github.com/nordfisch/kiekmap/issues), not in a file.** The documentation cites older items as
+„Punkt N" — a numbering that ran to 66 and was never reissued. Those numbers are not issue numbers
+and cannot become them, because GitHub shares one counter with the pull requests. The number
+register in [docs/history.md](docs/history.md#nummernregister) resolves them, and
+[docs/decisions.md](docs/decisions.md) point 69 says why.
 
 **What is no longer a backlog item but curation:** photos without a description, without a title,
 without a place. Those are written by whoever looks at the picture and knows the place — no program

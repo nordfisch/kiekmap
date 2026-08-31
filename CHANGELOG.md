@@ -17,6 +17,19 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   25. August 2026 mit v0.8.0 und bleibt deutsch. Was die Arbeit lehrt, wird künftig ein Punkt in
   `decisions.md` mit kurzer Begründung; wie sie verlief, steht in den Commits und den geschlossenen
   Issues. Ein neuer Abschnitt in der Historie macht `build_register.py --check` rot
+- **Die offenen Punkte sind GitHub-Issues**, `docs/backlog.md` ist weg. Vierzehn Stück, Art und
+  Bereich als Label, die alte Nummer im Fuß des Textes. Das **Nummernregister** steht jetzt in
+  `history.md`, über dem Änderungsregister: Es löst jedes „Punkt N" auf — die vierzehn offenen auf
+  ihr Issue, die übrigen auf den Abschnitt unter ihrem Datum. Zu Issue-Nummern konnten die Nummern
+  nicht werden, weil GitHub einen Zähler mit den Pull Requests teilt; „Punkt 15" wurde Issue #18.
+  Neue Arbeit heißt nur noch nach ihrer Issue-Nummer. **Die Labels sind englisch**, obwohl die
+  Issues deutsch sind — wer von aussen meldet, greift zu `bug`. Siehe
+  [Punkt 69](docs/decisions.md)
+- **Das Register der Historie heißt Änderungsregister**, weil daneben jetzt das Nummernregister
+  steht. `tools/build_register.py` überspringt dafür alles oberhalb des erzeugten Blocks, statt zwei
+  Überschriften namentlich auszunehmen
+- **`tools/check_numbers.py` prüft nur noch die Entscheidungen** — aufsteigend, keine Nummer
+  doppelt. Von 245 Zeilen sind 64 geblieben
 - **Die Entwicklerdoku ist englisch.** `architecture`, `development`, `decisions`, `CONTRIBUTING`
   und `CLAUDE.md` — rund 24.000 Wörter. `decisions.md` ist vorher zusammengefasst worden: alle 67
   Punkte bleiben, der Text ist ein Drittel kürzer. Weg sind Herkunfts- und Umsetzungsgeschichte,
@@ -51,7 +64,7 @@ Abhängigkeiten, ein Releaseprozess, geprüfte Herkunft jedes Commits.
 
 **Warum 0.8 und nicht 1.0:** `1.0.0` sagt unter SemVer eine stabile öffentliche Schnittstelle zu.
 Alles unter `deploy/pi/` ist bis heute ungeprüft, und die Abnahme auf dem ersten Gerät steht aus.
-Die `1.0.0` wird danach vergeben — siehe [Punkt 15](docs/backlog.md).
+Die `1.0.0` wird danach vergeben — siehe [Punkt 15](https://github.com/nordfisch/kiekmap/issues/18).
 
 **Dieser Block ist nach Bereichen geordnet, nicht nach Hinzugefügt, Geändert und Behoben.** Vor
 0.8.0 gab es keine Fassung, gegen die sich etwas geändert oder in der sich etwas beheben ließe;
@@ -218,9 +231,9 @@ alles hier ist neu. Die 250 Einzelschritte, aus denen es entstand, stehen in
 
 ### Dokumentation
 
-- **Neun Dateien, jede mit genau einer Frage**, erschlossen über [docs/index.md](docs/index.md):
+- **Acht Dateien, jede mit genau einer Frage**, erschlossen über [docs/index.md](docs/index.md):
   `architecture` (woraus es besteht), `decisions` (warum es so ist), `history` (wie es dazu kam),
-  `development` (wie man daran arbeitet), `backlog` (was fehlt), `adaption` und `licensing` (für
+  `development` (wie man daran arbeitet), `adaption` und `licensing` (für
   ein zweites Museum), `operations` und `usermanual` (für den Betrieb)
 - **Backlogpunkte tragen feste Nummern**, unter denen sie zitiert werden. Nummern werden nie neu
   vergeben, auch nicht nach dem Erledigen

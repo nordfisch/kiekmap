@@ -138,5 +138,5 @@ Was das Risiko klein hält, ist deshalb nicht die Klausel, sondern die **Unentge
 verschenkt, haftet im Kern nur für Vorsatz und grobe Fahrlässigkeit. Daraus folgt eine einzige
 Verhaltensregel: **keine Zusicherungen machen.** Nicht versprechen, dass der Bestand sicher ist,
 dass die Sicherung funktioniert, dass das Gerät durchläuft. Was das Programm kann, steht im
-Änderungsprotokoll; was ungeprüft ist, steht im [backlog.md](backlog.md) und in
+Änderungsprotokoll; was ungeprüft ist, steht in den [Issues](https://github.com/nordfisch/kiekmap/issues) und in
 [index.md](index.md). Diese Ehrlichkeit ist nicht nur guter Stil, sie ist der eigentliche Schutz.

@@ -6,9 +6,9 @@
 
 **Woran hängt es?**
 
-<!-- Backlogpunkt, Meldung, oder nichts davon -- alles drei ist in Ordnung. -->
+<!-- Issue, Meldung, oder nichts davon -- alles drei ist in Ordnung. -->
 
-- Backlogpunkt:
+- Issue:
 
 **Vor dem Absenden**
 
@@ -18,5 +18,5 @@
 - [ ] Nichts Ortsspezifisches im Code: keine Koordinate, kein Ortsname, keine sammlungsabhängige
       Zahl. Testdaten sind ausgenommen
 - [ ] Keine Namen aus einem echten Bestand — auch nicht im Kommentar
-- [ ] Bei einem erledigten Backlogpunkt: CHANGELOG, `history.md`, `backlog.md` nachgezogen
+- [ ] Bei einem erledigten Issue: CHANGELOG nachgezogen, Issue verlinkt
       (und `decisions.md`, falls eine Entscheidung herauskam)
