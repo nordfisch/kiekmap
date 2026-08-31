@@ -37,7 +37,7 @@ from app.services import auth, importer
 from app.services import backup as service
 
 log = logging.getLogger(__name__)
-router = APIRouter(prefix="/admin/backup", tags=["sicherung"])
+router = APIRouter(prefix="/admin/backup", tags=["backup"])
 
 # The stick import lives here although it is not a backup: it shares drive detection and the one
 # job with the backup. Having both twice would be worse than one module that does two things.

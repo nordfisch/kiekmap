@@ -478,11 +478,11 @@ notices would then not be those of the image.
 make version v=0.9.0                 # set the number
 git commit -am "chore: version 0.9.0"
 git tag -s v0.9.0 -m v0.9.0          # signed, tag.gpgsign is set
-make release nach=/Volumes/STICK/kiekmap-update
+make release to=/Volumes/STICK/kiekmap-update
 ```
 
-`tools/build_release.py` builds both images, saves them as `abbilder.tar`, writes the `version`
-file next to them and on request (`karte=1`) takes the map file and place index along — exactly
+`tools/build_release.py` builds both images, saves them as `images.tar`, writes the `version`
+file next to them and on request (`map=1`) takes the map file and place index along — exactly
 the folder `deploy/pi/update.sh` expects.
 
 **It aborts on a dirty working tree or a missing tag**, and there is no `--force` against that: a

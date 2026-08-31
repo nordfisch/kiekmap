@@ -217,9 +217,9 @@ def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:
 def german_in_english_prose(path: Path) -> list[tuple[int, str]]:
     """Paragraphs of an English document that are still German -- a leftover of the switch.
 
-    The other half of the language map, and the reason ``GERMAN_PROSE`` and ``ENGLISH_PROSE`` are
-    two lists. Judged per paragraph, not per line: one line rarely carries enough function words
-    to tell the languages apart, and ``language`` returns None on a tie.
+    The other half of the suffix rule: ``prose_language`` says English, this asks whether the file
+    is. Judged per paragraph, not per line: one line rarely carries enough function words to tell
+    the languages apart, and ``language`` returns None on a tie.
 
     Fenced blocks, inline code and quoted material are skipped for the same reason as above --
     a German example inside an English text is the subject, not the prose.
@@ -251,7 +251,7 @@ def german_in_english_prose(path: Path) -> list[tuple[int, str]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--all", action="store_true", help="jede Datei zeigen, nicht nur Verstoesse"
+        "--all", action="store_true", help="show every file, not only the offenders"
     )
     args = parser.parse_args()
 
@@ -278,61 +278,61 @@ def main() -> int:
         if wrong:
             breaks.append((name, wrong, counted["de"] + counted["en"]))
         if args.all and any(counted.values()):
-            print(f"  {name:56} {counted['de']:4} deutsch  {counted['en']:4} englisch")
+            print(f"  {name:56} {counted['de']:4} German  {counted['en']:4} English")
 
     if args.all:
         print()
-    print(f"Kommentare insgesamt: {total['de']} deutsch, {total['en']} englisch")
+    print(f"Comments in total: {total['de']} German, {total['en']} English")
 
     prose = sorted(f for f in listed if is_prose(f) and (ROOT / f).is_file())
 
-    umschrieben = [
+    transcribed = [
         (name, hits)
         for name in prose
         if prose_language(name) == "de" and (hits := transcribed_in_prose(ROOT / name))
     ]
 
-    deutsch_geblieben = [
+    still_german = [
         (name, hits)
         for name in prose
         if prose_language(name) == "en" and (hits := german_in_english_prose(ROOT / name))
     ]
 
-    if not breaks and not umschrieben and not deutsch_geblieben:
-        print("Keine Datei bricht die Sprachregelung.")
+    if not breaks and not transcribed and not still_german:
+        print("No file breaks the language rule.")
         return 0
 
     if breaks:
-        kommentare = sum(b[1] for b in breaks)
-        print(f"\n{len(breaks)} Dateien brechen die Regel ({kommentare} Kommentare):")
+        comments = sum(b[1] for b in breaks)
+        print(f"\n{len(breaks)} files break the rule ({comments} comments):")
         for name, wrong, all_of_them in sorted(breaks, key=lambda b: -b[1]):
-            richtung = "deutsch in einer Testdatei" if is_test(name) else "deutsch im Code"
-            print(f"  {name:56} {wrong:4} von {all_of_them:4}   {richtung}")
+            where = "German in a test file" if is_test(name) else "German in code"
+            print(f"  {name:56} {wrong:4} of {all_of_them:4}   {where}")
 
-    if umschrieben:
-        zeilen = sum(len(h) for _, h in umschrieben)
-        print(f"\n{zeilen} Zeilen Prosa schreiben einen Umlaut aus, in {len(umschrieben)} Dateien:")
-        for name, hits in umschrieben:
-            for number, woerter in hits[:5]:
-                print(f"  {name}:{number}  {woerter}")
+    if transcribed:
+        lines = sum(len(h) for _, h in transcribed)
+        print(f"\n{lines} lines of prose transcribe an umlaut, in {len(transcribed)} files:")
+        for name, hits in transcribed:
+            for number, words in hits[:5]:
+                print(f"  {name}:{number}  {words}")
             if len(hits) > 5:
-                print(f"  {name}  … und {len(hits) - 5} weitere Zeilen")
-        print("\n  In deutscher Doku werden Umlaute geschrieben, nicht umschrieben -- das")
-        print("  sind Texte fuer Menschen. Code, Bezeichner und Zitate sind ausgenommen.")
+                print(f"  {name}  … and {len(hits) - 5} more lines")
+        print("\n  German documentation writes its umlauts instead of transcribing them -- these")
+        print("  are texts for people. Code, identifiers and quotations are exempt.")
 
-    if deutsch_geblieben:
-        absaetze = sum(len(h) for _, h in deutsch_geblieben)
+    if still_german:
+        paragraphs = sum(len(h) for _, h in still_german)
         print(
-            f"\n{absaetze} Absaetze stehen deutsch in einer englischen Datei, in "
-            f"{len(deutsch_geblieben)} Dateien:"
+            f"\n{paragraphs} paragraphs stand in German inside an English file, in "
+            f"{len(still_german)} files:"
         )
-        for name, hits in deutsch_geblieben:
-            for number, anfang in hits[:5]:
-                print(f"  {name}:{number}  {anfang} …")
+        for name, hits in still_german:
+            for number, beginning in hits[:5]:
+                print(f"  {name}:{number}  {beginning} …")
             if len(hits) > 5:
-                print(f"  {name}  … und {len(hits) - 5} weitere Absaetze")
-        print("\n  Entwicklerdoku ist englisch, Doku fuer Museum und Betrieb deutsch. Was hier")
-        print("  steht, ist ein Rest der Umstellung.")
+                print(f"  {name}  … and {len(hits) - 5} more paragraphs")
+        print("\n  The repository speaks English; a German translation carries .de.md in its")
+        print("  name. What stands here is a leftover of the switch.")
     return 1
 
 

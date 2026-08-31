@@ -1,28 +1,27 @@
-# Ueberlagerung fuer den Entwicklungsmac. Nur zusammen mit docker-compose.yml zu benutzen,
-# am einfachsten ueber `make prod-mac`.
+# Overlay for the development Mac. To be used only together with docker-compose.yml, most easily
+# through `make prod-mac`.
 #
-# Sie aendert genau zwei Einhaengungen und sonst nichts: dieselben Abbilder, dieselbe
-# nginx-Konfiguration, derselbe Entrypoint. Alles, was der Containerbetrieb ausmacht, wird also
-# wirklich geprueft und nicht umgangen.
+# It changes exactly two mounts and nothing else: the same images, the same nginx configuration,
+# the same entrypoint. Everything that makes up container operation is therefore really checked
+# and not bypassed.
 #
-# Warum ueberhaupt: /media gibt es unter macOS nicht -- eingehaengte Datentraeger liegen unter
-# /Volumes. Und `rshared` ist eine Mount-Propagierung des Linux-Kerns, die ueber die
-# Dateifreigabe von Docker Desktop nicht durchgeht. Beides ist auf dem Pi richtig, hier aber
-# nicht herstellbar.
+# Why at all: /media does not exist under macOS -- mounted volumes lie under /Volumes. And
+# `rshared` is a mount propagation of the Linux kernel that does not pass through Docker Desktop's
+# file sharing. Both are right on the Pi but cannot be reproduced here.
 #
-# DARAUS FOLGT: Der USB-Weg der Sicherung ist auf dem Mac NICHT geprueft. Ein erst nach dem
-# Start eingesteckter Stick bleibt hier unsichtbar, und das ist genau der Fall, den `rshared`
-# auf dem Pi loesen soll. Das gehoert auf ein Geraet -- siehe Backlog, Punkt 18 und Punkt 15.
+# IT FOLLOWS THAT: the USB path of the backup is NOT checked on the Mac. A stick plugged in after
+# the start stays invisible here, and that is exactly the case `rshared` is meant to solve on the
+# Pi. This belongs on a device -- see backlog point 18 and point 15.
 
 services:
   backend:
     volumes:
-      # Compose fuehrt Volumes ueber den Zielpfad zusammen, diese beiden ersetzen also die
-      # gleichnamigen aus docker-compose.yml und treten nicht daneben.
+      # Compose merges volumes by their target path, so these two replace the ones of the same
+      # name from docker-compose.yml instead of standing beside them.
       #
-      # Der Vorgabewert ist derselbe Bestand wie im Betrieb. Wer gegen eine Kopie pruefen will --
-      # empfohlen, denn der Entrypoint zieht bei jedem Start den Schemastand nach --, setzt den
-      # Pfad relativ zu diesem Verzeichnis:
+      # The default is the same collection as in operation. Whoever wants to check against a copy
+      # -- recommended, because the entrypoint pulls the schema forward on every start -- sets the
+      # path relative to this directory:
       #   KIEKMAP_PROD_DATA=../../kiekmap-prodtest/data make prod-mac
       - ${KIEKMAP_PROD_DATA:-../data}:/data
       - /Volumes:/media

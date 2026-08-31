@@ -22,7 +22,7 @@ from app.services.storage import (
 )
 
 log = logging.getLogger(__name__)
-router = APIRouter(prefix="/photos", tags=["fotos"])
+router = APIRouter(prefix="/photos", tags=["photos"])
 
 #: Upper bound per query. More markers than this make no sense on a map anyway, and the response
 #: should go through in one go on a Pi.

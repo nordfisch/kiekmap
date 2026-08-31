@@ -1,85 +1,85 @@
 #!/bin/sh
-# Update ohne Internet -- vom USB-Stick.
+# Update without the internet -- from a USB stick.
 #
 #     sudo sh /opt/kiekmap/deploy/pi/update.sh /media/STICK/kiekmap-update
 #
-# Der Pi im Museum haengt an keinem Netz. Ein Update kommt deshalb als Ordner auf einem Stick:
-# die Abbilder als Tar-Datei, dazu die neuen Kartendaten, falls sich die Region geaendert hat.
+# The Pi in the museum hangs on no network. An update therefore arrives as a folder on a stick:
+# the images as a tar file, plus the new map data if the region has changed.
 #
-# Erzeugt wird so ein Ordner auf dem Entwicklungsrechner mit:
+# Such a folder is built on the development machine with:
 #
-#     make release nach=/Volumes/STICK/kiekmap-update
+#     make release to=/Volumes/STICK/kiekmap-update
 #
-# Der Bestand wird dabei nicht angefasst. Wer Fotos zurueckholen will, nimmt die Sicherung im
-# Admin-Bereich -- das hier tauscht nur die Software.
+# The collection is not touched. Whoever wants photos back takes the backup in the admin area --
+# this only swaps the software.
 
 set -eu
 
-QUELLE="${1:-}"
-WURZEL="${KIEKMAP_ROOT:-/opt/kiekmap}"
+SOURCE="${1:-}"
+ROOT="${KIEKMAP_ROOT:-/opt/kiekmap}"
 
-[ "$(id -u)" -eq 0 ] || { echo "Bitte mit sudo starten." >&2; exit 1; }
-[ -n "$QUELLE" ] && [ -d "$QUELLE" ] || {
-    echo "Aufruf: $0 /media/STICK/kiekmap-update" >&2
+[ "$(id -u)" -eq 0 ] || { echo "Please start with sudo." >&2; exit 1; }
+[ -n "$SOURCE" ] && [ -d "$SOURCE" ] || {
+    echo "Usage: $0 /media/STICK/kiekmap-update" >&2
     exit 1
 }
 
-ABBILDER="$QUELLE/abbilder.tar"
-[ -f "$ABBILDER" ] || { echo "$ABBILDER fehlt." >&2; exit 1; }
+IMAGES="$SOURCE/images.tar"
+[ -f "$IMAGES" ] || { echo "$IMAGES is missing." >&2; exit 1; }
 
-echo "== Abbilder einlesen"
-docker load -i "$ABBILDER"
+echo "== loading the images"
+docker load -i "$IMAGES"
 
-# Version aus dem Stick uebernehmen, falls dabei. Sonst bleibt die alte in der .env stehen --
-# und ein "docker compose up" zoege wieder das alte Abbild hoch.
-if [ -f "$QUELLE/version" ]; then
-    VERSION="$(cat "$QUELLE/version")"
-    echo "== Version $VERSION eintragen"
-    if grep -q '^KIEKMAP_VERSION=' "$WURZEL/.env" 2>/dev/null; then
-        sed -i "s/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=$VERSION/" "$WURZEL/.env"
+# Take the version from the stick, if it came along. Otherwise the old one stays in the .env --
+# and a "docker compose up" would pull the old image back up.
+if [ -f "$SOURCE/version" ]; then
+    VERSION="$(cat "$SOURCE/version")"
+    echo "== writing version $VERSION"
+    if grep -q '^KIEKMAP_VERSION=' "$ROOT/.env" 2>/dev/null; then
+        sed -i "s/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=$VERSION/" "$ROOT/.env"
     else
-        echo "KIEKMAP_VERSION=$VERSION" >>"$WURZEL/.env"
+        echo "KIEKMAP_VERSION=$VERSION" >>"$ROOT/.env"
     fi
 fi
 
-if [ -d "$QUELLE/tiles" ]; then
-    echo "== Kartendaten uebernehmen"
-    # Erst daneben, dann umbenennen: ein abgebrochenes Kopieren darf keine halbe Kartendatei
-    # hinterlassen, mit der das Geraet dann startet.
-    rm -rf "$WURZEL/frontend/public/tiles.neu"
-    cp -r "$QUELLE/tiles" "$WURZEL/frontend/public/tiles.neu"
-    rm -rf "$WURZEL/frontend/public/tiles.alt"
-    [ -d "$WURZEL/frontend/public/tiles" ] &&
-        mv "$WURZEL/frontend/public/tiles" "$WURZEL/frontend/public/tiles.alt"
-    mv "$WURZEL/frontend/public/tiles.neu" "$WURZEL/frontend/public/tiles"
+if [ -d "$SOURCE/tiles" ]; then
+    echo "== taking over the map data"
+    # Beside it first, then rename: an aborted copy must not leave half a map file behind for the
+    # device to start with.
+    rm -rf "$ROOT/frontend/public/tiles.new"
+    cp -r "$SOURCE/tiles" "$ROOT/frontend/public/tiles.new"
+    rm -rf "$ROOT/frontend/public/tiles.old"
+    [ -d "$ROOT/frontend/public/tiles" ] &&
+        mv "$ROOT/frontend/public/tiles" "$ROOT/frontend/public/tiles.old"
+    mv "$ROOT/frontend/public/tiles.new" "$ROOT/frontend/public/tiles"
 fi
 
-if [ -f "$QUELLE/places.json" ]; then
-    echo "== Ortsindex uebernehmen"
-    cp "$QUELLE/places.json" "$WURZEL/data/places.json"
+if [ -f "$SOURCE/places.json" ]; then
+    echo "== taking over the place index"
+    cp "$SOURCE/places.json" "$ROOT/data/places.json"
 fi
 
-echo "== Neu starten"
-cd "$WURZEL/deploy"
+echo "== restarting"
+cd "$ROOT/deploy"
 docker compose up -d
 
-echo "== Warten, bis die API antwortet"
-VERSUCH=0
+echo "== waiting for the API to answer"
+ATTEMPT=0
 until curl -sf --max-time 3 http://localhost/api/health >/dev/null 2>&1; do
-    VERSUCH=$((VERSUCH + 1))
-    [ "$VERSUCH" -gt 60 ] && { echo "API kommt nicht hoch -- siehe: docker compose logs" >&2; exit 1; }
+    ATTEMPT=$((ATTEMPT + 1))
+    [ "$ATTEMPT" -gt 60 ] && { echo "The API does not come up -- see: docker compose logs" >&2; exit 1; }
     sleep 2
 done
 
-# Der Ortsindex wird beim Start nur geladen, wenn die Tabelle leer ist. Nach einem Update mit
-# neuer places.json muss er ausdruecklich nachgezogen werden.
-if [ -f "$QUELLE/places.json" ]; then
-    echo "== Ortsindex neu einlesen"
+# The place index is loaded at startup only when the table is empty. After an update with a new
+# places.json it has to be pulled in explicitly.
+if [ -f "$SOURCE/places.json" ]; then
+    echo "== reading the place index in again"
     docker compose exec -T backend python -m app.cli places
 fi
 
-echo "== Kiosk neu starten"
+echo "== restarting the kiosk"
 systemctl restart kiekmap-kiosk
 
 echo
-echo "Fertig. Der Stick kann abgezogen werden."
+echo "Done. The stick can be removed."

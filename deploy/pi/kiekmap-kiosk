@@ -1,56 +1,56 @@
 #!/bin/sh
-# Startet die Besucheransicht im Vollbild -- das, was das Museum morgens sieht.
+# Starts the visitor view full screen -- what the museum sees in the morning.
 #
-# Zwei Dinge passieren hier, und beide haben einen Grund:
+# Two things happen here, and both have a reason:
 #
-#   1. Warten, bis die API antwortet. Ohne das begruesst das Geraet seine Besucher nach dem
-#      Einschalten ein paar Sekunden lang mit einer Fehlerseite -- und genau die bleibt stehen,
-#      weil Chromium nicht von allein neu laedt.
-#   2. cage statt eines Desktops. cage ist ein winziger Wayland-Compositor, der genau ein
-#      Programm im Vollbild zeigt. Nichts kann sich davorschieben, kein Hintergrundbild blitzt
-#      auf, keine Update-Hinweise, kein Bildschirmschoner.
+#   1. Wait until the API answers. Without it the device greets its visitors for a few seconds
+#      after switching on with an error page -- and that page stays, because Chromium does not
+#      reload by itself.
+#   2. cage instead of a desktop. cage is a tiny Wayland compositor that shows exactly one
+#      program full screen. Nothing can push itself in front, no wallpaper flashes up, no update
+#      notices, no screen saver.
 #
-# Wird von kiekmap-kiosk.service gerufen, nicht von Hand.
+# Called by kiekmap-kiosk.service, not by hand.
 
 set -eu
 
-ADRESSE="${KIEKMAP_URL:-http://localhost/}"
-GESUNDHEIT="${ADRESSE%/}/api/health"
+ADDRESS="${KIEKMAP_URL:-http://localhost/}"
+HEALTH="${ADDRESS%/}/api/health"
 
-# Frisches Browserprofil bei jedem Start. Damit ist nach einem Absturz oder Stromausfall nichts
-# von gestern uebrig -- kein halb geladener Zustand, kein Cache, der das Update verschluckt.
-PROFIL="$(mktemp -d /tmp/kiekmap-chromium.XXXXXX)"
-trap 'rm -rf "$PROFIL"' EXIT
+# A fresh browser profile on every start. After a crash or a power cut nothing from yesterday is
+# left -- no half-loaded state, no cache that swallows the update.
+PROFILE="$(mktemp -d /tmp/kiekmap-chromium.XXXXXX)"
+trap 'rm -rf "$PROFILE"' EXIT
 
-echo "Warte auf $GESUNDHEIT ..."
-VERSUCH=0
-while ! curl -sf --max-time 3 "$GESUNDHEIT" >/dev/null 2>&1; do
-    VERSUCH=$((VERSUCH + 1))
-    # Nach fuenf Minuten trotzdem starten. Lieber eine Fehlerseite, die jemand sieht und meldet,
-    # als ein schwarzer Bildschirm, bei dem niemand weiss, ob das Geraet ueberhaupt laeuft.
-    if [ "$VERSUCH" -gt 150 ]; then
-        echo "API antwortet nicht -- starte trotzdem." >&2
+echo "Waiting for $HEALTH ..."
+ATTEMPT=0
+while ! curl -sf --max-time 3 "$HEALTH" >/dev/null 2>&1; do
+    ATTEMPT=$((ATTEMPT + 1))
+    # Start anyway after five minutes. Better an error page that somebody sees and reports than a
+    # black screen where nobody can tell whether the device is running at all.
+    if [ "$ATTEMPT" -gt 150 ]; then
+        echo "The API does not answer -- starting anyway." >&2
         break
     fi
     sleep 2
 done
 
 exec cage -- chromium-browser \
-    --kiosk "$ADRESSE" \
+    --kiosk "$ADDRESS" \
     --ozone-platform=wayland \
-    --user-data-dir="$PROFIL" \
+    --user-data-dir="$PROFILE" \
     --no-first-run \
     --noerrdialogs \
     --disable-infobars \
     --disable-translate \
     --disable-features=TranslateUI \
-    `# Nach einem gezogenen Netzstecker fragt Chromium sonst "Seiten wiederherstellen?" --` \
-    `# ein Dialog mitten in der Ausstellung, den niemand wegklickt.` \
+    `# After a pulled power plug Chromium otherwise asks "Restore pages?" -- a dialog in the` \
+    `# middle of the exhibition that nobody clicks away.` \
     --disable-session-crashed-bubble \
     --hide-crash-restore-bubble \
-    `# Ein Wisch nach rechts loest sonst "Zurueck" aus. Auf einer Karte, die man wischt,` \
-    `# ist das ein taeglicher Aerger.` \
+    `# A swipe to the right otherwise triggers "back". On a map that is swiped, that is a daily` \
+    `# annoyance.` \
     --overscroll-history-navigation=0 \
-    `# Pinch-Zoom bleibt an -- die Karte lebt davon.` \
+    `# Pinch zoom stays on -- the map lives on it.` \
     --disable-pinch=false \
     --autoplay-policy=no-user-gesture-required

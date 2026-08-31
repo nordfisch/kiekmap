@@ -41,9 +41,9 @@ def check_decisions(problems: list[str]) -> None:
 
     doubled = sorted(n for n in set(numbers) if numbers.count(n) > 1)
     if doubled:
-        problems.append(f"decisions.md: Nummer doppelt vergeben: {doubled}")
+        problems.append(f"decisions.md: number handed out twice: {doubled}")
     if numbers != sorted(numbers):
-        problems.append("decisions.md: die Punkte stehen nicht in aufsteigender Reihenfolge")
+        problems.append("decisions.md: the points do not ascend")
 
 
 def main() -> int:
@@ -53,7 +53,7 @@ def main() -> int:
     for problem in problems:
         print(f"  {problem}")
 
-    print("Die Buchfuehrung stimmt." if not problems else f"{len(problems)} Unstimmigkeiten.")
+    print("The bookkeeping adds up." if not problems else f"{len(problems)} discrepancies.")
     return 1 if problems else 0
 
 

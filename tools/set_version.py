@@ -58,7 +58,7 @@ def found() -> list[tuple[Path, str]]:
     for path, pattern, _ in PLACES:
         match = pattern.search(path.read_text(encoding="utf-8"))
         if not match:
-            raise SystemExit(f"{path.relative_to(ROOT)}: keine Zeile mit einer Version gefunden.")
+            raise SystemExit(f"{path.relative_to(ROOT)}: no line with a version found.")
         values.append((path, match.group(2)))
     return values
 
@@ -73,36 +73,36 @@ def write(version: str) -> None:
         text = path.read_text(encoding="utf-8")
         replaced, n = pattern.subn(rf"\g<1>{version}\g<3>", text, count=count)
         if n != count:
-            raise SystemExit(f"{path.relative_to(ROOT)}: {n} statt {count} Stellen.")
+            raise SystemExit(f"{path.relative_to(ROOT)}: {n} places instead of {count}.")
         path.write_text(replaced, encoding="utf-8")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("version", nargs="?", help="die neue Version, etwa 0.8.0")
-    parser.add_argument("--check", action="store_true", help="nur pruefen, nichts schreiben")
+    parser.add_argument("version", nargs="?", help="the new version, for example 0.8.0")
+    parser.add_argument("--check", action="store_true", help="only check, write nothing")
     args = parser.parse_args()
 
     if args.version:
         if not SEMVER.match(args.version):
-            print(f'„{args.version}" ist keine Version der Form 1.2.3.')
+            print(f'"{args.version}" is not a version of the form 1.2.3.')
             return 1
         write(args.version)
-        print(f"Version {args.version} an {len(PLACES)} Stellen geschrieben.")
-        print("Nicht vergessen: committen, dann taggen.")
+        print(f"Version {args.version} written in {len(PLACES)} places.")
+        print("Do not forget: commit, then tag.")
         return 0
 
     values = found()
     differing = {value for _, value in values}
     if len(differing) > 1:
-        print("Die Stellen nennen verschiedene Versionen:")
+        print("The places name different versions:")
         for path, value in values:
             print(f"  {str(path.relative_to(ROOT)):32} {value}")
-        print("\n  Zusammenfuehren mit: make version v=<nummer>")
+        print("\n  Bring them together with: make version v=<number>")
         return 1
 
     version = differing.pop()
-    print(version if not args.check else f"Version einheitlich an {len(values)} Stellen: {version}")
+    print(version if not args.check else f"The same version in {len(values)} places: {version}")
     return 0
 
 

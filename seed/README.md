@@ -31,7 +31,7 @@ für das Ortswappen — siehe [decisions.md](../docs/decisions.md), Punkt 21.
 
 | | |
 |---|---|
-| `fotos/` | die Bilddateien |
+| `photos/` | die Bilddateien |
 | `seed.json` | alles Übrige: Titel, Datierung, Ort, Schlagwörter, Bildnachweis, Herkunft, Status — und die Besucherbeiträge, die zu jedem Foto gehören |
 
 Beides erzeugt [`tools/build_seed.py`](../tools/build_seed.py) aus einer Tabelle im Skript. Wer den

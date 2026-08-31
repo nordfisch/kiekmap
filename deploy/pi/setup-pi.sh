@@ -1,25 +1,25 @@
 #!/bin/sh
-# Richtet einen frischen Raspberry Pi als Museums-Kiosk ein.
+# Sets up a fresh Raspberry Pi as the museum kiosk.
 #
 #     sudo sh deploy/pi/setup-pi.sh
 #
-# Erwartet Raspberry Pi OS **Lite** (64 Bit) und ein bereits ausgechecktes Projekt unter
-# /opt/kiekmap. Laeuft einmal; ein zweiter Aufruf schadet nicht.
+# Expects Raspberry Pi OS **Lite** (64 bit) and the project already checked out under
+# /opt/kiekmap. Runs once; a second call does no harm.
 #
-# Was danach anders ist: Der Pi bootet ohne Tastatur in die Karte, haengt USB-Sticks unter /media
-# ein, und der Bildschirm bleibt an.
+# What is different afterwards: the Pi boots into the map without a keyboard, mounts USB sticks
+# under /media, and the screen stays on.
 
 set -eu
 
-WURZEL="${KIEKMAP_ROOT:-/opt/kiekmap}"
-BENUTZER="${KIEKMAP_USER:-kiekmap}"
+ROOT="${KIEKMAP_ROOT:-/opt/kiekmap}"
+USER_NAME="${KIEKMAP_USER:-kiekmap}"
 
-[ "$(id -u)" -eq 0 ] || { echo "Bitte mit sudo starten." >&2; exit 1; }
-[ -d "$WURZEL" ] || { echo "$WURZEL gibt es nicht -- Projekt zuerst dorthin klonen." >&2; exit 1; }
+[ "$(id -u)" -eq 0 ] || { echo "Please start with sudo." >&2; exit 1; }
+[ -d "$ROOT" ] || { echo "$ROOT does not exist -- clone the project there first." >&2; exit 1; }
 
-echo "== Pakete"
+echo "== packages"
 apt-get update
-# cage statt eines Desktops, chromium als Anzeige, curl fuer die Gesundheitsabfrage.
+# cage instead of a desktop, chromium as the display, curl for the health query.
 apt-get install -y --no-install-recommends cage chromium-browser curl ca-certificates
 
 echo "== Docker"
@@ -28,53 +28,53 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 systemctl enable --now docker
 
-echo "== Benutzer $BENUTZER"
-# UID 1000 muss zu der im backend/Dockerfile passen, sonst darf der Dienst nicht in ./data
-# schreiben. Auf einem frischen Pi OS hat der erste Benutzer diese Nummer bereits.
-if ! id "$BENUTZER" >/dev/null 2>&1; then
-    useradd --uid 1000 --create-home --shell /bin/bash "$BENUTZER" 2>/dev/null \
-        || useradd --create-home --shell /bin/bash "$BENUTZER"
+echo "== user $USER_NAME"
+# UID 1000 has to match the one in backend/Dockerfile, otherwise the service may not write into
+# ./data. On a fresh Pi OS the first user already carries that number.
+if ! id "$USER_NAME" >/dev/null 2>&1; then
+    useradd --uid 1000 --create-home --shell /bin/bash "$USER_NAME" 2>/dev/null \
+        || useradd --create-home --shell /bin/bash "$USER_NAME"
 fi
-usermod -aG docker,video,input,render,tty "$BENUTZER"
-chown -R "$BENUTZER":"$BENUTZER" "$WURZEL/data" 2>/dev/null || true
+usermod -aG docker,video,input,render,tty "$USER_NAME"
+chown -R "$USER_NAME":"$USER_NAME" "$ROOT/data" 2>/dev/null || true
 
-echo "== Kiosk-Dienst"
-install -m 755 "$WURZEL/deploy/pi/kiekmap-kiosk" /usr/local/bin/
-install -m 644 "$WURZEL/deploy/pi/kiekmap-kiosk.service" /etc/systemd/system/
+echo "== kiosk service"
+install -m 755 "$ROOT/deploy/pi/kiekmap-kiosk" /usr/local/bin/
+install -m 644 "$ROOT/deploy/pi/kiekmap-kiosk.service" /etc/systemd/system/
 
-echo "== USB-Sticks (fuer die Sicherung)"
-install -m 755 "$WURZEL/deploy/pi/kiekmap-usb-mount" /usr/local/sbin/
-install -m 644 "$WURZEL/deploy/pi/99-kiekmap-usb.rules" /etc/udev/rules.d/
+echo "== USB sticks (for the backup)"
+install -m 755 "$ROOT/deploy/pi/kiekmap-usb-mount" /usr/local/sbin/
+install -m 644 "$ROOT/deploy/pi/99-kiekmap-usb.rules" /etc/udev/rules.d/
 udevadm control --reload
 
-echo "== Bildschirm bleibt an"
-# Zwei verschiedene Abschaltungen, beide muessen weg: die der Textkonsole (consoleblank) und die
-# des Kernels beim Booten. Ohne sie ist der Bildschirm nach zehn Minuten schwarz, und niemand im
-# Museum weiss, ob das Geraet noch laeuft.
+echo "== the screen stays on"
+# Two different blankings, and both have to go: the one of the text console (consoleblank) and the
+# one the kernel does while booting. Without this the screen is black after ten minutes, and
+# nobody in the museum can tell whether the device is still running.
 CMDLINE=/boot/firmware/cmdline.txt
 [ -f "$CMDLINE" ] || CMDLINE=/boot/cmdline.txt
 if [ -f "$CMDLINE" ] && ! grep -q consoleblank=0 "$CMDLINE"; then
     sed -i 's/$/ consoleblank=0/' "$CMDLINE"
-    echo "  consoleblank=0 ergaenzt -- wirkt nach dem naechsten Neustart."
+    echo "  consoleblank=0 added -- takes effect after the next restart."
 fi
 
-echo "== Dienste einschalten"
+echo "== switching the services on"
 systemctl daemon-reload
 systemctl enable kiekmap-kiosk
 
-cat <<'ENDE'
+cat <<'END'
 
-Fertig. Was jetzt noch fehlt:
+Done. What is still missing:
 
-  1. .env anlegen (PIN, Version):
+  1. Create the .env (PIN, version):
        cd /opt/kiekmap && cp deploy/.env.example .env
-       cd backend && python3 -m app.cli pin      # Zeile in die .env eintragen
-  2. Kartendaten und Ortsindex vom Entwicklungsrechner herueberkopieren:
-       frontend/public/tiles/  und  data/places.json
-  3. Container starten:
+       cd backend && python3 -m app.cli pin      # put the line into the .env
+  2. Copy the map data and the place index over from the development machine:
+       frontend/public/tiles/  and  data/places.json
+  3. Start the containers:
        cd /opt/kiekmap/deploy && docker compose up -d
-  4. Neu starten und zusehen:
+  4. Restart and watch:
        sudo reboot
 
-Nach dem Neustart sollte der Pi ohne Tastatur in der Karte landen.
-ENDE
+After the restart the Pi should land in the map without a keyboard.
+END

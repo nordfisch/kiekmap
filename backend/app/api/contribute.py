@@ -36,7 +36,7 @@ from app.services.needs import NEEDS, Need, open_filter
 from app.services.places import ACCURACY_ADDRESS_M
 
 log = logging.getLogger(__name__)
-router = APIRouter(prefix="/contribute", tags=["hilf mit"])
+router = APIRouter(prefix="/contribute", tags=["contribute"])
 
 
 @router.get("/next", response_model=TaskResponse, summary="A photo that is missing something")

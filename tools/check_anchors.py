@@ -95,9 +95,9 @@ def main() -> int:
         name = str(path.relative_to(ROOT))
         dead = check(path, headings)
         broken += len(dead)
-        print(f"  {name:20} {len(dead):2} tot {dead if dead else ''}")
+        print(f"  {name:20} {len(dead):2} dead {dead if dead else ''}")
 
-    print("Kein toter Anker." if not broken else f"{broken} tote Anker.")
+    print("No dead anchor." if not broken else f"{broken} dead anchors.")
     return 1 if broken else 0
 
 

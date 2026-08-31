@@ -109,7 +109,7 @@ darauf, er ist nicht damit verbunden. Es begründet aber Pflichten für den, der
 Abbild** weitergibt.
 
 **Deshalb: Dockerfiles veröffentlichen, keine gebauten Abbilder.** Dann baut jeder Betreiber
-selbst, und die Pflichten bleiben, wo sie hingehören. Der Weg über `abbilder.tar` in
+selbst, und die Pflichten bleiben, wo sie hingehören. Der Weg über `images.tar` in
 `deploy/pi/update.sh` bleibt für das eigene Gerät richtig; er gehört nur nicht in ein Release.
 
 ## Wie das Projekt entstanden ist

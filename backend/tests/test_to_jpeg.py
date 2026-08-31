@@ -110,9 +110,9 @@ def test_the_tree_is_copied_and_the_source_is_left_alone(tmp_path: Path) -> None
     target = tmp_path / "Kopie"
     counted = tool.build(tmp_path / "Archiv", target)
 
-    assert counted["umgewandelt"] == 1
-    assert counted["kopiert"] == 1
-    assert counted["uebergangen"] == 1
+    assert counted["converted"] == 1
+    assert counted["copied"] == 1
+    assert counted["skipped"] == 1
     assert (target / "Hauptstraße" / "14 Museum" / "scan.jpg").exists()
     assert (target / "Hauptstraße" / "14 Museum" / "foto.jpg").exists()
     assert not (target / "Hauptstraße" / "14 Museum" / "Notiz.txt").exists()

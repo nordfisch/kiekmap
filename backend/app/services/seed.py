@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 #: Where the sample collection lives. Beside ``data/``, not inside it -- ``data/`` is what gets
 #: emptied, and a backup that lies in the thing it restores is none.
 SEED_DIR_NAME = "seed"
-IMAGE_DIR_NAME = "fotos"
+IMAGE_DIR_NAME = "photos"
 INDEX_NAME = "seed.json"
 
 #: Photo columns that belong to the collection rather than to this device. Everything about the
@@ -155,9 +155,9 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
     # What is no longer in the collection has no business here. Without this tidying every photo
     # ever deleted would stay behind as a file -- and a folder that only grows is no
     # Abbild eines Zustands mehr.
-    for datei in images.iterdir():
-        if datei.is_file() and datei.name not in taken:
-            datei.unlink()
+    for file_name in images.iterdir():
+        if file_name.is_file() and file_name.name not in taken:
+            file_name.unlink()
 
     index = {
         "created": datetime.now(UTC).replace(microsecond=0).isoformat(),

@@ -1,72 +1,72 @@
 #!/bin/sh
-# Haengt einen eingesteckten USB-Datentraeger unter /media/<Bezeichnung> ein.
+# Mounts a USB volume under /media/<label>.
 #
-# Raspberry Pi OS Lite hat keinen Desktop und damit auch keinen Automounter -- ein eingesteckter
-# Stick taucht dort schlicht nicht auf. Dieses Skript wird von der udev-Regel
-# 99-kiekmap-usb.rules gerufen und schliesst genau diese Luecke.
+# Raspberry Pi OS Lite has no desktop and therefore no automounter -- a stick that is plugged in
+# simply does not show up. This script is called by the udev rule 99-kiekmap-usb.rules and closes
+# exactly that gap.
 #
-# Zwei Dinge sind hier leicht falsch zu machen:
+# Two things are easy to get wrong here:
 #
-#   1. Aus einer udev-RUN-Anweisung heraus direkt zu mounten geht schief: udev raeumt die
-#      Kindprozesse eines Ereignisses wieder ab. Deshalb "systemd-mount" -- es reicht den
-#      Einhaengevorgang an systemd weiter und kehrt sofort zurueck.
-#   2. Ein FAT- oder exFAT-Stick kennt keine Besitzer. Ohne "uid=" gehoert er root, und der
-#      Dienst im Container (UID 1000) darf nicht darauf schreiben. Die Sicherung wuerde dann
-#      erst scheitern, nachdem jemand den Knopf gedrueckt hat.
+#   1. Mounting directly out of a udev RUN instruction goes wrong: udev clears away the child
+#      processes of an event. Hence "systemd-mount" -- it hands the mount on to systemd and
+#      returns at once.
+#   2. A FAT or exFAT stick knows no owners. Without "uid=" it belongs to root, and the service in
+#      the container (UID 1000) may not write to it. The backup would then fail only after
+#      somebody has pressed the button.
 #
-# Aufruf:  kiekmap-usb-mount einhaengen  /dev/sda1 [Bezeichnung] [Dateisystem]
-#          kiekmap-usb-mount aushaengen  /dev/sda1
+# Usage:  kiekmap-usb-mount mount    /dev/sda1 [label] [filesystem]
+#         kiekmap-usb-mount unmount  /dev/sda1
 
 set -eu
 
-# Muss zur UID im Container passen, siehe backend/Dockerfile.
-DIENST_UID=1000
-DIENST_GID=1000
+# Has to match the UID in the container, see backend/Dockerfile.
+SERVICE_UID=1000
+SERVICE_GID=1000
 
-AKTION="${1:-}"
-GERAET="${2:-}"
-BEZEICHNUNG="${3:-}"
-DATEISYSTEM="${4:-}"
+ACTION="${1:-}"
+DEVICE="${2:-}"
+LABEL="${3:-}"
+FILESYSTEM="${4:-}"
 
-[ -n "$AKTION" ] && [ -n "$GERAET" ] || {
-    echo "Aufruf: $0 einhaengen|aushaengen /dev/sdX1 [Bezeichnung] [Dateisystem]" >&2
+[ -n "$ACTION" ] && [ -n "$DEVICE" ] || {
+    echo "Usage: $0 mount|unmount /dev/sdX1 [label] [filesystem]" >&2
     exit 2
 }
 
-# Nur Buchstaben, Ziffern, Strich und Unterstrich: eine Bezeichnung wie "Kalles Stick / 2024"
-# wuerde sonst einen Pfad aufmachen, den so niemand gemeint hat.
-saeubern() {
+# Letters, digits, hyphen and underscore only: a label like "Kalle's stick / 2024" would otherwise
+# open up a path nobody meant.
+clean() {
     printf '%s' "$1" | tr -c 'A-Za-z0-9._-' '_' | cut -c1-40
 }
 
-case "$AKTION" in
-einhaengen)
-    NAME=$(saeubern "${BEZEICHNUNG:-$(basename "$GERAET")}")
-    [ -n "$NAME" ] || NAME=$(basename "$GERAET")
-    ZIEL="/media/$NAME"
+case "$ACTION" in
+mount)
+    NAME=$(clean "${LABEL:-$(basename "$DEVICE")}")
+    [ -n "$NAME" ] || NAME=$(basename "$DEVICE")
+    TARGET="/media/$NAME"
 
-    case "$DATEISYSTEM" in
+    case "$FILESYSTEM" in
     vfat | exfat | ntfs | ntfs3)
-        # Dateisysteme ohne Besitzrechte: die Rechte entstehen erst beim Einhaengen.
-        OPTIONEN="uid=$DIENST_UID,gid=$DIENST_GID,umask=0022,noatime"
+        # Filesystems without ownership: the permissions come into being at mount time.
+        OPTIONS="uid=$SERVICE_UID,gid=$SERVICE_GID,umask=0022,noatime"
         ;;
     *)
-        # ext4 und Verwandte bringen ihre eigenen Besitzer mit.
-        OPTIONEN="noatime"
+        # ext4 and relatives bring their own owners along.
+        OPTIONS="noatime"
         ;;
     esac
 
-    mkdir -p "$ZIEL"
-    exec systemd-mount --no-block --collect --options "$OPTIONEN" "$GERAET" "$ZIEL"
+    mkdir -p "$TARGET"
+    exec systemd-mount --no-block --collect --options "$OPTIONS" "$DEVICE" "$TARGET"
     ;;
 
-aushaengen)
-    # Nach dem Abziehen ist die Bezeichnung nicht mehr zu erfahren -- ueber das Geraet abmelden.
-    exec systemd-umount "$GERAET"
+unmount)
+    # After it has been pulled the label can no longer be learned -- unmount by device.
+    exec systemd-umount "$DEVICE"
     ;;
 
 *)
-    echo "Unbekannte Aktion: $AKTION" >&2
+    echo "Unknown action: $ACTION" >&2
     exit 2
     ;;
 esac

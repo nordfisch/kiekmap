@@ -91,11 +91,11 @@ hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
 Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
 
 ```bash
-make release nach=/Volumes/STICK/kiekmap-update
-make release nach=/Volumes/STICK/kiekmap-update karte=1   # falls sich die Region geändert hat
+make release to=/Volumes/STICK/kiekmap-update
+make release to=/Volumes/STICK/kiekmap-update map=1   # falls sich die Region geändert hat
 ```
 
-Das Ziel baut beide Abbilder, sichert sie als `abbilder.tar` und schreibt die `version`-Datei
+Das Ziel baut beide Abbilder, sichert sie als `images.tar` und schreibt die `version`-Datei
 daneben. **Es bricht ab, wenn der Arbeitsbaum nicht sauber ist oder der passende Tag fehlt** — ein
 Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen.
 

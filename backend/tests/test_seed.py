@@ -193,7 +193,7 @@ class TestEmptyingTheCollection:
 
         assert len(session.scalars(select(Photo)).all()) == 1
         assert list(settings.photos_dir.rglob("*.jpg"))
-        assert "Abgebrochen" in capsys.readouterr().out
+        assert "Cancelled" in capsys.readouterr().out
 
     def test_the_number_of_photos_is_the_confirmation(
         self, session, settings, sample_image, fixtures_dir, monkeypatch

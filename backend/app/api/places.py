@@ -11,7 +11,7 @@ from app.models import Place
 from app.schemas import PlaceOut
 from app.services import places as place_service
 
-router = APIRouter(prefix="/places", tags=["orte"])
+router = APIRouter(prefix="/places", tags=["places"])
 
 
 @router.get("", response_model=list[PlaceOut], summary="Search the gazetteer")

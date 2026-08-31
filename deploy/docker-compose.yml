@@ -1,7 +1,7 @@
-# Betriebsaufbau fuer den Museums-Pi.
+# The operating setup for the museum Pi.
 #
-# Zwei Dienste. Chromium ist bewusst KEIN Container -- er laeuft als gewoehnliches Programm auf dem
-# Pi (siehe deploy/pi/kiekmap-kiosk.service) und zeigt nur an, was diese beiden ausliefern.
+# Two services. Chromium is deliberately NOT a container -- it runs as an ordinary program on the
+# Pi (see deploy/pi/kiekmap-kiosk.service) and only displays what these two deliver.
 
 name: kiekmap
 
@@ -11,30 +11,30 @@ services:
       context: ../backend
     image: kiekmap-backend:${KIEKMAP_VERSION:-dev}
     restart: unless-stopped
-    # Die ganze .env, nicht eine Auswahl daraus.
+    # The whole .env, not a selection from it.
     #
-    # Sie liegt bewusst nicht im Abbild -- das Abbild ist die Software, die .env ist der Ort.
-    # Frueher standen nur einzelne Werte unter `environment:`, und die uebrigen fielen im Betrieb
-    # still auf ihre Vorgaben zurueck: Ein Import im Container verlor Schlagwort, Bildnachweis
-    # und Herkunftspraefix, ohne dass etwas fehlschlug. Gemessen am 14. August 2026.
+    # It deliberately does not sit in the image -- the image is the software, the .env is the
+    # place. Earlier only single values stood under `environment:`, and the rest fell back to
+    # their defaults in operation, silently: an import inside the container lost its tag, its
+    # credit and its provenance prefix without anything failing. Measured on 14 August 2026.
     #
-    # Wer hier eintraegt, aendert also den Betrieb -- das ist der Sinn: ein zweites Museum
-    # braucht eine eigene .env und keinen Fork. Siehe docs/adaption.md.
+    # Whoever writes here changes the operation -- that is the point: a second museum needs its
+    # own .env and no fork. See docs/adaption.md.
     env_file: ../.env
     environment:
-      # Diese vier gewinnen ueber die .env: sie beschreiben den Container, nicht den Ort.
+      # These four win over the .env: they describe the container, not the place.
       KIEKMAP_DATA_DIR: /data
       KIEKMAP_MEDIA_DIR: /media
       KIEKMAP_ADMIN_PIN_HASH: ${KIEKMAP_ADMIN_PIN_HASH:-}
-      # Gleiche Herkunft im Betrieb, also keine CORS-Ausnahmen noetig.
+      # Same origin in operation, so no CORS exceptions are needed.
       KIEKMAP_CORS_ORIGINS: "[]"
     volumes:
       - ../data:/data
-      # USB-Sticks fuer die Sicherung (Stufe 9). rshared ist noetig, damit ein erst spaeter
-      # eingesteckter Stick im Container ueberhaupt sichtbar wird -- ohne das bleibt der Ordner
-      # leer, und zwar ohne jede Fehlermeldung.
+      # USB sticks for the backup (stage 9). rshared is needed for a stick plugged in later to
+      # become visible inside the container at all -- without it the folder stays empty, and
+      # without any error message.
       - /media:/media:rshared
-    # Nach aussen nicht veroeffentlicht: nur nginx spricht mit dem Backend.
+    # Not published outwards: only nginx talks to the backend.
     expose:
       - "8000"
 
@@ -49,6 +49,6 @@ services:
     ports:
       - "80:80"
     volumes:
-      # Kartendatei und Regionsdefinition werden nicht ins Image gebacken: sie sind gross bzw.
-      # ortsabhaengig und aendern sich unabhaengig von der Software. Erzeugt von `make tiles`.
+      # The map file and the region definition are not baked into the image: they are large or
+      # place-dependent and change independently of the software. Built by `make tiles`.
       - ../frontend/public/tiles:/usr/share/nginx/html/tiles:ro

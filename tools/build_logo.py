@@ -72,7 +72,7 @@ def main() -> int:
         )
 
     image.resize((WIDTH, HEIGHT), Image.LANCZOS).save(TARGET, "PNG", optimize=True)
-    print(f"{TARGET.relative_to(ROOT)} geschrieben ({TARGET.stat().st_size // 1024} KB).")
+    print(f"{TARGET.relative_to(ROOT)} written ({TARGET.stat().st_size // 1024} KB).")
     return 0
 
 
