@@ -4,8 +4,9 @@ Both take minutes, so neither happens inside the request. A thread does the work
 asks how far along it is -- that is what makes the progress bar in the admin area possible, and
 what keeps a two-thousand-photo backup from running into a proxy timeout.
 
-Every message in here is German: this is the admin area, and it is read by whoever is standing in
-front of the device with a stick in their hand.
+Every message in here comes from ``app.text``: this is the admin area, and it is read by whoever
+is standing in front of the device with a stick in their hand -- in the language that device
+speaks.
 """
 
 import logging
@@ -35,6 +36,7 @@ from app.schemas import (
 )
 from app.services import auth, importer
 from app.services import backup as service
+from app.text import texts
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin/backup", tags=["backup"])
@@ -111,7 +113,7 @@ def _pick(settings: Settings, path: str) -> service.Drive:
     """Only a drive that was actually found counts -- the path comes from the browser."""
     drive = service.find_drive(settings.media_dir, path)
     if drive is None:
-        raise HTTPException(404, "Dieser Stick ist nicht mehr da. Bitte neu einstecken.")
+        raise HTTPException(404, texts().backup.stick_gone)
     return drive
 
 
@@ -125,7 +127,7 @@ def start(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
             return service.run_backup(session, settings, drive, report)
 
     if not service.job.start("backup", work):
-        raise HTTPException(409, "Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.")
+        raise HTTPException(409, texts().backup.busy)
 
     log.info("Backup to %s started", drive.path)
     return status(admin)
@@ -145,7 +147,7 @@ def restore(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
         return message
 
     if not service.job.start("restore", work):
-        raise HTTPException(409, "Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.")
+        raise HTTPException(409, texts().backup.busy)
 
     log.info("Restore from %s started", drive.path)
     return status(admin)
@@ -166,7 +168,7 @@ def restore_from_incoming(choice: IncomingChoice, admin: Admin, settings: Config
         return message
 
     if not service.job.start("restore", work):
-        raise HTTPException(409, "Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.")
+        raise HTTPException(409, texts().backup.busy)
 
     log.info("Restore from archive %s started", archive.name)
     return status(admin)
@@ -182,9 +184,9 @@ def _pick_archive(settings: Settings, name: str) -> Path:
     inbox = settings.incoming_dir
     wanted = (inbox / name).resolve()
     if wanted.parent != inbox.resolve() or not wanted.is_file():
-        raise HTTPException(404, "Diese Datei liegt nicht mehr im Eingangsordner.")
+        raise HTTPException(404, texts().backup.file_gone_from_inbox)
     if service.read_archive_manifest(wanted) is None:
-        raise HTTPException(422, "Diese Datei ist keine vollstaendige Sicherung.")
+        raise HTTPException(422, texts().backup.not_a_complete_backup)
     return wanted
 
 
@@ -257,7 +259,7 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
             return message, _review_rows(outcomes)
 
     if not service.job.start("import", work):
-        raise HTTPException(409, "Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.")
+        raise HTTPException(409, texts().backup.busy)
 
     log.info("Stick import from %s started", folder)
     return status(admin)
@@ -306,7 +308,7 @@ def _pick_folder(settings: Settings, path: str) -> Path:
             if wanted.is_dir():
                 return wanted
             break
-    raise HTTPException(404, "Diesen Ordner gibt es auf dem Stick nicht mehr.")
+    raise HTTPException(404, texts().backup.folder_gone_from_stick)
 
 
 # --- the backup as one file -------------------------------------------------
@@ -331,12 +333,12 @@ def zip_ticket(admin: Admin) -> DownloadTicket:
 @router.get("/zip", summary="The whole collection as one ZIP file")
 def zip_download(settings: Config, ticket: str = Query(description="From /zip/ticket")) -> Response:
     if not auth.tickets.redeem(ticket):
-        raise HTTPException(401, "Dieser Link ist abgelaufen. Bitte noch einmal herunterladen.")
+        raise HTTPException(401, texts().backup.link_expired)
 
     # During a restore the files would be swapped out from under the running stream,
     # and the archive would end up holding two different collections.
     if service.job.running:
-        raise HTTPException(409, "Es ist gerade etwas im Gange. Bitte warten, bis es fertig ist.")
+        raise HTTPException(409, texts().backup.busy)
 
     def strom():
         # Its own session: the generator runs on after the request has been answered.

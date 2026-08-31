@@ -10,6 +10,7 @@ from app.db import get_session
 from app.models import Place
 from app.schemas import PlaceOut
 from app.services import places as place_service
+from app.text import texts
 
 router = APIRouter(prefix="/places", tags=["places"])
 
@@ -64,5 +65,5 @@ def housenumbers(
     """
     street = session.get(Place, place_id)
     if street is None:
-        raise HTTPException(404, f"Kein Ort mit der Nummer {place_id}")
+        raise HTTPException(404, texts().places.no_such_place(place_id))
     return [PlaceOut.from_place(place) for place in place_service.housenumbers(session, street)]

@@ -32,6 +32,7 @@ from app.services import foldermeta, thumbnails
 from app.services.dates import date_range
 from app.services.storage import ALLOWED_FORMATS, original_path, sha256_of_file
 from app.services.tags import add_tags
+from app.text import texts
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ SPECIAL_DIRS = {DONE_DIR, PROBLEM_DIR}
 @dataclass
 class ImportOutcome:
     result: ImportResult
-    #: German -- this text reaches the curator through the import log.
+    #: From the text catalogue -- this text reaches the curator through the import log.
     message: str
     photo: Photo | None = None
     #: Where the image was stored. Only set when it was actually taken in.
@@ -208,7 +209,7 @@ def import_file(
     try:
         sha256 = sha256_of_file(path)
     except OSError as error:
-        outcome = ImportOutcome(ImportResult.REJECTED, f"Datei nicht lesbar: {error}")
+        outcome = ImportOutcome(ImportResult.REJECTED, texts().imports.unreadable_file(str(error)))
         _log_outcome(session, path, outcome)
         return outcome
 
@@ -216,7 +217,7 @@ def import_file(
     if existing:
         outcome = ImportOutcome(
             ImportResult.DUPLICATE,
-            f"Inhaltsgleich mit Foto {existing.id} ({existing.original_filename})",
+            texts().imports.same_content_as(existing.id, existing.original_filename),
             photo=existing,
         )
         _log_outcome(session, path, outcome, sha256)
@@ -228,7 +229,8 @@ def import_file(
     try:
         info = exif_service.read_image_info(path)
     except (UnidentifiedImageError, OSError, ValueError) as error:
-        outcome = ImportOutcome(ImportResult.REJECTED, f"Kein lesbares Bild: {error}")
+        message = texts().imports.no_readable_image(str(error))
+        outcome = ImportOutcome(ImportResult.REJECTED, message)
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
             _move_aside(path, inbox, PROBLEM_DIR)
@@ -237,8 +239,10 @@ def import_file(
     if info.format not in ALLOWED_FORMATS:
         outcome = ImportOutcome(
             ImportResult.REJECTED,
-            f"Format {info.format or 'unbekannt'} passt nicht "
-            f"(erlaubt sind: {', '.join(sorted(ALLOWED_FORMATS))})",
+            texts().imports.format_not_allowed(
+                info.format or texts().imports.unknown_format,
+                ", ".join(sorted(ALLOWED_FORMATS)),
+            ),
         )
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
@@ -308,12 +312,7 @@ def import_file(
     if root is not None:
         foldermeta.apply_folder_meta(session, photo, path, root, settings)
 
-    missing = [
-        label
-        for label, empty in (("Ort", photo.needs_location), ("Jahr", photo.needs_date))
-        if empty
-    ]
-    message = "Aufgenommen" + (f", es fehlt noch: {' und '.join(missing)}" if missing else "")
+    message = texts().imports.imported(photo.needs_location, photo.needs_date)
 
     outcome = ImportOutcome(ImportResult.IMPORTED, message, photo=photo, path=target)
     _log_outcome(session, path, outcome, sha256)
@@ -502,7 +501,7 @@ def import_from_folder(
 ) -> tuple[str, list[ImportOutcome]]:
     """Take in every image of one folder, subfolders included.
 
-    Returns the German closing message and what became of each file -- the caller decides whether
+    Returns the closing message and what became of each file -- the caller decides whether
     a list that long is still worth showing (see REVIEW_LIMIT in app/api/backup.py).
 
     Committed photo by photo, not at the end: a stick pulled out halfway then leaves behind what
@@ -525,18 +524,16 @@ def import_from_folder(
         outcomes.append(outcome)
         counts[outcome.result] += 1
         if report:
-            report(index, len(images), f"Lese Foto {index} von {len(images)}")
+            report(index, len(images), texts().imports.reading_photo(index, len(images)))
 
     log.info("Stick import from %s: %s", folder, dict(counts))
 
-    teile = [f"{counts[ImportResult.IMPORTED]} Fotos aufgenommen"]
-    if counts[ImportResult.DUPLICATE]:
-        waren = "war" if counts[ImportResult.DUPLICATE] == 1 else "waren"
-        teile.append(f"{counts[ImportResult.DUPLICATE]} {waren} schon da")
-    if counts[ImportResult.REJECTED]:
-        teile.append(f"{counts[ImportResult.REJECTED]} abgewiesen")
-
-    return ", ".join(teile) + ". Der Stick kann jetzt abgezogen werden.", outcomes
+    summary = texts().imports.stick_summary(
+        counts[ImportResult.IMPORTED],
+        counts[ImportResult.DUPLICATE],
+        counts[ImportResult.REJECTED],
+    )
+    return summary, outcomes
 
 
 def upload_name(filename: str) -> str:

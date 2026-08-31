@@ -10,6 +10,7 @@ from collections.abc import Callable
 
 from app.config import Settings
 from app.services import dates
+from app.text import texts
 
 log = logging.getLogger(__name__)
 
@@ -67,12 +68,13 @@ def place_name(settings: Settings) -> str:
 
 
 class BackupError(Exception):
-    """Something the person at the screen has to know. The message is German."""
+    """Something the person at the screen has to know, in the language of the instance."""
 
 
 def human_size(size: int) -> str:
-    """German, with a comma -- this text ends up on the screen."""
-    for unit, factor in (("GB", 1000**3), ("MB", 1000**2), ("kB", 1000)):
-        if size >= factor:
-            return f"{size / factor:.1f}".replace(".", ",") + f" {unit}"
-    return f"{size} Bytes"
+    """A size for a sentence on the screen -- "3,4 MB" or "3.4 MB", by the setting.
+
+    Also used in log lines, where the format then follows the instance rather than the reader.
+    That is the smaller oddity: one formatter, and every size in the same run reads alike.
+    """
+    return texts().backup.size(size)

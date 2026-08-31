@@ -52,7 +52,8 @@ class PhotoMarker(BaseModel):
     title: str | None
     #: The address, as it stands under the thumbnail. Absent for a photo located from EXIF alone.
     place_name: str | None
-    #: Ready-made German label ("1932", "1920er") so the frontend does no date arithmetic.
+    #: Ready-made label ("1932", "1920er") so the frontend does no date arithmetic. Formatted
+    #: in the language of the instance -- see services/dates.format_label.
     #: Spelled out, for screen readers -- what is *shown* is ``date_short``.
     date_label: str
     #: The same dating as it fits on a map: the year, a decade as "1930er", undated empty.
@@ -546,7 +547,7 @@ class JobState(BaseModel):
     phase: str
     done: int
     total: int
-    #: German -- goes straight onto the screen.
+    #: From the text catalogue -- goes straight onto the screen.
     message: str
     error: str | None
     #: Rows for the review table, when the finished job produced few enough to be worth showing.
@@ -582,7 +583,7 @@ class UploadItem(BaseModel):
 
     filename: str
     result: str
-    #: German -- this text goes straight into the admin's upload list.
+    #: From the text catalogue -- this text goes straight into the admin's upload list.
     message: str
     #: Set for imported files and for duplicates; the duplicate points at the photo already there.
     photo: PhotoDetail | None

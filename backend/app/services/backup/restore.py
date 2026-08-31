@@ -27,6 +27,7 @@ from app.services.backup.common import (
 )
 from app.services.backup.drives import Drive
 from app.services.backup.manifest import is_restorable, read_archive_manifest, read_manifest
+from app.text import texts
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
     """
     source = drive.path / BACKUP_DIR_NAME
     if not is_restorable(source):
-        raise BackupError("Auf diesem Stick fehlt eine Sicherung, oder sie ist nicht komplett.")
+        raise BackupError(texts().backup.no_backup_on_the_stick)
 
     manifest = read_manifest(source)
     assert manifest is not None  # is_restorable checked it
@@ -54,7 +55,7 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
     work = _prepare_work_dir(settings, manifest.bytes)
 
     total = sum(1 for path in (source / "photos").rglob("*") if path.is_file())
-    report(0, total, "Zuerst kommen die Angaben")
+    report(0, total, texts().backup.first_the_records)
     shutil.copy2(source / "kiekmap.db", work / "kiekmap.db")
 
     done = 0
@@ -63,7 +64,7 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
             continue
         copy_if_new(path, work / "photos" / path.relative_to(source / "photos"))
         done += 1
-        report(done, total, f"Hole Foto {done} von {total}")
+        report(done, total, texts().backup.fetching_photo(done, total))
 
     if (source / "thumbs").is_dir():
         for path in sorted((source / "thumbs").rglob("*")):
@@ -80,10 +81,7 @@ def _prepare_work_dir(settings: Settings, needed: int) -> Path:
     """An empty working folder beside the collection -- and room for what goes into it."""
     free = shutil.disk_usage(settings.data_dir).free
     if free < needed:
-        raise BackupError(
-            f"Hier ist zu wenig Platz. Gebraucht werden {human_size(needed)}, "
-            f"frei sind {human_size(free)}."
-        )
+        raise BackupError(texts().backup.no_room_here(human_size(needed), human_size(free)))
 
     work = settings.data_dir / RESTORE_WORK_DIR
     if work.exists():
@@ -110,13 +108,9 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
         # around. The archive it came from stays in the inbox, so nothing is lost.
         shutil.rmtree(work, ignore_errors=True)
         # Not a word about "newer": we know it is unknown, and that is a different statement.
-        raise BackupError(
-            "Diese Sicherung gehoert zu einer neueren Programmversion "
-            f"(Schemastand {ahead}). Bitte erst das Programm aktualisieren, dann die Sicherung "
-            "einspielen. Auf dem Geraet wurde nichts veraendert."
-        )
+        raise BackupError(texts().backup.backup_is_newer(str(ahead)))
 
-    report(total, total, "Der bisherige Stand wird beiseitegelegt")
+    report(total, total, texts().backup.setting_the_old_state_aside)
     set_aside = _set_aside(settings)
 
     for name in ("photos", "thumbs", "kiekmap.db", *LOOSE_FILES):
@@ -126,17 +120,14 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
     shutil.rmtree(work, ignore_errors=True)
 
     # Now, and not a step earlier: the file at the configured path is the restored one.
-    report(total, total, "Der Schemastand wird nachgezogen")
+    report(total, total, texts().backup.bringing_the_schema_forward)
     schema.bring_up_to_date(settings.db_path)
 
     # The collection is a different one now -- what was measured before says nothing any more.
     forget_size()
 
     log.info("Restore finished: %s photos, previous state at %s", total, set_aside)
-    return (
-        f"{total} Fotos und alle Angaben sind wieder da. Der bisherige Stand liegt im Ordner "
-        f"{set_aside.name} und kann weg, sobald alles stimmt."
-    )
+    return texts().backup.restore_done(total, set_aside.name)
 
 
 def run_restore_from_archive(settings: Settings, archive: Path, report: Report) -> str:
@@ -152,7 +143,7 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
     """
     info = read_archive_manifest(archive)
     if info is None:
-        raise BackupError("Diese Datei ist keine vollstaendige Sicherung.")
+        raise BackupError(texts().backup.not_a_complete_backup)
 
     work = _prepare_work_dir(settings, info.bytes)
     prefix = f"{BACKUP_DIR_NAME}/"
@@ -161,14 +152,14 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
         entries = [e for e in opened.infolist() if not e.is_dir() and e.filename.startswith(prefix)]
         total = sum(1 for e in entries if e.filename.startswith(f"{prefix}photos/"))
 
-        report(0, total, "Zuerst kommen die Angaben")
+        report(0, total, texts().backup.first_the_records)
         done = 0
         for entry in entries:
             relative = entry.filename[len(prefix) :]
             # An entry that leads out of the work directory did not come from our archive.
             target = (work / relative).resolve()
             if not target.is_relative_to(work.resolve()):
-                raise BackupError("Die Datei enthaelt einen unerwarteten Eintrag.")
+                raise BackupError(texts().backup.unexpected_entry)
 
             target.parent.mkdir(parents=True, exist_ok=True)
             with opened.open(entry) as source, target.open("wb") as sink:
@@ -176,7 +167,7 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
 
             if relative.startswith("photos/"):
                 done += 1
-                report(done, total, f"Hole Foto {done} von {total}")
+                report(done, total, texts().backup.fetching_photo(done, total))
 
     message = _swap_in(settings, work, total, report)
 
@@ -185,9 +176,7 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
     from app.services.importer import DONE_DIR, move_to_done
 
     move_to_done(archive, settings.incoming_dir)
-    return (
-        f"{message} Die eingespielte Datei liegt jetzt im Ordner {DONE_DIR} und kann ebenfalls weg."
-    )
+    return texts().backup.archive_done(message, DONE_DIR)
 
 
 def _set_aside(settings: Settings) -> Path:

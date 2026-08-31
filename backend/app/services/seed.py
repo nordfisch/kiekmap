@@ -97,7 +97,7 @@ def _free_name(taken: set[str], name: str) -> str:
         candidate = f"{stem} ({counter}){suffix}"
         if candidate not in taken:
             return candidate
-    raise RuntimeError(f"kein freier Name fuer {name}")
+    raise RuntimeError(f"no free name for {name}")
 
 
 # --- writing out -------------------------------------------------------------
@@ -124,7 +124,7 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
 
         source = original_path(settings.photos_dir, photo.sha256, suffix)
         if not source.exists():
-            log.warning("Foto %s: die Datei %s fehlt -- uebersprungen", photo.id, source)
+            log.warning("Photo %s: the file %s is missing -- skipped", photo.id, source)
             continue
 
         name = _free_name(taken, photo.original_filename)
@@ -219,7 +219,7 @@ def load(session: Session, settings: Settings, source: Path) -> tuple[int, int]:
 
         photo = outcome.photo
         if photo.sha256 != entry.get("sha256"):
-            log.warning("%s hat sich seit dem Sichern geaendert", entry["file"])
+            log.warning("%s has changed since it was saved", entry["file"])
 
         # The import has read title, date and tags out of the file. What is noted here counts
         # more -- it is the curated statement, the file only ever held a guess.
