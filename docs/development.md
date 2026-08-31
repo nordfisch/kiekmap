@@ -107,9 +107,42 @@ German paragraphs in English documentation. Its `IN_TRANSITION` tuple lists what
 switch yet — a file that is half of each is checked in neither language, and that list has to
 reach empty. It is the progress bar of [issue #31](https://github.com/nordfisch/kiekmap/issues/31).
 
-**The table above is the target, and one row of it is not true yet.** The test files are still
-German, and the checker still requires that of them; both flip in the same commit that translates
-them. Until then a German test name is correct, not a leftover.
+### The two catalogues
+
+Both are built the same way, and the construction is the point: **a missing entry has to stop the
+build, not the museum.**
+
+| | Frontend | Backend |
+|---|---|---|
+| Where | `frontend/src/text/` | `backend/app/text/` |
+| The shape | `types.ts` — `type Texts = typeof de` | `catalogue.py` — frozen dataclasses |
+| The source text | `de.ts` | `de.py` |
+| The translation | `en.ts` | `en.py` |
+| A missing entry | `tsc` refuses to build | `TypeError` when `en.py` is imported |
+| Resolved | once in `main.tsx`, before the first render | per call, through the cached settings |
+
+`de.ts` deliberately has no `as const`. With it every string would be its own literal type, and the
+English catalogue would have to carry the German wording to typecheck.
+
+**Parameterised texts are functions, not templates with placeholders.** "3 von 12" and "3 of 12"
+would survive a format string; "Aufgenommen, es fehlt noch: Ort und Jahr" against "Taken in, still
+missing: a place and a year" would not — singular, plural and word order all hang on the language.
+
+**Nothing reads `t` at module level.** A `const` beside the imports is evaluated before `main.tsx`
+has asked `/api/config`, so it freezes the default catalogue in — the interface works and the words
+are wrong. `tsc` cannot see it, because both catalogues have the same type. It happened on
+31 August 2026 in four files of the admin area; `text/moduleLevel.test.ts` walks the sources with
+the TypeScript parser and keeps it from happening again.
+
+**No i18n library.** `i18next` and `react-intl` bring lazy loading, ICU plural rules and switching
+at runtime. A kiosk with two languages and one fixed setting needs none of it, and every dependency
+is one more dependency in offline operation.
+
+**Three things are English in both languages, and are not translations.** The directory names
+`_done` and `_problem`, the backup folder `kiekmap-backup/` with everything under it, and the
+`status` of `/health`. The first two are names in a file system: were they to follow the setting,
+changing it would have to rename folders on the device and on every stick already written. The
+third is a machine value the kiosk service reads.
 
 ## Glossary
 

@@ -52,7 +52,8 @@ name and an entry in the drift checker.
 | `Makefile`, `deploy/`, GitHub workflows — comments | **English** |
 | Title and body of a pull request | English |
 | Commit messages from 30 August 2026 on | **English** |
-| Interface texts and every message that reaches a screen | **both**, by `KIEKMAP_LANGUAGE` |
+| Interface texts and every message that reaches a screen | **both**, by `KIEKMAP_LANGUAGE` — `frontend/src/text/`, `backend/app/text/` |
+| Names in the file system (`_done`, `kiekmap-backup/`) and `/health` | English, fixed in both languages |
 | `*.de.md` — `usermanual`, `operations`, `adaption`, `changelog` … | German, as a translation |
 | `docs/history.de.md` up to v0.8.0 | German, frozen |
 | Values in the database that come from OSM (`kind`: `strasse`, `flur` …) | German, as delivered |
@@ -60,10 +61,10 @@ name and an entry in the drift checker.
 **The file name carries the rule:** `operations.de.md` is German, `operations.md` is English. There
 is no list to keep.
 
-**The switch is under way, and two things are not true yet.** The test files are still German and
-the checker still requires that of them; both flip in the same commit that translates them. The
-prose still standing in German is listed in `IN_TRANSITION` in `tools/language_check.py`, and that
-list has to reach empty. Neither is a counter-example — see
+**The switch is under way, and the prose is what is left.** Twelve files still stand in German
+under an English name; they are listed in `IN_TRANSITION` in `tools/language_check.py`, and that
+list has to reach empty. A file in it is checked in neither language, so it is not a
+counter-example but a piece of open work — see
 [issue #31](https://github.com/nordfisch/kiekmap/issues/31).
 
 **Rule of thumb for messages:** *Can it appear in the visitor view or the admin view? Then it comes

@@ -192,6 +192,17 @@ etwas ändert, startet danach die Container neu:
 cd /opt/kiekmap && docker compose up -d
 ```
 
+**Die Sprache des Geräts** steht ebenfalls hier:
+
+```bash
+KIEKMAP_LANGUAGE=de     # oder en
+```
+
+Sie schaltet Besucheransicht, Verwaltung, Meldungen und Datumsbeschriftung um. **Ein neuer Bau ist
+nicht nötig** — nach dem Neustart der Container gilt der neue Wert. Ein anderer Wert als `de` oder
+`en` bricht den Start ab, statt still auf Deutsch zurückzufallen; im Protokoll steht dann eine
+Zeile von Pydantic. Mehr in [adaption.md](adaption.md#andere-sprache).
+
 **Vier Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
 `KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
 beschreiben den Container, nicht den Ort — innen heißen die Verzeichnisse immer `/data` und

@@ -5,7 +5,7 @@ Die kurze Antwort vorweg:
 | Vorhaben | Aufwand |
 |---|---|
 | **Anderer deutschsprachiger Ort** | reine Konfiguration — kein Fork, kein Codeeingriff |
-| **Andere Sprache** | überschaubarer Umbau, siehe unten. Bis dahin ein Fork. |
+| **Andere Sprache** | eine Zeile in der `.env` — siehe unten |
 
 Das ist kein Zufall, sondern eine Entscheidung, die sich durchzieht: **nichts Ortsspezifisches steht
 im Code.** Der Ausschnitt wird zur Laufzeit aus `region.json` geholt, die Kartendatei ist ein
@@ -285,52 +285,68 @@ OpenAPI-Beschreibung nennen Holm. Beides ist Dokumentation, keine Logik.
 
 ## Andere Sprache
 
-Hier ist ein Fork heute noch der ehrliche Weg — nicht weil es viel Arbeit wäre, sondern weil an
-einer Stelle eine bewusste Entscheidung im Weg steht.
+Eine Einstellung, und sie steht dort, wo alle Einstellungen der Instanz stehen:
 
-### Was schon vorbereitet ist
-
-Alle Oberflächentexte stehen in [`frontend/src/text/de.ts`](../frontend/src/text/de.ts), im Code
-stehen nur Schlüssel. Eine zweite Sprache ist dort eine Datei:
-
-```ts
-// frontend/src/text/en.ts
-export const t = { app: { title: "Pictures from our village", … } } as const;
+```bash
+# .env
+KIEKMAP_LANGUAGE=en
 ```
 
-Dazu ein Umschalter, wo `de` importiert wird — oder ein `index.ts`, das je nach Konfiguration das
-eine oder andere Modul weiterreicht.
+Danach den Dienst neu starten. **Ein neuer Bau ist nicht nötig** — das Frontend holt die Sprache
+beim Start über `GET /api/config`. Zulässig sind `de` und `en`; ein anderer Wert bricht den Start
+ab, statt still auf Deutsch zurückzufallen.
 
-### Was im Weg steht: serverseitige Datumsbeschriftung
+Umgestellt wird damit alles, was ein Mensch am Gerät liest: Besucheransicht, Verwaltung,
+Fehlermeldungen der API, das Import-Protokoll, die Meldungen der Sicherung, die Datumsbeschriftung
+und das Zahlenformat.
 
-`date_label` (`"1920er"`, `"Juni 1955"`, `"Jahr unbekannt"`) wird **im Backend** gebildet, in
-[`app/services/dates.py`](../backend/app/services/dates.py). Das war Absicht — das Frontend soll
-keine Datumsarithmetik betreiben — ist aber für Mehrsprachigkeit die falsche Stelle.
+### Wo die Texte stehen
 
-Der Umbau, falls er ansteht:
+Zwei Kataloge, gleich gebaut:
 
-1. `PhotoMarker` und `PhotoDetail` liefern statt `date_label` die Rohwerte, die ohnehin schon da
-   sind: `date_from`, `date_to`, `date_precision`.
-2. Die Formatierung wandert ins Frontend, neben die Textbausteine. Die Logik ist klein — fünf Fälle,
-   nachzulesen in `format_label`.
-3. `MONTH_NAMES` und `"Jahr unbekannt"` entfallen im Backend.
-
-Das ist ein halber Tag, kein Projekt. Wer die Zweisprachigkeit von Anfang an braucht, sollte es
-zuerst tun.
-
-### Was sonst noch deutsch ist
-
-| Ort | Was | Bemerkung |
+| | Oberfläche | Backend |
 |---|---|---|
-| Fehlermeldungen der API | `HTTPException`-Texte | erreichen Besucher und Kuratoren direkt |
-| Import-Protokoll | `ImportOutcome.message` | „Aufgenommen, es fehlt noch: Ort und Jahr" |
-| Ordnernamen im Eingang | `_done`, `_problem` | sieht das Museumsteam im Dateimanager |
-| Ortsarten | `strasse`, `gebaeude`, `flur` … | kommen so aus `tiles/build-places.py`; die Anzeige übersetzt sie in `t.location.kinds` |
-| Doku und Commit-Nachrichten | alles unter `docs/` | bewusst so, siehe [development.md](development.md) |
+| Ort | [`frontend/src/text/`](../frontend/src/text/) | [`backend/app/text/`](../backend/app/text/) |
+| Deutsch | `de.ts` | `de.py` |
+| Englisch | `en.ts` | `en.py` |
+
+**Ein fehlender Eintrag bricht den Bau, nicht das Museum.** Im Frontend ist der Typ der Kataloge
+`typeof de`, also lehnt `tsc` eine unvollständige Übersetzung ab. Im Backend sind es eingefrorene
+Dataclasses, und eine fehlende Angabe ist ein `TypeError` beim Start.
+
+### Eine dritte Sprache
+
+Dieselbe Konstruktion trägt sie ohne Umbau: eine Datei je Katalog, ein Wert mehr in
+`KIEKMAP_LANGUAGE`. Bei drei Sprachen lohnt sich allerdings ein Übersetzungsdienst — siehe
+[decisions.md](decisions.md).
+
+Die Sprache ist eine **Einstellung der Instanz, keine Wahl der Besucher**. Das Gerät steht in einem
+Museum und spricht dessen Sprache. Ein Umschalter auf dem Touchscreen wäre eine Bedienungsfrage für
+Besucher, die oft älter sind, und keine Erleichterung.
+
+### Was in jeder Sprache deutsch bleibt
+
+| Ort | Was | Warum |
+|---|---|---|
+| Ortsarten | `strasse`, `gebaeude`, `flur` … | Schlüssel aus `tiles/build-places.py`; angezeigt wird, was `t.location.kinds` daraus macht |
+| Straßen- und Ortsnamen | aus OpenStreetMap | ein Eigenname wird nicht übersetzt |
+| Ältere Einträge im Import-Protokoll | `ImportLog.message` | festgehalten, was das Gerät damals gesagt hat |
+| `*.de.md` und `docs/history.de.md` | Doku für Museum und Betrieb | als Übersetzung geführt, siehe [development.md](development.md#language) |
 
 Die Ortsarten sind der einzige Fall, der nach einer Falle aussieht und keine ist: In der Datenbank
-stehen deutsche Schlüsselwörter, aber angezeigt wird, was das Textmodul daraus macht. Eine
-englische Fassung mappt dieselben Schlüssel auf `"Street"`, `"Building"` und so weiter.
+stehen deutsche Schlüsselwörter, angezeigt wird die Übersetzung. `en.ts` bildet dieselben Schlüssel
+auf `"Street"`, `"Building"` und so weiter ab.
+
+Das Import-Protokoll ist der zweite. Es berichtet, was bei einem Import geschah, und der Satz wurde
+damals geschrieben und gespeichert. Neue Einträge folgen der eingestellten Sprache; die alten
+bleiben, wie sie lauteten.
+
+### Was englisch festgelegt ist und nicht mitwandert
+
+Die Ordner `_done` und `_problem` im Eingang, der Sicherungsordner `kiekmap-backup/` samt allem
+darin, und der `status` von `/health`. Die ersten beiden sind Namen im Dateisystem: Folgten sie der
+Einstellung, müsste ein Umstellen Ordner umbenennen — auf dem Gerät und auf jedem schon
+geschriebenen Stick. Der dritte ist ein Maschinenwert, den der Kiosk-Dienst liest.
 
 ---
 
