@@ -13,6 +13,8 @@ gets forgotten is the ``version`` file -- the images load, the ``.env`` keeps th
 ``docker compose up`` on the Pi pulls the previous image back up. The device then runs the old
 software and says so nowhere.
 
+    python3 tools/build_release.py --notes             the release text, both languages
+
 **What it refuses to do**, because a stick that does not match a commit is worse than no stick:
 build from a dirty working tree, or from a tree whose version does not match the tag it claims to
 release. There is no ``--force``; the fix is to commit and to tag.
@@ -66,6 +68,47 @@ def check_tree(tag: str) -> None:
         raise SystemExit(f"HEAD is not on {tag}. Check out what is being shipped first.")
 
 
+#: Where the two changelogs sit. Root rather than ``docs/``, so that the name rule of
+#: ``check_translations.py`` holds: a translation is ``X.de.md`` beside ``X.md``.
+CHANGELOG = ROOT / "CHANGELOG.md"
+CHANGELOG_DE = ROOT / "CHANGELOG.de.md"
+
+
+def section(path: Path, version: str) -> str:
+    """The entries of one version out of a changelog, without its heading.
+
+    Matched on ``## [1.2.3]`` and read to the next ``## ``. Empty when the version is not in there
+    -- which is a statement in itself, and the caller says so.
+    """
+    lines = path.read_text(encoding="utf-8").splitlines()
+    wanted, collected, inside = f"## [{version}]", [], False
+    for line in lines:
+        if line.startswith("## "):
+            if inside:
+                break
+            inside = line.startswith(wanted)
+            continue
+        if inside:
+            collected.append(line)
+    return "\n".join(collected).strip()
+
+
+def notes(version: str) -> str:
+    """The body of a GitHub release: English first, German below it.
+
+    One field, no language variants -- so both go into it, and the English half comes first
+    because the repository speaks English. A missing half is named rather than passed over: a
+    release whose German notes are silently absent is worse than one that says they are.
+    """
+    parts = []
+    for path, heading in ((CHANGELOG, None), (CHANGELOG_DE, "## Auf Deutsch")):
+        found = section(path, version)
+        if heading:
+            parts.append("---\n\n" + heading + "\n")
+        parts.append(found or f"*({path.name} names no {version}.)*")
+    return "\n\n".join(parts).strip() + "\n"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--to", type=Path, default=ROOT / "release" / "kiekmap-update")
@@ -74,10 +117,18 @@ def main() -> int:
         action="store_true",
         help="take the map file and the place index along (only needed when the region changed)",
     )
+    parser.add_argument(
+        "--notes", action="store_true", help="print the release text and build nothing"
+    )
     args = parser.parse_args()
 
     number = version()
     tag = f"v{number}"
+
+    if args.notes:
+        print(notes(number), end="")
+        return 0
+
     check_tree(tag)
 
     target = args.to

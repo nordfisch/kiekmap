@@ -65,6 +65,7 @@ watched for drift.
 | Test files — name, docstring, comment | English |
 | [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | English |
 | [README](../README.md), [CHANGELOG](../CHANGELOG.md), `SECURITY`, `CODE_OF_CONDUCT`, `AUTHORS`, `NOTICE` | English |
+| `README.de.md`, `CHANGELOG.de.md` | German, kept as a translation |
 | GitHub issues, issue and pull request templates | English |
 | `Makefile`, `deploy/`, GitHub workflows — comments | English |
 | CLI — commands, switches and output | English |
@@ -292,6 +293,10 @@ renders front matter as a table at the top of the page, and these files are read
 as well as on the documentation site. What it reports is drift, not wrongness -- a typo fixed in
 the English source turns it red although the German needs no change. Somebody has to look, decide,
 and then run `--update`.
+
+`tools/build_release.py --notes` assembles the body of a GitHub release out of both changelogs:
+English first, German below a rule. A release has one text field and no language variants, so both
+go into it.
 
 **`build_register.py` joined on 21 August 2026**, together with the register at the top of
 [history.de.md](history.de.md). It is really a generator — `make register` writes the table, `--check`
