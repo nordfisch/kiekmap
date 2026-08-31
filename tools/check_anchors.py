@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #: had noticed, because until then nobody had linked into it or out of it by anchor.
 DOCUMENTS = (
     "docs/decisions.md",
-    "docs/history.md",
+    "docs/history.de.md",
     "docs/index.md",
     "docs/architecture.md",
     "docs/adaption.md",
@@ -60,7 +60,7 @@ def headings_of(path: Path) -> set[str]:
     """The anchors a file offers.
 
     ``#`` counts. It used to start at ``##``, on the assumption that a level-one heading is a
-    document title and nothing links to it -- until the register in ``history.md`` linked to its
+    document title and nothing links to it -- until the register in ``history.de.md`` linked to its
     six parts and all six were reported dead. Only ever adds anchors, so nothing that passed
     before can fail now.
     """

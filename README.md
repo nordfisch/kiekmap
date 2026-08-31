@@ -100,7 +100,7 @@ ist [docs/usermanual.md](docs/usermanual.md).
 Woraus das System besteht und wie die Teile zusammenspielen, steht in
 [docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in
 [docs/decisions.md](docs/decisions.md); wie es dazu gekommen ist, in
-[docs/history.md](docs/history.md). Was noch offen ist, in den [Issues](https://github.com/nordfisch/kiekmap/issues).
+[docs/history.de.md](docs/history.de.md). Was noch offen ist, in den [Issues](https://github.com/nordfisch/kiekmap/issues).
 Welche Datei welche Frage beantwortet, sagt [docs/index.md](docs/index.md).
 
 ## Mitwirken

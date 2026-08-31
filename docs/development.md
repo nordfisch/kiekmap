@@ -2,7 +2,7 @@
 
 For people who work on Kiekmap. Why things are the way they are is in
 [decisions.md](decisions.md); what the system is made of is in
-[architecture.md](architecture.md); how it came about is in [history.md](history.md); what is
+[architecture.md](architecture.md); how it came about is in [history.de.md](history.de.md); what is
 still open is in the [issues](https://github.com/nordfisch/kiekmap/issues); how to work on it is here.
 
 ## Setup
@@ -52,68 +52,64 @@ Settings: interpreter on `backend/.venv/bin/python`, mark `backend` as sources r
 
 ## Language
 
-**Every text exists exactly once, in the language of its readers.** Do not translate, separate.
-Duplicate content in two languages is the expensive kind of mistake: the second copy goes stale
-and nobody notices.
+**The repository speaks English. German is a translation, and it is marked as one.**
 
-The axis is the audience, not the language:
+The boundary used to run through the repository, file by file, by audience. It now runs between
+the repository and what is published from it. Everything a contributor touches is English;
+everything a museum needs to run the device exists in German as well, under a `.de.md` name and
+watched for drift.
 
-| What | Language | Readers |
-|---|---|---|
-| Interface, CLI, messages in the visitor view and the admin view | German | visitors, volunteers |
-| [usermanual.md](usermanual.md), [operations.md](operations.md), [adaption.md](adaption.md) | German | museum team, a second museum |
-| [README](../README.md), [CHANGELOG](../CHANGELOG.md) | German | operators |
-| GitHub issues | German | whoever plans here |
-| Labels on issues and pull requests | English | see [point 69](decisions.md) |
-| Test files — name, docstring, comment | German | see below |
-| Identifiers, code comments, docstrings | English | developers |
-| [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | English | developers |
-| Commit messages from 30 August 2026 on | English | developers |
-| [history.md](history.md) up to v0.8.0 | German, frozen | a report stays in its language |
-| Title and body of a pull request | English | the same readers as the commits it summarises |
+| What | Language |
+|---|---|
+| Identifiers, code comments, docstrings | English |
+| Test files — name, docstring, comment | English |
+| [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | English |
+| [README](../README.md), [CHANGELOG](../CHANGELOG.md), `SECURITY`, `CODE_OF_CONDUCT`, `AUTHORS`, `NOTICE` | English |
+| GitHub issues, issue and pull request templates | English |
+| `Makefile`, `deploy/`, GitHub workflows — comments | English |
+| CLI — commands, switches and output | English |
+| Commit messages from 30 August 2026 on | English |
+| Title and body of a pull request | English |
+| Interface, messages in the visitor view and the admin view | **both**, by `KIEKMAP_LANGUAGE` |
+| `*.de.md` | German, kept as a translation |
+| [history.de.md](history.de.md) up to v0.8.0 | German, frozen |
+| Values from OSM (`kind`: `strasse`, `flur` …) | German, as delivered |
 
-**Why the developer half is English:** `def zeitraum(...) -> DatePrecision` creates a break at
-every boundary between our own code and a library. Coding agents and later contributors stumble
-over mixed code measurably more often.
+**The file name carries the rule.** `operations.de.md` is German, `operations.md` is English.
+Until 31 August 2026 this was two hand-kept lists in `language_check.py`, and a new file belonged
+to whichever one somebody remembered to add it to. A suffix cannot be forgotten.
 
-**Why the product stays German:** the interface, the CLI and the admin view are built for people
-in Holm. A museum that does not speak German cannot run Kiekmap today anyway, so the museum
-documentation has no English audience.
+**Why the code is English:** `def zeitraum(...) -> DatePrecision` creates a break at every boundary
+between our own code and a library. Coding agents and later contributors stumble over mixed code
+measurably more often.
+
+**Why German survives anyway:** the museum team, the operator and a second museum read German, and
+their documents are the ones that matter in practice — the handbook printed beside the device, the
+Pi setup, the guide to adopting the project elsewhere. Those exist in both languages and are
+delivered bilingually; see [point 71](decisions.md).
 
 **German examples inside English texts are wanted** wherever they explain the case. They are the
 subject the text talks about, not the prose.
 
-**One rule of thumb for messages:** *Can it appear in the visitor view or the admin view? Then
-German, otherwise English.*
-
-| Message | Who sees it | Language |
-|---|---|---|
-| „Dieses Foto hat inzwischen schon eine Angabe bekommen." | a visitor at the device | German |
-| „Kein Foto mit der Nummer 42" | a visitor in the photo overlay | German |
-| „Aufgenommen, es fehlt noch: Ort und Jahr" | a curator in the import log | German |
-| `bbox is inverted: min must be smaller than max` | only whoever calls the API directly | English |
-| `No thumbnail size 999; available sizes are [240, 1200]` | likewise | English |
-| OpenAPI `summary`/`description` under `/api/docs` | developers, next to `open_count` and friends | English |
-
-The CLI is the exception to the exception: the museum team also runs
-`python -m app.cli import` when filling the device for the first time, so its output stays German.
-
-**Test files stay German throughout** — name, docstring, comment. A test name is not an identifier
-in the usual sense but a sentence of specification: `test_scandatum_datiert_das_foto_nicht` says at
-once which promise the test protects, and the docstring below it carries the why. Translated, that
-would lose its edge. On top of that the domain terms — Flurname, Hausnummer, Ortsteil — have no
-good English equivalent.
+**Messages that reach a screen come from a catalogue**, not from the code around them:
+`frontend/src/text/` in the frontend, `backend/app/text/` in the backend, both selected by
+`KIEKMAP_LANGUAGE`. Messages that only ever surface when calling the API directly stay English in
+place — `bbox is inverted: min must be smaller than max` has no other reader.
 
 Umlauts are transcribed (`ue`, `oe`, `ae`, `ss`) in German prose inside source code and in shell
-scripts, and written out in texts for people. **A GitHub workflow counts as source code**, the
-issue templates next to it count as texts for people. **Quotations and data values keep them**:
+scripts, and written out in texts for people. **Quotations and data values keep them**:
 `"Mühlenweg"` as an example in a comment, `["Gebäude"]` as a setting value, `"März"` in the month
 list — without the umlaut they would simply be wrong. For commit messages the rule is moot since
 the switch to English.
 
 `python3 tools/language_check.py` checks both sides: transcribed umlauts in German documentation,
-German paragraphs in English documentation. A file being translated right now is in neither list —
-it is half of each, and both checks would be right to complain.
+German paragraphs in English documentation. Its `IN_TRANSITION` tuple lists what has not made the
+switch yet — a file that is half of each is checked in neither language, and that list has to
+reach empty. It is the progress bar of [issue #31](https://github.com/nordfisch/kiekmap/issues/31).
+
+**The table above is the target, and one row of it is not true yet.** The test files are still
+German, and the checker still requires that of them; both flip in the same commit that translates
+them. Until then a German test name is correct, not a leftover.
 
 ## Writing rules
 
@@ -135,7 +131,7 @@ The sample collection provides the cast, and it is enough for everything: **Gast
 example is meant to show: that a year beside a name is the archive's date and not the date of the
 shot does not depend on who the person was. On 21 August 2026, 87 occurrences in 15 files were
 replaced this way, and not one example lost its edge. The occasion is in
-[history.md](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), point 64, section 1.
+[history.de.md](history.de.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), point 64, section 1.
 
 **Three slipped through** back then and were caught up on 25 August 2026: a surname as an example
 of a misread archive entry, a house name in a comment, and a photo title that is a person's name.
@@ -202,7 +198,7 @@ occurs twice. **What it deliberately does not do is count numbers in running tex
 be wrong is in [decisions.md](decisions.md), point 59.
 
 **`build_register.py` joined on 21 August 2026**, together with the register at the top of
-[history.md](history.md). It is really a generator — `make register` writes the table, `--check`
+[history.de.md](history.de.md). It is really a generator — `make register` writes the table, `--check`
 only says that it no longer matches. Both need the same promise: **every section of the history
 states its date in the first lines below its heading.** Whoever forgets learns about it at commit
 time, not half a year later at a table with holes.
@@ -474,7 +470,7 @@ faster.
 
 ### Squash merge is disabled here, and there is a reason
 
-`history.md` cites **individual commits by hash** — over eighty occurrences. A squash merge
+`history.de.md` cites **individual commits by hash** — over eighty occurrences. A squash merge
 collapses the commits of a branch and destroys exactly the ones the documentation points at. That
 is not a matter of style but data loss in a file whose value hangs on those references.
 

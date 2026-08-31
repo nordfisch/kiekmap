@@ -12,7 +12,7 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 | [../CHANGELOG.md](../CHANGELOG.md) | *Was kann das Programm?* — sortiert nach Keep a Changelog |
 | [decisions.md](decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
 | [architecture.md](architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
-| **history.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
+| **history.de.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
 | [Issues](https://github.com/nordfisch/kiekmap/issues) | *Was fehlt noch?* |
 
 Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
@@ -87,7 +87,7 @@ er dabei:
 
 Die übrigen — 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 16, 17, 24, 25, 26, 27, 28, 29, 32, 33, 35, 36, 37,
 38, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53 — sind weiter unten unter ihrem Datum beschrieben, ohne
-die Nummer in der Überschrift zu führen. `grep -n "Punkt 44" docs/history.md` findet die Stelle.
+die Nummer in der Überschrift zu führen. `grep -n "Punkt 44" docs/history.de.md` findet die Stelle.
 
 <!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand ändern -->
 
@@ -1481,7 +1481,7 @@ keinen Remote, einen Branch, eine Arbeitskopie.** Es war nie irgendwohin gepusht
 keinen fremden Klon, der zerbrechen konnte — und der Preis stieg mit jeder Woche.
 
 Der Preis war die Dokumentation, und er war messbar: **83 der 97 Kurz-Hashes änderten sich, 61
-Zitate in drei Dateien wurden ungültig**, allein `history.md` nennt 71 Commits. Genau diese
+Zitate in drei Dateien wurden ungültig**, allein `history.de.md` nennt 71 Commits. Genau diese
 Verweise machen die Historie hier wertvoll; sie aufzugeben wäre der eigentliche Verlust gewesen.
 Sie sind mitgezogen: `filter-branch` lässt die alte Historie unter `refs/original/` stehen, alt und
 neu ließen sich Position für Position paaren, gegengeprüft an den Betreffzeilen — 97 von 97
@@ -4074,7 +4074,7 @@ geordnet — sie zeigt ihre Ordnung nur nicht.** Die Datumsangaben lagen in der 
 sie erreicht.
 
 Und dann die Zahl, die den Ausschlag gab: **31 Verweise aus anderen Dateien zeigen hierher, 30
-davon ohne Anker.** Auf 3.858 Zeilen. Wer aus `decisions.md` einem „siehe history.md" folgt,
+davon ohne Anker.** Auf 3.858 Zeilen. Wer aus `decisions.md` einem „siehe history.de.md" folgt,
 landet in Zeile 1 und hat nichts gewonnen. Das ist der Befund, nicht die Länge — eine Datei, die
 niemand von vorn liest, darf lang sein; ein Verweis, der nichts eingrenzt, ist kaum einer.
 
@@ -4099,7 +4099,7 @@ zum Wiedererkennen, nicht zum Suchen: Man kann nicht nach einem Fehler suchen, d
 benennen kann. Dafür gibt es `grep`, und die Datei ist ausführlich genug dafür.
 
 **Acht Verweise haben ein Ziel bekommen**, die, die erkennbar eine Stelle meinten. Einer davon war
-schon von aussen sichtbar schief: `[Punkt 62](history.md)` — eine Beschriftung, die einen Punkt
+schon von aussen sichtbar schief: `[Punkt 62](history.de.md)` — eine Beschriftung, die einen Punkt
 nennt, und ein Ziel, das die ganze Datei ist. Die übrigen 22 meinen wirklich die Datei und bleiben.
 
 ### Die Gewohnheit war eingeschlafen
@@ -4160,12 +4160,12 @@ Praxis anzupassen sei. Gemessen fiel die Frage weg:
 | | Umlaute | umschrieben |
 |---|--:|--:|
 | `decisions.md` | 830 | **338** |
-| `history.md` | 1.252 | **568** |
+| `history.de.md` | 1.252 | **568** |
 | die neun übrigen Dateien zusammen | 1.936 | **8** |
 
 **Elf von dreizehn Dateien halten die Regel makellos ein.** Die Regel ist nicht aus der Zeit
 gefallen; zwei Dateien sind es. Und innerhalb von ihnen ist die Drift nicht gleichmäßig: In
-`history.md` steht das erste Drittel bei 713 zu 16, das mittlere bei 192 zu 352. Das ist keine
+`history.de.md` steht das erste Drittel bei 713 zu 16, das mittlere bei 192 zu 352. Das ist keine
 Gewohnheit, die nachlässt, sondern eine Strecke Arbeit, in der die Regel für Quelltext auf die
 Dokumentation übergriff.
 

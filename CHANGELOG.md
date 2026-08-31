@@ -13,13 +13,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Geändert
 
-- **`docs/history.md` ist abgeschlossen, und eine Nachfolgerin gibt es nicht.** Sie endet am
+- **`docs/history.de.md` ist abgeschlossen, und eine Nachfolgerin gibt es nicht.** Sie endet am
   25. August 2026 mit v0.8.0 und bleibt deutsch. Was die Arbeit lehrt, wird künftig ein Punkt in
   `decisions.md` mit kurzer Begründung; wie sie verlief, steht in den Commits und den geschlossenen
   Issues. Ein neuer Abschnitt in der Historie macht `build_register.py --check` rot
 - **Die offenen Punkte sind GitHub-Issues**, `docs/backlog.md` ist weg. Vierzehn Stück, Art und
   Bereich als Label, die alte Nummer im Fuß des Textes. Das **Nummernregister** steht jetzt in
-  `history.md`, über dem Änderungsregister: Es löst jedes „Punkt N" auf — die vierzehn offenen auf
+  `history.de.md`, über dem Änderungsregister: Es löst jedes „Punkt N" auf — die vierzehn offenen auf
   ihr Issue, die übrigen auf den Abschnitt unter ihrem Datum. Zu Issue-Nummern konnten die Nummern
   nicht werden, weil GitHub einen Zähler mit den Pull Requests teilt; „Punkt 15" wurde Issue #18.
   Neue Arbeit heißt nur noch nach ihrer Issue-Nummer. **Die Labels sind englisch**, obwohl die
@@ -36,7 +36,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   die Buchführung der Bereinigungsläufe und die am Holmer Bestand gemessenen Stückzahlen. Zwei Punkte sind zu Verweisen geworden und behalten ihre
   Nummer, damit ältere Zitate weiter auflösen
 - **Der `0.8.0`-Block im CHANGELOG ist von 250 auf 55 Einträge zusammengefasst**, gruppiert nach
-  Bereichen statt nach Arbeitsschritt. Das Kleinteilige steht in `history.md` und in den Commits
+  Bereichen statt nach Arbeitsschritt. Das Kleinteilige steht in `history.de.md` und in den Commits
 - **Die Sprachgrenze verläuft jetzt nach Publikum, nicht nach Dateityp.** Deutsch bleibt, was
   Besucher, Museumsteam und Betreiber lesen: Oberfläche, CLI, `usermanual`, `operations`,
   `adaption`, README, CHANGELOG, Issues und die Testdateien. Englisch wird, was Entwickler lesen:
@@ -77,7 +77,7 @@ Die `1.0.0` wird danach vergeben — siehe [Punkt 15](https://github.com/nordfis
 **Dieser Block ist nach Bereichen geordnet, nicht nach Hinzugefügt, Geändert und Behoben.** Vor
 0.8.0 gab es keine Fassung, gegen die sich etwas geändert oder in der sich etwas beheben ließe;
 alles hier ist neu. Die 250 Einzelschritte, aus denen es entstand, stehen in
-[docs/history.md](docs/history.md) und in den Commits. Ab 0.9.0 gelten wieder die drei Rubriken.
+[docs/history.de.md](docs/history.de.md) und in den Commits. Ab 0.9.0 gelten wieder die drei Rubriken.
 
 ### Karte und Zeitleiste
 

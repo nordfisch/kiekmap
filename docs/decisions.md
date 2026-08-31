@@ -2,7 +2,7 @@
 
 Why things are the way they are. Every point names the **decision**, its **reason** and its
 **consequence**. What the program can do is in the [changelog](../CHANGELOG.md); how the work went
-is in the commits and the closed issues, and up to v0.8.0 in [history.md](history.md).
+is in the commits and the closed issues, and up to v0.8.0 in [history.de.md](history.de.md).
 
 **A lesson is kept as the decision it led to, not as a lesson.** Whatever the work teaches ends up
 here in one point with a short reason, or it stays where it happened — in a commit message, in an
@@ -1589,7 +1589,7 @@ the program, not the data. That, together with the ODbL question, is in
 *Extended by [point 68](#68-the-language-boundary-follows-the-audience-not-the-file-type): the file
 has been closed since 30 August 2026. It still was not split; it just no longer grows.*
 
-The question was whether `history.md` should be split — by year, by topic — or whether a file nobody
+The question was whether `history.de.md` should be split — by year, by topic — or whether a file nobody
 reads from the front may be long.
 
 **Measured, the length was not the problem.** Around ninety sections of medium length, all in an
@@ -1598,7 +1598,7 @@ the others: **the order.** And it would bring a question along with every append
 today — *into which file?* — whose wrong answer nobody notices.
 
 **The problem was a different one, and it was measurable:** of the references from other files to
-`history.md`, **almost none pointed at an anchor**, so each pointed at the whole file. A reference
+`history.de.md`, **almost none pointed at an anchor**, so each pointed at the whole file. A reference
 that narrows nothing is hardly a reference.
 
 **So indexed instead of split:** a register at the top, one row per section with date and anchor.
@@ -1625,7 +1625,7 @@ code. The documentation did not follow it, and the question was whether the rule
 practice.
 
 **No — measured, it was not the practice but two files.** Almost all documents keep the rule
-flawlessly; the drift sat in `decisions.md` and `history.md`, and in the history not even evenly but
+flawlessly; the drift sat in `decisions.md` and `history.de.md`, and in the history not even evenly but
 in one stretch of work where the rule for source code spilled over onto the documentation. **A rule
 that eleven files carry is not given up because of two.** The same holds for `ß`: the rule allows
 `ss` explicitly, but not *in the same paragraph as its opposite*.
@@ -1679,7 +1679,7 @@ against, instead of as a tag you have to know first.
 
 **No `release/*`, no `hotfix/*`.** With one maintainer that is effort without a return.
 
-**Squash merge is disabled, and that is the actual decision.** `history.md` cites **individual
+**Squash merge is disabled, and that is the actual decision.** `history.de.md` cites **individual
 commits by hash**, in dozens of places — a squash destroys exactly those, and it delivers **no**
 mapping table with which the citations could be caught up.
 
@@ -1768,7 +1768,7 @@ umlaut check for the wrong reason, because it has nothing German that could be t
 would move every hash the documentation cites — the same arithmetic as in point 66, and this time
 without a gain.
 
-**What follows, and what explicitly does not:** `history.md` is closed rather than translated, and
+**What follows, and what explicitly does not:** `history.de.md` is closed rather than translated, and
 nothing takes its place — what the work teaches becomes a decision here, and how it went stays in
 the commits and the issues. `decisions.md` is consolidated first and then translated.
 No GitHub wiki: `make check` does not reach into a second repository, and `operations.md` describes
@@ -1790,11 +1790,11 @@ instead of in it.
 requests, and the low numbers were used up by the first pull requests: „Punkt 15" could never become
 issue #15. The documentation cites points at over three hundred places, and one of the citing files
 is frozen. So the old numbering stays where it is, and
-[history.md](history.md#nummernregister) resolves it: the fourteen open points became issues #15 to
+[history.de.md](history.de.md#nummernregister) resolves it: the fourteen open points became issues #15 to
 #28, and every other number is described in that file under its date.
 
 **The register stands in the history, not in a file of its own.** That is where the numbers are
-cited — 186 of the three hundred citations are in `history.md` — and a register in a second file
+cited — 186 of the three hundred citations are in `history.de.md` — and a register in a second file
 would be one more thing to keep in step. It sits above the change register, under the note that the
 file is closed. New work is named by its issue number alone.
 
@@ -1839,3 +1839,47 @@ above the docstring in every file, and the docstring is the line that says what 
 copied file** carries with it. That was true and stays true. Pull `services/dates.py` into another
 project now and it arrives without a licence notice. The gap covers exactly that case; anyone who
 takes the repository, a release archive or a clone gets both files with it.
+
+## 71. The repository speaks English, German is a translation
+
+*Amends [point 68](#68-the-language-boundary-follows-the-audience-not-the-file-type) in four
+paragraphs: the museum documentation, the tests, the issues, and „why not bilingual".*
+
+Point 68 drew the boundary **by audience** and ran it through the repository, file by file. That was
+right for a project that had just been made public and had to stop mixing its languages at random.
+It stopped being enough for the same reason: the repository is public, and most of what a stranger
+sees first was German — `README`, `SECURITY`, `CHANGELOG`, the issue templates, and every one of the
+520 backend test names.
+
+**The boundary now runs between the repository and what is published from it.** Everything a
+contributor touches is English. Everything a museum needs in order to run the device exists in
+German as well, delivered through a bilingual documentation site.
+
+**The file name carries the rule.** `operations.de.md` is German, `operations.md` is English. Point
+68 left this to two hand-kept lists in `language_check.py`, and a new file belonged to whichever
+list somebody remembered to add it to. A suffix cannot be forgotten.
+
+**The price is the one point 68 named**, and it is paid deliberately: *„duplicate content in two
+languages is the expensive kind of mistake — the second copy goes stale and nobody notices."* That
+is still true. It is answered rather than ignored: every translated file carries the hash of the
+English source it was made from, and `tools/check_translations.py` reports what has drifted apart.
+The doubling is allowed because it is now watched, not because the risk went away.
+
+**Not everything is doubled.** `usermanual` exists in German only — it is a handout printed and left
+beside the device in Holm, and an English version would have no reader and would be exactly the copy
+that goes stale. `history.de.md` stays German and frozen: 40,768 words whose value is in the nuance,
+in a file that takes no further entries.
+
+**Why the tests turn.** Point 68 argued that a test name is a sentence of specification and that
+Flurname, Hausnummer and Ortsteil have no good English equivalent. The first half still holds — the
+names stay long and stay sentences. The second half was the weaker argument: a glossary settles the
+domain terms once, and 8,809 lines of German inside an otherwise English code base cost every
+contributor more than the translation costs once.
+
+**Why the issues turn.** A public repository takes reports from people who did not grow up with the
+subject. The labels were already English for that reason, and a German issue beside an English label
+was half a decision. Whoever prefers to write German still may; nothing is sent back for its
+language.
+
+**What point 68 keeps:** no Simplified Technical English, the writing rules for both languages,
+English commit messages from 30 August 2026, and `history` closed rather than translated.

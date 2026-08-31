@@ -120,42 +120,64 @@ TRANSCRIBED = re.compile(
     re.I,
 )
 
-#: Prose for people, split by its readers: German for visitors, the museum team and operators,
-#: English for developers. Each side needs a different check -- transcribed umlauts on the German
-#: side, leftover German on the English side.
+#: Which files are prose for people rather than source.
 #:
 #: **Not** ``.github/workflows/``. A workflow is closer to a shell script than to a manual -- and
 #: shell scripts transcribe their umlauts. ``.github/`` as a whole stood here until the first
 #: workflow arrived and the checker rightly complained about it.
+PROSE_DIRECTORIES = ("docs/", ".github/ISSUE_TEMPLATE/")
+PROSE_FILES = (
+    ".github/pull_request_template.md",
+    "AUTHORS",
+    "CHANGELOG.md",
+    "CLAUDE.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "SECURITY.md",
+)
+
+#: Prose that has not made the switch yet -- checked in neither language while it is half of each.
 #:
-#: The five developer documents at the end move to ``ENGLISH_PROSE`` once they are translated. A
-#: file being converted right now belongs in neither list: it is half of each, and both checks
-#: would be right to complain.
-GERMAN_PROSE = (
+#: This is the to-do list of the change of 31 August 2026, and it has to reach empty. Every entry
+#: removed is one file that from then on is checked in its target language. See issue #31.
+IN_TRANSITION = (
+    ".github/ISSUE_TEMPLATE/",
+    ".github/pull_request_template.md",
+    "AUTHORS",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "README.md",
+    "SECURITY.md",
     "docs/adaption.md",
-    "docs/history.md",
     "docs/index.md",
     "docs/licensing.md",
     "docs/operations.md",
     "docs/usermanual.md",
-    ".github/ISSUE_TEMPLATE/",
-    ".github/pull_request_template.md",
-    "README.md",
-    "CHANGELOG.md",
-    "SECURITY.md",
-    "CODE_OF_CONDUCT.md",
-    "AUTHORS",
 )
 
-#: One list with a flag would not do here: an English file passes the German check for the wrong
-#: reason -- it has no transcription because it has no German -- so silence there proves nothing.
-ENGLISH_PROSE: tuple[str, ...] = (
-    "docs/architecture.md",
-    "docs/decisions.md",
-    "docs/development.md",
-    "CLAUDE.md",
-    "CONTRIBUTING.md",
-)
+
+def is_prose(path: str) -> bool:
+    if path.startswith(IN_TRANSITION):
+        return False
+    if path.startswith(PROSE_DIRECTORIES):
+        return path.endswith((".md", ".yml"))
+    return path in PROSE_FILES
+
+
+def prose_language(path: str) -> str:
+    """Which language a prose file has to be written in. **The file name says it.**
+
+    ``operations.de.md`` is German, ``operations.md`` is English. Until 31 August 2026 this was two
+    hand-kept lists, and a new file belonged to whichever one somebody remembered to add it to. A
+    suffix cannot be forgotten: it is in the name.
+
+    Each side needs its own check. Transcribed umlauts betray a German text written like source
+    code; leftover German paragraphs betray an English text that was never finished. One list with
+    a flag would not do -- an English file passes the umlaut check for the wrong reason, because it
+    has nothing German that could be transcribed, so silence there proves nothing.
+    """
+    return "de" if path.endswith(".de.md") else "en"
 
 
 def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:
@@ -163,8 +185,8 @@ def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:
 
     The rule (CLAUDE.md): umlauts are written normally in texts for people, transcribed in source
     code, shell scripts and commit messages. Documentation is a text for people, and this used to
-    be nobody's job to check -- by 21 August 2026, ``decisions.md`` and ``history.md`` had drifted
-    to 900 transcribed words between them while every other file stayed clean.
+    be nobody's job to check -- by 21 August 2026, ``decisions.md`` and the history had drifted to
+    900 transcribed words between them while every other file stayed clean.
 
     Three things are not prose and are skipped: fenced blocks and inline code, where identifiers
     and commands live and the transcription is correct; and quoted material, because CLAUDE.md
@@ -253,20 +275,18 @@ def main() -> int:
         print()
     print(f"Kommentare insgesamt: {total['de']} deutsch, {total['en']} englisch")
 
+    prose = sorted(f for f in listed if is_prose(f) and (ROOT / f).is_file())
+
     umschrieben = [
         (name, hits)
-        for name in sorted(
-            f
-            for f in listed
-            if f.startswith(GERMAN_PROSE) and f.endswith((".md", ".yml", "AUTHORS"))
-        )
-        if (ROOT / name).is_file() and (hits := transcribed_in_prose(ROOT / name))
+        for name in prose
+        if prose_language(name) == "de" and (hits := transcribed_in_prose(ROOT / name))
     ]
 
     deutsch_geblieben = [
         (name, hits)
-        for name in sorted(f for f in listed if f.startswith(ENGLISH_PROSE) and f.endswith(".md"))
-        if (ROOT / name).is_file() and (hits := german_in_english_prose(ROOT / name))
+        for name in prose
+        if prose_language(name) == "en" and (hits := german_in_english_prose(ROOT / name))
     ]
 
     if not breaks and not umschrieben and not deutsch_geblieben:

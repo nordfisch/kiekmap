@@ -121,7 +121,7 @@ Für die Rechtslage folgt daraus wenig und nichts Überraschendes: Rein maschine
 keine persönliche geistige Schöpfung (§ 2 Abs. 2 UrhG) und damit nicht geschützt; geschützt ist die
 Auswahl-, Anordnungs- und Bearbeitungsleistung. Die liegt in diesem Repo offen zutage — in
 [decisions.md](decisions.md) stehen die Entscheidungen mit ihren Begründungen, in
-[history.md](history.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
+[history.de.md](history.de.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
 
 Praktisch heißt das nur eines: **den Anspruch nicht übertreiben.** Die Copyright-Zeile ist
 richtig; ein Satz, jede Zeile sei eigenes Werk, wäre es nicht. Wo einzelne Zeilen keine

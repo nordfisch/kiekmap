@@ -40,7 +40,7 @@ Sache behoben ist.
 
 Es gibt einen Betreuer, nebenher. Eine Antwortzeit ist nicht zugesagt; eine Meldung wird
 gelesen. Was behoben wird, steht danach im [CHANGELOG](CHANGELOG.md) und, mit dem Warum, in
-[history.md](docs/history.md).
+[history.de.md](docs/history.de.md).
 
 ## Welche Fassung gepflegt wird
 

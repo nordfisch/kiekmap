@@ -33,9 +33,9 @@ zweites Museum, das ein **eigenes** Gerät aufsetzt; dafür ist das Projekt geba
 | [architecture.md](architecture.md) | *Was* gibt es, und wie greift es ineinander? | wer einsteigt | Englisch |
 | [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler | Englisch |
 | [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will | Englisch |
-| [history.md](history.md) | *Wie* ist es dazu gekommen? — dazu das Nummernregister | wer wissen will, ob eine Idee schon einmal da war | Deutsch, abgeschlossen |
+| [history.de.md](history.de.md) | *Wie* ist es dazu gekommen? — dazu das Nummernregister | wer wissen will, ob eine Idee schon einmal da war | Deutsch, abgeschlossen |
 
-`decisions.md` liest man **vor** einer Änderung, `history.md` dann, wenn etwas unerklärlich
+`decisions.md` liest man **vor** einer Änderung, `history.de.md` dann, wenn etwas unerklärlich
 aussieht. Die Historie endet mit v0.8.0 und wird nicht fortgeschrieben: Was die Arbeit lehrt, wird
 eine Entscheidung, und wie sie verlief, steht in den Commits und den geschlossenen Issues. Ihr
 **Nummernregister** löst die Zitate der Form „Punkt N" auf.
@@ -58,6 +58,6 @@ Nötigste gekürzt, mit den drei Dingen vorneweg, die man hier falsch machen kan
 | [../seed/README.md](../seed/README.md) | Der Beispielbestand: was `make seed` herstellt und warum seine Lücken Absicht sind | Deutsch |
 | [../LICENSE](../LICENSE), [../NOTICE](../NOTICE) | Apache-2.0 im Wortlaut, und die Namensnennung, die mitreist | Englisch, Deutsch |
 
-`CHANGELOG.md` und `history.md` beschreiben beide Gebautes. Der eine listet **was**, die andere
+`CHANGELOG.md` und `history.de.md` beschreiben beide Gebautes. Der eine listet **was**, die andere
 erzählt **wie und warum**: Wer sucht, ob eine Funktion existiert, nimmt den CHANGELOG; wer wissen
 will, warum sie so aussieht, die Historie.

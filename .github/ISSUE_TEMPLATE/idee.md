@@ -21,6 +21,6 @@ assignees: ''
 
 - [ ] Die offenen Issues — steht das schon irgendwo?
 - [ ] `docs/decisions.md` — ist die Frage schon einmal entschieden worden?
-- [ ] `docs/history.md` — ist die Sache schon einmal versucht worden?
+- [ ] `docs/history.de.md` — ist die Sache schon einmal versucht worden?
 
 <!-- Falls ja: gern trotzdem melden, aber bitte mit dem, was die alte Begründung nicht wusste. -->

@@ -35,38 +35,40 @@ Miss these three and you build something that only shows up in the museum:
 
 ## Language
 
-**Every text exists exactly once, in the language of its readers.** The axis is the audience, not
-the language.
+**The repository speaks English. German is a translation, and it is marked as one** — a `.de.md`
+name and an entry in the drift checker.
 
 | What | Language |
 |---|---|
 | Identifiers (variables, functions, classes, CSS classes, file names) | **English** |
 | Code comments and docstrings | **English** |
-| **Everything in a test file** — names, docstrings, comments | **German** |
-| Interface texts | German, in `frontend/src/text/de.ts` |
-| Messages that can appear in the visitor view or the admin view | German, straight in the code |
-| Messages that only surface when working against the API | English |
+| **Everything in a test file** — names, docstrings, comments | **English** |
 | API paths, query parameters, JSON fields, OpenAPI descriptions | English |
-| Output of the CLI (`python -m app.cli …`) | German |
-| Docs for museum and operation: `usermanual`, `operations`, `adaption`, README, CHANGELOG | German |
+| CLI — commands, switches and output | **English** |
 | Docs for developers: `architecture`, `development`, `decisions`, `CONTRIBUTING`, this file | English |
-| `docs/history.md` up to v0.8.0 | German, frozen |
-| Title and body of a pull request | English |
-| GitHub issues | German |
+| README, CHANGELOG, `SECURITY`, `CODE_OF_CONDUCT`, `AUTHORS`, `NOTICE` | **English** |
+| GitHub issues, issue and pull request templates | **English** |
 | Labels on issues and pull requests | English |
+| `Makefile`, `deploy/`, GitHub workflows — comments | **English** |
+| Title and body of a pull request | English |
 | Commit messages from 30 August 2026 on | **English** |
+| Interface texts and every message that reaches a screen | **both**, by `KIEKMAP_LANGUAGE` |
+| `*.de.md` — `usermanual`, `operations`, `adaption`, `changelog` … | German, as a translation |
+| `docs/history.de.md` up to v0.8.0 | German, frozen |
 | Values in the database that come from OSM (`kind`: `strasse`, `flur` …) | German, as delivered |
 
-The developer docs are being translated. A file still standing in German is a leftover of that
-switch, not a counter-example.
+**The file name carries the rule:** `operations.de.md` is German, `operations.md` is English. There
+is no list to keep.
 
-**Rule of thumb for messages:** *Can it appear in the visitor view or the admin view? Then German,
-otherwise English.* That settles every borderline case. The CLI is the exception — the museum team
-runs it too when filling the device for the first time.
+**The switch is under way, and two things are not true yet.** The test files are still German and
+the checker still requires that of them; both flip in the same commit that translates them. The
+prose still standing in German is listed in `IN_TRANSITION` in `tools/language_check.py`, and that
+list has to reach empty. Neither is a counter-example — see
+[issue #31](https://github.com/nordfisch/kiekmap/issues/31).
 
-**Test files are German throughout**, name and docstring and comment. A test name is not an
-identifier but a sentence of specification: `test_scandatum_datiert_das_foto_nicht` says at once
-which promise the test protects. Class names likewise (`class TestUeberlappung`).
+**Rule of thumb for messages:** *Can it appear in the visitor view or the admin view? Then it comes
+from the text catalogue, in both languages.* Messages that only ever surface when calling the API
+directly stay English in place.
 
 **Umlauts:** written out in texts for people (Mühlenweg); transcribed (`ue`, `oe`, `ae`, `ss`) in
 German prose **inside source code** and in shell scripts. A writing habit for German messages in
@@ -104,7 +106,7 @@ tone.**
    information, it goes.
 8. No metaphors, no imagery, no exaggeration.
 
-**Two exceptions:** [docs/history.md](docs/history.md) is closed and keeps its tone. Test names
+**Two exceptions:** [docs/history.de.md](docs/history.de.md) is closed and keeps its tone. Test names
 stay long where precision demands it.
 
 No tool checks these rules. They work while writing and in review.
@@ -169,7 +171,7 @@ sprite URL that has to be absolute, `+` meaning addition in SQLite).
 **A finished item is recorded in two places, not nine:** what the program can do now goes into the
 [changelog](CHANGELOG.md), and the issue gets closed. If a decision came out of it, that becomes a
 new point in [docs/decisions.md](docs/decisions.md), with a short reason. How the work went is in
-the commit and the closed issue, and nowhere else — `docs/history.md` is closed and takes nothing
+the commit and the closed issue, and nowhere else — `docs/history.de.md` is closed and takes nothing
 more.
 
 **Keep the audience in mind.** Visitors stand at a touchscreen, often elderly. Controls at least
@@ -218,7 +220,7 @@ language would cost and when splitting things up starts to pay off.
 ## State of things
 
 What is built is in the [changelog](CHANGELOG.md); how it came about and what turned out differently
-from the plan is in [docs/history.md](docs/history.md); what is open is in
+from the plan is in [docs/history.de.md](docs/history.de.md); what is open is in
 the [issues](https://github.com/nordfisch/kiekmap/issues). Only what you would **assume wrongly**
 while working is here.
 
@@ -241,7 +243,7 @@ for the `.env`. Without it the login says so in plain words instead of rejecting
 **Open work lives in the [issues](https://github.com/nordfisch/kiekmap/issues), not in a file.** The documentation cites older items as
 „Punkt N" — a numbering that ran to 66 and was never reissued. Those numbers are not issue numbers
 and cannot become them, because GitHub shares one counter with the pull requests. The number
-register in [docs/history.md](docs/history.md#nummernregister) resolves them, and
+register in [docs/history.de.md](docs/history.de.md#nummernregister) resolves them, and
 [docs/decisions.md](docs/decisions.md) point 69 says why.
 
 **What is no longer a backlog item but curation:** photos without a description, without a title,
