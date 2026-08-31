@@ -12,7 +12,7 @@
 import { useEffect, useState } from "react";
 
 import { type PhotoAdminDetail, type PhotoPatch, patchPhoto } from "../api/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { type YearInput, toDate } from "./yearInput";
 import { PlaceField, type PickedPlace } from "./PlaceField";
 import { YearField } from "./YearField";

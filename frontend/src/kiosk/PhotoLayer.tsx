@@ -14,7 +14,7 @@ import Supercluster from "supercluster";
 
 import type { PhotoMarker } from "../api/client";
 import { useKiosk } from "../store/kiosk";
-import { t } from "../text/de";
+import { t } from "../text";
 import { clusterZoom, isStepChange, stillEntering } from "./clusterStep";
 import { captionOf } from "./mapCaption";
 import { type Stack, groupByLocation } from "./stacks";

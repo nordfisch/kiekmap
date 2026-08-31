@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { t } from "./de";
+import { de as t } from "./de";
 
 describe("questions with a street name in them", () => {
   /** All three genders, as they occur side by side in Holm. */

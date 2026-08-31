@@ -1,7 +1,26 @@
-/** Numbers and dates as they are read out loud in German. */
+/**
+ * Numbers and dates as they are read out loud, in the language of the instance.
+ *
+ * **The formatters are built on first use, not at import.** `t.locale` is only right after
+ * `setLanguage` has run in `main.tsx`, and this module is imported before that. A
+ * `new Intl.NumberFormat` at module level would freeze German into an English device -- silently,
+ * because a number still looks like a number.
+ */
 
-const NUMBER = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
-const COUNT = new Intl.NumberFormat("de-DE");
+import { t } from "../text";
+
+let number: Intl.NumberFormat | undefined;
+let count: Intl.NumberFormat | undefined;
+let locale: string | undefined;
+
+function formatters(): { number: Intl.NumberFormat; count: Intl.NumberFormat } {
+  if (locale !== t.locale) {
+    locale = t.locale;
+    number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+    count = new Intl.NumberFormat(locale);
+  }
+  return { number: number!, count: count! };
+}
 
 /**
  * File sizes in the units printed on the packaging.
@@ -15,13 +34,13 @@ export function formatBytes(bytes: number): string {
     ["MB", 1000 ** 2],
     ["kB", 1000],
   ] as const) {
-    if (bytes >= factor) return `${NUMBER.format(bytes / factor)} ${unit}`;
+    if (bytes >= factor) return `${formatters().number.format(bytes / factor)} ${unit}`;
   }
-  return `${COUNT.format(bytes)} Bytes`;
+  return `${formatters().count.format(bytes)} ${t.admin.format.bytes}`;
 }
 
 export function formatCount(value: number): string {
-  return COUNT.format(value);
+  return formatters().count.format(value);
 }
 
 /**
@@ -32,9 +51,9 @@ export function formatCount(value: number): string {
  * line.
  */
 export function formatDaysSince(days: number | null): string {
-  if (days === null) return "Noch nie";
-  if (days <= 0) return "Heute";
-  return COUNT.format(days);
+  if (days === null) return t.admin.format.never;
+  if (days <= 0) return t.admin.format.today;
+  return formatters().count.format(days);
 }
 
 /**
@@ -57,7 +76,7 @@ export function formatDaysSince(days: number | null): string {
  * one of the three is right by itself; see `docs/decisions.md`, point 58.
  */
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("de-DE", {
+  return new Date(iso).toLocaleDateString(t.locale, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -65,7 +84,7 @@ export function formatDate(iso: string): string {
 }
 
 export function formatWhen(iso: string): string {
-  return new Date(iso).toLocaleString("de-DE", {
+  return new Date(iso).toLocaleString(t.locale, {
     day: "numeric",
     month: "long",
     hour: "2-digit",
@@ -74,7 +93,7 @@ export function formatWhen(iso: string): string {
 }
 
 export function formatLogTime(iso: string): string {
-  return new Date(iso).toLocaleString("de-DE", {
+  return new Date(iso).toLocaleString(t.locale, {
     day: "numeric",
     month: "numeric",
     year: "numeric",

@@ -13,17 +13,20 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { fetchChanges, revertChange } from "../api/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { formatWhen } from "./format";
 import { Pager } from "./Pager";
 import { clampOffset } from "./pagination";
 import { useLoaded } from "./useLoaded";
 
-const FIELD_NAMES: Record<string, string> = {
-  location: t.admin.changes.fieldLocation,
-  date: t.admin.changes.fieldDate,
-  housenumber: t.admin.changes.fieldHouseNumber,
-};
+/** A function, not a constant: `t` is only resolved after this module has been imported. */
+function fieldNames(): Record<string, string> {
+  return {
+    location: t.admin.changes.fieldLocation,
+    date: t.admin.changes.fieldDate,
+    housenumber: t.admin.changes.fieldHouseNumber,
+  };
+}
 
 export function Changes() {
   const [includeReverted, setIncludeReverted] = useState(false);
@@ -40,7 +43,10 @@ export function Changes() {
     loading,
     reload,
   } = useLoaded(
-    useCallback(() => fetchChanges(includeReverted, offset), [includeReverted, offset]),
+    useCallback(
+      () => fetchChanges(includeReverted, offset),
+      [includeReverted, offset],
+    ),
   );
 
   useEffect(() => {
@@ -73,10 +79,14 @@ export function Changes() {
         {t.admin.changes.showReverted}
       </label>
 
-      {(error || loadError) && <p className="admin__error">{error ?? loadError}</p>}
+      {(error || loadError) && (
+        <p className="admin__error">{error ?? loadError}</p>
+      )}
       {loading && !data && <p className="admin__note">{t.admin.loading}</p>}
 
-      {data && data.changes.length === 0 && <p className="admin__note">{t.admin.changes.none}</p>}
+      {data && data.changes.length === 0 && (
+        <p className="admin__note">{t.admin.changes.none}</p>
+      )}
 
       {data && data.changes.length > 0 && (
         <ul className="photo-rows">
@@ -88,13 +98,18 @@ export function Changes() {
                   {change.photo_title || t.admin.photos.untitled}
                 </span>
                 <span className="photo-row__meta">
-                  {FIELD_NAMES[change.field] ?? change.field}: {change.new_value}
+                  {fieldNames()[change.field] ?? change.field}:{" "}
+                  {change.new_value}
                 </span>
-                <span className="photo-row__meta">{formatWhen(change.created_at)}</span>
+                <span className="photo-row__meta">
+                  {formatWhen(change.created_at)}
+                </span>
               </div>
 
               {change.reverted_at ? (
-                <span className="flag flag--muted">{t.admin.changes.reverted}</span>
+                <span className="flag flag--muted">
+                  {t.admin.changes.reverted}
+                </span>
               ) : change.revertable ? (
                 <button
                   type="button"
@@ -106,14 +121,18 @@ export function Changes() {
                   {t.admin.changes.revert}
                 </button>
               ) : (
-                <span className="flag flag--muted">{t.admin.changes.locked}</span>
+                <span className="flag flag--muted">
+                  {t.admin.changes.locked}
+                </span>
               )}
             </li>
           ))}
         </ul>
       )}
 
-      {data && <Pager total={data.total} offset={offset} onOffset={setOffset} />}
+      {data && (
+        <Pager total={data.total} offset={offset} onOffset={setOffset} />
+      )}
     </div>
   );
 }

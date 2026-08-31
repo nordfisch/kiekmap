@@ -14,7 +14,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
 import { RELOAD_DELAY_MS, lastRecovery, mayReload, noteRecovery } from "./recover";
-import { t } from "./text/de";
+import { t } from "./text";
 
 type Props = { children: ReactNode };
 type State = { failed: boolean; reloading: boolean };

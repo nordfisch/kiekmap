@@ -16,7 +16,7 @@
 import { useState } from "react";
 
 import type { Precision } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { BackIcon, CheckIcon } from "./icons";
 
 export function DatePicker({

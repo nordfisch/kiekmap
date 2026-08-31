@@ -26,7 +26,7 @@ import {
   postHouseNumber,
   postLocation,
 } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { useContribute } from "./contribute";
 import { useKiosk } from "./kiosk";
 

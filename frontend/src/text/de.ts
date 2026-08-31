@@ -1,15 +1,17 @@
 /**
- * Every piece of text that reaches a visitor's eyes.
+ * Every piece of text that reaches a visitor's eyes, in German. `en.ts` is the translation.
  *
  * Kept in one place rather than inline, for two reasons: the museum team can have wording changed
- * without anyone hunting through components, and a second language stays a small job rather than a
- * refactoring.
+ * without anyone hunting through components, and a second language stayed a small job rather than
+ * a refactoring.
  *
- * **Small, not free.** Two things come with it. The 29 files that use `t` import this module by
- * name, so a second language also needs an `index.ts` that hands out one or the other. And date
- * labels ("1920er", "Juni 1955") are formatted on the server, in `services/dates.py`; a bilingual
- * kiosk has to move that formatting to the client. Both steps are written out in
- * `docs/adaption.md`.
+ * **No `as const`, and that is deliberate.** `Texts` in `types.ts` is `typeof de`, and with
+ * `as const` every string would be its own literal type -- an English catalogue would then have to
+ * carry the German wording to typecheck. Without it the type says "a string here, a function of
+ * two numbers there", which is exactly the promise `en.ts` has to keep.
+ *
+ * The date labels ("1920er", "Juni 1955") are still formatted on the server, and that is now
+ * right rather than a limitation: `KIEKMAP_LANGUAGE` reaches `services/dates.py` too.
  */
 
 // The only import here, and type-only: it is what makes the compiler insist that every question
@@ -30,7 +32,16 @@ function since(days: number | null, what: string, done: string): string {
   return `${days === 1 ? "Tag" : "Tage"} seit ${what}`;
 }
 
-export const t = {
+export const de = {
+  /**
+   * What `Intl` is asked for -- number grouping, decimal comma, month names of a date.
+   *
+   * Part of the language, not of the text: "3,4 MB" against "3.4 MB", "3. Juni" against
+   * "3 June". `admin/format.ts` reads it, and lazily, because it must not be captured before
+   * `setLanguage` has run.
+   */
+  locale: "de-DE",
+
   app: {
     /**
      * The title above the "Hilf mit" panel, two lines beside the coat of arms.
@@ -40,6 +51,13 @@ export const t = {
      * screen.
      */
     titleLead: "Bilder aus",
+    /**
+     * What stands in the browser tab. Set by `main.tsx`, because `index.html` is written before
+     * the language is known.
+     *
+     * No place name: like `titleLead` it would be the one spot where "Holm" sat in the code.
+     */
+    documentTitle: "Bilder aus unserem Ort",
     /**
      * The arms, which since 9 August 2026 reload instead of opening the admin area.
      *
@@ -556,7 +574,19 @@ export const t = {
       page: (current: number, count: number) => `Seite ${current} von ${count}`,
     },
 
+    /**
+     * The three words `admin/format.ts` puts around its numbers.
+     *
+     * The edges get a word instead of a number: "0 Tage seit der letzten Sicherung" is a puzzle
+     * for somebody who walks up to this device twice a year.
+     */
+    format: {
+      never: "Noch nie",
+      today: "Heute",
+      bytes: "Bytes",
+    },
+
     loading: "Wird geladen …",
     expired: "Die Anmeldung ist abgelaufen.",
   },
-} as const;
+};

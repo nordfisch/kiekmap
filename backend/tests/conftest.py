@@ -17,6 +17,28 @@ from sqlalchemy.orm import Session
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
+@pytest.fixture(autouse=True)
+def _keep_the_local_env_out(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """No test may depend on what is configured on *this* machine.
+
+    ``data_dir`` does the same for the tests that ask for it. This one is autouse, because since
+    the language became a setting there are tests that read the configuration without wanting a
+    data directory: ``format_label`` asks ``texts()``, and ``texts()`` asks the settings. On
+    31 August 2026 a single line ``KIEKMAP_LANGUAGE=en`` in the developer's ``.env`` turned eight
+    tests red -- the code was right, the test setup was not.
+
+    German is the default, so the assertions that quote a German sentence stand on the default
+    rather than on a machine.
+    """
+    from app.config import Settings, get_settings
+
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
+    monkeypatch.delenv("KIEKMAP_LANGUAGE", raising=False)
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
 @pytest.fixture
 def fixtures_dir() -> Path:
     """The test images. Built by ``tests/fixtures/build_test_images.py``."""

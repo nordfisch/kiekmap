@@ -19,7 +19,7 @@ import {
   fetchImportFolders,
   fetchJob,
 } from "../api/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { DropZone } from "./DropZone";
 
 /** Is one plugged in? Faster while reading, so the bar keeps moving. */
