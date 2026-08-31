@@ -4,7 +4,7 @@ import type { Place } from "../api/client";
 import { baseNumber, blocksOf, groupByBase } from "./houseNumbers";
 
 let id = 0;
-function adresse(housenumber: string): Place {
+function address(housenumber: string): Place {
   return {
     id: ++id,
     name: `Mühlenweg ${housenumber}`,
@@ -17,73 +17,73 @@ function adresse(housenumber: string): Place {
   } as Place;
 }
 
-describe("Grundzahl", () => {
-  it("liest die fuehrende Zahl", () => {
+describe("the base number", () => {
+  it("reads the leading number", () => {
     expect(baseNumber("3")).toBe(3);
     expect(baseNumber("3c")).toBe(3);
     expect(baseNumber("10-18")).toBe(10);
   });
 
-  it("faellt auf Unsinn nicht herein", () => {
+  it("is not taken in by nonsense", () => {
     expect(baseNumber("")).toBeNull();
     expect(baseNumber("ohne Nummer")).toBeNull();
   });
 });
 
-describe("Buchstabenzusaetze zusammenfassen", () => {
-  it("macht aus einer Reihenhauszeile einen Knopf", () => {
-    // 3a bis 3z am Muehlenweg: raeumlich ist das ein Punkt, in der Liste waren es 27.
-    const liste = groupByBase([
-      adresse("3"),
-      adresse("3a"),
-      adresse("3b"),
-      adresse("3c"),
-      adresse("5"),
+describe("grouping letter suffixes", () => {
+  it("turns a terrace of houses into one button", () => {
+    // 3a to 3z on the Muehlenweg: spatially that is one point, in the list it was 27.
+    const list = groupByBase([
+      address("3"),
+      address("3a"),
+      address("3b"),
+      address("3c"),
+      address("5"),
     ]);
 
-    expect(liste.map((p) => p.housenumber)).toEqual(["3", "5"]);
+    expect(list.map((p) => p.housenumber)).toEqual(["3", "5"]);
   });
 
-  it("nimmt den ersten Eintrag, wenn es die nackte Zahl nicht gibt", () => {
-    // Sonst stuende auf dem Knopf eine Adresse, die es gar nicht gibt.
-    const liste = groupByBase([adresse("3a"), adresse("3b")]);
+  it("takes the first entry when the bare number does not exist", () => {
+    // Otherwise an address that does not exist would stand on the button.
+    const list = groupByBase([address("3a"), address("3b")]);
 
-    expect(liste.map((p) => p.housenumber)).toEqual(["3a"]);
+    expect(list.map((p) => p.housenumber)).toEqual(["3a"]);
   });
 
-  it("sortiert nach der Zahl, nicht alphabetisch", () => {
-    const liste = groupByBase([adresse("10"), adresse("9"), adresse("1")]);
+  it("sorts by the number, not alphabetically", () => {
+    const list = groupByBase([address("10"), address("9"), address("1")]);
 
-    expect(liste.map((p) => p.housenumber)).toEqual(["1", "9", "10"]);
+    expect(list.map((p) => p.housenumber)).toEqual(["1", "9", "10"]);
   });
 });
 
-describe("Bereiche", () => {
-  const viele = Array.from({ length: 39 }, (_, i) => adresse(String(i * 2 + 1)));
+describe("blocks", () => {
+  const many = Array.from({ length: 39 }, (_, i) => address(String(i * 2 + 1)));
 
-  it("laesst kurze Strassen in einem Schritt", () => {
-    // Holms mittlere Strasse hat fuenfzehn Adressen -- dort soll kein zweiter Schritt entstehen.
-    const bloecke = blocksOf(viele.slice(0, 12));
+  it("leaves short streets in one step", () => {
+    // Holm's average street has fifteen addresses -- no second step should arise there.
+    const blocks = blocksOf(many.slice(0, 12));
 
-    expect(bloecke).toHaveLength(1);
-    expect(bloecke[0]!.numbers).toHaveLength(12);
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0]!.numbers).toHaveLength(12);
   });
 
-  it("teilt lange Strassen in etwa gleich grosse Bereiche", () => {
-    const bloecke = blocksOf(viele);
+  it("splits long streets into roughly equal blocks", () => {
+    const blocks = blocksOf(many);
 
-    expect(bloecke.length).toBeLessThanOrEqual(12);
-    for (const block of bloecke) expect(block.numbers.length).toBeLessThanOrEqual(12);
-    // Keine Nummer geht verloren und keine kommt doppelt vor.
-    expect(bloecke.flatMap((b) => b.numbers)).toHaveLength(viele.length);
+    expect(blocks.length).toBeLessThanOrEqual(12);
+    for (const block of blocks) expect(block.numbers.length).toBeLessThanOrEqual(12);
+    // No number is lost and none appears twice.
+    expect(blocks.flatMap((b) => b.numbers)).toHaveLength(many.length);
   });
 
-  it("beschriftet die Bereiche mit den Nummern, die wirklich darin liegen", () => {
-    // Nach der Luecke am Muehlenweg heisst der letzte Bereich eben "47-183" -- das ist ehrlicher
-    // als ein glattes "40-49", in dem nichts steht.
-    const bloecke = blocksOf([...viele.slice(0, 20), adresse("169"), adresse("183")]);
+  it("labels the blocks with the numbers that really lie in them", () => {
+    // After the gap on the Muehlenweg the last block is simply called "47-183" -- that is more
+    // honest than a round "40-49" with nothing in it.
+    const blocks = blocksOf([...many.slice(0, 20), address("169"), address("183")]);
 
-    expect(bloecke[0]!.label).toMatch(/^1–/);
-    expect(bloecke.at(-1)!.label).toMatch(/–183$/);
+    expect(blocks[0]!.label).toMatch(/^1–/);
+    expect(blocks.at(-1)!.label).toMatch(/–183$/);
   });
 });

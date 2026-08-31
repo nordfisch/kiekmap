@@ -113,9 +113,10 @@ def is_test(path: str) -> bool:
 #: Test files that have not made the switch to English yet -- checked in neither language.
 #:
 #: Until 31 August 2026 the rule was the other way round: test files had to be German throughout,
-#: because a test name here is a sentence of specification. Point 71 reverses that. The backend
-#: turned first; this tuple holds what is still German and has to reach empty. See issue #31.
-TESTS_IN_TRANSITION = ("frontend/src/",)
+#: because a test name here is a sentence of specification. Point 71 reverses that; the sentence
+#: stays a sentence, it is only English now. **The tuple is empty, and that is the point** -- it
+#: is kept so that the next conversion has somewhere to put its files.
+TESTS_IN_TRANSITION: tuple[str, ...] = ()
 
 
 #: Transcriptions that are never a German word in their own right. Deliberately short: the

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { PhotoMarker } from "../api/client";
 import { captionOf } from "./mapCaption";
 
-function foto(felder: Partial<PhotoMarker>): PhotoMarker {
+function photo(fields: Partial<PhotoMarker>): PhotoMarker {
   return {
     id: 1,
     lat: 53.62,
@@ -15,100 +15,99 @@ function foto(felder: Partial<PhotoMarker>): PhotoMarker {
     width: 100,
     height: 80,
     thumb_url: "/api/photos/1/thumb",
-    ...felder,
+    ...fields,
   };
 }
 
-describe("Was unter einem Vorschaubild steht", () => {
-  it("nimmt den Titel vor der Adresse", () => {
+describe("what stands under a thumbnail", () => {
+  it("takes the title before the address", () => {
     /**
-     * Die Umkehrung vom 12. August 2026. Bis dahin stand dort die Adresse — und zwar zu Recht,
-     * weil die Titel damals Adressen *waren*. Seit sie aufgeräumt sind, sagt „Gasthof Timm"
-     * mehr als „Hauptstraße 11a".
+     * The reversal of 12 August 2026. Until then the address stood there -- and rightly so,
+     * because back then the titles *were* addresses. Since they were cleaned up, "Gasthof Timm"
+     * says more than "Hauptstraße 11a".
      */
-    const zeile = captionOf([foto({ title: "Gasthof Timm", place_name: "Hauptstraße 11a" })]);
+    const line = captionOf([photo({ title: "Gasthof Timm", place_name: "Hauptstraße 11a" })]);
 
-    expect(zeile).toBe("Gasthof Timm");
+    expect(line).toBe("Gasthof Timm");
   });
 
-  it("faellt ohne Titel auf die Adresse zurueck", () => {
-    expect(captionOf([foto({ place_name: "Lehmweg 17b" })])).toBe("Lehmweg 17b");
+  it("falls back to the address without a title", () => {
+    expect(captionOf([photo({ place_name: "Lehmweg 17b" })])).toBe("Lehmweg 17b");
   });
 
-  it("schreibt bei unbekannter Hausnummer ein Fragezeichen", () => {
+  it("writes a question mark when the house number is unknown", () => {
     /**
-     * Die Luecke wird benannt, nicht verschwiegen — dieselbe Haltung wie beim Nichtstreuen der
-     * Stapel (decisions.md, Punkt 33). Genau danach fragt der Beitragsbereich unter „Welche
-     * Hausnummer?", und auf der Karte steht, wo die Frage noch offen ist.
+     * The gap is named, not kept quiet -- the same stance as not scattering the stacks
+     * (decisions.md, point 33). That is exactly what the contribution panel asks about, and the
+     * map shows where the question is still open.
      */
-    expect(captionOf([foto({ place_name: "Hauptstraße" })])).toBe("Hauptstraße Nr. ?");
+    expect(captionOf([photo({ place_name: "Hauptstraße" })])).toBe("Hauptstraße Nr. ?");
   });
 
-  it("haengt das Jahr mit einem Gedankenstrich an", () => {
-    expect(captionOf([foto({ title: "Funkmast", date_short: "2018" })])).toBe("Funkmast — 2018");
+  it("appends the year with an em dash", () => {
+    expect(captionOf([photo({ title: "Funkmast", date_short: "2018" })])).toBe("Funkmast — 2018");
   });
 
-  it("laesst den Gedankenstrich weg, wo kein Jahr bekannt ist", () => {
-    // Zwei Drittel des Bestands. Ein angehaengtes „Jahr unbekannt" saehe siebenhundertmal gleich
-    // aus und sagte nichts.
-    expect(captionOf([foto({ title: "Funkmast" })])).toBe("Funkmast");
+  it("leaves the dash out where no year is known", () => {
+    // Two thirds of the collection. An appended "Jahr unbekannt" would look the same seven
+    // hundred times over and say nothing.
+    expect(captionOf([photo({ title: "Funkmast" })])).toBe("Funkmast");
   });
 
-  it("traegt die Zeile notfalls mit dem Jahr allein", () => {
-    // Ein nur ueber EXIF verortetes Foto hat weder Titel noch Adresse.
-    expect(captionOf([foto({ date_short: "2014" })])).toBe("2014");
+  it("carries the line with the year alone if it has to", () => {
+    // A photo located only through EXIF has neither a title nor an address.
+    expect(captionOf([photo({ date_short: "2014" })])).toBe("2014");
   });
 
-  it("bleibt leer, wenn nichts bekannt ist", () => {
-    // Und nicht etwa ein Gedankenstrich oder eine Fehlanzeige: Die Zeile faellt ganz weg.
-    expect(captionOf([foto({})])).toBe("");
+  it("stays empty when nothing is known", () => {
+    // And not a dash or a notice of absence: the line falls away entirely.
+    expect(captionOf([photo({})])).toBe("");
   });
 });
 
-describe("Was ueber einem Stapel steht", () => {
-  it("nennt den Titel nur, wenn alle Fotos ihn teilen", () => {
-    const zeile = captionOf([
-      foto({ title: "Jagdhaus", place_name: "Lehmweg" }),
-      foto({ title: "Jagdhaus", place_name: "Lehmweg" }),
+describe("what stands over a stack", () => {
+  it("names the title only when every photo shares it", () => {
+    const line = captionOf([
+      photo({ title: "Jagdhaus", place_name: "Lehmweg" }),
+      photo({ title: "Jagdhaus", place_name: "Lehmweg" }),
     ]);
 
-    expect(zeile).toBe("Jagdhaus");
+    expect(line).toBe("Jagdhaus");
   });
 
-  it("faellt bei verschiedenen Titeln auf die gemeinsame Adresse zurueck", () => {
+  it("falls back to the shared address when the titles differ", () => {
     /**
-     * Der stille Fehler, den diese Regel verhindert: Fotos landen auf einem Marker, weil sie eine
-     * Koordinate teilen — ihre Adresse teilen sie damit meist, ihre Titel selten. Den obersten zu
-     * nehmen hiesse, „Gasthof Timm" ueber fuenfzig Bilder zu schreiben, die etwas anderes
-     * zeigen.
+     * The silent error this rule prevents: photos land on one marker because they share a
+     * coordinate -- so they usually share their address, rarely their titles. Taking the topmost
+     * would mean writing "Gasthof Timm" over fifty images showing something else.
      */
-    const zeile = captionOf([
-      foto({ title: "Gasthof Timm", place_name: "Hauptstraße 11a" }),
-      foto({ title: "Bäckerei Petersen", place_name: "Hauptstraße 11a" }),
+    const line = captionOf([
+      photo({ title: "Gasthof Timm", place_name: "Hauptstraße 11a" }),
+      photo({ title: "Bäckerei Petersen", place_name: "Hauptstraße 11a" }),
     ]);
 
-    expect(zeile).toBe("Hauptstraße 11a");
+    expect(line).toBe("Hauptstraße 11a");
   });
 
-  it("schweigt, wenn auch die Adresse nicht geteilt wird", () => {
-    // Zwei ueber EXIF verortete Fotos koennen einen Meter auseinander liegen, ohne miteinander zu
-    // tun zu haben.
-    const zeile = captionOf([
-      foto({ title: "Hof Sieveking", place_name: "Im Sande 3" }),
-      foto({ title: "Hof Boysen", place_name: "Hauptstraße 29" }),
+  it("stays silent when the address is not shared either", () => {
+    // Two photos located through EXIF can lie a metre apart without having anything to do with
+    // each other.
+    const line = captionOf([
+      photo({ title: "Hof Sieveking", place_name: "Im Sande 3" }),
+      photo({ title: "Hof Boysen", place_name: "Hauptstraße 29" }),
     ]);
 
-    expect(zeile).toBe("");
+    expect(line).toBe("");
   });
 
-  it("bekommt kein Jahr", () => {
-    // Fuenfzig Fotos der Schulstrasse 2 sind ueber Jahrzehnte entstanden. Das Jahr des obersten
-    // stuende ueber allen.
-    const zeile = captionOf([
-      foto({ title: "Winter in Holm", date_short: "1985" }),
-      foto({ title: "Winter in Holm", date_short: "1990" }),
+  it("gets no year", () => {
+    // Fifty photos of Schulstrasse 2 were taken over decades. The year of the topmost would
+    // stand over all of them.
+    const line = captionOf([
+      photo({ title: "Winter in Holm", date_short: "1985" }),
+      photo({ title: "Winter in Holm", date_short: "1990" }),
     ]);
 
-    expect(zeile).toBe("Winter in Holm");
+    expect(line).toBe("Winter in Holm");
   });
 });

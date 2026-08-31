@@ -12,52 +12,52 @@ vi.mock("../api/admin", () => ({
 import { useAdmin } from "./admin";
 
 /**
- * Das Ziel, mit dem jemand die Verwaltung betritt.
+ * The target somebody enters the admin view with.
  *
- * Der Stift neben dem Titel in der Detailansicht setzt es; die Verwaltung liest es beim Aufbau
- * einmal und legt es sofort weg. Faellt es an einer Stelle nicht zurueck, oeffnet sich beim
- * naechsten Betreten wieder dasselbe Foto — bei jemandem, der nur die Uebersicht wollte.
+ * The pencil beside the title in the detail view sets it; the admin view reads it once while
+ * building and puts it away at once. If it fails to reset anywhere, the same photo opens on the
+ * next entry -- for somebody who only wanted the overview.
  */
-describe("Der Weg vom Foto in seine Bearbeitung", () => {
+describe("the way from a photo into editing it", () => {
   beforeEach(() => {
     useAdmin.setState({ view: "kiosk", editPhotoId: null, error: null, expiresAt: null });
   });
 
-  it("merkt sich das Foto und fragt die PIN", () => {
+  it("remembers the photo and asks for the PIN", () => {
     useAdmin.getState().askPin(412);
 
     expect(useAdmin.getState().view).toBe("pin");
     expect(useAdmin.getState().editPhotoId).toBe(412);
   });
 
-  it("bleibt ohne Ziel, wenn das Wappen die Tuer war", () => {
-    // Der andere Weg hinein. Ohne diese Unterscheidung landete jeder in einem Foto.
+  it("stays without a target when the coat of arms was the door", () => {
+    // The other way in. Without this distinction everybody would land inside a photo.
     useAdmin.getState().askPin();
 
     expect(useAdmin.getState().view).toBe("pin");
     expect(useAdmin.getState().editPhotoId).toBeNull();
   });
 
-  it("vergisst es bei „Zurueck zur Karte“", () => {
+  it("forgets it on going back to the map", () => {
     useAdmin.getState().askPin(412);
     useAdmin.getState().cancelPin();
 
     expect(useAdmin.getState().editPhotoId).toBeNull();
   });
 
-  it("vergisst es, wenn die Sitzung endet", () => {
-    // Sonst stuende das Ziel noch, wenn spaeter jemand anders ueber das Wappen hereinkommt.
+  it("forgets it when the session ends", () => {
+    // Otherwise the target would still stand when somebody else comes in via the coat of arms.
     useAdmin.getState().askPin(412);
     useAdmin.getState().dropSession();
 
     expect(useAdmin.getState().editPhotoId).toBeNull();
   });
 
-  it("vergisst es, sobald die Verwaltung es aufgegriffen hat", () => {
+  it("forgets it as soon as the admin view has picked it up", () => {
     /**
-     * Der Fall, der sonst zur Falle wird: Die Verwaltung liest das Ziel beim Aufbau und oeffnet
-     * das Foto. Bliebe es stehen, legte das Schliessen des Bearbeiten-Bildschirms es sofort
-     * wieder vor — und an der Fotoliste kaeme niemand mehr vorbei.
+     * The case that otherwise becomes a trap: the admin view reads the target while building and
+     * opens the photo. If it stayed, closing the edit screen would offer it again at once -- and
+     * nobody would get past it to the photo list.
      */
     useAdmin.getState().askPin(412);
     useAdmin.getState().clearTarget();
@@ -65,7 +65,7 @@ describe("Der Weg vom Foto in seine Bearbeitung", () => {
     expect(useAdmin.getState().editPhotoId).toBeNull();
   });
 
-  it("laesst ein zweites Ziel das erste ersetzen", () => {
+  it("lets a second target replace the first", () => {
     useAdmin.getState().askPin(412);
     useAdmin.getState().askPin(7);
 

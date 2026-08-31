@@ -2,53 +2,52 @@ import { describe, expect, it } from "vitest";
 
 import { ENTER_MS, clusterZoom, isStepChange, stillEntering } from "./clusterStep";
 
-describe("Die Gruppierungsstufe", () => {
-  it("ist die gerundete Zoomstufe", () => {
-    // Genau die Zahl, mit der `draw()` supercluster befragt -- steht sie hier anders, animiert
-    // die Karte an einer anderen Stelle, als sie neu gruppiert.
+describe("the clustering step", () => {
+  it("is the rounded zoom level", () => {
+    // Exactly the number `draw()` asks supercluster with -- if it differs here, the map
+    // animates at a different point from where it regroups.
     expect(clusterZoom(13.4)).toBe(13);
     expect(clusterZoom(13.5)).toBe(14);
   });
 });
 
-describe("Wann die Marker einblenden", () => {
-  it("wechselt erst, wenn die gerundete Stufe kippt", () => {
+describe("when the markers fade in", () => {
+  it("only changes once the rounded step tips over", () => {
     expect(isStepChange(13, 14)).toBe(true);
   });
 
-  it("bleibt beim Verschieben ruhig", () => {
+  it("stays quiet while panning", () => {
     /**
-     * Der teure Fehler. Beim Wischen zeichnet `draw()` dutzende Male auf derselben Stufe; würde
-     * dabei jedes Mal eingeblendet, flackerte die Karte durchgehend — auf dem Pi spürbar mehr als
-     * auf dem Entwicklungsrechner.
+     * The expensive error. While swiping, `draw()` runs dozens of times at the same step; fading
+     * in on each of them would make the map flicker throughout -- noticeably more on the Pi than
+     * on the development machine.
      */
     expect(isStepChange(13, 13)).toBe(false);
   });
 
-  it("zaehlt den ersten Aufbau nicht als Wechsel", () => {
-    // Die ersten Marker sind die Karte, die erscheint, keine Umgruppierung. Sie einzublenden
-    // verzögerte das Erste, was jemand ueberhaupt zu sehen bekommt.
+  it("does not count the first build as a change", () => {
+    // The first markers are the map appearing, not a regrouping. Fading them in would delay
+    // the very first thing anybody gets to see.
     expect(isStepChange(null, 13)).toBe(false);
   });
 });
 
-describe("Wie lange ein Einblenden dauert", () => {
-  it("nimmt einen zweiten Aufbau kurz danach mit", () => {
+describe("how long a fade-in lasts", () => {
+  it("takes a second build shortly afterwards along with it", () => {
     /**
-     * Der Fall, an dem die Animation zuerst gescheitert ist. Eine Umgruppierung ist nicht *ein*
-     * Zeichnen: Direkt nach dem Zoom werden die Fotos des neuen Ausschnitts geholt, und wenn sie
-     * ankommen, entstehen alle Marker neu. Gemessen lagen zwischen beiden wenige Dutzend
-     * Millisekunden — der zweite Aufbau nahm die Einblendung wieder weg, weil er selbst kein
-     * Stufenwechsel war.
+     * The case the animation first failed on. A regrouping is not *one* draw: right after the
+     * zoom the photos of the new viewport are fetched, and when they arrive every marker is built
+     * again. Measured, a few dozen milliseconds lay between the two -- and the second build took
+     * the fade-in away again, because it was not itself a step change.
      */
     expect(stillEntering(1000, 1000 + ENTER_MS - 1)).toBe(true);
   });
 
-  it("ist danach vorbei", () => {
+  it("is over after that", () => {
     expect(stillEntering(1000, 1000 + ENTER_MS)).toBe(false);
   });
 
-  it("laeuft nicht, solange nichts eingeblendet wurde", () => {
+  it("does not run while nothing has been faded in", () => {
     expect(stillEntering(null, 5000)).toBe(false);
   });
 });

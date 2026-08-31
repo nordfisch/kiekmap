@@ -2,68 +2,68 @@ import { describe, expect, it } from "vitest";
 
 import { RELOAD_COOLDOWN_MS, lastRecovery, mayReload, noteRecovery } from "./recover";
 
-/** Ein sessionStorage aus zwei Zeilen -- der Test braucht keinen Browser. */
-function speicher(inhalt: Record<string, string> = {}) {
+/** A sessionStorage in two lines -- the test needs no browser. */
+function storage(content: Record<string, string> = {}) {
   return {
-    getItem: (schluessel: string) => inhalt[schluessel] ?? null,
-    setItem: (schluessel: string, wert: string) => {
-      inhalt[schluessel] = wert;
+    getItem: (key: string) => content[key] ?? null,
+    setItem: (key: string, value: string) => {
+      content[key] = value;
     },
   };
 }
 
-describe("Darf sich die Seite selbst neu laden?", () => {
-  it("beim ersten Absturz auf jeden Fall", () => {
+describe("may the page reload itself?", () => {
+  it("on the first crash, certainly", () => {
     expect(mayReload(null, 1_000_000)).toBe(true);
   });
 
-  it("nicht gleich noch einmal", () => {
-    // Der Fall, um dessentwillen es diese Frage gibt: Ein Absturz, der beim Laden wiederkommt,
-    // liesse den Bildschirm sonst endlos flackern. Eine lesbare Meldung ist besser als das.
+  it("not straight away a second time", () => {
+    // The case this question exists for: a crash that returns while loading would otherwise
+    // make the screen flicker endlessly. A readable message is better than that.
     expect(mayReload(1_000_000, 1_000_000 + 5_000)).toBe(false);
   });
 
-  it("spaeter wieder", () => {
+  it("later on, again", () => {
     expect(mayReload(1_000_000, 1_000_000 + RELOAD_COOLDOWN_MS + 1)).toBe(true);
   });
 
-  it("auch wenn die Uhr rueckwaerts gesprungen ist", () => {
-    // Der Pi hat keine Echtzeituhr: Nach einem Stromausfall kann seine Uhr um Jahre danebenliegen.
-    // Rechnete man stur vorwaerts, waere die Selbstheilung damit dauerhaft abgeschaltet -- genau
-    // der Zustand, den sie verhindern soll.
+  it("even when the clock has jumped backwards", () => {
+    // The Pi has no real-time clock: after a power cut its clock can be years out. Calculating
+    // strictly forwards would switch the self-healing off for good -- exactly the state it is
+    // there to prevent.
     expect(mayReload(1_000_000, 1_000_000 - 60_000)).toBe(true);
   });
 });
 
-describe("Der Vermerk ueber den letzten Neustart", () => {
-  it("wird geschrieben und wiedergefunden", () => {
-    const store = speicher();
+describe("the note about the last restart", () => {
+  it("is written and found again", () => {
+    const store = storage();
     noteRecovery(store, 42_000);
 
     expect(lastRecovery(store)).toBe(42_000);
   });
 
-  it("ist ohne Vermerk leer", () => {
-    expect(lastRecovery(speicher())).toBeNull();
+  it("is empty without a note", () => {
+    expect(lastRecovery(storage())).toBeNull();
   });
 
-  it("uebersteht einen unbrauchbaren Wert", () => {
-    // Irgendwer hat im Speicher herumgeschrieben. Dann lieber einen Versuch zu viel als eine
-    // Ausnahme im Fehlerfall -- das waere ein Absturz waehrend der Behandlung eines Absturzes.
-    expect(lastRecovery(speicher({ "kiekmap-neustart": "gestern" }))).toBeNull();
+  it("survives an unusable value", () => {
+    // Somebody has written into the storage. Then rather one attempt too many than an exception
+    // in the error path -- that would be a crash while handling a crash.
+    expect(lastRecovery(storage({ "kiekmap-neustart": "gestern" }))).toBeNull();
   });
 
-  it("uebersteht einen Speicher, der sich verweigert", () => {
-    const verweigert = {
+  it("survives a storage that refuses", () => {
+    const refuses = {
       getItem: () => {
-        throw new Error("nicht verfuegbar");
+        throw new Error("not available");
       },
       setItem: () => {
-        throw new Error("nicht verfuegbar");
+        throw new Error("not available");
       },
     };
 
-    expect(lastRecovery(verweigert)).toBeNull();
-    expect(() => noteRecovery(verweigert, 1)).not.toThrow();
+    expect(lastRecovery(refuses)).toBeNull();
+    expect(() => noteRecovery(refuses, 1)).not.toThrow();
   });
 });
