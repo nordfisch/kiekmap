@@ -243,6 +243,7 @@ python3 tools/check_anchors.py    # do the links in docs/ still point somewhere?
                                   #   (across files too, since 15 August 2026)
 python3 tools/check_settings.py   # does every setting reach the container?
 python3 tools/check_numbers.py    # does the backlog's bookkeeping about its numbers add up?
+python3 tools/check_translations.py       # does every translation still match its source?
 python3 tools/build_register.py --check   # is the register of the history still complete?
 python3 tools/set_version.py --check      # do all five places name the same version?
 ```
@@ -274,6 +275,23 @@ the retired list, raise the count in front of it. That happened four times in on
 the one promise the numbering still makes: the points of `decisions.md` ascend and no number
 occurs twice. **What it deliberately does not do is count numbers in running text**; why that would
 be wrong is in [decisions.md](decisions.md), point 59.
+
+**`check_translations.py` joined on 31 August 2026**, and it is the condition under which the
+project keeps a text twice at all. Point 68 had rejected bilingual documentation for one reason:
+*"the second copy goes stale and nobody notices."* Point 71 does not deny that -- it answers it.
+Every `*.de.md` beside an English file of the same name carries the hash of that file in two HTML
+comments, and the check compares them.
+
+**The file names decide what is checked, not a list**, exactly as with the language rule. A
+`*.de.md` with no English neighbour is a German original: `history.de.md` is frozen,
+`usermanual.de.md` is a handout for the team in Holm and has no English reader. Neither can forget
+a marker it never needed.
+
+An HTML comment and not YAML front matter, although front matter is the usual carrier: GitHub
+renders front matter as a table at the top of the page, and these files are read in the repository
+as well as on the documentation site. What it reports is drift, not wrongness -- a typo fixed in
+the English source turns it red although the German needs no change. Somebody has to look, decide,
+and then run `--update`.
 
 **`build_register.py` joined on 21 August 2026**, together with the register at the top of
 [history.de.md](history.de.md). It is really a generator — `make register` writes the table, `--check`

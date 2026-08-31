@@ -155,7 +155,8 @@ path. The most valuable tests here are called `test_jahrzehnt_erscheint_bei_ausw
 **These checks run beside the tests**, because they read files no test ever sees:
 `tools/language_check.py` (the language rule), `tools/check_anchors.py` (links inside `docs/`),
 `tools/check_settings.py` (does every setting reach the container?), `tools/check_numbers.py` (does
-the backlog's bookkeeping about its own numbers add up?), `tools/build_register.py --check` (is the
+the backlog's bookkeeping about its own numbers add up?), `tools/check_translations.py` (does every
+translation still match the text it was made from?), `tools/build_register.py --check` (is the
 register of the history complete?) and `tools/set_version.py --check` (do all five places name the
 same version?). All of them run with `python3` and no venv; `make check` and the hook under
 `.githooks/` execute them. More in [docs/development.md](docs/development.md).

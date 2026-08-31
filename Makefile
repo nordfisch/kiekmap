@@ -124,17 +124,18 @@ lint: $(VENV)  ## check the code style
 	$(VENV)/bin/ruff format --check backend tiles tools
 
 # The checks that read files no test ever sees: the language rule, the links inside docs/, the
-# way of every setting into the container, and the bookkeeping of the decisions over their own
-# numbers.
+# way of every setting into the container, the bookkeeping of the decisions over their own
+# numbers, and whether a translation still matches the text it was made from.
 #
 # Pure readers, therefore without venv and without node_modules -- python3 from the system is
 # enough. Together they need under a second, and that is exactly why they also hang in the git
 # hook under .githooks/. Why they are needed at all: docs/decisions.md, point 59.
-docs-check:  ## language rule, links, settings, numbers, register, version
+docs-check:  ## language rule, links, settings, numbers, register, version, translations
 	@python3 tools/language_check.py
 	@python3 tools/check_anchors.py
 	@python3 tools/check_settings.py
 	@python3 tools/check_numbers.py
+	@python3 tools/check_translations.py
 	@python3 tools/build_register.py --check
 	@python3 tools/set_version.py --check
 
