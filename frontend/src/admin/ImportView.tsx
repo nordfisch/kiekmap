@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Taking photos in -- from the computer or from a USB stick.
  *

@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """The one long-running job of the device.
 
 Backup, restore and the stick import share it: they run in a thread, the screen asks how far along

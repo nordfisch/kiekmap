@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Check that every in-page link in the docs points at a heading that exists.
 
     python3 tools/check_anchors.py

@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Read metadata out of the image file.
 
 The most important thing here is an omission: **the EXIF date of a scan is not adopted as the

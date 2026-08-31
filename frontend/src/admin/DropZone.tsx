@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The area below the two source tiles.
  *

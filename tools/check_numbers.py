@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Check the numbering of the decisions -- ascending, and no number twice.
 
     python3 tools/check_numbers.py

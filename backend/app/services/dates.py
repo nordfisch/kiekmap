@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Fuzzy dating.
 
 For historical photos, "the 1920s" or "around 1930" is the normal case, not the exception. Each

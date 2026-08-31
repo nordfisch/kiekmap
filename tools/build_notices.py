@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Build the notice files that have to travel with each built artefact.
 
     backend/.venv/bin/python tools/build_notices.py          write them

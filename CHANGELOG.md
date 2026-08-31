@@ -56,6 +56,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Dependabot-Meldungen. Im Baum liegt jetzt je eine Fassung. Ausgeliefert war nichts davon; die
   189 Tests laufen unverändert
 
+### Entfernt
+
+- **Die SPDX-Kopfzeilen sind aus allen 153 Quelldateien weg.** Zwei Zeilen Lizenzbuchführung
+  standen über jedem Docstring; die Lizenz verlangt sie nicht, und keine Prüfung erzwang sie.
+  `LICENSE` und `NOTICE` decken jede Weitergabe des Repos ab. Eine einzeln herauskopierte Datei
+  trägt danach keinen Hinweis mehr — der Preis steht in
+  [Punkt 70](docs/decisions.md)
+
 ## [0.8.0] — 2026-08-25
 
 Die erste bezifferte Fassung. Sie ist **kein Meilenstein der Funktion**, sondern der Punkt, an dem

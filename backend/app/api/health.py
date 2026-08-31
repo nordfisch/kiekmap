@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Readiness probe.
 
 The kiosk service on the Pi waits for this endpoint before starting Chromium. It must therefore

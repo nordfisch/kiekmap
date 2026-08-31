@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Build the register at the top of ``docs/history.md`` -- one dated row per section.
 
     python3 tools/build_register.py            # write it

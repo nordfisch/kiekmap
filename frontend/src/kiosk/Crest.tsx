@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The village arms over the top left corner of the map -- and the way back to the start.
  *

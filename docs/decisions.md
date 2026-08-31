@@ -1815,3 +1815,27 @@ label descriptions therefore carry this project's definitions, not GitHub's.
 **The old number is not in the issue title**, it is in its footer. A title should say what the thing
 is about; the number only matters to somebody following a citation, and for them the footer names
 it.
+
+## 70. No licence header in the source files
+
+*The section „The head of every source file" in [development.md](development.md) is gone with
+this point.*
+
+Every source file carried two lines above its docstring:
+
+```python
+# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
+# SPDX-License-Identifier: Apache-2.0
+```
+
+**They are gone from all 153 files.** The Apache licence never required them. [LICENSE](../LICENSE)
+and [NOTICE](../NOTICE) cover every distribution of the repository, which is what §4.1 and §4.4 ask
+for, and no check enforced the headers anyway.
+
+**The reason to remove them is what a reader sees first.** Two lines of licence bookkeeping stood
+above the docstring in every file, and the docstring is the line that says what the file does.
+
+**The price, named:** the original argument was that those two lines are the only thing a **single
+copied file** carries with it. That was true and stays true. Pull `services/dates.py` into another
+project now and it arrives without a licence notice. The gap covers exactly that case; anyone who
+takes the repository, a release archive or a clone gets both files with it.

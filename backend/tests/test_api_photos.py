@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Tests der Abfrage-API.
 
 Der wichtigste Fall steht in :class:`TestZeitfilter`: ein auf "1920er" datiertes Foto muss bei der

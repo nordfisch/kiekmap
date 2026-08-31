@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 import { describe, expect, it } from "vitest";
 
 import { ENTER_MS, clusterZoom, isStepChange, stillEntering } from "./clusterStep";

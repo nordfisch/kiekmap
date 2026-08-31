@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Configuration.
 
 Every path hangs off a single root directory, ``data_dir``. That is deliberate: the entire mutable

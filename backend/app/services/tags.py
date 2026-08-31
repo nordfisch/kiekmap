@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Attaching keywords to a photo.
 
 Its own module because both layers of the import need it -- the metadata layer for what stands in

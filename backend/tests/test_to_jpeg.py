@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Die Umwandlung des Archivs nach JPEG -- ``tools/to_jpeg.py``.
 
 Die Zusage, an der alles haengt: **Dieselbe Datei ergibt zweimal denselben SHA-256.** Der Import

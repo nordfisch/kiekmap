@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Thumbnails.
 
 Two sizes, both created at import time: 240 px for the markers on the map, 1200 px for the overlay

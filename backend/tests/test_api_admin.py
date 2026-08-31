@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Tests des Admin-Bereichs.
 
 Zwei Zusagen tragen diesen Bereich, und beide brechen still, wenn sie brechen:

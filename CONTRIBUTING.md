@@ -80,7 +80,7 @@ cannot become them; the number register in
 
 The project is under the [Apache License 2.0](LICENSE). Under its **§5** every contribution
 submitted here is automatically under the same licence — there is no separate agreement (CLA), and
-none is needed. Whoever changes a file marks it as changed (**§4.2**); the two SPDX lines at the
-top of each source file carry that. More in [licensing.md](docs/licensing.md).
+none is needed. Whoever changes a file marks it as changed (**§4.2**). More in
+[licensing.md](docs/licensing.md).
 
 Add yourself to [AUTHORS](AUTHORS) if you like.

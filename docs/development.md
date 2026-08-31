@@ -150,22 +150,6 @@ identifiers and cost the `v0.8.0` tag — for three names in example sentences o
 nobody sees who reads today's files. **The promise is therefore exactly this:** the current state
 names nobody from the collection; the history before 25 August 2026 names three.
 
-## The head of every source file
-
-Two lines, above the docstring and below any shebang line:
-
-```python
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-```
-
-In `.ts` and `.tsx` with `//` instead of `#`. The Apache licence does **not** require them — it
-covers the whole repository through [LICENSE](../LICENSE). They are there anyway because they are
-the only thing a **single copied file** carries with it: pull `services/dates.py` into your own
-project and nothing else comes along. See [licensing.md](licensing.md).
-
-**No check enforces them.** New files get them by hand; if somebody forgets, the damage is small.
-
 ## Testing
 
 ```bash
