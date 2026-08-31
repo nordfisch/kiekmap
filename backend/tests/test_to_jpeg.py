@@ -134,7 +134,7 @@ class TestMetadatenWandernMit:
     Bytes mitgewandert sind, sondern ob das Programm hinterher dasselbe sieht.
 
     **Es hat einmal nicht gestimmt.** Die Umwandlung reichte nur Farbprofil und Aufloesung durch;
-    zwoelf Fotos des neueren Archivstands verloren dabei ihren Fotografen ("Hubert Wulf"), eine
+    zwoelf Fotos des neueren Archivstands verloren dabei ihren Fotografen ("A. Brahms"), eine
     Beschreibung und eine Datierung -- und trugen danach den Standardnachweis der Sammlung, was
     schlimmer ist als gar keiner: eine falsche Zuschreibung sieht aus wie eine Auskunft.
     """
@@ -167,7 +167,7 @@ class TestMetadatenWandernMit:
         self._tiff_mit_iptc(
             quelle,
             {
-                (2, 80): b"Hubert Wulf",  # By-line, der Fotograf
+                (2, 80): b"A. Brahms",  # By-line, der Fotograf
                 (2, 120): b"Collage aus der Niederstrasse",  # Caption
             },
         )
@@ -176,7 +176,7 @@ class TestMetadatenWandernMit:
         werkzeug.to_jpeg(quelle, ziel)
 
         gelesen = read_image_info(ziel)
-        assert gelesen.credit == "Hubert Wulf"
+        assert gelesen.credit == "A. Brahms"
         assert gelesen.description == "Collage aus der Niederstrasse"
 
     def test_die_koordinate_ueberlebt(self, tmp_path: Path) -> None:
@@ -202,7 +202,7 @@ class TestMetadatenWandernMit:
     def test_zwei_laeufe_bleiben_auch_mit_metadaten_gleich(self, tmp_path: Path) -> None:
         """Die Zusage aus Punkt 46 gilt weiter -- Metadatenbloecke duerfen nicht wackeln."""
         quelle = tmp_path / "scan.tif"
-        self._tiff_mit_iptc(quelle, {(2, 80): b"Hubert Wulf", (2, 25): b"Gebaeude"})
+        self._tiff_mit_iptc(quelle, {(2, 80): b"A. Brahms", (2, 25): b"Gebaeude"})
 
         erst, dann = tmp_path / "a.jpg", tmp_path / "b.jpg"
         werkzeug.to_jpeg(quelle, erst)

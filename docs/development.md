@@ -124,8 +124,9 @@ the case concrete. **Names** from Holm do not: no families, no farms, no compani
 not in a comment, not in the documentation.
 
 The sample collection provides the cast, and it is enough for everything: **Gasthof Petersen**,
-**Hof Sieveking**, **Familie Wendt**, **Familie Boysen**, **A. Brahms**, plus **Timm**,
-**Möller**, **Harms** and **Ohlsen**. Whoever needs another one invents it and adds it here.
+**Hof Sieveking**, **Ladengeschäft Rohlf**, **Familie Wendt**, **Familie Boysen**, **A. Brahms**,
+plus **Timm**, **Möller**, **Harms** and **Ohlsen**. Whoever needs another one invents it and adds
+it here.
 
 **The reason is not caution but that it costs nothing.** An invented name shows whatever the
 example is meant to show: that a year beside a name is the archive's date and not the date of the
@@ -133,18 +134,21 @@ shot does not depend on who the person was. On 21 August 2026, 87 occurrences in
 replaced this way, and not one example lost its edge. The occasion is in
 [history.de.md](history.de.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), point 64, section 1.
 
-**Three slipped through** back then and were caught up on 25 August 2026: a surname as an example
-of a misread archive entry, a house name in a comment, and a photo title that is a person's name.
-All three stood in examples that an invented name carries just as well. **What lost them in the
-first pass:** it searched for names the database knows as names; these three stood in prose, not
-in a name field. The counter-check before a release therefore matches the patterns names take in
-the collection — *Familie X*, *Hof X*, *A. Surname*, north German endings — not only the fields.
+**Some slipped through** and were caught up afterwards: a surname as an example of a misread
+archive entry, a house name in a comment, a photo title that is a person's name, and — found on
+31 August 2026 while translating the tests — a photographer's name in a docstring and in three test
+values. Each stood in an example that an invented name carries just as well. **What loses them:**
+a search for names the database knows as names. They stand in prose and in literals, not in a name
+field. The counter-check before a release therefore matches the patterns names take in the
+collection — *Familie X*, *Hof X*, *A. Surname*, north German endings — across prose and test
+values, not only the fields. **No number is given here on purpose:** it was wrong within a week,
+and a count that has to be maintained is a promise that quietly expires.
 
-**Those three are still in the git history**, and that is decided, not overlooked: a fourth
-rewrite in one day would have moved every hash again, demanded another pass over the cited
-identifiers and cost the `v0.8.0` tag — for three names in example sentences of old commits that
-nobody sees who reads today's files. **The promise is therefore exactly this:** the current state
-names nobody from the collection; the history before 25 August 2026 names three.
+**They are still in the git history**, and that is decided, not overlooked: a further
+rewrite would have moved every hash again, demanded another pass over the cited
+identifiers and cost the `v0.8.0` tag — for names in example sentences of old commits that nobody
+sees who reads today's files. **The promise is therefore exactly this:** the current state names
+nobody from the collection; the git history and `history.de.md` still do.
 
 ## Testing
 

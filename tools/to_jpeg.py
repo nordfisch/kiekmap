@@ -25,7 +25,7 @@ second time.
 
 **What the file says about itself comes along**: EXIF, the IPTC block and the XMP packet. It did
 not until 16 August 2026, and twelve photographs paid for it -- they lost their photographer
-("Hubert Wulf"), a caption and a date, and carried the collection's default credit instead. A
+("A. Brahms"), a caption and a date, and carried the collection's default credit instead. A
 wrong attribution is worse than none: it looks like an answer.
 
     That does move the goalposts of the promise above, and the shift is worth naming. Two runs of
