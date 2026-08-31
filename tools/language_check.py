@@ -219,7 +219,6 @@ PROSE_FILES = (
 #: removed is one file that from then on is checked in its target language. See issue #31.
 IN_TRANSITION = (
     "CHANGELOG.md",
-    "README.md",
     "docs/adaption.md",
     "docs/index.md",
     "docs/licensing.md",
@@ -233,6 +232,11 @@ def is_prose(path: str) -> bool:
         return False
     if path.startswith(PROSE_DIRECTORIES):
         return path.endswith((".md", ".yml"))
+    # A translation beside a prose file is prose as well. Named by the suffix rather than by a
+    # second entry in the list: ``README.de.md`` would otherwise be checked in no language at all,
+    # which is exactly the state the suffix rule exists to prevent.
+    if path.endswith(".de.md"):
+        return path[: -len(".de.md")] + ".md" in PROSE_FILES
     return path in PROSE_FILES
 
 
