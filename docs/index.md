@@ -1,6 +1,6 @@
 # Dokumentation
 
-Neun Dateien, jede mit genau einer Frage. Wer hier landet und nicht weiß, wohin: **Die erste
+Acht Dateien, jede mit genau einer Frage. Wer hier landet und nicht weiß, wohin: **Die erste
 Spalte sagt, was drinsteht, die zweite, für wen, die dritte, in welcher Sprache.**
 
 Die Sprache folgt dem Publikum: Deutsch für Besucher, Museumsteam und Betreiber, Englisch für
@@ -14,7 +14,7 @@ die Übersetzung noch aussteht — die Regel gilt seit dem 30. August 2026, sieh
 |---|---|---|---|
 | [architecture.md](architecture.md) | *Was* gibt es, und wie greift es ineinander? | wer einsteigt | Englisch |
 | [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will | Englisch |
-| [history.md](history.md) | *Wie* ist es dazu gekommen? — und was dabei anders kam als geplant | wer wissen will, ob eine Idee schon einmal da war | Deutsch, eingefroren |
+| [history.md](history.md) | *Wie* ist es dazu gekommen? — und was dabei anders kam als geplant; dazu das Nummernregister | wer wissen will, ob eine Idee schon einmal da war, oder ein „Punkt N" auflösen | Deutsch, eingefroren |
 
 `decisions.md` ist die Datei, die man **vor** einer Änderung liest; `history.md` die, die man liest,
 wenn etwas unerklärlich aussieht. Meist steht dort, warum.
@@ -28,7 +28,8 @@ sie verlief, steht in den Commits und den geschlossenen Issues.
 | Datei | Frage | Für wen | Sprache |
 |---|---|---|---|
 | [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler | Englisch |
-| [backlog.md](backlog.md) | Was fehlt noch? — nach Bereich geordnet, jeder Punkt mit Nummer, Art und Einordnung | wer etwas aufgreifen will | Deutsch |
+
+Was offen ist, steht in den [Issues](https://github.com/nordfisch/kiekmap/issues) und in keiner Datei.
 
 Für Coding-Agents kommt [../CLAUDE.md](../CLAUDE.md) dazu — dieselben Regeln, auf das Nötigste
 gekürzt, mit den drei Dingen vorneweg, die man hier falsch machen kann.
@@ -56,7 +57,7 @@ Die beiden trennen sich nach Zuständigkeit, nicht nach Schwierigkeit: `usermanu
 Bedienung, `operations.md` die Technik dahinter.
 
 > **Was darin steht, ist auf keinem Pi erprobt.** Alles unter `deploy/pi/` wurde ohne Gerät
-> gebaut. Der erste echte Aufbau ist zugleich die Abnahme — siehe [backlog.md](backlog.md).
+> gebaut. Der erste echte Aufbau ist zugleich die Abnahme — siehe [Punkt 15](https://github.com/nordfisch/kiekmap/issues/18).
 > Die **Container** sind seit dem 14. August 2026 geprüft, wenn auch auf einem Mac: Was dort nicht
 > zu prüfen war, sind der USB-Weg der Sicherung und das Verhalten nach einem Stromausfall.
 

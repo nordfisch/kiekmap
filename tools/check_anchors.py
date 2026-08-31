@@ -7,7 +7,7 @@
 
     python3 tools/check_anchors.py
 
-The backlog links its points to one another by anchor. Those links break silently: a renamed
+The documents link to one another by anchor. Those links break silently: a renamed
 heading, a dissolved point, a heading removed along with its neighbour -- the file still renders,
 and only a reader following the link notices. That happened while the backlog was being reworked,
 which is why this exists.
@@ -33,7 +33,6 @@ ROOT = Path(__file__).resolve().parent.parent
 #: ``architecture.md`` was missing until 21 August 2026 -- an oversight, not a decision. Nothing
 #: had noticed, because until then nobody had linked into it or out of it by anchor.
 DOCUMENTS = (
-    "docs/backlog.md",
     "docs/decisions.md",
     "docs/history.md",
     "docs/index.md",

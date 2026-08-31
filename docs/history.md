@@ -13,7 +13,7 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 | [decisions.md](decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
 | [architecture.md](architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
 | **history.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
-| [backlog.md](backlog.md) | *Was fehlt noch?* |
+| [Issues](https://github.com/nordfisch/kiekmap/issues) | *Was fehlt noch?* |
 
 Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 *„Was der Plan nicht wusste"* und sind der eigentliche Grund für diese Datei.
@@ -30,13 +30,68 @@ der Nuance. Vier Monate Arbeitstagebuch bleiben also, wie sie sind.
 [decisions.md](decisions.md) mit kurzer Begründung; wie es verlief, steht in den Commits und den
 geschlossenen Issues.
 
-Ein neuer Abschnitt hier macht `python3 tools/build_register.py --check` rot, weil das Register
-dann nicht mehr stimmt. Das ist die beabsichtigte Reibung. Eine Änderung an vorhandener Prosa
-fängt das Werkzeug nicht — dafür gibt es das Review.
+Ein neuer Abschnitt hier macht `python3 tools/build_register.py --check` rot, weil das
+Änderungsregister dann nicht mehr stimmt. Das ist die beabsichtigte Reibung. Eine Änderung an
+vorhandener Prosa fängt das Werkzeug nicht — dafür gibt es das Review.
+
+## Nummernregister
+
+Die Punktnummern des damaligen Backlogs. **„Punkt N" meint hier nie ein Issue.** Die Zählung
+reicht bis 66, wurde nie neu vergeben und endete am 31. August 2026 mit dem Umzug in die
+[GitHub-Issues](https://github.com/nordfisch/kiekmap/issues). Zu Issue-Nummern konnten die Nummern
+nicht werden, weil GitHub einen Zähler mit den Pull Requests teilt; die Begründung steht in
+[decisions.md](decisions.md), Punkt 69.
+
+### Offen beim Abschluss — vierzehn Punkte
+
+| Punkt | Issue |
+|---|---|
+| 8 | [#15 · Historische Karte als umschaltbare Grundkarte](https://github.com/nordfisch/kiekmap/issues/15) |
+| 9 | [#16 · Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](https://github.com/nordfisch/kiekmap/issues/16) |
+| 14 | [#17 · Bedienbarkeitstest mit der echten Zielgruppe](https://github.com/nordfisch/kiekmap/issues/17) |
+| 15 | [#18 · Abnahme auf dem ersten Pi](https://github.com/nordfisch/kiekmap/issues/18) |
+| 18 | [#19 · Wiederherstellung wirklich proben](https://github.com/nordfisch/kiekmap/issues/19) |
+| 19 | [#20 · Displayauflösung und -orientierung des Museumsgeräts](https://github.com/nordfisch/kiekmap/issues/20) |
+| 20 | [#21 · Das Gerät muss einen Stromausfall überstehen](https://github.com/nordfisch/kiekmap/issues/21) |
+| 21 | [#22 · Deployment auf einem Webserver evaluieren](https://github.com/nordfisch/kiekmap/issues/22) |
+| 30 | [#23 · Die Karte nach Schlagwörtern filtern](https://github.com/nordfisch/kiekmap/issues/23) |
+| 31 | [#24 · Einstellungen in der Verwaltung pflegen statt in der `.env`](https://github.com/nordfisch/kiekmap/issues/24) |
+| 34 | [#25 · Eine Karte in der Nachbearbeitung des Imports](https://github.com/nordfisch/kiekmap/issues/25) |
+| 40 | [#26 · Ein Durchgang über die ganze Oberfläche](https://github.com/nordfisch/kiekmap/issues/26) |
+| 43 | [#27 · Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](https://github.com/nordfisch/kiekmap/issues/27) |
+| 54 | [#28 · Das Layout der Detailansicht dem Bildformat folgen lassen](https://github.com/nordfisch/kiekmap/issues/28) |
+
+### Vergriffen — zweiundfünfzig Nummern
+
+Erledigt, aufgelöst oder gestrichen. Wo ein Abschnitt dieser Datei die Nummer im Titel führt, steht
+er dabei:
+
+- **1** — [Punkt 1: der Erstbestand, in zehn Schritten durchgesehen](#punkt-1-der-erstbestand-in-zehn-schritten-durchgesehen)
+- **22** — [Punkt 22: der Weg nach draussen, an einem Tag](#punkt-22-der-weg-nach-draussen-an-einem-tag)
+- **23** — [Punkt 23: die Lizenz war die kleinere Hälfte](#punkt-23-die-lizenz-war-die-kleinere-hälfte)
+- **39** — [Punkt 39: der Durchgang von aussen](#punkt-39-der-durchgang-von-aussen)
+- **41** — [Der Rest von Punkt 41: Text stand in den falschen Feldern](#der-rest-von-punkt-41-text-stand-in-den-falschen-feldern)
+- **42** — [Punkt 42: 44 Gruppen, und die Maschine durfte nicht entscheiden](#punkt-42-44-gruppen-und-die-maschine-durfte-nicht-entscheiden)
+- **55** — [Punkt 55, beantwortet mit Nein](#punkt-55-beantwortet-mit-nein)
+- **56** — [Punkt 56: der aufgehende Cluster, und zwei stille Nachbarn](#punkt-56-der-aufgehende-cluster-und-zwei-stille-nachbarn)
+- **57** — [Punkt 57, 58 und 59, behoben am selben Tag](#punkt-57-58-und-59-behoben-am-selben-tag)
+- **58** — [Punkt 57, 58 und 59, behoben am selben Tag](#punkt-57-58-und-59-behoben-am-selben-tag)
+- **59** — [Punkt 57, 58 und 59, behoben am selben Tag](#punkt-57-58-und-59-behoben-am-selben-tag)
+- **60** — [Punkt 60: 938 Zeilen in zehn Dateien, und die Tests merken nichts davon](#punkt-60-938-zeilen-in-zehn-dateien-und-die-tests-merken-nichts-davon)
+- **61** — [Punkt 61: zwei Regeln, und beide lagen anders als notiert](#punkt-61-zwei-regeln-und-beide-lagen-anders-als-notiert)
+- **62** — [Punkt 62: die vierte Prüfung prüft etwas anderes als geplant](#punkt-62-die-vierte-prüfung-prüft-etwas-anderes-als-geplant)
+- **63** — [Punkt 63: eine Frage, und die Antwort stand längst im Repo](#punkt-63-eine-frage-und-die-antwort-stand-längst-im-repo)
+- **64** — [Punkt 64, Abschnitt 1: die Namen aus dem Repo](#punkt-64-abschnitt-1-die-namen-aus-dem-repo)
+- **65** — [Punkt 65: veröffentlicht](#punkt-65-veröffentlicht)
+- **66** — [Punkt 66: sechs Meldungen, ein Haken](#punkt-66-sechs-meldungen-ein-haken)
+
+Die übrigen — 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 16, 17, 24, 25, 26, 27, 28, 29, 32, 33, 35, 36, 37,
+38, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53 — sind weiter unten unter ihrem Datum beschrieben, ohne
+die Nummer in der Überschrift zu führen. `grep -n "Punkt 44" docs/history.md` findet die Stelle.
 
 <!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand ändern -->
 
-## Register
+## Änderungsregister
 
 95 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
 die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die
@@ -317,7 +372,7 @@ ohne das Zweite fiele ein schreibgeschützter Stick erst auf, nachdem jemand den
 die Wiederherstellung auf einem zweiten, leeren Gerät nachweislich funktioniert.* — Die Funktion
 ist gegen einen echten eingehängten Datenträger erprobt (sichern, inkrementell erneuern,
 zurückspielen, Beiseitelegen). **Beide Hälften des Kriteriums brauchen aber das Gerät und die
-Zielgruppe und stehen deshalb im [backlog](backlog.md).**
+Zielgruppe und standen deshalb im Backlog.**
 
 ## Vormerkung erledigt: „Weiß ich nicht" wechselt die Frage
 
@@ -396,7 +451,7 @@ startet systemd ihn neu.
 *Fertig, wenn: der Pi nach einem Kaltstart ohne Tastatur von selbst in der Karte landet — und nach
 einem gezogenen Netzstecker genauso wieder hochkommt.* — **Gebaut und dokumentiert, aber auf
 keinem Pi gelaufen**; es gab beim Bauen kein Gerät. Geprüft sind der Leerlauf-Reset und die
-Shell-Syntax aller Skripte. Alles andere steht im [backlog](backlog.md).
+Shell-Syntax aller Skripte. Alles andere stand im Backlog.
 
 ## Vormerkung erledigt: Import vom USB-Stick
 
@@ -677,7 +732,7 @@ Pin bleibt dabei erhalten: Er liegt im Store, nicht in der Ansicht.
 
 # Teil VI — Einzelne Punkte aus dem Backlog
 
-Ab hier keine Blöcke mehr, sondern einzeln aufgegriffene Einträge aus [backlog.md](backlog.md).
+Ab hier keine Blöcke mehr, sondern einzeln aufgegriffene Einträge aus dem Backlog.
 
 ## Verwaltung verlassen lädt die Besucheransicht neu
 
@@ -2040,7 +2095,7 @@ von 3 auf 3,5 rem wuchs. Drei Rechnungen, die auseinanderlaufen konnten, sind je
 gemeinsame Mittellinie: `align-items: center` im Titelfeld, `justify-content: center` im
 Schieberfeld. Nachgemessen liegen alle drei Mitten auf demselben Pixel — 84.
 
-**Und damit hat sich [Punkt 19](backlog.md#19--displayauflösung-und--orientierung-des-museumsgeräts)
+**Und damit hat sich [Punkt 19](https://github.com/nordfisch/kiekmap/issues/20)
 zur Hälfte erledigt**, ohne dass jemand die Frage beantwortet hätte. Er stand als Blocker für
 den Kopfbereich, weil dort `--crest` schrumpfte und der Schieber nicht. Eine Mittellinie gilt in
 jeder Breite. Wo eine Abhängigkeit von einer offenen Frage verschwindet, sobald man die Stelle
@@ -2458,7 +2513,7 @@ zwanzigmal „Hauptstraße Nr. ?", vierzehnmal „Hörnstraße 9".
 was einen Tag zuvor für 815 Fotos entfernt worden war. Dazu zwei Folgen, die erst beim Aufschreiben
 sichtbar wurden: Ein kopierter Titel veraltet, sobald ein Besucher die Hausnummer nachschärft. Und
 die Unterscheidung „hat einen Titel" verschwände -- danach hätten alle 929 einen, und
-[Punkt 1](backlog.md) hätte seine Arbeitsgrundlage verloren.
+Punkt 1 hätte seine Arbeitsgrundlage verloren.
 
 Gebaut wurde deshalb die Hälfte, die Zugewinn ist: **75 Titel aus Beschreibungen geschrieben**,
 zusammengefasst statt abgeschnitten -- „Errichtung des Funkmastes" wurde „Funkmast". Die 152
@@ -2494,7 +2549,7 @@ Abschnitte. **Das Suchmuster muss bei `##` genauso halten wie bei `###`.**
 
 *14. August 2026.* Punkt 17. `make prod` war nie gelaufen -- beim Bauen stand kein Docker zur
 Verfügung. Auf dem Pi ist das der einzige Betriebsmodus, und
-[Punkt 21](backlog.md) begründete sich ausdrücklich mit „es läuft schon in Containern": genau
+[Punkt 21](https://github.com/nordfisch/kiekmap/issues/22) begründete sich ausdrücklich mit „es läuft schon in Containern": genau
 der Satz, den niemand geprüft hatte.
 
 Der Entwicklungsmac taugte dafür besser als erwartet. Docker Server 27.4 auf `linux/arm64` ist
@@ -2531,8 +2586,8 @@ Metadaten der Datei selbst. Erst der Blick in `docker exec … env` zeigte, dass
 `deploy/docker-compose.mac.yml`, das genau diese beiden Einhängungen ersetzt und sonst nichts.
 **Der USB-Weg der Sicherung bleibt damit ungeprüft** -- gerade der Fall, den `rshared` lösen
 soll, nämlich ein erst nach dem Start eingesteckter Stick. Er ist nach
-[Punkt 18](backlog.md) gewandert, das Verhalten nach Stromausfall und Neustart nach
-[Punkt 15](backlog.md). Wer später „Container sind geprüft" zitiert, soll die zwei Lücken
+[Punkt 18](https://github.com/nordfisch/kiekmap/issues/19) gewandert, das Verhalten nach Stromausfall und Neustart nach
+[Punkt 15](https://github.com/nordfisch/kiekmap/issues/18). Wer später „Container sind geprüft" zitiert, soll die zwei Lücken
 mitlesen.
 
 ### Und ein Fehler von mir, der lehrreicher war als das Ergebnis
@@ -2825,7 +2880,7 @@ an, was schon stimmte.
 **Der zweite Weg aus dem Eintrag -- das Layout dem Bildformat folgen lassen -- ist nicht gebaut**,
 und das war Absicht: Er stellt bei 884 von 929 Fotos die Ansicht um und will auf einem echten
 Gerät beurteilt werden, nicht im Browser. Er bleibt der nächste Schritt, wenn
-[Punkt 19](backlog.md) die Auflösung geklärt hat.
+[Punkt 19](https://github.com/nordfisch/kiekmap/issues/20) die Auflösung geklärt hat.
 
 ### Der Schließen-Knopf und die Rollenfrage
 
@@ -4191,7 +4246,7 @@ ohne Anmeldung, der Beitragsweg ohne Ratenbegrenzung, der unverschlüsselte Best
 
 Eine Vorlage hätte beinahe eine Adresse erfunden, die es nicht gibt: GitHub verlangt für
 Verweise in `config.yml` eine absolute Adresse, und die des Repos steht erst mit
-[Punkt 22](backlog.md) fest. Der Verweis ist weggeblieben, mit einem Kommentar an seiner Stelle.
+Punkt 22 fest. Der Verweis ist weggeblieben, mit einem Kommentar an seiner Stelle.
 
 ### Und der CHANGELOG sortierte seit zwei Wochen alles unter „Behoben"
 
@@ -4218,7 +4273,7 @@ kein Punkt mehr, sondern eine Prüfung mehr in `make check`.
 Punkt 22 hiess „Versionierung, Releaseprozess und Veröffentlichung" und war der letzte offene
 Punkt vor dem Schritt nach draussen. Vier seiner fünf Teile sind an diesem Tag gebaut worden; der
 fünfte, die Veröffentlichung selbst, ist keine Arbeit, sondern eine Entscheidung und zieht als
-[Punkt 65](backlog.md) weiter.
+Punkt 65 weiter.
 
 ### Erst die Frist, dann alles andere
 
@@ -4328,7 +4383,7 @@ zeigt und an dem der Tag hängt, ist das zu wenig. Danach `v0.8.0`, signiert.
 
 **Nicht `1.0.0`**, weil das unter SemVer eine stabile öffentliche Schnittstelle zusagt: Alles unter
 `deploy/pi/` ist ungeprüft, die Abnahme auf dem ersten Gerät steht aus. Die `1.0.0` wird nach
-[Punkt 15](backlog.md) vergeben — das macht aus ihm einen Meilenstein statt einer Fussnote.
+[Punkt 15](https://github.com/nordfisch/kiekmap/issues/18) vergeben — das macht aus ihm einen Meilenstein statt einer Fussnote.
 
 ---
 
@@ -4429,6 +4484,6 @@ sie dort, wo sie hingehören. Der Weg über `abbilder.tar` bleibt für das eigen
 
 Fünf Teile, an einem Tag: Identität und Signatur, Branch-Modell, Versionierung, Releaseprozess,
 CI — und jetzt die Veröffentlichung. Was bleibt, steht in
-[Punkt 15](backlog.md): Das Gerät im Museum fehlt noch, und mit ihm die Abnahme, an der die `1.0.0`
+[Punkt 15](https://github.com/nordfisch/kiekmap/issues/18): Das Gerät im Museum fehlt noch, und mit ihm die Abnahme, an der die `1.0.0`
 hängt.
 

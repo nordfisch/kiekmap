@@ -19,7 +19,7 @@ assignees: ''
 
 **Schon nachgesehen?**
 
-- [ ] `docs/backlog.md` — steht der Punkt schon drin?
+- [ ] Die offenen Issues — steht das schon irgendwo?
 - [ ] `docs/decisions.md` — ist die Frage schon einmal entschieden worden?
 - [ ] `docs/history.md` — ist die Sache schon einmal versucht worden?
 
