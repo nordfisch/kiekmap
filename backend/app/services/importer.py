@@ -8,7 +8,7 @@ never copied in.
 Files from the watched folder are moved aside afterwards, never deleted:
 
     data/incoming/            still to do
-    data/incoming/_erledigt/  imported
+    data/incoming/_done/      imported
     data/incoming/_problem/   unreadable or unsupported format
 """
 
@@ -35,8 +35,9 @@ from app.services.tags import add_tags
 
 log = logging.getLogger(__name__)
 
-# German directory names: the museum team sees these in the file manager.
-DONE_DIR = "_erledigt"
+# Fixed English, not translated: they are directory names, and a language setting that renamed
+# folders would be a setting that moves files. The museum team sees them in the file manager.
+DONE_DIR = "_done"
 PROBLEM_DIR = "_problem"
 #: Subfolders of the inbox that are not scanned themselves.
 SPECIAL_DIRS = {DONE_DIR, PROBLEM_DIR}
@@ -89,10 +90,10 @@ def _free_name(target: Path) -> Path:
 
 
 def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
-    """File a finished photo away under ``_erledigt/`` or ``_problem/`` -- **keeping its folders**.
+    """File a finished photo away under ``_done/`` or ``_problem/`` -- **keeping its folders**.
 
-    ``incoming/Hauptstraße/14 Museum/x.jpg`` becomes ``_erledigt/Hauptstraße/14 Museum/x.jpg``,
-    not ``_erledigt/x.jpg``. Flattened, a stack filed by street was a one-way trip: the folder
+    ``incoming/Hauptstraße/14 Museum/x.jpg`` becomes ``_done/Hauptstraße/14 Museum/x.jpg``,
+    not ``_done/x.jpg``. Flattened, a stack filed by street was a one-way trip: the folder
     names are what say where those photos are (see foldermeta.py), so a second run or even a spot
     check afterwards had nothing left to read -- and equal file names from different houses piled
     up as "023 (2).jpg", "023 (3).jpg".
@@ -105,7 +106,7 @@ def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
 def move_to_done(path: Path, inbox: Path) -> None:
     """File a finished file away -- public, because the backup needs it too.
 
-    A restored archive moves to ``_erledigt`` like every photo that came through this folder. Its
+    A restored archive moves to ``_done`` like every photo that came through this folder. Its
     own name rather than a public ``move_aside``: a parameter of ``import_file`` is called that,
     and it would shadow the function inside its scope.
     """
@@ -333,7 +334,7 @@ IMAGE_SUFFIXES = {suffix for _, suffix in ALLOWED_FORMATS.values()} | {".jpeg", 
 
 #: Folders never worth offering: our own backup, and what the operating systems leave behind.
 SKIPPED_FOLDERS = {
-    "kiekmap-sicherung",
+    "kiekmap-backup",
     "System Volume Information",
     ".Spotlight-V100",
     ".Trashes",

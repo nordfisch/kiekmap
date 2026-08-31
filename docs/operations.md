@@ -305,11 +305,11 @@ make migrate
 
 ## Wo die Sicherung liegt
 
-Auf dem Stick im Ordner `kiekmap-sicherung/`:
+Auf dem Stick im Ordner `kiekmap-backup/`:
 
 ```
-kiekmap-sicherung/
-  sicherung.json     Datum, Anzahl, Ortsname
+kiekmap-backup/
+  backup.json        Datum, Anzahl, Ortsname
   kiekmap.db        die Angaben, mit VACUUM INTO konsistent herausgeschrieben
   photos/            die Originale, nach ihrem Hash abgelegt
   thumbs/            die Vorschaubilder
@@ -320,11 +320,11 @@ kiekmap-sicherung/
 Ordner statt Archiv: Eine abgebrochene Sicherung ist so teilweise brauchbar statt komplett
 wertlos, und die Bilder lassen sich an jedem Rechner ansehen.
 
-Nach einer **Wiederherstellung** liegt der bisherige Stand unter `data/vorher-<Datum>/` — inklusive
+Nach einer **Wiederherstellung** liegt der bisherige Stand unter `data/before-<Datum>/` — inklusive
 Datenbank und Write-Ahead-Log. Er wird nie automatisch gelöscht. Wenn feststeht, dass alles stimmt:
 
 ```bash
-rm -rf data/vorher-2026-07-29-1115
+rm -rf data/before-2026-07-29-1115
 ```
 
 Das ist der einzige Ort, an dem die SD-Karte unbemerkt volllaufen kann.

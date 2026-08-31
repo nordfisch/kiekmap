@@ -94,7 +94,7 @@ class TestTakingImagesIn:
     ):
         """The most important promise of this function.
 
-        The watched inbox moves what it has taken in to _erledigt/ -- there that is right, it is
+        The watched inbox moves what it has taken in to _done/ -- there that is right, it is
         our folder. On somebody else's stick it would be an intrusion.
         """
         folder = images_on_the_stick()

@@ -9,7 +9,7 @@ def test_health_reports_ready(client: TestClient) -> None:
     response = client.get("/api/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "bereit", "version": __version__}
+    assert response.json() == {"status": "ready", "version": __version__}
 
 
 def test_starting_creates_the_data_directories(client: TestClient, data_dir: Path) -> None:

@@ -13,11 +13,14 @@ from app.services import dates
 
 log = logging.getLogger(__name__)
 
-# German names: the museum team sees these in a file manager on any computer.
-BACKUP_DIR_NAME = "kiekmap-sicherung"
-MANIFEST_NAME = "sicherung.json"
-SET_ASIDE_PREFIX = "vorher-"
-RESTORE_WORK_DIR = "wiederherstellung"
+# Fixed English, not translated. These are names in a file system: were they to follow
+# ``KIEKMAP_LANGUAGE``, changing that setting would have to rename folders on the device and on
+# every stick already written. The museum team sees them in a file manager, and the manual names
+# them.
+BACKUP_DIR_NAME = "kiekmap-backup"
+MANIFEST_NAME = "backup.json"
+SET_ASIDE_PREFIX = "before-"
+RESTORE_WORK_DIR = "restore"
 
 #: Where the date of the last backup is noted. In the data directory, but deliberately *not* part
 #: of the backup: it says something about this device, not about the collection.

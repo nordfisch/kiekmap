@@ -1452,7 +1452,7 @@ comes from a camera or a scanner; those write the wall clock of their location a
 Stamping UTC onto it shifts a scan by two hours and thereby invents a fact. **A timestamp carries
 not only a value but an origin.**
 
-**File names are the exception and carry local time.** The folder `vorher-…` and the name of the
+**File names are the exception and carry local time.** The folder `before-…` and the name of the
 downloaded archive are read by people in a file manager, not compared by a program. Somebody pulling
 a backup at half past midnight is looking for today's date.
 

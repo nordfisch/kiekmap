@@ -44,7 +44,7 @@ Dann **„Importieren"**. Das Gerät zeigt, bei welchem Bild es gerade ist.
 
 > **Es gibt noch einen dritten Weg, ganz ohne Verwaltung:** die Bilder am Rechner in den Ordner
 > `incoming` kopieren. Das Gerät nimmt sie von allein auf und legt die Dateien danach in den
-> Unterordner `_erledigt`. Gelöscht wird auch dort nichts.
+> Unterordner `_done`. Gelöscht wird auch dort nichts.
 
 ### Nach dem Importieren
 
@@ -130,7 +130,7 @@ dazugekommen ist. Steht am Ende „Neue Bilder gab es nicht", ist das kein Fehle
 Es war schon alles auf dem Stick.
 
 Denselben Stick können Sie immer wieder verwenden. Auf ihm liegt ein Ordner
-`kiekmap-sicherung` — den können Sie an jedem Rechner öffnen, die Bilder liegen dort als ganz
+`kiekmap-backup` — den können Sie an jedem Rechner öffnen, die Bilder liegen dort als ganz
 normale Dateien.
 
 > **Wenn kein Stick erscheint:** Steckt er richtig? Manche sehr alten Sticks werden nicht erkannt.
@@ -159,7 +159,7 @@ nehmen Sie den Stick.
 > **Wie kommt so eine Datei wieder ins Gerät?** Auf zwei Wegen. Am Rechner: die ZIP-Datei in den
 > Ordner `incoming` legen. Das Gerät erkennt sie von allein und fragt im Sicherungsbereich nach,
 > ob sie eingespielt werden soll — **von selbst passiert nichts.** Oder über den Stick: die Datei
-> so entpacken, dass dort der Ordner `kiekmap-sicherung` liegt, Stick einstecken, und dann wie
+> so entpacken, dass dort der Ordner `kiekmap-backup` liegt, Stick einstecken, und dann wie
 > im nächsten Abschnitt vorgehen.
 
 ## Eine Sicherung zurückspielen

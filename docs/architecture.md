@@ -161,7 +161,7 @@ Four ways, one destination — they all run through `import_file()` in
 `app/services/importer.py`, which always writes a row to the import log:
 
 1. **Watched incoming folder** — the watcher takes a file once it is fully written, then moves it
-   to `_erledigt/` or `_problem/`. Nothing is ever deleted. **One exception: it leaves ZIP files
+   to `_done/` or `_problem/`. Nothing is ever deleted. **One exception: it leaves ZIP files
    named like a backup alone** — those are not a photo but a whole collection, and they are only
    restored after a confirmation.
 2. **Upload in the admin view** — the way for forty selected files.

@@ -57,10 +57,10 @@ def test_the_import_runs_through_without_anyone_helping(session, settings, fixtu
 class TestAnAbortInTheMiddle:
     """What has already been read has to stay -- error 57.
 
-    ``import_file`` moves each file into ``_erledigt/`` itself, before anything is committed. When
+    ``import_file`` moves each file into ``_done/`` itself, before anything is committed. When
     the whole run was only committed at the end, an exception in the middle took the rows of every
     photo read before it along -- and the import log with them, because its entries hung in the
-    same transaction. The source files then lay in ``_erledigt/``, and nothing said they had ever
+    same transaction. The source files then lay in ``_done/``, and nothing said they had ever
     existed.
 
     ``_loop`` catches the exception and carries on at the next look, so the service runs on
@@ -106,7 +106,7 @@ class TestAnAbortInTheMiddle:
             assert any("1_erstes.jpg" in entry.path for entry in entries)
 
         # And the source file lies filed away -- that is the state the row belongs to.
-        assert (settings.incoming_dir / "_erledigt" / "1_erstes.jpg").is_file()
+        assert (settings.incoming_dir / "_done" / "1_erstes.jpg").is_file()
 
     def test_the_next_look_picks_up_what_was_left_behind(
         self, session, settings, fixtures_dir: Path, monkeypatch
@@ -220,7 +220,7 @@ class TestFolderNames:
         """Filed away flat, a sorted stack becomes a one-off attempt.
 
         The folder names are the statement about these photos. If they all end up side by side in
-        _erledigt/, a second run has nothing left to read -- and files of the same name from
+        _done/, a second run has nothing left to read -- and files of the same name from
         different houses pile up into "023 (2).jpg".
         """
         self._street(session)
@@ -233,7 +233,7 @@ class TestFolderNames:
         watcher.scan_once()
         assert watcher.scan_once() == 2
 
-        done = settings.incoming_dir / "_erledigt"
+        done = settings.incoming_dir / "_done"
         assert (done / "Hauptstrasse" / "14 Museum" / "023.jpg").is_file()
         assert (done / "Hauptstrasse" / "16 Anders" / "023.jpg").is_file()
         assert not (done / "023 (2).jpg").exists()

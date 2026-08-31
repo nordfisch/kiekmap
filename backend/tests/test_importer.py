@@ -420,7 +420,7 @@ class TestTheInbox:
         import_file(session, source, settings, move_aside=True)
         session.flush()
 
-        # Without this exception the watcher would loop endlessly over _erledigt/.
+        # Without this exception the watcher would loop endlessly over _done/.
         again = import_directory(session, settings.incoming_dir, settings)
         assert again == []
 

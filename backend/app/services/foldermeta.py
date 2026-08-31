@@ -197,7 +197,7 @@ def parse_path(parts: Sequence[str], streets: Mapping[str, str]) -> FolderMeta:
 def relative_to_root(path: Path, root: Path) -> Path:
     """The file's path below the import root -- or its bare name if it lies outside.
 
-    Public because moving a finished file aside needs the same answer: ``_erledigt/`` mirrors the
+    Public because moving a finished file aside needs the same answer: ``_done/`` mirrors the
     folder tree it came from, see importer._move_aside.
     """
     try:

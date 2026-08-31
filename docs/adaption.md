@@ -324,7 +324,7 @@ zuerst tun.
 |---|---|---|
 | Fehlermeldungen der API | `HTTPException`-Texte | erreichen Besucher und Kuratoren direkt |
 | Import-Protokoll | `ImportOutcome.message` | „Aufgenommen, es fehlt noch: Ort und Jahr" |
-| Ordnernamen im Eingang | `_erledigt`, `_problem` | sieht das Museumsteam im Dateimanager |
+| Ordnernamen im Eingang | `_done`, `_problem` | sieht das Museumsteam im Dateimanager |
 | Ortsarten | `strasse`, `gebaeude`, `flur` … | kommen so aus `tiles/build-places.py`; die Anzeige übersetzt sie in `t.location.kinds` |
 | Doku und Commit-Nachrichten | alles unter `docs/` | bewusst so, siehe [development.md](development.md) |
 

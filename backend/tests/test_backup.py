@@ -94,9 +94,9 @@ class TestRecognisingDrives:
         """
         (stick.parent / "nur-ein-ordner").mkdir()
 
-        namen = [drive.name for drive in backup.find_drives(settings.media_dir)]
+        names = [drive.name for drive in backup.find_drives(settings.media_dir)]
 
-        assert namen == ["SANDISK"]
+        assert names == ["SANDISK"]
 
     def test_a_stick_two_levels_down_too(
         self, settings, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -190,9 +190,9 @@ class TestBackingUp:
         collection(2)
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
         fresh = "f" * 64
-        pfad = original_path(settings.photos_dir, fresh, ".jpg")
-        pfad.parent.mkdir(parents=True, exist_ok=True)
-        pfad.write_bytes(b"noch ein bild")
+        path = original_path(settings.photos_dir, fresh, ".jpg")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"noch ein bild")
 
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
 
@@ -274,16 +274,16 @@ class TestRestoring:
         """Whoever plays in the wrong backup should not have lost everything."""
         self._make_backup(session, settings, stick, collection)
         later = "e" * 64
-        pfad = original_path(settings.photos_dir, later, ".jpg")
-        pfad.parent.mkdir(parents=True, exist_ok=True)
-        pfad.write_bytes(b"nach der sicherung entstanden")
+        path = original_path(settings.photos_dir, later, ".jpg")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"nach der sicherung entstanden")
 
         backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert not pfad.exists(), "in der Sicherung war es nicht"
-        beiseite = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
-        assert len(beiseite) == 1
-        assert (beiseite[0] / "photos" / later[0:2] / later[2:4] / f"{later}.jpg").is_file()
+        assert not path.exists(), "in der Sicherung war es nicht"
+        set_aside = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
+        assert len(set_aside) == 1
+        assert (set_aside[0] / "photos" / later[0:2] / later[2:4] / f"{later}.jpg").is_file()
 
     def test_the_write_ahead_log_is_set_aside_too(self, session, settings, stick, collection):
         """A -wal left lying belongs to a different database.
@@ -296,8 +296,8 @@ class TestRestoring:
         backup.run_restore(settings, _drive(settings), _report_nothing)
 
         assert not (settings.data_dir / "kiekmap.db-wal").exists()
-        beiseite = next(iter(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")))
-        assert (beiseite / "kiekmap.db-wal").is_file()
+        set_aside = next(iter(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")))
+        assert (set_aside / "kiekmap.db-wal").is_file()
 
     def test_the_working_folder_is_not_left_behind(self, session, settings, stick, collection):
         self._make_backup(session, settings, stick, collection, count=1)
@@ -329,8 +329,8 @@ class TestSchemaRevisionOnRestore:
         collection(1)
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
 
-        gesichert = stick / backup.BACKUP_DIR_NAME / "kiekmap.db"
-        connection = sqlite3.connect(gesichert)
+        saved = stick / backup.BACKUP_DIR_NAME / "kiekmap.db"
+        connection = sqlite3.connect(saved)
         if drop_column:
             connection.execute("alter table changes drop column old_source")
         connection.execute("create table if not exists alembic_version (version_num varchar(32))")
@@ -376,14 +376,14 @@ class TestSchemaRevisionOnRestore:
         """
         self._backup_at_schema_revision(session, settings, stick, collection, "aus der zukunft")
         later = "f" * 64
-        pfad = original_path(settings.photos_dir, later, ".jpg")
-        pfad.parent.mkdir(parents=True, exist_ok=True)
-        pfad.write_bytes(b"nach der sicherung entstanden")
+        path = original_path(settings.photos_dir, later, ".jpg")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"nach der sicherung entstanden")
 
         with pytest.raises(backup.BackupError):
             backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert pfad.is_file(), "der Bestand haette nicht angefasst werden duerfen"
+        assert path.is_file(), "der Bestand haette nicht angefasst werden duerfen"
         assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
 
@@ -391,19 +391,19 @@ class TestSchemaRevisionOnRestore:
 class TestTheReminder:
     def test_without_a_backup_it_is_overdue(self, settings):
         """Never backed up is exactly the case the reminder is for."""
-        zustand = backup.read_state(settings)
+        state = backup.read_state(settings)
 
-        assert zustand.last_backup_at is None
-        assert zustand.overdue is True
+        assert state.last_backup_at is None
+        assert state.overdue is True
 
     def test_a_fresh_backup_is_not_overdue(self, settings):
         backup.record_backup(settings, "SANDISK")
 
-        zustand = backup.read_state(settings)
+        state = backup.read_state(settings)
 
-        assert zustand.days_since == 0
-        assert zustand.overdue is False
-        assert zustand.last_drive == "SANDISK"
+        assert state.days_since == 0
+        assert state.overdue is False
+        assert state.last_drive == "SANDISK"
 
     def test_an_old_backup_is_overdue(self, settings):
         # UTC, because `_stamp()` writes it that way and `read_state` reads it that way. With local
@@ -414,10 +414,10 @@ class TestTheReminder:
             f'{{"last_backup_at": "{previous.isoformat()}", "last_drive": "X"}}', encoding="utf-8"
         )
 
-        zustand = backup.read_state(settings)
+        state = backup.read_state(settings)
 
-        assert zustand.days_since == backup.OVERDUE_DAYS + 4
-        assert zustand.overdue is True
+        assert state.days_since == backup.OVERDUE_DAYS + 4
+        assert state.overdue is True
 
     def test_a_broken_state_file_counts_as_never_backed_up(self, settings):
         (settings.data_dir / backup.STATE_FILE).write_text("kein json", encoding="utf-8")
@@ -488,9 +488,9 @@ class TestThroughTheApi:
 
         ende = time.monotonic() + sekunden
         while time.monotonic() < ende:
-            zustand = client.get("/api/admin/backup/status").json()
-            if zustand["phase"] != "running":
-                return zustand
+            state = client.get("/api/admin/backup/status").json()
+            if state["phase"] != "running":
+                return state
             time.sleep(0.02)
         raise AssertionError("Der Auftrag wurde nicht fertig")
 
@@ -524,9 +524,9 @@ class TestThroughTheApi:
         gestartet = admin_client.post("/api/admin/backup/start", json={"path": str(stick)}).json()
         assert gestartet["kind"] == "backup"
 
-        zustand = self._bis_fertig(admin_client)
-        assert zustand["phase"] == "done"
-        assert "2 Fotos" in zustand["message"]
+        state = self._bis_fertig(admin_client)
+        assert state["phase"] == "done"
+        assert "2 Fotos" in state["message"]
         assert (stick / backup.BACKUP_DIR_NAME / "kiekmap.db").is_file()
 
     def test_the_reminder_then_stands_in_the_overview(
@@ -552,18 +552,18 @@ class TestThroughTheApi:
         admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
         self._bis_fertig(admin_client)
 
-        zustand = admin_client.post("/api/admin/backup/acknowledge").json()
+        state = admin_client.post("/api/admin/backup/acknowledge").json()
 
-        assert zustand["phase"] == "idle"
+        assert state["phase"] == "idle"
 
     def test_restoring_without_a_backup_says_so(self, admin_client, settings, stick):
         (stick / backup.BACKUP_DIR_NAME).mkdir()
 
         admin_client.post("/api/admin/backup/restore", json={"path": str(stick)})
-        zustand = self._bis_fertig(admin_client)
+        state = self._bis_fertig(admin_client)
 
-        assert zustand["phase"] == "error"
-        assert "nicht komplett" in zustand["error"]
+        assert state["phase"] == "error"
+        assert "nicht komplett" in state["error"]
 
 
 class TestTheArchive:
@@ -601,13 +601,13 @@ class TestTheArchive:
         collection(2)
 
         with zipfile.ZipFile(io.BytesIO(self._archiv(session, settings))) as archiv:
-            namen = archiv.namelist()
+            names = archiv.namelist()
 
-        assert {name.split("/")[0] for name in namen} == {backup.BACKUP_DIR_NAME}
-        assert f"{backup.BACKUP_DIR_NAME}/kiekmap.db" in namen
-        assert f"{backup.BACKUP_DIR_NAME}/{backup.MANIFEST_NAME}" in namen
-        assert any(name.startswith(f"{backup.BACKUP_DIR_NAME}/photos/") for name in namen)
-        assert any(name.startswith(f"{backup.BACKUP_DIR_NAME}/thumbs/") for name in namen)
+        assert {name.split("/")[0] for name in names} == {backup.BACKUP_DIR_NAME}
+        assert f"{backup.BACKUP_DIR_NAME}/kiekmap.db" in names
+        assert f"{backup.BACKUP_DIR_NAME}/{backup.MANIFEST_NAME}" in names
+        assert any(name.startswith(f"{backup.BACKUP_DIR_NAME}/photos/") for name in names)
+        assert any(name.startswith(f"{backup.BACKUP_DIR_NAME}/thumbs/") for name in names)
 
     def test_the_archive_is_not_compressed(self, session, settings, collection):
         """JPEG and WebP are already compressed -- a second pass only costs the Pi time."""
@@ -640,9 +640,9 @@ class TestTheArchive:
 
         self._archiv(session, settings)
 
-        zustand = backup.read_state(settings)
-        assert zustand.last_backup_at is not None
-        assert zustand.last_drive == backup.ZIP_DRIVE_NAME
+        state = backup.read_state(settings)
+        assert state.last_backup_at is not None
+        assert state.last_drive == backup.ZIP_DRIVE_NAME
 
     def test_the_file_name_names_the_place_and_the_day(self, settings):
         settings.region_file.parent.mkdir(parents=True, exist_ok=True)
@@ -650,7 +650,7 @@ class TestTheArchive:
 
         name = backup.archive_name(settings)
 
-        assert name.startswith("kiekmap-sicherung-holm-")
+        assert name.startswith("kiekmap-backup-holm-")
         assert name.endswith(".zip")
         assert name.isascii(), "der Name steht in einem HTTP-Kopf"
 
@@ -711,7 +711,7 @@ class TestABackupFromTheInbox:
     the admin view.
     """
 
-    def _ablegen(self, session, settings, name: str = "kiekmap-sicherung-holm-2026-08-03.zip"):
+    def _put_down(self, session, settings, name: str = "kiekmap-backup-holm-2026-08-03.zip"):
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         target = settings.incoming_dir / name
         with target.open("wb") as file_name:
@@ -723,7 +723,7 @@ class TestABackupFromTheInbox:
         """The most important test: it closes the circle that until now only the detour over the
         stick closed."""
         shas = collection(3)
-        self._ablegen(session, settings)
+        self._put_down(session, settings)
 
         # Meanwhile something else has happened on the device.
         for sha in shas:
@@ -743,7 +743,7 @@ class TestABackupFromTheInbox:
     ):
         """Without both, the question in the admin view could not be answered."""
         collection(2)
-        self._ablegen(session, settings)
+        self._put_down(session, settings)
 
         gefunden = backup.waiting_archive(settings)
 
@@ -755,17 +755,17 @@ class TestABackupFromTheInbox:
     def test_a_half_copied_file_is_not_offered(self, session, settings, collection):
         """A truncated ZIP has no central directory -- it fails of its own accord."""
         collection(2)
-        pfad = self._ablegen(session, settings)
-        daten = pfad.read_bytes()
-        pfad.write_bytes(daten[: len(daten) // 2])
+        path = self._put_down(session, settings)
+        daten = path.read_bytes()
+        path.write_bytes(daten[: len(daten) // 2])
 
         assert backup.waiting_archive(settings) is None
 
     def test_a_foreign_zip_is_ignored(self, settings):
         """A matching name, no manifest -- the name only decides whether to look inside."""
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
-        fremd = settings.incoming_dir / "kiekmap-sicherung-fremd.zip"
-        with zipfile.ZipFile(fremd, "w") as archiv:
+        foreign = settings.incoming_dir / "kiekmap-backup-fremd.zip"
+        with zipfile.ZipFile(foreign, "w") as archiv:
             archiv.writestr("irgendwas.txt", "kein Bestand")
 
         assert backup.waiting_archive(settings) is None
@@ -777,13 +777,13 @@ class TestABackupFromTheInbox:
         from app.services.watcher import IncomingWatcher
 
         collection(1)
-        pfad = self._ablegen(session, settings)
+        path = self._put_down(session, settings)
         watcher = IncomingWatcher(settings)
 
         watcher.scan_once()
         watcher.scan_once()
 
-        assert pfad.is_file(), "der Watcher hat die Sicherung angefasst"
+        assert path.is_file(), "der Watcher hat die Sicherung angefasst"
         assert not (settings.incoming_dir / "_problem").exists()
 
     def test_a_photo_beside_it_is_still_taken_in(self, session, settings, collection, sample_image):
@@ -793,7 +793,7 @@ class TestABackupFromTheInbox:
         from app.services.watcher import IncomingWatcher
 
         collection(1)
-        self._ablegen(session, settings)
+        self._put_down(session, settings)
         _shutil.copy2(sample_image("scan_ohne_exif.jpg"), settings.incoming_dir / "neu.jpg")
 
         watcher = IncomingWatcher(settings)
@@ -804,32 +804,32 @@ class TestABackupFromTheInbox:
 
     def test_the_previous_state_is_set_aside(self, session, settings, collection):
         collection(2)
-        pfad = self._ablegen(session, settings)
+        path = self._put_down(session, settings)
         before = {p.name for p in settings.photos_dir.rglob("*") if p.is_file()}
 
-        backup.run_restore_from_archive(settings, pfad, _report_nothing)
+        backup.run_restore_from_archive(settings, path, _report_nothing)
 
-        beiseite = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
-        assert len(beiseite) == 1, "der bisherige Stand wurde nicht beiseitegelegt"
-        assert before <= {p.name for p in beiseite[0].rglob("*") if p.is_file()}
+        set_aside = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
+        assert len(set_aside) == 1, "der bisherige Stand wurde nicht beiseitegelegt"
+        assert before <= {p.name for p in set_aside[0].rglob("*") if p.is_file()}
 
     def test_the_archive_moves_to_the_done_folder(self, session, settings, collection):
         collection(1)
-        pfad = self._ablegen(session, settings)
+        path = self._put_down(session, settings)
 
-        backup.run_restore_from_archive(settings, pfad, _report_nothing)
+        backup.run_restore_from_archive(settings, path, _report_nothing)
 
-        assert not pfad.exists(), "die Datei liegt noch im Eingang"
-        assert (settings.incoming_dir / "_erledigt" / pfad.name).is_file()
+        assert not path.exists(), "die Datei liegt noch im Eingang"
+        assert (settings.incoming_dir / "_done" / path.name).is_file()
         assert backup.waiting_archive(settings) is None
 
     def test_an_incomplete_file_is_refused(self, settings):
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
-        keine = settings.incoming_dir / "kiekmap-sicherung-kaputt.zip"
-        keine.write_bytes(b"kein zip")
+        broken = settings.incoming_dir / "kiekmap-backup-kaputt.zip"
+        broken.write_bytes(b"kein zip")
 
         with pytest.raises(backup.BackupError) as fehler:
-            backup.run_restore_from_archive(settings, keine, _report_nothing)
+            backup.run_restore_from_archive(settings, broken, _report_nothing)
 
         assert "keine vollstaendige Sicherung" in str(fehler.value)
 
@@ -840,15 +840,15 @@ class TestEingangUeberDieApi:
 
         ende = time.monotonic() + sekunden
         while time.monotonic() < ende:
-            zustand = client.get("/api/admin/backup/status").json()
-            if zustand["phase"] != "running":
-                return zustand
+            state = client.get("/api/admin/backup/status").json()
+            if state["phase"] != "running":
+                return state
             time.sleep(0.02)
         raise AssertionError("Der Auftrag wurde nicht fertig")
 
-    def _ablegen(self, session, settings) -> str:
+    def _put_down(self, session, settings) -> str:
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
-        name = "kiekmap-sicherung-holm-2026-08-03.zip"
+        name = "kiekmap-backup-holm-2026-08-03.zip"
         with (settings.incoming_dir / name).open("wb") as file_name:
             for teil in backup.stream_archive(session, settings):
                 file_name.write(teil)
@@ -858,7 +858,7 @@ class TestEingangUeberDieApi:
         self, admin_client, session, settings, collection
     ):
         collection(2)
-        name = self._ablegen(session, settings)
+        name = self._put_down(session, settings)
 
         daten = admin_client.get("/api/admin/backup/drives").json()
 
@@ -871,16 +871,16 @@ class TestEingangUeberDieApi:
 
     def test_restoring_through_the_api(self, admin_client, session, settings, collection):
         shas = collection(2)
-        name = self._ablegen(session, settings)
+        name = self._put_down(session, settings)
         for sha in shas:
             original_path(settings.photos_dir, sha, ".jpg").unlink()
 
         response = admin_client.post("/api/admin/backup/incoming/restore", json={"file": name})
         assert response.status_code == 200
-        zustand = self._bis_fertig(admin_client)
+        state = self._bis_fertig(admin_client)
 
-        assert zustand["phase"] == "done", zustand
-        assert "_erledigt" in zustand["message"]
+        assert state["phase"] == "done", state
+        assert "_done" in state["message"]
         for sha in shas:
             assert original_path(settings.photos_dir, sha, ".jpg").is_file()
 

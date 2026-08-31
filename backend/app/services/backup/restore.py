@@ -3,7 +3,7 @@
 In three movements, and the order is the whole point: copy everything into a working folder beside
 the collection, set the current state aside -- move, not delete -- and only then move the new one
 into place. An interruption before the last step leaves the running collection untouched; after
-it, the old state is still there under ``vorher-<date>``.
+it, the old state is still there under ``before-<date>``.
 """
 
 import logging
@@ -41,7 +41,7 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
       3. Move the new one into place.
 
     An interruption before step 3 leaves the running collection untouched. After step 3 the old
-    state is still there under ``vorher-<date>``, so even a restore of the wrong backup is not
+    state is still there under ``before-<date>``, so even a restore of the wrong backup is not
     the end.
     """
     source = drive.path / BACKUP_DIR_NAME
@@ -147,7 +147,7 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
     the collection. This way it stays at three, and three is the floor as long as the archive is
     its own source.
 
-    Afterwards the file moves to ``_erledigt/``, like every photo that came through this folder.
+    Afterwards the file moves to ``_done/``, like every photo that came through this folder.
     It keeps taking up room there, which is why the closing message says so.
     """
     info = read_archive_manifest(archive)
