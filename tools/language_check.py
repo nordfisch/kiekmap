@@ -217,8 +217,6 @@ PROSE_FILES = (
 #: This is the to-do list of the change of 31 August 2026, and it has to reach empty. Every entry
 #: removed is one file that from then on is checked in its target language. See issue #31.
 IN_TRANSITION = (
-    ".github/ISSUE_TEMPLATE/",
-    ".github/pull_request_template.md",
     "AUTHORS",
     "CHANGELOG.md",
     "CODE_OF_CONDUCT.md",

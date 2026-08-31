@@ -1,22 +1,21 @@
-<!-- Ziel ist `develop`, nicht `main`. Warum, steht in docs/development.md. -->
+<!-- The target is `develop`, not `main`. Why, is in docs/development.md. -->
 
-**Was ändert sich, und warum?**
+**What changes, and why?**
 
 
 
-**Woran hängt es?**
+**What does it hang on?**
 
-<!-- Issue, Meldung, oder nichts davon -- alles drei ist in Ordnung. -->
+<!-- An issue, a report, or none of those -- all three are fine. -->
 
 - Issue:
 
-**Vor dem Absenden**
+**Before sending**
 
-- [ ] `make check` ist grün — Stil, die fünf Prüfungen, alle Tests
-- [ ] Die fachliche Entscheidung hat einen Test, der den **Fehlerfall** beschreibt, nicht nur den
-      Erfolgsfall
-- [ ] Nichts Ortsspezifisches im Code: keine Koordinate, kein Ortsname, keine sammlungsabhängige
-      Zahl. Testdaten sind ausgenommen
-- [ ] Keine Namen aus einem echten Bestand — auch nicht im Kommentar
-- [ ] Bei einem erledigten Issue: CHANGELOG nachgezogen, Issue verlinkt
-      (und `decisions.md`, falls eine Entscheidung herauskam)
+- [ ] `make check` is green — style, the checks, all tests
+- [ ] The domain decision has a test describing the **failure** case, not only the happy path
+- [ ] Nothing place-specific in the code: no coordinate, no place name, no number that depends on
+      the collection. Test data is exempt
+- [ ] No names from a real collection — not in a comment either
+- [ ] For a finished issue: CHANGELOG pulled along, issue linked
+      (and `decisions.md`, if a decision came out of it)
