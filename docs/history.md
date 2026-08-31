@@ -13,7 +13,6 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 | [decisions.md](decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
 | [architecture.md](architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
 | **history.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
-| [lessons.md](lessons.md) | *Was der Plan nicht wusste?* — fortgeführt, englisch |
 | [backlog.md](backlog.md) | *Was fehlt noch?* |
 
 Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
@@ -27,8 +26,9 @@ in den Commits, in den Pull Requests und in den geschlossenen Issues — dort en
 **Sie bleibt deutsch.** Übersetzt wäre sie eine zweite Fassung, die veraltet, und ihr Wert liegt in
 der Nuance. Vier Monate Arbeitstagebuch bleiben also, wie sie sind.
 
-**Fortgeführt wird sie in [lessons.md](lessons.md)**, englisch und deutlich schmaler. Diese Datei
-hielt jeden Schritt fest; die andere hält nur fest, was sonst ein zweites Mal passieren würde.
+**Eine Nachfolgerin gibt es nicht.** Was die Arbeit lehrt, wird ein Punkt in
+[decisions.md](decisions.md) mit kurzer Begründung; wie es verlief, steht in den Commits und den
+geschlossenen Issues.
 
 Ein neuer Abschnitt hier macht `python3 tools/build_register.py --check` rot, weil das Register
 dann nicht mehr stimmt. Das ist die beabsichtigte Reibung. Eine Änderung an vorhandener Prosa

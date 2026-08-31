@@ -1,6 +1,6 @@
 # Dokumentation
 
-Zehn Dateien, jede mit genau einer Frage. Wer hier landet und nicht weiß, wohin: **Die erste
+Neun Dateien, jede mit genau einer Frage. Wer hier landet und nicht weiß, wohin: **Die erste
 Spalte sagt, was drinsteht, die zweite, für wen, die dritte, in welcher Sprache.**
 
 Die Sprache folgt dem Publikum: Deutsch für Besucher, Museumsteam und Betreiber, Englisch für
@@ -13,16 +13,15 @@ die Übersetzung noch aussteht — die Regel gilt seit dem 30. August 2026, sieh
 | Datei | Frage | Für wen | Sprache |
 |---|---|---|---|
 | [architecture.md](architecture.md) | *Was* gibt es, und wie greift es ineinander? | wer einsteigt | Englisch |
-| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will | Deutsch, wird englisch |
+| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will | Englisch |
 | [history.md](history.md) | *Wie* ist es dazu gekommen? — und was dabei anders kam als geplant | wer wissen will, ob eine Idee schon einmal da war | Deutsch, eingefroren |
-| [lessons.md](lessons.md) | Was der Plan *nicht wusste* — nur das | wer etwas Ähnliches vorhat | Englisch |
 
 `decisions.md` ist die Datei, die man **vor** einer Änderung liest; `history.md` die, die man liest,
 wenn etwas unerklärlich aussieht. Meist steht dort, warum.
 
-`history.md` endet mit v0.8.0 am 25. August 2026 und wird nicht fortgeschrieben. `lessons.md` tritt
-an ihre Stelle und ist absichtlich viel kürzer: Ein Eintrag entsteht nur, wenn ohne ihn derselbe
-Fehler ein zweites Mal passieren würde.
+`history.md` endet mit v0.8.0 am 25. August 2026 und wird nicht fortgeschrieben. An ihre Stelle
+tritt keine zweite Datei: Was die Arbeit lehrt, wird eine Entscheidung in `decisions.md`, und wie
+sie verlief, steht in den Commits und den geschlossenen Issues.
 
 ## Daran arbeiten
 

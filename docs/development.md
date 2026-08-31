@@ -69,7 +69,6 @@ The axis is the audience, not the language:
 | [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | English | developers |
 | Commit messages from 30 August 2026 on | English | developers |
 | [history.md](history.md) up to v0.8.0 | German, frozen | a report stays in its language |
-| [lessons.md](lessons.md) | English | developers; successor of the history |
 | Title and body of a pull request | English | the same readers as the commits it summarises |
 
 **Why the developer half is English:** `def zeitraum(...) -> DatePrecision` creates a break at
