@@ -1,13 +1,13 @@
-"""Die Umwandlung des Archivs nach JPEG -- ``tools/to_jpeg.py``.
+"""Converting the archive to JPEG -- ``tools/to_jpeg.py``.
 
-Die Zusage, an der alles haengt: **Dieselbe Datei ergibt zweimal denselben SHA-256.** Der Import
-erkennt eine Dublette am Hash der Datei. Wer die Qualitaet hier nachjustiert, bekommt aus
-demselben Scan andere Bytes -- und beim naechsten Archivstand kaeme jedes schon vorhandene Bild
-ein zweites Mal herein, ohne dass jemand etwas merkt. Das ist kein Schoenheitsfehler, sondern der
-teuerste stille Fehler, den dieses Werkzeug haben kann.
+The promise everything hangs on: **the same file gives the same SHA-256 twice.** The import
+recognises a duplicate by the hash of the file. Whoever adjusts the quality here gets different
+bytes out of the same scan -- and with the next archive delivery every image already present would
+come in a second time without anyone noticing. That is not a blemish but the most expensive silent
+error this tool can have.
 
-Das Werkzeug liegt ausserhalb des Backends, weil es vor dem Import laeuft, auf dem Archivordner.
-Deshalb der Pfadeintrag -- der einzige Test, der ihn braucht.
+The tool lives outside the backend, because it runs before the import, on the archive folder.
+Hence the path entry -- the only test that needs it.
 """
 
 import hashlib
@@ -19,168 +19,166 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
 
-import to_jpeg as werkzeug  # noqa: E402
+import to_jpeg as tool  # noqa: E402
 
 from app.services.exif import read_image_info  # noqa: E402
 
 
 @pytest.fixture
 def scan(tmp_path: Path) -> Path:
-    """Ein TIFF voller feiner Struktur -- der unbequemste Fall, absichtlich.
+    """A TIFF full of fine structure -- the most awkward case, on purpose.
 
-    Ein Foto laesst sich bei Qualitaet 92 auf etwa ein Drittel Byte je Bildpunkt zusammendruecken;
-    dieses hier braucht mehr als ein ganzes. Genau daran scheitert die Umwandlung ohne den
-    groesseren ``MAXBLOCK`` -- siehe ``to_jpeg``.
+    A photograph compresses at quality 92 to roughly a third of a byte per pixel; this one needs
+    more than a whole one. That is exactly what the conversion fails on without the larger
+    ``MAXBLOCK`` -- see ``to_jpeg``.
     """
-    bild = Image.new("RGB", (400, 300))
+    image = Image.new("RGB", (400, 300))
     for x in range(400):
         for y in range(0, 300, 3):
-            bild.putpixel((x, y), (x % 256, (x * y) % 256, y % 256))
-    pfad = tmp_path / "Scan.TIF"
-    bild.save(pfad, "TIFF")
-    return pfad
+            image.putpixel((x, y), (x % 256, (x * y) % 256, y % 256))
+    path = tmp_path / "Scan.TIF"
+    image.save(path, "TIFF")
+    return path
 
 
-def _umgewandelt(scan: Path, name: str) -> bytes:
-    ziel = scan.parent / name
-    werkzeug.to_jpeg(scan, ziel)
-    return ziel.read_bytes()
+def _converted(scan: Path, name: str) -> bytes:
+    target = scan.parent / name
+    tool.to_jpeg(scan, target)
+    return target.read_bytes()
 
 
-def test_zweimal_umgewandelt_ergibt_denselben_hash(scan: Path) -> None:
-    """Sonst kaeme dasselbe Foto beim naechsten Archivstand noch einmal herein."""
-    erst = hashlib.sha256(_umgewandelt(scan, "erst.jpg")).hexdigest()
-    dann = hashlib.sha256(_umgewandelt(scan, "dann.jpg")).hexdigest()
-    assert erst == dann
+def test_converting_twice_gives_the_same_hash(scan: Path) -> None:
+    """Otherwise the same photo would come in again with the next archive delivery."""
+    first = hashlib.sha256(_converted(scan, "first.jpg")).hexdigest()
+    second = hashlib.sha256(_converted(scan, "second.jpg")).hexdigest()
+    assert first == second
 
 
-def test_eine_andere_qualitaet_ergibt_andere_bytes(scan: Path, monkeypatch) -> None:
-    """Die Gegenprobe zum vorigen Test: der Hash haengt wirklich an der Einstellung.
+def test_a_different_quality_gives_different_bytes(scan: Path, monkeypatch) -> None:
+    """The counter-check to the test above: the hash really does hang on the setting.
 
-    Ohne sie liesse sich die Zusage auch mit einem Werkzeug halten, das jede Einstellung
-    ignoriert -- und die Zusage waere nichts wert.
+    Without it the promise could also be kept by a tool that ignores every setting -- and the
+    promise would be worth nothing.
     """
-    vorher = _umgewandelt(scan, "vorher.jpg")
-    monkeypatch.setattr(
-        werkzeug, "JPEG_OPTIONS", {"quality": 90, "subsampling": 0, "optimize": True}
-    )
-    assert _umgewandelt(scan, "nachher.jpg") != vorher
+    before = _converted(scan, "before.jpg")
+    monkeypatch.setattr(tool, "JPEG_OPTIONS", {"quality": 90, "subsampling": 0, "optimize": True})
+    assert _converted(scan, "after.jpg") != before
 
 
-def test_ein_kleines_bild_voller_details_bricht_nicht_ab(scan: Path) -> None:
-    """Pillow raet den Puffer aus der Bildgroesse und liegt bei solchen Bildern daneben.
+def test_a_small_image_full_of_detail_does_not_abort(scan: Path) -> None:
+    """Pillow guesses the buffer from the image size and is wrong for images like this.
 
-    Der Abbruch heisst "broken data stream when writing image file" und traefe genau die
-    Vorlagen, die ein Archiv nebenbei mitschickt -- Karten, Zeitungsausschnitte, Bildschirmfotos.
+    The abort reads "broken data stream when writing image file" and would hit exactly the
+    originals an archive sends along on the side -- maps, newspaper cuttings, screenshots.
     """
-    ziel = scan.parent / "eng.jpg"
-    werkzeug.to_jpeg(scan, ziel)
-    assert Image.open(ziel).size == (400, 300)
+    target = scan.parent / "tight.jpg"
+    tool.to_jpeg(scan, target)
+    assert Image.open(target).size == (400, 300)
 
 
-def test_die_gemessene_einstellung_steht_fest() -> None:
-    """Qualitaet 92, 4:4:4, optimize -- am Erstbestand nachgemessen, nicht gewaehlt.
+def test_the_measured_setting_is_fixed() -> None:
+    """Quality 92, 4:4:4, optimize -- measured against the initial collection, not chosen.
 
-    Siehe den Docstring von ``tools/to_jpeg.py``: vier von 19 Dateien kommen damit bitgleich
-    heraus, achtzehn pixelgleich. Mit Qualitaet 90 keine einzige.
+    See the docstring of ``tools/to_jpeg.py``: four out of 19 files come out bit-identical this
+    way, eighteen pixel-identical. With quality 90 not a single one.
     """
-    assert werkzeug.JPEG_OPTIONS == {"quality": 92, "subsampling": 0, "optimize": True}
+    assert tool.JPEG_OPTIONS == {"quality": 92, "subsampling": 0, "optimize": True}
 
 
-def test_durchsichtiges_png_bekommt_weissen_grund(tmp_path: Path) -> None:
-    """JPEG kennt keine Transparenz, und ein Scan liegt auf Papier, nicht im Nichts.
+def test_a_transparent_png_gets_a_white_background(tmp_path: Path) -> None:
+    """JPEG knows no transparency, and a scan lies on paper, not in nothing.
 
-    Auf schwarzem Grund waere der durchsichtige Rand eines freigestellten Scans ein Trauerrand.
+    On a black background the transparent edge of a cut-out scan would become a mourning border.
     """
-    bild = Image.new("RGBA", (20, 20), (255, 0, 0, 0))
-    pfad = tmp_path / "frei.png"
-    bild.save(pfad)
+    image = Image.new("RGBA", (20, 20), (255, 0, 0, 0))
+    path = tmp_path / "cutout.png"
+    image.save(path)
 
-    werkzeug.to_jpeg(pfad, tmp_path / "frei.jpg")
-    assert Image.open(tmp_path / "frei.jpg").convert("RGB").getpixel((10, 10)) == (255, 255, 255)
-
-
-def test_der_baum_wird_kopiert_und_die_quelle_nicht_angefasst(tmp_path: Path) -> None:
-    """Was das Museum geschickt hat, bleibt, wie es geschickt wurde."""
-    quelle = tmp_path / "Archiv" / "Hauptstraße" / "14 Museum"
-    quelle.mkdir(parents=True)
-    Image.new("RGB", (10, 10)).save(quelle / "scan.tif")
-    Image.new("RGB", (10, 10)).save(quelle / "foto.jpg")
-    (quelle / "Notiz.txt").write_text("keine Bilddatei")
-    vorher = sorted(p.name for p in quelle.iterdir())
-
-    ziel = tmp_path / "Kopie"
-    zaehler = werkzeug.build(tmp_path / "Archiv", ziel)
-
-    assert zaehler["umgewandelt"] == 1
-    assert zaehler["kopiert"] == 1
-    assert zaehler["uebergangen"] == 1
-    assert (ziel / "Hauptstraße" / "14 Museum" / "scan.jpg").exists()
-    assert (ziel / "Hauptstraße" / "14 Museum" / "foto.jpg").exists()
-    assert not (ziel / "Hauptstraße" / "14 Museum" / "Notiz.txt").exists()
-    assert sorted(p.name for p in quelle.iterdir()) == vorher
+    tool.to_jpeg(path, tmp_path / "cutout.jpg")
+    assert Image.open(tmp_path / "cutout.jpg").convert("RGB").getpixel((10, 10)) == (255, 255, 255)
 
 
-def test_das_ziel_darf_nicht_in_der_quelle_liegen(tmp_path: Path) -> None:
-    """Sonst laeuft die Umwandlung ueber ihre eigene Ausgabe -- und zwar endlos."""
+def test_the_tree_is_copied_and_the_source_is_left_alone(tmp_path: Path) -> None:
+    """What the museum sent stays as it was sent."""
+    source = tmp_path / "Archiv" / "Hauptstraße" / "14 Museum"
+    source.mkdir(parents=True)
+    Image.new("RGB", (10, 10)).save(source / "scan.tif")
+    Image.new("RGB", (10, 10)).save(source / "foto.jpg")
+    (source / "Notiz.txt").write_text("not an image file")
+    before = sorted(path.name for path in source.iterdir())
+
+    target = tmp_path / "Kopie"
+    counted = tool.build(tmp_path / "Archiv", target)
+
+    assert counted["umgewandelt"] == 1
+    assert counted["kopiert"] == 1
+    assert counted["uebergangen"] == 1
+    assert (target / "Hauptstraße" / "14 Museum" / "scan.jpg").exists()
+    assert (target / "Hauptstraße" / "14 Museum" / "foto.jpg").exists()
+    assert not (target / "Hauptstraße" / "14 Museum" / "Notiz.txt").exists()
+    assert sorted(path.name for path in source.iterdir()) == before
+
+
+def test_the_target_must_not_lie_inside_the_source(tmp_path: Path) -> None:
+    """Otherwise the conversion runs over its own output -- and does so endlessly."""
     (tmp_path / "Archiv").mkdir()
-    assert werkzeug.main([str(tmp_path / "Archiv"), str(tmp_path / "Archiv" / "Kopie")]) == 1
+    assert tool.main([str(tmp_path / "Archiv"), str(tmp_path / "Archiv" / "Kopie")]) == 1
 
 
-class TestMetadatenWandernMit:
-    """Was die Quelldatei ueber sich sagt, muss die Kopie auch sagen.
+class TestMetadataComesAlong:
+    """What the source file says about itself, the copy has to say too.
 
-    Gemessen wird mit dem Leser des Imports, nicht mit einem eigenen: Gefragt ist nicht, ob die
-    Bytes mitgewandert sind, sondern ob das Programm hinterher dasselbe sieht.
+    Measured with the reader of the import, not with one of its own: the question is not whether
+    the bytes came along, but whether the program sees the same thing afterwards.
 
-    **Es hat einmal nicht gestimmt.** Die Umwandlung reichte nur Farbprofil und Aufloesung durch;
-    zwoelf Fotos des neueren Archivstands verloren dabei ihren Fotografen ("A. Brahms"), eine
-    Beschreibung und eine Datierung -- und trugen danach den Standardnachweis der Sammlung, was
-    schlimmer ist als gar keiner: eine falsche Zuschreibung sieht aus wie eine Auskunft.
+    **It was once not so.** The conversion passed through only the colour profile and the
+    resolution; twelve photos of the newer archive delivery lost their photographer ("A. Brahms"),
+    a caption and a date -- and afterwards carried the collection's default credit, which is worse
+    than none: a wrong attribution looks like an answer.
     """
 
-    def _tiff_mit_iptc(self, pfad: Path, felder: dict[tuple[int, int], bytes]) -> None:
-        """Ein TIFF, wie das Archiv es liefert: IPTC roh im Tag 33723.
+    def _tiff_with_iptc(self, path: Path, fields: dict[tuple[int, int], bytes]) -> None:
+        """A TIFF the way the archive delivers it: IPTC raw in tag 33723.
 
-        Von Hand zusammengesetzt und nicht mit dem Code erzeugt, den dieser Test prueft -- sonst
-        pruefte er sich selbst. Das Format ist IPTC-IIM: je Feld ein 0x1C, Record, Dataset, zwei
-        Byte Laenge, Inhalt.
+        Assembled by hand and not produced with the code this test checks -- otherwise it would be
+        checking itself. The format is IPTC-IIM: per field one 0x1C, record, dataset, two bytes of
+        length, content.
 
-        **Tag 33723 und nicht der Photoshop-Block:** In einem TIFF liest Pillow das IPTC nur von
-        dort, und zwar an seinem eigenen verstuemmelten Wert vorbei direkt aus den Rohbytes. Im
-        JPEG steht derselbe Inhalt dann in ``APP13``, hinter der Marke "Photoshop 3.0" -- zwei
-        Ablagen fuer dieselbe Sache, und die Umwandlung fuehrt von der einen in die andere.
+        **Tag 33723 and not the Photoshop block:** in a TIFF, Pillow reads the IPTC only from
+        there, and does so straight from the raw bytes, past its own mangled value. In the JPEG the
+        same content then stands in ``APP13``, behind the marker "Photoshop 3.0" -- two places for
+        the same thing, and the conversion leads from one into the other.
         """
         from PIL import TiffImagePlugin
 
         records = b"".join(
-            bytes((0x1C, record, dataset)) + len(wert).to_bytes(2, "big") + wert
-            for (record, dataset), wert in sorted(felder.items())
+            bytes((0x1C, record, dataset)) + len(value).to_bytes(2, "big") + value
+            for (record, dataset), value in sorted(fields.items())
         )
-        ordner = TiffImagePlugin.ImageFileDirectory_v2()
-        ordner[33723] = records
-        ordner.tagtype[33723] = 1  # BYTE
-        Image.new("RGB", (40, 30), (200, 180, 160)).save(pfad, "TIFF", tiffinfo=ordner)
+        directory = TiffImagePlugin.ImageFileDirectory_v2()
+        directory[33723] = records
+        directory.tagtype[33723] = 1  # BYTE
+        Image.new("RGB", (40, 30), (200, 180, 160)).save(path, "TIFF", tiffinfo=directory)
 
-    def test_fotograf_und_beschreibung_ueberleben(self, tmp_path: Path) -> None:
-        quelle = tmp_path / "scan.tif"
-        self._tiff_mit_iptc(
-            quelle,
+    def test_photographer_and_caption_survive(self, tmp_path: Path) -> None:
+        source = tmp_path / "scan.tif"
+        self._tiff_with_iptc(
+            source,
             {
-                (2, 80): b"A. Brahms",  # By-line, der Fotograf
+                (2, 80): b"A. Brahms",  # By-line, the photographer
                 (2, 120): b"Collage aus der Niederstrasse",  # Caption
             },
         )
 
-        ziel = tmp_path / "scan.jpg"
-        werkzeug.to_jpeg(quelle, ziel)
+        target = tmp_path / "scan.jpg"
+        tool.to_jpeg(source, target)
 
-        gelesen = read_image_info(ziel)
-        assert gelesen.credit == "A. Brahms"
-        assert gelesen.description == "Collage aus der Niederstrasse"
+        found = read_image_info(target)
+        assert found.credit == "A. Brahms"
+        assert found.description == "Collage aus der Niederstrasse"
 
-    def test_die_koordinate_ueberlebt(self, tmp_path: Path) -> None:
-        """Eine Datei des neuen Archivstands traegt GPS -- und ging beim Umwandeln verloren."""
+    def test_the_coordinate_survives(self, tmp_path: Path) -> None:
+        """A file of the new archive delivery carries GPS -- and lost it in the conversion."""
         exif = Image.Exif()
         exif[0x8825] = {
             1: "N",
@@ -188,26 +186,26 @@ class TestMetadatenWandernMit:
             3: "E",
             4: (9.0, 40.0, 28.0),
         }
-        quelle = tmp_path / "foto.png"
-        Image.new("RGB", (40, 30)).save(quelle, "PNG", exif=exif.tobytes())
+        source = tmp_path / "foto.png"
+        Image.new("RGB", (40, 30)).save(source, "PNG", exif=exif.tobytes())
 
-        ziel = tmp_path / "foto.jpg"
-        werkzeug.to_jpeg(quelle, ziel)
+        target = tmp_path / "foto.jpg"
+        tool.to_jpeg(source, target)
 
-        gelesen = read_image_info(ziel)
-        assert gelesen.lat is not None and gelesen.lon is not None
-        assert abs(gelesen.lat - 53.6191) < 0.001
-        assert abs(gelesen.lon - 9.6744) < 0.001
+        found = read_image_info(target)
+        assert found.lat is not None and found.lon is not None
+        assert abs(found.lat - 53.6191) < 0.001
+        assert abs(found.lon - 9.6744) < 0.001
 
-    def test_zwei_laeufe_bleiben_auch_mit_metadaten_gleich(self, tmp_path: Path) -> None:
-        """Die Zusage aus Punkt 46 gilt weiter -- Metadatenbloecke duerfen nicht wackeln."""
-        quelle = tmp_path / "scan.tif"
-        self._tiff_mit_iptc(quelle, {(2, 80): b"A. Brahms", (2, 25): b"Gebaeude"})
+    def test_two_runs_stay_equal_with_metadata_too(self, tmp_path: Path) -> None:
+        """The promise from point 46 still holds -- metadata blocks must not wobble."""
+        source = tmp_path / "scan.tif"
+        self._tiff_with_iptc(source, {(2, 80): b"A. Brahms", (2, 25): b"Gebaeude"})
 
-        erst, dann = tmp_path / "a.jpg", tmp_path / "b.jpg"
-        werkzeug.to_jpeg(quelle, erst)
-        werkzeug.to_jpeg(quelle, dann)
+        first, second = tmp_path / "a.jpg", tmp_path / "b.jpg"
+        tool.to_jpeg(source, first)
+        tool.to_jpeg(source, second)
 
-        assert hashlib.sha256(erst.read_bytes()).hexdigest() == (
-            hashlib.sha256(dann.read_bytes()).hexdigest()
+        assert hashlib.sha256(first.read_bytes()).hexdigest() == (
+            hashlib.sha256(second.read_bytes()).hexdigest()
         )

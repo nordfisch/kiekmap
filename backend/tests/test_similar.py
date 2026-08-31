@@ -1,11 +1,11 @@
-"""Dasselbe Bild zweimal finden -- ``services/similar.py``.
+"""Finding the same image twice -- ``services/similar.py``.
 
-Der SHA-256 erkennt eine Kopie der *Datei*. Er erkennt nicht denselben Papierabzug, zweimal
-gescannt, und nicht denselben Scan, einmal gross und einmal klein gespeichert. Genau davon ist ein
-gewachsenes Archiv voll: 1324 Fotos des Holmer Bestands enthielten 44 solcher Gruppen.
+The SHA-256 recognises a copy of the *file*. It does not recognise the same paper print scanned
+twice, nor the same scan stored once large and once small. A collection that has grown over decades
+is full of exactly that: 1,324 photos of the Holm stock held 44 such groups.
 
-Der Fingerabdruck darf deshalb **ungenau** sein -- er soll Helligkeit, Farbstich und Verkleinerung
-ertragen. Was er nicht darf, ist zwei verschiedene Bilder zusammenwerfen.
+The fingerprint is therefore allowed to be **imprecise** -- it has to survive brightness, a colour
+cast and downscaling. What it must not do is throw two different images together.
 """
 
 import pytest
@@ -17,107 +17,107 @@ from app.services.storage import THUMBNAIL_SIZES, thumbnail_path
 
 
 @pytest.fixture
-def haus(tmp_path):
-    """Ein Bild mit Struktur -- eine Flaeche allein hat keinen Fingerabdruck."""
-    bild = Image.new("RGB", (400, 300), (200, 205, 215))
+def house(tmp_path):
+    """An image with structure -- a plain surface has no fingerprint."""
+    image = Image.new("RGB", (400, 300), (200, 205, 215))
     for x in range(60, 340):
         for y in range(120, 260):
-            bild.putpixel((x, y), (150 - (x % 40), 90, 70))
+            image.putpixel((x, y), (150 - (x % 40), 90, 70))
     for x in range(100, 300, 60):
         for y in range(150, 200):
             for dx in range(30):
-                bild.putpixel((x + dx, y), (250, 250, 230))
-    pfad = tmp_path / "haus.png"
-    bild.save(pfad)
-    return pfad
+                image.putpixel((x + dx, y), (250, 250, 230))
+    path = tmp_path / "house.png"
+    image.save(path)
+    return path
 
 
-class TestFingerabdruck:
-    def test_dieselbe_datei_ergibt_denselben_abdruck(self, haus):
-        assert fingerprint(haus) == fingerprint(haus)
+class TestFingerprint:
+    def test_the_same_file_gives_the_same_fingerprint(self, house):
+        assert fingerprint(house) == fingerprint(house)
 
-    def test_die_kleine_kopie_bleibt_nah(self, haus, tmp_path):
-        """Der haeufigste Fall im Bestand: derselbe Scan, einmal gross und einmal klein."""
-        klein = tmp_path / "klein.png"
-        Image.open(haus).resize((160, 120), Image.Resampling.LANCZOS).save(klein)
+    def test_the_small_copy_stays_close(self, house, tmp_path):
+        """The most frequent case in the collection: one scan, stored once large and once small."""
+        small = tmp_path / "small.png"
+        Image.open(house).resize((160, 120), Image.Resampling.LANCZOS).save(small)
 
-        assert distance(fingerprint(haus), fingerprint(klein)) <= 40
+        assert distance(fingerprint(house), fingerprint(small)) <= 40
 
-    def test_heller_und_farbstichig_bleibt_nah(self, haus, tmp_path):
-        """Zwei Durchgaenge desselben Papierabzugs unterscheiden sich genau so."""
-        anders = tmp_path / "anders.png"
-        bild = ImageEnhance.Brightness(Image.open(haus)).enhance(1.4)
-        ImageEnhance.Color(bild).enhance(0.2).save(anders)
+    def test_brighter_and_colour_shifted_stays_close(self, house, tmp_path):
+        """Two runs over the same paper print differ in exactly this way."""
+        changed = tmp_path / "changed.png"
+        image = ImageEnhance.Brightness(Image.open(house)).enhance(1.4)
+        ImageEnhance.Color(image).enhance(0.2).save(changed)
 
-        assert distance(fingerprint(haus), fingerprint(anders)) <= 40
+        assert distance(fingerprint(house), fingerprint(changed)) <= 40
 
-    def test_ein_anderes_bild_bleibt_fern(self, haus, tmp_path):
-        """Die Gegenprobe. Ohne sie taete es auch ein Abdruck, der immer dasselbe sagt."""
-        anderes = tmp_path / "anderes.png"
-        bild = Image.new("RGB", (400, 300), (240, 240, 235))
+    def test_a_different_image_stays_far(self, house, tmp_path):
+        """The counter-check. Without it a fingerprint saying the same thing always would pass."""
+        other = tmp_path / "other.png"
+        image = Image.new("RGB", (400, 300), (240, 240, 235))
         for x in range(400):
             for y in range(x % 7, 300, 11):
-                bild.putpixel((x, y), (30, 80, 40))
-        bild.save(anderes)
+                image.putpixel((x, y), (30, 80, 40))
+        image.save(other)
 
-        assert distance(fingerprint(haus), fingerprint(anderes)) > 40
+        assert distance(fingerprint(house), fingerprint(other)) > 40
 
 
-class TestGruppen:
-    def _foto(self, session, settings, haus, wandeln=lambda bild: bild) -> Photo:
+class TestGroups:
+    def _photo(self, session, settings, house, transform=lambda image: image) -> Photo:
         from app.services.storage import sha256_of_file
 
-        nummer = len(session.query(Photo).all()) + 1
-        bild = wandeln(Image.open(haus).convert("RGB"))
-        foto = Photo(
-            sha256=f"{nummer:064x}",
-            original_filename=f"{nummer}.jpg",
+        number = len(session.query(Photo).all()) + 1
+        image = transform(Image.open(house).convert("RGB"))
+        photo = Photo(
+            sha256=f"{number:064x}",
+            original_filename=f"{number}.jpg",
             mime="image/jpeg",
             bytes=1,
-            width=bild.width,
-            height=bild.height,
+            width=image.width,
+            height=image.height,
             date_precision="unknown",
             status=PhotoStatus.PUBLISHED,
         )
-        session.add(foto)
+        session.add(photo)
         session.flush()
-        ziel = thumbnail_path(settings.thumbs_dir, foto.sha256, min(THUMBNAIL_SIZES))
-        ziel.parent.mkdir(parents=True, exist_ok=True)
-        bild.save(ziel, "WEBP")
-        assert sha256_of_file(ziel)
-        return foto
+        target = thumbnail_path(settings.thumbs_dir, photo.sha256, min(THUMBNAIL_SIZES))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        image.save(target, "WEBP")
+        assert sha256_of_file(target)
+        return photo
 
-    def test_beide_fotos_stehen_in_der_gruppe(self, session, settings, haus):
-        """Der Fehler, den diese Zeile schon einmal hatte.
+    def test_both_photos_are_in_the_group(self, session, settings, house):
+        """The error this line has had once already.
 
-        Beim Zusammenfassen ueber eine Union-Find-Struktur ist ein Foto die Wurzel seiner Gruppe.
-        Wer nur die Nicht-Wurzeln einsammelt, verliert aus **jeder** Gruppe ein Foto -- und ein
-        Paar schrumpft damit auf eines und faellt aus der Meldung. Am Bestand sah das aus wie
-        "keine Dubletten gefunden".
+        When grouping through a union-find structure, one photo is the root of its group. Whoever
+        collects only the non-roots loses one photo from **every** group -- and a pair thereby
+        shrinks to one and drops out of the report. On the collection that looked like "no
+        duplicates found".
         """
-        gross = self._foto(session, settings, haus)
-        klein = self._foto(
-            session, settings, haus, lambda b: b.resize((160, 120), Image.Resampling.LANCZOS)
+        large = self._photo(session, settings, house)
+        small = self._photo(
+            session, settings, house, lambda i: i.resize((160, 120), Image.Resampling.LANCZOS)
         )
         session.commit()
 
-        gruppen = candidate_groups(session, settings)
+        groups = candidate_groups(session, settings)
 
-        assert len(gruppen) == 1
-        assert {f.id for f in gruppen[0]} == {gross.id, klein.id}
+        assert len(groups) == 1
+        assert {photo.id for photo in groups[0]} == {large.id, small.id}
 
-    def test_das_groesste_steht_vorn(self, session, settings, haus):
-        self._foto(session, settings, haus, lambda b: b.resize((160, 120)))
-        gross = self._foto(session, settings, haus)
+    def test_the_largest_comes_first(self, session, settings, house):
+        self._photo(session, settings, house, lambda i: i.resize((160, 120)))
+        large = self._photo(session, settings, house)
         session.commit()
 
-        assert candidate_groups(session, settings)[0][0].id == gross.id
+        assert candidate_groups(session, settings)[0][0].id == large.id
 
-    def test_ein_herausgenommenes_foto_kommt_nicht_wieder_vor(self, session, settings, haus):
-        """Sonst legte der Befehl beim naechsten Lauf dieselbe Dublette erneut vor."""
-        self._foto(session, settings, haus)
-        raus = self._foto(session, settings, haus, lambda b: b.resize((160, 120)))
-        raus.status = PhotoStatus.DELETED
+    def test_a_withdrawn_photo_does_not_come_up_again(self, session, settings, house):
+        """Otherwise the command would offer the same duplicate again on its next run."""
+        self._photo(session, settings, house)
+        withdrawn = self._photo(session, settings, house, lambda i: i.resize((160, 120)))
+        withdrawn.status = PhotoStatus.DELETED
         session.commit()
 
         assert candidate_groups(session, settings) == []

@@ -9,103 +9,104 @@ from app.services.importer import DONE_DIR, PROBLEM_DIR, import_directory, impor
 from app.services.storage import THUMBNAIL_SIZES, original_path, thumbnail_path
 
 
-class TestGrundfall:
-    def test_scan_ohne_exif_wird_aufgenommen(self, session, settings, sample_image):
+class TestTheBasicCase:
+    def test_a_scan_without_exif_is_taken_in(self, session, settings, sample_image):
         outcome = import_file(session, sample_image("scan_ohne_exif.jpg"), settings)
 
         assert outcome.result == ImportResult.IMPORTED
-        foto = outcome.photo
-        assert foto is not None
-        assert foto.original_filename == "scan_ohne_exif.jpg"
-        assert (foto.width, foto.height) == (900, 640)
-        # Der Normalfall im Museum: weder Ort noch Jahr bekannt.
-        assert foto.needs_location and foto.needs_date
+        photo = outcome.photo
+        assert photo is not None
+        assert photo.original_filename == "scan_ohne_exif.jpg"
+        assert (photo.width, photo.height) == (900, 640)
+        # The normal case in the museum: neither place nor year known.
+        assert photo.needs_location and photo.needs_date
 
-    def test_original_liegt_unter_seinem_hash(self, session, settings, sample_image):
+    def test_the_original_lies_under_its_hash(self, session, settings, sample_image):
         outcome = import_file(session, sample_image("scan_ohne_exif.jpg"), settings)
         sha = outcome.photo.sha256
 
-        abgelegt = original_path(settings.photos_dir, sha, ".jpg")
-        assert abgelegt.is_file()
-        assert abgelegt.name == f"{sha}.jpg"
-        assert abgelegt.parent.name == sha[2:4], "zweistufige Faecherung"
+        stored = original_path(settings.photos_dir, sha, ".jpg")
+        assert stored.is_file()
+        assert stored.name == f"{sha}.jpg"
+        assert stored.parent.name == sha[2:4], "two-level fan-out"
 
-    def test_thumbnails_in_beiden_groessen(self, session, settings, sample_image):
+    def test_thumbnails_in_both_sizes(self, session, settings, sample_image):
         outcome = import_file(session, sample_image("scan_ohne_exif.jpg"), settings)
 
-        for groesse in THUMBNAIL_SIZES:
-            pfad = thumbnail_path(settings.thumbs_dir, outcome.photo.sha256, groesse)
-            assert pfad.is_file()
-            with Image.open(pfad) as vorschau:
-                assert vorschau.format == "WEBP"
-                assert max(vorschau.size) <= groesse
+        for size in THUMBNAIL_SIZES:
+            path = thumbnail_path(settings.thumbs_dir, outcome.photo.sha256, size)
+            assert path.is_file()
+            with Image.open(path) as preview:
+                assert preview.format == "WEBP"
+                assert max(preview.size) <= size
 
 
-class TestDubletten:
-    def test_dieselbe_datei_zweimal(self, session, settings, sample_image):
-        erst = import_file(session, sample_image("scan_ohne_exif.jpg"), settings)
+class TestDuplicates:
+    def test_the_same_file_twice(self, session, settings, sample_image):
+        first = import_file(session, sample_image("scan_ohne_exif.jpg"), settings)
         session.flush()
-        zweit = import_file(
+        second = import_file(
             session, sample_image("scan_ohne_exif.jpg", as_name="kopie.jpg"), settings
         )
 
-        assert zweit.result == ImportResult.DUPLICATE
-        assert zweit.photo.id == erst.photo.id
-        assert session.scalar(select(Photo).where(Photo.sha256 == erst.photo.sha256))
+        assert second.result == ImportResult.DUPLICATE
+        assert second.photo.id == first.photo.id
+        assert session.scalar(select(Photo).where(Photo.sha256 == first.photo.sha256))
         assert len(session.scalars(select(Photo)).all()) == 1
 
-    def test_dublette_wird_begruendet_protokolliert(self, session, settings, sample_image):
+    def test_a_duplicate_is_logged_with_its_reason(self, session, settings, sample_image):
         import_file(session, sample_image("scan_ohne_exif.jpg"), settings)
         session.flush()
-        import_file(session, sample_image("scan_ohne_exif.jpg", as_name="nochmal.jpg"), settings)
+        import_file(session, sample_image("scan_ohne_exif.jpg", as_name="again.jpg"), settings)
         session.flush()
 
-        eintrag = session.scalars(
+        entry = session.scalars(
             select(ImportLog).where(ImportLog.result == ImportResult.DUPLICATE)
         ).one()
-        # "Da fehlt was" ohne Grund waere fuer einen Ehrenamtlichen nicht auswertbar.
-        assert "Inhaltsgleich" in eintrag.message
+        # "Something is missing" without a reason is of no use to a volunteer.
+        assert "Inhaltsgleich" in entry.message
 
 
-class TestDatumAusExif:
-    def test_scandatum_datiert_das_foto_nicht(self, session, settings, sample_image):
-        """Der wichtigste Fall der ganzen Pipeline.
+class TestDateFromExif:
+    def test_a_scan_date_does_not_date_the_photo(self, session, settings, sample_image):
+        """The most important case of the whole pipeline.
 
-        Das EXIF sagt 2019, das Foto ist historisch. Wuerde das Datum uebernommen, laege das Bild
-        auf der Zeitleiste bei 2019 -- und es gaelte als datiert, taeuchte also nie im
-        "Hilf mit"-Bereich auf, wo jemand es haette richtigstellen koennen.
+        The EXIF says 2019, the photo is historic. If the date were adopted, the image would sit at
+        2019 on the timeline -- and it would count as dated, so it would never surface in the
+        contribution panel, where somebody could have put it right.
         """
         outcome = import_file(session, sample_image("scan_mit_scandatum.jpg"), settings)
-        foto = outcome.photo
+        photo = outcome.photo
 
-        assert foto.date_from is None
-        assert foto.date_precision == DatePrecision.UNKNOWN
-        assert foto.needs_date, "muss im 'Hilf mit'-Bereich erscheinen"
-        # Aufgehoben bleibt es trotzdem: der Kurator soll es sehen koennen.
-        assert foto.exif_datetime.year == 2019
+        assert photo.date_from is None
+        assert photo.date_precision == DatePrecision.UNKNOWN
+        assert photo.needs_date, "has to appear in the contribution panel"
+        # It is kept all the same: the curator should be able to see it.
+        assert photo.exif_datetime.year == 2019
 
-    def test_plausibles_aufnahmedatum_wird_uebernommen(self, session, settings, sample_image):
+    def test_a_plausible_capture_date_is_adopted(self, session, settings, sample_image):
         outcome = import_file(session, sample_image("foto_mit_gps.jpg"), settings)
-        foto = outcome.photo
+        photo = outcome.photo
 
-        assert foto.date_from == date(1975, 6, 21)
-        assert foto.date_to == date(1975, 6, 21)
-        assert foto.date_precision == DatePrecision.DAY
-        assert foto.date_source == Source.EXIF
+        assert photo.date_from == date(1975, 6, 21)
+        assert photo.date_to == date(1975, 6, 21)
+        assert photo.date_precision == DatePrecision.DAY
+        assert photo.date_source == Source.EXIF
 
-    def test_grenze_ist_einstellbar(self, session, settings, sample_image, monkeypatch):
-        """Eine Sammlung mit echten Digitalfotos hebt die Grenze an."""
+    def test_the_boundary_is_configurable(self, session, settings, sample_image, monkeypatch):
+        """A collection with genuine digital photographs raises the boundary."""
         monkeypatch.setattr(settings, "exif_date_max_year", 2030)
         outcome = import_file(session, sample_image("scan_mit_scandatum.jpg"), settings)
 
         assert outcome.photo.date_from == date(2019, 3, 14)
 
-    def test_scannerdatum_datiert_das_foto_nicht(self, session, settings, sample_image):
-        """Der teuerste Fehler dieses Imports -- 116 Fotos des Erstbestands, 91 aus einem Lauf.
+    def test_a_scanner_date_does_not_date_the_photo(self, session, settings, sample_image):
+        """The most expensive error of this import -- 116 photos of the initial collection, 91
+        from a single run.
 
-        Der Scanner nennt sich in der Datei, und danach entscheidet das Geraet, nicht das Jahr.
-        Ohne diese Regel laege ein Ortsbild von 1910 auf der Zeitleiste bei 2015, gaelte als
-        datiert und kaeme deshalb nie zur Korrektur.
+        The scanner names itself in the file, and after that the device decides, not the year.
+        Without this rule a village photograph from 1910 would sit at 2015 on the timeline, count
+        as dated and therefore never come up for correction.
         """
         outcome = import_file(session, sample_image("scan_vom_scanner.jpg"), settings)
 
@@ -113,24 +114,25 @@ class TestDatumAusExif:
         assert outcome.photo.needs_date
         assert outcome.photo.exif_datetime.year == 2015
 
-    def test_scannerdatum_bleibt_auch_bei_hoher_grenze_draussen(
+    def test_a_scanner_date_stays_out_even_with_a_high_boundary(
         self, session, settings, sample_image, monkeypatch
     ):
-        """Die Sammlung mit echten Digitalfotos hebt die Grenze -- der Scanner bleibt ein Scanner.
+        """The collection with genuine digital photographs raises the boundary -- a scanner stays
+        a scanner.
 
-        Genau der Fall, in dem die Jahresgrenze allein nicht mehr traegt: Sie steht hoch, damit
-        die Kamerafotos durchkommen, und wuerde die Scans gleich mit hindurchlassen.
+        Exactly the case where the year boundary alone no longer carries: it stands high so that
+        the camera photographs get through, and would let the scans through along with them.
         """
         monkeypatch.setattr(settings, "exif_date_max_year", 2030)
         outcome = import_file(session, sample_image("scan_vom_scanner.jpg"), settings)
 
         assert outcome.photo.date_from is None
 
-    def test_kameradatum_datiert_das_foto(self, session, settings, sample_image):
-        """Die Gegenrichtung, und ohne sie bliebe der halbe Bestand undatiert.
+    def test_a_camera_date_does_date_the_photo(self, session, settings, sample_image):
+        """The other direction, and without it half the collection would stay undated.
 
-        Das Foto ist von 2014, also weit hinter ``exif_date_max_year``. Die Jahresgrenze ist aber
-        nur der Ersatz fuer eine fehlende Geraeteangabe -- und hier steht sie in der Datei.
+        The photo is from 2014, far beyond ``exif_date_max_year``. But the year boundary is only
+        the stand-in for a missing device entry -- and here that entry is in the file.
         """
         outcome = import_file(session, sample_image("kamerafoto.jpg"), settings)
 
@@ -138,131 +140,130 @@ class TestDatumAusExif:
         assert outcome.photo.date_source == Source.EXIF
 
 
-class TestOrtUndTitel:
-    def test_gps_wird_uebernommen(self, session, settings, sample_image):
-        foto = import_file(session, sample_image("foto_mit_gps.jpg"), settings).photo
+class TestPlaceAndTitle:
+    def test_gps_is_adopted(self, session, settings, sample_image):
+        photo = import_file(session, sample_image("foto_mit_gps.jpg"), settings).photo
 
-        assert foto.lat is not None and foto.lon is not None
-        assert abs(foto.lat - 53.62053) < 0.0001
-        assert abs(foto.lon - 9.67601) < 0.0001
-        assert foto.location_source == Source.EXIF
-        assert not foto.needs_location
+        assert photo.lat is not None and photo.lon is not None
+        assert abs(photo.lat - 53.62053) < 0.0001
+        assert abs(photo.lon - 9.67601) < 0.0001
+        assert photo.location_source == Source.EXIF
+        assert not photo.needs_location
 
-    def test_titel_aus_exif(self, session, settings, sample_image):
-        foto = import_file(session, sample_image("scan_mit_scandatum.jpg"), settings).photo
+    def test_a_title_from_exif(self, session, settings, sample_image):
+        photo = import_file(session, sample_image("scan_mit_scandatum.jpg"), settings).photo
 
-        assert foto.title == "Kirchweih an der Muehle"
-        assert foto.title_source == Source.EXIF
+        assert photo.title == "Kirchweih an der Muehle"
+        assert photo.title_source == Source.EXIF
 
 
-class TestKameraTextbausteine:
-    """Was die Kamera von sich aus hineinschreibt, ist kein Titel.
+class TestCameraBoilerplate:
+    """What the camera writes in by itself is not a title.
 
-    Dieselbe Falle wie das Scandatum, ein Feld weiter: "OLYMPUS DIGITAL CAMERA" steht wirklich im
-    Titel- und im Beschreibungsfeld -- das Foto gilt damit als betitelt und wird nie wieder
-    jemandem vorgelegt, der einen echten Titel wuesste. Kein Titel ist ehrlicher.
+    The same trap as the scan date, one field further on: "OLYMPUS DIGITAL CAMERA" really does
+    stand in the title and the description field -- the photo thereby counts as titled and is never
+    offered again to somebody who would know a real title. No title is more honest.
     """
 
-    def test_kameramodell_wird_nicht_zum_titel(self):
+    def test_a_camera_model_does_not_become_a_title(self):
         from app.services.exif import _statement
 
         assert _statement(b"OLYMPUS DIGITAL CAMERA") is None
         assert _statement(b"SONY DSC") is None
         assert _statement(b"Picasa") is None
 
-    def test_echter_titel_bleibt(self):
+    def test_a_real_title_stays(self):
         from app.services.exif import _statement
 
         assert _statement(b"Kirchweih an der Muehle") == "Kirchweih an der Muehle"
 
-    def test_unbekannt_ist_kein_bildnachweis(self, session, settings, sample_image):
-        """In 82 Dateien des Erstbestands steht als Fotograf woertlich "unbekannt".
+    def test_unknown_is_not_a_credit(self, session, settings, sample_image):
+        """In 82 files of the initial collection the photographer reads literally "unbekannt".
 
-        Uebernommen stuende unter 82 Fotos im Kiosk die Zeile "unbekannt" -- schlechter als gar
-        keine, denn sie sieht aus wie eine Auskunft und ist keine.
+        Adopted, the line "unbekannt" would stand under 82 photos in the kiosk -- worse than none
+        at all, because it looks like information and is not.
         """
-        foto = import_file(session, sample_image("scan_vom_scanner.jpg"), settings).photo
+        photo = import_file(session, sample_image("scan_vom_scanner.jpg"), settings).photo
 
-        assert foto.credit is None
+        assert photo.credit is None
 
-    def test_ein_genannter_fotograf_bleibt(self, session, settings, sample_image):
-        foto = import_file(session, sample_image("kamerafoto.jpg"), settings).photo
+    def test_a_named_photographer_stays(self, session, settings, sample_image):
+        photo = import_file(session, sample_image("kamerafoto.jpg"), settings).photo
 
-        assert foto.credit == "August Kroeger"
+        assert photo.credit == "August Kroeger"
 
-    def test_eingestellter_bildnachweis_springt_nur_ein(
+    def test_the_configured_credit_only_steps_in(
         self, session, settings, sample_image, monkeypatch
     ):
-        """Die Sammlung als Rueckfall -- aber nur, wo die Datei niemanden nennt."""
+        """The collection as a fallback -- but only where the file names nobody."""
         monkeypatch.setattr(settings, "import_credit", "Sammlung Heimatmuseum Holm")
 
-        ohne = import_file(session, sample_image("scan_ohne_exif.jpg"), settings).photo
-        mit = import_file(session, sample_image("kamerafoto.jpg"), settings).photo
+        without = import_file(session, sample_image("scan_ohne_exif.jpg"), settings).photo
+        with_it = import_file(session, sample_image("kamerafoto.jpg"), settings).photo
 
-        assert ohne.credit == "Sammlung Heimatmuseum Holm"
-        assert mit.credit == "August Kroeger"
+        assert without.credit == "Sammlung Heimatmuseum Holm"
+        assert with_it.credit == "August Kroeger"
 
-    def test_eingestellte_schlagwoerter_kommen_an_jedes_foto(
-        self, session, settings, sample_image, monkeypatch
-    ):
-        """Eine Sammlung ist meist ueber etwas -- in Holm ueber Gebaeude.
+    def test_configured_tags_reach_every_photo(self, session, settings, sample_image, monkeypatch):
+        """A collection is usually about something -- in Holm about buildings.
 
-        Im Code steht das nicht: sonst brauchte das naechste Museum einen Fork. Siehe
+        That does not stand in the code: otherwise the next museum would need a fork. See
         Settings.import_tags.
         """
         monkeypatch.setattr(settings, "import_tags", ["Gebaeude"])
 
-        foto = import_file(session, sample_image("scan_ohne_exif.jpg"), settings).photo
+        photo = import_file(session, sample_image("scan_ohne_exif.jpg"), settings).photo
 
-        assert "Gebaeude" in {schlagwort.name for schlagwort in foto.tags}
+        assert "Gebaeude" in {tag.name for tag in photo.tags}
 
-    def test_beschreibung_wiederholt_den_titel_nicht(self):
-        """57 Dateien des Erstbestands tragen denselben Satz in beiden Feldern.
+    def test_the_description_does_not_repeat_the_title(self):
+        """57 files of the initial collection carry the same sentence in both fields.
 
-        Untereinander gestellt liest sich das wie ein Stottern und kostet den Platz, an dem etwas
-        stehen koennte, was das Bild wirklich braucht.
+        Placed one below the other that reads as a stutter and costs the space where something the
+        image really needs could stand.
         """
         from app.services.exif import ImageInfo
         from app.services.importer import _own_description
 
-        gleich = ImageInfo(1, 1, "JPEG", title="Hof Hinrich Petersen")
-        gleich.description = "hof hinrich petersen "
-        assert _own_description(gleich) is None
+        same = ImageInfo(1, 1, "JPEG", title="Hof Sieveking")
+        same.description = "hof sieveking "
+        assert _own_description(same) is None
 
-        verschieden = ImageInfo(1, 1, "JPEG", title="Hof Hinrich Petersen")
-        verschieden.description = "Aufnahme von der Strassenseite"
-        assert _own_description(verschieden) == "Aufnahme von der Strassenseite"
+        different = ImageInfo(1, 1, "JPEG", title="Hof Sieveking")
+        different.description = "Aufnahme von der Strassenseite"
+        assert _own_description(different) == "Aufnahme von der Strassenseite"
 
-    def test_ein_ganzer_absatz_ist_kein_titel_sondern_eine_beschreibung(self):
-        """Im Archiv steht die ganze Bildunterschrift im Titelfeld -- 223 Zeichen, mit Umbruechen.
+    def test_a_whole_paragraph_is_a_description_not_a_title(self):
+        """In the archive the whole caption stands in the title field -- 223 characters, with line
+        breaks.
 
-        Als Ueberschrift in der Detailansicht ist das eine Textwand. Weggeworfen gehoert sie
-        trotzdem nicht: Sie wandert in die Beschreibung, und den Titel liefert der Ordner.
+        As a heading in the detail view that is a wall of text. It should not be thrown away all
+        the same: it moves into the description, and the folder supplies the title.
         """
         from app.services.exif import ImageInfo
         from app.services.importer import _own_description, _own_title
 
-        lang = ImageInfo(1, 1, "JPEG", title="Beschriftung: v. li.: " + "Johann Harms, " * 12)
-        assert _own_title(lang) is None
-        assert _own_description(lang).startswith("Beschriftung: v. li.")
+        long_one = ImageInfo(1, 1, "JPEG", title="Beschriftung: v. li.: " + "Johann Harms, " * 12)
+        assert _own_title(long_one) is None
+        assert _own_description(long_one).startswith("Beschriftung: v. li.")
 
-        mehrzeilig = ImageInfo(1, 1, "JPEG", title="Bilderbummel S. 12\nClaus Petersen")
-        assert _own_title(mehrzeilig) is None
-        assert _own_description(mehrzeilig) == "Bilderbummel S. 12\nClaus Petersen"
+        multiline = ImageInfo(1, 1, "JPEG", title="Bilderbummel S. 12\nClaus Petersen")
+        assert _own_title(multiline) is None
+        assert _own_description(multiline) == "Bilderbummel S. 12\nClaus Petersen"
 
-    def test_die_grenze_liegt_bei_sechzig_zeichen(self):
-        """Die Zahl ist am Bestand gemessen, nicht gewaehlt.
+    def test_the_boundary_is_sixty_characters(self):
+        """The number is measured against the collection, not chosen.
 
-        Sie stand bei 120 und liess acht Bildunterschriften des neueren Archivstands als Titel
-        durch, die laengste mit 108 Zeichen. Von den 781 Titeln, die das Museum von Hand gesetzt
-        hat, ueberschreitet **kein einziger 58 Zeichen**; der Mittelwert liegt bei 13.
+        It stood at 120 and let eight captions of the newer archive delivery through as titles, the
+        longest at 108 characters. Of the 781 titles the museum set by hand, **not one exceeds 58
+        characters**; the mean is 13.
         """
         from app.services.exif import ImageInfo
         from app.services.importer import TITLE_MAX, _own_description, _own_title
 
         assert TITLE_MAX == 60
 
-        bildunterschrift = ImageInfo(
+        caption = ImageInfo(
             1,
             1,
             "JPEG",
@@ -271,19 +272,21 @@ class TestKameraTextbausteine:
                 "Schulstrasse 2a, Foto aus den 1980er Jahren"
             ),
         )
-        assert _own_title(bildunterschrift) is None
-        assert _own_description(bildunterschrift).startswith("links Hauptstrasse 27")
+        assert _own_title(caption) is None
+        assert _own_description(caption).startswith("links Hauptstrasse 27")
 
-        knapp = ImageInfo(1, 1, "JPEG", title="Pizzeria und Kindergarten von der Strasse gesehen")
-        assert _own_title(knapp) == "Pizzeria und Kindergarten von der Strasse gesehen"
+        short_one = ImageInfo(
+            1, 1, "JPEG", title="Pizzeria und Kindergarten von der Strasse gesehen"
+        )
+        assert _own_title(short_one) == "Pizzeria und Kindergarten von der Strasse gesehen"
 
-    def test_die_scannersoftware_landet_in_keinem_der_beiden_felder(self):
-        """ "Intel(R) JPEG Library, version [1.51.12.44]" stand als Titel von 35 Fotos.
+    def test_the_scanner_software_lands_in_neither_field(self):
+        """ "Intel(R) JPEG Library, version [1.51.12.44]" stood as the title of 35 photos.
 
-        Sie ist keine gekuerzte Bildunterschrift, also darf sie auch nicht in die Beschreibung
-        ausweichen wie ein zu langer Titel -- das schoebe denselben Unsinn nur eine Zeile tiefer,
-        wo er im Kiosk unter dem Bild steht. Punkt 41 hat achtzehn davon von Hand entfernt; mit dem
-        naechsten Import waren sie wieder da.
+        It is not a shortened caption, so it must not fall back into the description the way an
+        over-long title does -- that would only push the same nonsense one line lower, where it
+        stands under the image in the kiosk. Point 41 removed eighteen of them by hand; with the
+        next import they were back.
         """
         from app.services.exif import ImageInfo
         from app.services.importer import _own_description, _own_title
@@ -292,167 +295,167 @@ class TestKameraTextbausteine:
         assert _own_title(software) is None
         assert _own_description(software) is None
 
-        auch_als_beschreibung = ImageInfo(1, 1, "JPEG", title="Hof Koerner")
-        auch_als_beschreibung.description = "OLYMPUS DIGITAL CAMERA"
-        assert _own_title(auch_als_beschreibung) == "Hof Koerner"
-        assert _own_description(auch_als_beschreibung) is None
+        also_as_description = ImageInfo(1, 1, "JPEG", title="Hof Boysen")
+        also_as_description.description = "OLYMPUS DIGITAL CAMERA"
+        assert _own_title(also_as_description) == "Hof Boysen"
+        assert _own_description(also_as_description) is None
 
 
-class TestTextkodierung:
-    """Warum IPTC und die XP-Felder verschieden gelesen werden muessen.
+class TestTextEncoding:
+    """Why IPTC and the XP fields have to be read differently.
 
-    Anlass ist ein Bestand, in dem die Schlagwoerter "牁档癩潈浬", "楗瑮牥" und "浉匠湡敤"
-    standen -- das sind "ArchivHolm", "Winter" und "Im Sande", als UTF-16 gelesen.
-    Die Ursache ist tueckisch:
-    **Jede** Bytefolge gerader Laenge ist gueltiges UTF-16, es fliegt also nie ein Fehler und der
-    Rueckfall auf UTF-8 kommt nie zum Zug. Kaputt waren deshalb genau die Woerter mit gerader
-    Byte-Laenge, heil die mit ungerader -- was wie Zufall aussah und keiner war.
+    The occasion is a collection in which the tags read "牁档癩潈浬", "楗瑮牥" and "浉匠湡敤" --
+    those are "ArchivHolm", "Winter" and "Im Sande", read as UTF-16. The cause is treacherous:
+    **every** byte sequence of even length is valid UTF-16, so no error is ever raised and the
+    fallback to UTF-8 never comes into play. Broken were therefore exactly the words of even byte
+    length, intact those of odd length -- which looked like chance and was none.
     """
 
-    def test_iptc_schlagwort_mit_gerader_bytelaenge_bleibt_lesbar(self):
+    def test_an_iptc_tag_of_even_byte_length_stays_readable(self):
         from app.services.exif import _text
 
         assert _text(b"ArchivHolm") == "ArchivHolm"
         assert _text(b"Winter") == "Winter"
         assert _text(b"Im Sande") == "Im Sande"
 
-    def test_iptc_umlaut_kommt_als_utf8_an(self):
+    def test_an_iptc_umlaut_arrives_as_utf8(self):
         from app.services.exif import _text
 
         assert _text("Mühlenweg".encode()) == "Mühlenweg"
 
-    def test_doppelt_kodierter_umlaut_wird_zurueckgedreht(self):
-        """ "MÃ¶ller" ist "Möller", zweimal durch die falsche Kodierung gedreht.
+    def test_a_doubly_encoded_umlaut_is_turned_back(self):
+        """ "MÃ¶ller" is "Möller", put through the wrong encoding twice.
 
-        Passiert vor uns: Ein Programm schreibt UTF-8 in ein EXIF-Feld, das ASCII sein soll, das
-        naechste liest es Byte fuer Byte. Unter zwei Fotos des Erstbestands stuende sonst ein
-        falsch geschriebener Name.
+        It happens before us: one program writes UTF-8 into an EXIF field that is meant to be
+        ASCII, the next reads it byte by byte. Under two photos of the initial collection a
+        misspelt name would otherwise stand.
         """
         from app.services.exif import _text
 
         assert _text("August MÃ¶ller") == "August Möller"
-        # Was schon richtig ist, bleibt unangetastet.
+        # What is already right stays untouched.
         assert _text("August Möller") == "August Möller"
-        assert _text("Hof Hinrich Petersen") == "Hof Hinrich Petersen"
+        assert _text("Hof Sieveking") == "Hof Sieveking"
 
-    def test_windows_feld_bleibt_utf16(self):
-        """Die Gegenrichtung: XPTitle und XPKeywords sind wirklich UCS2-LE."""
+    def test_a_windows_field_stays_utf16(self):
+        """The other direction: XPTitle and XPKeywords really are UCS2-LE."""
         from app.services.exif import _xp_text
 
         assert _xp_text("Kirchweih".encode("utf-16-le")) == "Kirchweih"
         assert _xp_text("Mühlenweg".encode("utf-16-le")) == "Mühlenweg"
 
 
-class TestSchwierigeDateien:
-    def test_hochkant_wird_richtig_herum_vermessen(self, session, settings, sample_image):
-        """Die Pixel sind 900x600, die Ausrichtung steht im EXIF. Gespeichert gehoert 600x900."""
-        foto = import_file(session, sample_image("hochkant.jpg"), settings).photo
+class TestAwkwardFiles:
+    def test_a_portrait_image_is_measured_the_right_way_round(
+        self, session, settings, sample_image
+    ):
+        """The pixels are 900x600, the orientation stands in the EXIF. 600x900 is what to store."""
+        photo = import_file(session, sample_image("hochkant.jpg"), settings).photo
 
-        assert (foto.width, foto.height) == (600, 900)
+        assert (photo.width, photo.height) == (600, 900)
 
-    def test_hochkant_thumbnail_ist_gedreht(self, session, settings, sample_image):
+    def test_a_portrait_thumbnail_is_rotated(self, session, settings, sample_image):
         outcome = import_file(session, sample_image("hochkant.jpg"), settings)
 
         with Image.open(thumbnail_path(settings.thumbs_dir, outcome.photo.sha256, 240)) as v:
-            assert v.height > v.width, "Vorschau muss hochkant sein"
+            assert v.height > v.width, "the preview has to be portrait"
 
-    def test_graustufen_tiff(self, session, settings, sample_image):
+    def test_a_greyscale_tiff(self, session, settings, sample_image):
         outcome = import_file(session, sample_image("graustufen.tif"), settings)
 
         assert outcome.result == ImportResult.IMPORTED
         assert outcome.photo.mime == "image/tiff"
 
-    def test_cmyk_wird_umgewandelt_statt_abgewiesen(self, session, settings, sample_image):
-        """WebP kennt CMYK nicht. Ohne Umwandlung scheitert erst der letzte Schritt."""
+    def test_cmyk_is_converted_instead_of_rejected(self, session, settings, sample_image):
+        """WebP knows no CMYK. Without conversion only the last step fails."""
         outcome = import_file(session, sample_image("cmyk.tif"), settings)
 
         assert outcome.result == ImportResult.IMPORTED
         assert thumbnail_path(settings.thumbs_dir, outcome.photo.sha256, 240).is_file()
 
-    def test_textdatei_wird_mit_begruendung_abgewiesen(self, session, settings, sample_image):
+    def test_a_text_file_is_rejected_with_a_reason(self, session, settings, sample_image):
         outcome = import_file(session, sample_image("kein_bild.txt"), settings)
 
         assert outcome.result == ImportResult.REJECTED
         assert "kein lesbares bild" in outcome.message.lower()
 
-    def test_abgewiesene_datei_hinterlaesst_keine_reste(self, session, settings, sample_image):
+    def test_a_rejected_file_leaves_nothing_behind(self, session, settings, sample_image):
         import_file(session, sample_image("kein_bild.txt"), settings)
 
         assert list(settings.photos_dir.rglob("*.*")) == []
         assert session.scalars(select(Photo)).all() == []
 
 
-class TestEingangsordner:
-    def test_aufgenommenes_wird_beiseitegeraeumt_nicht_geloescht(
-        self, session, settings, sample_image
-    ):
-        quelle = settings.incoming_dir / "scan_ohne_exif.jpg"
-        quelle.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
+class TestTheInbox:
+    def test_what_is_taken_in_is_filed_aside_not_deleted(self, session, settings, sample_image):
+        source = settings.incoming_dir / "scan_ohne_exif.jpg"
+        source.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
 
-        import_file(session, quelle, settings, move_aside=True)
+        import_file(session, source, settings, move_aside=True)
 
-        assert not quelle.exists()
-        # Nie loeschen: ein Helfer, der seine Datei verschwinden sieht, hat einen schlechten Tag.
+        assert not source.exists()
+        # Never delete: a helper who sees their file vanish is having a bad day.
         assert (settings.incoming_dir / DONE_DIR / "scan_ohne_exif.jpg").is_file()
 
-    def test_problematisches_kommt_in_den_problemordner(self, session, settings, sample_image):
-        quelle = settings.incoming_dir / "kein_bild.txt"
-        quelle.write_bytes(sample_image("kein_bild.txt").read_bytes())
+    def test_a_problem_file_goes_into_the_problem_folder(self, session, settings, sample_image):
+        source = settings.incoming_dir / "kein_bild.txt"
+        source.write_bytes(sample_image("kein_bild.txt").read_bytes())
 
-        import_file(session, quelle, settings, move_aside=True)
+        import_file(session, source, settings, move_aside=True)
 
         assert (settings.incoming_dir / PROBLEM_DIR / "kein_bild.txt").is_file()
 
-    def test_namensgleiches_ueberschreibt_nichts(self, session, settings, sample_image):
-        for inhalt in ("scan_ohne_exif.jpg", "hochkant.jpg"):
-            quelle = settings.incoming_dir / "gleicher_name.jpg"
-            quelle.write_bytes(sample_image(inhalt).read_bytes())
-            import_file(session, quelle, settings, move_aside=True)
+    def test_a_file_of_the_same_name_overwrites_nothing(self, session, settings, sample_image):
+        for content in ("scan_ohne_exif.jpg", "hochkant.jpg"):
+            source = settings.incoming_dir / "gleicher_name.jpg"
+            source.write_bytes(sample_image(content).read_bytes())
+            import_file(session, source, settings, move_aside=True)
 
-        erledigt = sorted(p.name for p in (settings.incoming_dir / DONE_DIR).iterdir())
-        assert erledigt == ["gleicher_name (2).jpg", "gleicher_name.jpg"]
+        done = sorted(p.name for p in (settings.incoming_dir / DONE_DIR).iterdir())
+        assert done == ["gleicher_name (2).jpg", "gleicher_name.jpg"]
 
-    def test_sonderordner_werden_nicht_erneut_durchsucht(self, session, settings, sample_image):
-        quelle = settings.incoming_dir / "scan_ohne_exif.jpg"
-        quelle.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
-        import_file(session, quelle, settings, move_aside=True)
+    def test_the_special_folders_are_not_searched_again(self, session, settings, sample_image):
+        source = settings.incoming_dir / "scan_ohne_exif.jpg"
+        source.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
+        import_file(session, source, settings, move_aside=True)
         session.flush()
 
-        # Ohne diese Ausnahme liefe der Waechter in eine Endlosschleife ueber _erledigt/.
-        nochmal = import_directory(session, settings.incoming_dir, settings)
-        assert nochmal == []
+        # Without this exception the watcher would loop endlessly over _erledigt/.
+        again = import_directory(session, settings.incoming_dir, settings)
+        assert again == []
 
 
-class TestVerzeichnisimport:
-    def test_alles_auf_einmal(self, session, settings, tmp_path: Path, fixtures_dir: Path):
-        quelle = tmp_path / "stapel"
-        quelle.mkdir()
-        for datei in fixtures_dir.iterdir():
-            if datei.suffix in (".jpg", ".tif", ".txt"):
-                (quelle / datei.name).write_bytes(datei.read_bytes())
+class TestImportingADirectory:
+    def test_everything_at_once(self, session, settings, tmp_path: Path, fixtures_dir: Path):
+        source = tmp_path / "stapel"
+        source.mkdir()
+        for file in fixtures_dir.iterdir():
+            if file.suffix in (".jpg", ".tif", ".txt"):
+                (source / file.name).write_bytes(file.read_bytes())
 
-        outcomes = import_directory(session, quelle, settings)
+        outcomes = import_directory(session, source, settings)
         session.flush()
 
-        aufgenommen = [e for e in outcomes if e.result == ImportResult.IMPORTED]
-        abgewiesen = [e for e in outcomes if e.result == ImportResult.REJECTED]
+        taken_in = [e for e in outcomes if e.result == ImportResult.IMPORTED]
+        rejected = [e for e in outcomes if e.result == ImportResult.REJECTED]
 
-        assert len(aufgenommen) == 8, "8 Bilder, 1 Textdatei"
-        assert len(abgewiesen) == 1
-        # Originale des Nutzers bleiben unangetastet.
-        assert len(list(quelle.iterdir())) == 9
+        assert len(taken_in) == 8, "8 images, 1 text file"
+        assert len(rejected) == 1
+        # The user's originals stay untouched.
+        assert len(list(source.iterdir())) == 9
 
 
-class TestWoDiePfadSchichtNichtGilt:
-    """Der Upload hat keinen Pfad -- und darf sich keinen ausdenken.
+class TestWhereThePathLayerDoesNotApply:
+    """An upload has no path -- and must not invent one.
 
-    Die Gegenrichtung zum Fehler im Eingangsordner. Beim Hochladen im Browser landet die Datei in
-    einem temporaeren Verzeichnis; dessen Name sagt ueber niemandes Archiv etwas aus. Wuerde dieser
-    Weg die Pfad-Schicht mitbekommen, waeren die Angaben frei erfunden, saehen aber aus wie
-    gelesene -- und weil der Import nur leere Felder fuellt, kaeme das Foto nie zur Korrektur.
+    The opposite direction to the error in the inbox. When uploading through the browser the file
+    lands in a temporary directory; its name says nothing about anybody's archive. If this path got
+    the path layer along with it, the entries would be freely invented but would look like ones
+    that were read -- and because the import fills only empty fields, the photo would never come up
+    for correction.
     """
 
-    def test_hochladen_hat_keinen_pfad_und_erfindet_keinen(
+    def test_an_upload_has_no_path_and_invents_none(
         self, session, settings, fixtures_dir: Path, monkeypatch
     ):
         from app.models import Place
@@ -461,52 +464,52 @@ class TestWoDiePfadSchichtNichtGilt:
 
         monkeypatch.setattr(settings, "import_provenance", "Archiv/")
 
-        # Die Strasse heisst wie das Datenverzeichnis, in dem die Ablage liegt. Nur so trifft der
-        # Test wirklich etwas: Der temporaere Ordner heisst "upload-a1b2c3", den findet kein
-        # Strassenname. Der Ordner darueber heisst auf jedem Geraet gleich.
-        strasse = settings.data_dir.name
+        # The street is named after the data directory the files lie in. Only that way does the
+        # test really hit something: the temporary folder is called "upload-a1b2c3", which no
+        # street name matches. The folder above it has the same name on every device.
+        street = settings.data_dir.name
         session.add(
             Place(
-                name=strasse,
-                name_normalized=normalize(strasse),
+                name=street,
+                name_normalized=normalize(street),
                 lat=53.62,
                 lon=9.676,
-                kind="strasse",
+                kind="street",
             )
         )
         session.commit()
 
-        with (fixtures_dir / "scan_ohne_exif.jpg").open("rb") as datei:
-            foto = import_upload(session, "023.jpg", datei, settings).photo
+        with (fixtures_dir / "scan_ohne_exif.jpg").open("rb") as file:
+            photo = import_upload(session, "023.jpg", file, settings).photo
 
-        assert foto is not None
-        assert foto.needs_location
-        assert foto.place_name is None
-        assert foto.title is None
-        assert foto.provenance is None
-        assert foto.tags == []
+        assert photo is not None
+        assert photo.needs_location
+        assert photo.place_name is None
+        assert photo.title is None
+        assert photo.provenance is None
+        assert photo.tags == []
 
 
-class TestSperrigeDateien:
-    """Dateien, an denen der Import selbst haengen bleibt -- nicht ihr Inhalt, ihre Form."""
+class TestUnwieldyFiles:
+    """Files the import itself gets stuck on -- not their content, their form."""
 
-    def test_ein_tiff_mit_krummem_xmp_bricht_den_lauf_nicht_ab(self, session, settings, tmp_path):
-        """25 Archivscans legen ihr XMP in einem Zahlen-Tag ab, und Pillow gibt Zahlen zurueck.
+    def test_a_tiff_with_crooked_xmp_does_not_abort_the_run(self, session, settings, tmp_path):
+        """25 archive scans file their XMP in a numeric tag, and Pillow returns numbers.
 
-        Jeder spaetere ``getexif()`` jagt einen regulaeren Ausdruck darueber und wirft
-        ``TypeError`` -- den faengt ``import_file`` nicht, weil er auf ``OSError`` und
-        ``ValueError`` gefasst ist. **Eine einzige solche Datei haette damit nicht sich selbst,
-        sondern den ganzen Importlauf beendet**, und TIFF ist ein erlaubtes Format.
+        Every later ``getexif()`` runs a regular expression over it and raises ``TypeError`` --
+        which ``import_file`` does not catch, because it is prepared for ``OSError`` and
+        ``ValueError``. **A single such file would thereby have ended not itself but the whole
+        import run**, and TIFF is an allowed format.
         """
         from PIL import TiffImagePlugin
 
-        ordner = TiffImagePlugin.ImageFileDirectory_v2()
-        ordner[700] = (1010792560, 1633905509)  # XMLPacket
-        ordner.tagtype[700] = 4  # LONG statt BYTE -- so liegt es in den Archivdateien
-        pfad = tmp_path / "scan.tif"
-        Image.new("RGB", (40, 30)).save(pfad, "TIFF", tiffinfo=ordner)
+        directory = TiffImagePlugin.ImageFileDirectory_v2()
+        directory[700] = (1010792560, 1633905509)  # XMLPacket
+        directory.tagtype[700] = 4  # LONG instead of BYTE -- that is how the archive files hold it
+        path = tmp_path / "scan.tif"
+        Image.new("RGB", (40, 30)).save(path, "TIFF", tiffinfo=directory)
 
-        outcome = import_file(session, pfad, settings)
+        outcome = import_file(session, path, settings)
 
         assert outcome.result == ImportResult.IMPORTED
         assert (outcome.photo.width, outcome.photo.height) == (40, 30)

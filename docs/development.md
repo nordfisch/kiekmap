@@ -111,6 +111,47 @@ reach empty. It is the progress bar of [issue #31](https://github.com/nordfisch/
 German, and the checker still requires that of them; both flip in the same commit that translates
 them. Until then a German test name is correct, not a leftover.
 
+## Glossary
+
+The subject is a German village museum, and the words for it were German first. **One German term
+gets exactly one English word here**, so that the same thing is not called three things in three
+files. Where the translation is not obvious, the reason is beside it.
+
+| German | English | Note |
+|---|---|---|
+| Bestand | **collection** | the whole set of photos, not one folder of it |
+| Eingangsordner | **inbox** | the directory is `data/incoming/` |
+| Dublette | **duplicate** | same SHA-256, therefore the same image |
+| Scandatum | **scan date** | the date the paper was scanned, not the date of the shot |
+| Datierung | **dating** | what a photo says about when it was taken |
+| Spanne, Zeitraum | **range** | `date_from`/`date_to`; a dating is a range, never a point |
+| Überlappung | **overlap** | the filter asks for overlap, not for containment |
+| Genauigkeit | **precision** | `DatePrecision`: day, month, year, decade |
+| Jahrzehnt | **decade** | |
+| Zeitschieber | **time slider** | |
+| Stapel | **stack** | photos sharing one spot on the map |
+| Beitrag | **contribution** | what a visitor adds; the panel is the *contribution panel* |
+| Sicherung | **backup** | |
+| Wappen | **coat of arms** | the way into the admin view |
+| Vorlegen | **to offer** | the panel offers a photo that is missing something |
+| Abweisen | **to reject** | `ImportResult.REJECTED` |
+
+**Place kinds keep their German keys**, because that is how `tiles/build-places.py` writes them into
+the database and how OSM delivers them. Only the display is translated:
+
+| Key | English |
+|---|---|
+| `strasse` | Street |
+| `ortsteil` | District |
+| `gebaeude` | Building |
+| `natur` | Nature |
+| `flur` | Field name |
+| `adresse` | Address |
+
+`Flur` is the one with no ready equivalent: a named stretch of open land, older than the streets
+around it. **Field name** carries it; *locality* would be vaguer and *parcel* would be a land
+registry term this project does not mean.
+
 ## Writing rules
 
 How a text is written here — German and English alike — is in

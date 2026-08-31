@@ -1,8 +1,8 @@
-"""Tests der Abfrage-API.
+"""Tests of the query API.
 
-Der wichtigste Fall steht in :class:`TestZeitfilter`: ein auf "1920er" datiertes Foto muss bei der
-Auswahl 1925-1930 erscheinen. Bei einer Abfrage auf Enthaltensein statt Ueberlappung faellt es
-lautlos heraus -- und mit ihm der Grossteil eines Heimatmuseumsbestands.
+The most important case stands in :class:`TestTimeFilter`: a photo dated "1920er" has to appear for
+the selection 1925-1930. With a query for containment instead of overlap it drops out silently --
+and with it most of a local history museum's collection.
 """
 
 import pytest
@@ -10,107 +10,111 @@ from fastapi.testclient import TestClient
 
 from app.models import DatePrecision, PhotoStatus
 
-# Holm und Umgebung.
+# Holm and its surroundings.
 BBOX = "9.60,53.57,9.75,53.67"
-BBOX_WOANDERS = "10.50,52.00,10.60,52.10"
+BBOX_ELSEWHERE = "10.50,52.00,10.60,52.10"
 
 
-class TestKartenausschnitt:
-    def test_foto_im_ausschnitt_erscheint(self, client: TestClient, session, make_photo):
+class TestMapViewport:
+    def test_a_photo_inside_the_viewport_appears(self, client: TestClient, session, make_photo):
         make_photo()
         session.commit()
 
-        antwort = client.get("/api/photos", params={"bbox": BBOX})
+        response = client.get("/api/photos", params={"bbox": BBOX})
 
-        assert antwort.status_code == 200
-        daten = antwort.json()
-        assert daten["total"] == 1
-        assert daten["photos"][0]["title"] == "Testfoto"
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 1
+        assert data["photos"][0]["title"] == "Test photo"
 
-    def test_foto_ausserhalb_erscheint_nicht(self, client: TestClient, session, make_photo):
+    def test_a_photo_outside_does_not_appear(self, client: TestClient, session, make_photo):
         make_photo()
         session.commit()
 
-        assert client.get("/api/photos", params={"bbox": BBOX_WOANDERS}).json()["total"] == 0
+        assert client.get("/api/photos", params={"bbox": BBOX_ELSEWHERE}).json()["total"] == 0
 
-    def test_foto_ohne_ort_erscheint_nie(self, client: TestClient, session, make_photo):
-        # Es gehoert in den "Hilf mit"-Bereich, nicht auf die Karte.
+    def test_a_photo_without_a_place_never_appears(self, client: TestClient, session, make_photo):
+        # It belongs in the contribution panel, not on the map.
         make_photo(lat=None, lon=None)
         session.commit()
 
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 0
 
-    def test_verstecktes_foto_erscheint_nicht(self, client: TestClient, session, make_photo):
+    def test_a_deleted_photo_does_not_appear(self, client: TestClient, session, make_photo):
         make_photo(status=PhotoStatus.DELETED)
         session.commit()
 
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["total"] == 0
 
     @pytest.mark.parametrize("bbox", ["9.6,53.5", "a,b,c,d", "9.75,53.67,9.60,53.57"])
-    def test_unbrauchbare_bbox_wird_abgewiesen(self, client: TestClient, bbox):
+    def test_an_unusable_bbox_is_rejected(self, client: TestClient, bbox):
         assert client.get("/api/photos", params={"bbox": bbox}).status_code == 422
 
 
-class TestZeitfilter:
-    def test_jahrzehnt_erscheint_bei_auswahl_mittendrin(
+class TestTimeFilter:
+    def test_a_decade_appears_when_the_selection_starts_inside_it(
         self, client: TestClient, session, make_photo
     ):
-        """Der Fall, der bei naiver Datumsabfrage still verloren geht."""
+        """The case that goes silently missing with a naive date query."""
         make_photo(year=1920, precision=DatePrecision.DECADE, title="1920er Jahre")
         session.commit()
 
-        antwort = client.get(
+        response = client.get(
             "/api/photos", params={"bbox": BBOX, "from_year": 1925, "to_year": 1930}
         )
 
-        assert antwort.json()["total"] == 1, "1920er-Foto muss in 1925-1930 erscheinen"
+        assert response.json()["total"] == 1, "1920er-Foto muss in 1925-1930 erscheinen"
 
-    def test_jahrzehnt_ausserhalb_erscheint_nicht(self, client: TestClient, session, make_photo):
+    def test_a_decade_outside_does_not_appear(self, client: TestClient, session, make_photo):
         make_photo(year=1920, precision=DatePrecision.DECADE)
         session.commit()
 
-        antwort = client.get(
+        response = client.get(
             "/api/photos", params={"bbox": BBOX, "from_year": 1950, "to_year": 1960}
         )
-        assert antwort.json()["total"] == 0
+        assert response.json()["total"] == 0
 
-    def test_genaues_jahr_am_rand_der_auswahl(self, client: TestClient, session, make_photo):
+    def test_an_exact_year_at_the_edge_of_the_selection(
+        self, client: TestClient, session, make_photo
+    ):
         make_photo(year=1932)
         session.commit()
 
-        for von, bis in ((1932, 1932), (1900, 1932), (1932, 2000)):
-            antwort = client.get(
-                "/api/photos", params={"bbox": BBOX, "from_year": von, "to_year": bis}
+        for start, end in ((1932, 1932), (1900, 1932), (1932, 2000)):
+            response = client.get(
+                "/api/photos", params={"bbox": BBOX, "from_year": start, "to_year": end}
             )
-            assert antwort.json()["total"] == 1, f"{von}-{bis} muss 1932 enthalten"
+            assert response.json()["total"] == 1, f"{start}-{end} muss 1932 enthalten"
 
-    def test_vertauschte_jahre_werden_gedreht(self, client: TestClient, session, make_photo):
+    def test_swapped_years_are_turned_around(self, client: TestClient, session, make_photo):
         make_photo(year=1932)
         session.commit()
 
-        antwort = client.get(
+        response = client.get(
             "/api/photos", params={"bbox": BBOX, "from_year": 1950, "to_year": 1900}
         )
-        assert antwort.json()["total"] == 1
+        assert response.json()["total"] == 1
 
 
-class TestMarkerbeschriftung:
-    """Was die Karte je Foto braucht, um Adresse und Jahr darunter zu setzen."""
+class TestMarkerLabels:
+    """What the map needs per photo in order to put the address and the year below it."""
 
-    def test_marker_traegt_adresse_und_kurzes_datum(self, client: TestClient, session, make_photo):
+    def test_a_marker_carries_the_address_and_the_short_date(
+        self, client: TestClient, session, make_photo
+    ):
         make_photo(year=2014, month=3, day=22, place_name="Lehmweg 17b")
         session.commit()
 
         marker = client.get("/api/photos", params={"bbox": BBOX}).json()["photos"][0]
 
         assert marker["place_name"] == "Lehmweg 17b"
-        # Der Tag gehoert nicht unter ein Vorschaubild -- auf der Karte zaehlt das Jahr.
+        # The day does not belong under a thumbnail -- on the map the year is what counts.
         assert marker["date_short"] == "2014"
-        # Die ausgeschriebene Form bleibt daneben stehen: Sie traegt die Beschriftung fuer
-        # Vorlesewerkzeuge, wo die Genauigkeit nicht stoert.
+        # The written-out form stays beside it: it carries the label for screen readers, where
+        # the precision does not get in the way.
         assert marker["date_label"] == "22. März 2014"
 
-    def test_undatiertes_foto_bekommt_eine_leere_kurzform(
+    def test_an_undated_photo_gets_an_empty_short_form(
         self, client: TestClient, session, make_photo
     ):
         make_photo(year=None, place_name="Im Sande 18")
@@ -122,249 +126,251 @@ class TestMarkerbeschriftung:
         assert marker["date_label"] == "Jahr unbekannt"
 
 
-class TestUndatierte:
-    """Fotos ohne Jahr sind der dritte Fall, und wer fragt, entscheidet ihn.
+class TestUndatedPhotos:
+    """Photos without a year are the third case, and whoever asks decides it.
 
-    Sie ueberlappen keinen Zeitraum, fielen also aus jeder Auswahl heraus -- in diesem Bestand
-    zwei Drittel davon, lautlos. ``include_undated`` ist deshalb ein eigener Schalter und nicht
-    eine Nebenwirkung der Schieberstellung.
+    They overlap no time range, so they dropped out of every selection -- two thirds of this
+    collection, silently. ``include_undated`` is therefore a switch of its own and not a side
+    effect of where the slider stands.
     """
 
-    def test_bleiben_standardmaessig_in_der_zeitauswahl(
+    def test_they_stay_in_the_time_selection_by_default(
         self, client: TestClient, session, make_photo
     ):
-        # Der Regelfall: Wer den Schieber anfasst, soll nicht ohne Ansage drei Viertel der Karte
-        # verlieren. Frueher war genau das die Wirkung.
+        # The normal case: whoever touches the slider should not lose three quarters of the map
+        # without being told. That used to be exactly the effect.
         make_photo(year=None)
         session.commit()
 
-        antwort = client.get(
+        response = client.get(
             "/api/photos", params={"bbox": BBOX, "from_year": 1920, "to_year": 1930}
         )
 
-        assert antwort.json()["total"] == 1
+        assert response.json()["total"] == 1
 
-    def test_fallen_heraus_wenn_der_schalter_aus_ist(self, client: TestClient, session, make_photo):
+    def test_they_drop_out_when_the_switch_is_off(self, client: TestClient, session, make_photo):
         make_photo(year=None)
         session.commit()
 
-        antwort = client.get(
+        response = client.get(
             "/api/photos",
             params={"bbox": BBOX, "from_year": 1920, "to_year": 1930, "include_undated": False},
         )
 
-        assert antwort.json()["total"] == 0
+        assert response.json()["total"] == 0
 
-    def test_der_schalter_wirkt_auch_ohne_zeitauswahl(
+    def test_the_switch_works_without_a_time_selection_too(
         self, client: TestClient, session, make_photo
     ):
-        """Die Stellung, bei der der Schieber steht, wenn niemand ihn angefasst hat.
+        """The position the slider is in when nobody has touched it.
 
-        Ueber die ganze Achse schickt der Kiosk bewusst keinen Zeitfilter. Griffe der Schalter
-        nur zusammen mit einem, taete er ausgerechnet dort nichts, wo er anfaengt.
+        Across the whole axis the kiosk deliberately sends no time filter. If the switch only took
+        hold together with one, it would do nothing at exactly the place where it starts.
         """
         make_photo(year=None, sha="a" * 64)
         make_photo(year=1932, sha="b" * 64)
         session.commit()
 
-        antwort = client.get("/api/photos", params={"bbox": BBOX, "include_undated": False})
+        response = client.get("/api/photos", params={"bbox": BBOX, "include_undated": False})
 
-        assert antwort.json()["total"] == 1
+        assert response.json()["total"] == 1
 
-    def test_datierte_bleiben_von_dem_schalter_unberuehrt(
+    def test_dated_photos_stay_untouched_by_the_switch(
         self, client: TestClient, session, make_photo
     ):
-        """Die Gegenprobe: Der Schalter erweitert die Auswahl, er ersetzt sie nicht.
+        """The counter-check: the switch widens the selection, it does not replace it.
 
-        Waere aus ``kein Datum ODER Ueberlappung`` versehentlich nur ``kein Datum``, stuende
-        ploetzlich nichts Datiertes mehr auf der Karte -- und der Test oben faende das gut.
+        If ``no date OR overlap`` had accidentally become just ``no date``, nothing dated would
+        stand on the map any more -- and the test above would be happy with that.
         """
         make_photo(year=1932, sha="c" * 64)
         session.commit()
 
-        drin = client.get("/api/photos", params={"bbox": BBOX, "from_year": 1930, "to_year": 1935})
-        draussen = client.get(
+        inside = client.get(
+            "/api/photos", params={"bbox": BBOX, "from_year": 1930, "to_year": 1935}
+        )
+        outside = client.get(
             "/api/photos", params={"bbox": BBOX, "from_year": 1950, "to_year": 1955}
         )
 
-        assert drin.json()["total"] == 1
-        assert draussen.json()["total"] == 0
+        assert inside.json()["total"] == 1
+        assert outside.json()["total"] == 0
 
-    def test_das_histogramm_zaehlt_sie_immer(self, client: TestClient, session, make_photo):
-        """Sonst verschwaende mit der Zahl auch der Schalter, der sie zurueckholt.
+    def test_the_histogram_always_counts_them(self, client: TestClient, session, make_photo):
+        """Otherwise the switch that brings them back would vanish along with the number.
 
-        Das Etikett neben dem Schieber heisst „670 Fotos ohne Jahr anzeigen". Zaehlte das
-        Histogramm nur die gerade sichtbaren, stuende dort nach dem Abschalten eine Null -- und
-        der Weg zurueck waere weg.
+        The label beside the slider reads „670 Fotos ohne Jahr anzeigen". If the histogram counted
+        only the currently visible ones, a zero would stand there after switching off -- and the
+        way back would be gone.
         """
         make_photo(year=None)
         session.commit()
 
-        antwort = client.get(
+        response = client.get(
             "/api/photos/histogram", params={"bbox": BBOX, "include_undated": False}
         )
 
-        assert antwort.json()["undated"] == 1
+        assert response.json()["undated"] == 1
 
 
-class TestBegrenzung:
-    def test_limit_meldet_sich(self, client: TestClient, session, make_photo):
-        for nummer in range(5):
-            make_photo(title=f"Foto {nummer}", sha=f"{nummer:064d}")
+class TestTheLimit:
+    def test_the_limit_announces_itself(self, client: TestClient, session, make_photo):
+        for number in range(5):
+            make_photo(title=f"Photo {number}", sha=f"{number:064d}")
         session.commit()
 
-        antwort = client.get("/api/photos", params={"bbox": BBOX, "limit": 2}).json()
+        response = client.get("/api/photos", params={"bbox": BBOX, "limit": 2}).json()
 
-        assert len(antwort["photos"]) == 2
-        assert antwort["total"] == 5
-        assert antwort["truncated"] is True, "die Karte soll zum Hineinzoomen auffordern koennen"
+        assert len(response["photos"]) == 2
+        assert response["total"] == 5
+        assert response["truncated"] is True, "die Karte soll zum Hineinzoomen auffordern koennen"
 
-    def test_ohne_begrenzung_kein_hinweis(self, client: TestClient, session, make_photo):
+    def test_no_notice_without_a_limit(self, client: TestClient, session, make_photo):
         make_photo()
         session.commit()
 
         assert client.get("/api/photos", params={"bbox": BBOX}).json()["truncated"] is False
 
 
-class TestReihenfolge:
-    def test_zuletzt_bearbeitetes_foto_kommt_zuerst(self, client: TestClient, session, make_photo):
-        """Fotos am selben Ort liegen als Stapel uebereinander -- oben das eben Ergaenzte.
+class TestOrder:
+    def test_the_most_recently_edited_photo_comes_first(
+        self, client: TestClient, session, make_photo
+    ):
+        """Photos at the same spot lie stacked -- the one just added on top.
 
-        Genau dorthin faehrt die Karte nach einem Besucherbeitrag.
+        That is exactly where the map travels to after a visitor contribution.
         """
         from datetime import datetime
 
-        alt = make_photo(title="Lange her", sha="a" * 64)
-        neu = make_photo(title="Eben bearbeitet", sha="b" * 64)
+        older = make_photo(title="Lange her", sha="a" * 64)
+        newer = make_photo(title="Eben bearbeitet", sha="b" * 64)
         session.commit()
-        alt.updated_at = datetime(2026, 1, 1, 12, 0)
-        neu.updated_at = datetime(2026, 7, 31, 12, 0)
+        older.updated_at = datetime(2026, 1, 1, 12, 0)
+        newer.updated_at = datetime(2026, 7, 31, 12, 0)
         session.commit()
 
-        daten = client.get("/api/photos", params={"bbox": BBOX}).json()
+        data = client.get("/api/photos", params={"bbox": BBOX}).json()
 
-        assert [foto["title"] for foto in daten["photos"]] == ["Eben bearbeitet", "Lange her"]
+        assert [photo["title"] for photo in data["photos"]] == ["Eben bearbeitet", "Lange her"]
 
 
-class TestHistogramm:
-    """Die Balken hinter dem Zeitschieber -- und wie breit ein Balken ist.
+class TestHistogram:
+    """The bars behind the time slider -- and how wide one bar is.
 
-    Der teure Fehler steckt in der Breite, nicht in der Zaehlung: Ein auf "1920er" datiertes Foto
-    traegt ``date_from = 1920-01-01``. In Jahresbalken tuermten sich dann zehn Jahrgaenge auf dem
-    Balken 1920 -- ein Turm, wo in Wahrheit ein Jahrzehnt liegt.
+    The expensive error sits in the width, not in the counting: a photo dated "1920er" carries
+    ``date_from = 1920-01-01``. With year bars all ten years would then land on the bar for 1920 --
+    a single tall bar where in truth a whole decade lies.
     """
 
-    def test_jahrgenauer_bestand_bekommt_jahresbalken(
+    def test_a_year_precise_collection_gets_year_bars(
         self, client: TestClient, session, make_photo
     ):
-        for jahr in (2010, 2014, 2014, 2024):
-            make_photo(year=jahr)
+        for year in (2010, 2014, 2014, 2024):
+            make_photo(year=year)
         session.commit()
 
-        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten["step"] == 1
-        assert daten["bars"] == [
+        assert data["step"] == 1
+        assert data["bars"] == [
             {"year": 2010, "count": 1},
             {"year": 2014, "count": 2},
             {"year": 2024, "count": 1},
         ]
 
-    def test_eine_jahrzehnt_datierung_vergroebert_alles(
-        self, client: TestClient, session, make_photo
-    ):
-        """Der wichtigste Test dieser Klasse.
+    def test_one_decade_dating_coarsens_everything(self, client: TestClient, session, make_photo):
+        """The most important test of this class.
 
-        Sobald *ein* Foto auf ein Jahrzehnt datiert ist, sind Jahresbalken eine Luege -- und zwar
-        eine stille: Man saehe einen Turm auf 1920 und haette keinen Anlass, ihn anzuzweifeln.
+        As soon as *one* photo is dated to a decade, year bars are a lie -- and a silent one: you
+        would see a tall bar at 1920 and have no reason to doubt it.
         """
         make_photo(year=2010)
         make_photo(year=2014)
         make_photo(year=1920, precision="decade")
         session.commit()
 
-        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten["step"] == 10
-        assert daten["bars"] == [
+        assert data["step"] == 10
+        assert data["bars"] == [
             {"year": 1920, "count": 1},
             {"year": 2010, "count": 2},
         ]
 
-    def test_lange_spanne_bekommt_breitere_buendel(self, client: TestClient, session, make_photo):
-        """130 Jahre in Jahresbalken waeren eine Hecke, kein Bild.
+    def test_a_long_span_gets_wider_bundles(self, client: TestClient, session, make_photo):
+        """130 years in year bars would be too narrow to read.
 
-        Wie breit genau, entscheidet die Regel in services/dates.py -- hier zaehlt, dass die
-        Spanne nicht mehr in Jahren zerlegt wird und in dreissig Balken passt.
+        How wide exactly is decided by the rule in services/dates.py -- what counts here is that
+        the span is no longer split into years and fits into thirty bars.
         """
         make_photo(year=1890)
         make_photo(year=2020)
         session.commit()
 
-        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        spanne = daten["collection_to"] - daten["collection_from"]
-        assert daten["step"] > 1
-        assert spanne / daten["step"] <= 30
+        span = data["collection_to"] - data["collection_from"]
+        assert data["step"] > 1
+        assert span / data["step"] <= 30
 
-    def test_spanne_ignoriert_den_kartenausschnitt(self, client: TestClient, session, make_photo):
-        """Die Achse des Zeitschiebers gehoert der Sammlung, nicht dem Ausschnitt.
+    def test_the_span_ignores_the_map_viewport(self, client: TestClient, session, make_photo):
+        """The axis of the time slider belongs to the collection, not to the viewport.
 
-        Sonst bedeutete dieselbe Stelle des Schiebers nach jedem Zoom ein anderes Jahr -- und eine
-        vorher getroffene Auswahl laege ausserhalb ihrer eigenen Bahn.
+        Otherwise the same position of the slider would mean a different year after every zoom --
+        and a selection made earlier would lie outside its own track.
         """
         make_photo(year=1930)
-        # Weit weg, ausserhalb der abgefragten bbox.
+        # Far away, outside the bbox being queried.
         make_photo(year=1890, lat=48.0, lon=11.0)
         session.commit()
 
-        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten["bars"] == [{"year": 1930, "count": 1}], "Balken zeigen den Ausschnitt"
-        assert daten["collection_from"] == 1890, "die Achse zeigt den ganzen Bestand"
+        assert data["bars"] == [{"year": 1930, "count": 1}], "Balken zeigen den Ausschnitt"
+        assert data["collection_from"] == 1890, "die Achse zeigt den ganzen Bestand"
 
-    def test_die_breite_gehoert_ebenfalls_der_sammlung(
-        self, client: TestClient, session, make_photo
-    ):
-        """Sonst wechselte die Bedeutung der Balken beim Verschieben der Karte.
+    def test_the_width_belongs_to_the_collection_too(self, client: TestClient, session, make_photo):
+        """Otherwise the meaning of the bars would change while panning the map.
 
-        Das Jahrzehnt-Foto liegt ausserhalb des Ausschnitts und vergroebert die Anzeige trotzdem --
-        genau wie die Achse.
+        The decade photo lies outside the viewport and coarsens the display all the same -- just
+        like the axis.
         """
         make_photo(year=2014)
         make_photo(year=1920, precision="decade", lat=48.0, lon=11.0)
         session.commit()
 
-        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten["step"] == 10
+        assert data["step"] == 10
 
-    def test_zeigt_auch_ausserhalb_der_auswahl(self, client: TestClient, session, make_photo):
-        """Der Schieber soll zeigen, wo ueberhaupt etwas liegt -- auch jenseits der Auswahl."""
+    def test_shows_what_lies_outside_the_selection_too(
+        self, client: TestClient, session, make_photo
+    ):
+        """The slider should show where anything lies at all -- beyond the selection too."""
         make_photo(year=1923)
         make_photo(year=1980)
         session.commit()
 
-        daten = client.get(
+        data = client.get(
             "/api/photos/histogram", params={"bbox": BBOX, "from_year": 1920, "to_year": 1930}
         ).json()
 
-        assert len(daten["bars"]) == 2
+        assert len(data["bars"]) == 2
 
-    def test_undatierte_werden_getrennt_gezaehlt(self, client: TestClient, session, make_photo):
+    def test_undated_photos_are_counted_separately(self, client: TestClient, session, make_photo):
         make_photo(year=None)
         make_photo(year=1932)
         session.commit()
 
-        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten["undated"] == 1
-        assert daten["bars"] == [{"year": 1932, "count": 1}]
+        assert data["undated"] == 1
+        assert data["bars"] == [{"year": 1932, "count": 1}]
 
-    def test_leerer_ausschnitt(self, client: TestClient, session):
-        daten = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
+    def test_an_empty_viewport(self, client: TestClient, session):
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert daten == {
+        assert data == {
             "bars": [],
             "step": 1,
             "undated": 0,
@@ -373,117 +379,116 @@ class TestHistogramm:
         }
 
 
-class TestEinzelnesFoto:
+class TestASinglePhoto:
     def test_detail(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=1920, precision=DatePrecision.DECADE)
+        photo = make_photo(year=1920, precision=DatePrecision.DECADE)
         session.commit()
 
-        daten = client.get(f"/api/photos/{foto.id}").json()
+        data = client.get(f"/api/photos/{photo.id}").json()
 
-        assert daten["date_label"] == "1920er"
-        assert daten["needs_date"] is False
-        assert daten["needs_location"] is False
-        assert daten["image_url"] == f"/api/photos/{foto.id}/image"
+        assert data["date_label"] == "1920er"
+        assert data["needs_date"] is False
+        assert data["needs_location"] is False
+        assert data["image_url"] == f"/api/photos/{photo.id}/image"
 
-    def test_unbekannte_nummer(self, client: TestClient):
-        antwort = client.get("/api/photos/9999")
+    def test_an_unknown_id(self, client: TestClient):
+        response = client.get("/api/photos/9999")
 
-        assert antwort.status_code == 404
-        assert "9999" in antwort.json()["detail"]
+        assert response.status_code == 404
+        assert "9999" in response.json()["detail"]
 
-    def test_falsche_thumbnailgroesse_nennt_die_richtigen(
+    def test_a_wrong_thumbnail_size_names_the_right_ones(
         self, client: TestClient, session, make_photo
     ):
-        foto = make_photo()
+        photo = make_photo()
         session.commit()
 
-        antwort = client.get(f"/api/photos/{foto.id}/thumb", params={"size": 999})
+        response = client.get(f"/api/photos/{photo.id}/thumb", params={"size": 999})
 
-        assert antwort.status_code == 422
-        assert "240" in antwort.json()["detail"]
+        assert response.status_code == 422
+        assert "240" in response.json()["detail"]
 
 
-class TestAuslieferung:
-    """Gegen echte importierte Dateien statt gegen erfundene Zeilen."""
+class TestServingFiles:
+    """Against really imported files rather than against invented rows."""
 
     @pytest.fixture
-    def importiertes_foto(self, session, settings, sample_image):
+    def imported_photo(self, session, settings, sample_image):
         from app.services.importer import import_file
 
         outcome = import_file(session, sample_image("foto_mit_gps.jpg"), settings)
         session.commit()
         return outcome.photo
 
-    def test_thumbnail_wird_ausgeliefert(self, client: TestClient, importiertes_foto):
-        antwort = client.get(f"/api/photos/{importiertes_foto.id}/thumb", params={"size": 240})
+    def test_a_thumbnail_is_served(self, client: TestClient, imported_photo):
+        response = client.get(f"/api/photos/{imported_photo.id}/thumb", params={"size": 240})
 
-        assert antwort.status_code == 200
-        assert antwort.headers["content-type"] == "image/webp"
-        assert antwort.content[:4] == b"RIFF"
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "image/webp"
+        assert response.content[:4] == b"RIFF"
 
-    def test_thumbnail_darf_beliebig_gecacht_werden(self, client: TestClient, importiertes_foto):
-        # Der Dateiname ist der Inhalts-Hash: gleicher Name heisst garantiert gleicher Inhalt.
-        antwort = client.get(f"/api/photos/{importiertes_foto.id}/thumb")
+    def test_a_thumbnail_may_be_cached_without_limit(self, client: TestClient, imported_photo):
+        # The file name is the content hash: the same name guarantees the same content.
+        response = client.get(f"/api/photos/{imported_photo.id}/thumb")
 
-        assert "immutable" in antwort.headers["cache-control"]
+        assert "immutable" in response.headers["cache-control"]
 
-    def test_original_wird_ausgeliefert(self, client: TestClient, importiertes_foto):
-        antwort = client.get(f"/api/photos/{importiertes_foto.id}/image")
+    def test_the_original_is_served(self, client: TestClient, imported_photo):
+        response = client.get(f"/api/photos/{imported_photo.id}/image")
 
-        assert antwort.status_code == 200
-        assert antwort.headers["content-type"] == "image/jpeg"
-        assert antwort.content[:2] == b"\xff\xd8", "JPEG-Kennung"
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "image/jpeg"
+        assert response.content[:2] == b"\xff\xd8", "JPEG marker"
 
-    def test_importiertes_foto_erscheint_auf_der_karte(self, client: TestClient, importiertes_foto):
-        """Das GPS-Testbild liegt in Holm und traegt ein Aufnahmedatum von 1975."""
-        antwort = client.get(
+    def test_an_imported_photo_appears_on_the_map(self, client: TestClient, imported_photo):
+        """The GPS test image lies in Holm and carries a capture date of 1975."""
+        response = client.get(
             "/api/photos", params={"bbox": BBOX, "from_year": 1970, "to_year": 1980}
         ).json()
 
-        assert antwort["total"] == 1
-        assert antwort["photos"][0]["date_label"] == "21. Juni 1975"
+        assert response["total"] == 1
+        assert response["photos"][0]["date_label"] == "21. Juni 1975"
 
 
-class TestDateiendung:
-    """Woher die Auslieferung weiss, wie die Datei auf der Platte heisst -- Punkt 61.
+class TestFileSuffix:
+    """How the serving code knows what the file on disk is called -- point 61.
 
-    Der Dateiname ist der SHA-256 plus die Endung des Formats. Welche Endung zu welchem MIME-Typ
-    gehoert, steht in ``ALLOWED_FORMATS`` -- und stand daneben ein zweites Mal in ``api/photos.py``,
-    als Rechnung auf dem String: ``mime.split("/")[-1]``, mit ``jpeg`` und ``tiff`` von Hand
-    zurueckgebogen. Beide stimmten ueberein, solange jede Endung das Ende ihres MIME-Typs ist.
+    The file name is the SHA-256 plus the suffix of the format. Which suffix belongs to which MIME
+    type stands in ``ALLOWED_FORMATS`` -- and stood beside it a second time in ``api/photos.py``, as
+    arithmetic on the string: ``mime.split("/")[-1]``, with ``jpeg`` and ``tiff`` bent back by hand.
+    Both agreed as long as every suffix is the end of its MIME type.
     """
 
-    def test_jeder_erlaubte_typ_findet_seine_endung(self):
-        """Die Gegenprobe, die das Auseinanderlaufen unmoeglich macht.
+    def test_every_allowed_type_finds_its_suffix(self):
+        """The counter-check that makes drifting apart impossible.
 
-        Sie prueft nicht eine Liste von Beispielen, sondern die Tabelle gegen sich selbst: Was der
-        Import ablegen darf, muss die Auslieferung benennen koennen.
+        It checks not a list of examples but the table against itself: whatever the import may file
+        away, the serving code has to be able to name.
         """
         from app.services.storage import ALLOWED_FORMATS, suffix_for_mime
 
-        for mime, endung in ALLOWED_FORMATS.values():
-            assert suffix_for_mime(mime) == endung, f"{mime} findet seine Endung nicht"
+        for mime, suffix in ALLOWED_FORMATS.values():
+            assert suffix_for_mime(mime) == suffix, f"{mime} findet seine Endung nicht"
 
-    def test_ein_unbekannter_typ_ergibt_keine_endung(self):
+    def test_an_unknown_type_yields_no_suffix(self):
         from app.services.storage import suffix_for_mime
 
         assert suffix_for_mime("image/heic") is None
         assert suffix_for_mime("") is None
 
-    def test_ein_foto_mit_unbekanntem_typ_meldet_die_fehlende_datei(
+    def test_a_photo_with_an_unknown_type_reports_the_missing_file(
         self, client: TestClient, session, make_photo
     ):
-        """So etwas legt der Import nie an -- eine zurueckgespielte Sicherung aber vielleicht.
+        """The import never creates such a thing -- a restored backup might.
 
-        Vorher entstand daraus stillschweigend ein Pfad, den es nicht gibt. Die Antwort ist
-        dieselbe geblieben, weil sie fuer den Besucher stimmt; im Protokoll steht jetzt, woran es
-        wirklich lag.
+        Before, that silently produced a path that does not exist. The answer has stayed the same,
+        because it is right for the visitor; the log now says what it really was.
         """
-        foto = make_photo()
-        foto.mime = "image/heic"
+        photo = make_photo()
+        photo.mime = "image/heic"
         session.commit()
 
-        antwort = client.get(f"/api/photos/{foto.id}/image")
+        response = client.get(f"/api/photos/{photo.id}/image")
 
-        assert antwort.status_code == 404
-        assert antwort.json()["detail"] == "Originaldatei fehlt"
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Originaldatei fehlt"

@@ -1,6 +1,6 @@
 """Which comments are written in which language -- and whether the prose spells its umlauts.
 
-The rule is in CLAUDE.md: identifiers and comments in English, test files entirely in German.
+The rule is in CLAUDE.md: identifiers, comments and test files in English.
 Held only in part for a long time -- 338 German comments sat in 52 production files next to 687
 English ones, and nobody could say whether that was getting better or worse.
 
@@ -108,6 +108,14 @@ def typescript_texts(path: Path) -> list[str]:
 
 def is_test(path: str) -> bool:
     return "/tests/" in path or ".test." in path or Path(path).name.startswith("test_")
+
+
+#: Test files that have not made the switch to English yet -- checked in neither language.
+#:
+#: Until 31 August 2026 the rule was the other way round: test files had to be German throughout,
+#: because a test name here is a sentence of specification. Point 71 reverses that. The backend
+#: turned first; this tuple holds what is still German and has to reach empty. See issue #31.
+TESTS_IN_TRANSITION = ("frontend/src/",)
 
 
 #: Transcriptions that are never a German word in their own right. Deliberately short: the
@@ -264,8 +272,8 @@ def main() -> int:
             if found := language(text):
                 counted[found] += 1
                 total[found] += 1
-        # A test file should be German throughout, everything else English.
-        wrong = counted["en"] if is_test(name) else counted["de"]
+        # English throughout, tests included -- except what is still being converted.
+        wrong = 0 if is_test(name) and name.startswith(TESTS_IN_TRANSITION) else counted["de"]
         if wrong:
             breaks.append((name, wrong, counted["de"] + counted["en"]))
         if args.all and any(counted.values()):
@@ -297,9 +305,7 @@ def main() -> int:
         kommentare = sum(b[1] for b in breaks)
         print(f"\n{len(breaks)} Dateien brechen die Regel ({kommentare} Kommentare):")
         for name, wrong, all_of_them in sorted(breaks, key=lambda b: -b[1]):
-            richtung = (
-                "englisch in einer Testdatei" if is_test(name) else "deutsch im Produktivcode"
-            )
+            richtung = "deutsch in einer Testdatei" if is_test(name) else "deutsch im Code"
             print(f"  {name:56} {wrong:4} von {all_of_them:4}   {richtung}")
 
     if umschrieben:
