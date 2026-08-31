@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Names, errors and the two or three things every part of the backup needs.
 
 No logic of its own -- it exists so that the modules beside it do not have to import each other

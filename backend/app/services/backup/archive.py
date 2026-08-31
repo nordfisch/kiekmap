@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """The same backup, as one file -- built while it is being sent.
 
 The second route out of the collection: a download through the browser, for when no stick is at

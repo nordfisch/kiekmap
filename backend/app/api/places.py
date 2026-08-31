@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Place search for locating photos in the "Hilf mit" panel."""
 
 from typing import Annotated

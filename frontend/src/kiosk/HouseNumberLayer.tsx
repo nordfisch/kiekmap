@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The house numbers of one street, on the map, for as long as they are being asked about.
  *

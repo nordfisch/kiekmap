@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Gemeinsame Testeinrichtung.
 
 Jeder Test bekommt ein frisches, temporaeres Datenverzeichnis. Das muss geschehen, *bevor*

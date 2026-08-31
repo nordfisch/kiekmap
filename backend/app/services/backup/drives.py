@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Removable drives, as the device sees them.
 
 The one module that talks to the operating system about mount points -- and the one where a

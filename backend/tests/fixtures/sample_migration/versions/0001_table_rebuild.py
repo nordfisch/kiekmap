@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Baut ``photos`` neu, ohne sonst etwas zu aendern.
 
 ``recreate="always"`` erzwingt genau den Weg, der einmal Daten gekostet hat: Kopie anlegen,

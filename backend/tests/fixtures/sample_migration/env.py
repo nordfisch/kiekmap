@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Faehrt die *echte* ``alembic/env.py``.
 
 Der Sinn der Probe ist, jene Datei zu pruefen -- eine eigene Umgebung mit einer eigenen Kopie der

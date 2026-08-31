@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Tests des Ortsindex und der Hausnummern.
 
 Der Kernpunkt: Eine Strasse von 800 m bekommt einen Punkt. Ohne Hausnummern liegen alle Fotos

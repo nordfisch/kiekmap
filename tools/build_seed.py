@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Builds the sample collection under ``seed/`` -- pictures and metadata, all of it invented.
 
     python3 tools/build_seed.py

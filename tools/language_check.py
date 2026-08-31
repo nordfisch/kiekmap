@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Which comments are written in which language -- and whether the prose spells its umlauts.
 
 The rule is in CLAUDE.md: identifiers and comments in English, test files entirely in German.

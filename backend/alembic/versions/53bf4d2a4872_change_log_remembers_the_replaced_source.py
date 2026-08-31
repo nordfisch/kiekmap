@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """change log remembers the replaced source
 
 Needed since visitors may sharpen a street-precise location to a house number -- the one route

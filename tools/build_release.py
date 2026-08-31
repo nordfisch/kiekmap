@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Build the folder that goes on the update stick.
 
     python3 tools/build_release.py                    into release/kiekmap-update

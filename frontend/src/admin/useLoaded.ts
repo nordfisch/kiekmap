@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Load once, keep the three states apart, allow reloading.
  *

@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Writing the collection onto a stick.
 
 A folder, not a ZIP: an interrupted backup is then partly usable instead of entirely worthless,
