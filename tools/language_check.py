@@ -210,6 +210,7 @@ PROSE_FILES = (
     "CONTRIBUTING.md",
     "README.md",
     "SECURITY.md",
+    "seed/README.md",
 )
 
 #: Prose that has not made the switch yet -- checked in neither language while it is half of each.
@@ -217,11 +218,8 @@ PROSE_FILES = (
 #: This is the to-do list of the change of 31 August 2026, and it has to reach empty. Every entry
 #: removed is one file that from then on is checked in its target language. See issue #31.
 IN_TRANSITION = (
-    "AUTHORS",
     "CHANGELOG.md",
-    "CODE_OF_CONDUCT.md",
     "README.md",
-    "SECURITY.md",
     "docs/adaption.md",
     "docs/index.md",
     "docs/licensing.md",
