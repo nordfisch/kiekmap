@@ -106,6 +106,72 @@ def typescript_texts(path: Path) -> list[str]:
     return found
 
 
+#: Formats whose comments start at a ``#`` and run to the end of the line.
+#:
+#: Nothing exotic among them, and that is the point: every one of these survived the switch of
+#: August 2026 in German, because the checker read only ``.py``, ``.ts`` and ``.tsx``. The gap was
+#: found on 31 August 2026, by a person reading the repository rather than by any check.
+HASH_COMMENT = (
+    ".conf",
+    ".dockerignore",
+    ".gitignore",
+    ".ini",
+    ".sh",
+    ".toml",
+    ".yml",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    "pre-commit",
+    "Makefile",
+)
+
+#: Formats whose comments are ``/* … */``. CSS carries more prose than one would think: the kiosk
+#: layout is explained in the stylesheet, because that is where the grid stands.
+BLOCK_COMMENT = (".css",)
+
+
+def hash_comment_texts(path: Path) -> list[str]:
+    """Comment blocks of a ``#`` format -- consecutive lines are one text.
+
+    Per block rather than per line: one line rarely carries enough function words to tell the
+    languages apart, and ``language`` returns None on a tie. The shebang is skipped, and so is a
+    line that only draws a rule.
+    """
+    found: list[str] = []
+    block: list[str] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#") and not stripped.startswith("#!"):
+            text = stripped.lstrip("#").strip()
+            if text and set(text) - set("-=_ "):
+                block.append(text)
+            continue
+        if block:
+            found.append(" ".join(block))
+            block = []
+    if block:
+        found.append(" ".join(block))
+    return found
+
+
+def block_comment_texts(path: Path) -> list[str]:
+    source = path.read_text(encoding="utf-8")
+    return [m.group(1) for m in re.finditer(r"/\*(.*?)\*/", source, re.S)]
+
+
+def texts_of(name: str, path: Path) -> list[str] | None:
+    """Every comment of a file, or None when this is not a format we can read."""
+    if name.endswith(".py"):
+        return python_texts(path)
+    if name.endswith((".ts", ".tsx")):
+        return typescript_texts(path)
+    if name.endswith(BLOCK_COMMENT):
+        return block_comment_texts(path)
+    if name.endswith(HASH_COMMENT):
+        return hash_comment_texts(path)
+    return None
+
+
 def is_test(path: str) -> bool:
     return "/tests/" in path or ".test." in path or Path(path).name.startswith("test_")
 
@@ -258,7 +324,14 @@ def main() -> int:
     listed = subprocess.run(
         ["git", "ls-files"], capture_output=True, text=True, cwd=ROOT
     ).stdout.split("\n")
-    files = [f for f in listed if f.endswith((".py", ".ts", ".tsx")) and "node_modules" not in f]
+    # Prose is judged elsewhere, by its file name, and a file still being converted is judged
+    # nowhere. Without this a .yml under docs/ or in the issue templates would be counted twice
+    # and reported in two different ways.
+    files = [
+        f
+        for f in listed
+        if "node_modules" not in f and not is_prose(f) and not f.startswith(IN_TRANSITION)
+    ]
 
     breaks: list[tuple[str, int, int]] = []
     total = {"de": 0, "en": 0}
@@ -267,7 +340,9 @@ def main() -> int:
         path = ROOT / name
         if not path.is_file():
             continue
-        texts = python_texts(path) if name.endswith(".py") else typescript_texts(path)
+        texts = texts_of(name, path)
+        if texts is None:
+            continue
         counted = {"de": 0, "en": 0}
         for text in texts:
             if found := language(text):
