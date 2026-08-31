@@ -374,13 +374,13 @@ class TestAwkwardFiles:
         assert thumbnail_path(settings.thumbs_dir, outcome.photo.sha256, 240).is_file()
 
     def test_a_text_file_is_rejected_with_a_reason(self, session, settings, sample_image):
-        outcome = import_file(session, sample_image("kein_bild.txt"), settings)
+        outcome = import_file(session, sample_image("not_an_image.txt"), settings)
 
         assert outcome.result == ImportResult.REJECTED
         assert "kein lesbares bild" in outcome.message.lower()
 
     def test_a_rejected_file_leaves_nothing_behind(self, session, settings, sample_image):
-        import_file(session, sample_image("kein_bild.txt"), settings)
+        import_file(session, sample_image("not_an_image.txt"), settings)
 
         assert list(settings.photos_dir.rglob("*.*")) == []
         assert session.scalars(select(Photo)).all() == []
@@ -398,12 +398,12 @@ class TestTheInbox:
         assert (settings.incoming_dir / DONE_DIR / "scan_ohne_exif.jpg").is_file()
 
     def test_a_problem_file_goes_into_the_problem_folder(self, session, settings, sample_image):
-        source = settings.incoming_dir / "kein_bild.txt"
-        source.write_bytes(sample_image("kein_bild.txt").read_bytes())
+        source = settings.incoming_dir / "not_an_image.txt"
+        source.write_bytes(sample_image("not_an_image.txt").read_bytes())
 
         import_file(session, source, settings, move_aside=True)
 
-        assert (settings.incoming_dir / PROBLEM_DIR / "kein_bild.txt").is_file()
+        assert (settings.incoming_dir / PROBLEM_DIR / "not_an_image.txt").is_file()
 
     def test_a_file_of_the_same_name_overwrites_nothing(self, session, settings, sample_image):
         for content in ("scan_ohne_exif.jpg", "hochkant.jpg"):

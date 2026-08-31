@@ -656,7 +656,9 @@ class TestBatchUpload:
     def test_a_text_file_is_rejected_with_a_reason(self, admin_client: TestClient, fixtures_dir):
         data = admin_client.post(
             "/api/admin/upload",
-            files=[("files", ("liste.txt", _image(fixtures_dir, "kein_bild.txt"), "text/plain"))],
+            files=[
+                ("files", ("a_list.txt", _image(fixtures_dir, "not_an_image.txt"), "text/plain"))
+            ],
         ).json()
 
         assert data["rejected"] == 1
@@ -697,13 +699,13 @@ class TestTheImportLog:
             "/api/admin/upload",
             files=[
                 ("files", ("gut.jpg", _image(fixtures_dir), "image/jpeg")),
-                ("files", ("schlecht.txt", _image(fixtures_dir, "kein_bild.txt"), "text/plain")),
+                ("files", ("bad.txt", _image(fixtures_dir, "not_an_image.txt"), "text/plain")),
             ],
         )
 
         data = admin_client.get("/api/admin/imports", params={"result": "rejected"}).json()
 
-        assert [entry["filename"] for entry in data["entries"]] == ["schlecht.txt"]
+        assert [entry["filename"] for entry in data["entries"]] == ["bad.txt"]
 
     def test_newest_first(self, admin_client: TestClient, session):
         from app.models import ImportLog, ImportResult

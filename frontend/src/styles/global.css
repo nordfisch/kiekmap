@@ -21,15 +21,14 @@
    * entirely. */
   --sidebar-width: clamp(16rem, 22%, 28rem);
 
-  /* Der Abstand, der die Ansicht zusammenhaelt: seitlich zwischen Beitragsbereich und Karte,
-   * senkrecht zwischen der oberen Zeile und der Karte darunter. Eine Zahl, damit beide gleich
-   * sind. */
+  /* The gap that holds the view together: sideways between the panel and the map, vertically
+   * between the top row and the map below it. One number, so that both are the same. */
   --gap: 1.25rem;
 
-  /* Hoehe des Wappens -- und zugleich die des Titels daneben, der sich daraus ableitet.
+  /* Height of the coat of arms -- and with it that of the title beside it, which derives from it.
    *
-   * Nur der Rueckfallwert. Den wirklichen Wert setzt `.app__title` aus seiner eigenen Breite;
-   * hier steht er, damit `.crest` auch ausserhalb der Kopfzeile eine Groesse hat. */
+   * The fallback only. The real value is set by `.app__title` out of its own width; it stands
+   * here so that `.crest` has a size outside the title bar too. */
   --crest: 6.2rem;
 
   --paper: #faf8f4;
@@ -80,9 +79,9 @@ button {
 .app {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
-  /* Die obere Zeile misst sich an ihrem Inhalt statt an einer geratenen Hoehe. Damit ist der
-   * Abstand zur Karte das, was die beiden Zellen unten an Polster mitbringen -- und nicht der
-   * Rest, der von einer festen Zeilenhoehe uebrigbleibt. */
+  /* The top row measures itself by its content instead of by a guessed height. The gap to the map
+   * is then whatever padding the two cells below bring along -- and not what is left over from a
+   * fixed row height. */
   grid-template-rows: auto 1fr;
   grid-template-areas:
     "title timeline"
@@ -90,8 +89,8 @@ button {
   height: 100%;
 }
 
-/* Ist nichts mehr zu ergaenzen, verschwindet die linke Spalte und die Karte nimmt die volle
- * Breite. Eine Erfolgsmeldung, die monatelang dasteht, ist kein Inhalt -- die Fotos sind es. */
+/* When there is nothing left to add, the left column disappears and the map takes the full
+ * width. A success message standing there for months is not content -- the photos are. */
 .app--complete {
   grid-template-areas:
     "title timeline"
@@ -100,14 +99,14 @@ button {
 
 /* --- title bar ----------------------------------------------------------- */
 
-/* Ohne Rahmenlinien zu den Nachbarfeldern. Die einzige Kante, die eine Aufgabe hat, ist der
- * Papierton gegen die Karte -- alles andere machte aus einer Ausstellung ein Formular.
+/* No border lines towards the neighbouring cells. The only edge with a job is the paper tone
+ * against the map -- anything else would turn an exhibition into a form.
  *
- * Senkrecht mittig, und zwar in der Hoehe, die das hoechste Element der Zeile vorgibt. Vorher
- * standen Wappen, Titel und Schieber oben buendig und endeten fast fuenfzig Pixel auseinander --
- * ein Kommentar hier rechnete vor, dass Titel und Wappen genau so hoch stuenden wie der Schieber,
- * und das galt nur fuer eine Schirmbreite und nur bis der Schieber wuchs. Drei Rechnungen, die
- * auseinanderlaufen konnten, sind durch eine Ausrichtung ersetzt, die sich selbst traegt. */
+ * Vertically centred, in the height the tallest element of the row sets. Coat of arms, title and
+ * slider used to be aligned at the top and ended almost fifty pixels apart -- a comment here
+ * worked out that title and arms stood exactly as tall as the slider, and that held for one
+ * screen width and only until the slider grew. Three calculations that could drift apart are
+ * replaced by an alignment that carries itself. */
 .app__title {
   grid-area: title;
   display: flex;
@@ -116,27 +115,26 @@ button {
   min-width: 0;
   padding: 0.75rem 1.25rem var(--gap);
 
-  /* Wappen und Titel messen sich an dieser Zelle, nicht am Ansichtsfenster. `cqi` ist ein Prozent
-   * ihrer Breite; `container-type` ist der Bezug dafuer und hier gefahrlos, weil die Breite aus
-   * dem Raster kommt und nicht aus dem Inhalt.
+  /* Coat of arms and title measure themselves against this cell, not against the viewport. `cqi`
+   * is a percent of its width; `container-type` is what that refers to, and it is safe here
+   * because the width comes from the grid and not from the content.
    *
-   * Vorher schaltete `--crest` bei `@media (max-width: 85rem)` von 6,2rem auf 4rem, und das ging
-   * aus zwei Gruenden schief. Erstens: **In einer Medienabfrage ist `rem` immer 16px**, die
-   * Groesse des Wurzelelements *bevor* `:root` sie auf 18px setzt -- die Umschaltung griff also
-   * bei 1360px statt bei den 1530px, mit denen die Regel rechnete. Zweitens, und schwerer: Selbst
-   * oberhalb davon blieben **0,3 px** zwischen dem, was "Bilder aus" braucht, und dem, was die
-   * Spalte hergibt. Der Entwurf war auf den Millimeter gerechnet; jede andere Schrift, jeder
-   * laengere Ortsname und jeder andere Browser kippten ihn. Bei 1470 x 956 brach Safari um und
-   * Chromium nicht.
+   * `--crest` used to switch from 6.2rem to 4rem at `@media (max-width: 85rem)`, and that went
+   * wrong for two reasons. First: **inside a media query `rem` is always 16px**, the size of the
+   * root element *before* `:root` sets it to 18px -- so the switch took hold at 1360px instead of
+   * the 1530px the rule was reckoning with. Second, and worse: even above that there were
+   * **0.3 px** left between what "Bilder aus" needs and what the column gives. The design was
+   * calculated to the millimetre; any other font, any longer place name and any other browser
+   * tipped it over. At 1470 x 956 Safari wrapped and Chromium did not.
    *
-   * Jetzt gibt es keine Schwelle mehr, an der etwas kippen koennte: Wappen und Schrift wachsen
-   * und schrumpfen mit dem Platz, den sie wirklich haben. Die Grenzen des `clamp` halten das
-   * Wappen in den Maszen, die vorher die beiden Stufen hatten.
+   * There is no threshold left now at which anything could tip: arms and type grow and shrink
+   * with the room they really have. The bounds of the `clamp` keep the arms within the sizes the
+   * two steps used to give them.
    *
-   * **Die 34 sind gerechnet, nicht geraten.** Die engste Zeile ist der Ortsname, nicht "Bilder
-   * aus": vier fette Zeichen auf 0,54 des Wappens sind breiter als zehn magere auf 0,28. Bei 34
-   * bleiben ueber den ganzen Bereich rund 25 % Luft; bei 38 waeren es 11, und bei genau diesen
-   * 11 % faengt das Zittern an, das diesen Fehler ausgemacht hat. */
+   * **The 34 is calculated, not guessed.** The tightest line is the place name, not "Bilder aus":
+   * four bold characters at 0.54 of the arms are wider than ten light ones at 0.28. At 34 there
+   * is about 25 % of slack across the whole range; at 38 it would be 11, and at exactly those
+   * 11 % begins the wobble this mistake was made of. */
   container-type: inline-size;
   --crest: clamp(4rem, 34cqi, 6.2rem);
 }
@@ -147,12 +145,12 @@ button {
   line-height: 1.15;
 }
 
-/* Die Tuer in die Verwaltung, und sie soll nicht danach aussehen: keine Unterstreichung, keine
- * Farbe, kein Rahmen. Ein Besucher liest eine Ueberschrift; wer hinein will, weiss, wo er tippt.
- * Das Schloss ist und bleibt die PIN (decisions.md, Punkt 26).
+/* The door into the admin area, and it is not meant to look like one: no underline, no colour,
+ * no border. A visitor reads a heading; whoever wants to get in knows where to tap. The lock is
+ * and remains the PIN (decisions.md, point 26).
  *
- * Die Ausrichtung nach links kommt vom Knopf, nicht vom Text darin -- `button` zentriert von
- * Haus aus, und der Titel stuende sonst mittig ueber einer linksbuendigen Spalte. */
+ * The alignment to the left comes from the button, not from the text inside it -- `button`
+ * centres by default, and the title would otherwise stand centred above a left-aligned column. */
 .app__heading-door {
   display: block;
   width: 100%;
@@ -179,43 +177,43 @@ button {
   display: block;
 }
 
-/* Die beiden Faktoren binden den Titel an die Hoehe des Wappens. Dass er damit auch so hoch
- * stuende wie der Schieber, gilt nicht mehr und muss auch nicht mehr gelten -- das erledigt seit
- * dem 9. August 2026 die senkrechte Zentrierung oben.
+/* The two factors tie the title to the height of the coat of arms. That it would thereby stand
+ * as tall as the slider no longer holds and no longer has to -- the vertical centring above has
+ * done that since 9 August 2026.
  *
- * Der Faktor der Vorzeile war 0,323 und liesz 0,3 px Luft. Er ist auf 0,28 herunter, damit
- * zwischen dem laengeren der beiden Woerter und dem Spaltenrand ein Finger breit Platz bleibt --
- * eine Zeile, die erst beim Nachmessen passt, passt nicht. */
+ * The factor of the lead line was 0.323 and left 0.3 px of slack. It is down to 0.28, so that a
+ * finger's width of room stays between the longer of the two words and the edge of the column --
+ * a line that only fits once you measure it does not fit. */
 .app__heading-lead {
   font-size: calc(var(--crest) * 0.28);
   font-weight: 400;
   color: var(--muted);
-  /* "Bilder aus" steht fest in de.ts und ist keine Frage der Sammlung: Es darf nie umbrechen,
-   * und mit der Groesse oben muss es das auch nie. */
+  /* "Bilder aus" is fixed in de.ts and is no question of the collection: it must never wrap, and
+   * with the size above it never has to. */
   white-space: nowrap;
 }
 
-/* Der Ortsname ist die engste Zeile im Kopf, nicht "Bilder aus": vier fette Zeichen auf 0,54 des
- * Wappens sind breiter als zehn magere auf 0,28. Und seine Laenge steht nicht fest -- sie kommt
- * aus `region.json`, und "Holm" ist mit vier Zeichen der guenstigste Fall, den es gibt.
+/* The place name is the tightest line in the header, not "Bilder aus": four bold characters at
+ * 0.54 of the arms are wider than ten light ones at 0.28. And its length is not fixed -- it comes
+ * from `region.json`, and "Holm" with four characters is the most favourable case there is.
  *
- * **Deshalb entscheidet hier nicht die Wappenhoehe allein, sondern auch der Name.** Der kleinere
- * der beiden Werte gewinnt:
+ * **So it is not the height of the arms alone that decides here, but the name as well.** The
+ * smaller of the two values wins:
  *
- *   1. `--crest * 0.54` -- die gewachsene Proportion, solange der Name kurz ist.
- *   2. Der Platz neben dem Wappen, geteilt durch die Zeichenzahl. `100cqi` ist die ganze Zelle,
- *      davon gehen das Wappen (34cqi) und der Abstand ab. Der Faktor 0,61 ist die mittlere Breite
- *      eines fetten Zeichens in Bruchteilen der Schriftgroesse -- gemessen an "Holm": 147 px bei
- *      60,3 px Schrift, also 2,44 fuer vier Zeichen.
+ *   1. `--crest * 0.54` -- the proportion that grew, as long as the name is short.
+ *   2. The room beside the arms, divided by the number of characters. `100cqi` is the whole cell;
+ *      the arms (34cqi) and the gap come off it. The factor 0.61 is the average width of a bold
+ *      character in fractions of the font size -- measured against "Holm": 147 px at 60.3 px of
+ *      type, so 2.44 for four characters.
  *
- * `--name-length` setzt `App.tsx`, weil CSS Text nicht messen kann. Ohne diese eine Zahl braeche
- * schon "Hetlingen" um -- gemessen am 16. August 2026, bevor diese Regel entstand.
+ * `--name-length` is set by `App.tsx`, because CSS cannot measure text. Without that one number
+ * even "Hetlingen" would wrap -- measured on 16 August 2026, before this rule existed.
  *
- * **Nach unten ist Schluss bei der Groesse der Vorzeile**, und das ist der Punkt, an dem die
- * Zusage endet. Ein Ortsname kleiner als das "Bilder aus" darueber stellt die Rangfolge auf den
- * Kopf; ohne diesen Boden landete "Klein Nordende-Lieth" bei zwoelf Pixeln. Wo der Boden greift,
- * bricht der Name um -- und das ist die bessere der beiden schlechten Antworten, es war auch
- * schon vorher die gewaehlte. Bis zu welcher Laenge es gutgeht, steht in `docs/adaption.md`.
+ * **Downwards it stops at the size of the lead line**, and that is where the promise ends. A place
+ * name smaller than the "Bilder aus" above it turns the ranking upside down; without that floor
+ * "Klein Nordende-Lieth" ended up at twelve pixels. Where the floor takes hold the name wraps --
+ * and that is the better of the two bad answers, and was the chosen one before as well. Up to
+ * which length it goes well is in `docs/adaption.md`.
  */
 .app__heading-place {
   font-size: max(
@@ -224,15 +222,16 @@ button {
   );
   font-weight: 700;
   color: var(--accent);
-  /* Notnagel fuer den Fall, dass auch das nicht reicht -- ein einzelnes sehr langes Wort, oder
-   * eine Schrift, in der 0,61 danebenliegt. Lieber im Wort umbrechen als aus der Spalte laufen.
-   * Er soll nicht mehr greifen; er steht da, damit ein Irrtum nicht zum Ueberlauf wird. */
+  /* A last resort for the case that even this is not enough -- one very long word, or a font in
+   * which 0.61 is off. Better to break inside a word than to run out of the column. It is not
+   * meant to take hold any more; it stands there so that a miscalculation does not become an
+   * overflow. */
   overflow-wrap: anywhere;
 }
 
-/* Sieht aus wie "Bilder aus", ist aber nicht mehr an dessen Groesse gebunden: Das eine ist der Kopf
- * des Geraets, das andere die Ueberschrift einer Spalte. Waere es gekoppelt, stuende hier eine
- * 2-rem-Zeile ueber einer Frage von 1,25 rem. */
+/* Looks like "Bilder aus" but is no longer tied to its size: the one is the header of the device,
+ * the other the heading of a column. Were they coupled, a 2 rem line would stand here above a
+ * question of 1.25 rem. */
 .help-panel__title {
   font-size: 1.15rem;
   font-weight: 400;
@@ -260,12 +259,12 @@ button {
   inset: 0;
 }
 
-/* Das Wappen in der Kopfzeile, neben dem Ortsnamen. Es lag bis zum 9. August 2026 in admin.css,
- * weil es die Tuer in die Verwaltung war; das ist jetzt der Titel daneben (decisions.md, Punkt
- * 26). Ein Tipp darauf laedt neu und setzt damit alles zurueck.
+/* The coat of arms in the title bar, beside the place name. It sat in admin.css until 9 August
+ * 2026, because it was the door into the admin area; that is now the title beside it
+ * (decisions.md, point 26). A tap on it reloads and thereby resets everything.
  *
- * Ohne Flaeche und ohne Schatten: In der Kopfzeile ist es ein Wappen und kein Knopf, und es soll
- * erst beim Druecken wie einer aussehen. */
+ * Without a surface and without a shadow: in the title bar it is a coat of arms and not a button,
+ * and it should look like one only while it is being pressed. */
 .crest {
   flex: 0 0 auto;
   display: grid;
@@ -290,7 +289,7 @@ button {
 
 /* --- "Hilf mit" panel ---------------------------------------------------- */
 
-/* Ohne Abstand nach oben: "Hilf mit:" beginnt damit auf derselben Hoehe wie die Karte daneben. */
+/* No space above: "Hilf mit:" thereby begins at the same height as the map beside it. */
 .help-panel {
   grid-area: help;
   display: flex;
@@ -301,12 +300,12 @@ button {
   background: var(--paper);
 }
 
-/* Groesse, Gewicht und Farbe kommen aus der Gruppe bei `.app__heading-lead` -- die beiden
- * Ueberschriften der linken Spalte sollen gleich aussehen.
+/* Size, weight and colour come from the group at `.app__heading-lead` -- the two headings of the
+ * left column are meant to look alike.
  *
- * Und genauso eng beieinander: "Hilf mit:" steht ueber der Frage wie "Bilder aus" ueber dem
- * Ortsnamen, also ohne Abstand dazwischen. Deshalb dieselbe Zeilenhoehe wie beim Titelpaar oben --
- * dort entsteht der Abstand allein aus ihr. */
+ * And to sit just as close together: "Hilf mit:" stands above the question the way "Bilder aus"
+ * stands above the place name, so with nothing between them. Hence the same line height as in the
+ * title pair above -- there the spacing comes out of it alone. */
 .help-panel__title {
   margin: 0;
   line-height: 1.15;
@@ -319,8 +318,8 @@ button {
   line-height: 1.15;
 }
 
-/* Der Knopf um das Bild bleibt unsichtbar: Es soll ein Bild bleiben, kein Knopf werden. Nur beim
- * Antippen gibt es eine Rückmeldung, wie beim Wappen. */
+/* The button around the picture stays invisible: it is meant to stay a picture, not become a
+ * button. Only on a tap is there any feedback, as with the coat of arms. */
 .help-panel__zoom {
   display: block;
   width: 100%;
@@ -377,9 +376,9 @@ button {
   font-size: 0.9rem;
 }
 
-/* Den Abstand bringt jetzt `.button--skip` mit, samt der Linie darueber -- er gehoert zur Rolle
- * und nicht zu dieser einen Stelle. Die Klasse bleibt als Griff fuer den Fall, dass sich an dieser
- * Stelle noch etwas aendert. */
+/* The spacing now comes with `.button--skip`, together with the line above it -- it belongs to
+ * the role and not to this one place. The class stays as a handle in case something at this spot
+ * changes after all. */
 .help-panel__next {
   margin-bottom: 0;
 }
@@ -427,17 +426,17 @@ button {
 }
 
 /* Every button at least a fingertip wide -- the kiosk is used standing, with the pad of a finger. */
-/* Die Knopfsprache der Besucheransicht. Vier Rollen, und jede sieht wie ein Knopf aus:
+/* The button language of the visitor view. Four roles, and every one of them looks like a button:
  *
- *   .button            auswaehlen -- Buchstabe, Strasse, Jahrzehnt, Jahr, Hausnummer, Abschnitt,
- *                      dazu die neutrale Handlung („Auf der Karte zeigen")
- *   .button--primary   uebernehmen -- die Antwort. Gefuellt, mit Haken.
- *   .button--back      zurueck. Bleibt beim selben Foto. Mit Pfeil nach links.
- *   .button--skip      ueberspringen. Legt das Foto weg. Mit Pfeil nach rechts, und durch eine
- *                      Linie vom Rest getrennt -- es gehoert zum Foto, nicht zur Frage.
+ *   .button            choose -- letter, street, decade, year, house number, section, plus the
+ *                      neutral action ("Auf der Karte zeigen")
+ *   .button--primary   accept -- the answer. Filled, with a tick.
+ *   .button--back      back. Stays with the same photo. With an arrow to the left.
+ *   .button--skip      skip. Puts the photo aside. With an arrow to the right, and separated from
+ *                      the rest by a line -- it belongs to the photo, not to the question.
  *
- * Flex statt block, seit Symbole neben den Beschriftungen stehen. Am Aussehen der Rasterknoepfe
- * aendert das nichts: mittig zentriert ist, was `text-align: center` vorher tat. */
+ * Flex instead of block, since icons stand beside the labels. Nothing changes in the look of the
+ * grid buttons: centred is what `text-align: center` did before. */
 .button {
   display: flex;
   align-items: center;
@@ -454,7 +453,7 @@ button {
   text-align: center;
 }
 
-/* Faellt beim Umbrechen nicht in sich zusammen und waechst nicht mit der Schrift mit. */
+/* Does not collapse when the label wraps, and does not grow with the type. */
 .button__icon {
   flex: none;
 }
@@ -475,20 +474,20 @@ button {
   font-size: 1.1rem;
 }
 
-/* Zurueck: leiser als eine Antwort, aber unverkennbar ein Knopf. Die Vorgaengerform war randlos
- * und las sich als Text -- fuer eine Zielgruppe, die einmal im Jahr vor diesem Geraet steht, genau
- * das Falsche. Rand und Hoehe stimmen jetzt mit allen anderen ueberein; leiser wird sie ueber die
- * Schriftfarbe, nicht ueber die Form. */
+/* Back: quieter than an answer, but unmistakably a button. The earlier form had no border and
+ * read as text -- exactly the wrong thing for an audience that stands in front of this device
+ * once a year. Border and height now agree with all the others; it gets quieter through the text
+ * colour, not through the shape. */
 .button--back {
   color: var(--muted);
 }
 
-/* Ueberspringen sieht aus wie Zurueck und tut etwas anderes: Es legt das Foto weg. Die Linie
- * darueber ist der ganze Unterschied, und sie ist die Aussage -- was darueber steht, gehoert zur
- * Frage, dieser Knopf zum Foto. */
+/* Skip looks like Back and does something else: it puts the photo aside. The line above it is
+ * the whole difference, and it is the statement -- what stands above belongs to the question,
+ * this button to the photo. */
 .button--skip {
-  /* Der Abstand liegt ueberwiegend *ausserhalb* des Knopfes: Innenabstand waere mittippbar, und
-   * ein Streifen ueber der Beschriftung, der das Foto weglegt, gehoert nicht dazu. */
+  /* The spacing lies mostly *outside* the button: padding would be tappable, and a strip above the
+   * label that puts the photo aside does not belong to it. */
   margin-top: 1.5rem;
   padding-top: 0.8rem;
   border-top: 1px solid var(--line);
@@ -500,8 +499,8 @@ button {
   color: var(--muted);
 }
 
-/* Bleibt fuer das Zahlenfeld: „Zurueck zur Karte" fuehrt aus der Verwaltungstuer heraus und
- * gehoert nicht zur Knopfsprache der Besucherfragen. */
+/* Stays for the number pad: "Zurueck zur Karte" leads back out of the admin door and does not
+ * belong to the button language of the visitor questions. */
 .button--quiet {
   border-color: transparent;
   background: none;
@@ -510,17 +509,17 @@ button {
   font-size: 0.9rem;
 }
 
-/* Löschen ist die einzige Handlung im Verwaltungsbereich, die etwas aus dem Bestand nimmt. Sie
- * traegt deshalb Farbe -- aber nur am Rand und in der Schrift, nicht als Flaeche: Ein rot
- * gefuellter Knopf neben „Speichern" zoege den Blick genau dorthin, wo er nicht hingehoert. */
+/* Deleting is the only action in the admin area that takes something out of the collection. It
+ * therefore carries colour -- but only in the border and the type, not as a fill: a red filled
+ * button beside "Speichern" would draw the eye exactly where it does not belong. */
 .button--danger {
   border-color: #b4443a;
   color: #b4443a;
 }
 
-/* Das Gegenstueck: Wiederherstellen holt zurueck, was Loeschen genommen hat. Dieselbe Bauform --
- * Farbe nur am Rand und in der Schrift --, damit die beiden als Paar zu erkennen sind, und im
- * Kontrast zu ihm abgestimmt: Beide liegen bei rund 5:1 gegen Weiss. */
+/* The counterpart: restoring brings back what deleting took. The same build -- colour only in
+ * the border and the type -- so that the two are recognisable as a pair, and matched to it in
+ * contrast: both sit at roughly 5:1 against white. */
 .button--restore {
   border-color: #3f7a4e;
   color: #3f7a4e;
@@ -695,8 +694,8 @@ button {
   transition: transform 120ms ease;
 }
 
-/* Mehrere Fotos an derselben Stelle: die Anzahl in der Ecke sagt es, bevor jemand tippt.
- * Hineinzoomen hilft hier nicht -- identische Punkte trennen sich bei keiner Zoomstufe. */
+/* Several photos at the same spot: the count in the corner says so before anybody taps. Zooming
+ * in does not help here -- identical points do not come apart at any zoom level. */
 .marker__count {
   position: absolute;
   top: -0.4rem;
@@ -733,10 +732,10 @@ button {
   background: var(--line);
 }
 
-/* Seit hier eine Adresse steht und nicht mehr eine Jahreszahl, braucht die Zeile eine Grenze.
- * „Uetersener Straße 12 — 1953" ist gut doppelt so breit wie das Vorschaubild darueber; ohne
- * Deckel schoebe sie sich ueber die Nachbarmarker. Zwei Zeilen, dann wird abgeschnitten -- der
- * volle Text steht ohnehin in der Beschriftung fuer Vorlesewerkzeuge und in der Detailansicht. */
+/* Since an address stands here rather than a year, the line needs a limit. "Uetersener Straße 12
+ * — 1953" is a good twice as wide as the thumbnail above it; without a cap it would push itself
+ * over the neighbouring markers. Two lines, then it is cut -- the full text stands in the label
+ * for screen readers and in the detail view anyway. */
 .marker__caption {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -755,7 +754,7 @@ button {
     0 0 4px rgb(0 0 0 / 60%);
 }
 
-/* Mittig unter der Beschriftung, sobald diese breiter wird als das Bild. */
+/* Centred under the caption, as soon as that grows wider than the picture. */
 .marker__image {
   margin-inline: auto;
 }
@@ -801,17 +800,17 @@ button {
 
 /* --- time slider --------------------------------------------------------- */
 
-/* Oben ausgerichtet, nicht mittig: So liegt die erste Zeile des Schiebers auf derselben Hoehe wie
- * das Wappen nebenan -- beide beginnen bei `padding-top`. Zentriert waere ihre Lage ein
- * Rechenergebnis aus der Inhaltshoehe und veraenderte sich, sobald der Kopf des Schiebers anders
- * aussieht. */
+/* Aligned to the top, not centred: the first line of the slider then sits at the same height as
+ * the coat of arms beside it -- both begin at `padding-top`. Centred, its position would be the
+ * result of a calculation over the content height and would change as soon as the head of the
+ * slider looked different. */
 .timeline {
   grid-area: timeline;
   display: flex;
   flex-direction: column;
-  /* Das Gegenstueck zur Zentrierung im Titelfeld: Beide Zellen der Zeile sind gleich hoch, und
-   * beide legen ihren Inhalt in die Mitte. Damit steht die ganze Zeile mittig, ohne dass eine
-   * Seite die Hoehe der anderen kennen muesste. */
+  /* The counterpart of the centring in the title cell: both cells of the row are the same height,
+   * and both put their content in the middle. The whole row then stands centred without either
+   * side having to know the height of the other. */
   justify-content: center;
   gap: 0.35rem;
   min-width: 0;
@@ -827,8 +826,8 @@ button {
 
 .timeline__header {
   display: flex;
-  /* Zentriert statt an der Grundlinie, seit rechts ein Schalter steht statt eines Wortes: Eine
-   * Flaeche von 48 px an einer Schriftgrundlinie auszurichten setzt sie sichtbar zu tief. */
+  /* Centred rather than on the baseline, since a switch stands on the right instead of a word:
+   * aligning a 48 px surface to a text baseline sets it visibly too low. */
   align-items: center;
   justify-content: space-between;
   gap: var(--gap);
@@ -847,11 +846,11 @@ button {
   margin: 0 0.15rem;
 }
 
-/* Der Schalter fuer die Fotos ohne Jahr -- und die blosse Meldung, wenn es nichts zu schalten
- * gibt. Beide tragen dieselbe Klasse, damit die Kopfzeile in beiden Faellen gleich hoch bleibt.
+/* The switch for the photos without a year -- and the bare message when there is nothing to
+ * switch. Both carry the same class, so that the header stays the same height in either case.
  *
- * Kein `input[type=checkbox]`: Der ist rund 13 px gross und damit weit unter den 48 px, die diese
- * Zielgruppe braucht. Das Kaestchen ist deshalb gezeichnet, der Knopf traegt den Zustand. */
+ * No `input[type=checkbox]`: that is about 13 px and therefore far below the 48 px this audience
+ * needs. The box is drawn instead, and the button carries the state. */
 .timeline__undated {
   display: flex;
   align-items: center;
@@ -1001,38 +1000,37 @@ button.timeline__undated:hover {
 /* --- photo at full size -------------------------------------------------- */
 
 .overlay {
-  /* Drei gedachte Zeilen: Kopfzeile mit dem Schließen-Knopf, darunter Bild und Text nebeneinander,
-   * darunter die Blätterknöpfe. Die beiden Zahlen sagen, wie viel Höhe Kopf- und Fußzeile dem Bild
-   * wegnehmen -- jeweils Knopfhöhe plus den Abstand darunter.
+  /* Three notional rows: a header with the close button, below it picture and text side by side,
+   * below that the paging buttons. The two numbers say how much height header and footer take
+   * away from the picture -- button height plus the gap below it, each time.
    *
-   * Die Fußzeile gibt es **nur bei einem Stapel**, und dann kostet sie auch nur dort Platz. Sie
-   * immer zu reservieren hielte den Rahmen in beiden Fällen gleich, nähme aber jedem einzelnen
-   * Foto -- dem häufigeren Fall -- rund 8 % Bildhöhe. Zwei Öffnungen sieht ohnehin niemand
-   * nebeneinander, und der Schließen-Knopf steht so oder so an derselben Stelle. */
+   * The footer exists **only for a stack**, and then it costs room only there. Reserving it always
+   * would keep the frame the same in both cases, but would take about 8 % of picture height away
+   * from every single photo -- the more common case. Nobody sees two openings side by side
+   * anyway, and the close button stands in the same place either way. */
   --overlay-head: 4.5rem;
   --pager-room: 0rem;
   --overlay-pad: 2.5rem;
   --overlay-gap: 2rem;
 
-  /* Die Textspalte waechst mit, statt gesetzt zu sein.
+  /* The text column grows along instead of being set.
    *
-   * Fest auf 24rem waren das bei 18px Wurzelschrift 432px -- auf einem 1024er Panel blieben dem
-   * querformatigen Scan damit **466px**, also weniger als die Haelfte des Schirms fuer das, was
-   * die Ansicht zeigen soll. Der `minmax(16rem, ...)` in `grid-template-columns` federte das nicht
-   * ab: Er nennt eine Untergrenze, und die Spalte bleibt bei ihrer Wunschbreite, solange sie
-   * passt.
+   * Fixed at 24rem that was 432px at 18px root type -- on a 1024 panel it left the landscape scan
+   * **466px**, so less than half the screen for what the view is there to show. The
+   * `minmax(16rem, ...)` in `grid-template-columns` did not cushion that: it names a lower bound,
+   * and the column stays at its preferred width as long as that fits.
    *
-   * 16rem ist die Grenze nach unten, weil darunter die Schlagwoerter unruhig umbrechen; 24rem die
-   * nach oben, weil eine breitere Textspalte nur laengere Zeilen macht und keine besseren. */
+   * 16rem is the bound below, because the keywords wrap restlessly under it; 24rem the one above,
+   * because a wider text column only makes longer lines and not better ones. */
   --overlay-aside: clamp(16rem, 28vw, 24rem);
 
   position: fixed;
   inset: 0;
   z-index: 10;
   display: grid;
-  /* Waagerecht mittig, senkrecht auf volle Hoehe gezogen. Das Ziehen ist der Grund, warum die
-   * Blaetterknoepfe unten stehen bleiben koennen -- ohne eine feste Hoehe haette der Inhalt nur
-   * die seines Bildes, und "unten" waere jedes Mal woanders. */
+  /* Centred horizontally, stretched to full height vertically. The stretching is why the paging
+   * buttons can stay at the bottom -- without a fixed height the content would only have that of
+   * its picture, and "at the bottom" would be somewhere else every time. */
   justify-items: center;
   align-items: stretch;
   padding: var(--overlay-pad);
@@ -1045,70 +1043,73 @@ button.timeline__undated:hover {
 
 .overlay__content {
   display: grid;
-  /* Die linke Spalte ist so breit wie das Bild, nicht breiter -- nur so stehen die Blätterknöpfe
-   * darunter mittig unter dem Bild und nicht mittig in einer leeren Spalte. */
+  /* The left column is as wide as the picture and no wider -- only then do the paging buttons below
+   * stand centred under the picture and not centred in an empty column. */
   grid-template-columns: auto minmax(16rem, var(--overlay-aside));
   column-gap: var(--overlay-gap);
   row-gap: 1rem;
-  /* Oben ausgerichtet: Bild und Text fangen in derselben Flucht an. */
+  /* Aligned at the top: picture and text begin on the same line. */
   align-items: start;
   max-width: 100%;
   max-height: 100%;
 }
 
-/* Die Kopfzeile haelt nur noch den Platz frei -- der Knopf selbst steht seit dem 16. August 2026
- * ausserhalb des Rasters, siehe `.overlay__close`. Ohne diese Zeile ruecke der Inhalt nach oben
- * und der Knopf laege darueber. */
+/* The header only keeps the room free now -- the button itself has stood outside the grid since
+ * 16 August 2026, see `.overlay__close`. Without this row the content would move up and the
+ * button would lie over it. */
 .overlay__head {
   grid-column: 1 / -1;
   min-height: 3.5rem;
 }
 
-/* Bild oben, Blaetterknoepfe unten -- und dazwischen so viel Luft, wie das Bild uebriglaesst.
+/* Picture at the top, paging buttons at the bottom -- and between them as much air as the
+ * picture leaves.
  *
- * Vorher standen die Knoepfe unmittelbar unter dem Bild und wanderten mit dessen Hoehe: zwischen
- * einem 3:2-Querformat und einem 2:3-Hochformat lagen **103 px**, gemessen am 16. August 2026.
- * Wer durch einen Stapel blaettert, dessen Fotos nicht alle dasselbe Format haben, jagt den
- * Knopf ueber den Schirm -- und trifft im schlimmsten Fall das Bild statt "Naechstes".
+ * The buttons used to stand directly under the picture and travelled with its height: between a
+ * 3:2 landscape and a 2:3 portrait lay **103 px**, measured on 16 August 2026. Whoever pages
+ * through a stack whose photos are not all the same format chases the button across the screen --
+ * and in the worst case hits the picture instead of "Naechstes".
  *
- * Waagerecht bleiben sie mittig **unter dem Bild**, nicht mittig im Schirm: Die linke Spalte ist
- * so breit wie das Bild, und `justify-items: center` mittet darin. */
+ * Horizontally they stay centred **under the picture**, not centred in the screen: the left column
+ * is as wide as the picture, and `justify-items: center` centres inside it. */
 .overlay__figure {
   display: grid;
   grid-template-rows: auto 1fr;
   justify-items: center;
   gap: 1rem;
   min-width: 0;
-  /* Volle Hoehe der Zeile -- sonst haette das Raster oben nichts, woran es "unten" messen kann. */
+  /* Full height of the row -- otherwise the grid above would have nothing to measure "bottom"
+ * against. */
   align-self: stretch;
 }
 
 .overlay__image {
-  /* Was nach Textspalte, Abstand und Rand übrig bleibt. Ein Anteil der Breite (etwa 62vw) traf
-   * dieselbe Zahl nur zufällig: bei einem querformatigen Foto schob sich der Inhalt dann über
-   * seine eigenen Ränder hinaus. */
+  /* What is left after the text column, the gap and the margin. A share of the width (62vw, say)
+   * hit the same number only by chance: with a landscape photo the content then pushed itself
+   * beyond its own margins. */
   max-width: calc(100vw - var(--overlay-aside) - var(--overlay-gap) - 2 * var(--overlay-pad));
   max-height: calc(100vh - 2 * var(--overlay-pad) - var(--overlay-head) - var(--pager-room));
   object-fit: contain;
-  /* Ohne Hintergrund, und das ist kein Versehen: Das Element traegt sein Seitenverhaeltnis als
-   * `aspect-ratio` (siehe PhotoOverlay.tsx), die Box entspricht dem Bild also genau und
-   * `object-fit: contain` laesst nirgends einen Rand frei. Ein Hintergrund waere damit nur in
-   * einem einzigen Moment zu sehen -- bevor das Bild gezeichnet ist. Genau das war er: ein
-   * schwarzer Blitz beim Oeffnen und bei jedem Schritt durch einen Stapel. */
+  /* No background, and that is not an oversight: the element carries its own ratio as
+   * `aspect-ratio` (see PhotoOverlay.tsx), so the box matches the picture exactly and
+   * `object-fit: contain` leaves no margin anywhere. A background would therefore be visible in
+   * one single moment -- before the picture is drawn. That is exactly what it was: a black flash
+   * on opening and at every step through a stack. */
   box-shadow: 0 6px 30px rgb(0 0 0 / 60%);
 }
 
-/* Solange die Datei unterwegs ist, wird nichts gezeichnet -- der Schatten am wenigsten. Er saesse
- * sonst um ein leeres Rechteck, was schlimmer aussieht als das Schwarz vorher, weil es wie ein
- * fehlendes Bild wirkt. `visibility` statt `display`, damit der Platz stehen bleibt und die
- * Ansicht beim Blaettern nicht springt. */
+/* While the file is on its way nothing is drawn -- the shadow least of all. It would otherwise
+ * sit around an empty rectangle, which looks worse than the black did, because it reads as a
+ * missing picture. `visibility` rather than `display`, so that the room stays and the view does
+ * not jump while paging. */
 .overlay__image--loading {
   visibility: hidden;
 }
 
 .overlay__text {
-  /* Viel Text scrollt in seiner Spalte, statt unter den Bildschirmrand zu laufen. Die Grenze ist
-   * dieselbe wie beim Bild, nur ohne die Fußzeile -- der Text reicht bis unter die Blätterknöpfe. */
+  /* A lot of text scrolls inside its column instead of running under the edge of the screen. The
+   * limit is the same as for the picture, only without the footer -- the text reaches below the
+   * paging buttons. */
   max-height: calc(100vh - 2 * var(--overlay-pad) - var(--overlay-head));
   overflow-y: auto;
   min-height: 0;
@@ -1116,8 +1117,8 @@ button.timeline__undated:hover {
   color: #f4efe8;
 }
 
-/* Titel und Stift in einer Zeile. Der Stift bleibt oben buendig, damit er bei einem zweizeiligen
- * Titel neben dessen erster Zeile steht und nicht in dessen Mitte rutscht. */
+/* Title and pencil on one line. The pencil stays aligned at the top, so that with a two-line
+ * title it stands beside the first line and does not slide into the middle of it. */
 .overlay__title-row {
   display: flex;
   align-items: flex-start;
@@ -1132,9 +1133,9 @@ button.timeline__undated:hover {
   flex: 1;
 }
 
-/* Die zweite Tuer in die Verwaltung (siehe decisions.md, Punkt 26). Sichtbar, aber leise: Sie
- * gehoert nicht dem Besucher, und ein farbiger Knopf neben dem Titel zoege den Blick dorthin.
- * Die Flaeche misst trotzdem die vollen 48 px -- daran aendert die Zielgruppe nichts. */
+/* The second door into the admin area (see decisions.md, point 26). Visible but quiet: it does
+ * not belong to the visitor, and a coloured button beside the title would draw the eye there. The
+ * surface still measures the full 48 px -- the audience changes nothing about that. */
 .overlay__edit {
   flex: none;
   display: grid;
@@ -1148,8 +1149,8 @@ button.timeline__undated:hover {
   color: rgb(216 208 198 / 70%);
 }
 
-/* Der Stift ist das einzige Symbol ohne Beschriftung -- siehe kiosk/icons.tsx. Er steht deshalb
- * nicht im Knopffluss und braucht die Abstandsregel von `.button__icon` nicht. */
+/* The pencil is the only icon without a label -- see kiosk/icons.tsx. It therefore stands outside
+ * the button flow and does not need the spacing rule of `.button__icon`. */
 .overlay__edit-icon {
   display: block;
 }
@@ -1190,8 +1191,8 @@ button.timeline__undated:hover {
   color: #d8d0c6;
 }
 
-/* Der Bildnachweis steht zuletzt und am leisesten. Er gehört dorthin, weil er zum Bild gehört --
- * aber er ist nicht das, wofür jemand vor dem Schirm steht. */
+/* The credit stands last and quietest. It belongs there because it belongs to the picture -- but
+ * it is not what anybody is standing in front of the screen for. */
 .overlay__credit {
   margin: 1.25rem 0 0;
   font-size: 0.8rem;
@@ -1199,9 +1200,9 @@ button.timeline__undated:hover {
   color: rgb(216 208 198 / 65%);
 }
 
-/* Die Kennung ganz unten, kleiner und leiser als der Bildnachweis: Sie ist keine Angabe zum Bild,
- * sondern ein Griff, um es wiederzufinden. Wer sie nicht sucht, soll sie nicht lesen muessen.
- * Zeichen mit gleicher Breite, weil sie abgetippt wird. */
+/* The identifier right at the bottom, smaller and quieter than the credit: it is not a statement
+ * about the picture but a handle for finding it again. Whoever is not looking for it should not
+ * have to read it. Fixed-width characters, because it gets typed out. */
 .overlay__hash {
   margin: 0.6rem 0 0;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -1210,18 +1211,19 @@ button.timeline__undated:hover {
   color: rgb(216 208 198 / 40%);
 }
 
-/* Blättern durch die Fotos einer Stelle: mittig unter dem Bild, nicht mittig im Schirm. Über dem
- * Bildrand dürfen sie nicht liegen -- ausgerechnet dort steht bei alten Abzügen die Beschriftung. */
+/* Paging through the photos of one spot: centred under the picture, not centred in the screen.
+ * They must not lie over the edge of the picture -- on old prints that is exactly where the
+ * caption stands. */
 .overlay__pager {
   display: flex;
   align-items: center;
   gap: 1rem;
-  /* Ans untere Ende der zweiten Rasterzeile -- siehe .overlay__figure. */
+  /* To the bottom of the second grid row -- see .overlay__figure. */
   align-self: end;
 }
 
-/* Blaetterknoepfe und Frageknoepfe teilen sich die Form -- die Ansicht kennt genau eine, und
- * `.button` selbst ist fuer die helle Spalte gemacht und waere hier hell auf dunkel. */
+/* Paging buttons and question buttons share the shape -- the view knows exactly one, and
+ * `.button` itself is made for the light column and would be light on dark here. */
 .overlay__pager .button,
 .overlay__ask {
   min-height: 3.5rem;
@@ -1241,11 +1243,11 @@ button.timeline__undated:hover {
   opacity: 0.35;
 }
 
-/* Der Weg in den Beitragsbereich, jeweils unter der Zeile, die er aendert.
+/* The way into the contribution panel, each under the line it changes.
  *
- * Bis August 2026 standen hier die Auswahlraster selbst -- bis zu 37 Knoepfe unter der
- * Beschreibung. Jetzt ist es je ein Knopf, und die Auswahl steht im Bereich, wo sie die Karte
- * daneben hat. Siehe decisions.md. */
+ * Until August 2026 the choice grids themselves stood here -- up to 37 buttons under the
+ * description. Now it is one button each, and the choice stands in the panel, where it has the
+ * map beside it. See decisions.md. */
 .overlay__ask {
   width: auto;
   margin: 0.5rem 0 1rem;
@@ -1257,20 +1259,20 @@ button.timeline__undated:hover {
   text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
 }
 
-/* Gleiche Form, gleicher Rahmen, gleiche Höhe wie die Blätterknöpfe -- die Ansicht kennt damit
- * genau eine Knopfform.
+/* The same shape, the same border and the same height as the paging buttons -- the view thereby
+ * knows exactly one button shape.
  *
- * **Immer in der Ecke des Schirms, nicht am rechten Rand des Inhalts.** Vorher sass er buendig mit
- * der Textspalte: Bei einem breiten Foto war das dasselbe wie "oben rechts", bei einem schmalen
- * rueckte der ganze Inhalt zusammen und der Knopf mit ihm nach innen -- er stand dann irgendwo im
- * Bild statt dort, wo man ihn sucht.
+ * **Always in the corner of the screen, not at the right edge of the content.** It used to sit
+ * flush with the text column: with a wide photo that was the same as "top right", with a narrow
+ * one the whole content drew together and the button moved inwards with it -- it then stood
+ * somewhere inside the picture instead of where one looks for it.
  *
- * Aus dem Raster genommen und an `.overlay` geheftet, das als einziger Vorfahr positioniert ist.
- * Den Platz haelt weiterhin `.overlay__head` frei.
+ * Taken out of the grid and pinned to `.overlay`, the only positioned ancestor. The room is still
+ * kept free by `.overlay__head`.
  *
- * **Und er bekommt keine der vier Rollen** aus decisions.md, Punkt 30: Die sind die Sprache des
- * Beitragsbereichs -- auswaehlen, uebernehmen, zurueck, ueberspringen -- und Schliessen ist keine
- * davon. Die Detailansicht fuehrt auf ihrem dunklen Grund ohnehin eine eigene Knopffamilie. */
+ * **And it gets none of the four roles** from decisions.md, point 30: those are the language of
+ * the contribution panel -- choose, accept, back, skip -- and closing is none of them. The detail
+ * view runs a button family of its own on its dark ground anyway. */
 .overlay__close {
   position: absolute;
   top: var(--overlay-pad);
@@ -1311,11 +1313,10 @@ button.timeline__undated:hover {
   color: #a03030;
 }
 
-/* Der Kasten, in dem der Absturz erklaert wird -- siehe ErrorBoundary.tsx.
+/* The box in which the crash is explained -- see ErrorBoundary.tsx.
  *
- * Schmal gehalten, weil .splash ueber die ganze Breite geht: Zwei Zeilen Text quer ueber einen
- * 27-Zoll-Bildschirm liest niemand. Der Knopf darunter erbt Groesse und Fingerflaeche von
- * .button. */
+ * Kept narrow, because .splash spans the full width: nobody reads two lines of text across a
+ * 27-inch screen. The button below inherits its size and its finger area from .button. */
 .splash__panel {
   max-width: 26rem;
 }

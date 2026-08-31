@@ -13,7 +13,7 @@ something wrong:
     hochkant.jpg            the orientation stands in the EXIF, not in the pixels
     graustufen.tif          TIFF without colour, the way book scanners deliver it
     cmyk.tif                CMYK -- WebP does not know this colour space
-    kein_bild.txt           a text file with an image suffix
+    not_an_image.txt           a text file with an image suffix
 """
 
 import io
@@ -122,7 +122,7 @@ def main() -> None:
     _image(800, 600, "CMYK").convert("CMYK").save(HERE / "cmyk.tif", "TIFF")
 
     # 7. Not an image file, despite the suffix.
-    (HERE / "kein_bild.txt").write_text("Das hier ist kein Bild.\n", encoding="utf-8")
+    (HERE / "not_an_image.txt").write_text("This is not an image.\n", encoding="utf-8")
 
     for path in sorted(HERE.iterdir()):
         if path.name != Path(__file__).name:

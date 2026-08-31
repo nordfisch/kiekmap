@@ -41,6 +41,6 @@ line-length = 100
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.per-file-ignores]
-# Migrationen sind generiert und importieren op/sa auf Vorrat. Beim Anpassen von Hand ist genau
-# das praktisch -- also nicht anmeckern.
+# Migrations are generated and import op/sa whether they need them or not. When one is adjusted
+# by hand that is exactly what helps -- so do not complain about it.
 "alembic/versions/*.py" = ["F401"]
