@@ -51,7 +51,6 @@ the language.
 | Docs for museum and operation: `usermanual`, `operations`, `adaption`, README, CHANGELOG, `backlog` | German |
 | Docs for developers: `architecture`, `development`, `decisions`, `CONTRIBUTING`, this file | English |
 | `docs/history.md` up to v0.8.0 | German, frozen |
-| `docs/lessons.md` — what the plan did not know | English |
 | Title and body of a pull request | English |
 | GitHub issues | German |
 | Commit messages from 30 August 2026 on | **English** |
@@ -166,12 +165,11 @@ documentation cites individual commits by hash. More in
 deleted. A comment that names a pitfall is gold, and there are a few here (the `rshared` mount, the
 sprite URL that has to be absolute, `+` meaning addition in SQLite).
 
-**A finished item is recorded in three places, not nine:** what the program can do now goes into
-the [changelog](CHANGELOG.md); how it came about goes to the end of
-[docs/history.md](docs/history.md); the item itself comes out of
-[docs/backlog.md](docs/backlog.md) and its number goes onto the retired list. If a decision came
-out of it, that becomes a new point in [docs/decisions.md](docs/decisions.md), with its reasoning.
-**This file is not one of the three** — it says how to work, not what happened.
+**A finished item is recorded in two places, not nine:** what the program can do now goes into the
+[changelog](CHANGELOG.md), and the item itself comes out of [docs/backlog.md](docs/backlog.md) with
+its number going onto the retired list. If a decision came out of it, that becomes a new point in
+[docs/decisions.md](docs/decisions.md), with a short reason. How the work went is in the commit and
+the closed issue, and nowhere else — `docs/history.md` is closed and takes nothing more.
 
 **Keep the audience in mind.** Visitors stand at a touchscreen, often elderly. Controls at least
 48 px. The admin view is used once or twice a year by volunteers — plain wording matters more than

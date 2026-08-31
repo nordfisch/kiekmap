@@ -10,14 +10,20 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Sicherheitsmeldung, auf die `SECURITY.md` verweist und die es nur auf öffentlichen Repos gibt,
   Branch-Schutz für `main` und `develop`, Secret-Scanning mit Push-Schutz, und ein Abzeichen im
   README, das den Zustand der Prüfungen zeigt
-- **[lessons.md](docs/lessons.md)** — der Nachfolger der Historie, englisch und absichtlich
-  schmal: ein Eintrag entsteht nur, wenn ohne ihn derselbe Fehler ein zweites Mal passieren würde
 
 ### Geändert
 
-- **`docs/history.md` ist abgeschlossen.** Sie endet am 25. August 2026 mit v0.8.0, bleibt deutsch
-  und wird nicht übersetzt. Was danach kam, steht in den Commits, den Pull Requests und den
-  geschlossenen Issues. Ein neuer Abschnitt darin macht `build_register.py --check` rot
+- **`docs/history.md` ist abgeschlossen, und eine Nachfolgerin gibt es nicht.** Sie endet am
+  25. August 2026 mit v0.8.0 und bleibt deutsch. Was die Arbeit lehrt, wird künftig ein Punkt in
+  `decisions.md` mit kurzer Begründung; wie sie verlief, steht in den Commits und den geschlossenen
+  Issues. Ein neuer Abschnitt in der Historie macht `build_register.py --check` rot
+- **Die Entwicklerdoku ist englisch.** `architecture`, `development`, `decisions`, `CONTRIBUTING`
+  und `CLAUDE.md` — rund 24.000 Wörter. `decisions.md` ist vorher zusammengefasst worden: alle 67
+  Punkte bleiben, der Text ist ein Drittel kürzer. Weg sind Herkunfts- und Umsetzungsgeschichte,
+  die Buchführung der Bereinigungsläufe und die am Holmer Bestand gemessenen Stückzahlen. Zwei Punkte sind zu Verweisen geworden und behalten ihre
+  Nummer, damit ältere Zitate weiter auflösen
+- **Der `0.8.0`-Block im CHANGELOG ist von 250 auf 55 Einträge zusammengefasst**, gruppiert nach
+  Bereichen statt nach Arbeitsschritt. Das Kleinteilige steht in `history.md` und in den Commits
 - **Die Sprachgrenze verläuft jetzt nach Publikum, nicht nach Dateityp.** Deutsch bleibt, was
   Besucher, Museumsteam und Betreiber lesen: Oberfläche, CLI, `usermanual`, `operations`,
   `adaption`, README, CHANGELOG, Issues und die Testdateien. Englisch wird, was Entwickler lesen:
@@ -26,12 +32,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   gilt ab sofort. Siehe [Punkt 68](docs/decisions.md)
 - **Die Zahl vor den Prüfungen ist weg**, wo direkt darunter die Liste steht. Vier Dateien sagten
   „fünf" und zählten sechs auf; eine Zahl in Prosa altert still. Siehe
-  [lessons.md](docs/lessons.md)
+  [Punkt 59](docs/decisions.md)
 - **`tools/language_check.py` prüft beide Seiten.** Statt einer Prosaliste zwei: deutsche Doku wird
   auf umschriebene Umlaute geprüft, englische auf deutsche Absätze. Dazu Schreibregeln für
   Dokumentation in beiden Sprachen, in [CLAUDE.md](CLAUDE.md)
-- **`tools/check_anchors.py` liest auch `CLAUDE.md`, `CONTRIBUTING.md` und `lessons.md`.** Drei
-  Dateien, in die andere hineinverweisen und deren Überschriften bis dahin niemand nachhielt
+- **`tools/check_anchors.py` liest auch `CLAUDE.md` und `CONTRIBUTING.md`.** Zwei Dateien, in die
+  andere hineinverweisen und deren Überschriften bis dahin niemand nachhielt
 - **Vitest von 2 auf 3.** Nicht wegen einer neuen Funktion, sondern weil Vitest 2 seine eigenen,
   alten Kopien von `vite` und `esbuild` mitbrachte — daran hingen fünf von sechs
   Dependabot-Meldungen. Im Baum liegt jetzt je eine Fassung. Ausgeliefert war nichts davon; die
@@ -212,11 +218,10 @@ alles hier ist neu. Die 250 Einzelschritte, aus denen es entstand, stehen in
 
 ### Dokumentation
 
-- **Zehn Dateien, jede mit genau einer Frage**, erschlossen über [docs/index.md](docs/index.md):
+- **Neun Dateien, jede mit genau einer Frage**, erschlossen über [docs/index.md](docs/index.md):
   `architecture` (woraus es besteht), `decisions` (warum es so ist), `history` (wie es dazu kam),
-  `lessons` (was der Plan nicht wusste), `development` (wie man daran arbeitet), `backlog` (was
-  fehlt), `adaption` und `licensing` (für ein zweites Museum), `operations` und `usermanual`
-  (für den Betrieb)
+  `development` (wie man daran arbeitet), `backlog` (was fehlt), `adaption` und `licensing` (für
+  ein zweites Museum), `operations` und `usermanual` (für den Betrieb)
 - **Backlogpunkte tragen feste Nummern**, unter denen sie zitiert werden. Nummern werden nie neu
   vergeben, auch nicht nach dem Erledigen
 - **Die Historie hat ein Register** mit einer Zeile je Abschnitt und Datum, erzeugt und geprüft

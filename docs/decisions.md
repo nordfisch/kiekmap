@@ -1,8 +1,12 @@
 # Decisions
 
 Why things are the way they are. Every point names the **decision**, its **reason** and its
-**consequence**. How it came about is in [history.md](history.md); what the program can do is in
-the [changelog](../CHANGELOG.md).
+**consequence**. What the program can do is in the [changelog](../CHANGELOG.md); how the work went
+is in the commits and the closed issues, and up to v0.8.0 in [history.md](history.md).
+
+**A lesson is kept as the decision it led to, not as a lesson.** Whatever the work teaches ends up
+here in one point with a short reason, or it stays where it happened — in a commit message, in an
+issue. There is no third place for it.
 
 Append new entries at the bottom, do not delete old ones. Superseded ones get the note
 *Superseded by …*; merged ones keep their number as a pointer, so that a citation in an old note
@@ -566,6 +570,12 @@ number.
 
 This file does the same: **point 8 is missing**, because it was absorbed into
 [point 11](#11-backup-is-a-feature-not-a-script).
+
+**Two sequences share one word.** This file numbers its points as well, independently of the
+backlog, and both are cited as „Punkt N". A citation therefore always names its file, as a link —
+`[point 15](backlog.md)` for a backlog item, an anchor for a decision. And whoever writes a new
+point reads the last heading of the file it goes into first: what the other sequence has reached
+says nothing about this one.
 
 **The ranking stands only in the overview table**, not additionally under each heading. Two places
 for the same value drift apart, and then nobody knows which one is right.
@@ -1464,6 +1474,11 @@ times points on a map are meant; once a sentence in the history is right for its
 log entry, and a correction makes both wrong. The two places that really were meant to be current
 therefore **lost** their numbers instead of getting a check.
 
+**A number that something else already states does not get written at all.** Four files said this
+repository has „five checks" and then listed six of them; the count in front of the list said
+nothing a reader could not see, and it went stale the moment a sixth check arrived. Where the list
+is right there, the list counts itself.
+
 **What can be checked is the backlog's bookkeeping about itself.** That is not prose but structure,
 and it makes a promise that either holds or does not: every number ever issued is either open or
 retired — no gap, no surplus, none twice. `tools/check_numbers.py` verifies it.
@@ -1755,7 +1770,8 @@ umlaut check for the wrong reason, because it has nothing German that could be t
 would move every hash the documentation cites — the same arithmetic as in point 66, and this time
 without a gain.
 
-**What follows, and what explicitly does not:** `history.md` is closed rather than translated, and a
-lean English successor stands beside it. `decisions.md` is consolidated first and then translated.
+**What follows, and what explicitly does not:** `history.md` is closed rather than translated, and
+nothing takes its place — what the work teaches becomes a decision here, and how it went stays in
+the commits and the issues. `decisions.md` is consolidated first and then translated.
 No GitHub wiki: `make check` does not reach into a second repository, and `operations.md` describes
 `deploy/pi/update.sh` line by line — today a change to both is one commit and one review.

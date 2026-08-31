@@ -50,8 +50,8 @@ important ones:
   the collection — those go into `region.json` or into the settings. Test data is exempt.
 - **No names from the real collection**, not even in a comment. The sample collection provides an
   invented cast; it is listed in [development.md](docs/development.md).
-- **A finished item is recorded in three places**, not nine: the changelog, `history.md`,
-  `backlog.md` — plus `decisions.md` if a decision came out of it.
+- **A finished item is recorded in two places**, not nine: the changelog and `backlog.md` — plus
+  `decisions.md` if a decision came out of it. How the work went stays in the commit and the issue.
 
 ## An idea or a bug
 

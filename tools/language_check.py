@@ -157,7 +157,6 @@ ENGLISH_PROSE: tuple[str, ...] = (
     "docs/architecture.md",
     "docs/decisions.md",
     "docs/development.md",
-    "docs/lessons.md",
     "CLAUDE.md",
     "CONTRIBUTING.md",
 )
