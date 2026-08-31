@@ -161,10 +161,10 @@ class TestBackingUp:
 
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
 
-        ziel = stick / backup.BACKUP_DIR_NAME
-        assert (ziel / "kiekmap.db").is_file()
+        target = stick / backup.BACKUP_DIR_NAME
+        assert (target / "kiekmap.db").is_file()
         for sha in shas:
-            assert (ziel / "photos" / sha[0:2] / sha[2:4] / f"{sha}.jpg").is_file()
+            assert (target / "photos" / sha[0:2] / sha[2:4] / f"{sha}.jpg").is_file()
 
     def test_thumbnails_come_along(self, session, settings, stick, collection):
         """Otherwise a restored device would compute for an hour before showing anything."""
@@ -172,9 +172,9 @@ class TestBackingUp:
 
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
 
-        ziel = stick / backup.BACKUP_DIR_NAME
+        target = stick / backup.BACKUP_DIR_NAME
         for size in THUMBNAIL_SIZES:
-            assert (ziel / "thumbs" / str(size) / sha[0:2] / sha[2:4] / f"{sha}.webp").is_file()
+            assert (target / "thumbs" / str(size) / sha[0:2] / sha[2:4] / f"{sha}.webp").is_file()
 
     def test_a_second_backup_copies_nothing_twice(self, session, settings, stick, collection):
         """The reason anybody makes a second backup at all."""
@@ -189,15 +189,17 @@ class TestBackingUp:
     def test_a_new_photo_is_added_the_second_time(self, session, settings, stick, collection):
         collection(2)
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
-        neu = "f" * 64
-        pfad = original_path(settings.photos_dir, neu, ".jpg")
+        fresh = "f" * 64
+        pfad = original_path(settings.photos_dir, fresh, ".jpg")
         pfad.parent.mkdir(parents=True, exist_ok=True)
         pfad.write_bytes(b"noch ein bild")
 
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
 
-        ziel = stick / backup.BACKUP_DIR_NAME / "photos" / neu[0:2] / neu[2:4] / f"{neu}.jpg"
-        assert ziel.is_file()
+        target = (
+            stick / backup.BACKUP_DIR_NAME / "photos" / fresh[0:2] / fresh[2:4] / f"{fresh}.jpg"
+        )
+        assert target.is_file()
 
     def test_too_little_space_is_said_beforehand(self, session, settings, stick, collection):
         """Better not to start at all than to stop half way."""
@@ -242,8 +244,8 @@ class TestBackingUp:
 
 
 class TestRestoring:
-    def _make_backup(self, session, settings, stick, collection, anzahl=2):
-        shas = collection(anzahl)
+    def _make_backup(self, session, settings, stick, collection, count=2):
+        shas = collection(count)
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
         return shas
 
@@ -288,7 +290,7 @@ class TestRestoring:
 
         If it stayed beside the restored file, SQLite would try to apply it.
         """
-        self._make_backup(session, settings, stick, collection, anzahl=1)
+        self._make_backup(session, settings, stick, collection, count=1)
         (settings.data_dir / "kiekmap.db-wal").write_bytes(b"altes journal")
 
         backup.run_restore(settings, _drive(settings), _report_nothing)
@@ -298,7 +300,7 @@ class TestRestoring:
         assert (beiseite / "kiekmap.db-wal").is_file()
 
     def test_the_working_folder_is_not_left_behind(self, session, settings, stick, collection):
-        self._make_backup(session, settings, stick, collection, anzahl=1)
+        self._make_backup(session, settings, stick, collection, count=1)
 
         backup.run_restore(settings, _drive(settings), _report_nothing)
 
@@ -348,9 +350,9 @@ class TestSchemaRevisionOnRestore:
         assert schema.revision_of(settings.db_path) == schema.head_revision()
         # And really so: the column it failed on back then is there.
         connection = sqlite3.connect(settings.db_path)
-        spalten = {zeile[1] for zeile in connection.execute("pragma table_info(changes)")}
+        columns = {row[1] for row in connection.execute("pragma table_info(changes)")}
         connection.close()
-        assert "old_source" in spalten
+        assert "old_source" in columns
 
     def test_a_newer_backup_is_refused(self, session, settings, stick, collection):
         """The reverse case, and it is the more awkward one.
@@ -407,9 +409,9 @@ class TestTheReminder:
         # UTC, because `_stamp()` writes it that way and `read_state` reads it that way. With local
         # time this test was red for two hours a day: from 22:00 CEST the converted stamp slips to
         # the next calendar day, and the difference came out one day smaller.
-        alt = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=backup.OVERDUE_DAYS + 4)
+        previous = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=backup.OVERDUE_DAYS + 4)
         (settings.data_dir / backup.STATE_FILE).write_text(
-            f'{{"last_backup_at": "{alt.isoformat()}", "last_drive": "X"}}', encoding="utf-8"
+            f'{{"last_backup_at": "{previous.isoformat()}", "last_drive": "X"}}', encoding="utf-8"
         )
 
         zustand = backup.read_state(settings)
@@ -540,10 +542,10 @@ class TestThroughTheApi:
         assert overview["backup"]["last_drive"] == "SANDISK"
 
     def test_an_unknown_stick_is_rejected(self, admin_client, settings, stick):
-        antwort = admin_client.post("/api/admin/backup/start", json={"path": "/"})
+        response = admin_client.post("/api/admin/backup/start", json={"path": "/"})
 
-        assert antwort.status_code == 404
-        assert "nicht mehr da" in antwort.json()["detail"]
+        assert response.status_code == 404
+        assert "nicht mehr da" in response.json()["detail"]
 
     def test_acknowledging_clears_the_status(self, admin_client, settings, stick, collection):
         collection(1)
@@ -612,7 +614,7 @@ class TestTheArchive:
         collection(2)
 
         with zipfile.ZipFile(io.BytesIO(self._archiv(session, settings))) as archiv:
-            verfahren = {eintrag.compress_type for eintrag in archiv.infolist()}
+            verfahren = {entry.compress_type for entry in archiv.infolist()}
 
         assert verfahren == {zipfile.ZIP_STORED}
 
@@ -658,9 +660,9 @@ class TestTheArchiveThroughTheApi:
         assert admin_client.get("/api/admin/backup/zip").status_code == 422
 
     def test_an_invented_ticket_is_rejected(self, admin_client):
-        antwort = admin_client.get("/api/admin/backup/zip", params={"ticket": "ausgedacht"})
+        response = admin_client.get("/api/admin/backup/zip", params={"ticket": "ausgedacht"})
 
-        assert antwort.status_code == 401
+        assert response.status_code == 401
 
     def test_a_ticket_is_valid_only_once(self, admin_client, settings, collection):
         collection(1)
@@ -679,26 +681,26 @@ class TestTheArchiveThroughTheApi:
         collection(2)
         ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
 
-        antwort = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+        response = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
 
-        assert antwort.headers["content-type"] == "application/zip"
-        assert "attachment" in antwort.headers["content-disposition"]
-        with zipfile.ZipFile(io.BytesIO(antwort.content)) as archiv:
+        assert response.headers["content-type"] == "application/zip"
+        assert "attachment" in response.headers["content-disposition"]
+        with zipfile.ZipFile(io.BytesIO(response.content)) as archiv:
             assert archiv.testzip() is None
 
     def test_a_running_job_blocks_the_download(self, admin_client, settings):
         """A restore would swap the files out from under the running stream."""
         import threading
 
-        haltepunkt = threading.Event()
-        backup.job.start("backup", lambda report: (haltepunkt.wait(2), "fertig")[1])
+        breakpoint = threading.Event()
+        backup.job.start("backup", lambda report: (breakpoint.wait(2), "fertig")[1])
         ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
         try:
-            antwort = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+            response = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
         finally:
-            haltepunkt.set()
+            breakpoint.set()
 
-        assert antwort.status_code == 409
+        assert response.status_code == 409
 
 
 class TestABackupFromTheInbox:
@@ -711,11 +713,11 @@ class TestABackupFromTheInbox:
 
     def _ablegen(self, session, settings, name: str = "kiekmap-sicherung-holm-2026-08-03.zip"):
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
-        ziel = settings.incoming_dir / name
-        with ziel.open("wb") as datei:
+        target = settings.incoming_dir / name
+        with target.open("wb") as file_name:
             for teil in backup.stream_archive(session, settings):
-                datei.write(teil)
-        return ziel
+                file_name.write(teil)
+        return target
 
     def test_a_downloaded_archive_comes_back_through_the_inbox(self, session, settings, collection):
         """The most important test: it closes the circle that until now only the detour over the
@@ -803,13 +805,13 @@ class TestABackupFromTheInbox:
     def test_the_previous_state_is_set_aside(self, session, settings, collection):
         collection(2)
         pfad = self._ablegen(session, settings)
-        vorher = {p.name for p in settings.photos_dir.rglob("*") if p.is_file()}
+        before = {p.name for p in settings.photos_dir.rglob("*") if p.is_file()}
 
         backup.run_restore_from_archive(settings, pfad, _report_nothing)
 
         beiseite = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
         assert len(beiseite) == 1, "der bisherige Stand wurde nicht beiseitegelegt"
-        assert vorher <= {p.name for p in beiseite[0].rglob("*") if p.is_file()}
+        assert before <= {p.name for p in beiseite[0].rglob("*") if p.is_file()}
 
     def test_the_archive_moves_to_the_done_folder(self, session, settings, collection):
         collection(1)
@@ -847,9 +849,9 @@ class TestEingangUeberDieApi:
     def _ablegen(self, session, settings) -> str:
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         name = "kiekmap-sicherung-holm-2026-08-03.zip"
-        with (settings.incoming_dir / name).open("wb") as datei:
+        with (settings.incoming_dir / name).open("wb") as file_name:
             for teil in backup.stream_archive(session, settings):
-                datei.write(teil)
+                file_name.write(teil)
         return name
 
     def test_the_drive_list_reports_the_waiting_backup(
@@ -873,8 +875,8 @@ class TestEingangUeberDieApi:
         for sha in shas:
             original_path(settings.photos_dir, sha, ".jpg").unlink()
 
-        antwort = admin_client.post("/api/admin/backup/incoming/restore", json={"file": name})
-        assert antwort.status_code == 200
+        response = admin_client.post("/api/admin/backup/incoming/restore", json={"file": name})
+        assert response.status_code == 200
         zustand = self._bis_fertig(admin_client)
 
         assert zustand["phase"] == "done", zustand
@@ -882,17 +884,17 @@ class TestEingangUeberDieApi:
         for sha in shas:
             assert original_path(settings.photos_dir, sha, ".jpg").is_file()
 
-    def test_erfundener_dateiname_wird_abgewiesen(self, admin_client, settings):
-        antwort = admin_client.post(
+    def test_an_invented_file_name_is_rejected(self, admin_client, settings):
+        response = admin_client.post(
             "/api/admin/backup/incoming/restore", json={"file": "gibt-es-nicht.zip"}
         )
 
-        assert antwort.status_code == 404
+        assert response.status_code == 404
 
-    def test_pfad_aus_dem_ordner_heraus_wird_abgewiesen(self, admin_client, settings):
+    def test_a_path_out_of_the_folder_is_rejected(self, admin_client, settings):
         """The name comes from the browser -- without the check every file could be played in."""
-        antwort = admin_client.post(
+        response = admin_client.post(
             "/api/admin/backup/incoming/restore", json={"file": "../kiekmap.db"}
         )
 
-        assert antwort.status_code == 404
+        assert response.status_code == 404

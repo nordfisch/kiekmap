@@ -60,14 +60,14 @@ class TestTheNextTask:
         self, client: TestClient, session, make_photo
     ):
         """Better to repeat than to report "nothing left" while something is still open."""
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
         daten = client.get(
-            "/api/contribute/next", params={"need": "location", "exclude": str(foto.id)}
+            "/api/contribute/next", params={"need": "location", "exclude": str(photo.id)}
         ).json()
 
-        assert daten["photo"]["id"] == foto.id
+        assert daten["photo"]["id"] == photo.id
 
     def test_nothing_open(self, client: TestClient, session, make_photo):
         make_photo(sha="a" * 64)
@@ -106,12 +106,12 @@ class TestOneDefinitionPerQuestion:
         make_photo(lat=None, lon=None, status=PhotoStatus.DELETED, sha="e" * 64)
         session.commit()
 
-        fotos = session.scalars(select(Photo).where(Photo.status == PhotoStatus.PUBLISHED)).all()
+        photos = session.scalars(select(Photo).where(Photo.status == PhotoStatus.PUBLISHED)).all()
 
-        for frage, property_name in (("location", "needs_location"), ("date", "needs_date")):
-            gemeldet = client.get("/api/contribute/next", params={"need": frage}).json()
-            erwartet = sum(1 for foto in fotos if getattr(foto, property_name))
-            assert gemeldet["open_count"] == erwartet, frage
+        for question, property_name in (("location", "needs_location"), ("date", "needs_date")):
+            reported = client.get("/api/contribute/next", params={"need": question}).json()
+            expected = sum(1 for photo in photos if getattr(photo, property_name))
+            assert reported["open_count"] == expected, question
 
 
 class TestARequestedPhoto:
@@ -217,7 +217,7 @@ class TestTheRanking:
 def streets(session):
     """Two streets, only one of them with addresses -- the difference carries a whole test."""
 
-    def anlegen(name, kind, street=None, housenumber=None):
+    def create_place(name, kind, street=None, housenumber=None):
         session.add(
             Place(
                 name=name,
@@ -230,13 +230,15 @@ def streets(session):
             )
         )
 
-    anlegen("Am Kamp", "strasse")
-    for nummer in ("1", "2", "3"):
-        anlegen(f"Am Kamp {nummer}", "adresse", street="Am Kamp", housenumber=nummer)
+    create_place("Am Kamp", "strasse")
+    for number in ("1", "2", "3"):
+        create_place(f"Am Kamp {number}", "adresse", street="Am Kamp", housenumber=number)
     # A street without a single address -- the place index holds 141 of 486 such.
-    anlegen("Feldweg", "strasse")
-    anlegen("Strasse des 17. Juni", "strasse")
-    anlegen("Strasse des 17. Juni 4", "adresse", street="Strasse des 17. Juni", housenumber="4")
+    create_place("Feldweg", "strasse")
+    create_place("Strasse des 17. Juni", "strasse")
+    create_place(
+        "Strasse des 17. Juni 4", "adresse", street="Strasse des 17. Juni", housenumber="4"
+    )
     session.commit()
     return session
 
@@ -248,7 +250,7 @@ class TestRefining:
     counted as located and never came back -- and yet that is the case where somebody who walks
     past it every day could name the house."""
 
-    def _strassengenau(self, make_photo, **felder):
+    def _street_accurate(self, make_photo, **felder):
         return make_photo(
             place_name="Am Kamp",
             accuracy=150,
@@ -259,7 +261,7 @@ class TestRefining:
     def test_a_street_accurate_photo_without_a_house_number_is_offered(
         self, client: TestClient, streets, make_photo
     ):
-        self._strassengenau(make_photo, title="Nur die Strasse", sha="a" * 64)
+        self._street_accurate(make_photo, title="Nur die Strasse", sha="a" * 64)
         streets.commit()
 
         daten = client.get("/api/contribute/next", params={"need": "housenumber"}).json()
@@ -434,30 +436,30 @@ class TestTheNumbersForAPhoto:
     def test_returns_the_numbers_of_the_photos_street(
         self, client: TestClient, streets, make_photo
     ):
-        foto = make_photo(place_name="Am Kamp", accuracy=150, sha="a" * 64)
+        photo = make_photo(place_name="Am Kamp", accuracy=150, sha="a" * 64)
         streets.commit()
 
-        nummern = client.get(f"/api/contribute/{foto.id}/housenumbers").json()
+        numbers = client.get(f"/api/contribute/{photo.id}/housenumbers").json()
 
-        assert [eintrag["housenumber"] for eintrag in nummern] == ["1", "2", "3"]
-        assert all(eintrag["accuracy_m"] == 15 for eintrag in nummern)
+        assert [entry["housenumber"] for entry in numbers] == ["1", "2", "3"]
+        assert all(entry["accuracy_m"] == 15 for entry in numbers)
 
     def test_returns_nothing_for_an_already_house_accurate_photo(
         self, client: TestClient, streets, make_photo
     ):
         # Otherwise the detail view would get buttons for a question that is none.
-        foto = make_photo(place_name="Am Kamp", accuracy=15, sha="b" * 64)
+        photo = make_photo(place_name="Am Kamp", accuracy=15, sha="b" * 64)
         streets.commit()
 
-        assert client.get(f"/api/contribute/{foto.id}/housenumbers").json() == []
+        assert client.get(f"/api/contribute/{photo.id}/housenumbers").json() == []
 
     def test_returns_nothing_for_a_street_without_addresses(
         self, client: TestClient, streets, make_photo
     ):
-        foto = make_photo(place_name="Feldweg", accuracy=150, sha="c" * 64)
+        photo = make_photo(place_name="Feldweg", accuracy=150, sha="c" * 64)
         streets.commit()
 
-        assert client.get(f"/api/contribute/{foto.id}/housenumbers").json() == []
+        assert client.get(f"/api/contribute/{photo.id}/housenumbers").json() == []
 
     def test_an_unknown_photo(self, client: TestClient, streets):
         assert client.get("/api/contribute/999/housenumbers").status_code == 404
@@ -470,26 +472,26 @@ class TestRefiningToAHouseNumber:
     the precision claimed by the client is harmless, *because* the field has to be empty anyway.
     The moment it decided what may be overwritten, it would be a key -- and the client holds it."""
 
-    def _foto(self, make_photo, **felder):
+    def _photo(self, make_photo, **felder):
         return make_photo(place_name="Am Kamp", accuracy=150, sha="a" * 64, **felder)
 
-    def _nummer(self, session, housenumber="2"):
+    def _number(self, session, housenumber="2"):
         return session.scalar(
             select(Place).where(Place.kind == "adresse", Place.housenumber == housenumber)
         )
 
     def test_refines_the_street_to_the_house_number(self, client: TestClient, streets, make_photo):
-        foto = self._foto(make_photo)
+        photo = self._photo(make_photo)
         streets.commit()
-        nummer = self._nummer(streets)
+        number = self._number(streets)
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": nummer.id}
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id}
         )
 
-        assert antwort.status_code == 200
-        assert antwort.json()["place_name"] == "Am Kamp 2"
-        assert antwort.json()["location_accuracy_m"] == 15
+        assert response.status_code == 200
+        assert response.json()["place_name"] == "Am Kamp 2"
+        assert response.json()["location_accuracy_m"] == 15
 
     def test_takes_the_coordinate_and_the_precision_from_the_place_index(
         self, client: TestClient, streets, make_photo
@@ -500,86 +502,88 @@ class TestRefiningToAHouseNumber:
         the server looks up. If it were otherwise, a call with ``accuracy_m: 1`` could replace any
         entry.
         """
-        foto = self._foto(make_photo)
+        photo = self._photo(make_photo)
         streets.commit()
-        nummer = self._nummer(streets)
+        number = self._number(streets)
 
         client.post(
-            f"/api/contribute/{foto.id}/housenumber",
-            json={"place_id": nummer.id, "lat": 48.13, "lon": 11.57, "accuracy_m": 1},
+            f"/api/contribute/{photo.id}/housenumber",
+            json={"place_id": number.id, "lat": 48.13, "lon": 11.57, "accuracy_m": 1},
         )
-        streets.refresh(foto)
+        streets.refresh(photo)
 
-        assert (foto.lat, foto.lon) == (nummer.lat, nummer.lon)
-        assert foto.location_accuracy_m == 15
+        assert (photo.lat, photo.lon) == (number.lat, number.lon)
+        assert photo.location_accuracy_m == 15
 
     def test_is_logged_with_the_street_as_the_old_value(
         self, client: TestClient, streets, make_photo
     ):
         # The old value is at the same time the key with which a revert finds the street centre
         # again -- on the other two paths it is rightly empty.
-        foto = self._foto(make_photo, location_source=Source.CURATOR)
+        photo = self._photo(make_photo, location_source=Source.CURATOR)
         streets.commit()
-        nummer = self._nummer(streets)
+        number = self._number(streets)
 
-        client.post(f"/api/contribute/{foto.id}/housenumber", json={"place_id": nummer.id})
+        client.post(f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id})
 
-        eintrag = streets.scalar(select(Change).where(Change.field == "housenumber"))
-        assert eintrag.old_value == "Am Kamp"
-        assert eintrag.new_value == "Am Kamp 2"
-        assert eintrag.old_source == Source.CURATOR
+        entry = streets.scalar(select(Change).where(Change.field == "housenumber"))
+        assert entry.old_value == "Am Kamp"
+        assert entry.new_value == "Am Kamp 2"
+        assert entry.old_source == Source.CURATOR
 
     def test_a_house_number_of_another_street_is_rejected(
         self, client: TestClient, streets, make_photo
     ):
-        foto = self._foto(make_photo)
+        photo = self._photo(make_photo)
         streets.commit()
         fremd = streets.scalar(
             select(Place).where(Place.kind == "adresse", Place.street == "Strasse des 17. Juni")
         )
 
-        antwort = client.post(f"/api/contribute/{foto.id}/housenumber", json={"place_id": fremd.id})
-
-        assert antwort.status_code == 422
-
-    def test_a_street_is_not_a_house_number(self, client: TestClient, streets, make_photo):
-        foto = self._foto(make_photo)
-        streets.commit()
-        strasse = streets.scalar(select(Place).where(Place.name == "Am Kamp"))
-
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": strasse.id}
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": fremd.id}
         )
 
-        assert antwort.status_code == 404
+        assert response.status_code == 422
+
+    def test_a_street_is_not_a_house_number(self, client: TestClient, streets, make_photo):
+        photo = self._photo(make_photo)
+        streets.commit()
+        street_place = streets.scalar(select(Place).where(Place.name == "Am Kamp"))
+
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": street_place.id}
+        )
+
+        assert response.status_code == 404
 
     def test_an_already_house_accurate_photo_is_not_overwritten(
         self, client: TestClient, streets, make_photo
     ):
-        foto = make_photo(place_name="Am Kamp 1", accuracy=15, sha="b" * 64)
+        photo = make_photo(place_name="Am Kamp 1", accuracy=15, sha="b" * 64)
         streets.commit()
-        nummer = self._nummer(streets)
+        number = self._number(streets)
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": nummer.id}
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id}
         )
 
-        assert antwort.status_code == 409
-        streets.refresh(foto)
-        assert foto.place_name == "Am Kamp 1"
+        assert response.status_code == 409
+        streets.refresh(photo)
+        assert photo.place_name == "Am Kamp 1"
 
     def test_an_unlocated_photo_is_not_refined(self, client: TestClient, streets, make_photo):
         # It belongs in the first question, not here -- and has no street the number
         # passen koennte.
-        foto = make_photo(lat=None, lon=None, place_name=None, sha="c" * 64)
+        photo = make_photo(lat=None, lon=None, place_name=None, sha="c" * 64)
         streets.commit()
-        nummer = self._nummer(streets)
+        number = self._number(streets)
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": nummer.id}
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id}
         )
 
-        assert antwort.status_code == 409
+        assert response.status_code == 409
 
     def test_a_second_visitor_cannot_replace_the_house_number(
         self, client: TestClient, streets, make_photo
@@ -589,45 +593,45 @@ class TestRefiningToAHouseNumber:
 
         Without it the second visitor would overwrite the first, and that is exactly why
         contributions may go through without moderation at all."""
-        foto = self._foto(make_photo)
+        photo = self._photo(make_photo)
         streets.commit()
-        erste = self._nummer(streets, "1")
-        zweite = self._nummer(streets, "3")
+        erste = self._number(streets, "1")
+        zweite = self._number(streets, "3")
 
-        client.post(f"/api/contribute/{foto.id}/housenumber", json={"place_id": erste.id})
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": zweite.id}
+        client.post(f"/api/contribute/{photo.id}/housenumber", json={"place_id": erste.id})
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": zweite.id}
         )
 
-        assert antwort.status_code == 409
-        streets.refresh(foto)
-        assert foto.place_name == "Am Kamp 1"
+        assert response.status_code == 409
+        streets.refresh(photo)
+        assert photo.place_name == "Am Kamp 1"
 
 
 class TestAddingAPlace:
     def test_takes_it_at_once(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/location",
+        response = client.post(
+            f"/api/contribute/{photo.id}/location",
             json={**IN_HOLM, "place_name": "Mühlenweg"},
         )
 
-        assert antwort.status_code == 200
-        daten = antwort.json()
+        assert response.status_code == 200
+        daten = response.json()
         assert daten["needs_location"] is False
         assert daten["place_name"] == "Mühlenweg"
         assert daten["location_source"] == Source.VISITOR
 
     def test_appears_on_the_map_afterwards(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, year=1932, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, year=1932, sha="a" * 64)
         session.commit()
         assert (
             client.get("/api/photos", params={"bbox": "9.60,53.57,9.75,53.67"}).json()["total"] == 0
         )
 
-        client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
+        client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
 
         # The immediate effect is what makes it appealing to the visitor:
         # "mein Wissen ist jetzt auf der Karte".
@@ -636,51 +640,51 @@ class TestAddingAPlace:
         )
 
     def test_is_logged(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
-        client.post(f"/api/contribute/{foto.id}/location", json={**IN_HOLM, "session_id": "abc"})
+        client.post(f"/api/contribute/{photo.id}/location", json={**IN_HOLM, "session_id": "abc"})
 
-        eintrag = session.scalars(select(Change).where(Change.photo_id == foto.id)).one()
-        assert eintrag.field == "location"
-        assert eintrag.source == Source.VISITOR
-        assert eintrag.session_id == "abc"
-        assert "53.62" in eintrag.new_value
+        entry = session.scalars(select(Change).where(Change.photo_id == photo.id)).one()
+        assert entry.field == "location"
+        assert entry.source == Source.VISITOR
+        assert entry.session_id == "abc"
+        assert "53.62" in entry.new_value
 
     def test_a_filled_field_is_not_overwritten(self, client: TestClient, session, make_photo):
         """What a curator has set is untouchable -- and the second visitor must not overwrite the
         first."""
-        foto = make_photo(lat=53.61, lon=9.66, sha="a" * 64)
+        photo = make_photo(lat=53.61, lon=9.66, sha="a" * 64)
         session.commit()
 
-        antwort = client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
+        response = client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
 
-        assert antwort.status_code == 409
-        session.refresh(foto)
-        assert foto.lat == 53.61
+        assert response.status_code == 409
+        session.refresh(photo)
+        assert photo.lat == 53.61
         # The message should not treat the visitor as a nuisance.
-        assert "Dank" in antwort.json()["detail"]
+        assert "Dank" in response.json()["detail"]
 
     def test_a_place_outside_the_region(self, client: TestClient, session, settings, make_photo):
         (settings.data_dir / "region.json").write_text(
             json.dumps({"bbox": [9.60028, 53.57561, 9.75174, 53.66545]}), encoding="utf-8"
         )
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
-        antwort = client.post(f"/api/contribute/{foto.id}/location", json=WEIT_WEG)
+        response = client.post(f"/api/contribute/{photo.id}/location", json=WEIT_WEG)
 
-        assert antwort.status_code == 422
-        assert "ausserhalb" in antwort.json()["detail"].lower()
+        assert response.status_code == 422
+        assert "ausserhalb" in response.json()["detail"].lower()
 
     def test_without_a_configured_region_nothing_is_checked(
         self, client: TestClient, session, make_photo
     ):
         # No region.json present: then rather accept than refuse without reason.
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
-        assert client.post(f"/api/contribute/{foto.id}/location", json=WEIT_WEG).status_code == 200
+        assert client.post(f"/api/contribute/{photo.id}/location", json=WEIT_WEG).status_code == 200
 
     def test_an_unknown_photo(self, client: TestClient):
         assert client.post("/api/contribute/9999/location", json=IN_HOLM).status_code == 404
@@ -688,11 +692,11 @@ class TestAddingAPlace:
 
 class TestAddingAYear:
     def test_a_year_entry(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=None, sha="a" * 64)
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         daten = client.post(
-            f"/api/contribute/{foto.id}/date", json={"year": 1932, "precision": "year"}
+            f"/api/contribute/{photo.id}/date", json={"year": 1932, "precision": "year"}
         ).json()
 
         assert daten["date_label"] == "1932"
@@ -701,11 +705,11 @@ class TestAddingAYear:
 
     def test_a_decade_becomes_an_interval(self, client: TestClient, session, make_photo):
         """ "Irgendwann in den Zwanzigern" is the most frequent honest answer."""
-        foto = make_photo(year=None, sha="a" * 64)
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         daten = client.post(
-            f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"}
+            f"/api/contribute/{photo.id}/date", json={"year": 1924, "precision": "decade"}
         ).json()
 
         assert daten["date_label"] == "1920er"
@@ -715,76 +719,76 @@ class TestAddingAYear:
     def test_a_photo_dated_that_way_appears_for_an_overlapping_selection(
         self, client, session, make_photo
     ):
-        foto = make_photo(year=None, sha="a" * 64)
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
-        client.post(f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"})
+        client.post(f"/api/contribute/{photo.id}/date", json={"year": 1924, "precision": "decade"})
 
-        antwort = client.get(
+        response = client.get(
             "/api/photos",
             params={"bbox": "9.60,53.57,9.75,53.67", "from_year": 1925, "to_year": 1930},
         )
 
-        assert antwort.json()["total"] == 1
+        assert response.json()["total"] == 1
 
     def test_an_already_dated_photo(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=1932, sha="a" * 64)
+        photo = make_photo(year=1932, sha="a" * 64)
         session.commit()
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/date", json={"year": 1800, "precision": "year"}
+        response = client.post(
+            f"/api/contribute/{photo.id}/date", json={"year": 1800, "precision": "year"}
         )
 
-        assert antwort.status_code == 409
-        session.refresh(foto)
-        assert foto.date_from == date(1932, 1, 1)
+        assert response.status_code == 409
+        session.refresh(photo)
+        assert photo.date_from == date(1932, 1, 1)
 
     def test_a_nonsensical_year_is_rejected(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=None, sha="a" * 64)
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         assert (
             client.post(
-                f"/api/contribute/{foto.id}/date", json={"year": 3000, "precision": "year"}
+                f"/api/contribute/{photo.id}/date", json={"year": 3000, "precision": "year"}
             ).status_code
             == 422
         )
 
     def test_is_logged(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=None, sha="a" * 64)
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
 
-        client.post(f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"})
+        client.post(f"/api/contribute/{photo.id}/date", json={"year": 1924, "precision": "decade"})
 
-        eintrag = session.scalars(select(Change).where(Change.field == "date")).one()
-        assert eintrag.new_value == "1920er"
-        assert eintrag.source == Source.VISITOR
+        entry = session.scalars(select(Change).where(Change.field == "date")).one()
+        assert entry.new_value == "1920er"
+        assert entry.source == Source.VISITOR
 
 
 class TestTheTwoTogether:
     def test_filling_both_gaps_one_after_the_other(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, year=None, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, year=None, sha="a" * 64)
         session.commit()
 
-        client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
-        client.post(f"/api/contribute/{foto.id}/date", json={"year": 1955, "precision": "year"})
+        client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
+        client.post(f"/api/contribute/{photo.id}/date", json={"year": 1955, "precision": "year"})
 
-        daten = client.get(f"/api/photos/{foto.id}").json()
+        daten = client.get(f"/api/photos/{photo.id}").json()
         assert daten["needs_location"] is False
         assert daten["needs_date"] is False
         assert len(session.scalars(select(Change)).all()) == 2
 
     def test_the_open_count_goes_down(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         make_photo(lat=None, lon=None, sha="b" * 64)
         session.commit()
 
         assert client.get("/api/contribute/next?need=location").json()["open_count"] == 2
-        client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
+        client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
         assert client.get("/api/contribute/next?need=location").json()["open_count"] == 1
 
 
 class TestPlaceSearch:
-    def _lege_orte_an(self, session):
+    def _create_places(self, session):
         from app.models import Place
         from app.services.places import normalize
 
@@ -800,7 +804,7 @@ class TestPlaceSearch:
         session.commit()
 
     def test_finds_it_despite_a_missing_umlaut(self, client: TestClient, session):
-        self._lege_orte_an(session)
+        self._create_places(session)
 
         namen = [o["name"] for o in client.get("/api/places", params={"q": "muhlen"}).json()]
 
@@ -808,7 +812,7 @@ class TestPlaceSearch:
 
     def test_a_word_beginning_comes_first(self, client: TestClient, session):
         """Whoever types "Muhl" means the Mühlenweg, not the Alte Mühlenstraße."""
-        self._lege_orte_an(session)
+        self._create_places(session)
 
         namen = [o["name"] for o in client.get("/api/places", params={"q": "muhl"}).json()]
 
@@ -816,14 +820,14 @@ class TestPlaceSearch:
         assert "Alte Mühlenstraße" in namen
 
     def test_the_sharp_s(self, client: TestClient, session):
-        self._lege_orte_an(session)
+        self._create_places(session)
 
         namen = [o["name"] for o in client.get("/api/places", params={"q": "hauptstrasse"}).json()]
 
         assert namen == ["Hauptstraße"]
 
     def test_too_short_an_input_returns_nothing(self, client: TestClient, session):
-        self._lege_orte_an(session)
+        self._create_places(session)
 
         assert client.get("/api/places", params={"q": "m"}).json() == []
         assert client.get("/api/places").json() == []
@@ -848,15 +852,15 @@ class TestLoadingThePlaceIndex:
             encoding="utf-8",
         )
 
-        anzahl = load_from_file(session, settings.places_file)
+        count = load_from_file(session, settings.places_file)
 
-        assert anzahl == 1
+        assert count == 1
         from app.models import Place
 
-        ort = session.scalars(select(Place)).one()
+        place = session.scalars(select(Place)).one()
         # The normalisation is recomputed: an older file would otherwise leave the search
         # stillschweigend leer laufen lassen.
-        assert ort.name_normalized == "suderstrasse"
+        assert place.name_normalized == "suderstrasse"
 
     def test_a_missing_file_is_not_an_error(self, session, settings):
         from app.services.places import load_from_file

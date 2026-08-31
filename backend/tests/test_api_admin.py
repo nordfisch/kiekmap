@@ -106,7 +106,7 @@ class TestTheOverview:
         assert data["on_map"] == 2
         assert data["deleted"] == 1
 
-    def test_foto_ohne_jahr_steht_auf_der_karte(
+    def test_a_photo_without_a_year_stands_on_the_map(
         self, admin_client: TestClient, session, make_photo
     ):
         """Undated is not invisible -- the normal case is the map without a time filter.
@@ -123,9 +123,7 @@ class TestTheOverview:
         assert data["on_map"] == 1
         assert data["without_date"] == 1
 
-    def test_foto_ohne_ort_steht_nicht_auf_der_karte(
-        self, admin_client: TestClient, session, make_photo
-    ):
+    def test_a_photo_without_a_place_does_not(self, admin_client: TestClient, session, make_photo):
         """The counter-check: without a place there is no marker, year or no year."""
         make_photo(lat=None, lon=None, sha="g" * 64)
         session.commit()
@@ -175,7 +173,7 @@ class TestTheOverview:
         assert data["visitor_changes"] == 0
         assert data["days_since_change"] is None
 
-    def test_offener_beitrag_datiert_die_kachel(
+    def test_an_open_contribution_dates_the_tile(
         self, admin_client: TestClient, session, make_photo
     ):
         photo = make_photo(sha="a" * 64)
@@ -197,7 +195,7 @@ class TestTheOverview:
 
 
 class TestThePhotoList:
-    def test_filter_ohne_ort_zeigt_nicht_die_ohne_jahr(
+    def test_the_place_filter_leaves_out_the_undated(
         self, admin_client: TestClient, session, make_photo
     ):
         """The reason for the split.
@@ -213,7 +211,7 @@ class TestThePhotoList:
 
         assert [photo["title"] for photo in data["photos"]] == ["Ohne Ort"]
 
-    def test_filter_ohne_jahr_zeigt_nicht_die_ohne_ort(
+    def test_the_year_filter_leaves_out_the_unplaced(
         self, admin_client: TestClient, session, make_photo
     ):
         make_photo(title="Vollstaendig", sha="a" * 64)
@@ -388,7 +386,7 @@ class TestEditingAPhoto:
 
         assert response.status_code == 422
 
-    def test_jahrzehnt_wird_zum_intervall(self, admin_client: TestClient, session, make_photo):
+    def test_a_decade_becomes_an_interval(self, admin_client: TestClient, session, make_photo):
         photo = make_photo(year=None)
         session.commit()
 
@@ -412,9 +410,7 @@ class TestEditingAPhoto:
         assert (entry.old_value, entry.new_value) == ("Alt", "Neu")
         assert entry.source == Source.CURATOR
 
-    def test_gleicher_wert_erzeugt_keinen_eintrag(
-        self, admin_client: TestClient, session, make_photo
-    ):
+    def test_the_same_value_makes_no_entry(self, admin_client: TestClient, session, make_photo):
         """Otherwise the contribution list drowns in entries that say nothing."""
         photo = make_photo(title="Alt")
         session.commit()
@@ -423,7 +419,7 @@ class TestEditingAPhoto:
 
         assert session.scalars(select(Change)).all() == []
 
-    def test_kurator_darf_ausserhalb_der_region_verorten(
+    def test_a_curator_may_place_outside_the_region(
         self, admin_client: TestClient, session, make_photo
     ):
         """Unlike a visitor: the curator may know about an outing."""
@@ -897,7 +893,7 @@ class TestRevertingARefinement:
 
         assert photo.location_source == Source.CURATOR
 
-    def test_foto_wird_danach_wieder_nach_der_hausnummer_gefragt(
+    def test_the_photo_is_asked_for_its_house_number_again(
         self, admin_client: TestClient, place_index, make_photo
     ):
         photo = self._photo(make_photo, location_source=Source.VISITOR)
