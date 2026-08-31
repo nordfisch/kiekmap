@@ -56,10 +56,20 @@ ENGLISH = set(
 #: fixed by falsifying the example.
 QUOTED = re.compile("``.*?``|\"[^\"]*\"|„[^“]*“|'[^']*'", re.S)
 
+#: A German opening quote closed with a straight mark -- the form this project actually uses.
+#: ``QUOTED`` expects „…“ and would otherwise pair the straight mark with the *next* one, leaving
+#: the quote itself bare. Stripped before ``QUOTED`` everywhere quoted material has to disappear.
+GERMAN_QUOTE = re.compile('„[^“”"]*[“”"]')
+
+
+def strip_quoted(text: str) -> str:
+    """Text with every quotation and code span removed -- what is left is the prose itself."""
+    return QUOTED.sub(" ", GERMAN_QUOTE.sub(" ", text))
+
 
 def language(text: str) -> str | None:
     """ "de", "en", or None when the text carries no function words either way."""
-    words = re.findall(r"[a-zA-ZäöüÄÖÜß]+", QUOTED.sub(" ", text).lower())
+    words = re.findall(r"[a-zA-ZäöüÄÖÜß]+", strip_quoted(text).lower())
     german = sum(1 for w in words if w in GERMAN)
     english = sum(1 for w in words if w in ENGLISH)
     if german == english:
@@ -139,13 +149,13 @@ GERMAN_PROSE = (
     "SECURITY.md",
     "CODE_OF_CONDUCT.md",
     "AUTHORS",
-    "docs/decisions.md",
 )
 
 #: One list with a flag would not do here: an English file passes the German check for the wrong
 #: reason -- it has no transcription because it has no German -- so silence there proves nothing.
 ENGLISH_PROSE: tuple[str, ...] = (
     "docs/architecture.md",
+    "docs/decisions.md",
     "docs/development.md",
     "docs/lessons.md",
     "CLAUDE.md",
@@ -172,10 +182,7 @@ def transcribed_in_prose(path: Path) -> list[tuple[int, str]]:
             continue
         if fenced:
             continue
-        bare = re.sub(r"`[^`]*`", " ", line)
-        # Before QUOTED, not after: it expects „…“, and a „…" closed with a straight mark would
-        # otherwise let QUOTED pair that mark with the *next* one and leave the quote itself bare.
-        bare = QUOTED.sub(" ", re.sub('„[^“”"]*[“”"]', " ", bare))
+        bare = strip_quoted(re.sub(r"`[^`]*`", " ", line))
         if found := TRANSCRIBED.findall(bare):
             hits.append((number, ", ".join(sorted({f for f in found}))))
     return hits

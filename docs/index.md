@@ -13,7 +13,7 @@ die Übersetzung noch aussteht — die Regel gilt seit dem 30. August 2026, sieh
 | Datei | Frage | Für wen | Sprache |
 |---|---|---|---|
 | [architecture.md](architecture.md) | *Was* gibt es, und wie greift es ineinander? | wer einsteigt | Englisch |
-| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will | Deutsch, wird englisch |
+| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will | Englisch |
 | [history.md](history.md) | *Wie* ist es dazu gekommen? — und was dabei anders kam als geplant | wer wissen will, ob eine Idee schon einmal da war | Deutsch, eingefroren |
 | [lessons.md](lessons.md) | Was der Plan *nicht wusste* — nur das | wer etwas Ähnliches vorhat | Englisch |
 
