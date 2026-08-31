@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
-from app.api import admin, backup, contribute, health, photos, places
+from app.api import admin, backup, config, contribute, health, photos, places
 from app.config import get_settings
 from app.db import SessionLocal
 from app.services.places import load_if_empty as load_places_if_empty
@@ -58,6 +58,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router, prefix="/api")
+app.include_router(config.router, prefix="/api")
 app.include_router(photos.router, prefix="/api")
 app.include_router(places.router, prefix="/api")
 app.include_router(contribute.router, prefix="/api")

@@ -594,3 +594,14 @@ class UploadResult(BaseModel):
     #: Named rather than silently skipped: "3 waren schon da" is information, silence is not.
     duplicates: int
     rejected: int
+
+
+class InstanceConfig(BaseModel):
+    """What the device is, as far as the interface needs to know.
+
+    ``language`` decides which text catalogue the frontend loads; ``version`` is the same number
+    ``/health`` reports and is here so the admin view can show it without a second call.
+    """
+
+    language: str
+    version: str
