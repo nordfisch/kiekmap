@@ -12,7 +12,7 @@ assignees: ''
 
 **Where?**
 
-- [ ] Visitor view (map, time slider, „Hilf mit")
+- [ ] Visitor view (map, time slider, contribution panel)
 - [ ] Admin area
 - [ ] Import, backup or command line
 - [ ] Setting the device up (`deploy/pi/`, kiosk operation)

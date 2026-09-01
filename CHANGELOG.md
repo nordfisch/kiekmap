@@ -102,7 +102,7 @@ again.
 - **A detail view at full size** with title, description, address, credit, the short SHA-256, and a
   pencil that leads into editing after the PIN
 
-### „Hilf mit"
+### The contribution panel
 
 - **Three questions for the visitor:** "Wo ist das?", "Wann war das?" and, after those, "Welche
   Hausnummer?"

@@ -16,7 +16,7 @@ make seed-save   # save the running collection here
 
 **Only the street names and the coordinates are real**, and they have to be: the points have to lie
 inside the `bbox` from `tiles/region.json`, or the map shows nothing, and `place_name` has to match
-the place index that was built, or the place search in the "Hilf mit" panel finds nothing — and
+the place index that was built, or the place search in the contribution panel finds nothing — and
 that search is the heart of the demonstration. Streets and coordinates are public geography from
 OpenStreetMap anyway, which `make places` puts on every device.
 
@@ -56,7 +56,7 @@ exception — it serves only to warn when a file has changed since it was built.
 ## The collection has gaps on purpose
 
 A collection in which everything is complete leaves half the program unchecked. So it holds photos
-without a year, photos without a place and one without either — otherwise the "Hilf mit" panel
+without a year, photos without a place and one without either — otherwise the contribution panel
 would have nothing to offer:
 
 | | |

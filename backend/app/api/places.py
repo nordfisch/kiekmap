@@ -1,4 +1,4 @@
-"""Place search for locating photos in the "Hilf mit" panel."""
+"""Place search for locating photos in the contribution panel."""
 
 from typing import Annotated
 
@@ -33,7 +33,7 @@ def streets(
     session: Annotated[Session, Depends(get_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> list[PlaceOut]:
-    """The streets the "Hilf mit" panel puts up for choice, alphabetically.
+    """The streets the contribution panel puts up for choice, alphabetically.
 
     Which ones, and how many, is the service's decision -- see ``nearby_streets``. Registered
     before the ``/{place_id}`` route below, otherwise "streets" would be read as an id.

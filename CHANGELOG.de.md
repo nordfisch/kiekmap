@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: d01c05d2094f90a60e9ccb9b2b6f4297d0d6a545a32f06d3c37991bc703c79fb -->
+<!-- source-sha: 2fca74321b43b6c2483595487528f767347bd566ad482c0e8c771963587a1cb5 -->
 
 # Änderungen
 

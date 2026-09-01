@@ -6,7 +6,7 @@
  * and can take a single statement back.
  *
  * Taking back means clearing, not restoring: a visitor may only ever fill what was empty, so
- * there is nothing to restore. The photo returns to the "Hilf mit" panel and can be answered
+ * there is nothing to restore. The photo returns to the contribution panel and can be answered
  * again, which is usually the point.
  */
 

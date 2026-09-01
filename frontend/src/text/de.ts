@@ -44,7 +44,7 @@ export const de = {
 
   app: {
     /**
-     * The title above the "Hilf mit" panel, two lines beside the coat of arms.
+     * The title above the contribution panel, two lines beside the coat of arms.
      *
      * The place name deliberately does not stand here but comes from `region.json` -- otherwise
      * the one spot in the project where "Holm" sat in the code would be the largest type on the

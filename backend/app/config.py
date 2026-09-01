@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     #:
     #: Historical photos are scans; their EXIF carries the date of the scanning run. Adopting it
     #: would place a photo from 1932 at 2019 on the timeline -- and it would count as dated, so
-    #: it would never surface in the "Hilf mit" panel where someone could correct it.
+    #: it would never surface in the contribution panel where someone could correct it.
     #: Raise this if the collection also holds genuine digital photographs.
     exif_date_max_year: int = 1990
 
@@ -148,7 +148,7 @@ class Settings(BaseSettings):
             return None
 
     def street_choice(self) -> int:
-        """How many streets the "Hilf mit" panel offers as buttons -- the nearest ones.
+        """How many streets the contribution panel offers as buttons -- the nearest ones.
 
         See the comment in ``tiles/region.json``. The fallback keeps a village without the key
         usable rather than leaving the panel empty.

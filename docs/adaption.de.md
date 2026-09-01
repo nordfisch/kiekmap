@@ -1,5 +1,5 @@
 <!-- translated-from: docs/adaption.md -->
-<!-- source-sha: 5a9ef920a264e043448810d0f8060a27d6c0d238644608a271692391600e57d6 -->
+<!-- source-sha: 3120d9828b75c4159cea8168e6a1bc227d3ed5d483c188a390b3fd58378d0ad6 -->
 
 # Kiekmap für einen anderen Ort oder eine andere Sprache
 

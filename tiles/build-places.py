@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Builds the gazetteer for the search in the "Hilf mit" panel.
+"""Builds the gazetteer for the search in the contribution panel.
 
     python3 tiles/build-places.py
 

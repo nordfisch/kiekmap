@@ -1,7 +1,7 @@
 """Thumbnails.
 
 Two sizes, both created at import time: 240 px for the markers on the map, 1200 px for the overlay
-and the "Hilf mit" panel. Computing them at display time would be noticeable on a Pi; at import
+and the contribution panel. Computing them at display time would be noticeable on a Pi; at import
 time nobody notices.
 
 WebP, because at equal quality it is considerably smaller than JPEG -- and the map easily loads

@@ -98,7 +98,7 @@ class Photo(Base):
     description: Mapped[str | None] = mapped_column(Text)
 
     # Capture time as an interval. Both NULL means "unknown" -- and exactly those photos end up
-    # in the "Hilf mit" panel.
+    # in the contribution panel.
     date_from: Mapped[date | None] = mapped_column(Date)
     date_to: Mapped[date | None] = mapped_column(Date)
     date_precision: Mapped[str] = mapped_column(String(10), default=DatePrecision.UNKNOWN)
@@ -227,7 +227,7 @@ class Change(Base):
 
 
 class Place(Base):
-    """Gazetteer for the search in the "Hilf mit" panel.
+    """Gazetteer for the search in the contribution panel.
 
     Built from the OSM extract; replaces Nominatim for the single purpose we have: answering
     "where is this?" with a street name, without internet.

@@ -1,4 +1,4 @@
-"""The "Hilf mit" panel: visitors fill in missing statements.
+"""The contribution panel: visitors fill in missing statements.
 
 For historical scans, place and year are nowhere in the file. Someone who knows the village often
 knows them at a glance. This path is therefore not a side feature but the main way the system

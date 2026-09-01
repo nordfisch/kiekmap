@@ -5,7 +5,7 @@ capture date.**
 
 For a scanned paper print, EXIF carries the date of the scan. Adopting it would place a photo from
 1932 at 2019 on the timeline -- worse, it would count as dated and therefore never surface in the
-"Hilf mit" panel where someone could have corrected it. A wrong date does more damage here than no
+contribution panel where someone could have corrected it. A wrong date does more damage here than no
 date at all.
 
 Two things decide it, and the order matters -- see ``is_scan`` and ``is_scan_date``:

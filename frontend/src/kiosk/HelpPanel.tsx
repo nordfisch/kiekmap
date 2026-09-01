@@ -1,5 +1,5 @@
 /**
- * The "Hilf mit" panel along the right edge.
+ * The contribution panel along the right edge.
  *
  * For historical scans, place and year are nowhere in the file -- whoever knows the village often
  * knows them at a glance. This panel is therefore not a side feature but the main way the system

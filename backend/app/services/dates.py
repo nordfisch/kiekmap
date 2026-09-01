@@ -94,7 +94,7 @@ def format_label(start: date | None, end: date | None, precision: str | DatePrec
     """How the dating is shown to the visitor, in the language of the instance.
 
     Formatted here and not in the browser, although it reaches a screen: the label is part of the
-    photo the API hands out, and the map, the detail view and the "Hilf mit" panel all show the
+    photo the API hands out, and the map, the detail view and the contribution panel all show the
     same one. ``docs/adaption.md`` used to name this as what stood in the way of a second language.
     That was true while the backend had no notion of one; ``KIEKMAP_LANGUAGE`` removed the
     premise.
@@ -148,7 +148,7 @@ def overlaps(
     """Pure-Python counterpart to the SQL query -- for tests and as documentation.
 
     Two intervals overlap when neither lies entirely before the other. An undated photo never
-    overlaps: it appears in no time selection, but in the "Hilf mit" panel instead.
+    overlaps: it appears in no time selection, but in the contribution panel instead.
     """
     if start is None or end is None:
         return False

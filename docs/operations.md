@@ -157,7 +157,7 @@ In this order:
 | Map without labels | `frontend/public/basemaps/` is missing — `make tiles` did not run |
 | Map grey, no tiles | `frontend/public/tiles/map.pmtiles` is missing or half copied |
 | The place search finds nothing | `data/places.json` is missing, or `python -m app.cli places` did not run |
-| The "Help out" panel fails silently | The region check without `data/region.json` — `make tiles` puts it there too |
+| The contribution panel fails silently | The region check without `data/region.json` — `make tiles` puts it there too |
 | **Display normal, but nothing can be saved** | **The schema is out of date. Since August 2026 the restore brings it forward itself — [see below](#the-schema-of-a-restored-backup)** |
 | The USB stick does not appear | The udev rule or `:rshared` — see below |
 | The login rejects every PIN | `KIEKMAP_ADMIN_PIN_HASH` is empty; the area says so in plain words |

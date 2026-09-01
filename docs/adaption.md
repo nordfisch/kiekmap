@@ -30,7 +30,7 @@ One file only: [`tiles/region.json`](../tiles/region.json).
 }
 ```
 
-`streetChoice` is the number of streets the "Help out" panel offers as buttons — the ones nearest
+`streetChoice` is the number of streets the contribution panel offers as buttons — the ones nearest
 to `center`. The place index may reach further; whatever lies beyond it is tapped on the map. **A
 count and not a radius**, because that keeps the button budget independent of how densely a place
 is built up: 80 streets fit into two questions with at most ten buttons each (see
@@ -38,7 +38,7 @@ is built up: 80 streets fit into two questions with at most ten buttons each (se
 
 **The value is to be checked, not adopted** — how, is in [step 3](#3-checking-the-street-choice).
 
-The file describes a **place** and nothing else. Which decades the "Help out" panel offers stood
+The file describes a **place** and nothing else. Which decades the contribution panel offers stood
 here once — but that belongs to the collection and follows from it now: what is offered is what
 the collection spans, but at least the 1920s to the 2010s. A museum that later dates a photo to
 1890 gets the 1890s button by itself.
@@ -109,12 +109,12 @@ would get the same point. Whoever wants to keep the place index small can commen
 lines out in `tiles/build-places.py`; the interface then skips the house-number step by itself.
 
 `make tiles` also puts `region.json` under `data/` — the backend reads it there and uses it to
-check whether a placing from the "Help out" panel lies in the region at all. **Without that file
+check whether a placing from the contribution panel lies in the region at all. **Without that file
 the guard does not bite** (it then lets everything through instead of refusing for no reason).
 
 ### 3. Checking the street choice
 
-The "Help out" panel asks where a photo was taken, and **the main way there is buttons**: first the
+The contribution panel asks where a photo was taken, and **the main way there is buttons**: first the
 initial letter, then the street, then the house number. There is no search field — the visitor view
 has no input field at all, because no keyboard stands at the kiosk (see
 [decisions.md](decisions.md), point 24). Whether that way holds up is decided by the place index,
@@ -253,7 +253,7 @@ make dev
 
 - Does the map show the right place in the right extent?
 - Can the map not be dragged beyond the region?
-- Do the buttons in the "Help out" panel lead to a real street in two or three steps (see
+- Do the buttons in the contribution panel lead to a real street in two or three steps (see
   [step 3](#3-checking-the-street-choice))?
 - **Switch the wifi off and move the map** — the labels have to stay visible.
 

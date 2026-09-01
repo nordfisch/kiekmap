@@ -1,5 +1,5 @@
 <!-- translated-from: docs/operations.md -->
-<!-- source-sha: 11c73a87830f30bd71d39e1573e411eb1f5302144fd361a79a84d4a89db92cd1 -->
+<!-- source-sha: e5c72853414dc94fd527c4f98da1ecd3a99c10aa12ece90a4acae8a23a578a1e -->
 
 # Betriebshandbuch
 

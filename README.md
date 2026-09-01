@@ -33,13 +33,13 @@ up by plugging in a USB stick and pressing one button.
 
 ## What a visitor sees
 
-![The visitor view: the „Hilf mit" panel on the left, the time slider and the map on the
+![The visitor view: the contribution panel on the left, the time slider and the map on the
 right](docs/images/kiosk-map.png)
 
 *The device in Holm, in German. `KIEKMAP_LANGUAGE=en` switches the same screen to English.*
 
 Zooming the map and moving the time slider filters the photos. The slider sits above the map it
-filters — not above the contribution panel. On the left, the „Hilf mit" panel asks for what is
+filters — not above the contribution panel. On the left, the contribution panel asks for what is
 missing — *"Where is this?"*, *"When was this?"* — because with historic scans none of that stands
 in the file. Whoever knows the place fills the database in passing. Once nothing is open any more,
 the panel falls away and the map takes the full width.

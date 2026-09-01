@@ -10,7 +10,7 @@
  *
  * **What is missing is answered next door, not here.** Up to three buttons stand beside the lines
  * they would change -- "Wo ist das?", "Welche Hausnummer?", "Wann war das?". A tap closes this
- * view and puts *this* photo up in the "Hilf mit" panel for *that* question.
+ * view and puts *this* photo up in the contribution panel for *that* question.
  *
  * Until August 2026 the pickers sat here, embedded. Two reasons ended that, and the second is the
  * heavier one: the text column carried up to 37 buttons under the description -- fifteen decades

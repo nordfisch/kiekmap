@@ -208,7 +208,7 @@ class Histogram(BaseModel):
     #: How many years one bar covers. Follows the collection rather than being fixed at a decade --
     #: see ``bar_width`` in services/dates.py for why that matters.
     step: int
-    #: Photos without a date. In no time selection, but in the "Hilf mit" panel.
+    #: Photos without a date. In no time selection, but in the contribution panel.
     undated: int
     #: Span of the whole collection, deliberately **not** of the viewport: the slider axis must not
     #: move under the visitor's hand while they pan the map. See frontend kiosk/timeAxis.ts.
@@ -257,7 +257,7 @@ class DateInput(BaseModel):
     precision: DatePrecision = DatePrecision.YEAR
 
 
-# --- the "Hilf mit" panel ---------------------------------------------------
+# --- the contribution panel ---------------------------------------------------
 
 
 class LocationContribution(BaseModel):
@@ -344,7 +344,7 @@ class PhotoUpdate(BaseModel):
     date: DateInput | None = None
     location: LocationUpdate | None = None
     tags: list[str] | None = None
-    #: Hidden photos disappear from the map and the "Hilf mit" panel, but are not deleted.
+    #: Hidden photos disappear from the map and the contribution panel, but are not deleted.
     status: PhotoStatus | None = None
 
 

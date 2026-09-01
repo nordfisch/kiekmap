@@ -8,7 +8,7 @@
 the collections and provenances are made up. Street names and coordinates are genuine, and they
 have to be: the coordinates must lie inside the ``bbox`` from ``tiles/region.json`` or the map
 shows nothing, and ``place_name`` must match the built gazetteer or the place search in the
-"Hilf mit" panel finds nothing -- and that search is the heart of the demonstration. Streets and
+contribution panel finds nothing -- and that search is the heart of the demonstration. Streets and
 coordinates are public geography out of OpenStreetMap anyway. **A personal reference would only
 arise from tying names to addresses, and that tie is invented.**
 

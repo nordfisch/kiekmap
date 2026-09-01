@@ -2,7 +2,7 @@
 
 Kiekmap is a touchscreen kiosk for a local history museum in **Holm**, in the district of
 Pinneberg: historic photos of the place on a map, filtered by a time-range slider, plus a
-contribution panel — labelled „Hilf mit" on screen — where visitors fill in what is missing. The
+contribution panel — „Hilf mit" on a German screen — where visitors fill in what is missing. The
 device runs **offline** on a Raspberry Pi.
 
 Read [docs/decisions.md](docs/decisions.md) first — it says *why* things are the way they are —

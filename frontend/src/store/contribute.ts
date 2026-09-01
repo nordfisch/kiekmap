@@ -1,5 +1,5 @@
 /**
- * State of the "Hilf mit" panel.
+ * State of the contribution panel.
  *
  * Kept apart from the map state because both run independently: the visitor can explore the map
  * while a question stands on the right, and the other way round.

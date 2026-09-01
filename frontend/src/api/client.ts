@@ -67,7 +67,7 @@ export type Histogram = {
    * a year, the bars are yearly. See `bar_width` in `app/services/dates.py`.
    */
   step: number;
-  /** Photos without a date: not on the timeline, but in the "Hilf mit" panel. */
+  /** Photos without a date: not on the timeline, but in the contribution panel. */
   undated: number;
   /**
    * Span of the whole collection -- the axis of the time slider.

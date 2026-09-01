@@ -2,7 +2,7 @@
  * The idle reset.
  *
  * Without it the device stands there each morning in the state the last visitor of the previous
- * evening left it: a photo open over the map, the time slider narrowed to 1932, the "Hilf mit"
+ * evening left it: a photo open over the map, the time slider narrowed to 1932, the contribution
  * panel showing a picture somebody had already waved away. The next person has to undo all of
  * that before they can start -- and mostly will not.
  *
