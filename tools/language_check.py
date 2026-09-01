@@ -220,7 +220,6 @@ PROSE_FILES = (
 IN_TRANSITION: tuple[str, ...] = (
     "docs/adaption.md",
     "docs/index.md",
-    "docs/licensing.md",
     "docs/operations.md",
 )
 

@@ -47,6 +47,9 @@ SHA_MARKER = re.compile(r"^<!--\s*source-sha:\s*([0-9a-f]{64})\s*-->\s*$", re.M)
 #: example further down from being read as the real thing.
 MARKER_LINES = 10
 
+#: Any marker line, well formed or not -- ``--update`` strips these before writing a fresh pair.
+MARKER_LINE = re.compile(r"^<!--\s*(?:translated-from|source-sha):.*-->\s*$")
+
 
 def translations() -> list[str]:
     """Every ``*.de.md`` under version control."""
@@ -119,13 +122,20 @@ def update() -> int:
 
         if carried == current and named == source:
             continue
-        if named is None or carried is None:
-            marker = f"<!-- translated-from: {source} -->\n<!-- source-sha: {current} -->\n\n"
-            path.write_text(marker + text, encoding="utf-8")
-        else:
-            text = SOURCE_MARKER.sub(f"<!-- translated-from: {source} -->", text, count=1)
-            text = SHA_MARKER.sub(f"<!-- source-sha: {current} -->", text, count=1)
-            path.write_text(text, encoding="utf-8")
+        # Strip whatever marker lines the head carries and write one correct pair above them.
+        # Repairing rather than prepending: a half-written marker -- a source line with a
+        # malformed hash under it -- used to get a fresh pair put on top and left the old line
+        # orphaned below. A stale second copy, in the file whose purpose is to catch those.
+        kept = [
+            line
+            for i, line in enumerate(text.splitlines())
+            if not (i < MARKER_LINES and MARKER_LINE.match(line))
+        ]
+        while kept and not kept[0].strip():
+            kept.pop(0)
+        marker = f"<!-- translated-from: {source} -->\n<!-- source-sha: {current} -->\n\n"
+        path.write_text(marker + "\n".join(kept) + "\n", encoding="utf-8")
+
         print(f"  {name}  <- {source}")
         written += 1
 
