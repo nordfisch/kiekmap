@@ -162,7 +162,7 @@ aus denen es entstand, stehen in [docs/history.de.md](docs/history.de.md) und in
 
 - **Kartenausschnitt, Jahrzehnte und Straßenauswahl kommen aus `tiles/region.json`**; Karte und
   Ortsindex sind gebaute Artefakte. Ein zweites Museum braucht keinen Fork — siehe
-  [docs/adaption.md](docs/adaption.md)
+  [docs/adaption.de.md](docs/adaption.de.md)
 - **Das Ortswappen ist eine austauschbare Datei**; im Repo liegt ein Platzhalter, denn ein
   Hoheitszeichen darf nicht an jeden weitergegeben werden, der ein Repo klont
 - **Drei Import-Einstellungen**, alle leer voreingestellt
@@ -198,7 +198,7 @@ aus denen es entstand, stehen in [docs/history.de.md](docs/history.de.md) und in
 
 ### Dokumentation
 
-- **Acht Dateien, jede mit genau einer Frage**, erschlossen über [docs/index.md](docs/index.md)
+- **Acht Dateien, jede mit genau einer Frage**, erschlossen über [docs/index.de.md](docs/index.de.md)
 - **Backlogpunkte tragen feste Nummern**, unter denen sie zitiert werden; eine Nummer wird nie neu
   vergeben
 - **Die Historie hat ein Register** mit einer Zeile je Abschnitt und Datum, erzeugt und geprüft

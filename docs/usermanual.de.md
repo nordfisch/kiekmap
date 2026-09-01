@@ -210,4 +210,4 @@ Bestand nichts. Von allein passiert dasselbe, sobald das Gerät fünf Minuten un
 über Nacht steht es also morgens ohnehin frisch da.
 
 Bleibt es dabei, hilft nur jemand mit Zugang zum Gerät weiter. Was er wissen muss, steht in
-[operations.md](operations.md).
+[operations.de.md](operations.de.md).

@@ -1,63 +1,64 @@
-# Dokumentation
+# Documentation
 
-In diesem Ordner liegen acht Dateien, und jede beantwortet eine andere Frage. Welche das ist, steht
-in der ersten Spalte der Tabellen unten; daneben, für wen die Datei geschrieben ist und in welcher
-Sprache.
+Each file in this folder answers a different question. Which one that is stands in the first column
+of the tables below; beside it, who the file is written for.
 
-Die Sprache richtet sich nach den Lesern. Alles, was Besucher, Museumsteam und Betreiber angeht,
-ist deutsch; alles, was beim Arbeiten am Code gebraucht wird, englisch. 
+**The repository speaks English.** German is kept as a translation and carries the suffix to say
+so: `operations.de.md` is the German half of `operations.md`, and
+[`tools/check_translations.py`](../tools/check_translations.py) reports when one of the two halves
+has drifted. One file has no English version and needs none: `history.de.md` is closed.
 
-## Kiekmap einrichten und betreiben
+## Setting Kiekmap up and running it
 
-| Datei | Frage | Für wen | Sprache |
-|---|---|---|---|
-| [usermanual.de.md](usermanual.de.md) | Wie füge ich Fotos hinzu und sichere den Bestand? | das Museumsteam, zum Ausdrucken | Deutsch |
-| [operations.md](operations.md) | Wie richte ich den Pi ein, und was tue ich, wenn er nicht startet? | wer das Gerät am Laufen hält | Deutsch |
-| [adaption.md](adaption.md) | Wie richte ich das für **einen anderen Ort** ein? | ein zweites Museum | Deutsch |
-| [licensing.md](licensing.md) | Was darf weitergegeben werden, und unter welchen Bedingungen? | wer veröffentlicht oder übernimmt | Deutsch |
-
-`usermanual.de.md` ist die Bedienung, `operations.md` die Technik dahinter — sie trennen sich nach
-Zuständigkeit, nicht nach Schwierigkeit. `adaption.md` und `licensing.md` richten sich an ein
-zweites Museum, das ein **eigenes** Gerät aufsetzt; dafür ist das Projekt gebaut.
-
-> **Was darin steht, ist auf keinem Pi erprobt.** Alles unter `deploy/pi/` wurde ohne Gerät gebaut.
-> Der erste echte Aufbau ist zugleich die Abnahme — siehe
-> [#18](https://github.com/nordfisch/kiekmap/issues/18). Die **Container** sind geprüft, wenn
-> auch nur auf einem Mac: Was dort nicht zu prüfen war, sind der USB-Weg der Sicherung und das
-> Verhalten nach einem Stromausfall.
-
-## Das System verstehen und anpassen
-
-| Datei | Frage | Für wen | Sprache |
-|---|---|---|---|
-| [architecture.md](architecture.md) | *Was* gibt es, und wie greift es ineinander? | wer einsteigt | Englisch |
-| [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler | Englisch |
-| [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will | Englisch |
-| [history.de.md](history.de.md) | *Wie* ist es dazu gekommen? — dazu das Nummernregister | wer wissen will, ob eine Idee schon einmal da war | Deutsch, abgeschlossen |
-
-`decisions.md` liest man **vor** einer Änderung, `history.de.md` dann, wenn etwas unerklärlich
-aussieht. Die Historie endet mit v0.8.0 und wird nicht fortgeschrieben: Was die Arbeit lehrt, wird
-eine Entscheidung, und wie sie verlief, steht in den Commits und den geschlossenen Issues. Ihr
-**Nummernregister** löst die Zitate der Form „Punkt N" auf.
-
-Was offen ist, steht in den [Issues](https://github.com/nordfisch/kiekmap/issues) und in keiner
-Datei. Für Coding-Agents kommt [../CLAUDE.md](../CLAUDE.md) dazu — dieselben Regeln, auf das
-Nötigste gekürzt, mit den drei Dingen vorneweg, die man hier falsch machen kann.
-
-## Außerhalb von `docs/`
-
-| Datei | Inhalt | Sprache |
+| File | Question | For whom |
 |---|---|---|
-| [../README.md](../README.md) | Der Einstieg: was das Ganze ist, wie man es startet | Deutsch |
-| [../CHANGELOG.md](../CHANGELOG.md) | Was das Programm kann, nach Keep a Changelog sortiert | Deutsch |
-| [../CLAUDE.md](../CLAUDE.md) | Die Regeln dieses Repos, für Coding-Agents | Englisch |
-| [../CONTRIBUTING.md](../CONTRIBUTING.md) | Wie man mitwirkt — und was man erwarten darf, und was nicht | Englisch |
-| [../SECURITY.md](../SECURITY.md) | Was hier eine Schwachstelle ist, was Entwurf, und wohin damit | Deutsch |
-| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Der Umgangston, kurz gehalten | Deutsch |
-| [../AUTHORS](../AUTHORS) | Wer daran gebaut hat | Deutsch |
-| [../seed/README.md](../seed/README.md) | Der Beispielbestand: was `make seed` herstellt und warum seine Lücken Absicht sind | Deutsch |
-| [../LICENSE](../LICENSE), [../NOTICE](../NOTICE) | Apache-2.0 im Wortlaut, und die Namensnennung, die mitreist | Englisch, Deutsch |
+| [usermanual.md](usermanual.md) · [de](usermanual.de.md) | How do I add photos and back the collection up? | the museum team, to print out |
+| [operations.md](operations.md) · [de](operations.de.md) | How do I set the Pi up, and what do I do when it does not start? | whoever keeps the device running |
+| [adaption.md](adaption.md) · [de](adaption.de.md) | How do I set this up for **another place**? | a second museum |
+| [licensing.md](licensing.md) · [de](licensing.de.md) | What may be passed on, and under which conditions? | whoever publishes or takes it over |
 
-`CHANGELOG.md` und `history.de.md` beschreiben beide Gebautes. Der eine listet **was**, die andere
-erzählt **wie und warum**: Wer sucht, ob eine Funktion existiert, nimmt den CHANGELOG; wer wissen
-will, warum sie so aussieht, die Historie.
+`usermanual` is the operation, `operations` the technology behind it — they part along
+responsibility, not along difficulty. `adaption` and `licensing` address a second museum setting up
+a device of its **own**; that is what the project is built for.
+
+> **None of it has been tried on a Pi.** Everything under `deploy/pi/` was built without a device.
+> The first real setup is also the acceptance test — see
+> [#18](https://github.com/nordfisch/kiekmap/issues/18). The **containers** are verified, if only
+> on a Mac: what could not be checked there is the USB path of the backup and the behaviour after
+> a power cut.
+
+## Understanding the system and changing it
+
+| File | Question | For whom |
+|---|---|---|
+| [architecture.md](architecture.md) | *What* is there, and how does it fit together? | whoever is starting out |
+| [development.md](development.md) | *How* is it worked on? — setup, the language rule, tests, pitfalls | developers |
+| [decisions.md](decisions.md) | *Why* is it this way and not another? — every decision with its reason | whoever wants to change something |
+| [history.de.md](history.de.md) | *How* did it come about? — and the number register | whoever wants to know whether an idea has been here before |
+
+`decisions.md` is read **before** a change, `history.de.md` when something looks inexplicable. The
+history is German, ends with v0.8.0 and is not continued: what the work teaches becomes a decision,
+and how it went is in the commits and the closed issues. Its **number register** resolves the
+citations of the form "Punkt N".
+
+What is open is in the [issues](https://github.com/nordfisch/kiekmap/issues) and in no file. For
+coding agents [../CLAUDE.md](../CLAUDE.md) comes on top — the same rules, cut to what is needed,
+with the three things you can get wrong here at the front.
+
+## Outside `docs/`
+
+| File | Content |
+|---|---|
+| [../README.md](../README.md) · [de](../README.de.md) | The way in: what the whole thing is, how to start it |
+| [../CHANGELOG.md](../CHANGELOG.md) · [de](../CHANGELOG.de.md) | What the program can do, sorted by Keep a Changelog |
+| [../CLAUDE.md](../CLAUDE.md) | The rules of this repository, for coding agents |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md) | How to take part — and what to expect, and what not |
+| [../SECURITY.md](../SECURITY.md) | What counts as a vulnerability here, what is by design, and where to send it |
+| [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | How people deal with one another, kept short |
+| [../AUTHORS](../AUTHORS) | Who built it |
+| [../seed/README.md](../seed/README.md) | The sample collection: what `make seed` produces and why its gaps are deliberate |
+| [../LICENSE](../LICENSE), [../NOTICE](../NOTICE) | Apache-2.0 in full, and the attribution that travels with it |
+
+`CHANGELOG.md` and `history.de.md` both describe what was built. One lists **what**, the other
+tells **how and why**: whoever is looking for whether a feature exists takes the changelog;
+whoever wants to know why it looks the way it does takes the history.

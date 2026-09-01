@@ -1,228 +1,227 @@
-# Betriebshandbuch
+# Operations manual
 
-Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung für das
-Museumsteam steht in der [Kuratoren-Anleitung](usermanual.de.md); hier steht die Technik.
+Everything somebody needs to know who keeps the device running in the museum. How to use it is in
+the [guide for the museum team](usermanual.md); the technology is here.
 
-> **Auf einem echten Pi noch nicht erprobt.** Die Dateien unter `deploy/pi/` sind sorgfältig
-> geschrieben und syntaktisch geprüft, aber nie gelaufen — es gab beim Bauen kein Gerät. Was
-> davon zuerst hakt, gehört in diese Datei, sobald der Pi dasteht.
+> **Not yet tried on a real Pi.** The files under `deploy/pi/` are written carefully and checked
+> for syntax, but have never run — there was no device while they were built. Whatever sticks
+> first belongs in this file, as soon as the Pi stands there.
 
 ---
 
-## Einen neuen Pi einrichten
+## Setting up a new Pi
 
-Raspberry Pi OS **Lite** (64 Bit), kein Desktop. Dann:
+Raspberry Pi OS **Lite** (64 bit), no desktop. Then:
 
 ```bash
 sudo git clone <repo> /opt/kiekmap
 sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh
 ```
 
-Das Skript installiert cage, Chromium und Docker, legt den Benutzer `kiekmap` an, richtet den
-Kiosk-Dienst und die USB-Regel ein und schaltet die Bildschirmabschaltung ab. Danach nennt es die
-vier Schritte, die es nicht selbst tun kann: `.env` anlegen, PIN setzen, Kartendaten kopieren,
-Container starten.
+The script installs cage, Chromium and Docker, creates the user `kiekmap`, sets up the kiosk
+service and the USB rule, and switches the screen blanking off. It then names the four steps it
+cannot do itself: create the `.env`, set the PIN, copy the map data, start the containers.
 
-**Kartendaten kommen vom Entwicklungsrechner**, nicht vom Pi. `make tiles` und `make places`
-brauchen Internet und Rechenzeit; auf den Pi gehören nur die Ergebnisse:
+**The map data comes from the development machine**, not from the Pi. `make tiles` and
+`make places` need the internet and processing time; only the results belong on the Pi:
 
 ```bash
 rsync -a frontend/public/tiles/ pi:/opt/kiekmap/frontend/public/tiles/
 rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
 ```
 
-**Das Wappen kommt denselben Weg.** Im Repo liegt nur ein Platzhalter — ein Gemeindewappen darf
-dort nicht liegen, siehe [decisions.md](decisions.md), Punkt 21. Auf dem Gerät gehört das echte
-hin:
+**The coat of arms comes the same way.** Only a placeholder lies in the repository — a municipal
+coat of arms must not lie there, see [decisions.md](decisions.md), point 21. The real one belongs
+on the device:
 
 ```bash
 rsync -a wappen.png pi:/opt/kiekmap/frontend/public/logo.png
 ```
 
-Danach das Frontend neu bauen (`make prod` baut die Images ohnehin neu) — die Datei wird beim Bau
-in das Abbild aufgenommen, nicht zur Laufzeit gelesen. Das Holmer Wappen liegt unter
-`~/Developer/Museum/Wappen/holm-wappen.png` auf dem Entwicklungsrechner; Quelle und
-Rechtelage stehen in [adaption.md](adaption.md), Abschnitt „Wappen einsetzen".
+Then build the frontend again (`make prod` rebuilds the images anyway) — the file is taken into
+the image at build time, not read at run time. The coat of arms of Holm lies under
+`~/Developer/Museum/Wappen/holm-wappen.png` on the development machine; its source and the rights
+to it are in [adaption.md](adaption.md), section "Putting the coat of arms in".
 
 ---
 
-## Was beim Einschalten passiert
+## What happens when it is switched on
 
-Etwa 20 Sekunden, in dieser Reihenfolge:
+About 20 seconds, in this order:
 
-1. **Docker startet.** Die Container laufen mit `restart: unless-stopped` von selbst hoch. Beim
-   ersten Start nach einem Update laufen die Alembic-Migrationen — deshalb kann er länger dauern.
-2. **`kiekmap-kiosk.service` wartet auf `/api/health`.** Ohne das Warten sähen die ersten
-   Besucher ein paar Sekunden lang eine Fehlerseite — und die bliebe stehen, weil Chromium nicht
-   von allein neu lädt. Nach fünf Minuten startet der Dienst trotzdem: eine Fehlerseite, die
-   jemand sieht und meldet, ist besser als ein schwarzer Bildschirm.
-3. **`cage -- chromium --kiosk`** übernimmt den Bildschirm. Frisches Browserprofil bei jedem
-   Start, damit nach einem Stromausfall nichts von gestern übrig ist.
-4. **Stürzt Chromium ab, startet systemd ihn neu** (`Restart=always`, 5 s Pause).
+1. **Docker starts.** The containers come up by themselves with `restart: unless-stopped`. On the
+   first start after an update the Alembic migrations run, which is why it can take longer.
+2. **`kiekmap-kiosk.service` waits for `/api/health`.** Without that wait the first visitors would
+   see an error page for a few seconds — and it would stay, because Chromium does not reload by
+   itself. After five minutes the service starts regardless: an error page that somebody sees and
+   reports is better than a black screen.
+3. **`cage -- chromium --kiosk`** takes over the screen. A fresh browser profile on every start,
+   so that nothing from yesterday is left after a power cut.
+4. **If Chromium crashes, systemd starts it again** (`Restart=always`, 5 s pause).
 
-Woran man erkennt, dass etwas hakt:
+How to tell that something is stuck:
 
 ```bash
-systemctl status kiekmap-kiosk       # läuft der Kiosk?
-journalctl -u kiekmap-kiosk -n 50    # warum nicht?
+systemctl status kiekmap-kiosk       # is the kiosk running?
+journalctl -u kiekmap-kiosk -n 50    # why not?
 cd /opt/kiekmap/deploy && docker compose ps
-curl -sf http://localhost/api/health && echo " API antwortet"
+curl -sf http://localhost/api/health && echo " the API answers"
 ```
 
 ---
 
-## Wartungsausgang
+## The way out for maintenance
 
-Der Kiosk kennt keine Tastenkombination zum Beenden — das ist Absicht, ein Besucher soll nicht
-versehentlich herausfallen. Der Weg hinaus geht über SSH:
+The kiosk knows no key combination for quitting — that is deliberate, so that a visitor does not
+leave the exhibition by accident. The way out goes through SSH:
 
 ```bash
-sudo systemctl stop kiekmap-kiosk     # Bildschirm wird schwarz, Dienste laufen weiter
-sudo systemctl start kiekmap-kiosk    # zurück in die Karte
+sudo systemctl stop kiekmap-kiosk     # the screen goes black, the services keep running
+sudo systemctl start kiekmap-kiosk    # back into the map
 ```
 
-Für Arbeiten am Gerät selbst genügt meist der Admin-Bereich über das Wappen — Fotos pflegen,
-hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
+For work on the device itself the admin area through the coat of arms is usually enough — tending
+photos, uploading, backing up. SSH is needed for updates and for troubleshooting.
 
 ---
 
-## Update ohne Internet
+## Updating without the internet
 
-Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
+Build a folder for the stick on the development machine:
 
 ```bash
 make release to=/Volumes/STICK/kiekmap-update
-make release to=/Volumes/STICK/kiekmap-update map=1   # falls sich die Region geändert hat
+make release to=/Volumes/STICK/kiekmap-update map=1   # if the region has changed
 ```
 
-Das Ziel baut beide Abbilder, sichert sie als `images.tar` und schreibt die `version`-Datei
-daneben. **Es bricht ab, wenn der Arbeitsbaum nicht sauber ist oder der passende Tag fehlt** — ein
-Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen.
+The target builds both images, saves them as `images.tar` and writes the `version` file beside
+them. **It aborts when the working tree is not clean or the matching tag is missing** — a stick
+that belongs to no commit cannot be placed a year later.
 
-Vorher also: `make version v=0.9.0`, committen, `git tag -s v0.9.0 -m v0.9.0`.
+So beforehand: `make version v=0.9.0`, commit, `git tag -s v0.9.0 -m v0.9.0`.
 
-Von Hand war das vier Befehle, und der, den man vergisst, ist die `version`-Datei: Die Abbilder
-laden, `KIEKMAP_VERSION` bleibt in der `.env` stehen, und der nächste Start zieht das **alte**
-Abbild wieder hoch. Das Gerät läuft dann mit der alten Software und sagt es nirgends.
+By hand these were four commands. The one that gets forgotten writes the `version` file: the
+images load, `KIEKMAP_VERSION` stays as it was in the `.env`, and the next start pulls the **old**
+image up again. The device then runs the old software and says so nowhere.
 
-Am Pi:
+On the Pi:
 
 ```bash
 sudo sh /opt/kiekmap/deploy/pi/update.sh /media/STICK/kiekmap-update
 ```
 
-Das Skript liest die Abbilder ein, trägt die Version in die `.env`, tauscht Kartendaten und
-Ortsindex, startet die Container neu und wartet, bis die API antwortet. **Der Bestand wird nicht
-angefasst** — Fotos und Angaben bleiben, wo sie sind.
+The script reads the images in, enters the version in the `.env`, swaps the map data and the place
+index, restarts the containers and waits until the API answers. **The collection is not touched** —
+photos and records stay where they are.
 
-Zwei Feinheiten stecken darin: Die Kartendaten werden erst danebengelegt und dann umbenannt, damit
-ein abgebrochenes Kopieren keine halbe Kartendatei hinterlässt. Und der Ortsindex wird ausdrücklich
-neu eingelesen — beim Start lädt das Backend ihn nur, wenn die Tabelle leer ist.
+Two details sit in there: the map data is first put beside the old file and then renamed, so that
+a copy broken off halfway leaves no half map file. And the place index is read in explicitly — at
+startup the backend loads it only when the table is empty.
 
 ---
 
-## SD-Karte klonen
+## Cloning the SD card
 
-Die vollständige Sicherung des Geräts, inklusive Betriebssystem. Einmal nach der Einrichtung und
-nach jedem größeren Update:
+The complete backup of the device, operating system included. Once after setting it up and after
+every larger update:
 
 ```bash
-# Pi herunterfahren, Karte in den Entwicklungsrechner:
+# shut the Pi down, card into the development machine:
 sudo dd if=/dev/rdiskN bs=4m | gzip > holm-pi-2026-07-29.img.gz
 ```
 
-Das ersetzt die Sicherung im Admin-Bereich **nicht** — die läuft im laufenden Betrieb und sichert
-den Bestand. Der Klon sichert das eingerichtete Gerät.
+This does **not** replace the backup in the admin area — that one runs while the device is in
+service and saves the collection. The clone saves the set-up device.
 
 ---
 
-## Bildschirm bleibt schwarz
+## The screen stays black
 
-In dieser Reihenfolge:
+In this order:
 
-1. `systemctl status kiekmap-kiosk` — läuft der Dienst?
-2. `journalctl -u kiekmap-kiosk -n 50` — meldet cage etwas? *„unable to open primary DRM device"*
-   heißt: Die Sitzung hat kein Ausgabegerät. Dann fehlt eine der vier Zeilen `PAMName`,
-   `TTYPath`, `StandardInput`, `UtmpIdentifier` in der Unit, oder der Benutzer ist nicht in den
-   Gruppen `video` und `render`.
-3. `docker compose ps` — laufen die Container? Wenn nicht: `docker compose logs backend`.
-4. Nach zehn Minuten schwarz, obwohl vorher alles lief: `consoleblank=0` fehlt in der
-   `cmdline.txt` (setzt `setup-pi.sh`, wirkt erst nach einem Neustart).
+1. `systemctl status kiekmap-kiosk` — is the service running?
+2. `journalctl -u kiekmap-kiosk -n 50` — does cage report anything? *"unable to open primary DRM
+   device"* means: the session has no output device. Then one of the four lines `PAMName`,
+   `TTYPath`, `StandardInput`, `UtmpIdentifier` is missing from the unit, or the user is not in
+   the groups `video` and `render`.
+3. `docker compose ps` — are the containers running? If not: `docker compose logs backend`.
+4. Black after ten minutes although everything ran before: `consoleblank=0` is missing from
+   `cmdline.txt` (`setup-pi.sh` sets it, and it takes effect only after a restart).
 
 ---
 
-## Fehlersuche kurz
+## Troubleshooting in brief
 
-| Beobachtung | Erster Verdacht |
+| What you see | First suspicion |
 |---|---|
-| Karte ohne Beschriftung | `frontend/public/basemaps/` fehlt — `make tiles` lief nicht |
-| Karte grau, keine Kacheln | `frontend/public/tiles/map.pmtiles` fehlt oder ist halb kopiert |
-| Ortssuche findet nichts | `data/places.json` fehlt, oder `python -m app.cli places` lief nicht |
-| „Hilf mit" meldet stumm Fehler | Regionsprüfung ohne `data/region.json` — `make tiles` legt sie mit ab |
-| **Anzeige normal, aber nichts lässt sich speichern** | **Schema veraltet. Seit August 2026 zieht die Wiederherstellung es selbst nach — [siehe unten](#der-schemastand-einer-zurückgespielten-sicherung)** |
-| USB-Stick erscheint nicht | udev-Regel oder `:rshared` — siehe unten |
-| Anmeldung lehnt jede PIN ab | `KIEKMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
-| Importierte Fotos ohne Schlagwort oder Bildnachweis | Eine Einstellung erreicht den Container nicht — [siehe unten](#einstellungen-im-containerbetrieb) |
+| Map without labels | `frontend/public/basemaps/` is missing — `make tiles` did not run |
+| Map grey, no tiles | `frontend/public/tiles/map.pmtiles` is missing or half copied |
+| The place search finds nothing | `data/places.json` is missing, or `python -m app.cli places` did not run |
+| The "Help out" panel fails silently | The region check without `data/region.json` — `make tiles` puts it there too |
+| **Display normal, but nothing can be saved** | **The schema is out of date. Since August 2026 the restore brings it forward itself — [see below](#the-schema-of-a-restored-backup)** |
+| The USB stick does not appear | The udev rule or `:rshared` — see below |
+| The login rejects every PIN | `KIEKMAP_ADMIN_PIN_HASH` is empty; the area says so in plain words |
+| Imported photos without a keyword or a credit | A setting does not reach the container — [see below](#settings-in-container-operation) |
 
 ---
 
-## Die PIN für den Admin-Bereich einrichten
+## Setting up the PIN for the admin area
 
 ```bash
 cd backend && .venv/bin/python -m app.cli pin
 ```
 
-Der Befehl fragt die PIN zweimal ab und gibt die Zeile aus, die in die `.env` gehört. Die PIN
-selbst wird nirgends gespeichert; vergessen heißt neu setzen. Danach den Dienst neu starten.
+The command asks for the PIN twice and prints the line that belongs in the `.env`. The PIN itself
+is stored nowhere; forgetting it means setting a new one. Restart the service afterwards.
 
-Ist keine PIN eingerichtet, sagt das Zahlenfeld genau das — es lehnt nicht stumm jede Eingabe ab.
-Nach fünf Fehlversuchen sperrt es für eine Minute. Die Sitzung endet nach 30 Minuten ohne
-Bedienung; jede Aktion schiebt sie hinaus, und ein Neustart des Dienstes beendet jede Sitzung.
+If no PIN is set up, the number pad says exactly that — it does not silently reject every entry.
+After five wrong attempts it locks for a minute. The session ends after 30 minutes without use;
+every action pushes that out, and a restart of the service ends every session.
 
 ---
 
-## Einstellungen im Containerbetrieb
+## Settings in container operation
 
-Die `.env` im Projektverzeichnis ist auch im Betrieb die Stelle, an der Einstellungen stehen. Sie
-liegt bewusst **nicht** im Abbild — das Abbild ist die Software, die `.env` ist der Ort — und wird
-in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml) als `env_file` eingelesen. Wer dort
-etwas ändert, startet danach die Container neu:
+The `.env` in the project directory is where the settings stand in operation as well. It
+deliberately does **not** lie in the image — the image is the software, the `.env` is the place —
+and is read by [`deploy/docker-compose.yml`](../deploy/docker-compose.yml) as `env_file`. Whoever
+changes something there restarts the containers afterwards:
 
 ```bash
 cd /opt/kiekmap && docker compose up -d
 ```
 
-**Die Sprache des Geräts** steht ebenfalls hier:
+**The language of the device** stands here too:
 
 ```bash
-KIEKMAP_LANGUAGE=de     # oder en
+KIEKMAP_LANGUAGE=de     # or en
 ```
 
-Sie schaltet Besucheransicht, Verwaltung, Meldungen und Datumsbeschriftung um. **Ein neuer Bau ist
-nicht nötig** — nach dem Neustart der Container gilt der neue Wert. Ein anderer Wert als `de` oder
-`en` bricht den Start ab, statt still auf Deutsch zurückzufallen; im Protokoll steht dann eine
-Zeile von Pydantic. Mehr in [adaption.md](adaption.md#andere-sprache).
+It switches the visitor view, the admin area, the messages and the date labels. **No new build is
+needed** — the new value applies once the containers have restarted. A value other than `de` or
+`en` aborts the start instead of falling back to German in silence; a line from Pydantic then
+stands in the log. More in [adaption.md](adaption.md#another-language).
 
-**Vier Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
-`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
-beschreiben den Container, nicht den Ort — innen heißen die Verzeichnisse immer `/data` und
-`/media`, gleichgültig wo sie aussen liegen. Ein `KIEKMAP_MEDIA_DIR=/Volumes` in der `.env` des
-Entwicklungsmacs stört den Betrieb deshalb nicht.
+**Four values the compose file sets itself**, and those win over the `.env`:
+`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` and the location of the PIN hash.
+They describe the container, not the place — inside, the directories are always called `/data` and
+`/media`, wherever they lie outside. A `KIEKMAP_MEDIA_DIR=/Volumes` in the `.env` of the
+development Mac therefore does not disturb operation.
 
-**Warum das hier steht:** Bis zum 14. August 2026 reichte die Compose-Datei nur einzelne Werte
-durch. Die übrigen fielen im Container still auf ihre Vorgaben zurück, und das traf ausgerechnet
-den Import: Fotos kamen an, aber ohne Schlagwort, ohne Bildnachweis und ohne Herkunftsangabe.
-Nichts schlug fehl, nichts stand im Protokoll. Wer heute eine neue Einstellung einführt, muss
-nichts weiter tun — sie kommt von selbst durch; geprüft ist das sowohl über den Eingangsordner als
-auch über den Stapel-Upload der Verwaltung.
+**Why this stands here:** until 14 August 2026 the compose file passed only individual values
+through. The rest fell back to their defaults inside the container in silence, and that hit the
+import of all things: photos arrived, but without a keyword, without a credit and without a note
+on their provenance. Nothing failed, nothing stood in the log. Whoever introduces a new setting
+today need do nothing further — it comes through by itself; that is verified both through the
+inbox folder and through the batch upload of the admin area.
 
 ---
 
-## USB-Sticks sichtbar machen
+## Making USB sticks visible
 
-Raspberry Pi OS **Lite** hat keinen Desktop und damit keinen Automounter: Ein eingesteckter Stick
-taucht von allein nirgends auf. Der Admin-Bereich sähe nie einen und meldete ewig „Bitte USB-Stick
-einstecken".
+Raspberry Pi OS **Lite** has no desktop and therefore no automounter: a stick that is plugged in
+turns up nowhere by itself. The admin area would never see one and would report "Please plug in a
+USB stick" for ever.
 
 ```bash
 sudo install -m 755 deploy/pi/kiekmap-usb-mount /usr/local/sbin/
@@ -230,114 +229,114 @@ sudo install -m 644 deploy/pi/99-kiekmap-usb.rules /etc/udev/rules.d/
 sudo udevadm control --reload
 ```
 
-Prüfen: Stick einstecken, dann
+To check: plug a stick in, then
 
 ```bash
 ls /media && findmnt /media/*
 ```
 
-Zwei Fallstricke stecken darin, beide still:
+Two traps sit in there, both silent:
 
-**Der Container sieht den Stick nicht.** Ein Docker-Bind-Mount zeigt nur, was beim Start des
-Containers schon eingehängt war. Ein später eingesteckter Stick bleibt unsichtbar — ohne
-Fehlermeldung, der Ordner ist einfach leer. Dagegen steht `:rshared` an der Zeile `/media:/media`
-in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml). Fehlt es, hilft auch kein Neustart
-des Containers zur richtigen Zeit.
+**The container does not see the stick.** A Docker bind mount shows only what was already mounted
+when the container started. A stick plugged in later stays invisible — with no error message, the
+folder is simply empty. `:rshared` on the line `/media:/media` in
+[`deploy/docker-compose.yml`](../deploy/docker-compose.yml) is what stands against that. Without
+it, not even restarting the container at the right moment helps.
 
-**Der Stick ist da, aber schreibgeschützt.** FAT- und exFAT-Sticks kennen keine Besitzer; ohne
-`uid=1000` beim Einhängen gehören sie root, und der Dienst (UID 1000, siehe
-`backend/Dockerfile`) darf nicht schreiben. Das Skript setzt die Option — der Admin-Bereich
-blendet solche Laufwerke aber ohnehin aus, statt einen Knopf anzubieten, der später scheitert.
+**The stick is there but write-protected.** FAT and exFAT sticks know no owners; without `uid=1000`
+at mount time they belong to root, and the service (UID 1000, see `backend/Dockerfile`) is not
+allowed to write. The script sets the option — the admin area hides such drives anyway, rather
+than offering a button that fails later.
 
-**Auf dem Mac zum Entwickeln:** `KIEKMAP_MEDIA_DIR=/Volumes` in die `.env`. Ein Prüfvolumen
-entsteht mit
+**On the Mac for development:** `KIEKMAP_MEDIA_DIR=/Volumes` into the `.env`. A test volume comes
+into being with
 
 ```bash
 hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil attach teststick.dmg
 ```
 
-> **In `/Volumes` liegt immer ein Symlink auf `/`**, benannt nach dem internen Volume — das legt
-> macOS selbst an. Bis zum 14. August 2026 galt er als Datenträger, und die Sicherung landete
-> dahinter, im laufenden Datenverzeichnis. Seither werden Symlinks übersprungen
-> ([decisions.md](decisions.md), Punkt 40); die Liste ist auf einem Mac ohne angestecktes
-> Laufwerk jetzt leer, und genau das ist richtig.
+> **There is always a symlink to `/` in `/Volumes`**, named after the internal volume — macOS
+> creates it itself. Until 14 August 2026 it counted as a drive, and the backup landed behind it,
+> in the running data directory. Symlinks have been skipped since ([decisions.md](decisions.md),
+> point 40); on a Mac with no drive attached the list is now empty, and that is exactly right.
 
 ---
 
-## Der Schemastand einer zurückgespielten Sicherung
+## The schema of a restored backup
 
-**Seit dem 15. August 2026 regelt das die Wiederherstellung selbst** — dieser Abschnitt beschreibt,
-*wie*, und was zu tun ist, wenn doch etwas hakt. Für das Museumsteam steht der kurze Weg im
-[Benutzerhandbuch](usermanual.de.md#wenn-die-sicherung-älter-ist-als-das-programm).
+**The restore has handled this itself since 15 August 2026** — this section describes *how*, and
+what to do if something sticks after all. The short way for the team is in the
+[guide](usermanual.md#when-the-backup-is-older-than-the-program).
 
-**Warum es überhaupt eine Frage ist.** Eine Sicherung enthält `kiekmap.db` genau so, wie die Datei
-damals aussah — mitsamt ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird
-die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`); danach hängt sich das
-laufende Programm nur neu an sie (`_reopen_database`). Migrationen laufen dabei nicht von selbst:
-Sie laufen beim *Start* (`backend/docker-entrypoint.sh`), und eine Wiederherstellung ist kein Start.
+**Why it is a question at all.** A backup holds `kiekmap.db` exactly as the file looked at the
+time — schema version in the table `alembic_version` included. On restoring, the file is swapped
+**as a whole** (`_swap_in` in `services/backup/restore.py`); the running program then only attaches
+itself to it again (`_reopen_database`). Migrations do not run by themselves in the process: they
+run at *startup* (`backend/docker-entrypoint.sh`), and a restore is not a startup.
 
-**Was jetzt passiert**, und die Reihenfolge ist der ganze Punkt (`services/schema.py`):
+**What happens now**, and the order is the whole point (`services/schema.py`):
 
-| Die Sicherung ist … | … und dann |
+| The backup is … | … and then |
 |---|---|
-| **älter** als das Programm | wird nach dem Tausch `alembic upgrade head` gefahren. Auf dem Balken steht „Der Schemastand wird nachgezogen" |
-| **auf dem gleichen Stand** | passiert nichts, der Aufruf ist folgenlos |
-| **neuer** als das Programm | **bricht ab, bevor irgendetwas getauscht ist** — der Bestand auf dem Gerät bleibt unangetastet |
+| **older** than the program | `alembic upgrade head` runs after the swap. The bar reads "The schema is being brought forward" |
+| **at the same level** | nothing happens, the call has no effect |
+| **newer** than the program | **it aborts before anything is swapped** — the collection on the device stays untouched |
 
-Die Ablehnung kommt **vor** dem Tausch, und das ist keine Feinheit: Eine Sicherung, die dieses
-Programm nicht lesen kann, darf das Gerät nicht halb ersetzt zurücklassen. Nach der Ablehnung liegt
-das Archiv weiterhin im Eingangsordner, der Arbeitsordner ist aufgeräumt.
+The refusal comes **before** the swap, and that is no detail: a backup this program cannot read
+must not leave the device half replaced. After the refusal the archive still lies in the inbox
+folder, and the working directory is tidied up.
 
-**Bei einer zu neuen Sicherung: erst das Programm aktualisieren, dann einspielen.** Siehe
-[Update ohne Internet](#update-ohne-internet).
+**With a backup that is too new: update the program first, then read it in.** See
+[Updating without the internet](#updating-without-the-internet).
 
-### Nachsehen, wo etwas steht
+### Looking up where things stand
 
 ```bash
 docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
 docker compose exec backend alembic heads
 ```
 
-Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand. Das ist bei
-Schreibfehlern im Betrieb der erste Blick, und der Zustand ist von aussen nicht zu sehen: Die
-Ausstellung zeigt Fotos, Karte und Zeitleiste wie immer, nur **jeder Schreibzugriff** scheitert
-mit HTTP 500. Auf dem Entwicklungsrechner dasselbe ohne Container:
+If the two values do not agree, the schema is not up to date. That is the first thing to look at
+when writing fails in operation, and the state cannot be seen from outside: the exhibition shows
+photos, map and timeline as always, only **every write** fails with HTTP 500. The same on the
+development machine, without containers:
 
 ```bash
 sqlite3 data/kiekmap.db "select * from alembic_version;"
 cd backend && .venv/bin/alembic heads
 ```
 
-Und die Reparatur von Hand:
+And the repair by hand:
 
 ```bash
 make migrate
 ```
 
-## Wo die Sicherung liegt
+## Where the backup lies
 
-Auf dem Stick im Ordner `kiekmap-backup/`:
+On the stick, in the folder `kiekmap-backup/`:
 
 ```
 kiekmap-backup/
-  backup.json        Datum, Anzahl, Ortsname
-  kiekmap.db        die Angaben, mit VACUUM INTO konsistent herausgeschrieben
-  photos/            die Originale, nach ihrem Hash abgelegt
-  thumbs/            die Vorschaubilder
-  region.json        Kartenausschnitt
-  places.json        Ortsverzeichnis
+  backup.json        date, count, name of the place
+  kiekmap.db         the records, written out consistently with VACUUM INTO
+  photos/            the originals, filed under their hash
+  thumbs/            the thumbnails
+  region.json        the map extent
+  places.json        the place index
 ```
 
-Ordner statt Archiv: Eine abgebrochene Sicherung ist so teilweise brauchbar statt komplett
-wertlos, und die Bilder lassen sich an jedem Rechner ansehen.
+A folder rather than an archive: a backup broken off halfway is then partly usable instead of
+worthless, and the pictures can be looked at on any computer.
 
-Nach einer **Wiederherstellung** liegt der bisherige Stand unter `data/before-<Datum>/` — inklusive
-Datenbank und Write-Ahead-Log. Er wird nie automatisch gelöscht. Wenn feststeht, dass alles stimmt:
+After a **restore** the previous state lies under `data/before-<date>/` — database and
+write-ahead log included. It is never deleted automatically. Once it is certain that everything is
+right:
 
 ```bash
 rm -rf data/before-2026-07-29-1115
 ```
 
-Das ist der einzige Ort, an dem die SD-Karte unbemerkt volllaufen kann.
+That is the only place where the SD card can fill up unnoticed.
 
-Das Gerät für einen anderen Ort einrichten: [adaption.md](adaption.md).
+Setting the device up for another place: [adaption.md](adaption.md).

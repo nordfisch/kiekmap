@@ -102,7 +102,7 @@ Entscheidung.
 
 **Das Gemeindewappen.** Urheberrechtlich gemeinfrei (§ 5 Abs. 1 UrhG), in der *Führung* aber als
 Hoheitszeichen beschränkt. Deshalb liegt im Repo ein gezeichneter Platzhalter und nicht das Wappen.
-Ausführlich in [decisions.md](decisions.md), Punkt 21, und in [adaption.md](adaption.md).
+Ausführlich in [decisions.md](decisions.md), Punkt 21, und in [adaption.de.md](adaption.de.md).
 
 ## Basis-Abbilder und der Verbreitungsweg
 
@@ -142,4 +142,4 @@ verschenkt, haftet im Kern nur für Vorsatz und grobe Fahrlässigkeit. Daraus fo
 Verhaltensregel: **keine Zusicherungen machen.** Nicht versprechen, dass der Bestand sicher ist,
 dass die Sicherung funktioniert, dass das Gerät durchläuft. Was das Programm kann, steht im
 Änderungsprotokoll; was ungeprüft ist, steht in den [Issues](https://github.com/nordfisch/kiekmap/issues) und in
-[index.md](index.md).
+[index.de.md](index.de.md).

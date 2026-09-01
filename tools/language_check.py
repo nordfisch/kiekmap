@@ -215,13 +215,11 @@ PROSE_FILES = (
 
 #: Prose that has not made the switch yet -- checked in neither language while it is half of each.
 #:
-#: This is the to-do list of the change of 31 August 2026, and it has to reach empty. Every entry
-#: removed is one file that from then on is checked in its target language. See issue #31.
-IN_TRANSITION: tuple[str, ...] = (
-    "docs/adaption.md",
-    "docs/index.md",
-    "docs/operations.md",
-)
+#: This was the to-do list of the change of 1 September 2026, twelve files long, and it reached
+#: empty: every document is now checked in the language its name promises. See issue #31. Empty
+#: and kept, like ``TESTS_IN_TRANSITION`` above -- the next conversion needs somewhere to put its
+#: files while they are half of each language.
+IN_TRANSITION: tuple[str, ...] = ()
 
 
 def is_prose(path: str) -> bool:

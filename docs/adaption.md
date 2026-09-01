@@ -1,24 +1,22 @@
-# Kiekmap für einen anderen Ort oder eine andere Sprache
+# Kiekmap for another place or another language
 
-Die kurze Antwort vorweg:
-
-| Vorhaben | Aufwand |
+| What you want | What it costs |
 |---|---|
-| **Anderer deutschsprachiger Ort** | reine Konfiguration — kein Fork, kein Codeeingriff |
-| **Andere Sprache** | eine Zeile in der `.env` — siehe unten |
+| **Another German-speaking place** | configuration only — no fork, no change to the code |
+| **Another language** | one line in the `.env` — see below |
 
-Das ist kein Zufall, sondern eine Entscheidung, die sich durchzieht: **nichts Ortsspezifisches steht
-im Code.** Der Ausschnitt wird zur Laufzeit aus `region.json` geholt, die Kartendatei ist ein
-Artefakt, der Ortsindex kommt aus einem Bauskript. Wer daran etwas ändert, sollte diese Eigenschaft
-erhalten — sie ist der Grund, warum ein zweites Museum keinen zweiten Zweig braucht.
+That is no accident but a decision that runs through the whole project: **nothing place-specific
+stands in the code.** The extent is fetched from `region.json` at run time, the map file is a build
+artefact, the place index comes out of a build script. Whoever changes something here should keep
+that property — it is the reason a second museum needs no second branch.
 
 ---
 
-## Anderer Ort
+## Another place
 
-### 1. Region festlegen
+### 1. Fixing the region
 
-Nur eine Datei: [`tiles/region.json`](../tiles/region.json).
+One file only: [`tiles/region.json`](../tiles/region.json).
 
 ```json
 {
@@ -32,339 +30,340 @@ Nur eine Datei: [`tiles/region.json`](../tiles/region.json).
 }
 ```
 
-`streetChoice` ist die Anzahl der Straßen, die der „Hilf mit"-Bereich als Knöpfe zur Wahl stellt —
-die dem `center` nächsten. Der Ortsindex darf weiter reichen; was darüber hinaus liegt, wird auf
-der Karte angetippt. **Eine Anzahl und kein Radius**, weil sie das Knopfbudget unabhängig davon
-hält, wie dicht ein Ort bebaut ist: 80 Straßen passen in zwei Fragen mit je höchstens zehn Knöpfen
-(siehe [decisions.md](decisions.md), Punkt 24). Fehlt der Schlüssel, gilt 80.
+`streetChoice` is the number of streets the "Help out" panel offers as buttons — the ones nearest
+to `center`. The place index may reach further; whatever lies beyond it is tapped on the map. **A
+count and not a radius**, because that keeps the button budget independent of how densely a place
+is built up: 80 streets fit into two questions with at most ten buttons each (see
+[decisions.md](decisions.md), point 24). If the key is missing, 80 applies.
 
-**Der Wert ist zu prüfen, nicht zu übernehmen** — wie, steht in
-[Schritt 3](#3-die-straßenauswahl-prüfen).
+**The value is to be checked, not adopted** — how, is in [step 3](#3-checking-the-street-choice).
 
-Die Datei beschreibt einen **Ort** und sonst nichts. Welche Jahrzehnte der „Hilf mit"-Bereich zur
-Auswahl stellt, stand hier einmal mit — das gehört aber zur Sammlung und ergibt sich inzwischen aus
-ihr: angeboten wird, was der Bestand umspannt, mindestens jedoch 1920er bis 2010er. Ein Museum, das
-später ein Foto von 1890 datiert, bekommt den 1890er-Knopf von selbst dazu.
+The file describes a **place** and nothing else. Which decades the "Help out" panel offers stood
+here once — but that belongs to the collection and follows from it now: what is offered is what
+the collection spans, but at least the 1920s to the 2010s. A museum that later dates a photo to
+1890 gets the 1890s button by itself.
 
-**Zur Länge des `name`.** Er steht als Überschrift im Kopfbereich, und dort passt er sich der Spalte
-an: Je länger er ist, desto kleiner wird er gesetzt, damit er **auf einer Zeile bleibt**. Das geht
-nicht unbegrenzt — kleiner als die Zeile „Bilder aus" darüber wird er nicht, und darunter bricht er
-um. Nachgemessen am 16. August 2026:
+**On the length of `name`.** It stands as the heading in the header area, and there it adapts to
+the column: the longer it is, the smaller it is set, so that it **stays on one line**. That does
+not go on for ever — it does not get smaller than the line "Pictures from" above it, and below
+that it wraps. Measured on 16 August 2026:
 
-| Länge des Namens | Auf einem 1024er Schirm | Auf einem 1920er |
+| Length of the name | On a 1024 screen | On a 1920 one |
 |---|---|---|
-| bis 12 Zeichen | einzeilig | einzeilig |
-| 13 bis 16 Zeichen | bricht um | einzeilig |
-| darüber | bricht um | bricht um |
+| up to 12 characters | one line | one line |
+| 13 to 16 characters | wraps | one line |
+| more | wraps | wraps |
 
-„Holm" hat vier, „Klein Nordende" hat vierzehn. **Ein Umbruch ist kein Fehler**, sondern die
-bewusste Rückfallebene — ein abgeschnittener Ortsname wäre schlimmer. Wer ihn vermeiden will, kürzt
-den `name` („Klein Nordende" statt „Klein Nordende-Lieth"); der volle Name gehört ohnehin eher in
-den Begrüßungstext als in die Überschrift.
+"Holm" has four, "Klein Nordende" has fourteen. **A wrap is not an error** but the deliberate
+fallback — a truncated place name would be worse. Whoever wants to avoid it shortens the `name`
+("Klein Nordende" instead of "Klein Nordende-Lieth"); the full name belongs in the welcome text
+rather than in the heading anyway.
 
-**Bounding Box ausrechnen.** Aus Mittelpunkt und gewünschtem Umkreis:
+**Working out the bounding box.** From a centre and the radius you want:
 
 ```bash
 python3 -c "
 import math
-lat, lon, r = 53.62053, 9.67601, 5.0   # Mittelpunkt und Radius in km
+lat, lon, r = 53.62053, 9.67601, 5.0   # centre, and radius in km
 dlat = r / 111.320
 dlon = r / (111.320 * math.cos(math.radians(lat)))
 print([round(x, 5) for x in (lon-dlon, lat-dlat, lon+dlon, lat+dlat)])
 "
 ```
 
-Großzügig wählen. Die `bbox` begrenzt zugleich, wie weit sich die Karte schieben lässt; zu eng
-fällt erst am Kiosk auf, wenn jemand hinauszoomt. Die Kacheln werden ohnehin mit 10 % Rand gebaut.
+Choose generously. The `bbox` also limits how far the map can be dragged; too tight shows up only
+at the kiosk, when somebody zooms out. The tiles are built with a 10 % margin anyway.
 
-**Zoomstufen bestimmen.** `defaultZoom` so wählen, dass der Ortskern das Bild füllt:
+**Determining the zoom levels.** Choose `defaultZoom` so that the centre of the place fills the
+picture:
 
 ```bash
 python3 -c "
 import math
-lat, kartenbreite_px, gewuenscht_km = 53.62, 1500, 3.0
+lat, map_width_px, wanted_km = 53.62, 1500, 3.0
 mpp = 156543.03392 * math.cos(math.radians(lat))
 for z in (13, 14, 14.5, 15, 15.5, 16):
     m = mpp / 2**z
-    print(f'  z={z:<5} {kartenbreite_px*m/1000:5.2f} km breit')
+    print(f'  z={z:<5} {map_width_px*m/1000:5.2f} km wide')
 "
 ```
 
-Auf einem 1080p-Display ist die Kartenfläche etwa 1500 × 920 px breit. `minZoom` so, dass der ganze
-Ausschnitt auf einmal sichtbar ist. `maxZoom` bleibt bei 15 — das ist die Grenze des
-Protomaps-Tagesbuilds, darüber hinaus wird überzoomt und bleibt trotzdem scharf.
+On a 1080p display the map area is about 1500 × 920 px. Choose `minZoom` so that the whole extent
+is visible at once. `maxZoom` stays at 15 — that is the limit of the Protomaps daily build; beyond
+it the map is over-zoomed and still stays sharp.
 
-**Jahrzehnte** an die Sammlung anpassen: Ein Museum, dessen ältester Abzug von 1890 ist, gewinnt
-nichts durch einen 1860er-Knopf.
-
-### 2. Kartendaten und Ortsindex bauen
+### 2. Building the map data and the place index
 
 ```bash
-make tiles     # Vektorkacheln, Schriften und Symbole für die neue Region
-make places    # Ortsindex aus OpenStreetMap
+make tiles     # vector tiles, fonts and icons for the new region
+make places    # place index from OpenStreetMap
 ```
 
-Beides braucht Internet und läuft auf dem Entwicklungsrechner, nicht auf dem Pi. Größenordnung für
-eine Gemeinde mit 5 km Umkreis: 4–5 MB Kacheln, 14 MB Schriften und Symbole, rund achttausend Orte
-(`places.json` ~1,5 MB).
+Both need the internet and run on the development machine, not on the Pi. Order of magnitude for a
+municipality with a 5 km radius: 4–5 MB of tiles, 14 MB of fonts and icons, some eight thousand
+places (`places.json` about 1.5 MB).
 
-Der Löwenanteil sind **Adressen** — für Holm 7686 von 8513 Einträgen. Sie machen die Verortung
-haus- statt straßengenau; ohne sie bekäme jedes Foto einer 800 m langen Straße denselben Punkt. Wer
-den Ortsindex klein halten will, kann die beiden `addr:`-Zeilen in `tiles/build-places.py`
-auskommentieren; die Oberfläche überspringt den Hausnummernschritt dann von allein.
+**Addresses** make up the largest part — for Holm 7686 of 8513 entries. They make the placing
+accurate to the house rather than to the street; without them every photo of a street 800 m long
+would get the same point. Whoever wants to keep the place index small can comment the two `addr:`
+lines out in `tiles/build-places.py`; the interface then skips the house-number step by itself.
 
-`make tiles` legt `region.json` zusätzlich unter `data/` ab — dort liest das Backend sie und prüft
-damit, ob eine Verortung aus dem „Hilf mit"-Bereich überhaupt in der Region liegt. **Ohne diese
-Datei greift der Schutz nicht** (er lässt dann alles durch, statt grundlos abzulehnen).
+`make tiles` also puts `region.json` under `data/` — the backend reads it there and uses it to
+check whether a placing from the "Help out" panel lies in the region at all. **Without that file
+the guard does not bite** (it then lets everything through instead of refusing for no reason).
 
-### 3. Die Straßenauswahl prüfen
+### 3. Checking the street choice
 
-Der „Hilf mit"-Bereich fragt nach dem Ort eines Fotos, und der **Hauptweg dorthin sind Knöpfe**:
-erst der Anfangsbuchstabe, dann die Straße, dann die Hausnummer. Ein Suchfeld gibt es dort nicht —
-die Besucheransicht hat überhaupt kein Eingabefeld, weil am Kiosk keine Tastatur steht (siehe
-[decisions.md](decisions.md), Punkt 24). Ob dieser Weg trägt, entscheidet sich am Ortsindex, und
-das lässt sich vor dem ersten Besucher nachsehen.
+The "Help out" panel asks where a photo was taken, and **the main way there is buttons**: first the
+initial letter, then the street, then the house number. There is no search field — the visitor view
+has no input field at all, because no keyboard stands at the kiosk (see
+[decisions.md](decisions.md), point 24). Whether that way holds up is decided by the place index,
+and that can be looked at before the first visitor.
 
-**Woher die Straßen kommen.** Aus `make places`: Das Skript fragt einmal die Overpass-API nach
-allem, was innerhalb der `bbox` liegt, und schreibt es in den Ortsindex. Wer diesen Schritt
-auslässt, bekommt keinen Fehler — der Bereich sagt dann „Tippen Sie die Stelle bitte auf der Karte
-an" und schaltet die Karte von sich aus scharf. Das ist ein funktionierender Notweg, aber eben ein
-Notweg: Ohne Ortsindex ist auch die Hausnummer nicht zu haben, und jedes Foto einer 800 m langen
-Straße bekäme denselben Punkt.
+**Where the streets come from.** From `make places`: the script asks the Overpass API once for
+everything inside the `bbox` and writes it into the place index. Whoever skips this step gets no
+error — the panel then says "Please tap the spot on the map" and arms the map by itself. That is a
+working way out, but a way out: without the place index there is no house number either, and every
+photo of a street 800 m long would get the same point.
 
-**Wie man nachsieht, ohne zu raten.** Ein Aufruf liefert genau die Liste, die der Baum bekommt:
+**How to look instead of guessing.** One call returns exactly the list the tree gets:
 
 ```bash
 curl -s localhost:8000/api/places/streets | python3 -c "
 import json,sys
-namen = [p['name'] for p in json.load(sys.stdin)]
-print(f'{len(namen)} Strassen zur Wahl:')
-print('  ' + ', '.join(namen))
+names = [p['name'] for p in json.load(sys.stdin)]
+print(f'{len(names)} streets to choose from:')
+print('  ' + ', '.join(names))
 "
 ```
 
-Wer sie sich ansieht, weiß dreierlei: ob der Ortskern vollständig drin ist, wie viele Fremdorte
-mitkommen, und ob `streetChoice` passt.
+Whoever looks at it knows three things: whether the centre of the place is completely in, how many
+streets from elsewhere come along, and whether `streetChoice` fits.
 
-**Wie `streetChoice` zu wählen ist.** Der Wert entscheidet, wie viele Fragen bis zur Straße nötig
-sind. Die Gruppen werden gerechnet, nicht aufgeschrieben: Aus höchstens zehn Knöpfen je Stufe
-ergibt sich der Baum von selbst. Für Holm sieht das so aus:
+**How to choose `streetChoice`.** The value decides how many questions it takes to reach a street.
+The groups are calculated, not written down: from at most ten buttons per level the tree follows by
+itself. For Holm it looks like this:
 
 | | |
 |---|---|
-| Straßen zur Wahl (`streetChoice` 80) | 80 |
-| Knöpfe auf der ersten Stufe | 10 — `A` `B–D` `E` `F–G` `H` `I` `K–L` `M–R` `S` `T–Z` |
-| davon direkt zur Straßenliste | 7 |
-| mit einem Zwischenschritt | 3 — `A` (15), `H` (11), `I` (11) |
+| Streets to choose from (`streetChoice` 80) | 80 |
+| Buttons on the first level | 10 — `A` `B–D` `E` `F–G` `H` `I` `K–L` `M–R` `S` `T–Z` |
+| of those straight to the street list | 7 |
+| with one step in between | 3 — `A` (15), `H` (11), `I` (11) |
 
-Zwei Fragen im Regelfall, drei im Ausnahmefall. **Das ist die Zielgröße.** Ein dichter bebauter Ort
-braucht einen kleineren Wert, ein weitläufiger verträgt einen größeren — nachrechnen lässt sich das
-mit derselben Abfrage oben: Kommen mehr als etwa hundert Straßen zusammen, gerät die dritte Stufe
-zum Regelfall, und der Weg zur Hausnummer wird lang.
+Two questions as a rule, three in the exception. **That is the target.** A more densely built place
+needs a smaller value, a spread-out one takes a larger — and it can be worked out with the same
+query above: once more than about a hundred streets come together, the third level becomes the
+rule and the way to the house number gets long.
 
-**Was schiefgehen kann, und beides fällt erst am Gerät auf:**
+**What can go wrong, both without an error message:**
 
-- **Die `bbox` ist zu eng gesetzt.** Der Ortsindex reicht nur so weit wie sie; Randstraßen fehlen
-  dann ganz und stehen weder in der Suche noch auf einem Knopf.
-- **Die `bbox` ist zu weit gesetzt.** Dann kommen Nachbardörfer mit — und weil `streetChoice` die
-  *nächsten* nimmt, verdrängen deren Straßen die eigenen aus der Auswahl. In Holm liegen 486
-  Straßen im Index und nur 80 auf den Knöpfen; wäre der Ausschnitt doppelt so groß, wären darunter
-  Straßen, die kein Foto der Sammlung je zeigt.
+- **The `bbox` is set too tight.** The place index reaches only as far as it does; edge streets are
+  then missing entirely and stand neither in the search nor on a button.
+- **The `bbox` is set too wide.** Neighbouring villages come along — and because `streetChoice`
+  takes the *nearest*, their streets push the local ones out of the choice. In Holm 486 streets lie
+  in the index and only 80 on the buttons; had the extent been twice as large, streets no photo of
+  the collection ever shows would be among them.
 
-Beides ist an der Liste oben zu sehen, bevor jemand davorsteht. Erwartet man einen Straßennamen
-und findet ihn nicht, ist die `bbox` der erste Verdacht, nicht der Code.
+Both can be seen in the list above, before anybody stands in front of it. If you expect a street
+name and do not find it, the `bbox` is the first suspicion, not the code.
 
-### 4. Wappen einsetzen
+### 4. Putting the coat of arms in
 
-**Mitgeliefert wird ein Platzhalter, kein Wappen** — ein schlichtes Schild aus
-[`tools/build_logo.py`](../tools/build_logo.py). Warum kein echtes, steht in
-[decisions.md](decisions.md), Punkt 21.
+**What ships is a placeholder, not a coat of arms** — a plain shield out of
+[`tools/build_logo.py`](../tools/build_logo.py). Why not a real one is in
+[decisions.md](decisions.md), point 21.
 
-[`frontend/public/logo.png`](../frontend/public/logo.png) durch das eigene ersetzen — gleicher
-Dateiname, sonst nichts. Das Bild liegt über der linken oberen Ecke der Karte und ist zugleich der
-Weg in den Admin-Bereich. Im Code steht nirgends, was darauf zu sehen ist; die Beschriftung für
-Vorlesewerkzeuge setzt sich aus `name` in der `region.json` zusammen.
+Replace [`frontend/public/logo.png`](../frontend/public/logo.png) with your own — same file name,
+nothing else. The picture lies over the top left corner of the map and is at the same time the way
+into the admin area. Nowhere in the code does it say what is on it; the label for screen readers is
+put together from `name` in the `region.json`.
 
-Hochkant oder quer ist gleich, das Bild wird in ein Quadrat von 4,5 rem eingepasst. Sinnvoll sind
-etwa 400 px Kantenlänge; PNG mit Transparenz sieht auf der Karte am besten aus.
+Portrait or landscape makes no difference, the picture is fitted into a square of 4.5 rem. About
+400 px on a side is sensible; PNG with transparency looks best on the map.
 
-> **Die ersetzte Datei nicht committen.** Sie trägt denselben Namen wie der Platzhalter, taucht
-> also als geänderte Datei auf. Auf dem eigenen Gerät ist das richtig; in einem Repo, das jemand
-> klonen kann, gibt sie das Wappen weiter — siehe unten.
+> **Do not commit the replaced file.** It carries the same name as the placeholder, so it turns up
+> as a changed file. On your own device that is right; in a repository somebody can clone, it
+> passes the coat of arms on — see below.
 
-#### Zum Recht: zwei Fragen, die oft zu einer verschmolzen werden
+#### On the law: two questions that often get merged into one
 
-**Urheberrecht.** Ein Gemeindewappen ist nach § 5 Abs. 1 UrhG ein amtliches Werk und damit
-gemeinfrei. Von dieser Seite ist nichts zu klären.
+**Copyright.** A municipal coat of arms is an official work under § 5 (1) UrhG and therefore free
+of copyright. There is nothing to settle from that side.
 
-**Wappenrecht.** Davon unabhängig ist die *Führung* eines Wappens beschränkt: Es ist ein
-Hoheitszeichen, die Gemeinde regelt seinen Gebrauch, geschützt über das Namensrecht (§ 12 BGB) und
-die Vorschriften über Hoheitszeichen. Auch die Wikipedia weist auf ihren Wappenseiten
-ausdrücklich darauf hin.
+**The law on arms.** Independently of that, *using* a coat of arms is restricted: it is an official
+emblem, the municipality governs its use, protected through the right to a name (§ 12 BGB) and the
+rules on official emblems. Wikipedia points this out explicitly on its coat-of-arms pages too.
 
-Daraus folgt zweierlei:
+Two things follow:
 
-- **Auf dem eigenen Gerät** ist das Wappen des eigenen Ortes für ein Heimatmuseum in aller Regel
-  unproblematisch — im Zweifel kurz bei der Gemeinde nachfragen.
-- **In einem öffentlichen Repo ist es etwas anderes.** Wer das Repo veröffentlicht, gibt jede
-  darin liegende Datei an jeden weiter, der sie klont. Eine Erlaubnis für das eigene Museum ist
-  keine Erlaubnis für Dritte, und ein Hinweis oder eine Namensnennung ändert daran nichts: Hier
-  geht es nicht um Zuschreibung, sondern um Erlaubnis.
+- **On your own device** the coat of arms of your own place is as a rule unproblematic for a local
+  history museum — if in doubt, ask the municipality.
+- **In a public repository it is another matter.** Whoever publishes the repository passes every
+  file in it to everybody who clones it. Permission for your own museum is not permission for
+  third parties, and a note or an attribution changes nothing about that: this is not about credit
+  but about permission.
 
-Deshalb liegt in diesem Repo ein Platzhalter, und das Wappen bleibt eine lokale Datei — wie
-`.env` und die gebaute Karte.
+That is why a placeholder lies in this repository, and the coat of arms stays a local file — like
+the `.env` and the built map.
 
-### 5. Sammlungsspezifisches prüfen
+### 5. Checking what belongs to the collection
 
-In der `.env`:
+In the `.env`:
 
 ```bash
-KIEKMAP_EXIF_DATE_MAX_YEAR=1990   # ab wann ein EXIF-Datum als Scandatum gilt
-KIEKMAP_ADMIN_PIN_HASH=...        # PIN für den Admin-Bereich
+KIEKMAP_EXIF_DATE_MAX_YEAR=1990   # from when an EXIF date counts as the date of the scan
+KIEKMAP_ADMIN_PIN_HASH=...        # PIN for the admin area
 
-# Angaben, die beim Import für jedes Foto gelten. Alle drei sind leer voreingestellt.
-KIEKMAP_IMPORT_TAGS=["Gebäude"]                 # Schlagwörter für jedes importierte Foto
-KIEKMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # Bildnachweis, wo die Datei niemanden nennt
+# Details that apply to every photo on import. All three are empty by default.
+KIEKMAP_IMPORT_TAGS=["Gebäude"]                 # keywords for every imported photo
+KIEKMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # credit where the file names nobody
 KIEKMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
 ```
 
-`exif_date_max_year` hochsetzen, falls die Sammlung auch echte Digitalfotos enthält — sonst
-verlieren die ihr Aufnahmedatum. Herunterlassen, wenn ausschließlich Scans erwartet werden. Wo
-die Datei ihr Gerät nennt, entscheidet ohnehin das: Ein Scanner datiert nie, eine Kamera immer.
-Der Wert greift nur für Dateien ohne Geräteangabe.
+Raise `exif_date_max_year` if the collection also holds genuine digital photographs — otherwise
+they lose the date they were taken. Lower it when nothing but scans is expected. Where the file
+names its device, that decides anyway: a scanner never dates, a camera always does. The value
+applies only to files with no device recorded.
 
-Die drei `IMPORT_`-Werte sind der Ort für das, was eine *Sammlung* ausmacht.
-`KIEKMAP_IMPORT_TAGS` ist eine JSON-Liste; in Holm besteht der Bestand aus Gebäuden, anderswo
-aus Trachten oder Schiffen. `KIEKMAP_IMPORT_PROVENANCE` wird wörtlich vor den Dateipfad im
-Import-Ordner gesetzt und trägt darum sein eigenes Trennzeichen am Ende — so führt die
-Herkunftsangabe eines Fotos zurück auf die Datei im eigenen Archiv.
+The three `IMPORT_` values are the place for what makes a *collection*. `KIEKMAP_IMPORT_TAGS` is a
+JSON list; in Holm the stock is buildings, elsewhere it is costumes or ships.
+`KIEKMAP_IMPORT_PROVENANCE` is put verbatim in front of the file path in the import folder and
+therefore carries its own separator at the end — so the provenance of a photo leads back to the
+file in your own archive.
 
-Ob der Import die **Ordnernamen** auswertet, muss nirgends eingestellt werden: Ein Pfadteil gilt
-als Straße, wenn der Ortsindex sie kennt. Ein Archiv, das nach Straße und Hausnummer abgelegt
-ist, wird damit von selbst verortet; eines mit anderer Ablage bleibt einfach unberührt.
+Whether the import reads the **folder names** need not be set anywhere: a path element counts as a
+street when the place index knows it. An archive filed by street and house number is placed by
+itself; one filed differently is simply left alone.
 
-Den PIN-Hash erzeugt:
+The PIN hash is produced by:
 
 ```bash
 cd backend && .venv/bin/python -m app.cli pin
 ```
 
-Die PIN selbst wird nirgends gespeichert. Ist `KIEKMAP_ADMIN_PIN_HASH` leer, sagt der
-Admin-Bereich das im Klartext, statt jede Eingabe abzulehnen.
+The PIN itself is stored nowhere. If `KIEKMAP_ADMIN_PIN_HASH` is empty, the admin area says so in
+plain words instead of rejecting every entry.
 
-### 6. Alles zusammen prüfen
+### 6. Checking it all together
 
 ```bash
 make dev
 ```
 
-- Zeigt die Karte den richtigen Ort im richtigen Ausschnitt?
-- Lässt sich die Karte nicht über die Region hinausschieben?
-- Führen die Knöpfe im „Hilf mit"-Bereich in zwei bis drei Schritten zu einer echten Straße
-  (siehe [Schritt 3](#3-die-straßenauswahl-prüfen))?
-- **WLAN abschalten und die Karte bewegen** — Beschriftungen müssen sichtbar bleiben.
+- Does the map show the right place in the right extent?
+- Can the map not be dragged beyond the region?
+- Do the buttons in the "Help out" panel lead to a real street in two or three steps (see
+  [step 3](#3-checking-the-street-choice))?
+- **Switch the wifi off and move the map** — the labels have to stay visible.
 
-Der letzte Punkt ist der wichtigste. Prüfung ohne Hinsehen:
+The last point is the most important. Checking it without looking:
 
 ```js
 performance.getEntriesByType('resource')
   .filter(e => !e.name.startsWith(location.origin) && !e.name.startsWith('data:')).length
-// muss 0 sein
+// has to be 0
 ```
 
-### Was dabei *nicht* zu tun ist
+### What *not* to do while doing it
 
-Kein Codeeingriff, kein Fork, kein neuer Zweig. Wer beim Anpassen feststellt, dass er doch Code
-ändern muss, hat einen Fehler gefunden — dann gehört der Wert nach `region.json` oder in die `.env`,
-nicht in eine Kopie des Projekts.
+No change to the code, no fork, no new branch. Whoever finds while adapting that they do have to
+change code has found a bug — the value then belongs in `region.json` or in the `.env`, not in a
+copy of the project.
 
-Ausgenommen sind kosmetische Reste: ein Kommentar in `app/api/places.py` und das Beispiel in der
-OpenAPI-Beschreibung nennen Holm. Beides ist Dokumentation, keine Logik.
+Cosmetic residues are the exception: comments in the backend name Holm where an example makes the
+case concrete. That is documentation, not logic.
 
 ---
 
-## Andere Sprache
+## Another language
 
-Eine Einstellung, und sie steht dort, wo alle Einstellungen der Instanz stehen:
+One setting, and it stands where every setting of the instance stands:
 
 ```bash
 # .env
 KIEKMAP_LANGUAGE=en
 ```
 
-Danach den Dienst neu starten. **Ein neuer Bau ist nicht nötig** — das Frontend holt die Sprache
-beim Start über `GET /api/config`. Zulässig sind `de` und `en`; ein anderer Wert bricht den Start
-ab, statt still auf Deutsch zurückzufallen.
+Then restart the service. **No new build is needed** — the frontend fetches the language at startup
+through `GET /api/config`. `de` and `en` are allowed; any other value aborts the start instead of
+falling back to German in silence.
 
-Umgestellt wird damit alles, was ein Mensch am Gerät liest: Besucheransicht, Verwaltung,
-Fehlermeldungen der API, das Import-Protokoll, die Meldungen der Sicherung, die Datumsbeschriftung
-und das Zahlenformat.
+What that switches is everything a person reads at the device: the visitor view, the admin area,
+the error messages of the API, the import log, the messages of the backup, the date labels and the
+number format.
 
-### Wo die Texte stehen
+**What it does not switch is the map underneath.** It labels its places in German whatever the
+setting says, because the label language is a property of the place rather than of the reader — in
+Holm the street is called Mühlenweg in every language. For a museum outside the German-speaking
+area that is the wrong answer, and it is open work:
+[issue #33](https://github.com/nordfisch/kiekmap/issues/33).
 
-Zwei Kataloge, gleich gebaut:
+### Where the texts are
 
-| | Oberfläche | Backend |
+Two catalogues, built the same way:
+
+| | Interface | Backend |
 |---|---|---|
-| Ort | [`frontend/src/text/`](../frontend/src/text/) | [`backend/app/text/`](../backend/app/text/) |
-| Deutsch | `de.ts` | `de.py` |
-| Englisch | `en.ts` | `en.py` |
+| Where | [`frontend/src/text/`](../frontend/src/text/) | [`backend/app/text/`](../backend/app/text/) |
+| German | `de.ts` | `de.py` |
+| English | `en.ts` | `en.py` |
 
-**Ein fehlender Eintrag bricht den Bau, nicht das Museum.** Im Frontend ist der Typ der Kataloge
-`typeof de`, also lehnt `tsc` eine unvollständige Übersetzung ab. Im Backend sind es eingefrorene
-Dataclasses, und eine fehlende Angabe ist ein `TypeError` beim Start.
+**A missing entry breaks the build, not the museum.** In the frontend the type of the catalogues is
+`typeof de`, so `tsc` refuses an incomplete translation. In the backend they are frozen dataclasses,
+and a missing entry is a `TypeError` at startup.
 
-### Eine dritte Sprache
+### A third language
 
-Dieselbe Konstruktion trägt sie ohne Umbau: eine Datei je Katalog, ein Wert mehr in
-`KIEKMAP_LANGUAGE`. Bei drei Sprachen lohnt sich allerdings ein Übersetzungsdienst — siehe
+The same construction carries it without rebuilding: one file per catalogue, one more value in
+`KIEKMAP_LANGUAGE`. At three languages a translation service starts to pay off — see
 [decisions.md](decisions.md).
 
-Die Sprache ist eine **Einstellung der Instanz, keine Wahl der Besucher**. Das Gerät steht in einem
-Museum und spricht dessen Sprache. Ein Umschalter auf dem Touchscreen wäre eine Bedienungsfrage für
-Besucher, die oft älter sind, und keine Erleichterung.
+The language is a **setting of the instance, not a choice for visitors**. The device stands in a
+museum and speaks that museum's language. A switch on the touchscreen would be one more thing to
+operate for visitors who are often elderly, and no relief.
 
-### Was in jeder Sprache deutsch bleibt
+### What stays German in every language
 
-| Ort | Was | Warum |
+| Where | What | Why |
 |---|---|---|
-| Ortsarten | `strasse`, `gebaeude`, `flur` … | Schlüssel aus `tiles/build-places.py`; angezeigt wird, was `t.location.kinds` daraus macht |
-| Straßen- und Ortsnamen | aus OpenStreetMap | ein Eigenname wird nicht übersetzt |
-| Ältere Einträge im Import-Protokoll | `ImportLog.message` | festgehalten, was das Gerät damals gesagt hat |
-| `*.de.md` und `docs/history.de.md` | Doku für Museum und Betrieb | als Übersetzung geführt, siehe [development.md](development.md#language) |
+| Kinds of place | `strasse`, `gebaeude`, `flur` … | keys from `tiles/build-places.py`; what is shown is what `t.location.kinds` makes of them |
+| Street and place names | from OpenStreetMap | a proper name is not translated |
+| Older entries in the import log | `ImportLog.message` | a record of what the device said at the time |
+| `*.de.md` and `docs/history.de.md` | docs for the museum and for operation | kept as a translation, see [development.md](development.md#language) |
 
-Die Ortsarten sind der einzige Fall, der nach einer Falle aussieht und keine ist: In der Datenbank
-stehen deutsche Schlüsselwörter, angezeigt wird die Übersetzung. `en.ts` bildet dieselben Schlüssel
-auf `"Street"`, `"Building"` und so weiter ab.
+The kinds of place are the one case that looks like a trap and is not: German keywords stand in the
+database, and the translation is what gets shown. `en.ts` maps the same keys onto `"Street"`,
+`"Building"` and so on.
 
-Das Import-Protokoll ist der zweite. Es berichtet, was bei einem Import geschah, und der Satz wurde
-damals geschrieben und gespeichert. Neue Einträge folgen der eingestellten Sprache; die alten
-bleiben, wie sie lauteten.
+The import log is the second. It reports what happened during an import, and the sentence was
+written and stored at the time. New entries follow the language that is set; the old ones stay as
+they read.
 
-### Was englisch festgelegt ist und nicht mitwandert
+### What is fixed in English and does not travel
 
-Die Ordner `_done` und `_problem` im Eingang, der Sicherungsordner `kiekmap-backup/` samt allem
-darin, und der `status` von `/health`. Die ersten beiden sind Namen im Dateisystem: Folgten sie der
-Einstellung, müsste ein Umstellen Ordner umbenennen — auf dem Gerät und auf jedem schon
-geschriebenen Stick. Der dritte ist ein Maschinenwert, den der Kiosk-Dienst liest.
+The folders `_done` and `_problem` in the inbox, the backup folder `kiekmap-backup/` with
+everything in it, and the `status` of `/health`. The first two are names in the file system: were
+they to follow the setting, changing it would have to rename folders — on the device and on every
+stick already written. The third is a machine value that the kiosk service reads.
 
 ---
 
-## Wann Modularisierung sich lohnt
+## When splitting things up starts to pay off
 
-Solange es um **einen Ort je Installation** geht, ist der jetzige Zuschnitt der richtige: eine
-Konfigurationsdatei, zwei Bauskripte, fertig. Mehr Struktur würde nur Arbeit erzeugen, die niemand
-braucht.
+As long as it is **one place per installation**, the present cut is the right one: one
+configuration file, two build scripts, done. More structure would only create work nobody needs.
 
-Interessant wird es, sobald einer dieser Fälle eintritt:
+It gets interesting as soon as one of these cases arrives:
 
-- **Mehrere Orte auf einem Gerät** — etwa ein Kreismuseum mit mehreren Gemeinden. Dann bräuchte
-  `region` einen Datenbankbezug statt einer Datei, und Fotos müssten einer Region zugeordnet werden.
-- **Ein gemeinsamer Bestand, mehrere Kioske** — dann wäre das Backend zentral und nur das Frontend
-  je Standort konfiguriert.
-- **Regelmäßige Updates an mehrere Museen** — dann lohnt es, die Konfiguration vollständig aus dem
-  Repo zu lösen, damit ein `git pull` nie eine Anpassung überschreibt.
+- **Several places on one device** — a district museum with several municipalities, say. `region`
+  would then need a database reference instead of a file, and photos would have to be assigned to
+  a region.
+- **One shared collection, several kiosks** — the backend would then be central and only the
+  frontend configured per site.
+- **Regular updates to several museums** — it would then pay off to take the configuration out of
+  the repository entirely, so that a `git pull` never overwrites an adaptation.
 
-Bis dahin gilt: Ein zweites Museum bekommt eine Kopie des Repos, ändert `region.json` und die
-`.env`, baut Kacheln und Ortsindex, und ist fertig. Updates zieht es per `git pull` — die eigenen
-Anpassungen liegen in Dateien, die dabei nicht kollidieren.
+Until then: a second museum gets a copy of the repository, changes `region.json` and the `.env`,
+builds tiles and place index, and is done. It pulls updates with `git pull` — its own adaptations
+lie in files that do not collide.

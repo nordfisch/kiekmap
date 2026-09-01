@@ -64,7 +64,7 @@ was der Bestand hat, was noch fehlt, und wie lange die letzte Sicherung her ist.
 | `frontend/` | React + MapLibre: Besucheransicht (`src/kiosk/`) und Admin (`src/admin/`) |
 | `tiles/` | Skripte, die die Offline-Karte und die lokale Ortssuche bauen |
 | `deploy/` | Docker Compose und die Einrichtung des Raspberry Pi |
-| `docs/` | Die ganze Dokumentation — Wegweiser: [docs/index.md](docs/index.md) |
+| `docs/` | Die ganze Dokumentation — Wegweiser: [docs/index.de.md](docs/index.de.md) |
 | `data/` | Laufzeitdaten (nicht im Repo): Datenbank, Fotos, Thumbnails |
 
 ## Entwicklung
@@ -94,7 +94,7 @@ Einrichtung im Detail, Sprachregelung, Teststrategie und die Fallstricke, die Ze
 
 **Für einen anderen Ort:** Es genügt, `tiles/region.json` anzupassen und `make tiles && make places`
 auszuführen — kein Fork, kein Codeeingriff. Schritt für Schritt in
-[docs/adaption.md](docs/adaption.md).
+[docs/adaption.de.md](docs/adaption.de.md).
 
 **Für eine andere Sprache:** eine Zeile in der `.env`. `KIEKMAP_LANGUAGE=en` stellt Besucheransicht,
 Verwaltung, Meldungen und Datumsbeschriftung um, ohne neuen Bau.
@@ -103,14 +103,14 @@ Verwaltung, Meldungen und Datumsbeschriftung um, ohne neuen Bau.
 
 Der Pi bootet direkt in die Karte — kein Login, kein Desktop, keine Bedienung nötig.
 Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in
-[docs/operations.md](docs/operations.md). Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen
+[docs/operations.de.md](docs/operations.de.md). Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen
 ist [docs/usermanual.de.md](docs/usermanual.de.md).
 
 Woraus das System besteht und wie die Teile zusammenspielen, steht in
 [docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in
 [docs/decisions.md](docs/decisions.md); wie es dazu gekommen ist, in
 [docs/history.de.md](docs/history.de.md). Was noch offen ist, in den [Issues](https://github.com/nordfisch/kiekmap/issues).
-Welche Datei welche Frage beantwortet, sagt [docs/index.md](docs/index.md).
+Welche Datei welche Frage beantwortet, sagt [docs/index.de.md](docs/index.de.md).
 
 ## Mitwirken
 
@@ -135,6 +135,6 @@ Copyleft, nichts, was einer Nutzung im Weg steht.
 **Die Kartendaten sind eine eigene Frage.** Sie stammen aus OpenStreetMap und stehen unter der
 **ODbL 1.0**; die Schriften unter der OFL 1.1, die Kartensymbole unter MIT. Was das für eine
 Weitergabe bedeutet — und was der Fotobestand des Museums damit zu tun hat, nämlich nichts —,
-steht in [docs/licensing.md](docs/licensing.md).
+steht in [docs/licensing.de.md](docs/licensing.de.md).
 
 Ohne Gewähr, ohne Haftung, wie in Abschnitt 7 und 8 der Lizenz beschrieben.

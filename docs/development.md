@@ -104,9 +104,10 @@ list — without the umlaut they would simply be wrong. For commit messages the 
 the switch to English.
 
 `python3 tools/language_check.py` checks both sides: transcribed umlauts in German documentation,
-German paragraphs in English documentation. Its `IN_TRANSITION` tuple lists what has not made the
-switch yet — a file that is half of each is checked in neither language, and that list has to
-reach empty. It is the progress bar of [issue #31](https://github.com/nordfisch/kiekmap/issues/31).
+German paragraphs in English documentation. Its `IN_TRANSITION` tuple holds what has not made the
+switch yet — a file that is half of each is checked in neither language. It was the progress bar
+of [issue #31](https://github.com/nordfisch/kiekmap/issues/31) and is empty again, kept for the
+next conversion.
 
 ### The two catalogues
 
