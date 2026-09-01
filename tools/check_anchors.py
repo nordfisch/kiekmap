@@ -13,6 +13,7 @@ Deliberately **not** a test: it checks documentation, not behaviour, and a red t
 renamed heading would train people to ignore the suite.
 """
 
+import posixpath
 import re
 import sys
 import unicodedata
@@ -73,7 +74,22 @@ def headings_of(path: Path) -> set[str]:
     return {slug(match.group(1)) for match in re.finditer(r"^#{1,6} (.+)$", text, re.M)}
 
 
-def check(path: Path, headings: dict[str, set[str]]) -> list[str]:
+def resolve(source: str, target: str) -> str:
+    """Where a link in ``source`` points, as a path from the root of the repository.
+
+    ``../developer/decisions.md`` in ``docs/museum/operations.md`` resolves to
+    ``docs/developer/decisions.md``, and that is the whole job.
+
+    It used to be done with ``Path(target).name``, which threw the directory away and matched on
+    the file name alone. That was harmless while every document sat in one folder, and wrong from
+    the moment two of them were called ``index.md``: the second one silently replaced the first in
+    the table of headings, and both files were then checked against the wrong anchors -- reporting
+    a correct link as dead as readily as missing a broken one.
+    """
+    return posixpath.normpath(posixpath.join(posixpath.dirname(source), target))
+
+
+def check(name: str, path: Path, headings: dict[str, set[str]]) -> list[str]:
     """The dead anchors of one file, empty when all of them resolve.
 
     **Both kinds count.** ``](#anchor)`` points inside the file; ``](other.md#anchor)`` points
@@ -82,25 +98,24 @@ def check(path: Path, headings: dict[str, set[str]]) -> list[str]:
     left alone: we do not know its headings, and guessing would be noise.
     """
     text = path.read_text(encoding="utf-8")
-    dead = [link for link in re.findall(r"\]\(#([^)]+)\)", text) if link not in headings[path.name]]
+    dead = [link for link in re.findall(r"\]\(#([^)]+)\)", text) if link not in headings[name]]
 
     for target, anchor in re.findall(r"\]\(([\w./-]+\.md)#([^)]+)\)", text):
-        name = Path(target).name
-        if name in headings and anchor not in headings[name]:
-            dead.append(f"{name}#{anchor}")
+        where = resolve(name, target)
+        if where in headings and anchor not in headings[where]:
+            dead.append(f"{target}#{anchor}")
     return dead
 
 
 def main() -> int:
-    paths = [ROOT / name for name in DOCUMENTS if (ROOT / name).is_file()]
-    headings = {path.name: headings_of(path) for path in paths}
+    names = [name for name in DOCUMENTS if (ROOT / name).is_file()]
+    headings = {name: headings_of(ROOT / name) for name in names}
 
     broken = 0
-    for path in paths:
-        name = str(path.relative_to(ROOT))
-        dead = check(path, headings)
+    for name in names:
+        dead = check(name, ROOT / name, headings)
         broken += len(dead)
-        print(f"  {name:20} {len(dead):2} dead {dead if dead else ''}")
+        print(f"  {name:28} {len(dead):2} dead {dead if dead else ''}")
 
     print("No dead anchor." if not broken else f"{broken} dead anchors.")
     return 1 if broken else 0
