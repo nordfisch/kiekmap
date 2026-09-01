@@ -14,7 +14,7 @@ the device — that is not a criticism of the work.
 
 **What helps most**, in this order:
 
-1. **A second museum that sets it up and reports back.** [adaption.md](docs/adaption.md) was
+1. **A second museum that sets it up and reports back.** [adaption.md](docs/museum/adaption.md) was
    written without a device; every stumbling block from a real setup is worth more than any
    feature.
 2. **Bug reports from real operation** — from the Pi, from the touchscreen, from the museum.
@@ -30,12 +30,12 @@ make dev          # backend on 8000, frontend on 5173, both with hot reload
 make seed         # build the invented sample collection
 ```
 
-In full in [development.md](docs/development.md). The admin view needs a PIN:
+In full in [development.md](docs/developer/development.md). The admin view needs a PIN:
 `cd backend && .venv/bin/python -m app.cli pin` produces the line for the `.env`.
 
 ## The rules of this repository
 
-They are complete in [CLAUDE.md](CLAUDE.md) and in [development.md](docs/development.md). The
+They are complete in [CLAUDE.md](CLAUDE.md) and in [development.md](docs/developer/development.md). The
 important ones:
 
 - **`make check` before every commit.** Style, checks, tests. The hook under `.githooks/` takes
@@ -44,27 +44,27 @@ important ones:
   messages, issues. German survives as a *translation*, under a `.de.md` name and watched for
   drift: the handbook, the operations guide, the adoption guide. The device itself speaks either
   language, set by `KIEKMAP_LANGUAGE`. Umlauts are written out in German texts for people and
-  transcribed in source code. The map is in [development.md](docs/development.md#language).
+  transcribed in source code. The map is in [development.md](docs/developer/development.md#language).
 - **Every domain decision gets a test that describes the failure case.** The most valuable tests
   here cover mistakes that would happen *silently*.
 - **Nothing place-specific in the code.** No coordinate, no place name, no number that depends on
   the collection — those go into `region.json` or into the settings. Test data is exempt.
 - **No names from the real collection**, not even in a comment. The sample collection provides an
-  invented cast; it is listed in [development.md](docs/development.md).
+  invented cast; it is listed in [development.md](docs/developer/development.md).
 - **A finished item is recorded in two places**, not nine: the changelog, and the issue gets
   closed — plus `decisions.md` if a decision came out of it.
 
 ## An idea or a bug
 
 First check the [open issues](https://github.com/nordfisch/kiekmap/issues) for the same thing, and
-[history.de.md](docs/archive/history.de.md) for whether it has been tried before. Then open an issue; the
+[history.de.md](docs/developer/archive/history.de.md) for whether it has been tried before. Then open an issue; the
 templates ask for what is needed. **Issues are written in English**, like everything else in the
 repository. Write in German if that is easier for you — nobody will send it back. The
 [discussions](https://github.com/nordfisch/kiekmap/discussions) take either language too.
 
 **The documentation cites older items as „Punkt N".** Those numbers are not issue numbers and
 cannot become them; the number register in
-[history.de.md](docs/archive/history.de.md#nummernregister) resolves them.
+[history.de.md](docs/developer/archive/history.de.md#nummernregister) resolves them.
 
 ## The path of a contribution
 
@@ -73,7 +73,7 @@ cannot become them; the number register in
    percent of the commits here follow them. **New commit messages are English**; everything
    before 30 August 2026 is German and stays that way.
 3. **Pull request against `develop`**, not against `main`. `main` is the state running in the
-   museum and takes merges from `develop` only. More in [development.md](docs/development.md).
+   museum and takes merges from `develop` only. More in [development.md](docs/developer/development.md).
 4. Merging uses a **merge commit**. Squash and rebase are disabled for this repository: the
    documentation cites individual commits by hash, a squash destroys them, and a rebase rewrites
    them and throws the signatures away.
@@ -83,6 +83,6 @@ cannot become them; the number register in
 The project is under the [Apache License 2.0](LICENSE). Under its **§5** every contribution
 submitted here is automatically under the same licence — there is no separate agreement (CLA), and
 none is needed. Whoever changes a file marks it as changed (**§4.2**). More in
-[licensing.md](docs/licensing.md).
+[licensing.md](docs/museum/licensing.md).
 
 Add yourself to [AUTHORS](AUTHORS) if you like.

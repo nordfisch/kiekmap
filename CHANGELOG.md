@@ -10,10 +10,10 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   the visitor view, the admin area, the messages, the import log, the date labels and the number
   format. **No new build** — the frontend fetches the language at startup. An unknown value aborts
   the start instead of falling back in silence. A museum that does not speak German no longer needs
-  a fork. See [point 73](docs/decisions.md)
+  a fork. See [point 73](docs/developer/decisions.md)
 - **A documentation site**, [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/),
   in both languages and built from the newest tag: the museum reads the documentation for the
-  version it runs. MkDocs Material, deployed by Actions. See [point 72](docs/decisions.md)
+  version it runs. MkDocs Material, deployed by Actions. See [point 72](docs/developer/decisions.md)
 - **`tools/check_translations.py`** — every German file carries the hash of the English text it was
   made from, and the check reports what has drifted apart. It is the condition under which the
   project keeps a text twice at all
@@ -27,14 +27,14 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   used to run through the repository by audience; it now runs between the repository and what is
   published from it. `operations.de.md` is German, `operations.md` is English — the file name
   carries the rule, so there is no list to keep. Issues, labels, commit messages from 30 August
-  2026, and every test name are English. See [point 71](docs/decisions.md)
+  2026, and every test name are English. See [point 71](docs/developer/decisions.md)
 - **`docs/archive/history.de.md` is closed, and nothing succeeds it.** It ends on 25 August 2026 with
   v0.8.0 and stays German. What the work teaches becomes a point in `decisions.md`; how it went
   stays in the commits and the closed issues
 - **The open items are GitHub issues**, `docs/backlog.md` is gone. The **number register** now sits
   in `history.de.md` and resolves every "Punkt N" — the open ones to their issue, the rest to the
   section under their date. They could not become issue numbers, because GitHub shares one counter
-  with the pull requests; "Punkt 15" became issue #18. See [point 69](docs/decisions.md)
+  with the pull requests; "Punkt 15" became issue #18. See [point 69](docs/developer/decisions.md)
 - **The developer documentation is English** — `architecture`, `development`, `decisions`,
   `CONTRIBUTING` and `CLAUDE.md`, about 24,000 words. `decisions.md` was consolidated first: all 67
   points stay, the text is a third shorter
@@ -43,6 +43,12 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **`tools/language_check.py` checks both sides** and every format, not only `.py`, `.ts` and
   `.tsx`: German documentation for transcribed umlauts, English documentation for German
   paragraphs, and the comments of CSS, Dockerfiles, shell scripts and configuration files
+- **The documentation splits by audience, and the site publishes one half.** `docs/museum/` is
+  what a museum needs in order to use, run, adapt and pass on the device, and it is what
+  [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/) serves: a welcome page and
+  four documents. `docs/developer/` is read in the repository, beside the code it describes. The
+  front page of the site greets an operator instead of listing files. See
+  [point 75](docs/developer/decisions.md)
 - **The museum documentation is bilingual.** `usermanual`, `operations`, `adaption`, `licensing`,
   `index`, the README and the CHANGELOG exist as an English original and a German translation.
   Checking the German sources against the writing rules first turned up four errors, among them a
@@ -54,7 +60,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **`tools/check_anchors.py` reads `CLAUDE.md` and `CONTRIBUTING.md` as well**
 - **A count in front of a list is gone** wherever the list stands right below it. Four files said
   "five" and listed six; a number in prose goes stale in silence. See
-  [point 59](docs/decisions.md)
+  [point 59](docs/developer/decisions.md)
 - **Vitest from 2 to 3.** Not for a feature: Vitest 2 brought its own old copies of `vite` and
   `esbuild`, and five of six Dependabot reports hung on those
 
@@ -71,7 +77,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **The SPDX headers are gone from every source file.** Two lines of licence bookkeeping above each
   docstring; the licence does not demand them and no check enforced them. `LICENSE` and `NOTICE`
   cover every distribution of the repository. A single file copied out on its own now carries no
-  notice — the price is in [point 70](docs/decisions.md)
+  notice — the price is in [point 70](docs/developer/decisions.md)
 
 ## [0.8.0] — 2026-08-25
 
@@ -85,7 +91,7 @@ comes after that — see [issue #18](https://github.com/nordfisch/kiekmap/issues
 
 **This block is ordered by area, not by Added, Changed and Fixed.** Before 0.8.0 there was no
 version to change anything against; everything here is new. The steps it grew from are in
-[docs/archive/history.de.md](docs/archive/history.de.md) and in the commits. From 0.9.0 the three headings apply
+[docs/developer/archive/history.de.md](docs/developer/archive/history.de.md) and in the commits. From 0.9.0 the three headings apply
 again.
 
 ### Map and timeline
@@ -179,7 +185,7 @@ again.
 ### Nothing place-specific in the code
 
 - **Map extent, decades and street choice come from `tiles/region.json`**; map and place index are
-  build artefacts. A second museum needs no fork — see [docs/adaption.md](docs/adaption.md)
+  build artefacts. A second museum needs no fork — see [docs/museum/adaption.md](docs/museum/adaption.md)
 - **The coat of arms is an exchangeable file**; the repository holds a placeholder, because an
   emblem of a municipality may not be passed to everybody who clones a repository
 - **Three import settings**, all empty by default
@@ -213,7 +219,7 @@ again.
 
 ### Documentation
 
-- **Eight files, each with exactly one question**, opened up by [docs/index.md](docs/index.md)
+- **Eight files, each with exactly one question**, opened up by [docs/museum/index.md](docs/museum/index.md)
 - **Backlog items carry fixed numbers** under which they are cited; a number is never handed out
   twice
 - **The history has a register** with one line per section and date, generated and checked

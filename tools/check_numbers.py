@@ -17,7 +17,7 @@ What it does *not* do is count the numbers that stand in prose, although that wa
 Measured, the pattern "N Punkte" matches a handful of places in the docs and **not one of them
 should be updated**: several quote the wrong old figure on purpose, several are about points on a
 map, and one is a sentence in the history that was true on its date. A count in prose is either a
-quotation or a record; see docs/decisions.md, point 59.
+quotation or a record; see docs/developer/decisions.md, point 59.
 """
 
 import re
@@ -26,7 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-DECISIONS = ROOT / "docs/decisions.md"
+DECISIONS = ROOT / "docs/developer/decisions.md"
 
 
 def check_decisions(problems: list[str]) -> None:

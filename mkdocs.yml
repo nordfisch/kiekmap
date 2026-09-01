@@ -1,7 +1,10 @@
 # The documentation site: https://nordfisch.github.io/kiekmap/
 #
-# It serves what is in docs/ -- the same files the repository shows, in both languages. The
-# README stays on the repository start page and is not part of the site; the two are joined by
+# It serves docs/museum/ and nothing else -- what a museum needs in order to use, run, adapt and
+# pass on the device, in both languages. docs/developer/ is read in the repository, beside the
+# code it describes, and has no address here.
+#
+# The README stays on the repository start page and is not part of the site; the two are joined by
 # links and by the "Website" field of the repository.
 #
 # Built by .github/workflows/pages.yml from the newest tag, not from develop: the museum reads
@@ -14,16 +17,9 @@ repo_url: https://github.com/nordfisch/kiekmap
 edit_uri: edit/develop/docs/
 copyright: Copyright 2026 Kalle Erlhoff · Apache-2.0
 
-docs_dir: docs
+docs_dir: docs/museum
 
-# Neither is a page. The history is a closed German record of how the thing was built, forty
-# thousand words for whoever works on it -- it stays in the repository and is not published.
-# The directory name carries that, so nothing has to remember it.
-exclude_docs: |
-  requirements.txt
-  archive/
-
-# Links out of docs/ point at files in the repository, which are no pages here.
+# Links that leave docs/museum/ point at files in the repository, which are no pages here.
 hooks:
   - tools/mkdocs_hooks.py
 
@@ -70,28 +66,18 @@ plugins:
           name: English
           build: true
           nav:
-            - Documentation: index.md
-            - Using and running it:
-                - Guide for the museum team: usermanual.md
-                - Operations manual: operations.md
-                - Another place or language: adaption.md
-                - Passing it on: licensing.md
-            - Understanding and changing it:
-                - Architecture: architecture.md
-                - Development: development.md
-                - Decisions: decisions.md
+            - Welcome: index.md
+            - Adding photos and backing them up: usermanual.md
+            - Running the device: operations.md
+            - Setting it up for another place: adaption.md
+            - Passing it on: licensing.md
         - locale: de
           name: Deutsch
           build: true
           site_name: Kiekmap
           nav:
-            - Dokumentation: index.md
-            - Benutzen und betreiben:
-                - Anleitung für das Museumsteam: usermanual.md
-                - Betriebshandbuch: operations.md
-                - Anderer Ort oder andere Sprache: adaption.md
-                - Weitergabe: licensing.md
-            - Verstehen und anpassen:
-                - Architektur: architecture.md
-                - Entwicklung: development.md
-                - Entscheidungen: decisions.md
+            - Willkommen: index.md
+            - Fotos hinzufügen und sichern: usermanual.md
+            - Das Gerät betreiben: operations.md
+            - Für einen anderen Ort einrichten: adaption.md
+            - Weitergabe: licensing.md

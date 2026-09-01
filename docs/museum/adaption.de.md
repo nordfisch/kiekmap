@@ -1,5 +1,5 @@
-<!-- translated-from: docs/adaption.md -->
-<!-- source-sha: 3120d9828b75c4159cea8168e6a1bc227d3ed5d483c188a390b3fd58378d0ad6 -->
+<!-- translated-from: docs/museum/adaption.md -->
+<!-- source-sha: 27b574c8eca3f392fd888c07fb2f081a2750728a919124f784d7e48acb36c1ba -->
 
 # Kiekmap für einen anderen Ort oder eine andere Sprache
 
@@ -19,7 +19,7 @@ erhalten — sie ist der Grund, warum ein zweites Museum keinen zweiten Zweig br
 
 ### 1. Region festlegen
 
-Nur eine Datei: [`tiles/region.json`](../tiles/region.json).
+Nur eine Datei: [`tiles/region.json`](../../tiles/region.json).
 
 ```json
 {
@@ -37,7 +37,7 @@ Nur eine Datei: [`tiles/region.json`](../tiles/region.json).
 die dem `center` nächsten. Der Ortsindex darf weiter reichen; was darüber hinaus liegt, wird auf
 der Karte angetippt. **Eine Anzahl und kein Radius**, weil sie das Knopfbudget unabhängig davon
 hält, wie dicht ein Ort bebaut ist: 80 Straßen passen in zwei Fragen mit je höchstens zehn Knöpfen
-(siehe [decisions.md](decisions.md), Punkt 24). Fehlt der Schlüssel, gilt 80.
+(siehe [decisions.md](../developer/decisions.md), Punkt 24). Fehlt der Schlüssel, gilt 80.
 
 **Der Wert ist zu prüfen, nicht zu übernehmen** — wie, steht in
 [Schritt 3](#3-die-straßenauswahl-prüfen).
@@ -121,7 +121,7 @@ Datei greift der Schutz nicht** (er lässt dann alles durch, statt grundlos abzu
 Der „Hilf mit"-Bereich fragt nach dem Ort eines Fotos, und der **Hauptweg dorthin sind Knöpfe**:
 erst der Anfangsbuchstabe, dann die Straße, dann die Hausnummer. Ein Suchfeld gibt es dort nicht —
 die Besucheransicht hat überhaupt kein Eingabefeld, weil am Kiosk keine Tastatur steht (siehe
-[decisions.md](decisions.md), Punkt 24). Ob dieser Weg trägt, entscheidet sich am Ortsindex, und
+[decisions.md](../developer/decisions.md), Punkt 24). Ob dieser Weg trägt, entscheidet sich am Ortsindex, und
 das lässt sich vor dem ersten Besucher nachsehen.
 
 **Woher die Straßen kommen.** Aus `make places`: Das Skript fragt einmal die Overpass-API nach
@@ -176,10 +176,10 @@ und findet ihn nicht, ist die `bbox` der erste Verdacht, nicht der Code.
 ### 4. Wappen einsetzen
 
 **Mitgeliefert wird ein Platzhalter, kein Wappen** — ein schlichtes Schild aus
-[`tools/build_logo.py`](../tools/build_logo.py). Warum kein echtes, steht in
-[decisions.md](decisions.md), Punkt 21.
+[`tools/build_logo.py`](../../tools/build_logo.py). Warum kein echtes, steht in
+[decisions.md](../developer/decisions.md), Punkt 21.
 
-[`frontend/public/logo.png`](../frontend/public/logo.png) durch das eigene ersetzen — gleicher
+[`frontend/public/logo.png`](../../frontend/public/logo.png) durch das eigene ersetzen — gleicher
 Dateiname, sonst nichts. Das Bild liegt über der linken oberen Ecke der Karte und ist zugleich der
 Weg in den Admin-Bereich. Im Code steht nirgends, was darauf zu sehen ist; die Beschriftung für
 Vorlesewerkzeuge setzt sich aus `name` in der `region.json` zusammen.
@@ -311,7 +311,7 @@ Zwei Kataloge, gleich gebaut:
 
 | | Oberfläche | Backend |
 |---|---|---|
-| Ort | [`frontend/src/text/`](../frontend/src/text/) | [`backend/app/text/`](../backend/app/text/) |
+| Ort | [`frontend/src/text/`](../../frontend/src/text/) | [`backend/app/text/`](../../backend/app/text/) |
 | Deutsch | `de.ts` | `de.py` |
 | Englisch | `en.ts` | `en.py` |
 
@@ -323,7 +323,7 @@ Dataclasses, und eine fehlende Angabe ist ein `TypeError` beim Start.
 
 Dieselbe Konstruktion trägt sie ohne Umbau: eine Datei je Katalog, ein Wert mehr in
 `KIEKMAP_LANGUAGE`. Bei drei Sprachen lohnt sich allerdings ein Übersetzungsdienst — siehe
-[decisions.md](decisions.md).
+[decisions.md](../developer/decisions.md).
 
 Die Sprache ist eine **Einstellung der Instanz, keine Wahl der Besucher**. Das Gerät steht in einem
 Museum und spricht dessen Sprache. Ein Umschalter auf dem Touchscreen wäre eine Bedienungsfrage für
@@ -336,7 +336,7 @@ Besucher, die oft älter sind, und keine Erleichterung.
 | Ortsarten | `strasse`, `gebaeude`, `flur` … | Schlüssel aus `tiles/build-places.py`; angezeigt wird, was `t.location.kinds` daraus macht |
 | Straßen- und Ortsnamen | aus OpenStreetMap | ein Eigenname wird nicht übersetzt |
 | Ältere Einträge im Import-Protokoll | `ImportLog.message` | festgehalten, was das Gerät damals gesagt hat |
-| `*.de.md` und `docs/archive/history.de.md` | Doku für Museum und Betrieb | als Übersetzung geführt, siehe [development.md](development.md#language) |
+| `*.de.md` und `docs/archive/history.de.md` | Doku für Museum und Betrieb | als Übersetzung geführt, siehe [development.md](../developer/development.md#language) |
 
 Die Ortsarten sind der einzige Fall, der nach einer Falle aussieht und keine ist: In der Datenbank
 stehen deutsche Schlüsselwörter, angezeigt wird die Übersetzung. `en.ts` bildet dieselben Schlüssel

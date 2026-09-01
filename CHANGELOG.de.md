@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 2fca74321b43b6c2483595487528f767347bd566ad482c0e8c771963587a1cb5 -->
+<!-- source-sha: 28aa8a18810204ea83664039993de05c3ceb9f0a9545dfcaaa479c5f20d5c302 -->
 
 # Änderungen
 
@@ -13,10 +13,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Umgestellt werden Besucheransicht, Verwaltung, Meldungen, Import-Protokoll, Datumsbeschriftung
   und Zahlenformat. **Kein neuer Bau** — das Frontend holt die Sprache beim Start. Ein unbekannter
   Wert bricht den Start ab, statt still zurückzufallen. Ein Museum, das kein Deutsch spricht,
-  braucht keinen Fork mehr. Siehe [Punkt 73](docs/decisions.md)
+  braucht keinen Fork mehr. Siehe [Punkt 73](docs/developer/decisions.md)
 - **Eine Doku-Website**, [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in
   beiden Sprachen und gebaut vom neuesten Tag: Das Museum liest die Doku zu der Fassung, die es
-  betreibt. MkDocs Material, ausgeliefert über Actions. Siehe [Punkt 72](docs/decisions.md)
+  betreibt. MkDocs Material, ausgeliefert über Actions. Siehe [Punkt 72](docs/developer/decisions.md)
 - **`tools/check_translations.py`** — jede deutsche Datei trägt den Hash des englischen Textes, aus
   dem sie entstand, und die Prüfung meldet, was auseinandergelaufen ist. Sie ist die Bedingung,
   unter der das Projekt einen Text überhaupt zweimal führt
@@ -31,7 +31,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Repo und dem, was daraus veröffentlicht wird. `operations.de.md` ist deutsch, `operations.md`
   englisch — der Dateiname trägt die Regel, es gibt keine Liste zu pflegen. Issues, Labels,
   Commit-Nachrichten ab dem 30. August 2026 und jeder Testname sind englisch. Siehe
-  [Punkt 71](docs/decisions.md)
+  [Punkt 71](docs/developer/decisions.md)
 - **`docs/archive/history.de.md` ist abgeschlossen, und eine Nachfolgerin gibt es nicht.** Sie endet am
   25. August 2026 mit v0.8.0 und bleibt deutsch. Was die Arbeit lehrt, wird ein Punkt in
   `decisions.md`; wie sie verlief, steht in den Commits und den geschlossenen Issues
@@ -39,7 +39,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   steht jetzt in `history.de.md` und löst jedes „Punkt N" auf — die offenen auf ihr Issue, die
   übrigen auf den Abschnitt unter ihrem Datum. Zu Issue-Nummern konnten sie nicht werden, weil
   GitHub einen Zähler mit den Pull Requests teilt; „Punkt 15" wurde Issue #18. Siehe
-  [Punkt 69](docs/decisions.md)
+  [Punkt 69](docs/developer/decisions.md)
 - **Die Entwicklerdoku ist englisch** — `architecture`, `development`, `decisions`, `CONTRIBUTING`
   und `CLAUDE.md`, rund 24.000 Wörter. `decisions.md` ist vorher zusammengefasst worden: alle 67
   Punkte bleiben, der Text ist ein Drittel kürzer
@@ -48,6 +48,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **`tools/language_check.py` prüft beide Seiten** und jedes Format, nicht nur `.py`, `.ts` und
   `.tsx`: deutsche Doku auf umschriebene Umlaute, englische auf deutsche Absätze, dazu die
   Kommentare von CSS, Dockerfiles, Shell-Skripten und Konfigurationsdateien
+- **Die Doku trennt sich nach Publikum, und die Website veröffentlicht eine Hälfte.**
+  `docs/museum/` ist, was ein Museum braucht, um das Gerät zu benutzen, zu betreiben, zu übernehmen
+  und weiterzugeben — und genau das liefert
+  [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/) aus: eine Begrüßungsseite und
+  vier Dokumente. `docs/developer/` wird im Repo gelesen, neben dem Code, den es beschreibt. Die
+  Startseite der Website begrüßt einen Betreiber, statt Dateien aufzuzählen. Siehe
+  [Punkt 75](docs/developer/decisions.md)
 - **Die Museumsdoku ist zweisprachig.** `usermanual`, `operations`, `adaption`, `licensing`,
   `index`, README und CHANGELOG gibt es als englisches Original und deutsche Übersetzung. Die
   Prüfung der deutschen Quellen gegen die Schreibregeln förderte vorher vier Fehler zutage,
@@ -60,7 +67,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **`tools/check_anchors.py` liest auch `CLAUDE.md` und `CONTRIBUTING.md`**
 - **Die Zahl vor einer Liste ist weg**, wo die Liste direkt darunter steht. Vier Dateien sagten
   „fünf" und zählten sechs auf; eine Zahl in Prosa altert still. Siehe
-  [Punkt 59](docs/decisions.md)
+  [Punkt 59](docs/developer/decisions.md)
 - **Vitest von 2 auf 3.** Nicht wegen einer Funktion: Vitest 2 brachte eigene, alte Kopien von
   `vite` und `esbuild` mit, und daran hingen fünf von sechs Dependabot-Meldungen
 
@@ -77,7 +84,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Die SPDX-Kopfzeilen sind aus jeder Quelldatei weg.** Zwei Zeilen Lizenzbuchführung über jedem
   Docstring; die Lizenz verlangt sie nicht, und keine Prüfung erzwang sie. `LICENSE` und `NOTICE`
   decken jede Weitergabe des Repos ab. Eine einzeln herauskopierte Datei trägt danach keinen
-  Hinweis mehr — der Preis steht in [Punkt 70](docs/decisions.md)
+  Hinweis mehr — der Preis steht in [Punkt 70](docs/developer/decisions.md)
 
 ## [0.8.0] — 2026-08-25
 
@@ -92,7 +99,7 @@ Die `1.0.0` wird danach vergeben — siehe
 
 **Dieser Block ist nach Bereichen geordnet, nicht nach Hinzugefügt, Geändert und Behoben.** Vor
 0.8.0 gab es keine Fassung, gegen die sich etwas geändert hätte; alles hier ist neu. Die Schritte,
-aus denen es entstand, stehen in [docs/archive/history.de.md](docs/archive/history.de.md) und in den Commits. Ab
+aus denen es entstand, stehen in [docs/developer/archive/history.de.md](docs/developer/archive/history.de.md) und in den Commits. Ab
 0.9.0 gelten wieder die drei Rubriken.
 
 ### Karte und Zeitleiste
@@ -190,7 +197,7 @@ aus denen es entstand, stehen in [docs/archive/history.de.md](docs/archive/histo
 
 - **Kartenausschnitt, Jahrzehnte und Straßenauswahl kommen aus `tiles/region.json`**; Karte und
   Ortsindex sind gebaute Artefakte. Ein zweites Museum braucht keinen Fork — siehe
-  [docs/adaption.de.md](docs/adaption.de.md)
+  [docs/museum/adaption.de.md](docs/museum/adaption.de.md)
 - **Das Ortswappen ist eine austauschbare Datei**; im Repo liegt ein Platzhalter, denn ein
   Hoheitszeichen darf nicht an jeden weitergegeben werden, der ein Repo klont
 - **Drei Import-Einstellungen**, alle leer voreingestellt
@@ -226,7 +233,7 @@ aus denen es entstand, stehen in [docs/archive/history.de.md](docs/archive/histo
 
 ### Dokumentation
 
-- **Acht Dateien, jede mit genau einer Frage**, erschlossen über [docs/index.de.md](docs/index.de.md)
+- **Acht Dateien, jede mit genau einer Frage**, erschlossen über [docs/museum/index.de.md](docs/museum/index.de.md)
 - **Backlogpunkte tragen feste Nummern**, unter denen sie zitiert werden; eine Nummer wird nie neu
   vergeben
 - **Die Historie hat ein Register** mit einer Zeile je Abschnitt und Datum, erzeugt und geprüft

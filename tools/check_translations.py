@@ -17,7 +17,7 @@ needed.
 
 The marker is an HTML comment in the first lines:
 
-    <!-- translated-from: docs/operations.md -->
+    <!-- translated-from: docs/museum/operations.md -->
     <!-- source-sha: 4f2a1c9… -->
 
 An HTML comment and not YAML front matter, although front matter is the more usual carrier: GitHub

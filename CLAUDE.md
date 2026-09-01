@@ -5,10 +5,10 @@ Pinneberg: historic photos of the place on a map, filtered by a time-range slide
 contribution panel — „Hilf mit" on a German screen — where visitors fill in what is missing. The
 device runs **offline** on a Raspberry Pi.
 
-Read [docs/decisions.md](docs/decisions.md) first — it says *why* things are the way they are —
-and [docs/architecture.md](docs/architecture.md), which says *what* the system is made of and how
+Read [docs/developer/decisions.md](docs/developer/decisions.md) first — it says *why* things are the way they are —
+and [docs/developer/architecture.md](docs/developer/architecture.md), which says *what* the system is made of and how
 the parts fit together. This file says *how* to work here. Which file answers which other question is
-in [docs/index.md](docs/index.md).
+in [docs/museum/index.md](docs/museum/index.md).
 
 ## The three things you can get wrong here
 
@@ -84,7 +84,7 @@ the subject the text talks about; without the umlaut it would simply be wrong. `
 ordinary source code of this repository.
 
 Why the rule reads this way and where its borderline cases lie is spelled out in
-[docs/development.md](docs/development.md). Whether a file obeys it is answered by
+[docs/developer/development.md](docs/developer/development.md). Whether a file obeys it is answered by
 `python3 tools/language_check.py` — it checks both sides.
 
 ## Writing rules
@@ -105,14 +105,14 @@ tone.**
    information, it goes.
 8. No metaphors, no imagery, no exaggeration.
 
-**Two exceptions:** [docs/archive/history.de.md](docs/archive/history.de.md) is closed and keeps its tone. Test names
+**Two exceptions:** [docs/developer/archive/history.de.md](docs/developer/archive/history.de.md) is closed and keeps its tone. Test names
 stay long where precision demands it.
 
 No tool checks these rules. They work while writing and in review.
 
 ## Layout
 
-The directory tree is in [docs/architecture.md](docs/architecture.md); only what you cannot see
+The directory tree is in [docs/developer/architecture.md](docs/developer/architecture.md); only what you cannot see
 from it is here:
 
 - **`backend/app/services/` is the place for domain logic without HTTP context** — that is where
@@ -157,12 +157,12 @@ the backlog's bookkeeping about its own numbers add up?), `tools/check_translati
 translation still match the text it was made from?), `tools/build_register.py --check` (is the
 register of the history complete?) and `tools/set_version.py --check` (do all five places name the
 same version?). All of them run with `python3` and no venv; `make check` and the hook under
-`.githooks/` execute them. More in [docs/development.md](docs/development.md).
+`.githooks/` execute them. More in [docs/developer/development.md](docs/developer/development.md).
 
 **Work happens on `develop`**, never on `main` — that branch holds the state running in the museum
 and takes merges only. A topic of its own gets a `feature/` or `fix/` branch. **Never squash:** the
 documentation cites individual commits by hash. More in
-[docs/development.md](docs/development.md).
+[docs/developer/development.md](docs/developer/development.md).
 
 **Comments** explain the *why*, not the *what*. A comment that only repeats what the code says gets
 deleted. A comment that names a pitfall is gold, and there are a few here (the `rshared` mount, the
@@ -170,7 +170,7 @@ sprite URL that has to be absolute, `+` meaning addition in SQLite).
 
 **A finished item is recorded in two places, not nine:** what the program can do now goes into the
 [changelog](CHANGELOG.md), and the issue gets closed. If a decision came out of it, that becomes a
-new point in [docs/decisions.md](docs/decisions.md), with a short reason. How the work went is in
+new point in [docs/developer/decisions.md](docs/developer/decisions.md), with a short reason. How the work went is in
 the commit and the closed issue, and nowhere else — `docs/archive/history.de.md` is closed and takes nothing
 more.
 
@@ -198,7 +198,7 @@ the example is meant to show — that a year beside a name is the archive's date
 the shot does not depend on the name. The collection lives in `data/` and never goes into the
 repository; neither do its people.
 
-How to adapt the project is in [docs/adaption.md](docs/adaption.md), including what a second
+How to adapt the project is in [docs/museum/adaption.md](docs/museum/adaption.md), including what a second
 language would cost and when splitting things up starts to pay off.
 
 ## What not to touch
@@ -220,7 +220,7 @@ language would cost and when splitting things up starts to pay off.
 ## State of things
 
 What is built is in the [changelog](CHANGELOG.md); how it came about and what turned out differently
-from the plan is in [docs/archive/history.de.md](docs/archive/history.de.md); what is open is in
+from the plan is in [docs/developer/archive/history.de.md](docs/developer/archive/history.de.md); what is open is in
 the [issues](https://github.com/nordfisch/kiekmap/issues). Only what you would **assume wrongly**
 while working is here.
 
@@ -235,7 +235,7 @@ are the **USB path of the backup** and the behaviour after **restart and power c
 be checked on a Mac. The containers, by contrast, are verified, if only there.
 
 **To develop on a Mac**, set `KIEKMAP_MEDIA_DIR=/Volumes` and create a test volume with `hdiutil` —
-see [docs/operations.md](docs/operations.md). Container operation runs there with `make prod-mac`.
+see [docs/museum/operations.md](docs/museum/operations.md). Container operation runs there with `make prod-mac`.
 
 **The admin view needs a PIN:** `cd backend && .venv/bin/python -m app.cli pin` produces the line
 for the `.env`. Without it the login says so in plain words instead of rejecting every attempt.
@@ -243,8 +243,8 @@ for the `.env`. Without it the login says so in plain words instead of rejecting
 **Open work lives in the [issues](https://github.com/nordfisch/kiekmap/issues), not in a file.** The documentation cites older items as
 „Punkt N" — a numbering that ran to 66 and was never reissued. Those numbers are not issue numbers
 and cannot become them, because GitHub shares one counter with the pull requests. The number
-register in [docs/archive/history.de.md](docs/archive/history.de.md#nummernregister) resolves them, and
-[docs/decisions.md](docs/decisions.md) point 69 says why.
+register in [docs/developer/archive/history.de.md](docs/developer/archive/history.de.md#nummernregister) resolves them, and
+[docs/developer/decisions.md](docs/developer/decisions.md) point 69 says why.
 
 **What is no longer a backlog item but curation:** photos without a description, without a title,
 without a place. Those are written by whoever looks at the picture and knows the place — no program

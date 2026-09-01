@@ -9,7 +9,7 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 
 | Datei | Frage |
 |---|---|
-| [../CHANGELOG.md](../CHANGELOG.md) | *Was kann das Programm?* — sortiert nach Keep a Changelog |
+| [../CHANGELOG.md](../../CHANGELOG.md) | *Was kann das Programm?* — sortiert nach Keep a Changelog |
 | [decisions.md](../decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
 | [architecture.md](../architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
 | **history.de.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
@@ -1927,7 +1927,7 @@ liegt.
 ## Die Straßenauswahl in der Adaptionsanleitung
 
 9. August 2026. Punkt 37, und der günstigste des Tages: reine Dokumentation. Die
-[adaption.md](../adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Straßenauswahl
+[adaption.md](../../museum/adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Straßenauswahl
 kam dort seit dem 8. August nur als eine Zeile zu `streetChoice` vor, obwohl sie inzwischen der
 Hauptweg zur Verortung ist.
 
@@ -2480,8 +2480,8 @@ Sicherung vom 5. August, also von vor der Migration. **Eine Sicherung bringt ihr
 `_swap_in` tauscht `kiekmap.db` im Ganzen aus, `_reopen_database` hängt das laufende Programm nur
 neu an sie. Migrationen laufen beim *Start*, und eine Wiederherstellung ist kein Start.
 
-Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](../usermanual.md) als Einschränkung und
-in [operations.md](../operations.md) mit Diagnose und Abhilfe -- samt dem umgekehrten, schlimmeren
+Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](../../museum/usermanual.md) als Einschränkung und
+in [operations.md](../../museum/operations.md) mit Diagnose und Abhilfe -- samt dem umgekehrten, schlimmeren
 Fall: Eine Sicherung, die *neuer* ist als das Programm, lässt das Gerät gar nicht erst hochkommen.
 
 Dass es niemandem auffiel, hat einen zweiten Grund, und der ist der unangenehmere: **Alles Prüfen
@@ -4478,7 +4478,7 @@ Zeitpunkt, der Scanner über jeden künftigen Push.
 Abbilder**. Ein Abbild aus `python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes
 Userland; wer es weitergibt, übernimmt dessen Pflichten. Wer die Dockerfiles veröffentlicht, lässt
 sie dort, wo sie hingehören. Der Weg über `abbilder.tar` bleibt für das eigene Gerät richtig — siehe
-[licensing.md](../licensing.md).
+[licensing.md](../../museum/licensing.md).
 
 ### Womit Punkt 22 vollständig ist
 

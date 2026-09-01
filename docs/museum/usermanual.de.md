@@ -1,4 +1,4 @@
-<!-- translated-from: docs/usermanual.md -->
+<!-- translated-from: docs/museum/usermanual.md -->
 <!-- source-sha: f1bd28600e0930cb0ed0678b6fffe6d5ca6a839c70aadb2b117fcee3bd77bb0a -->
 
 # Anleitung für das Museumsteam

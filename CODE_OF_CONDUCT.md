@@ -10,7 +10,7 @@ report that can be followed.
 
 **What does not go here.** Insults, belittling, harassment, spreading somebody else's personal
 data. And insisting on a matter that is decided — the reasoning is in
-[decisions.md](docs/decisions.md), and a new reason is welcome, a repetition is not.
+[decisions.md](docs/developer/decisions.md), and a new reason is welcome, a repetition is not.
 
 **A museum project makes one particular demand**, and it holds here too: the photos show people and
 their houses. They are talked about like neighbours, not like records.

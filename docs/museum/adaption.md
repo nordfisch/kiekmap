@@ -16,7 +16,7 @@ that property — it is the reason a second museum needs no second branch.
 
 ### 1. Fixing the region
 
-One file only: [`tiles/region.json`](../tiles/region.json).
+One file only: [`tiles/region.json`](../../tiles/region.json).
 
 ```json
 {
@@ -34,7 +34,7 @@ One file only: [`tiles/region.json`](../tiles/region.json).
 to `center`. The place index may reach further; whatever lies beyond it is tapped on the map. **A
 count and not a radius**, because that keeps the button budget independent of how densely a place
 is built up: 80 streets fit into two questions with at most ten buttons each (see
-[decisions.md](decisions.md), point 24). If the key is missing, 80 applies.
+[decisions.md](../developer/decisions.md), point 24). If the key is missing, 80 applies.
 
 **The value is to be checked, not adopted** — how, is in [step 3](#3-checking-the-street-choice).
 
@@ -117,7 +117,7 @@ the guard does not bite** (it then lets everything through instead of refusing f
 The contribution panel asks where a photo was taken, and **the main way there is buttons**: first the
 initial letter, then the street, then the house number. There is no search field — the visitor view
 has no input field at all, because no keyboard stands at the kiosk (see
-[decisions.md](decisions.md), point 24). Whether that way holds up is decided by the place index,
+[decisions.md](../developer/decisions.md), point 24). Whether that way holds up is decided by the place index,
 and that can be looked at before the first visitor.
 
 **Where the streets come from.** From `make places`: the script asks the Overpass API once for
@@ -171,10 +171,10 @@ name and do not find it, the `bbox` is the first suspicion, not the code.
 ### 4. Putting the coat of arms in
 
 **What ships is a placeholder, not a coat of arms** — a plain shield out of
-[`tools/build_logo.py`](../tools/build_logo.py). Why not a real one is in
-[decisions.md](decisions.md), point 21.
+[`tools/build_logo.py`](../../tools/build_logo.py). Why not a real one is in
+[decisions.md](../developer/decisions.md), point 21.
 
-Replace [`frontend/public/logo.png`](../frontend/public/logo.png) with your own — same file name,
+Replace [`frontend/public/logo.png`](../../frontend/public/logo.png) with your own — same file name,
 nothing else. The picture lies over the top left corner of the map and is at the same time the way
 into the admin area. Nowhere in the code does it say what is on it; the label for screen readers is
 put together from `name` in the `region.json`.
@@ -305,7 +305,7 @@ Two catalogues, built the same way:
 
 | | Interface | Backend |
 |---|---|---|
-| Where | [`frontend/src/text/`](../frontend/src/text/) | [`backend/app/text/`](../backend/app/text/) |
+| Where | [`frontend/src/text/`](../../frontend/src/text/) | [`backend/app/text/`](../../backend/app/text/) |
 | German | `de.ts` | `de.py` |
 | English | `en.ts` | `en.py` |
 
@@ -317,7 +317,7 @@ and a missing entry is a `TypeError` at startup.
 
 The same construction carries it without rebuilding: one file per catalogue, one more value in
 `KIEKMAP_LANGUAGE`. At three languages a translation service starts to pay off — see
-[decisions.md](decisions.md).
+[decisions.md](../developer/decisions.md).
 
 The language is a **setting of the instance, not a choice for visitors**. The device stands in a
 museum and speaks that museum's language. A switch on the touchscreen would be one more thing to
@@ -330,7 +330,7 @@ operate for visitors who are often elderly, and no relief.
 | Kinds of place | `strasse`, `gebaeude`, `flur` … | keys from `tiles/build-places.py`; what is shown is what `t.location.kinds` makes of them |
 | Street and place names | from OpenStreetMap | a proper name is not translated |
 | Older entries in the import log | `ImportLog.message` | a record of what the device said at the time |
-| `*.de.md` and `docs/archive/history.de.md` | docs for the museum and for operation | kept as a translation, see [development.md](development.md#language) |
+| `*.de.md` and `docs/archive/history.de.md` | docs for the museum and for operation | kept as a translation, see [development.md](../developer/development.md#language) |
 
 The kinds of place are the one case that looks like a trap and is not: German keywords stand in the
 database, and the translation is what gets shown. `en.ts` maps the same keys onto `"Street"`,

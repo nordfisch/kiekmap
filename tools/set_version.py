@@ -7,7 +7,8 @@
     python3 tools/set_version.py 0.8.0      write it into both
 
 Front end and back end are versioned together: this is a single-device system, and separate
-numbers would be ballast -- see docs/development.md. That leaves one number in **four** files, and
+numbers would be ballast -- see docs/developer/development.md. That leaves one number in
+**four** files, and
 a number kept by hand in four places is wrong within a month. Hence the check, in the same spirit
 as ``build_notices.py`` and ``build_register.py``.
 

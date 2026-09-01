@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # The checks no test ever runs. Which ones they are stands at the bottom of this file, and that
-# list counts itself -- see docs/decisions.md, point 59.
+# list counts itself -- see docs/developer/decisions.md, point 59.
 #
 # Deliberately **without** the test suite: that runs anyway, because `make test` and `make check`
 # execute it and nobody forgets it. What does get forgotten is what stands below, and together it

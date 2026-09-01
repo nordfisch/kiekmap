@@ -25,7 +25,7 @@ invented.**
 
 The reason for the effort: the real pictures belong to the local history museum. Shipping them in a
 repository anybody can clone is a different thing from showing them in the museum. The same holds
-for the village coat of arms — see [decisions.md](../docs/decisions.md), point 21.
+for the village coat of arms — see [decisions.md](../docs/developer/decisions.md), point 21.
 
 ## What lies here
 
@@ -76,7 +76,7 @@ away and the numbers appear at once.
 
 The two also differ in their **source**: one comes from a visitor who pressed "Reicht so — die
 Straße genügt", the other from the curator. That a curator's statement may be refined as well is
-the softening from [decisions.md](../docs/decisions.md), point 32 — it belongs in the collection
+the softening from [decisions.md](../docs/developer/decisions.md), point 32 — it belongs in the collection
 where it can be seen.
 
 Beside that: descriptions of different lengths, portrait and landscape formats, and a few untidy

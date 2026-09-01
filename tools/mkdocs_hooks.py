@@ -1,58 +1,39 @@
-"""Two link forms that mean one thing in the repository and another on the site.
+"""Links that mean one thing in the repository and another on the site.
 
-The documents point at 61 files that are not pages -- ``../LICENSE``, ``../CLAUDE.md``,
-``../deploy/docker-compose.yml``, ``../frontend/src/text/``. On GitHub those links work, because
-the reader is standing in the repository. On the site they lead nowhere, and ``--strict`` says so.
+The site is ``docs/museum/`` and nothing else. Every link that leaves that directory points at a
+file in the repository -- ``../../LICENSE``, ``../developer/decisions.md``,
+``../../frontend/src/text/``. On GitHub those work, because the reader is standing in the
+repository. Here they lead nowhere, and ``--strict`` says so.
 
-The alternative was to write 61 absolute URLs into the markdown by hand, in both languages, and to
-keep them in step for ever. A rule applied at build time is the cheaper half of that trade: the
-files stay readable in the repository, which is where most people meet them.
+Writing the absolute URLs into the markdown by hand was the alternative: some sixty of them, in
+two languages, to be kept in step for ever. A rule applied at build time is the cheaper half of
+that trade, and it leaves the files readable where most people meet them.
 
-The second form is a link into ``docs/archive/``, which is excluded from the site for the same
-reason -- the history is a repository file here, not a page.
-
-The third form is a link to a German half. ``usermanual.de.md`` is what a reader on GitHub has
-to click; here the same page lives at ``/kiekmap/de/usermanual/``. Only English pages need the
-rewrite -- a German page linking to a German neighbour is already pointing at its own tree, and
-MkDocs resolves it on its own.
-
-``KIEKMAP_DOCS_REF`` says which ref the outward links point at -- the workflow sets the tag it
-built from, so a link out of the site for v0.9.0 lands on the files of v0.9.0.
+``KIEKMAP_DOCS_REF`` says which ref the links point at -- the workflow sets the tag it built from,
+so a link out of the site for v0.9.0 lands on the files of v0.9.0.
 """
 
 import os
+import posixpath
 import re
-from urllib.parse import urlsplit
 
 REPOSITORY = "https://github.com/nordfisch/kiekmap"
 
-#: A link target one level above ``docs/``, with an optional anchor: ``../NOTICE``,
-#: ``../CLAUDE.md#writing-rules``, ``../frontend/src/text/``.
-OUTWARD = re.compile(r"\]\(\.\./([^)#]+)(#[^)]*)?\)")
+#: Where the published documents live, so a link out of them can be resolved against the root.
+PUBLISHED = "docs/museum"
 
-#: A link to the German half of a document, from a document beside it: ``licensing.de.md``.
-GERMAN_HALF = re.compile(r"\]\(([A-Za-z0-9_-]+)\.de\.md(#[^)]*)?\)")
-
-#: A link into ``docs/archive/``, which is kept out of the site and stays a repository file.
-ARCHIVED = re.compile(r"\]\((?:\.\./)?(archive/[^)#]+)(#[^)]*)?\)")
+#: A link that climbs out of the published directory, with an optional anchor.
+OUTWARD = re.compile(r"\]\((\.\./[^)#]+)(#[^)]*)?\)")
 
 
-def _target(match: re.Match[str], ref: str, under: str = "") -> str:
-    path, anchor = under + match.group(1), match.group(2) or ""
-    # GitHub serves a directory under /tree/ and a file under /blob/. A trailing slash is the
-    # only thing that tells them apart here, and every directory link in the docs carries one.
-    kind = "tree" if path.endswith("/") else "blob"
-    return f"]({REPOSITORY}/{kind}/{ref}/{path.rstrip('/')}{anchor})"
+def _target(match: re.Match[str], ref: str) -> str:
+    path = posixpath.normpath(posixpath.join(PUBLISHED, match.group(1)))
+    # GitHub serves a directory under /tree/ and a file under /blob/. A trailing slash is the only
+    # thing that tells them apart here, and normpath eats it -- hence the test on the match.
+    kind = "tree" if match.group(1).endswith("/") else "blob"
+    return f"]({REPOSITORY}/{kind}/{ref}/{path}{match.group(2) or ''})"
 
 
-def on_page_markdown(markdown: str, page, config, **_: object) -> str:  # noqa: ANN001
+def on_page_markdown(markdown: str, **_: object) -> str:
     ref = os.environ.get("KIEKMAP_DOCS_REF", "develop")
-    markdown = OUTWARD.sub(lambda m: _target(m, ref), markdown)
-    markdown = ARCHIVED.sub(lambda m: _target(m, ref, "docs/"), markdown)
-
-    if not page.file.src_path.endswith(".de.md"):
-        base = urlsplit(config["site_url"]).path or "/"
-        markdown = GERMAN_HALF.sub(
-            lambda m: f"]({base}de/{m.group(1)}/{m.group(2) or ''})", markdown
-        )
-    return markdown
+    return OUTWARD.sub(lambda m: _target(m, ref), markdown)

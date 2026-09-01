@@ -31,7 +31,7 @@ rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
 ```
 
 **The coat of arms comes the same way.** Only a placeholder lies in the repository — a municipal
-coat of arms must not lie there, see [decisions.md](decisions.md), point 21. The real one belongs
+coat of arms must not lie there, see [decisions.md](../developer/decisions.md), point 21. The real one belongs
 on the device:
 
 ```bash
@@ -184,7 +184,7 @@ every action pushes that out, and a restart of the service ends every session.
 
 The `.env` in the project directory is where the settings stand in operation as well. It
 deliberately does **not** lie in the image — the image is the software, the `.env` is the place —
-and is read by [`deploy/docker-compose.yml`](../deploy/docker-compose.yml) as `env_file`. Whoever
+and is read by [`deploy/docker-compose.yml`](../../deploy/docker-compose.yml) as `env_file`. Whoever
 changes something there restarts the containers afterwards:
 
 ```bash
@@ -240,7 +240,7 @@ Two traps sit in there, both silent:
 **The container does not see the stick.** A Docker bind mount shows only what was already mounted
 when the container started. A stick plugged in later stays invisible — with no error message, the
 folder is simply empty. `:rshared` on the line `/media:/media` in
-[`deploy/docker-compose.yml`](../deploy/docker-compose.yml) is what stands against that. Without
+[`deploy/docker-compose.yml`](../../deploy/docker-compose.yml) is what stands against that. Without
 it, not even restarting the container at the right moment helps.
 
 **The stick is there but write-protected.** FAT and exFAT sticks know no owners; without `uid=1000`
@@ -257,7 +257,7 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 
 > **There is always a symlink to `/` in `/Volumes`**, named after the internal volume — macOS
 > creates it itself. Until 14 August 2026 it counted as a drive, and the backup landed behind it,
-> in the running data directory. Symlinks have been skipped since ([decisions.md](decisions.md),
+> in the running data directory. Symlinks have been skipped since ([decisions.md](../developer/decisions.md),
 > point 40); on a Mac with no drive attached the list is now empty, and that is exactly right.
 
 ---

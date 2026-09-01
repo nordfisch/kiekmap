@@ -1,7 +1,7 @@
 # Decisions
 
 Why things are the way they are. Every point names the **decision**, its **reason** and its
-**consequence**. What the program can do is in the [changelog](../CHANGELOG.md); how the work went
+**consequence**. What the program can do is in the [changelog](../../CHANGELOG.md); how the work went
 is in the commits and the closed issues, and up to v0.8.0 in [archive/history.de.md](archive/history.de.md).
 
 **A lesson is kept as the decision it led to, not as a lesson.** Whatever the work teaches ends up
@@ -251,7 +251,7 @@ history, in bookmarks and in proxy logs, and that token opens the whole admin vi
 
 A colour style of its own, „Papier", in the tones of the interface instead of one of the supplied
 ones, plus three layers fewer and streets at 80 % of their width
-([`kiosk/mapStyle.ts`](../frontend/src/kiosk/mapStyle.ts)).
+([`kiosk/mapStyle.ts`](../../frontend/src/kiosk/mapStyle.ts)).
 
 **Why.** The ready-made styles are built for navigation: turquoise water, strong green, cool grey.
 The rule while picking colours was: **nothing on the map may be as saturated as a photo.**
@@ -615,7 +615,7 @@ locating is described in one piece. The number stays for older citations.
 ## 25. The bars group what the collection allows
 
 How many years one bar behind the time slider covers is computed by `bar_width()` in
-[services/dates.py](../backend/app/services/dates.py), by two rules.
+[services/dates.py](../../backend/app/services/dates.py), by two rules.
 
 **First: never finer than the coarsest dating in the collection.** A photo dated „1920er" carries
 `date_from = 1920-01-01`. In yearly bars its ten years pile up on the single bar for 1920, where in
@@ -1121,7 +1121,7 @@ leaves slack. A threshold in the viewport is always a place where two calculatio
 
 **The promise is deliberately bounded.** The place name is set smaller the longer it is, but **never
 smaller than the line above it** — otherwise the hierarchy would stand on its head. Where that floor
-takes effect, the name wraps. From what name length that happens is in [adaption.md](adaption.md),
+takes effect, the name wraps. From what name length that happens is in [adaption.md](../museum/adaption.md),
 because it concerns the next municipality and not this one.
 
 ---
@@ -1461,7 +1461,7 @@ a backup at half past midnight is looking for today's date.
 ## 59. A number in prose is a quotation or a record — what gets checked is the bookkeeping
 
 The checks beside the tests only ran when somebody thought of them. Two counted figures in
-[index.md](index.md) were wrong for weeks, without consequence and unnoticed by anyone.
+[index.md](../museum/index.md) were wrong for weeks, without consequence and unnoticed by anyone.
 
 The obvious conclusion was to have a check count them. **Measured, that was wrong.** The pattern „N
 Punkte" occurs in a handful of places in this documentation, and **not one of them may be
@@ -1580,7 +1580,7 @@ adapting the documentation.
 
 **What the decision explicitly does not touch: the photo collection.** A software licence licenses
 the program, not the data. That, together with the ODbL question, is in
-[licensing.md](licensing.md).
+[licensing.md](../museum/licensing.md).
 
 ---
 
@@ -1749,14 +1749,14 @@ project international. It makes it readable for the people who read the code.
 that the domain terms — Flurname, Hausnummer, Ortsteil — have no good English equivalent.
 
 **Why issues are German.** The subject matter is German, and whoever reports here reports from a
-German museum. That is written in [CONTRIBUTING](../CONTRIBUTING.md), together with the sentence
+German museum. That is written in [CONTRIBUTING](../../CONTRIBUTING.md), together with the sentence
 that code, commits and developer documentation are English. Unusual, but coherent: the subject is a
 German museum, the tool is software.
 
 **No Simplified Technical English.** Checked and rejected: its controlled vocabulary is built for
 maintenance instructions and cuts away exactly the nuance these texts carry. Instead, writing rules
 apply to both languages — one thought per sentence, active voice, no hedging, no imagery. They are
-in [CLAUDE.md](../CLAUDE.md#writing-rules).
+in [CLAUDE.md](../../CLAUDE.md#writing-rules).
 
 **What makes the rule checkable:** `tools/language_check.py` has two prose lists instead of one,
 `GERMAN_PROSE` and `ENGLISH_PROSE`. The German half is checked for transcribed umlauts, the English
@@ -1828,8 +1828,8 @@ Every source file carried two lines above its docstring:
 # SPDX-License-Identifier: Apache-2.0
 ```
 
-**They are gone from all 153 files.** The Apache licence never required them. [LICENSE](../LICENSE)
-and [NOTICE](../NOTICE) cover every distribution of the repository, which is what §4.1 and §4.4 ask
+**They are gone from all 153 files.** The Apache licence never required them. [LICENSE](../../LICENSE)
+and [NOTICE](../../NOTICE) cover every distribution of the repository, which is what §4.1 and §4.4 ask
 for, and no check enforced the headers anyway.
 
 **The reason to remove them is what a reader sees first.** Two lines of licence bookkeeping stood
@@ -1976,3 +1976,37 @@ the setting says, because the label language is a property of the place and not 
 Holm the street is called Mühlenweg in every language. For a museum outside the German-speaking
 area that is the wrong answer, and it is open work:
 [issue #33](https://github.com/nordfisch/kiekmap/issues/33).
+
+## 75. The documentation splits by audience, and only one half is published
+
+`docs/museum/` holds what a museum needs in order to use, run, adapt and pass on the device.
+`docs/developer/` holds what somebody needs in order to work on the code. The site publishes the
+first and nothing else.
+
+**This is not a second language boundary and it does not amend
+[point 71](#71-the-repository-speaks-english-german-is-a-translation).** Point 71 answers *which
+language* a file is written in and runs its boundary between the repository and what is published
+from it. This point answers *what gets published at all*, and it runs the same boundary through
+the content. Both halves keep the language rule: English is the original, `.de.md` the
+translation, and only the museum half has translations because only it has German readers.
+
+**Why a website is the wrong place for `decisions.md`.** The site was serving everything under
+`docs/`, so an operator arriving at the front page met a table of file names, a paragraph about
+suffixes and drift checkers, and 17,000 words of engineering rationale in the navigation. Every
+one of those is right where it stands and noise where he stands. The measure of a documentation
+site is whether the first screen answers the question its reader arrived with.
+
+**Why the developer half gets no site of its own.** It is read beside the code it describes, by
+people who have already cloned the repository. A second thing to deploy, for a reader who is
+holding the files, buys nothing.
+
+**`licensing` stays in the published half**, although its neighbours by subject are the developer
+documents. Its reader is a museum that wants to pass the system on or wants to know what law its
+collection stands under — that question comes up in a museum, not in an editor. It is the one
+document of the four that keeps its German translation for a reason other than the device.
+
+**What the split cost, and what it repaid.** It cost one real defect in `check_anchors.py`, found
+before it could bite: the table of headings was keyed by file name, so two files called `index.md`
+would have silently checked each other's anchors — see the commit that fixed it. It repaid a
+third of `tools/mkdocs_hooks.py`: with the site reduced to one directory, "every link that leaves
+it points at the repository" replaced three separate rules.

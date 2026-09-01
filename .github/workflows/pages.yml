@@ -20,7 +20,7 @@ on:
   # Only builds, never deploys: a broken link is worth finding before the release, not after.
   pull_request:
     paths:
-      - "docs/**"
+      - "docs/museum/**"
       - "mkdocs.yml"
       - "tools/mkdocs_hooks.py"
       - ".github/workflows/pages.yml"

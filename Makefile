@@ -157,10 +157,10 @@ docs-check:  ## language rule, links, settings, numbers, register, version, tran
 	@python3 tools/build_register.py --check
 	@python3 tools/set_version.py --check
 
-# The register at the start of docs/archive/history.de.md. Generated instead of maintained, for the same
+# The register at the start of docs/developer/archive/history.de.md. Generated instead of maintained, for the same
 # reason as the licence notices: ninety lines by hand are wrong within a month. See
 # docs/decisions.md.
-register:  ## rewrite the register in docs/archive/history.de.md
+register:  ## rewrite the register in docs/developer/archive/history.de.md
 	@python3 tools/build_register.py
 
 # One number, two files. The tag is not the source but has to match it -- a check against

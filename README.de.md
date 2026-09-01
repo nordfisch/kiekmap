@@ -1,5 +1,5 @@
 <!-- translated-from: README.md -->
-<!-- source-sha: 80a777f52b3105fe4b456817e7007178047dc7fcbaef34848efca538013accaf -->
+<!-- source-sha: e131fcc85fa2191eb22026002697a0e3b61d4771f1110e52143bc725863de94c -->
 
 # Kiekmap
 
@@ -37,7 +37,7 @@ werden, indem man einen USB-Stick einsteckt und einen Knopf drückt.
 ## Was der Besucher sieht
 
 ![Die Besucheransicht: links der „Hilf mit"-Bereich, rechts Zeitschieber und
-Karte](docs/images/kiosk-map.png)
+Karte](docs/museum/images/kiosk-map.png)
 
 *Das Gerät in Holm. `KIEKMAP_LANGUAGE=en` stellt denselben Schirm auf Englisch.*
 
@@ -50,14 +50,14 @@ offen, fällt der Bereich weg und die Karte nimmt die volle Breite.
 Ein Tipp öffnet ein Foto in voller Größe, mit allem, was darüber bekannt ist: Datierung, Adresse,
 Schlagwörter, Bildnachweis — und die Kennung, mit der es sich im Archiv wiederfinden lässt.
 
-![Die Detailansicht: das Foto groß, daneben seine Angaben](docs/images/kiosk-detail.png)
+![Die Detailansicht: das Foto groß, daneben seine Angaben](docs/museum/images/kiosk-detail.png)
 
 Das Wappen führt die linke Spalte an und ist zugleich der Weg in die Verwaltung.
 
 Dahinter liegt der Verwaltungsbereich, den die Ehrenamtlichen ein- bis zweimal im Jahr benutzen:
 was der Bestand hat, was noch fehlt, und wie lange die letzte Sicherung her ist.
 
-![Der Verwaltungsbereich: neun Kacheln mit dem Stand des Bestands](docs/images/admin-overview.png)
+![Der Verwaltungsbereich: neun Kacheln mit dem Stand des Bestands](docs/museum/images/admin-overview.png)
 
 ## Aufbau
 
@@ -67,7 +67,7 @@ was der Bestand hat, was noch fehlt, und wie lange die letzte Sicherung her ist.
 | `frontend/` | React + MapLibre: Besucheransicht (`src/kiosk/`) und Admin (`src/admin/`) |
 | `tiles/` | Skripte, die die Offline-Karte und die lokale Ortssuche bauen |
 | `deploy/` | Docker Compose und die Einrichtung des Raspberry Pi |
-| `docs/` | Die ganze Dokumentation — Wegweiser: [docs/index.de.md](docs/index.de.md) |
+| `docs/` | Die ganze Dokumentation — Wegweiser: [docs/museum/index.de.md](docs/museum/index.de.md) |
 | `data/` | Laufzeitdaten (nicht im Repo): Datenbank, Fotos, Thumbnails |
 
 ## Entwicklung
@@ -93,11 +93,11 @@ Vite leitet `/api` an das Backend weiter, sodass in Entwicklung und Betrieb dies
 | `make prod` | Alles in Containern, so wie es auf dem Pi läuft |
 
 Einrichtung im Detail, Sprachregelung, Teststrategie und die Fallstricke, die Zeit gekostet haben:
-[docs/development.md](docs/development.md), englisch. Für Coding-Agents: [CLAUDE.md](CLAUDE.md).
+[docs/developer/development.md](docs/developer/development.md), englisch. Für Coding-Agents: [CLAUDE.md](CLAUDE.md).
 
 **Für einen anderen Ort:** Es genügt, `tiles/region.json` anzupassen und `make tiles && make places`
 auszuführen — kein Fork, kein Codeeingriff. Schritt für Schritt in
-[docs/adaption.de.md](docs/adaption.de.md).
+[docs/museum/adaption.de.md](docs/museum/adaption.de.md).
 
 **Für eine andere Sprache:** eine Zeile in der `.env`. `KIEKMAP_LANGUAGE=en` stellt Besucheransicht,
 Verwaltung, Meldungen und Datumsbeschriftung um, ohne neuen Bau.
@@ -106,15 +106,15 @@ Verwaltung, Meldungen und Datumsbeschriftung um, ohne neuen Bau.
 
 Der Pi bootet direkt in die Karte — kein Login, kein Desktop, keine Bedienung nötig.
 Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in
-[docs/operations.de.md](docs/operations.de.md). Die Kurzanleitung zum Ausdrucken für die
-Ehrenamtlichen ist [docs/usermanual.de.md](docs/usermanual.de.md).
+[docs/museum/operations.de.md](docs/museum/operations.de.md). Die Kurzanleitung zum Ausdrucken für die
+Ehrenamtlichen ist [docs/museum/usermanual.de.md](docs/museum/usermanual.de.md).
 
 Woraus das System besteht und wie die Teile zusammenspielen, steht in
-[docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in
-[docs/decisions.md](docs/decisions.md); wie es dazu gekommen ist, in
-[docs/archive/history.de.md](docs/archive/history.de.md). Was noch offen ist, in den
+[docs/developer/architecture.md](docs/developer/architecture.md); warum die Technik so gewählt ist, in
+[docs/developer/decisions.md](docs/developer/decisions.md); wie es dazu gekommen ist, in
+[docs/developer/archive/history.de.md](docs/developer/archive/history.de.md). Was noch offen ist, in den
 [Issues](https://github.com/nordfisch/kiekmap/issues). Welche Datei welche Frage beantwortet, sagt
-[docs/index.de.md](docs/index.de.md).
+[docs/museum/index.de.md](docs/museum/index.de.md).
 
 ## Mitwirken
 
@@ -139,6 +139,6 @@ Copyleft, nichts, was einer Nutzung im Weg steht.
 **Die Kartendaten sind eine eigene Frage.** Sie stammen aus OpenStreetMap und stehen unter der
 **ODbL 1.0**; die Schriften unter der OFL 1.1, die Kartensymbole unter MIT. Was das für eine
 Weitergabe bedeutet — und was der Fotobestand des Museums damit zu tun hat, nämlich nichts —,
-steht in [docs/licensing.de.md](docs/licensing.de.md).
+steht in [docs/museum/licensing.de.md](docs/museum/licensing.de.md).
 
 Ohne Gewähr, ohne Haftung, wie in Abschnitt 7 und 8 der Lizenz beschrieben.

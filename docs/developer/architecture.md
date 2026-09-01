@@ -9,9 +9,9 @@ not *why it is like this*, and not *how to work on it*:
 | [decisions.md](decisions.md) | *Why* is it this way and not another? |
 | [development.md](development.md) | *How* do you work on it? — setup, tests, conventions |
 | [archive/history.de.md](archive/history.de.md) | *How* did it come about? |
-| [operations.md](operations.md) | How does the device run in the museum? |
+| [operations.md](../museum/operations.md) | How does the device run in the museum? |
 
-The full overview is in [index.md](index.md).
+The full overview is in [index.md](../museum/index.md).
 
 Where this file only names a decision, its reasoning is in `decisions.md`. The directory tree is
 in `development.md`; the connections are here.
@@ -125,7 +125,7 @@ running view.
 
 From this follows the property that holds the project together: **nothing place-specific is in the
 code.** A second museum needs no fork, only its own `region.json` and `.env`. The procedure is in
-[adaption.md](adaption.md).
+[adaption.md](../museum/adaption.md).
 
 ---
 

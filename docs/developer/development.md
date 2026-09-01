@@ -63,8 +63,8 @@ watched for drift.
 |---|---|
 | Identifiers, code comments, docstrings | English |
 | Test files — name, docstring, comment | English |
-| [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | English |
-| [README](../README.md), [CHANGELOG](../CHANGELOG.md), `SECURITY`, `CODE_OF_CONDUCT`, `AUTHORS`, `NOTICE` | English |
+| [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../../CONTRIBUTING.md), [CLAUDE.md](../../CLAUDE.md) | English |
+| [README](../../README.md), [CHANGELOG](../../CHANGELOG.md), `SECURITY`, `CODE_OF_CONDUCT`, `AUTHORS`, `NOTICE` | English |
 | `README.de.md`, `CHANGELOG.de.md` | German, kept as a translation |
 | GitHub issues, issue and pull request templates | English |
 | `Makefile`, `deploy/`, GitHub workflows — comments | English |
@@ -225,7 +225,7 @@ registry term this project does not mean.
 ## Writing rules
 
 How a text is written here — German and English alike — is in
-[CLAUDE.md](../CLAUDE.md#writing-rules). Eight rules in one place, because they apply while
+[CLAUDE.md](../../CLAUDE.md#writing-rules). Eight rules in one place, because they apply while
 writing and not while looking things up.
 
 ## Examples are invented
@@ -420,10 +420,10 @@ lengths, deleted photos, visitor contributions including a withdrawn one. Withou
 collection exercises half the program — the contribution panel would have nothing to offer.
 
 **Everything in this collection is invented** — drawn images, made-up people, produced by
-[../tools/build_seed.py](../tools/build_seed.py). Only street names and coordinates are real, and
+[../tools/build_seed.py](../../tools/build_seed.py). Only street names and coordinates are real, and
 they have to be: without them the map shows nothing and the place search finds nothing. The real
 photographs belong to the museum and are not in the repository. The rest is in
-[../seed/README.md](../seed/README.md).
+[../seed/README.md](../../seed/README.md).
 
 ## Taking in an archive delivery
 
@@ -522,7 +522,7 @@ depends on the collection into the code, it belongs in the configuration instead
 exempt.
 
 The full procedure — compute the bounding box, choose the zoom levels, build tiles and place
-index, verify — is in [adaption.md](adaption.md). That file also covers what a second language
+index, verify — is in [adaption.md](../museum/adaption.md). That file also covers what a second language
 would cost and when splitting things up starts to pay off.
 
 ## The dependencies are pinned
@@ -671,4 +671,4 @@ committer date from the author date, otherwise all 188 commits would have got 25
 committer date. One commit previously had ten seconds between the two dates; those were lost.
 
 The museum device is offline. The update path to it (an image tarball on a USB stick) is in
-[operations.md](operations.md).
+[operations.md](../museum/operations.md).

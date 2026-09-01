@@ -1,5 +1,5 @@
-<!-- translated-from: docs/licensing.md -->
-<!-- source-sha: 714667e177249fc72553255bec21ad8739c5b0a31fd17c4994158e96d9201369 -->
+<!-- translated-from: docs/museum/licensing.md -->
+<!-- source-sha: 4c9d89f4ed474486dac6b0d58bf8908aca2b34557e7de977e972ae4ee3538d48 -->
 
 # Weitergabe
 
@@ -13,9 +13,9 @@ Recht der Bestand im Museum steht.
 ## Kiekmap selbst
 
 **Apache-Lizenz 2.0**, Copyright 2026 Kalle Erlhoff. Der Text steht in
-[../LICENSE](../LICENSE), die Namensnennung in [../NOTICE](../NOTICE). Beide gelten für Code,
+[../LICENSE](../../LICENSE), die Namensnennung in [../NOTICE](../../NOTICE). Beide gelten für Code,
 Dokumentation und die erfundenen Beispielbilder unter `seed/` — eine Lizenz für alles, ohne
-Abgrenzungsfragen. Warum diese und nicht MIT: [decisions.md](decisions.md), Punkt 62.
+Abgrenzungsfragen. Warum diese und nicht MIT: [decisions.md](../developer/decisions.md), Punkt 62.
 
 Der Lizenztext ist **wörtlich der von apache.org** und wird nicht angefasst. Der Platzhalter
 `Copyright [yyyy] [name of copyright owner]` in seinem Anhang ist die Vorlage für Dateiköpfe, kein
@@ -50,7 +50,7 @@ Bauzeit-Datenbank von browserslist, die in keinem Artefakt landet. Nichts schrä
 eigenen Lizenz ein, und nichts steht einer Veröffentlichung im Weg.
 
 **Die Namen und ihre Lizenztexte stehen in `THIRD-PARTY.txt`**, erzeugt von
-[../tools/build_notices.py](../tools/build_notices.py) und eingecheckt wie eine Sperrdatei. Warum
+[../tools/build_notices.py](../../tools/build_notices.py) und eingecheckt wie eine Sperrdatei. Warum
 erzeugt und nicht gepflegt: Eine handgeschriebene Liste ist in drei Monaten falsch, und zwar in der
 Richtung, die niemand prüft. `make notices` schreibt sie, `make check` merkt, wenn sie veraltet
 ist.
@@ -103,7 +103,7 @@ Entscheidung.
 
 **Das Gemeindewappen.** Urheberrechtlich gemeinfrei (§ 5 Abs. 1 UrhG), in der *Führung* aber als
 Hoheitszeichen beschränkt. Deshalb liegt im Repo ein gezeichneter Platzhalter und nicht das Wappen.
-Ausführlich in [decisions.md](decisions.md), Punkt 21, und in [adaption.de.md](adaption.de.md).
+Ausführlich in [decisions.md](../developer/decisions.md), Punkt 21, und in [adaption.de.md](adaption.de.md).
 
 ## Basis-Abbilder und der Verbreitungsweg
 
@@ -124,8 +124,8 @@ Eine Person hat Kiekmap zusammen mit einem Sprachmodell gebaut; die Commits trag
 Für die Rechtslage folgt daraus wenig und nichts Überraschendes: Rein maschinell Erzeugtes ist
 keine persönliche geistige Schöpfung (§ 2 Abs. 2 UrhG) und damit nicht geschützt; geschützt ist die
 Auswahl-, Anordnungs- und Bearbeitungsleistung. Die liegt in diesem Repo offen zutage — in
-[decisions.md](decisions.md) stehen die Entscheidungen mit ihren Begründungen, in
-[archive/history.de.md](archive/history.de.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
+[decisions.md](../developer/decisions.md) stehen die Entscheidungen mit ihren Begründungen, in
+[archive/history.de.md](../developer/archive/history.de.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
 
 Praktisch heißt das nur eines: **den Anspruch nicht übertreiben.** Die Copyright-Zeile ist
 richtig; ein Satz, jede Zeile sei eigenes Werk, wäre es nicht. Wo einzelne Zeilen keine

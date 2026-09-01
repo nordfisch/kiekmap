@@ -1,5 +1,5 @@
-<!-- translated-from: docs/operations.md -->
-<!-- source-sha: e5c72853414dc94fd527c4f98da1ecd3a99c10aa12ece90a4acae8a23a578a1e -->
+<!-- translated-from: docs/museum/operations.md -->
+<!-- source-sha: 5a2df922ffca1d488dcfbc17fca46b3c1cfa5c4a522fd2a47a146052ffac8830 -->
 
 # Betriebshandbuch
 
@@ -35,7 +35,7 @@ rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
 ```
 
 **Das Wappen kommt denselben Weg.** Im Repo liegt nur ein Platzhalter — ein Gemeindewappen darf
-dort nicht liegen, siehe [decisions.md](decisions.md), Punkt 21. Auf dem Gerät gehört das echte
+dort nicht liegen, siehe [decisions.md](../developer/decisions.md), Punkt 21. Auf dem Gerät gehört das echte
 hin:
 
 ```bash
@@ -188,7 +188,7 @@ Bedienung; jede Aktion schiebt sie hinaus, und ein Neustart des Dienstes beendet
 
 Die `.env` im Projektverzeichnis ist auch im Betrieb die Stelle, an der Einstellungen stehen. Sie
 liegt bewusst **nicht** im Abbild — das Abbild ist die Software, die `.env` ist der Ort — und wird
-in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml) als `env_file` eingelesen. Wer dort
+in [`deploy/docker-compose.yml`](../../deploy/docker-compose.yml) als `env_file` eingelesen. Wer dort
 etwas ändert, startet danach die Container neu:
 
 ```bash
@@ -244,7 +244,7 @@ Zwei Fallstricke stecken darin, beide still:
 **Der Container sieht den Stick nicht.** Ein Docker-Bind-Mount zeigt nur, was beim Start des
 Containers schon eingehängt war. Ein später eingesteckter Stick bleibt unsichtbar — ohne
 Fehlermeldung, der Ordner ist einfach leer. Dagegen steht `:rshared` an der Zeile `/media:/media`
-in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml). Fehlt es, hilft auch kein Neustart
+in [`deploy/docker-compose.yml`](../../deploy/docker-compose.yml). Fehlt es, hilft auch kein Neustart
 des Containers zur richtigen Zeit.
 
 **Der Stick ist da, aber schreibgeschützt.** FAT- und exFAT-Sticks kennen keine Besitzer; ohne
@@ -262,7 +262,7 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 > **In `/Volumes` liegt immer ein Symlink auf `/`**, benannt nach dem internen Volume — das legt
 > macOS selbst an. Bis zum 14. August 2026 galt er als Datenträger, und die Sicherung landete
 > dahinter, im laufenden Datenverzeichnis. Seither werden Symlinks übersprungen
-> ([decisions.md](decisions.md), Punkt 40); die Liste ist auf einem Mac ohne angestecktes
+> ([decisions.md](../developer/decisions.md), Punkt 40); die Liste ist auf einem Mac ohne angestecktes
 > Laufwerk jetzt leer, und genau das ist richtig.
 
 ---

@@ -6,8 +6,8 @@
 > **Documentation:** [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/) — the
 > files under `docs/`, in both languages, built from the newest tag.
 >
-> **Deutsch:** [README.de.md](README.de.md) · [Benutzung](docs/usermanual.de.md) ·
-> [Betrieb](docs/operations.de.md) · [Übernahme](docs/adaption.de.md)
+> **Deutsch:** [README.de.md](README.de.md) · [Benutzung](docs/museum/usermanual.de.md) ·
+> [Betrieb](docs/museum/operations.de.md) · [Übernahme](docs/museum/adaption.de.md)
 
 Discover historic pictures of a village on a map, decade by decade. A touchscreen kiosk for a local
 history museum: it runs offline on a Raspberry Pi, adapts to any place, and the visitors fill in
@@ -34,7 +34,7 @@ up by plugging in a USB stick and pressing one button.
 ## What a visitor sees
 
 ![The visitor view: the contribution panel on the left, the time slider and the map on the
-right](docs/images/kiosk-map.png)
+right](docs/museum/images/kiosk-map.png)
 
 *The device in Holm, in German. `KIEKMAP_LANGUAGE=en` switches the same screen to English.*
 
@@ -47,14 +47,14 @@ the panel falls away and the map takes the full width.
 A tap opens a photo at full size, with everything known about it: the dating, the address, the
 keywords, the credit — and the identifier, so that it can be found again in the archive.
 
-![The detail view: the photo at full size, its statements beside it](docs/images/kiosk-detail.png)
+![The detail view: the photo at full size, its statements beside it](docs/museum/images/kiosk-detail.png)
 
 The coat of arms heads the left column and is at the same time the way into the admin area.
 
 Behind it lies the admin view, used once or twice a year by volunteers: what the collection holds,
 what is still missing, and how long ago the last backup was.
 
-![The admin view: nine tiles with the state of the collection](docs/images/admin-overview.png)
+![The admin view: nine tiles with the state of the collection](docs/museum/images/admin-overview.png)
 
 ## Layout
 
@@ -64,7 +64,7 @@ what is still missing, and how long ago the last backup was.
 | `frontend/` | React + MapLibre: the visitor view (`src/kiosk/`) and the admin view (`src/admin/`) |
 | `tiles/` | Scripts that build the offline map and the local place search |
 | `deploy/` | Docker Compose and the setup of the Raspberry Pi |
-| `docs/` | All the documentation — signpost: [docs/index.md](docs/index.md) |
+| `docs/` | All the documentation — signpost: [docs/museum/index.md](docs/museum/index.md) |
 | `data/` | Runtime data (not in the repository): database, photos, thumbnails |
 
 ## Development
@@ -90,10 +90,10 @@ reload. Vite passes `/api` on to the backend, so development and production shar
 | `make prod` | everything in containers, the way it runs on the Pi |
 
 Setup in detail, the language rule, the testing strategy and the traps that cost time:
-[docs/development.md](docs/development.md). For coding agents: [CLAUDE.md](CLAUDE.md).
+[docs/developer/development.md](docs/developer/development.md). For coding agents: [CLAUDE.md](CLAUDE.md).
 
 **For a different place:** adjusting `tiles/region.json` and running `make tiles && make places` is
-enough — no fork, no change to the code. Step by step in [docs/adaption.md](docs/adaption.md).
+enough — no fork, no change to the code. Step by step in [docs/museum/adaption.md](docs/museum/adaption.md).
 
 **For a different language:** one line in the `.env`. `KIEKMAP_LANGUAGE=en` switches the visitor
 view, the admin area, the messages and the date labels, without a new build.
@@ -101,15 +101,15 @@ view, the admin area, the messages and the date labels, without a new build.
 ## Operation
 
 The Pi boots straight into the map — no login, no desktop, nothing to operate. Setup, backup,
-restore and troubleshooting are in [docs/operations.md](docs/operations.md). The short guide to
-print out for the volunteers is [docs/usermanual.de.md](docs/usermanual.de.md), in German.
+restore and troubleshooting are in [docs/museum/operations.md](docs/museum/operations.md). The short guide to
+print out for the volunteers is [docs/museum/usermanual.de.md](docs/museum/usermanual.de.md), in German.
 
 What the system is made of and how the parts fit together is in
-[docs/architecture.md](docs/architecture.md); why the technology was chosen this way, in
-[docs/decisions.md](docs/decisions.md); how it came about, in
-[docs/archive/history.de.md](docs/archive/history.de.md), in German. What is still open is in the
+[docs/developer/architecture.md](docs/developer/architecture.md); why the technology was chosen this way, in
+[docs/developer/decisions.md](docs/developer/decisions.md); how it came about, in
+[docs/developer/archive/history.de.md](docs/developer/archive/history.de.md), in German. What is still open is in the
 [issues](https://github.com/nordfisch/kiekmap/issues). Which file answers which question is in
-[docs/index.md](docs/index.md).
+[docs/museum/index.md](docs/museum/index.md).
 
 ## Contributing
 
@@ -134,6 +134,6 @@ copyleft, nothing that stands in the way of using it.
 **The map data is a question of its own.** It comes from OpenStreetMap and is under the
 **ODbL 1.0**; the fonts under the OFL 1.1, the map sprites under MIT. What that means for passing
 it on — and what the museum's photo collection has to do with it, namely nothing — is in
-[docs/licensing.md](docs/licensing.md).
+[docs/museum/licensing.md](docs/museum/licensing.md).
 
 Without warranty and without liability, as described in sections 7 and 8 of the licence.

@@ -8,7 +8,8 @@
 
 ``deploy/pi/update.sh`` expects exactly this folder: ``images.tar`` with both images, a
 ``version`` file whose content is the image tag, and optionally ``tiles/`` and ``places.json``.
-Until now that was four commands typed by hand out of ``docs/operations.md``, and the one that
+Until now that was four commands typed by hand out of ``docs/museum/operations.md``, and the
+one that
 gets forgotten is the ``version`` file -- the images load, the ``.env`` keeps the old number, and
 ``docker compose up`` on the Pi pulls the previous image back up. The device then runs the old
 software and says so nowhere.

@@ -9,10 +9,10 @@ collection stands under.
 
 ## Kiekmap itself
 
-**Apache Licence 2.0**, Copyright 2026 Kalle Erlhoff. The text is in [../LICENSE](../LICENSE), the
-attribution in [../NOTICE](../NOTICE). Both cover the code, the documentation and the invented
+**Apache Licence 2.0**, Copyright 2026 Kalle Erlhoff. The text is in [../LICENSE](../../LICENSE), the
+attribution in [../NOTICE](../../NOTICE). Both cover the code, the documentation and the invented
 sample pictures under `seed/` — one licence for everything, with no questions of demarcation. Why
-this one and not MIT: [decisions.md](decisions.md), point 62.
+this one and not MIT: [decisions.md](../developer/decisions.md), point 62.
 
 The licence text is **verbatim the one from apache.org** and is not touched. The placeholder
 `Copyright [yyyy] [name of copyright owner]` in its appendix is the template for file headers, not
@@ -46,7 +46,7 @@ database from browserslist that lands in no artefact. Nothing restricts the choi
 licence, and nothing stands in the way of publishing.
 
 **The names and their licence texts are in `THIRD-PARTY.txt`**, produced by
-[../tools/build_notices.py](../tools/build_notices.py) and checked in like a lock file. Why
+[../tools/build_notices.py](../../tools/build_notices.py) and checked in like a lock file. Why
 produced and not maintained: a hand-written list is wrong within three months, and wrong in the
 direction nobody checks. `make notices` writes it, `make check` notices when it has gone stale.
 
@@ -98,7 +98,7 @@ one.
 
 **The municipal coat of arms.** Free of copyright (§ 5 (1) UrhG), but restricted in its *use* as an
 official emblem. That is why a drawn placeholder lies in the repository and not the coat of arms.
-At length in [decisions.md](decisions.md), point 21, and in [adaption.md](adaption.md).
+At length in [decisions.md](../developer/decisions.md), point 21, and in [adaption.md](adaption.md).
 
 ## Base images and the route of distribution
 
@@ -119,8 +119,8 @@ It is recorded here because keeping quiet would be the worse way to handle it.
 Little follows from that for the legal position, and nothing surprising: what is produced purely
 by machine is no personal intellectual creation (§ 2 (2) UrhG) and is therefore not protected;
 what is protected is the work of selecting, arranging and editing. That work lies open in this
-repository — [decisions.md](decisions.md) holds the decisions with their reasons,
-[archive/history.de.md](archive/history.de.md) the cases where the first proposal was thrown out.
+repository — [decisions.md](../developer/decisions.md) holds the decisions with their reasons,
+[archive/history.de.md](../developer/archive/history.de.md) the cases where the first proposal was thrown out.
 
 In practice this means one thing: **do not overstate the claim.** The copyright line is right; a
 sentence saying every line is our own work would not be. Where individual lines do not reach the
