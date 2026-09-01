@@ -299,7 +299,14 @@ def _pick_folder(settings: Settings, path: str) -> Path:
 
     The path comes back from the browser, so it is input, not a fact. Without this check the
     admin area would be a way to read any folder on the device into the collection -- and a
-    resolved path is compared, so ``..`` gets nobody out of the drive either.
+    resolved path is compared, so ``..`` gets nobody out of the drive either. ``resolve()`` runs
+    **before** the comparison, so a symlink on the stick pointing at ``/etc`` resolves out of the
+    drive and fails the test rather than passing it.
+
+    CodeQL reports the two lines below as ``py/path-injection``. It sees input reaching a path and
+    does not recognise the loop as the sanitiser it is: the value is not merely checked but
+    required to sit under one of the drives the system itself found. Both alerts are dismissed
+    with this reasoning. The endpoint is behind the admin PIN besides.
     """
     wanted = Path(path).resolve()
     for drive in service.find_drives(settings.media_dir):
