@@ -1,7 +1,7 @@
 # Betriebshandbuch
 
 Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung für das
-Museumsteam steht in der [Kuratoren-Anleitung](usermanual.md); hier steht die Technik.
+Museumsteam steht in der [Kuratoren-Anleitung](usermanual.de.md); hier steht die Technik.
 
 > **Auf einem echten Pi noch nicht erprobt.** Die Dateien unter `deploy/pi/` sind sorgfältig
 > geschrieben und syntaktisch geprüft, aber nie gelaufen — es gab beim Bauen kein Gerät. Was
@@ -268,7 +268,7 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 
 **Seit dem 15. August 2026 regelt das die Wiederherstellung selbst** — dieser Abschnitt beschreibt,
 *wie*, und was zu tun ist, wenn doch etwas hakt. Für das Museumsteam steht der kurze Weg im
-[Benutzerhandbuch](usermanual.md#wenn-die-sicherung-älter-ist-als-das-programm).
+[Benutzerhandbuch](usermanual.de.md#wenn-die-sicherung-älter-ist-als-das-programm).
 
 **Warum es überhaupt eine Frage ist.** Eine Sicherung enthält `kiekmap.db` genau so, wie die Datei
 damals aussah — mitsamt ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird

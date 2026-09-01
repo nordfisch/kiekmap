@@ -1865,10 +1865,10 @@ is still true. It is answered rather than ignored: every translated file carries
 English source it was made from, and `tools/check_translations.py` reports what has drifted apart.
 The doubling is allowed because it is now watched, not because the risk went away.
 
-**Not everything is doubled.** `usermanual` exists in German only — it is a handout printed and left
-beside the device in Holm, and an English version would have no reader and would be exactly the copy
-that goes stale. `history.de.md` stays German and frozen: 40,768 words whose value is in the nuance,
-in a file that takes no further entries.
+**One file is not doubled.** `history.de.md` stays German and frozen: 40,768 words whose value is
+in the nuance, in a file that takes no further entries. Everything else the museum reads exists
+twice, `usermanual` included — the printed handout for the team in Holm is the German half of a
+pair, not an original.
 
 **Why the tests turn.** Point 68 argued that a test name is a sentence of specification and that
 Flurname, Hausnummer and Ortsteil have no good English equivalent. The first half still holds — the

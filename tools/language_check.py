@@ -222,7 +222,6 @@ IN_TRANSITION: tuple[str, ...] = (
     "docs/index.md",
     "docs/licensing.md",
     "docs/operations.md",
-    "docs/usermanual.md",
 )
 
 

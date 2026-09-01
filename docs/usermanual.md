@@ -1,212 +1,204 @@
-# Anleitung für das Museumsteam
+# Guide for the museum team
 
-> Zum Ausdrucken und Neben-das-Gerät-Legen gedacht — Bildschirmfotos folgen, wenn das Gerät im
-> Museum steht.
+> Meant to be printed and left beside the device — screenshots follow once the device stands in
+> the museum.
 
-## In den Verwaltungsbereich kommen
+## Getting into the admin area
 
-Oben links auf der Karte liegt das **Wappen**. Einmal darauf tippen, dann die **PIN** eingeben und
-auf „Weiter" tippen.
+The **coat of arms** sits at the top left of the map. Tap it once, enter the **PIN** and tap
+"Continue".
 
-Wer die PIN nicht kennt, kommt nicht hinein — das ist Absicht. Nach fünf falschen Eingaben wartet
-das Gerät eine Minute, bevor es die nächste annimmt.
+Whoever does not know the PIN does not get in — that is deliberate. After five wrong entries the
+device waits a minute before it takes the next one.
 
-Zurück zur Karte kommen Sie jederzeit über **„Verwaltung beenden"** oben rechts. Wenn Sie das
-vergessen, meldet sich das Gerät nach einer halben Stunde von selbst ab.
+You can go back to the map at any time with **"Leave the admin area"** at the top right. If you
+forget, the device signs itself out after half an hour.
 
-## Fotos hinzufügen
+## Adding photos
 
-Zwei Wege führen zum selben Ergebnis:
+Admin area → **Import**. The page asks two things, in this order:
 
-Verwaltung → **Importieren**. Die Seite fragt zwei Dinge, in dieser Reihenfolge:
+**Choosing the pictures to import**
 
-**Auswahl der zu importierenden Bilder**
+Two tiles stand at the top; the chosen one has a border. Below them is always the same area, only
+its content changes:
 
-Oben stehen zwei Kacheln; die gewählte ist umrandet. Darunter ist immer dieselbe Fläche, sie
-ändert nur ihren Inhalt:
+- **From the computer** — tap **"Choose"** and click the files. With a mouse you can drag them
+  onto the area instead.
+- **From a USB stick** — plug the stick in. The folders with pictures appear in the area by
+  themselves; choose one of them. *Nothing on the stick is changed, only read.*
 
-- **Vom Rechner** — auf **„Auswählen"** tippen und die Dateien anklicken. Wer mit der Maus
-  arbeitet, kann sie stattdessen auf die Fläche ziehen.
-- **Vom USB-Stick** — Stick einstecken. In der Fläche erscheinen von allein die Ordner mit
-  Bildern; einen davon auswählen. *Auf dem Stick wird nichts verändert, nur gelesen.*
+**Details for all newly added pictures (optional)**
 
-**Angaben für alle neu hinzugefügten Bilder (optional)**
+*Year* and *Place* for the whole batch — with forty pictures of the same parish fair that saves
+thirty-nine entries. Both can be changed per picture afterwards.
 
-*Jahr* und *Ort* für den ganzen Stapel — bei vierzig Bildern derselben Kirchweih spart das
-neununddreißig Eingaben. Beides lässt sich hinterher für jedes Bild einzeln ändern.
+**"Precision"** stands beside the year: *Year* or *Decade*. As long as no year is entered, nothing
+can be chosen there. *Decade* exists only for round numbers such as 1920 or 1930 — with 1923 it
+would not be clear what is meant. Whoever picks 1920 and Decade and then changes the number to
+1923 gets *Year* back automatically.
 
-Neben dem Jahr steht **„Genauigkeit"**: *Jahr* oder *Jahrzehnt*. Solange kein Jahr eingetragen
-ist, lässt sich dort nichts wählen. *Jahrzehnt* gibt es nur bei runden Zahlen wie 1920 oder 1930 —
-bei 1923 wäre nicht klar, was gemeint ist. Wer erst 1920 und Jahrzehnt wählt und die Zahl danach
-auf 1923 ändert, bekommt automatisch wieder *Jahr*.
+Then **"Import"**. The device shows which picture it is at.
 
-Dann **„Importieren"**. Das Gerät zeigt, bei welchem Bild es gerade ist.
+> **There is a third way, entirely without the admin area:** copy the pictures into the folder
+> `incoming` on the computer. The device takes them in by itself and afterwards moves the files
+> into the subfolder `_done`. Nothing is deleted there either.
 
-> **Es gibt noch einen dritten Weg, ganz ohne Verwaltung:** die Bilder am Rechner in den Ordner
-> `incoming` kopieren. Das Gerät nimmt sie von allein auf und legt die Dateien danach in den
-> Unterordner `_done`. Gelöscht wird auch dort nichts.
+### After the import
 
-### Nach dem Importieren
+With a manageable number of pictures a list appears: the picture on the left, title, year and
+place beside it. The **title is suggested from the file name** — `Kirchweih_1932_Muehle.jpg`
+becomes "Kirchweih 1932 Muehle".
 
-Bei überschaubar vielen Bildern erscheint eine Liste: links das Bild, daneben Titel, Jahr und Ort.
-Der **Titel ist aus dem Dateinamen vorgeschlagen** — aus `Kirchweih_1932_Muehle.jpg` wird
-„Kirchweih 1932 Muehle".
+With very many pictures at once it only says how many there are, and a button into the list
+**"Without a place"**. A table of two hundred rows would be no place to work.
 
-Bei sehr vielen Bildern auf einmal steht dort nur, wie viele es geworden sind, und ein Knopf in die
-Liste **„Ohne Ort"**. Eine Tabelle mit zweihundert Zeilen wäre keine Arbeitsfläche.
+Change what you know and tap **"Apply"**. The row then disappears. **"Apply all"** deals with the
+rest in one go.
 
-Ändern Sie, was Sie wissen, und tippen Sie auf **„Übernehmen"**. Die Zeile verschwindet dann.
-**„Alle übernehmen"** erledigt den Rest in einem Zug.
+> **The pictures are saved already, before you apply anything.** You can leave the list at any
+> time without losing something. What you leave lying turns up later by itself in the "Help out"
+> panel and gets answered there by visitors.
 
-> **Die Bilder sind schon gespeichert, bevor Sie irgendetwas übernehmen.** Sie können die Liste
-> jederzeit verlassen, ohne dass etwas verloren geht. Was Sie liegen lassen, taucht später von
-> selbst im „Hilf mit"-Bereich auf und wird dort von Besuchern beantwortet.
+If a picture was there before, the device says so ("3 were already there"). No second copy comes
+into being.
 
-War ein Bild schon einmal da, sagt das Gerät das („3 waren schon da"). Es entsteht keine zweite
-Kopie.
+## Filling in and correcting records
 
-## Angaben ergänzen und korrigieren
+Admin area → **Photos**. With **"Without a place"** and **"Without a year"** you see exactly the
+pictures where the one or the other is missing — those are the lists to work through. The search
+field finds a particular picture by title, place or file name.
 
-Verwaltung → **Fotos**. Mit **„Ohne Ort"** und **„Ohne Jahr"** sehen Sie genau die Bilder, bei
-denen das eine oder das andere fehlt — das sind die Listen zum Durcharbeiten. Über das Suchfeld
-finden Sie ein bestimmtes Bild nach Titel, Ort oder Dateiname.
+**The shortest way there is the start page:** every number of the overview leads straight into the
+matching list. Tap "4 without a year" and you are there.
 
-**Der kürzeste Weg dorthin ist die Startseite:** Jede Zahl der Übersicht führt direkt in die
-passende Liste. „4 ohne Jahr" antippen, und Sie sind dort.
+With more than thirty pictures, **"Back · Page 1 of 3 · Next"** stands below the list. After
+editing a picture you are on the same page again. Change the filter or search for something and it
+starts at page 1 again.
 
-Sind es mehr als dreißig Bilder, steht unter der Liste **„Zurück · Seite 1 von 3 · Weiter"**. Wenn
-Sie ein Bild bearbeitet haben, sind Sie danach wieder auf derselben Seite. Wechseln Sie den Filter
-oder suchen Sie etwas, fängt es wieder bei Seite 1 an.
+"Edit" opens the form. For the **place** there is a search by street name; it works without the
+internet.
 
-„Bearbeiten" öffnet das Formular. Zum **Ort** gibt es eine Suche nach Straßennamen; sie funktioniert
-ohne Internet.
+Two particulars:
 
-Zwei Dinge sind wichtig zu wissen:
+- An **empty year field means "unknown"**. If you delete a wrong year and save, the picture counts
+  as undated again — and is put to visitors once more. That is intended.
+- A picture can be **hidden** instead of deleted. It then disappears from the map but is kept and
+  stays findable in the admin area. The device cannot delete.
 
-- Ein **leeres Jahresfeld heißt „unbekannt"**. Wenn Sie eine falsche Jahreszahl herauslöschen und
-  speichern, gilt das Bild wieder als undatiert — und wird Besuchern erneut vorgelegt. Das ist so
-  gewollt.
-- Ein Bild lässt sich **verstecken**, statt es zu löschen. Es verschwindet dann von der Karte,
-  bleibt aber erhalten und in der Verwaltung auffindbar. Löschen kann das Gerät nicht.
+## What visitors have contributed
 
-## Was Besucher beigetragen haben
+Admin area → **Moderation**. What visitors have entered on the screen stands here.
 
-Verwaltung → **Moderation**. Hier steht, was Besucher am Bildschirm eingetragen haben.
+If something is obviously wrong, tap **"Take back"**. The record is deleted and the picture goes
+back into the "Help out" panel — perhaps the next visitor knows better.
 
-Ist etwas offensichtlich falsch, tippen Sie auf **„Zurücknehmen"**. Die Angabe wird gelöscht und
-das Bild wandert zurück in den „Hilf mit"-Bereich — vielleicht weiß es der nächste Besucher besser.
+If **"Edited by hand"** stands there instead of a button, somebody from the team has reworked the
+record since. Taking it back would throw that work away with it, so it is no longer possible.
 
-Steht dort statt eines Knopfes **„Von Hand bearbeitet"**, hat inzwischen jemand aus dem Team die
-Angabe überarbeitet. Zurücknehmen würde diese Arbeit mit wegwerfen, deshalb geht es dann nicht mehr.
+> **Which decades visitors are offered** follows from the collection itself: everything that
+> occurs in it, but at least the 1920s to the 2010s. If a button for a very old photo is missing,
+> date a single picture from that time under **Photos → Edit** — the decade is then available to
+> visitors as well.
 
-> **Welche Jahrzehnte Besucher anbieten bekommen**, ergibt sich aus der Sammlung selbst: alles, was
-> im Bestand vorkommt, mindestens aber die 1920er bis 2010er. Fehlt ein Knopf für ein sehr altes
-> Foto, datieren Sie ein einziges Bild aus dieser Zeit über **Fotos → Bearbeiten** — danach steht
-> das Jahrzehnt auch den Besuchern zur Verfügung.
+## When something does not arrive
 
-## Wenn etwas nicht ankommt
+Admin area → **Log**. Every file the device has looked at stands there, with the reason: taken in,
+duplicate or rejected. There is no "nothing happened" here — if a picture is missing, the reason
+stands here.
 
-Verwaltung → **Protokoll**. Dort steht jede Datei, die das Gerät angesehen hat, mit dem Grund:
-aufgenommen, Dublette oder abgewiesen. „Nichts passiert" gibt es hier nicht — wenn ein Bild fehlt,
-steht hier, warum.
+## Backup onto a USB stick
 
-## Sicherung auf einen USB-Stick
+Once a year, and always after a larger batch of new pictures. The start page of the admin area
+says at the bottom left how many days have passed since the last backup; if it is longer than a
+month ago, the tile turns red. Tapping it leads straight here.
 
-Einmal im Jahr, und immer nach einem größeren Stapel neuer Bilder. Auf der Startseite der
-Verwaltung steht unten links, wie viele Tage seit der letzten Sicherung vergangen sind; ist es
-länger als einen Monat her, wird die Kachel rot. Antippen führt direkt hierher.
+1. **Plug the USB stick in.** An ordinary stick will do. It should have as much room as the
+   collection is large — the device works it out for you.
+2. Admin area → **Backup**. The stick appears by itself as soon as it is in.
+3. Once its name and "enough for … photos" stand there, tap **"Start the backup"**.
+4. Wait. The device shows which picture it is at. **Do not pull the stick out while the bar is
+   running.**
+5. At the end it says "… photos and all records saved. The stick can be removed now." Only then
+   pull it out.
 
-1. **USB-Stick einstecken.** Ein gewöhnlicher Stick genügt. Er sollte so viel Platz haben wie die
-   Sammlung groß ist — das Gerät rechnet es Ihnen vor.
-2. Verwaltung → **Sicherung**. Der Stick erscheint von allein, sobald er steckt.
-3. Steht dort sein Name und „genug für … Fotos", auf **„Sicherung starten"** tippen.
-4. Warten. Das Gerät zeigt, bei welchem Bild es gerade ist. **Den Stick nicht abziehen, solange
-   der Balken läuft.**
-5. Am Ende steht „… Fotos und alle Angaben gesichert. Der Stick kann jetzt abgezogen werden."
-   Erst dann abziehen.
+**The second time is quick.** The device writes only what has come in since the last time. If it
+says "There were no new pictures" at the end, that is not an error but means: everything was on
+the stick already.
 
-**Beim zweiten Mal geht es schnell.** Das Gerät schreibt nur, was seit dem letzten Mal
-dazugekommen ist. Steht am Ende „Neue Bilder gab es nicht", ist das kein Fehler, sondern heißt:
-Es war schon alles auf dem Stick.
+You can use the same stick over and over. A folder `kiekmap-backup` lies on it — you can open that
+on any computer, the pictures lie there as ordinary files.
 
-Denselben Stick können Sie immer wieder verwenden. Auf ihm liegt ein Ordner
-`kiekmap-backup` — den können Sie an jedem Rechner öffnen, die Bilder liegen dort als ganz
-normale Dateien.
+> **If no stick appears:** is it in properly? Some very old sticks are not recognised. Another
+> stick is the quickest thing to try.
 
-> **Wenn kein Stick erscheint:** Steckt er richtig? Manche sehr alten Sticks werden nicht erkannt.
-> Ein anderer Stick ist der schnellste Versuch.
+> **If you give a backup out of the house** — to another museum, to a company, to somebody to try
+> out: besides your photos the database also holds the place index, and that comes from
+> OpenStreetMap. Please add the note "Place data: © OpenStreetMap contributors, ODbL" to it. One
+> sentence in the email will do. Nothing changes for your own photos — they still belong to the
+> museum.
 
-> **Wenn Sie eine Sicherung aus dem Haus geben** — an ein anderes Museum, an eine Firma, an
-> jemanden zum Ausprobieren: In der Datenbank steckt neben Ihren Fotos auch das Ortsverzeichnis,
-> und das stammt aus OpenStreetMap. Legen Sie dann bitte den Hinweis „Ortsdaten:
-> © OpenStreetMap-Mitwirkende, ODbL" dazu. Ein Satz in der Mail genügt. Für Ihre eigenen Fotos
-> ändert sich dadurch nichts — die gehören weiterhin dem Museum.
+## Downloading the backup as one file
 
-## Sicherung als eine Datei herunterladen
+If no stick is to hand, it also works through the computer you are sitting at: Admin area →
+**Backup** → tile **"As one file"** → **"Download the backup"**. You get the whole collection as
+one ZIP file.
 
-Wenn kein Stick zur Hand ist, geht es auch über den Rechner, an dem Sie gerade sitzen: Verwaltung
-→ **Sicherung** → Kachel **„Als eine Datei"** → **„Sicherung herunterladen"**. Sie bekommen den
-ganzen Bestand als eine ZIP-Datei.
+**The stick stays the better way**, for two reasons: onto the stick the device writes only what is
+new the second time — the file holds everything every time and takes correspondingly long. And if
+the download breaks off, the file is unusable, while a backup broken off on the stick is not.
 
-**Der Stick bleibt trotzdem der bessere Weg**, und dafür gibt es zwei handfeste Gründe: Auf den
-Stick schreibt das Gerät beim zweiten Mal nur, was neu ist — die Datei enthält jedes Mal alles und
-dauert entsprechend. Und wenn der Download abbricht, ist die Datei unbrauchbar, während eine
-abgebrochene Sicherung auf dem Stick es nicht ist.
+So the file is the addition, not the replacement. For the backup that stays in the museum, take
+the stick.
 
-Die Datei ist also die Ergänzung, nicht der Ersatz. Für die Sicherung, die im Museum bleibt,
-nehmen Sie den Stick.
+> **How does such a file get back into the device?** In two ways. On the computer: put the ZIP
+> file into the folder `incoming`. The device recognises it by itself and asks in the backup area
+> whether it should be read in — **nothing happens on its own.** Or by stick: unpack the file so
+> that the folder `kiekmap-backup` lies there, plug the stick in, and then go by the next section.
 
-> **Wie kommt so eine Datei wieder ins Gerät?** Auf zwei Wegen. Am Rechner: die ZIP-Datei in den
-> Ordner `incoming` legen. Das Gerät erkennt sie von allein und fragt im Sicherungsbereich nach,
-> ob sie eingespielt werden soll — **von selbst passiert nichts.** Oder über den Stick: die Datei
-> so entpacken, dass dort der Ordner `kiekmap-backup` liegt, Stick einstecken, und dann wie
-> im nächsten Abschnitt vorgehen.
+## Reading a backup back in
 
-## Eine Sicherung zurückspielen
+You only need this when the device was set up again or something really has been lost. **The
+collection as it stands is replaced.**
 
-Das brauchen Sie nur, wenn das Gerät neu aufgesetzt wurde oder wirklich etwas verloren gegangen
-ist. **Der jetzige Bestand wird dabei ersetzt.**
+1. Plug the stick in, Admin area → **Backup**.
+2. Right at the bottom **"Restore"**.
+3. The device asks back and names the date and the count of the backup. Only then does it start.
 
-1. Stick einstecken, Verwaltung → **Sicherung**.
-2. Ganz unten **„Zurückspielen"**.
-3. Das Gerät fragt nach und nennt Datum und Anzahl der Sicherung. Erst dann geht es los.
+What was on the device before is **not deleted** but set aside into a folder with today's date.
+So whoever reads the wrong backup in by mistake has lost nothing — tell somebody in that case who
+can get at the device.
 
-Was vorher auf dem Gerät war, wird **nicht gelöscht**, sondern in einen Ordner mit dem heutigen
-Datum beiseitegelegt. Wer also versehentlich die falsche Sicherung einspielt, hat nichts verloren
-— sagen Sie in dem Fall jemandem Bescheid, der an das Gerät kann.
+### When the backup is older than the program
 
-### Wenn die Sicherung älter ist als das Programm
+That is the normal case, and **you need do nothing for it**. A backup holds the records in the
+form the program had at the time; if the program has been renewed since, it brings the records it
+reads back in to its present form itself. "The schema is being brought forward" then stands
+briefly on the progress bar.
 
-Das ist der Normalfall, und **Sie müssen dafür nichts tun**. Eine Sicherung enthält die Angaben in
-der Form, die das Programm damals hatte; ist das Programm seither erneuert worden, bringt es die
-zurückgespielten Angaben beim Einspielen selbst auf seine heutige Form. Auf dem Fortschrittsbalken
-steht dann kurz „Der Schemastand wird nachgezogen".
+*Until August 2026 you had to restart the device by hand afterwards. Without the restart the
+exhibition looked right but took nothing in any more. That is fixed.*
 
-*Bis August 2026 musste man das Gerät hinterher von Hand neu starten. Ohne den Neustart sah die
-Ausstellung richtig aus, nahm aber nichts mehr an. Das ist behoben.*
+### When the backup is newer than the program
 
-### Wenn die Sicherung neuer ist als das Programm
+The other way round — a backup from a freshly updated device on one that has not been updated yet.
+Then **reading it back in breaks off** and tells you so:
 
-Der umgekehrte Fall — etwa eine Sicherung von einem frisch aktualisierten Gerät auf einem, das noch
-nicht aktualisiert wurde. Dann **bricht das Zurückspielen ab** und sagt Ihnen das:
+> This backup belongs to a newer version of the program. Please update the program first, then
+> read the backup in. Nothing on the device was changed.
 
-> Diese Sicherung gehört zu einer neueren Programmversion. Bitte erst das Programm aktualisieren,
-> dann die Sicherung einspielen. Auf dem Gerät wurde nichts verändert.
+**The collection on the device stays untouched** — nothing is half replaced. Tell somebody who can
+update the program; the same backup can be read in afterwards.
 
-**Der Bestand auf dem Gerät bleibt dabei unangetastet** — es wird nichts halb ersetzt. Sagen Sie
-jemandem Bescheid, der das Programm aktualisieren kann; danach lässt sich dieselbe Sicherung
-einspielen.
+## What to do when the screen stays black
 
-## Was tun, wenn der Bildschirm schwarz bleibt
+First: is the plug in, is the screen on? If so, a restart usually helps — switch the device off,
+wait ten seconds, switch it on again. After about twenty seconds the map should appear by itself.
 
-Zuerst: Steckt der Stecker, ist der Bildschirm an? Wenn ja, hilft meist ein Neustart — Gerät
-ausschalten, zehn Sekunden warten, wieder einschalten. Nach etwa zwanzig Sekunden sollte die Karte
-von allein erscheinen.
+**If the display only sticks without the screen being black**, there is a gentler way: Admin area
+→ **"Reload the display"** right at the bottom of the start page. It takes a moment and changes
+nothing in the collection. The same happens by itself as soon as the device is untouched for five
+minutes — so overnight it stands fresh again by morning anyway.
 
-**Hakt die Anzeige nur, ohne dass der Bildschirm schwarz ist**, geht es sanfter: Verwaltung →
-**„Anzeige neu laden"** ganz unten auf der Startseite. Das dauert einen Augenblick und ändert am
-Bestand nichts. Von allein passiert dasselbe, sobald das Gerät fünf Minuten unberührt bleibt —
-über Nacht steht es also morgens ohnehin frisch da.
-
-Bleibt es dabei, hilft nur jemand mit Zugang zum Gerät weiter. Was er wissen muss, steht in
-[operations.md](operations.md).
+If it stays that way, only somebody with access to the device can help further. What they need to
+know is in [operations.md](operations.md).

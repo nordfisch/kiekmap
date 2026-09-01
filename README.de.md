@@ -1,5 +1,5 @@
 <!-- translated-from: README.md -->
-<!-- source-sha: 4b8bae1d1393d2c64974a30b5001c6af5c3f65944b14ea919ce17032f80dee6e -->
+<!-- source-sha: 6225b2e4d48de1584d8475e68df28123ba8a0a9d50eebc15518962a305e383d8 -->
 # Kiekmap
 
 [![check](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml/badge.svg?branch=develop)](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml)
@@ -103,7 +103,7 @@ Verwaltung, Meldungen und Datumsbeschriftung um, ohne neuen Bau.
 Der Pi bootet direkt in die Karte — kein Login, kein Desktop, keine Bedienung nötig.
 Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in
 [docs/operations.md](docs/operations.md). Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen
-ist [docs/usermanual.md](docs/usermanual.md).
+ist [docs/usermanual.de.md](docs/usermanual.de.md).
 
 Woraus das System besteht und wie die Teile zusammenspielen, steht in
 [docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in

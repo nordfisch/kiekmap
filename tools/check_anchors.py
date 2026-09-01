@@ -38,6 +38,7 @@ DOCUMENTS = (
     "docs/development.md",
     "docs/licensing.md",
     "docs/operations.md",
+    "docs/usermanual.de.md",
     "docs/usermanual.md",
     "README.md",
     "CLAUDE.md",

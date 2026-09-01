@@ -284,9 +284,8 @@ Every `*.de.md` beside an English file of the same name carries the hash of that
 comments, and the check compares them.
 
 **The file names decide what is checked, not a list**, exactly as with the language rule. A
-`*.de.md` with no English neighbour is a German original: `history.de.md` is frozen,
-`usermanual.de.md` is a handout for the team in Holm and has no English reader. Neither can forget
-a marker it never needed.
+`*.de.md` with no English neighbour is a German original: `history.de.md` is frozen and takes
+no further entries. It cannot forget a marker it never needed.
 
 An HTML comment and not YAML front matter, although front matter is the usual carrier: GitHub
 renders front matter as a table at the top of the page, and these files are read in the repository

@@ -12,8 +12,8 @@ That is still true. Point 71 does not deny it -- it answers it with this script.
 **The file names decide what is checked, not a list.** ``operations.de.md`` beside
 ``operations.md`` is a pair, so the German half has to name the hash of the English one. A
 ``*.de.md`` with no English neighbour is a German original, and originals are not checked:
-``history.de.md`` is frozen, ``usermanual.de.md`` is a handout printed for the team in Holm and has
-no English reader. Neither can forget a marker it never needed.
+``history.de.md`` is frozen and takes no further entries. It cannot forget a marker it never
+needed.
 
 The marker is an HTML comment in the first lines:
 

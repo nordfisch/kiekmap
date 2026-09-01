@@ -61,10 +61,10 @@ name and an entry in the drift checker.
 **The file name carries the rule:** `operations.de.md` is German, `operations.md` is English. There
 is no list to keep.
 
-**The switch is under way, and the prose is what is left.** Twelve files still stand in German
-under an English name; they are listed in `IN_TRANSITION` in `tools/language_check.py`, and that
-list has to reach empty. A file in it is checked in neither language, so it is not a
-counter-example but a piece of open work — see
+**The switch is under way, and the prose is what is left.** What still stands in German under an
+English name is listed in `IN_TRANSITION` in `tools/language_check.py`, and that list has to reach
+empty. A file in it is checked in neither language, so it is not a counter-example but a piece of
+open work — see
 [issue #31](https://github.com/nordfisch/kiekmap/issues/31).
 
 **Rule of thumb for messages:** *Can it appear in the visitor view or the admin view? Then it comes

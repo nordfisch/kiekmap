@@ -3,7 +3,7 @@
 [![check](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml/badge.svg?branch=develop)](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml)
 [![Licence: Apache 2.0](https://img.shields.io/badge/Licence-Apache%202.0-blue.svg)](LICENSE)
 
-> **Deutsch:** [README.de.md](README.de.md) · [Benutzung](docs/usermanual.md) ·
+> **Deutsch:** [README.de.md](README.de.md) · [Benutzung](docs/usermanual.de.md) ·
 > [Betrieb](docs/operations.md) · [Übernahme](docs/adaption.md)
 
 Discover historic pictures of a village on a map, decade by decade. A touchscreen kiosk for a local
@@ -99,7 +99,7 @@ view, the admin area, the messages and the date labels, without a new build.
 
 The Pi boots straight into the map — no login, no desktop, nothing to operate. Setup, backup,
 restore and troubleshooting are in [docs/operations.md](docs/operations.md). The short guide to
-print out for the volunteers is [docs/usermanual.md](docs/usermanual.md), in German.
+print out for the volunteers is [docs/usermanual.de.md](docs/usermanual.de.md), in German.
 
 What the system is made of and how the parts fit together is in
 [docs/architecture.md](docs/architecture.md); why the technology was chosen this way, in

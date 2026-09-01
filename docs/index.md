@@ -11,12 +11,12 @@ ist deutsch; alles, was beim Arbeiten am Code gebraucht wird, englisch.
 
 | Datei | Frage | Für wen | Sprache |
 |---|---|---|---|
-| [usermanual.md](usermanual.md) | Wie füge ich Fotos hinzu und sichere den Bestand? | das Museumsteam, zum Ausdrucken | Deutsch |
+| [usermanual.de.md](usermanual.de.md) | Wie füge ich Fotos hinzu und sichere den Bestand? | das Museumsteam, zum Ausdrucken | Deutsch |
 | [operations.md](operations.md) | Wie richte ich den Pi ein, und was tue ich, wenn er nicht startet? | wer das Gerät am Laufen hält | Deutsch |
 | [adaption.md](adaption.md) | Wie richte ich das für **einen anderen Ort** ein? | ein zweites Museum | Deutsch |
 | [licensing.md](licensing.md) | Was darf weitergegeben werden, und unter welchen Bedingungen? | wer veröffentlicht oder übernimmt | Deutsch |
 
-`usermanual.md` ist die Bedienung, `operations.md` die Technik dahinter — sie trennen sich nach
+`usermanual.de.md` ist die Bedienung, `operations.md` die Technik dahinter — sie trennen sich nach
 Zuständigkeit, nicht nach Schwierigkeit. `adaption.md` und `licensing.md` richten sich an ein
 zweites Museum, das ein **eigenes** Gerät aufsetzt; dafür ist das Projekt gebaut.
 

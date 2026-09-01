@@ -80,7 +80,7 @@ Angabe bricht den Lauf ab.
 **Die Tabelle `places` ist die Stelle, die man übersieht.** Sie steht in `kiekmap.db` und damit in
 jeder Sicherung. Für den Museumsbetrieb folgenlos; wer die Datenbank an Dritte weitergibt, gibt
 ODbL-Material mit und muss es kenntlich machen. Derselbe Satz steht in
-[usermanual.md](usermanual.md).
+[usermanual.de.md](usermanual.de.md).
 
 ## Was **nicht** von der Lizenz erfasst ist
 
