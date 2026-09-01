@@ -6,6 +6,17 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 
 ### Added
 
+- **The device speaks German or English**, decided by `KIEKMAP_LANGUAGE` in the `.env`. It switches
+  the visitor view, the admin area, the messages, the import log, the date labels and the number
+  format. **No new build** — the frontend fetches the language at startup. An unknown value aborts
+  the start instead of falling back in silence. A museum that does not speak German no longer needs
+  a fork. See [point 73](docs/decisions.md)
+- **A documentation site**, [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/),
+  in both languages and built from the newest tag: the museum reads the documentation for the
+  version it runs. MkDocs Material, deployed by Actions. See [point 72](docs/decisions.md)
+- **`tools/check_translations.py`** — every German file carries the hash of the English text it was
+  made from, and the check reports what has drifted apart. It is the condition under which the
+  project keeps a text twice at all
 - **The repository is public** — `github.com/nordfisch/kiekmap`, Apache-2.0, with GitHub's private
   security reporting, branch protection for `main` and `develop`, secret scanning, and a badge in
   the README
@@ -32,12 +43,28 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **`tools/language_check.py` checks both sides** and every format, not only `.py`, `.ts` and
   `.tsx`: German documentation for transcribed umlauts, English documentation for German
   paragraphs, and the comments of CSS, Dockerfiles, shell scripts and configuration files
+- **The museum documentation is bilingual.** `usermanual`, `operations`, `adaption`, `licensing`,
+  `index`, the README and the CHANGELOG exist as an English original and a German translation.
+  Checking the German sources against the writing rules first turned up four errors, among them a
+  package count contradicting its own table and an instruction for a setting that no longer exists
+- **The CLI, the tools, the `Makefile`, `deploy/` and the workflows are English**, output included:
+  `dubletten` is `duplicates`, `--abstand` is `--distance`. The folders in the inbox are `_done`
+  and `_problem` in both languages — they are names in the file system, and a changed setting must
+  not have to rename folders
 - **`tools/check_anchors.py` reads `CLAUDE.md` and `CONTRIBUTING.md` as well**
 - **A count in front of a list is gone** wherever the list stands right below it. Four files said
   "five" and listed six; a number in prose goes stale in silence. See
   [point 59](docs/decisions.md)
 - **Vitest from 2 to 3.** Not for a feature: Vitest 2 brought its own old copies of `vite` and
   `esbuild`, and five of six Dependabot reports hung on those
+
+### Fixed
+
+- **The map credit was German in the English instance.** It stood hard-wired in the map style
+  instead of the text catalogue
+- **Twenty interface texts stayed German in the English instance**, because they were read at
+  module level before the language was resolved. A test now walks the sources with the TypeScript
+  parser and fails on any read outside a function
 
 ### Removed
 

@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: b9753082f2bb31c882d4255f987adc268fcec0f480fa9adf741cc8fef4d322b7 -->
+<!-- source-sha: d01c05d2094f90a60e9ccb9b2b6f4297d0d6a545a32f06d3c37991bc703c79fb -->
 
 # Änderungen
 
@@ -9,6 +9,17 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Hinzugefügt
 
+- **Das Gerät spricht Deutsch oder Englisch**, entschieden von `KIEKMAP_LANGUAGE` in der `.env`.
+  Umgestellt werden Besucheransicht, Verwaltung, Meldungen, Import-Protokoll, Datumsbeschriftung
+  und Zahlenformat. **Kein neuer Bau** — das Frontend holt die Sprache beim Start. Ein unbekannter
+  Wert bricht den Start ab, statt still zurückzufallen. Ein Museum, das kein Deutsch spricht,
+  braucht keinen Fork mehr. Siehe [Punkt 73](docs/decisions.md)
+- **Eine Doku-Website**, [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in
+  beiden Sprachen und gebaut vom neuesten Tag: Das Museum liest die Doku zu der Fassung, die es
+  betreibt. MkDocs Material, ausgeliefert über Actions. Siehe [Punkt 72](docs/decisions.md)
+- **`tools/check_translations.py`** — jede deutsche Datei trägt den Hash des englischen Textes, aus
+  dem sie entstand, und die Prüfung meldet, was auseinandergelaufen ist. Sie ist die Bedingung,
+  unter der das Projekt einen Text überhaupt zweimal führt
 - **Das Repo ist öffentlich** — `github.com/nordfisch/kiekmap`, Apache-2.0, dazu die private
   Sicherheitsmeldung bei GitHub, Branch-Schutz für `main` und `develop`, Secret-Scanning und ein
   Abzeichen im README
@@ -37,12 +48,29 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **`tools/language_check.py` prüft beide Seiten** und jedes Format, nicht nur `.py`, `.ts` und
   `.tsx`: deutsche Doku auf umschriebene Umlaute, englische auf deutsche Absätze, dazu die
   Kommentare von CSS, Dockerfiles, Shell-Skripten und Konfigurationsdateien
+- **Die Museumsdoku ist zweisprachig.** `usermanual`, `operations`, `adaption`, `licensing`,
+  `index`, README und CHANGELOG gibt es als englisches Original und deutsche Übersetzung. Die
+  Prüfung der deutschen Quellen gegen die Schreibregeln förderte vorher vier Fehler zutage,
+  darunter eine Paketzahl, die ihrer eigenen Tabelle widersprach, und eine Anleitung für eine
+  Einstellung, die es nicht mehr gibt
+- **CLI, Werkzeuge, `Makefile`, `deploy/` und die Workflows sind englisch**, Ausgabe eingeschlossen:
+  aus `dubletten` wird `duplicates`, aus `--abstand` wird `--distance`. Die Ordner im Eingang
+  heißen in beiden Sprachen `_done` und `_problem` — sie sind Namen im Dateisystem, und eine
+  geänderte Einstellung darf keine Ordner umbenennen müssen
 - **`tools/check_anchors.py` liest auch `CLAUDE.md` und `CONTRIBUTING.md`**
 - **Die Zahl vor einer Liste ist weg**, wo die Liste direkt darunter steht. Vier Dateien sagten
   „fünf" und zählten sechs auf; eine Zahl in Prosa altert still. Siehe
   [Punkt 59](docs/decisions.md)
 - **Vitest von 2 auf 3.** Nicht wegen einer Funktion: Vitest 2 brachte eigene, alte Kopien von
   `vite` und `esbuild` mit, und daran hingen fünf von sechs Dependabot-Meldungen
+
+### Behoben
+
+- **Die Kartenzuschreibung blieb in der englischen Instanz deutsch.** Sie stand fest verdrahtet im
+  Kartenstil statt im Textkatalog
+- **Zwanzig Oberflächentexte blieben in der englischen Instanz deutsch**, weil sie auf Modulebene
+  gelesen wurden, bevor die Sprache aufgelöst war. Ein Test geht die Quellen jetzt mit dem
+  TypeScript-Parser durch und schlägt bei jedem Zugriff außerhalb einer Funktion fehl
 
 ### Entfernt
 

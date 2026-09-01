@@ -1883,3 +1883,96 @@ language.
 
 **What point 68 keeps:** no Simplified Technical English, the writing rules for both languages,
 English commit messages from 30 August 2026, and `history` closed rather than translated.
+
+## 72. The documentation site is built from this repository, and from the newest tag
+
+Point 68 kept the museum documentation in the repository and left a documentation site as an
+option for later. Point 71 made that option necessary: two languages in one repository need
+somewhere to be delivered from, and a folder of `.md` files is not it.
+
+**Out of this repository, not a second one.** The drift checker needs both halves in view, and
+`make check` does not reach into a foreign repository. That is what the wiki failed at before
+(point 68), and nothing about it has changed.
+
+**From the newest tag, not from `develop`.** The museum reads the documentation for the version it
+is running. A site that ran ahead of the device would describe buttons that are not there yet,
+and the reader has no way to tell. `workflow_dispatch` builds a preview from any ref for whoever
+is working on the docs.
+
+**MkDocs Material with `mkdocs-static-i18n`, not GitHub's own build.** A branch plus `/docs` is the
+simple route and is not available: GitHub builds that with Jekyll, and Jekyll cannot do i18n there.
+The plugin needs one line — `docs_structure: suffix` reads the file name exactly as
+`language_check.py` does, so the suffix rule from point 71 carries the site as well and there is no
+second list.
+
+**No Crowdin and no Weblate.** Both have free licences for open source and can do exactly the right
+thing. For one target language and some 6,000 words they are too much apparatus, and the drift
+checker already answers the question they would answer. A third language changes that, and then
+Crowdin is the first choice.
+
+**`tools/mkdocs_hooks.py` exists because a link means two things.** `../LICENSE` and
+`usermanual.de.md` are correct in the repository and wrong on the site. Writing 61 absolute URLs
+into the markdown by hand, in two languages, and keeping them in step for ever was the
+alternative. The rule runs at build time instead, and the files stay readable where most people
+meet them.
+
+**`docs/archive/` is not published.** The history is a closed German record for whoever works on
+the project, and they are in the repository anyway. The directory name carries the exclusion, so
+nothing has to remember it.
+
+## 73. The interface is bilingual: one setting, two catalogues, resolved at startup
+
+`KIEKMAP_LANGUAGE` in the `.env`, where every other setting of the instance stands. The backend
+reads it directly; the frontend fetches it once through `GET /api/config`.
+
+**Not through a Vite variable**, although that would be simpler to build. Each language would then
+need its own build, and the principle of this project is that the device can be changed on the Pi
+without building anything. A wrong setting must cost a restart, not a toolchain.
+
+**Resolved once at startup, not through a React context.** The language is a property of the
+instance and never changes while the device runs. A context would also not work: eleven of the 31
+imports stand in modules that are not components, where no hook runs.
+
+**Typed modules instead of an i18n library.** `Texts = typeof de` in the frontend, frozen
+dataclasses in the backend. A missing key then breaks the build — `tsc` refuses, or the import
+raises `TypeError` — rather than showing a visitor an empty string. `i18next` brings lazy loading,
+ICU plural rules and runtime switching; a kiosk with two languages and a fixed setting needs none
+of them, and every dependency is one more thing that has to work offline.
+
+**The catalogue is the only place a screen text may live.** Two defects showed why. Twenty
+constants read the catalogue at module level, before the language was resolved, and stayed German
+in the English instance; `frontend/src/text/moduleLevel.test.ts` now walks the sources with the
+TypeScript parser and fails on any read outside a function. And the map credit stood hard-wired in
+`kiosk/mapStyle.ts` until 1 September 2026, for the simple reason that nobody thought of a map
+attribution as a text.
+
+**The language is a setting, not a choice for visitors.** The device stands in a museum and speaks
+that museum's language. A switch on the touchscreen would be one more thing to operate for
+visitors who are often elderly, and no relief.
+
+**What does not follow the setting** is named rather than left to chance: `_done` and `_problem`,
+`kiekmap-backup/` and the `status` of `/health`. The first three are names in the file system —
+were they to follow the language, changing it would have to rename folders on the device and on
+every stick already written. The last is a machine value the kiosk service reads.
+
+## 74. The date labels stay in the backend, and `adaption.md` said the opposite
+
+„1920er", „März 1932", „Jahr unbekannt" are built in `services/dates.py` and travel as finished
+strings. The frontend receives a label, not a date and a format.
+
+Until 31 August 2026 `adaption.md` named exactly this as the thing standing in the way of a second
+language, and recommended a fork to a museum that does not speak German. **That was right while the
+backend had no notion of language.** Point 73 removes the premise: `MONTH_NAMES` and „Jahr
+unbekannt" moved into the catalogue, and the setting reaches them like everything else.
+
+**Why the labels do not move to the frontend instead.** A dating here is an interval, not a point
+in time, and the label is a reading of that interval — „1920er" for a decade, a bare year for a
+year, „Jahr unbekannt" for the absence of one. Whoever formats it has to know the rule that
+produced it. Building it twice, once per client, is how the two readings drift apart; the same
+argument as for `t.map.markerLabel`, where one line has to serve the eye and the screen reader.
+
+**The map is the one thing the setting does not reach.** It labels its places in German whatever
+the setting says, because the label language is a property of the place and not of the reader — in
+Holm the street is called Mühlenweg in every language. For a museum outside the German-speaking
+area that is the wrong answer, and it is open work:
+[issue #33](https://github.com/nordfisch/kiekmap/issues/33).
