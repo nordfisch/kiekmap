@@ -39,7 +39,7 @@ is fixed.
 
 There is one maintainer, on the side. No response time is promised; a report will be read. What
 gets fixed appears afterwards in the [CHANGELOG](CHANGELOG.md) and, with the reasoning, in
-[history.de.md](docs/history.de.md).
+[history.de.md](docs/archive/history.de.md).
 
 ## Which version is maintained
 

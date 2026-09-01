@@ -17,7 +17,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   published from it. `operations.de.md` is German, `operations.md` is English — the file name
   carries the rule, so there is no list to keep. Issues, labels, commit messages from 30 August
   2026, and every test name are English. See [point 71](docs/decisions.md)
-- **`docs/history.de.md` is closed, and nothing succeeds it.** It ends on 25 August 2026 with
+- **`docs/archive/history.de.md` is closed, and nothing succeeds it.** It ends on 25 August 2026 with
   v0.8.0 and stays German. What the work teaches becomes a point in `decisions.md`; how it went
   stays in the commits and the closed issues
 - **The open items are GitHub issues**, `docs/backlog.md` is gone. The **number register** now sits
@@ -58,7 +58,7 @@ comes after that — see [issue #18](https://github.com/nordfisch/kiekmap/issues
 
 **This block is ordered by area, not by Added, Changed and Fixed.** Before 0.8.0 there was no
 version to change anything against; everything here is new. The steps it grew from are in
-[docs/history.de.md](docs/history.de.md) and in the commits. From 0.9.0 the three headings apply
+[docs/archive/history.de.md](docs/archive/history.de.md) and in the commits. From 0.9.0 the three headings apply
 again.
 
 ### Map and timeline

@@ -21,6 +21,6 @@ assignees: ''
 
 - [ ] The open issues — is it written down somewhere already?
 - [ ] `docs/decisions.md` — has the question been decided once before?
-- [ ] `docs/history.de.md` — has it been tried once before?
+- [ ] `docs/archive/history.de.md` — has it been tried once before?
 
 <!-- If so: please report it anyway, but with what the old reasoning did not know. -->

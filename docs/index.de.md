@@ -1,5 +1,5 @@
 <!-- translated-from: docs/index.md -->
-<!-- source-sha: cf9afd2ac5816814b9bae2068b7422dc6278553daa1890dab7cf150fac52e89e -->
+<!-- source-sha: 021e53654f2b1a5b2f7429cba2010d3c61701878953aa67fbff95dbf393b62e0 -->
 
 # Dokumentation
 
@@ -38,7 +38,7 @@ Museum, das ein **eigenes** Gerät aufsetzt; dafür ist das Projekt gebaut.
 | [architecture.md](architecture.md) | *Was* gibt es, und wie greift es ineinander? | wer einsteigt |
 | [development.md](development.md) | *Wie* arbeitet man daran? — Einrichtung, Sprachregelung, Tests, Fallstricke | Entwickler |
 | [decisions.md](decisions.md) | *Warum* ist es so und nicht anders? — jede Entscheidung mit Begründung | wer etwas ändern will |
-| [history.de.md](history.de.md) | *Wie* ist es dazu gekommen? — dazu das Nummernregister | wer wissen will, ob eine Idee schon einmal da war |
+| [archive/history.de.md](archive/history.de.md) | *Wie* ist es dazu gekommen? — dazu das Nummernregister | wer wissen will, ob eine Idee schon einmal da war |
 
 `decisions.md` liest man **vor** einer Änderung, `history.de.md` dann, wenn etwas unerklärlich
 aussieht. Die Historie ist deutsch, endet mit v0.8.0 und wird nicht fortgeschrieben: Was die Arbeit

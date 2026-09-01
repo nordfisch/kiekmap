@@ -1,11 +1,14 @@
 <!-- translated-from: README.md -->
-<!-- source-sha: 6225b2e4d48de1584d8475e68df28123ba8a0a9d50eebc15518962a305e383d8 -->
+<!-- source-sha: 75fd17916d7555effd10ccb5c3d09a6e7c02b855e24e88c8cd760aacbc45b585 -->
 
 # Kiekmap
 
 [![check](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml/badge.svg?branch=develop)](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml)
 [![Lizenz: Apache 2.0](https://img.shields.io/badge/Lizenz-Apache%202.0-blue.svg)](LICENSE)
 
+> **Dokumentation:** [nordfisch.github.io/kiekmap/de/](https://nordfisch.github.io/kiekmap/de/) —
+> die Dateien unter `docs/`, in beiden Sprachen, gebaut vom neuesten Tag.
+>
 > **In English:** [README.md](README.md) — das Repository ist englisch, diese Seite und die
 > Anleitungen unter [docs/](docs/) sind die deutschen Fassungen.
 
@@ -103,14 +106,15 @@ Verwaltung, Meldungen und Datumsbeschriftung um, ohne neuen Bau.
 
 Der Pi bootet direkt in die Karte — kein Login, kein Desktop, keine Bedienung nötig.
 Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in
-[docs/operations.de.md](docs/operations.de.md). Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen
-ist [docs/usermanual.de.md](docs/usermanual.de.md).
+[docs/operations.de.md](docs/operations.de.md). Die Kurzanleitung zum Ausdrucken für die
+Ehrenamtlichen ist [docs/usermanual.de.md](docs/usermanual.de.md).
 
 Woraus das System besteht und wie die Teile zusammenspielen, steht in
 [docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in
 [docs/decisions.md](docs/decisions.md); wie es dazu gekommen ist, in
-[docs/history.de.md](docs/history.de.md). Was noch offen ist, in den [Issues](https://github.com/nordfisch/kiekmap/issues).
-Welche Datei welche Frage beantwortet, sagt [docs/index.de.md](docs/index.de.md).
+[docs/archive/history.de.md](docs/archive/history.de.md). Was noch offen ist, in den
+[Issues](https://github.com/nordfisch/kiekmap/issues). Welche Datei welche Frage beantwortet, sagt
+[docs/index.de.md](docs/index.de.md).
 
 ## Mitwirken
 

@@ -2,7 +2,7 @@
 
 For people who work on Kiekmap. Why things are the way they are is in
 [decisions.md](decisions.md); what the system is made of is in
-[architecture.md](architecture.md); how it came about is in [history.de.md](history.de.md); what is
+[architecture.md](architecture.md); how it came about is in [archive/history.de.md](archive/history.de.md); what is
 still open is in the [issues](https://github.com/nordfisch/kiekmap/issues); how to work on it is here.
 
 ## Setup
@@ -73,7 +73,7 @@ watched for drift.
 | Title and body of a pull request | English |
 | Interface, messages in the visitor view and the admin view | **both**, by `KIEKMAP_LANGUAGE` |
 | `*.de.md` | German, kept as a translation |
-| [history.de.md](history.de.md) up to v0.8.0 | German, frozen |
+| [archive/history.de.md](archive/history.de.md) up to v0.8.0 | German, frozen |
 | Values from OSM (`kind`: `strasse`, `flur` …) | German, as delivered |
 
 **The file name carries the rule.** `operations.de.md` is German, `operations.md` is English.
@@ -108,6 +108,37 @@ German paragraphs in English documentation. Its `IN_TRANSITION` tuple holds what
 switch yet — a file that is half of each is checked in neither language. It was the progress bar
 of [issue #31](https://github.com/nordfisch/kiekmap/issues/31) and is empty again, kept for the
 next conversion.
+
+### The documentation site
+
+`mkdocs.yml` builds everything under `docs/` into
+[nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in both languages. The
+plugin is `mkdocs-static-i18n`, and its configuration is one line: `docs_structure: suffix`. It
+reads the file name exactly as `language_check.py` does — `operations.de.md` is the German half of
+`operations.md` — so there is no second list to keep in step.
+
+```bash
+pip install -r docs/requirements.txt
+mkdocs serve      # http://localhost:8000, both languages
+mkdocs build --strict
+```
+
+**`--strict` is the point of it.** A link that goes nowhere fails the build, and that catches what
+`check_anchors.py` cannot see: what becomes of a repository link once it is a web page.
+
+`tools/mkdocs_hooks.py` reconciles the two readings a link has. In the repository
+`../LICENSE` and `usermanual.de.md` are right; on the site the first is not a page at all and the
+second lives at `/kiekmap/de/usermanual/`. The hook rewrites both at build time, so the markdown
+stays correct for whoever reads it on GitHub — which is most people.
+
+**`docs/archive/` is not published.** The history is a closed German record of how the thing was
+built, and the directory name carries that: `exclude_docs` names the directory, not the file.
+Links into it become links to the repository, like `../LICENSE`.
+
+**The site builds from the newest tag**, not from `develop` — the museum reads the documentation
+for the version it is running. `.github/workflows/pages.yml` does that on a `v*` tag; a
+`workflow_dispatch` builds a preview from any ref, and a pull request touching the docs builds
+without deploying.
 
 ### The two catalogues
 
@@ -208,7 +239,7 @@ it here.
 example is meant to show: that a year beside a name is the archive's date and not the date of the
 shot does not depend on who the person was. On 21 August 2026, 87 occurrences in 15 files were
 replaced this way, and not one example lost its edge. The occasion is in
-[history.de.md](history.de.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), point 64, section 1.
+[archive/history.de.md](archive/history.de.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), point 64, section 1.
 
 **Some slipped through** and were caught up afterwards: a surname as an example of a misread
 archive entry, a house name in a comment, a photo title that is a person's name, and — found on
@@ -299,7 +330,7 @@ English first, German below a rule. A release has one text field and no language
 go into it.
 
 **`build_register.py` joined on 21 August 2026**, together with the register at the top of
-[history.de.md](history.de.md). It is really a generator — `make register` writes the table, `--check`
+[archive/history.de.md](archive/history.de.md). It is really a generator — `make register` writes the table, `--check`
 only says that it no longer matches. Both need the same promise: **every section of the history
 states its date in the first lines below its heading.** Whoever forgets learns about it at commit
 time, not half a year later at a table with holes.

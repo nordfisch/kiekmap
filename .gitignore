@@ -18,6 +18,9 @@
 
 # Python
 .venv/
+# The environment for the documentation site, built by `make docs-serve`, and what it builds.
+/.venv-docs/
+/site/
 __pycache__/
 *.py[cod]
 .pytest_cache/

@@ -1,11 +1,14 @@
 .DEFAULT_GOAL := help
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
         migrate revision seed seed-save empty lint docs-check notices notices-check check \
-        tiles places build prod \
+        tiles places build prod docs-serve docs-build \
         prod-mac prod-down clean
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
+# Its own environment, not the backend one: MkDocs never runs on the Pi and has no business in
+# the image's dependency tree.
+DOCS_VENV := .venv-docs
 PIP     := $(VENV)/bin/pip
 COMPOSE := docker compose -f deploy/docker-compose.yml --env-file .env
 
@@ -130,6 +133,21 @@ lint: $(VENV)  ## check the code style
 # Pure readers, therefore without venv and without node_modules -- python3 from the system is
 # enough. Together they need under a second, and that is exactly why they also hang in the git
 # hook under .githooks/. Why they are needed at all: docs/decisions.md, point 59.
+# --- the documentation site --------------------------------------------------
+
+$(DOCS_VENV): docs/requirements.txt
+	$(PYTHON) -m venv $(DOCS_VENV)
+	$(DOCS_VENV)/bin/pip install --quiet --upgrade pip
+	$(DOCS_VENV)/bin/pip install --quiet -r docs/requirements.txt
+	@touch $(DOCS_VENV)
+
+docs-serve: $(DOCS_VENV)  ## the documentation site at http://localhost:8001/kiekmap/
+	$(DOCS_VENV)/bin/mkdocs serve --dev-addr 127.0.0.1:8001
+
+# What the workflow does. --strict makes a link that goes nowhere a failed build.
+docs-build: $(DOCS_VENV)  ## build the site as the workflow does, strictly
+	$(DOCS_VENV)/bin/mkdocs build --strict
+
 docs-check:  ## language rule, links, settings, numbers, register, version, translations
 	@python3 tools/language_check.py
 	@python3 tools/check_anchors.py
@@ -139,10 +157,10 @@ docs-check:  ## language rule, links, settings, numbers, register, version, tran
 	@python3 tools/build_register.py --check
 	@python3 tools/set_version.py --check
 
-# The register at the start of docs/history.de.md. Generated instead of maintained, for the same
+# The register at the start of docs/archive/history.de.md. Generated instead of maintained, for the same
 # reason as the licence notices: ninety lines by hand are wrong within a month. See
 # docs/decisions.md.
-register:  ## rewrite the register in docs/history.de.md
+register:  ## rewrite the register in docs/archive/history.de.md
 	@python3 tools/build_register.py
 
 # One number, two files. The tag is not the source but has to match it -- a check against

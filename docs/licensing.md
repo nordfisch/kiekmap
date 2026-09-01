@@ -18,7 +18,7 @@ The licence text is **verbatim the one from apache.org** and is not touched. The
 `Copyright [yyyy] [name of copyright owner]` in its appendix is the template for file headers, not
 a field to fill in — the usual detection tools no longer recognise an altered text as Apache-2.0.
 
-## The four ways something goes out
+## The ways something goes out
 
 The obligations do not hang on the project but on **what somebody gets into their hands**:
 
@@ -28,6 +28,7 @@ The obligations do not hang on the project but on **what somebody gets into thei
 | **The container images** | plus 37 npm and 26 Python packages, fonts, icons | `THIRD-PARTY.txt` per image, the licence files under `basemaps/` |
 | **The update stick** | plus the map file and the place index | the ODbL notice as well |
 | **The screen in the museum** | the running map | "© OpenStreetMap contributors, ODbL" — at the bottom right |
+| **The documentation site** | the files under `docs/`, and MkDocs Material with them | the footer names both licences; nothing else travels |
 
 ## The dependencies, all permissive
 
@@ -119,7 +120,7 @@ Little follows from that for the legal position, and nothing surprising: what is
 by machine is no personal intellectual creation (§ 2 (2) UrhG) and is therefore not protected;
 what is protected is the work of selecting, arranging and editing. That work lies open in this
 repository — [decisions.md](decisions.md) holds the decisions with their reasons,
-[history.de.md](history.de.md) the cases where the first proposal was thrown out.
+[archive/history.de.md](archive/history.de.md) the cases where the first proposal was thrown out.
 
 In practice this means one thing: **do not overstate the claim.** The copyright line is right; a
 sentence saying every line is our own work would not be. Where individual lines do not reach the

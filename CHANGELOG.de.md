@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 28a649674cbb2c554beb39eeb51782b84336ff25f9342e57365899d17a61ebb6 -->
+<!-- source-sha: b9753082f2bb31c882d4255f987adc268fcec0f480fa9adf741cc8fef4d322b7 -->
 
 # Änderungen
 
@@ -21,7 +21,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   englisch — der Dateiname trägt die Regel, es gibt keine Liste zu pflegen. Issues, Labels,
   Commit-Nachrichten ab dem 30. August 2026 und jeder Testname sind englisch. Siehe
   [Punkt 71](docs/decisions.md)
-- **`docs/history.de.md` ist abgeschlossen, und eine Nachfolgerin gibt es nicht.** Sie endet am
+- **`docs/archive/history.de.md` ist abgeschlossen, und eine Nachfolgerin gibt es nicht.** Sie endet am
   25. August 2026 mit v0.8.0 und bleibt deutsch. Was die Arbeit lehrt, wird ein Punkt in
   `decisions.md`; wie sie verlief, steht in den Commits und den geschlossenen Issues
 - **Die offenen Punkte sind GitHub-Issues**, `docs/backlog.md` ist weg. Das **Nummernregister**
@@ -64,7 +64,7 @@ Die `1.0.0` wird danach vergeben — siehe
 
 **Dieser Block ist nach Bereichen geordnet, nicht nach Hinzugefügt, Geändert und Behoben.** Vor
 0.8.0 gab es keine Fassung, gegen die sich etwas geändert hätte; alles hier ist neu. Die Schritte,
-aus denen es entstand, stehen in [docs/history.de.md](docs/history.de.md) und in den Commits. Ab
+aus denen es entstand, stehen in [docs/archive/history.de.md](docs/archive/history.de.md) und in den Commits. Ab
 0.9.0 gelten wieder die drei Rubriken.
 
 ### Karte und Zeitleiste

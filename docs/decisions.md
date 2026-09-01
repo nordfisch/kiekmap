@@ -2,7 +2,7 @@
 
 Why things are the way they are. Every point names the **decision**, its **reason** and its
 **consequence**. What the program can do is in the [changelog](../CHANGELOG.md); how the work went
-is in the commits and the closed issues, and up to v0.8.0 in [history.de.md](history.de.md).
+is in the commits and the closed issues, and up to v0.8.0 in [archive/history.de.md](archive/history.de.md).
 
 **A lesson is kept as the decision it led to, not as a lesson.** Whatever the work teaches ends up
 here in one point with a short reason, or it stays where it happened — in a commit message, in an
@@ -1790,7 +1790,7 @@ instead of in it.
 requests, and the low numbers were used up by the first pull requests: „Punkt 15" could never become
 issue #15. The documentation cites points at over three hundred places, and one of the citing files
 is frozen. So the old numbering stays where it is, and
-[history.de.md](history.de.md#nummernregister) resolves it: the fourteen open points became issues #15 to
+[archive/history.de.md](archive/history.de.md#nummernregister) resolves it: the fourteen open points became issues #15 to
 #28, and every other number is described in that file under its date.
 
 **The register stands in the history, not in a file of its own.** That is where the numbers are

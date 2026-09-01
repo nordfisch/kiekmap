@@ -1,7 +1,7 @@
 # Documentation
 
-Each file in this folder answers a different question. Which one that is stands in the first column
-of the tables below; beside it, who the file is written for.
+Each file in this folder answers a different question. Which question that is stands in the first
+column of the tables below; beside it, who the file is written for.
 
 **The repository speaks English.** German is kept as a translation and carries the suffix to say
 so: `operations.de.md` is the German half of `operations.md`, and
@@ -34,7 +34,7 @@ a device of its **own**; that is what the project is built for.
 | [architecture.md](architecture.md) | *What* is there, and how does it fit together? | whoever is starting out |
 | [development.md](development.md) | *How* is it worked on? — setup, the language rule, tests, pitfalls | developers |
 | [decisions.md](decisions.md) | *Why* is it this way and not another? — every decision with its reason | whoever wants to change something |
-| [history.de.md](history.de.md) | *How* did it come about? — and the number register | whoever wants to know whether an idea has been here before |
+| [archive/history.de.md](archive/history.de.md) | *How* did it come about? — and the number register | whoever wants to know whether an idea has been here before |
 
 `decisions.md` is read **before** a change, `history.de.md` when something looks inexplicable. The
 history is German, ends with v0.8.0 and is not continued: what the work teaches becomes a decision,

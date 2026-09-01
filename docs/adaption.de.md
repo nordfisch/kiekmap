@@ -1,5 +1,5 @@
 <!-- translated-from: docs/adaption.md -->
-<!-- source-sha: a0951243bff648d92530dd9d0d90c52b872b9ae5922fc2f6d5b02ada4dce23d8 -->
+<!-- source-sha: 5a9ef920a264e043448810d0f8060a27d6c0d238644608a271692391600e57d6 -->
 
 # Kiekmap für einen anderen Ort oder eine andere Sprache
 
@@ -336,7 +336,7 @@ Besucher, die oft älter sind, und keine Erleichterung.
 | Ortsarten | `strasse`, `gebaeude`, `flur` … | Schlüssel aus `tiles/build-places.py`; angezeigt wird, was `t.location.kinds` daraus macht |
 | Straßen- und Ortsnamen | aus OpenStreetMap | ein Eigenname wird nicht übersetzt |
 | Ältere Einträge im Import-Protokoll | `ImportLog.message` | festgehalten, was das Gerät damals gesagt hat |
-| `*.de.md` und `docs/history.de.md` | Doku für Museum und Betrieb | als Übersetzung geführt, siehe [development.md](development.md#language) |
+| `*.de.md` und `docs/archive/history.de.md` | Doku für Museum und Betrieb | als Übersetzung geführt, siehe [development.md](development.md#language) |
 
 Die Ortsarten sind der einzige Fall, der nach einer Falle aussieht und keine ist: In der Datenbank
 stehen deutsche Schlüsselwörter, angezeigt wird die Übersetzung. `en.ts` bildet dieselben Schlüssel

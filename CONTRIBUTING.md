@@ -57,14 +57,14 @@ important ones:
 ## An idea or a bug
 
 First check the [open issues](https://github.com/nordfisch/kiekmap/issues) for the same thing, and
-[history.de.md](docs/history.de.md) for whether it has been tried before. Then open an issue; the
+[history.de.md](docs/archive/history.de.md) for whether it has been tried before. Then open an issue; the
 templates ask for what is needed. **Issues are written in English**, like everything else in the
 repository. Write in German if that is easier for you — nobody will send it back. The
 [discussions](https://github.com/nordfisch/kiekmap/discussions) take either language too.
 
 **The documentation cites older items as „Punkt N".** Those numbers are not issue numbers and
 cannot become them; the number register in
-[history.de.md](docs/history.de.md#nummernregister) resolves them.
+[history.de.md](docs/archive/history.de.md#nummernregister) resolves them.
 
 ## The path of a contribution
 

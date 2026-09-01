@@ -55,7 +55,7 @@ name and an entry in the drift checker.
 | Interface texts and every message that reaches a screen | **both**, by `KIEKMAP_LANGUAGE` — `frontend/src/text/`, `backend/app/text/` |
 | Names in the file system (`_done`, `kiekmap-backup/`) and `/health` | English, fixed in both languages |
 | `*.de.md` — `usermanual`, `operations`, `adaption`, `changelog` … | German, as a translation |
-| `docs/history.de.md` up to v0.8.0 | German, frozen |
+| `docs/archive/history.de.md` up to v0.8.0 | German, frozen |
 | Values in the database that come from OSM (`kind`: `strasse`, `flur` …) | German, as delivered |
 
 **The file name carries the rule:** `operations.de.md` is German, `operations.md` is English. There
@@ -105,7 +105,7 @@ tone.**
    information, it goes.
 8. No metaphors, no imagery, no exaggeration.
 
-**Two exceptions:** [docs/history.de.md](docs/history.de.md) is closed and keeps its tone. Test names
+**Two exceptions:** [docs/archive/history.de.md](docs/archive/history.de.md) is closed and keeps its tone. Test names
 stay long where precision demands it.
 
 No tool checks these rules. They work while writing and in review.
@@ -171,7 +171,7 @@ sprite URL that has to be absolute, `+` meaning addition in SQLite).
 **A finished item is recorded in two places, not nine:** what the program can do now goes into the
 [changelog](CHANGELOG.md), and the issue gets closed. If a decision came out of it, that becomes a
 new point in [docs/decisions.md](docs/decisions.md), with a short reason. How the work went is in
-the commit and the closed issue, and nowhere else — `docs/history.de.md` is closed and takes nothing
+the commit and the closed issue, and nowhere else — `docs/archive/history.de.md` is closed and takes nothing
 more.
 
 **Keep the audience in mind.** Visitors stand at a touchscreen, often elderly. Controls at least
@@ -220,7 +220,7 @@ language would cost and when splitting things up starts to pay off.
 ## State of things
 
 What is built is in the [changelog](CHANGELOG.md); how it came about and what turned out differently
-from the plan is in [docs/history.de.md](docs/history.de.md); what is open is in
+from the plan is in [docs/archive/history.de.md](docs/archive/history.de.md); what is open is in
 the [issues](https://github.com/nordfisch/kiekmap/issues). Only what you would **assume wrongly**
 while working is here.
 
@@ -243,7 +243,7 @@ for the `.env`. Without it the login says so in plain words instead of rejecting
 **Open work lives in the [issues](https://github.com/nordfisch/kiekmap/issues), not in a file.** The documentation cites older items as
 „Punkt N" — a numbering that ran to 66 and was never reissued. Those numbers are not issue numbers
 and cannot become them, because GitHub shares one counter with the pull requests. The number
-register in [docs/history.de.md](docs/history.de.md#nummernregister) resolves them, and
+register in [docs/archive/history.de.md](docs/archive/history.de.md#nummernregister) resolves them, and
 [docs/decisions.md](docs/decisions.md) point 69 says why.
 
 **What is no longer a backlog item but curation:** photos without a description, without a title,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Build the register at the top of ``docs/history.de.md`` -- one dated row per section.
+"""Build the register at the top of ``docs/archive/history.de.md`` -- one dated row per section.
 
     python3 tools/build_register.py            # write it
     python3 tools/build_register.py --check     # fail if it is out of date
@@ -35,7 +35,7 @@ from pathlib import Path
 from check_anchors import slug
 
 ROOT = Path(__file__).resolve().parent.parent
-HISTORY = ROOT / "docs" / "history.de.md"
+HISTORY = ROOT / "docs" / "archive" / "history.de.md"
 
 BEGIN = "<!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand ändern -->"
 END = "<!-- register:ende -->"
@@ -212,7 +212,7 @@ def main() -> int:
 
     if args.check:
         if wanted != text:
-            print("The register in docs/history.de.md is out of date: make register")
+            print("The register in docs/archive/history.de.md is out of date: make register")
             return 1
         print("The register is up to date.")
         return 0

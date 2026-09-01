@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #: had noticed, because until then nobody had linked into it or out of it by anchor.
 DOCUMENTS = (
     "docs/decisions.md",
-    "docs/history.de.md",
+    "docs/archive/history.de.md",
     "docs/index.de.md",
     "docs/index.md",
     "docs/architecture.md",

@@ -3,8 +3,11 @@
 [![check](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml/badge.svg?branch=develop)](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml)
 [![Licence: Apache 2.0](https://img.shields.io/badge/Licence-Apache%202.0-blue.svg)](LICENSE)
 
+> **Documentation:** [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/) — the
+> files under `docs/`, in both languages, built from the newest tag.
+>
 > **Deutsch:** [README.de.md](README.de.md) · [Benutzung](docs/usermanual.de.md) ·
-> [Betrieb](docs/operations.md) · [Übernahme](docs/adaption.md)
+> [Betrieb](docs/operations.de.md) · [Übernahme](docs/adaption.de.md)
 
 Discover historic pictures of a village on a map, decade by decade. A touchscreen kiosk for a local
 history museum: it runs offline on a Raspberry Pi, adapts to any place, and the visitors fill in
@@ -104,7 +107,7 @@ print out for the volunteers is [docs/usermanual.de.md](docs/usermanual.de.md), 
 What the system is made of and how the parts fit together is in
 [docs/architecture.md](docs/architecture.md); why the technology was chosen this way, in
 [docs/decisions.md](docs/decisions.md); how it came about, in
-[docs/history.de.md](docs/history.de.md), in German. What is still open is in the
+[docs/archive/history.de.md](docs/archive/history.de.md), in German. What is still open is in the
 [issues](https://github.com/nordfisch/kiekmap/issues). Which file answers which question is in
 [docs/index.md](docs/index.md).
 

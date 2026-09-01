@@ -10,8 +10,8 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 | Datei | Frage |
 |---|---|
 | [../CHANGELOG.md](../CHANGELOG.md) | *Was kann das Programm?* — sortiert nach Keep a Changelog |
-| [decisions.md](decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
-| [architecture.md](architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
+| [decisions.md](../decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
+| [architecture.md](../architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
 | **history.de.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
 | [Issues](https://github.com/nordfisch/kiekmap/issues) | *Was fehlt noch?* |
 
@@ -27,7 +27,7 @@ in den Commits, in den Pull Requests und in den geschlossenen Issues — dort en
 der Nuance. Vier Monate Arbeitstagebuch bleiben also, wie sie sind.
 
 **Eine Nachfolgerin gibt es nicht.** Was die Arbeit lehrt, wird ein Punkt in
-[decisions.md](decisions.md) mit kurzer Begründung; wie es verlief, steht in den Commits und den
+[decisions.md](../decisions.md) mit kurzer Begründung; wie es verlief, steht in den Commits und den
 geschlossenen Issues.
 
 Ein neuer Abschnitt hier macht `python3 tools/build_register.py --check` rot, weil das
@@ -40,7 +40,7 @@ Die Punktnummern des damaligen Backlogs. **„Punkt N" meint hier nie ein Issue.
 reicht bis 66, wurde nie neu vergeben und endete am 31. August 2026 mit dem Umzug in die
 [GitHub-Issues](https://github.com/nordfisch/kiekmap/issues). Zu Issue-Nummern konnten die Nummern
 nicht werden, weil GitHub einen Zähler mit den Pull Requests teilt; die Begründung steht in
-[decisions.md](decisions.md), Punkt 69.
+[decisions.md](../decisions.md), Punkt 69.
 
 ### Offen beim Abschluss — vierzehn Punkte
 
@@ -618,7 +618,7 @@ der Gesamtbestand, im Museum also ständig.
 zeigen den Ausschnitt. Damit verschwindet auch die Ursache dahinter: Vorher bedeutete dieselbe
 Stelle des Schiebers nach jedem Zoom ein anderes Jahr. Zusätzlich ist die Positionsrechnung auf
 0…1 geklammert — der bauliche Riegel, falls Achse und Auswahl je wieder auseinanderlaufen. Steht
-in [decisions.md](decisions.md), Punkt 14.
+in [decisions.md](../decisions.md), Punkt 14.
 
 ## 3. Jahrzehnte kommen aus dem Bestand
 
@@ -670,7 +670,7 @@ Fotos auf demselben Punkt werden seither **vor** dem Clustern zu einem Eintrag z
 supercluster sieht gar keine Dubletten mehr; der Stapel ist auf jeder Zoomstufe ein Marker, so
 dargestellt wie ein einzelnes Foto, mit einer Anzahl in der Ecke. Ein Tipp öffnet die
 Vollbildansicht mit zwei großen Blätterknöpfen. Das Denkmodell bleibt *ein Ort = ein Marker = die
-Fotos von dort*. Steht in [decisions.md](decisions.md), Punkt 15.
+Fotos von dort*. Steht in [decisions.md](../decisions.md), Punkt 15.
 
 Gruppiert wird auf fünf Nachkommastellen, rund einen Meter — das trifft den tatsächlichen Fall:
 Über die Ortssuche verortete Fotos tragen exakt dieselbe Koordinate der Straße. Wer den Punkt von
@@ -853,7 +853,7 @@ drittes Ziel bekommen. Der Grund ist derselbe wie überall in diesem Projekt: Be
 Aus „Verstecken" wurde „Löschen": derselbe Status unter dem Wort, unter dem das Museumsteam ihn
 sucht. Bedient wird es im Editor und in jeder Zeile der Fotoliste, beide mit Rückfrage; gelöschte
 Fotos zählen in keiner Kachel mehr mit und stehen in keiner Liste ausser „Gelöscht". Die
-Begründung steht als Punkt 16 in [decisions.md](decisions.md).
+Begründung steht als Punkt 16 in [decisions.md](../decisions.md).
 
 **Der eigentliche Fund war die Migration.** Sie benennt den Wert `hidden` in `deleted` um, und
 weil SQLite einen Check-Constraint nicht ändern kann, baut Alembic die Tabelle `photos` dazu neu:
@@ -1194,7 +1194,7 @@ Fläche an fester Stelle. Der Stick steht links, weil er die bessere Sicherung i
 Zwei Sätze stehen dabei bewusst auf dem Bildschirm und nicht nur in der Dokumentation. Der erste
 ordnet den Weg ein: Das Archiv ist nicht inkrementell, und ein abgebrochener Download ist
 wertlos — beides Eigenschaften, die genau die Begründung für „Ordner statt ZIP" waren
-([decisions.md](decisions.md), Punkt 11). Der zweite sagt, wie eine solche Datei wieder ins Gerät
+([decisions.md](../decisions.md), Punkt 11). Der zweite sagt, wie eine solche Datei wieder ins Gerät
 kommt; ohne ihn sähe die fehlende Rückrichtung wie ein Fehler aus.
 
 Am echten Bestand nachgemessen: 31 MB in 132 Stücken, entpackt 18 Fotos, 36 Vorschaubilder, eine
@@ -1469,7 +1469,7 @@ Erlaubnis, das Zeichen an jeden weiterzugeben, der ein Repo klont.
 
 Der Tausch selbst kostete eine Datei und keine Zeile Logik — weil im Code nirgends steht, was auf
 dem Bild zu sehen ist. Dieselbe Eigenschaft, die ein zweites Museum ohne Fork auskommen lässt, hat
-hier ein Rechtsproblem auf einen Dateitausch reduziert. Begründung: [decisions.md](decisions.md),
+hier ein Rechtsproblem auf einen Dateitausch reduziert. Begründung: [decisions.md](../decisions.md),
 Punkt 21.
 
 ### Der Rewrite: erst „später", nach einer Prüfung „sofort"
@@ -1528,7 +1528,7 @@ der Datei und beschrieb ihr eigenes Problem: Sie mischte auf 405 Zeilen Fehler, 
 Entscheidungsfragen und Ideen in einer Gliederung, die nur nach Bereich sortierte, und kein Punkt
 war zitierbar, weil es ihn nur unter seiner Überschrift gab.
 
-Was daraus wurde, steht in [decisions.md](decisions.md), Punkt 22: vier Arten, zwei Achsen, eine
+Was daraus wurde, steht in [decisions.md](../decisions.md), Punkt 22: vier Arten, zwei Achsen, eine
 Nummer je Punkt, alles in einer Übersichtstabelle am Dateianfang. Erwartet war Aufräumarbeit.
 Herausgekommen sind zwei Dinge, die die Datei vorher nicht gesagt hatte.
 
@@ -1730,7 +1730,7 @@ sähe nicht nach Fehler aus, sondern nach Befund.
 
 Also **nie feiner als die gröbste Datierung im Bestand**, dazu eine Breite, die in dreißig Balken
 passt. Heute ergibt das Jahresbalken, morgen Jahrzehnte — und der Umschwung kommt genau in dem
-Moment, in dem er muss. Begründung in [decisions.md](decisions.md), Punkt 25.
+Moment, in dem er muss. Begründung in [decisions.md](../decisions.md), Punkt 25.
 
 ### Zwei Fehler, die nur der laufende Kiosk zeigte
 
@@ -1927,7 +1927,7 @@ liegt.
 ## Die Straßenauswahl in der Adaptionsanleitung
 
 9. August 2026. Punkt 37, und der günstigste des Tages: reine Dokumentation. Die
-[adaption.md](adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Straßenauswahl
+[adaption.md](../adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Straßenauswahl
 kam dort seit dem 8. August nur als eine Zeile zu `streetChoice` vor, obwohl sie inzwischen der
 Hauptweg zur Verortung ist.
 
@@ -2325,7 +2325,7 @@ Die Frage war, welche Seite irrt. Beantwortet hat sie eine Abfrage von drei Zeil
 teilen ihre Koordinate mit einem anderen Foto**, an einem Punkt hängen 20 Fotos von vier
 verschiedenen Tagen. Sechs gleiche Nachkommastellen an vier Tagen liefert kein Empfänger. Die
 Werte sind eingetragen worden, nicht gemessen — es stand also nie Messung gegen Ablage, sondern
-eine Ablage gegen eine andere. Siehe [decisions.md](decisions.md), Punkt 34.
+eine Ablage gegen eine andere. Siehe [decisions.md](../decisions.md), Punkt 34.
 
 **Das ist beim Vorlegen aufgefallen, nicht beim Planen.** Der Plan hatte die Zahl 331 und den Satz
 „die GPS-Angabe ist echt"; beides war falsch, und beides stand schon im Plan, bevor jemand
@@ -2341,7 +2341,7 @@ das?".
 Der Grund stand in `NEEDS`: `location, date, housenumber`. Eine Frage wird erst erreicht, wenn die
 vor ihr **leer** ist — und 673 undatierte Fotos laufen nie leer. Die dritte Frage wäre nie
 gestellt worden, und der ganze Aufwand von Punkt 36 hätte brachgelegen. Die Reihenfolge ist
-umgedreht; die Begründung steht in [decisions.md](decisions.md), Punkt 35.
+umgedreht; die Begründung steht in [decisions.md](../decisions.md), Punkt 35.
 
 **Und die Reihenfolge liess sich vertauschen, ohne dass im Backend ein Test fiel.** Gemerkt hat es
 allein einer im Frontend, wo dieselbe Liste ein zweites Mal steht — genau die Doppelung, die sonst
@@ -2380,7 +2380,7 @@ Bild. Unter einem Hof des 19. Jahrhunderts hätte dann „P 35" gestanden.
 `provenance` ist das Feld dafür, und der Grund steht seit Stufe 8 im Docstring von `PhotoDetail`:
 Das öffentliche Schema hat kein Feld dafür, *damit* die Angabe nicht auf den Schirm im
 Ausstellungsraum gerät. Nachgeprüft nach dem Umräumen: `/api/photos/247` liefert 28 Felder, und
-keines davon enthält das Wort „Signatur". Siehe [decisions.md](decisions.md), Punkt 36.
+keines davon enthält das Wort „Signatur". Siehe [decisions.md](../decisions.md), Punkt 36.
 
 ### Zwei Anläufe, das Datieren zu automatisieren, und beide waren falsch
 
@@ -2401,7 +2401,7 @@ Regalnummern („P 37" -> 1937) und Hausnummern („Friedhofsweg 30" -> 1930) ni
 Am Ende: **52 datiert, 17 Vorschläge verworfen.** Und das Verworfene ist die teurere Hälfte der
 Entscheidung — ein verworfener Vorschlag kostet nichts, das Foto bleibt in „Wann war das?". Ein
 angenommener falscher macht das Foto datiert, nimmt es aus der Frage und legt es an die falsche
-Stelle der Zeitleiste, wo es niemand mehr ansieht. Siehe [decisions.md](decisions.md), Punkt 37.
+Stelle der Zeitleiste, wo es niemand mehr ansieht. Siehe [decisions.md](../decisions.md), Punkt 37.
 
 ### Was man am Ende sehen konnte
 
@@ -2459,7 +2459,7 @@ Jetzt stehen dort bis zu drei Knöpfe, und ein Tipp gibt Foto und Frage an den B
 Server lernte dafür einen `photo_id`-Parameter -- **einen Wunsch, keine Anweisung**: Er prüft ihn
 gegen dieselbe Bedingung wie jedes andere Foto und fällt sonst auf die Zufallswahl zurück. Alles
 danach ist der gewöhnliche Ablauf; `contribute()` blieb unangetastet. Siehe
-[decisions.md](decisions.md), Punkt 38.
+[decisions.md](../decisions.md), Punkt 38.
 
 ### Der Fund beim Abnehmen: seit zwei Tagen ging kein Beitrag mehr durch
 
@@ -2480,8 +2480,8 @@ Sicherung vom 5. August, also von vor der Migration. **Eine Sicherung bringt ihr
 `_swap_in` tauscht `kiekmap.db` im Ganzen aus, `_reopen_database` hängt das laufende Programm nur
 neu an sie. Migrationen laufen beim *Start*, und eine Wiederherstellung ist kein Start.
 
-Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](usermanual.md) als Einschränkung und
-in [operations.md](operations.md) mit Diagnose und Abhilfe -- samt dem umgekehrten, schlimmeren
+Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](../usermanual.md) als Einschränkung und
+in [operations.md](../operations.md) mit Diagnose und Abhilfe -- samt dem umgekehrten, schlimmeren
 Fall: Eine Sicherung, die *neuer* ist als das Programm, lässt das Gerät gar nicht erst hochkommen.
 
 Dass es niemandem auffiel, hat einen zweiten Grund, und der ist der unangenehmere: **Alles Prüfen
@@ -2620,7 +2620,7 @@ aussehend wie eine richtige Sicherung.
 
 Der Docstring von `find_drives` benannte diesen Fall bereits als den, den die Einhängeprüfung
 verhindern soll. Der Symlink war das Loch darin. Behoben in zwei Zeilen, festgehalten als
-[Punkt 40](decisions.md).
+[Punkt 40](../decisions.md).
 
 **Zwei Dinge daran sind das Aufschreiben wert.** Erstens: Der Fund kam aus dem Rest, den ich als
 ungeprüft stehengelassen hatte. Eine ehrlich benannte Lücke ist mehr wert als eine, die man
@@ -2683,7 +2683,7 @@ einstellbar. Aufgefallen ist das nicht mir, sondern dem Werkzeug, beim ersten La
 
 *15. August 2026.* Punkt 48. Der bisherige Name beschrieb, was das Programm tut; **Kiekmap** —
 plattdeutsch *kieken* — sagt, was es ist, und nennt dabei keinen Ort. Warum das keine Geschmacks-,
-sondern eine Bauentscheidung ist, steht als [Punkt 41](decisions.md) daneben: Das zweite Museum
+sondern eine Bauentscheidung ist, steht als [Punkt 41](../decisions.md) daneben: Das zweite Museum
 soll eine eigene `region.json` brauchen und keinen Fork, und ein Ortsname im Paket hätte dieser
 Zusage widersprochen, lange bevor jemand sie technisch verletzt.
 
@@ -2804,7 +2804,7 @@ Chromium nicht — ein Pixel entschied.
 Jetzt messen sich Wappen und Titel an der Breite ihrer eigenen Zelle (`cqi`), nicht am
 Ansichtsfenster. Es gibt keine Schwelle mehr, an der etwas kippen könnte, und über den ganzen
 Bereich von 1024 bis 2560 px bleiben 25 bis 56 Prozent Luft. Als
-[Punkt 43](decisions.md) festgehalten.
+[Punkt 43](../decisions.md) festgehalten.
 
 ### Der Prüfstein war nicht „Bilder aus", sondern der Ortsname
 
@@ -2852,7 +2852,7 @@ Bild, wo eben noch „Nächstes" stand.
 
 Jetzt sind sie senkrecht verankert und stehen waagerecht weiter mittig **unter dem Bild**. Nach dem
 Umbau: **0 px Sprung** bei jedem geprüften Format, und die Mitte der Knopfzeile liegt auf die
-Pixel genau auf der Bildmitte. Als [Punkt 44](decisions.md) festgehalten, samt der Regel dahinter:
+Pixel genau auf der Bildmitte. Als [Punkt 44](../decisions.md) festgehalten, samt der Regel dahinter:
 Was der Besucher trifft, steht still; was er ansieht, darf sich bewegen.
 
 Dass Bild und Text weiter **in einer Flucht** anfangen, ist dabei erhalten geblieben -- das war
@@ -2928,7 +2928,7 @@ für den die Frage gebaut wurde.
 
 Die Bedingung nennt jetzt, was sie meint -- auf der Karte, nicht schon hausgenau, Straßenname ohne
 Ziffer, Adressen im Ortsindex. **Die Frage wächst von 70 auf 116 Fotos, 46 kommen dazu, 30 davon
-mit bekanntem Jahr, keines fällt weg.** Als [Punkt 45](decisions.md) festgehalten.
+mit bekanntem Jahr, keines fällt weg.** Als [Punkt 45](../decisions.md) festgehalten.
 
 ### Der Test, der seinen eigenen Namen nicht hielt
 
@@ -3604,7 +3604,7 @@ Aufgefallen ist es **nicht beim Lesen, sondern beim Messen**: ein Absturzschalte
 „Timer gesetzt", direkt danach „unmount, Timer war 3". Nach dem Fangen baut React den Baum von
 Grund auf neu und nimmt die Fehlergrenze mit; das Aufräumen löschte also jedes Mal genau die
 Selbstheilung, um derentwillen es sie gibt. Warum der Zeitgeber jetzt stehen bleibt, steht als
-Punkt 57 in [decisions.md](decisions.md).
+Punkt 57 in [decisions.md](../decisions.md).
 
 Nachgemessen im Browser, nicht angesehen: `timeOrigin` der neu geladenen Seite minus dem Vermerk
 über den letzten Versuch ergab **8003 ms**, und der Navigationstyp war `reload`. Der zweite
@@ -3698,7 +3698,7 @@ liegen jetzt in `admin/format.ts`, mit der Tabelle oben als Kommentar, damit der
 
 Ihre Tests prüfen deshalb nicht, wie ein Datum in Berlin aussieht, sondern **was jede Form
 weglässt** — und laufen damit in jeder Zeitzone. Die Zone selbst ist seit
-[Punkt 58](decisions.md) kein Thema dieser Funktionen mehr.
+[Punkt 58](../decisions.md) kein Thema dieser Funktionen mehr.
 
 **Ein Backlogeintrag ist eine Notiz, kein Befund.** Beide Hälften dieses Punktes sahen beim
 Aufschreiben anders aus als beim Aufgreifen, und in beiden Fällen war das Nachsehen billiger als
@@ -3918,7 +3918,7 @@ jetzt ein Satz im Handbuch, in der Sprache, in der das Handbuch geschrieben ist.
 **Apache-2.0**, entschieden an §4.2: Das Projekt ist zum Übernehmen gebaut, und geänderte Dateien
 müssen als geändert gekennzeichnet sein — eine missratene Übernahme bleibt damit sichtbar eine
 Übernahme. Die Begründung samt der verworfenen Alternativen steht in
-[decisions.md](decisions.md), Punkt 62.
+[decisions.md](../decisions.md), Punkt 62.
 
 `tools/build_notices.py` erzeugt die Hinweisdateien und ist dabei dreimal an sich selbst
 gescheitert, jedes Mal an derselben Sorte Fehler: **eine Zeichenkette, die fast richtig zerlegt
@@ -4199,7 +4199,7 @@ Testnamen, und das Beispiel in CLAUDE.md, das eine umschriebene Meldung *zeigt* 
 
 ### Die Prüfung, die schon versprochen war
 
-Und hier der eigentliche Fund. In [development.md](development.md) steht seit Monaten, direkt
+Und hier der eigentliche Fund. In [development.md](../development.md) steht seit Monaten, direkt
 unter dem Absatz über Umlaute: *„Ob eine Datei sich daran hält, beantwortet
 `tools/language_check.py`."* **Das tat sie nicht.** Das Werkzeug las `.py`, `.ts` und `.tsx` und
 beantwortete eine andere Frage — in welcher Sprache ein Kommentar geschrieben ist. Die Umlautfrage
@@ -4288,7 +4288,7 @@ Auskunft über die Arbeitsumgebung. Kein Commit war signiert, kein Schlüssel la
 
 Beides ist an diesem Tag bereinigt worden, in zwei Rewrites: eine Identität für alle, und alle 188
 signiert, auch die aus der Zeit vor dem Schlüssel. Die Begründung dafür steht in
-[decisions.md](decisions.md), Punkt 67 — samt des Preises, den man kennen muss.
+[decisions.md](../decisions.md), Punkt 67 — samt des Preises, den man kennen muss.
 
 ### Der Rewrite hing nicht an der Dauer, sondern an einer Rückfrage
 
@@ -4310,7 +4310,7 @@ Gegenprobe läuft seither über jeden siebenstelligen Hash in `docs/`, `CHANGELO
 
 Zwei langlebige Zweige: `develop` für den Alltag, `main` für den Stand, der ausgeliefert ist. Das
 ist **nicht** GitHub Flow, auch wenn es so aussieht — die Begründung steht in
-[decisions.md](decisions.md), Punkt 66.
+[decisions.md](../decisions.md), Punkt 66.
 
 Darin stand zunächst „`feature/*` → `develop` per Rebase". **Der erste Pull Request hat das
 widerlegt.** Ein Rebase erzeugt die Commits neu, GitHub baut sie auf dem Server, und dort liegt
@@ -4478,7 +4478,7 @@ Zeitpunkt, der Scanner über jeden künftigen Push.
 Abbilder**. Ein Abbild aus `python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes
 Userland; wer es weitergibt, übernimmt dessen Pflichten. Wer die Dockerfiles veröffentlicht, lässt
 sie dort, wo sie hingehören. Der Weg über `abbilder.tar` bleibt für das eigene Gerät richtig — siehe
-[licensing.md](licensing.md).
+[licensing.md](../licensing.md).
 
 ### Womit Punkt 22 vollständig ist
 

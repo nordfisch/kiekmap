@@ -330,7 +330,7 @@ operate for visitors who are often elderly, and no relief.
 | Kinds of place | `strasse`, `gebaeude`, `flur` … | keys from `tiles/build-places.py`; what is shown is what `t.location.kinds` makes of them |
 | Street and place names | from OpenStreetMap | a proper name is not translated |
 | Older entries in the import log | `ImportLog.message` | a record of what the device said at the time |
-| `*.de.md` and `docs/history.de.md` | docs for the museum and for operation | kept as a translation, see [development.md](development.md#language) |
+| `*.de.md` and `docs/archive/history.de.md` | docs for the museum and for operation | kept as a translation, see [development.md](development.md#language) |
 
 The kinds of place are the one case that looks like a trap and is not: German keywords stand in the
 database, and the translation is what gets shown. `en.ts` maps the same keys onto `"Street"`,

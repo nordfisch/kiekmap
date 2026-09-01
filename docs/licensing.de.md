@@ -1,5 +1,5 @@
 <!-- translated-from: docs/licensing.md -->
-<!-- source-sha: 3408ba691d74637cdff1067e0ee482ee8630617785f2c39480737d2a2aaba206 -->
+<!-- source-sha: 714667e177249fc72553255bec21ad8739c5b0a31fd17c4994158e96d9201369 -->
 
 # Weitergabe
 
@@ -22,7 +22,7 @@ Der Lizenztext ist **wörtlich der von apache.org** und wird nicht angefasst. De
 Feld zum Ausfüllen — ein geänderter Text wird von den üblichen Erkennungswerkzeugen nicht mehr als
 Apache-2.0 erkannt.
 
-## Die vier Wege, auf denen etwas weggeht
+## Die Wege, auf denen etwas weggeht
 
 Die Pflichten hängen nicht am Projekt, sondern daran, **was jemand in die Hand bekommt**:
 
@@ -32,6 +32,7 @@ Die Pflichten hängen nicht am Projekt, sondern daran, **was jemand in die Hand 
 | **Die Container-Abbilder** | dazu 37 npm- und 26 Python-Pakete, Schriften, Symbole | `THIRD-PARTY.txt` je Abbild, die Lizenzdateien unter `basemaps/` |
 | **Der Update-Stick** | dazu Kartendatei und Ortsindex | zusätzlich der ODbL-Hinweis |
 | **Der Bildschirm im Museum** | die laufende Karte | „© OpenStreetMap-Mitwirkende, ODbL" — steht unten rechts |
+| **Die Doku-Website** | die Dateien unter `docs/`, dazu MkDocs Material | die Fußzeile nennt beide Lizenzen; sonst reist nichts mit |
 
 ## Die Abhängigkeiten, alle permissiv
 
@@ -124,7 +125,7 @@ Für die Rechtslage folgt daraus wenig und nichts Überraschendes: Rein maschine
 keine persönliche geistige Schöpfung (§ 2 Abs. 2 UrhG) und damit nicht geschützt; geschützt ist die
 Auswahl-, Anordnungs- und Bearbeitungsleistung. Die liegt in diesem Repo offen zutage — in
 [decisions.md](decisions.md) stehen die Entscheidungen mit ihren Begründungen, in
-[history.de.md](history.de.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
+[archive/history.de.md](archive/history.de.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
 
 Praktisch heißt das nur eines: **den Anspruch nicht übertreiben.** Die Copyright-Zeile ist
 richtig; ein Satz, jede Zeile sei eigenes Werk, wäre es nicht. Wo einzelne Zeilen keine
