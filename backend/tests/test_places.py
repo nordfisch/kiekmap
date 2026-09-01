@@ -1,16 +1,13 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
+"""Tests of the place index and the house numbers.
 
-"""Tests des Ortsindex und der Hausnummern.
+The core point: a street 800 m long gets one point. Without house numbers every photo of a street
+lies on top of every other, and "this is where it was" is off by up to 400 m.
 
-Der Kernpunkt: Eine Strasse von 800 m bekommt einen Punkt. Ohne Hausnummern liegen alle Fotos
-einer Strasse uebereinander, und "hier war das" ist um bis zu 400 m falsch.
+Two mistakes there happen silently:
 
-Zwei Fehler dabei passieren still:
-
-  1. Adressen verdraengen die Strassen aus der Trefferliste -- zwoelf Plaetze sind nach den
-     Hausnummern eines Muehlenwegs voll.
-  2. Hausnummern werden alphabetisch sortiert. Dann kommt die 10 vor der 9.
+  1. Addresses push the streets out of the hit list -- twelve slots are full after the house
+     numbers of one Muehlenweg.
+  2. House numbers are sorted alphabetically. Then the 10 comes before the 9.
 """
 
 import pytest
@@ -21,10 +18,10 @@ from app.services import places as place_service
 
 
 @pytest.fixture
-def ortsindex(session):
-    """Ein Ausschnitt aus Holm: zwei Strassen, eine davon mit Hausnummern."""
+def place_index(session):
+    """A section of Holm: two streets, one of them with house numbers."""
 
-    def anlegen(name, kind, lat=53.62, lon=9.676, street=None, housenumber=None):
+    def add(name, kind, lat=53.62, lon=9.676, street=None, housenumber=None):
         session.add(
             Place(
                 name=name,
@@ -37,41 +34,41 @@ def ortsindex(session):
             )
         )
 
-    anlegen("Muehlenweg", "strasse")
-    anlegen("Muehlenteich", "natur")
-    anlegen("Alte Muehlenstrasse", "strasse")
-    # Absichtlich in einer Reihenfolge, die alphabetisch falsch herauskaeme.
-    for nummer in ("9", "10", "1a", "2", "1", "12"):
-        anlegen(f"Muehlenweg {nummer}", "adresse", street="Muehlenweg", housenumber=nummer)
+    add("Muehlenweg", "strasse")
+    add("Muehlenteich", "natur")
+    add("Alte Muehlenstrasse", "strasse")
+    # Deliberately in an order that would come out wrong alphabetically.
+    for number in ("9", "10", "1a", "2", "1", "12"):
+        add(f"Muehlenweg {number}", "adresse", street="Muehlenweg", housenumber=number)
     session.commit()
     return session
 
 
-class TestFreieSuche:
-    def test_adressen_verdraengen_die_strassen_nicht(self, ortsindex):
-        """Der Grund fuer die zwei Schritte.
+class TestFreeSearch:
+    def test_addresses_do_not_push_out_the_streets(self, place_index):
+        """The reason for the two steps.
 
-        Ohne diese Regel waere die Liste nach den Hausnummern des Muehlenwegs voll -- und der
-        Muehlenteich, den jemand vielleicht meinte, faende sich nicht mehr darin.
+        Without this rule the list would be full of the house numbers of the Muehlenweg -- and the
+        Muehlenteich, which somebody may have meant, would no longer be in it.
         """
-        treffer = place_service.search(ortsindex, "muehlen")
+        hits = place_service.search(place_index, "muehlen")
 
-        arten = {ort.kind for ort in treffer}
-        assert "adresse" not in arten
-        assert {"Muehlenweg", "Muehlenteich", "Alte Muehlenstrasse"} <= {t.name for t in treffer}
+        kinds = {place.kind for place in hits}
+        assert "adresse" not in kinds
+        assert {"Muehlenweg", "Muehlenteich", "Alte Muehlenstrasse"} <= {hit.name for hit in hits}
 
-    def test_hausnummer_mit_ziffer_wird_direkt_gefunden(self, ortsindex):
-        """Wer die Nummer weiss, tippt sie."""
-        treffer = place_service.search(ortsindex, "muehlenweg 12")
+    def test_a_house_number_with_a_digit_is_found_directly(self, place_index):
+        """Whoever knows the number types it."""
+        hits = place_service.search(place_index, "muehlenweg 12")
 
-        assert [ort.name for ort in treffer] == ["Muehlenweg 12"]
+        assert [place.name for place in hits] == ["Muehlenweg 12"]
 
-    def test_strasse_steht_weiterhin_vor_der_natur(self, ortsindex):
-        treffer = place_service.search(ortsindex, "muehlen")
+    def test_a_street_still_comes_before_a_natural_feature(self, place_index):
+        hits = place_service.search(place_index, "muehlen")
 
-        assert treffer[0].name == "Muehlenweg"
+        assert hits[0].name == "Muehlenweg"
 
-    def test_umlaut_toleranz_gilt_auch_fuer_adressen(self, session):
+    def test_umlaut_tolerance_applies_to_addresses_too(self, session):
         session.add(
             Place(
                 name="Mühlenweg 12",
@@ -88,43 +85,47 @@ class TestFreieSuche:
         assert place_service.search(session, "muhlenweg 12")
 
 
-class TestHausnummern:
-    def test_werden_natuerlich_sortiert(self, ortsindex):
-        """Alphabetisch kaeme die 10 vor der 9 und die 1a vor der 2."""
-        strasse = next(
-            ort for ort in place_service.search(ortsindex, "muehlenweg") if ort.kind == "strasse"
+class TestHouseNumbers:
+    def test_are_sorted_naturally(self, place_index):
+        """Alphabetically the 10 would come before the 9 and the 1a before the 2."""
+        street = next(
+            place
+            for place in place_service.search(place_index, "muehlenweg")
+            if place.kind == "strasse"
         )
 
-        nummern = [ort.housenumber for ort in place_service.housenumbers(ortsindex, strasse)]
+        numbers = [place.housenumber for place in place_service.housenumbers(place_index, street)]
 
-        assert nummern == ["1", "1a", "2", "9", "10", "12"]
+        assert numbers == ["1", "1a", "2", "9", "10", "12"]
 
-    def test_sortierschluessel_kommt_ohne_zahl_aus(self):
-        # In OSM steht gelegentlich Unsinn im Feld. Absturz waere die schlechteste Antwort.
+    def test_the_sort_key_manages_without_a_number(self):
+        # OSM occasionally holds nonsense in the field. A crash would be the worst answer.
         assert place_service.sort_key("ohne") == (0, "ohne")
         assert place_service.sort_key("") == (0, "")
 
-    def test_strasse_ohne_hausnummern_bleibt_beantwortbar(self, ortsindex):
-        """Nicht jede Strasse ist in OpenStreetMap erfasst -- der Schritt entfaellt dann."""
-        andere = next(
-            ort for ort in place_service.search(ortsindex, "alte muehlen") if ort.kind == "strasse"
+    def test_a_street_without_house_numbers_stays_answerable(self, place_index):
+        """Not every street is recorded in OpenStreetMap -- the step is then skipped."""
+        other = next(
+            place
+            for place in place_service.search(place_index, "alte muehlen")
+            if place.kind == "strasse"
         )
 
-        assert place_service.housenumbers(ortsindex, andere) == []
+        assert place_service.housenumbers(place_index, other) == []
 
 
-class TestStrassenZurWahl:
-    """Die Strassen, die der Beitragsbereich als Knoepfe vorlegt.
+class TestStreetsOnOffer:
+    """The streets the contribution panel offers as buttons.
 
-    Sie ersetzen dort das Suchfeld -- ohne Tastatur ist es das einzige Bedienelement der
-    Besucheransicht, das nichts annimmt.
+    They replace the search field there -- without a keyboard it is the only control of the visitor
+    view that accepts nothing.
     """
 
     @pytest.fixture
-    def weitlaeufig(self, session):
-        """Zwei Strassen im Ort, eine im Nachbardorf sieben Kilometer weiter."""
+    def spread_out(self, session):
+        """Two streets in the village, one in the next one seven kilometres away."""
 
-        def anlegen(name, lat, lon):
+        def add(name, lat, lon):
             session.add(
                 Place(
                     name=name,
@@ -135,30 +136,30 @@ class TestStrassenZurWahl:
                 )
             )
 
-        anlegen("Zippelhornweg", 53.6205, 9.6762)
-        anlegen("Hauptstrasse", 53.6210, 9.6755)
-        anlegen("Ferner Deich", 53.5800, 9.7400)
+        add("Zippelhornweg", 53.6205, 9.6762)
+        add("Hauptstrasse", 53.6210, 9.6755)
+        add("Ferner Deich", 53.5800, 9.7400)
         session.commit()
         return session
 
-    def test_nimmt_die_ortsnaechsten(self, weitlaeufig):
-        gewaehlt = place_service.nearby_streets(weitlaeufig, (53.62053, 9.67601), limit=2)
+    def test_takes_the_ones_nearest_the_village(self, spread_out):
+        chosen = place_service.nearby_streets(spread_out, (53.62053, 9.67601), limit=2)
 
-        assert [ort.name for ort in gewaehlt] == ["Hauptstrasse", "Zippelhornweg"]
+        assert [place.name for place in chosen] == ["Hauptstrasse", "Zippelhornweg"]
 
-    def test_liefert_alphabetisch_und_nicht_nach_entfernung(self, weitlaeufig):
-        """Der Besucher sucht seine Strasse im Alphabet, nicht im Umkreis.
+    def test_returns_them_alphabetically_and_not_by_distance(self, spread_out):
+        """The visitor looks for their street in the alphabet, not in a radius.
 
-        Die Naehe entscheidet nur, *welche* Strassen dabei sind.
+        Nearness decides only *which* streets are there at all.
         """
-        gewaehlt = place_service.nearby_streets(weitlaeufig, (53.62053, 9.67601), limit=9)
+        chosen = place_service.nearby_streets(spread_out, (53.62053, 9.67601), limit=9)
 
-        assert [ort.name for ort in gewaehlt] == ["Ferner Deich", "Hauptstrasse", "Zippelhornweg"]
+        assert [place.name for place in chosen] == ["Ferner Deich", "Hauptstrasse", "Zippelhornweg"]
 
-    def test_umlaut_sortiert_wie_der_grundbuchstabe(self, session):
-        """Sonst stuende der Oelmuehlenweg hinter dem Z und bekaeme einen eigenen Knopf.
+    def test_an_umlaut_sorts_like_its_base_letter(self, session):
+        """Otherwise the Ölmühlenweg would stand behind the Z and get a button of its own.
 
-        In Holm gibt es keine solche Strasse -- beim zweiten Museum faellt es sonst still auf.
+        There is no such street in Holm -- at the second museum it would otherwise go unnoticed.
         """
         for name in ("Zwickauer Weg", "Ölmühlenweg", "Ostweg"):
             session.add(
@@ -172,53 +173,53 @@ class TestStrassenZurWahl:
             )
         session.commit()
 
-        gewaehlt = place_service.nearby_streets(session, (53.62, 9.676), limit=9)
+        chosen = place_service.nearby_streets(session, (53.62, 9.676), limit=9)
 
-        assert [ort.name for ort in gewaehlt] == ["Ölmühlenweg", "Ostweg", "Zwickauer Weg"]
+        assert [place.name for place in chosen] == ["Ölmühlenweg", "Ostweg", "Zwickauer Weg"]
 
-    def test_ohne_region_lieber_leer_als_beliebig(self, weitlaeufig):
-        """Ohne 'make tiles' gibt es keinen Mittelpunkt -- dann ist keine Strasse die naechste."""
-        assert place_service.nearby_streets(weitlaeufig, None, limit=9) == []
+    def test_without_a_region_rather_empty_than_arbitrary(self, spread_out):
+        """Without 'make tiles' there is no centre -- then no street is the nearest."""
+        assert place_service.nearby_streets(spread_out, None, limit=9) == []
 
 
-class TestUeberDieApi:
-    def test_hausnummern_ueber_die_nummer_der_strasse(self, client: TestClient, ortsindex):
-        strasse = place_service.search(ortsindex, "muehlenweg")[0]
+class TestThroughTheApi:
+    def test_house_numbers_by_the_number_of_the_street(self, client: TestClient, place_index):
+        street = place_service.search(place_index, "muehlenweg")[0]
 
-        daten = client.get(f"/api/places/{strasse.id}/housenumbers").json()
+        data = client.get(f"/api/places/{street.id}/housenumbers").json()
 
-        assert [eintrag["housenumber"] for eintrag in daten] == ["1", "1a", "2", "9", "10", "12"]
+        assert [entry["housenumber"] for entry in data] == ["1", "1a", "2", "9", "10", "12"]
 
-    def test_unbekannte_strasse(self, client: TestClient, ortsindex):
-        antwort = client.get("/api/places/9999/housenumbers")
+    def test_an_unknown_street(self, client: TestClient, place_index):
+        response = client.get("/api/places/9999/housenumbers")
 
-        assert antwort.status_code == 404
+        assert response.status_code == 404
 
-    def test_strassen_zur_wahl(self, client: TestClient, ortsindex, settings):
-        """'/streets' darf nicht als Ortsnummer gelesen werden -- daher stehen die Routen so."""
+    def test_streets_on_offer(self, client: TestClient, place_index, settings):
+        """'/streets' must not be read as a place id -- hence the order of the routes."""
         import json
 
         settings.region_file.write_text(
             json.dumps({"center": [9.676, 53.62], "streetChoice": 1}), encoding="utf-8"
         )
 
-        daten = client.get("/api/places/streets").json()
+        data = client.get("/api/places/streets").json()
 
-        assert [eintrag["name"] for eintrag in daten] == ["Alte Muehlenstrasse"]
-        assert daten[0]["accuracy_m"] == place_service.ACCURACY_STREET_M
+        assert [entry["name"] for entry in data] == ["Alte Muehlenstrasse"]
+        assert data[0]["accuracy_m"] == place_service.ACCURACY_STREET_M
 
-    def test_hausnummer_ist_genauer_als_die_strasse(self, client: TestClient, ortsindex):
-        """Die Genauigkeit reist mit -- der Kurator sieht spaeter, worauf Verlass ist."""
-        strasse = client.get("/api/places", params={"q": "muehlenweg"}).json()[0]
-        nummer = client.get("/api/places", params={"q": "muehlenweg 12"}).json()[0]
+    def test_a_house_number_is_more_precise_than_the_street(self, client: TestClient, place_index):
+        """The precision travels along -- the curator sees later what can be relied on."""
+        street = client.get("/api/places", params={"q": "muehlenweg"}).json()[0]
+        number = client.get("/api/places", params={"q": "muehlenweg 12"}).json()[0]
 
-        assert strasse["accuracy_m"] == place_service.ACCURACY_STREET_M
-        assert nummer["accuracy_m"] == place_service.ACCURACY_ADDRESS_M
-        assert nummer["accuracy_m"] < strasse["accuracy_m"]
+        assert street["accuracy_m"] == place_service.ACCURACY_STREET_M
+        assert number["accuracy_m"] == place_service.ACCURACY_ADDRESS_M
+        assert number["accuracy_m"] < street["accuracy_m"]
 
 
-class TestLaden:
-    def test_hausnummern_kommen_aus_der_datei_mit(self, session, settings):
+class TestLoading:
+    def test_house_numbers_come_along_from_the_file(self, session, settings):
         import json
 
         settings.places_file.write_text(
@@ -238,66 +239,67 @@ class TestLaden:
             encoding="utf-8",
         )
 
-        anzahl = place_service.load_from_file(session, settings.places_file)
+        count = place_service.load_from_file(session, settings.places_file)
 
-        assert anzahl == 2
-        adresse = place_service.search(session, "muehlenweg 12")[0]
-        assert (adresse.street, adresse.housenumber) == ("Muehlenweg", "12")
+        assert count == 2
+        address = place_service.search(session, "muehlenweg 12")[0]
+        assert (address.street, address.housenumber) == ("Muehlenweg", "12")
 
 
-class TestStrasseUnterIhremNamen:
-    """``street_named`` schlaegt exakt nach, ohne zu normalisieren.
+class TestStreetByItsName:
+    """``street_named`` looks up exactly, without normalising.
 
-    ``normalize()`` ist fuer das gedacht, was jemand tippt. Hier wird ein Wert nachgeschlagen, der
-    aus dem Ortsindex in ``photo.place_name`` **kopiert** wurde -- und derselbe String ist der Weg,
-    auf dem eine zurueckgenommene Nachschaerfung ihre Strassenmitte wiederfindet.
+    ``normalize()`` is meant for what somebody types. Here a value is looked up that was **copied**
+    out of the place index into ``photo.place_name`` -- and the same string is the path on which a
+    reverted refinement finds its street centre again.
     """
 
-    def test_findet_die_strasse_unter_ihrem_gespeicherten_namen(self, ortsindex):
-        gefunden = place_service.street_named(ortsindex, "Muehlenweg")
+    def test_finds_the_street_under_its_stored_name(self, place_index):
+        found = place_service.street_named(place_index, "Muehlenweg")
 
-        assert gefunden is not None
-        assert gefunden.kind == "strasse"
+        assert found is not None
+        assert found.kind == "strasse"
 
-    def test_findet_keine_adresse(self, ortsindex):
-        # Sonst liefe eine Ruecknahme auf einer Hausnummer statt auf der Strassenmitte auf.
-        assert place_service.street_named(ortsindex, "Muehlenweg 12") is None
+    def test_finds_no_address(self, place_index):
+        # Otherwise a revert would land on a house number instead of the street centre.
+        assert place_service.street_named(place_index, "Muehlenweg 12") is None
 
-    def test_normalisiert_nicht(self, ortsindex):
-        """Eine andere Schreibweise ist eine andere Strasse -- lieber nichts als das Falsche."""
-        assert place_service.street_named(ortsindex, "muehlenweg") is None
+    def test_does_not_normalise(self, place_index):
+        """A different spelling is a different street -- rather nothing than the wrong one."""
+        assert place_service.street_named(place_index, "muehlenweg") is None
 
 
-class TestVerschwundeneHausnummer:
-    """``address_near`` findet das Haus, dessen Nummer sich seit der Aufnahme geaendert hat.
+class TestAVanishedHouseNumber:
+    """``address_near`` finds the house whose number has changed since the photo was taken.
 
-    Neun Adressen des Erstbestands stehen so da: Das Archiv kennt "Schulstrasse 2", der Ortsindex
-    nur noch "2a", weil das Haus aufgeteilt wurde. Das ist Maschinenarbeit und keine Frage fuer den
-    Kiosk -- wo die frueher Schulstrasse 2 stand, weiss ein Besucher so wenig wie der Ortsindex.
+    Nine addresses of the initial collection stand like that: the archive knows "Schulstrasse 2",
+    the place index only "2a", because the house was split. That is machine work and no question
+    for the kiosk -- where the former Schulstrasse 2 stood, a visitor knows as little as the place
+    index does.
     """
 
-    def test_findet_die_nummer_mit_anderem_zusatz(self, ortsindex):
-        gefunden = place_service.address_near(ortsindex, "Muehlenweg", "1")
+    def test_finds_the_number_with_a_different_suffix(self, place_index):
+        found = place_service.address_near(place_index, "Muehlenweg", "1")
 
-        assert gefunden is not None
-        assert gefunden.housenumber == "1"
+        assert found is not None
+        assert found.housenumber == "1"
 
-    def test_nimmt_den_zusatz_wenn_die_blanke_zahl_fehlt(self, ortsindex):
-        """Der eigentliche Fall: gesucht "1b", im Index stehen nur "1" und "1a"."""
-        gefunden = place_service.address_near(ortsindex, "Muehlenweg", "1b")
+    def test_takes_the_suffix_when_the_bare_number_is_missing(self, place_index):
+        """The actual case: "1b" was asked for, the index holds only "1" and "1a"."""
+        found = place_service.address_near(place_index, "Muehlenweg", "1b")
 
-        assert gefunden is not None
-        # In Gehrichtung die erste mit fuehrender 1 -- "1" vor "1a", siehe sort_key.
-        assert gefunden.housenumber == "1"
+        assert found is not None
+        # Walking along, the first one beginning with 1 -- "1" before "1a", see sort_key.
+        assert found.housenumber == "1"
 
-    def test_findet_nichts_wenn_die_zahl_gar_nicht_vorkommt(self, ortsindex):
-        """Der stille Fehler, wenn diese Grenze fehlte.
+    def test_finds_nothing_when_the_number_does_not_occur_at_all(self, place_index):
+        """The silent error if this boundary were missing.
 
-        Schmidt-Isserstedt-Weg 4 liegt im Ortsindex zwischen 2 und 8. Wuerde hier irgendein
-        Nachbar genommen, saesse das Foto auf einem fremden Haus -- und behauptete danach 15 m
-        Genauigkeit, waere also nicht einmal mehr als ungenau erkennbar.
+        Schmidt-Isserstedt-Weg 4 lies in the place index between 2 and 8. If just any neighbour
+        were taken here, the photo would sit on somebody else's house -- and then claim 15 m of
+        precision, so it would not even be recognisable as imprecise any more.
         """
-        assert place_service.address_near(ortsindex, "Muehlenweg", "7") is None
+        assert place_service.address_near(place_index, "Muehlenweg", "7") is None
 
-    def test_eine_strasse_ohne_adressen_liefert_nichts(self, ortsindex):
-        assert place_service.address_near(ortsindex, "Alte Muehlenstrasse", "1") is None
+    def test_a_street_without_addresses_returns_nothing(self, place_index):
+        assert place_service.address_near(place_index, "Alte Muehlenstrasse", "1") is None

@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Picking a year: the decade first, then the year.
  *
@@ -19,7 +16,7 @@
 import { useState } from "react";
 
 import type { Precision } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { BackIcon, CheckIcon } from "./icons";
 
 export function DatePicker({

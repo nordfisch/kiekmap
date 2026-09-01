@@ -1,11 +1,8 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
+"""Tests of the arithmetic behind the place index.
 
-"""Tests fuer die Rechnung hinter dem Ortsindex.
-
-Die Zahlen stammen aus dem echten Fall: Im Ausschnitt fuer Holm liegen siebzehn Strassen namens
-"Hauptstrasse". Der Index fuehrte sie als eine und mittelte ihre Punkte -- der Vertreter lag
-danach 490 m von der naechsten echten Hauptstrasse entfernt und 2,26 km von Holms Ortsmitte.
+The numbers come from the real case: the extract for Holm holds seventeen streets called
+"Hauptstrasse". The index carried them as one and averaged their points -- the representative then
+lay 490 m from the nearest real Hauptstrasse and 2.26 km from the centre of Holm.
 """
 
 from itertools import pairwise
@@ -21,107 +18,107 @@ from geometry import (
     representative_point,
 )
 
-#: Holms Ortsmitte aus tiles/region.json, als (lat, lon).
+#: The centre of Holm from tiles/region.json, as (lat, lon).
 HOLM = (53.62053, 9.67601)
 
 
-class TestVertreterpunkt:
-    def test_gerade_strasse_wird_in_der_mitte_vertreten(self):
-        linie = [(53.620, 9.670), (53.620, 9.680)]
-        lat, lon = representative_point([linie])
+class TestTheRepresentativePoint:
+    def test_a_straight_street_is_represented_at_its_middle(self):
+        line = [(53.620, 9.670), (53.620, 9.680)]
+        lat, lon = representative_point([line])
         assert lat == pytest.approx(53.620, abs=1e-6)
         assert lon == pytest.approx(9.675, abs=1e-4)
 
-    def test_punkt_liegt_auf_der_strasse_und_nicht_daneben(self):
-        # Eine L-foermige Strasse. Der Schwerpunkt ihrer Stuetzpunkte liegt in der Ecke des
-        # umschliessenden Rechtecks -- also neben der Fahrbahn. Genau das war der Fehler.
-        linie = [(53.620, 9.670), (53.620, 9.680), (53.630, 9.680)]
-        punkt = representative_point([linie])
+    def test_the_point_lies_on_the_street_and_not_beside_it(self):
+        # An L-shaped street. The centroid of its vertices lies in the corner of the bounding
+        # box -- so beside the carriageway. That was exactly the error.
+        line = [(53.620, 9.670), (53.620, 9.680), (53.630, 9.680)]
+        point = representative_point([line])
 
-        abstand = min(_abstand_zur_strecke(punkt, a, b) for a, b in pairwise(linie))
-        assert abstand < 1.0, "der Vertreterpunkt muss auf dem Strassenverlauf liegen"
+        distance = min(_distance_to_segment(point, a, b) for a, b in pairwise(line))
+        assert distance < 1.0, "the representative point has to lie on the course of the street"
 
-    def test_lange_strasse_ohne_zwischenpunkte_endet_nicht_am_rand(self):
-        # Zwei Stuetzpunkte, ein Kilometer dazwischen. Wer nur unter den Stuetzpunkten sucht,
-        # landet an einem Ende -- deshalb wird auf die Strecke projiziert.
-        linie = [(53.615, 9.676), (53.624, 9.676)]
-        punkt = representative_point([linie])
-        assert distance_m(punkt, linie[0]) > 400
-        assert distance_m(punkt, linie[1]) > 400
+    def test_a_long_street_without_intermediate_points_does_not_end_at_an_edge(self):
+        # Two vertices, a kilometre apart. Searching only among the vertices lands at one end --
+        # which is why the point is projected onto the segment.
+        line = [(53.615, 9.676), (53.624, 9.676)]
+        point = representative_point([line])
+        assert distance_m(point, line[0]) > 400
+        assert distance_m(point, line[1]) > 400
 
-    def test_mehrere_stuecke_werden_zusammen_vertreten(self):
-        stueck_a = [(53.620, 9.670), (53.620, 9.675)]
-        stueck_b = [(53.620, 9.675), (53.620, 9.680)]
-        assert representative_point([stueck_a, stueck_b]) == pytest.approx(
+    def test_several_pieces_are_represented_together(self):
+        piece_a = [(53.620, 9.670), (53.620, 9.675)]
+        piece_b = [(53.620, 9.675), (53.620, 9.680)]
+        assert representative_point([piece_a, piece_b]) == pytest.approx(
             representative_point([[(53.620, 9.670), (53.620, 9.680)]]), abs=1e-4
         )
 
-    def test_ohne_punkte_wird_nicht_geraten(self):
+    def test_without_points_nothing_is_guessed(self):
         with pytest.raises(ValueError):
             representative_point([])
 
 
-class TestGruppieren:
-    def test_zwei_doerfer_ergeben_zwei_strassen(self):
-        # Der eigentliche Fehlerfall: gleicher Name, kilometerweit auseinander.
+class TestGrouping:
+    def test_two_villages_yield_two_streets(self):
+        # The actual failure case: the same name, kilometres apart.
         in_holm = [(53.6205, 9.6727), (53.6210, 9.6740)]
-        im_nachbarort = [(53.6550, 9.6582), (53.6555, 9.6590)]
-        assert len(group_lines([in_holm, im_nachbarort])) == 2
+        in_the_next_village = [(53.6550, 9.6582), (53.6555, 9.6590)]
+        assert len(group_lines([in_holm, in_the_next_village])) == 2
 
-    def test_anschliessende_stuecke_bleiben_eine_strasse(self):
-        # Aufeinanderfolgende Wegstuecke teilen ihren Endpunkt -- Abstand null.
-        erst = [(53.620, 9.670), (53.620, 9.675)]
-        dann = [(53.620, 9.675), (53.620, 9.680)]
-        assert len(group_lines([erst, dann])) == 1
+    def test_adjoining_pieces_stay_one_street(self):
+        # Consecutive way pieces share their end point -- distance zero.
+        first = [(53.620, 9.670), (53.620, 9.675)]
+        second = [(53.620, 9.675), (53.620, 9.680)]
+        assert len(group_lines([first, second])) == 1
 
-    def test_eine_lange_strasse_zerfaellt_nicht(self):
-        # Drei Stuecke, Anfang und Ende ueber einen Kilometer auseinander. Ohne die transitive
-        # Verkettung wuerde die Strasse in Teile zerfallen und jedes Teil einen Punkt bekommen.
-        stuecke = [
+    def test_a_long_street_does_not_fall_apart(self):
+        # Three pieces, start and end more than a kilometre apart. Without the transitive
+        # chaining the street would fall into parts and each part would get a point.
+        pieces = [
             [(53.615, 9.676), (53.618, 9.676)],
             [(53.618, 9.676), (53.621, 9.676)],
             [(53.621, 9.676), (53.624, 9.676)],
         ]
-        gruppen = group_lines(stuecke)
-        assert len(gruppen) == 1
-        assert sorted(gruppen[0]) == [0, 1, 2]
+        groups = group_lines(pieces)
+        assert len(groups) == 1
+        assert sorted(groups[0]) == [0, 1, 2]
 
-    def test_reihenfolge_der_stuecke_aendert_nichts(self):
-        stuecke = [
+    def test_the_order_of_the_pieces_changes_nothing(self):
+        pieces = [
             [(53.621, 9.676), (53.624, 9.676)],
             [(53.6550, 9.6582), (53.6555, 9.6590)],
             [(53.618, 9.676), (53.621, 9.676)],
         ]
-        gruppen = sorted(sorted(g) for g in group_lines(stuecke))
-        assert gruppen == [[0, 2], [1]]
+        groups = sorted(sorted(g) for g in group_lines(pieces))
+        assert groups == [[0, 2], [1]]
 
 
-class TestNaechsteGruppe:
-    def test_die_strasse_im_museumsort_gewinnt(self):
-        # Aus dem echten Bestand: Holms Hauptstrasse liegt 0,2 km von der Ortsmitte, die
-        # groesste gleichnamige Gruppe 2,0 km entfernt in einem Nachbarort. Die Mehrheit der
-        # Hausnummern entscheidet also gerade nicht -- die Naehe zum Ort entscheidet.
-        kandidaten = [(53.6304, 9.6498), (53.6205, 9.6727), (53.6111, 9.6305)]
-        assert nearest_group(kandidaten, HOLM) == 1
+class TestTheNearestGroup:
+    def test_the_street_in_the_museums_village_wins(self):
+        # From the real collection: Holm's Hauptstrasse lies 0.2 km from the village centre, the
+        # largest group of the same name 2.0 km away in a neighbouring village. So the majority of
+        # house numbers is precisely not what decides -- nearness to the village decides.
+        candidates = [(53.6304, 9.6498), (53.6205, 9.6727), (53.6111, 9.6305)]
+        assert nearest_group(candidates, HOLM) == 1
 
-    def test_der_gemittelte_punkt_haette_verloren(self):
-        # Der alte Wert: der Durchschnitt aller siebzehn Hauptstrassen. Er liegt weiter von Holm
-        # entfernt als Holms eigene Hauptstrasse -- der Beleg, dass Mitteln der falsche Griff war.
-        gemittelt = (53.6405036, 9.669539)
+    def test_the_averaged_point_would_have_lost(self):
+        # The old value: the average of all seventeen Hauptstrassen. It lies further from Holm
+        # than Holm's own Hauptstrasse -- the proof that averaging was the wrong move.
+        averaged = (53.6405036, 9.669539)
         in_holm = (53.6205, 9.6727)
-        assert distance_m(gemittelt, HOLM) > distance_m(in_holm, HOLM)
-        assert distance_m(gemittelt, HOLM) == pytest.approx(2260, abs=150)
+        assert distance_m(averaged, HOLM) > distance_m(in_holm, HOLM)
+        assert distance_m(averaged, HOLM) == pytest.approx(2260, abs=150)
 
-    def test_ohne_kandidaten_wird_nicht_geraten(self):
+    def test_without_candidates_nothing_is_guessed(self):
         with pytest.raises(ValueError):
             nearest_group([], HOLM)
 
 
-class TestHausnummern:
-    def test_gehreihenfolge_statt_alphabet(self):
-        # Alphabetisch kaeme "10" vor "9" und "1a" vor "2" -- der klassische stille Fehler.
-        adressen = [(n, (53.62, 9.67)) for n in ["10", "1a", "2", "9", "1", "12"]]
-        assert [n for n, _ in by_housenumber(adressen)] == [
+class TestHouseNumbers:
+    def test_walking_order_instead_of_the_alphabet(self):
+        # Alphabetically "10" would come before "9" and "1a" before "2" -- the classic silent error.
+        addresses = [(n, (53.62, 9.67)) for n in ["10", "1a", "2", "9", "1", "12"]]
+        assert [n for n, _ in by_housenumber(addresses)] == [
             "1",
             "1a",
             "2",
@@ -130,51 +127,51 @@ class TestHausnummern:
             "12",
         ]
 
-    def test_median_housenumber_vertritt_die_strasse(self):
-        adressen = [
+    def test_median_housenumber_represents_the_street(self):
+        addresses = [
             ("1", (53.620, 9.670)),
             ("3", (53.620, 9.672)),
             ("5", (53.620, 9.674)),
         ]
-        assert median_housenumber(adressen) == (53.620, 9.672)
+        assert median_housenumber(addresses) == (53.620, 9.672)
 
-    def test_reihenfolge_der_eingabe_aendert_die_mitte_nicht(self):
-        adressen = [("9", (53.62, 9.679)), ("1", (53.62, 9.671)), ("5", (53.62, 9.675))]
-        assert median_housenumber(adressen) == (53.62, 9.675)
-        assert median_housenumber(list(reversed(adressen))) == (53.62, 9.675)
+    def test_the_input_order_does_not_change_the_middle(self):
+        addresses = [("9", (53.62, 9.679)), ("1", (53.62, 9.671)), ("5", (53.62, 9.675))]
+        assert median_housenumber(addresses) == (53.62, 9.675)
+        assert median_housenumber(list(reversed(addresses))) == (53.62, 9.675)
 
-    def test_bei_gerader_anzahl_gewinnt_die_kleinere(self):
-        adressen = [("1", (53.62, 9.671)), ("2", (53.62, 9.672))]
-        assert median_housenumber(adressen) == (53.62, 9.671)
+    def test_with_an_even_count_the_smaller_one_wins(self):
+        addresses = [("1", (53.62, 9.671)), ("2", (53.62, 9.672))]
+        assert median_housenumber(addresses) == (53.62, 9.671)
 
-    def test_lowest_housenumber_ignoriert_die_lage_in_der_liste(self):
-        adressen = [
+    def test_lowest_housenumber_ignores_the_position_in_the_list(self):
+        addresses = [
             ("12", (53.62, 9.679)),
             ("1a", (53.62, 9.671)),
             ("1", (53.62, 9.670)),
         ]
-        assert lowest_housenumber(adressen) == (53.62, 9.670)
+        assert lowest_housenumber(addresses) == (53.62, 9.670)
 
-    def test_die_hausnummer_eins_entscheidet_zwischen_zwei_doerfern(self):
-        # Der Fall, um den es geht: zwei "Hauptstrassen". Die im Nachbarort ist laenger und ihre
-        # Mitte zufaellig naeher am Museumsort -- ihre Nummer 1 aber nicht.
+    def test_house_number_one_decides_between_two_villages(self):
+        # The case at issue: two "Hauptstrassen". The one in the neighbouring village is longer
+        # and its middle happens to be nearer the museum's village -- its number 1 is not.
         in_holm = [("1", (53.6205, 9.6727)), ("40", (53.6180, 9.6690))]
-        im_nachbarort = [("1", (53.6550, 9.6582)), ("2", (53.6300, 9.6600))]
-        kandidaten = [
+        in_the_next_village = [("1", (53.6550, 9.6582)), ("2", (53.6300, 9.6600))]
+        candidates = [
             lowest_housenumber(in_holm),
-            lowest_housenumber(im_nachbarort),
+            lowest_housenumber(in_the_next_village),
         ]
-        assert nearest_group(kandidaten, HOLM) == 0
+        assert nearest_group(candidates, HOLM) == 0
 
-    def test_ohne_adressen_wird_nicht_geraten(self):
+    def test_without_addresses_nothing_is_guessed(self):
         with pytest.raises(ValueError):
             median_housenumber([])
         with pytest.raises(ValueError):
             lowest_housenumber([])
 
 
-def _abstand_zur_strecke(punkt, anfang, ende):
-    """Nur fuer den Test: liegt der Punkt wirklich auf der Strecke?"""
+def _distance_to_segment(point, start, end):
+    """For the test only: does the point really lie on the segment?"""
     from geometry import _nearest_on_segment
 
-    return distance_m(punkt, _nearest_on_segment(anfang, ende, punkt))
+    return distance_m(point, _nearest_on_segment(start, end, point))

@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """The same backup, as one file -- built while it is being sent.
 
 The second route out of the collection: a download through the browser, for when no stick is at
@@ -95,7 +92,7 @@ def _add_to_archive(
 
 
 def archive_name(settings: Settings) -> str:
-    """``kiekmap-sicherung-holm-2026-08-03.zip``.
+    """``kiekmap-backup-holm-2026-08-03.zip``.
 
     Plain ASCII: it travels in an HTTP header and lands as a file name on somebody's computer.
 

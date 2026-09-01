@@ -1,46 +1,45 @@
 #!/usr/bin/env bash
 #
-# Baut alles, was die Karte offline braucht:
+# Builds everything the map needs offline:
 #
-#   frontend/public/tiles/map.pmtiles   Vektorkacheln der Region (eine Datei)
-#   frontend/public/tiles/region.json   Kopie der Regionsdefinition, zur Laufzeit geholt
-#   frontend/public/basemaps/fonts/     Beschriftungen
-#   frontend/public/basemaps/sprites/   Symbole
+#   frontend/public/tiles/map.pmtiles   vector tiles of the region (one file)
+#   frontend/public/tiles/region.json   copy of the region definition, fetched at runtime
+#   frontend/public/basemaps/fonts/     labels
+#   frontend/public/basemaps/sprites/   sprites
 #
-# Die Schriften und Symbole sind der Punkt, an dem eine Offline-Karte sonst still zerbricht: der
-# Protomaps-Stil verweist standardmaessig auf protomaps.github.io. Kacheln kaemen dann lokal,
-# Beschriftungen aber gar nicht -- und das faellt erst auf, wenn das Geraet im Museum steht.
+# The fonts and sprites are where an offline map otherwise breaks silently: the Protomaps style
+# points at protomaps.github.io by default. Tiles would then come locally, labels not at all --
+# and that shows only once the device stands in the museum.
 #
-# Laeuft auf dem Entwicklungsrechner mit Internet, nicht auf dem Pi. Auf den Pi kommt nur das
-# Ergebnis.
+# Runs on the development machine with internet, not on the Pi. Only the result goes to the Pi.
 
 set -euo pipefail
 
-WURZEL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REGION="$WURZEL/tiles/region.json"
-ZIEL="$WURZEL/frontend/public"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REGION="$ROOT/tiles/region.json"
+TARGET="$ROOT/frontend/public"
 
 ASSETS_URL="https://github.com/protomaps/basemaps-assets/archive/refs/heads/main.zip"
 
-rot()  { printf '\033[31m%s\033[0m\n' "$*" >&2; }
+red()  { printf '\033[31m%s\033[0m\n' "$*" >&2; }
 info() { printf '\033[36m%s\033[0m\n' "$*"; }
 
-# --- Voraussetzungen --------------------------------------------------------
+# --- prerequisites ----------------------------------------------------------
 
 if ! command -v pmtiles >/dev/null 2>&1; then
-  rot "Das Kommando 'pmtiles' fehlt."
-  rot ""
-  rot "  brew install pmtiles"
-  rot ""
-  rot "Alternativ von https://github.com/protomaps/go-pmtiles/releases herunterladen."
+  red "The command 'pmtiles' is missing."
+  red ""
+  red "  brew install pmtiles"
+  red ""
+  red "Or download it from https://github.com/protomaps/go-pmtiles/releases."
   exit 1
 fi
 
-for werkzeug in python3 curl unzip; do
-  command -v "$werkzeug" >/dev/null 2>&1 || { rot "Das Kommando '$werkzeug' fehlt."; exit 1; }
+for tool in python3 curl unzip; do
+  command -v "$tool" >/dev/null 2>&1 || { red "The command '$tool' is missing."; exit 1; }
 done
 
-# --- Region einlesen --------------------------------------------------------
+# --- reading the region -----------------------------------------------------
 
 eval "$(python3 - "$REGION" <<'PY'
 import json, shlex, sys
@@ -48,76 +47,76 @@ import json, shlex, sys
 region = json.load(open(sys.argv[1]))
 min_lon, min_lat, max_lon, max_lat = region["bbox"]
 
-# Etwas Rand um den Ausschnitt herum. Die bbox ist zugleich die Grenze, ueber die hinaus die Karte
-# nicht geschoben werden kann -- ohne Rand liefe der Besucher am Anschlag gegen eine graue Flaeche.
-RAND = 0.10
-pad_lon = (max_lon - min_lon) * RAND
-pad_lat = (max_lat - min_lat) * RAND
-gepolstert = (min_lon - pad_lon, min_lat - pad_lat, max_lon + pad_lon, max_lat + pad_lat)
+# A little margin around the extent. The bbox is at the same time the boundary beyond which the
+# map cannot be pushed -- without a margin the visitor would run against a grey surface at the end.
+MARGIN = 0.10
+pad_lon = (max_lon - min_lon) * MARGIN
+pad_lat = (max_lat - min_lat) * MARGIN
+padded = (min_lon - pad_lon, min_lat - pad_lat, max_lon + pad_lon, max_lat + pad_lat)
 
 print(f"NAME={shlex.quote(region['name'])}")
-print(f"BBOX={shlex.quote(','.join(f'{x:.5f}' for x in gepolstert))}")
+print(f"BBOX={shlex.quote(','.join(f'{x:.5f}' for x in padded))}")
 print(f"MAXZOOM={shlex.quote(str(region['maxZoom']))}")
 PY
 )"
 
-if [ "$NAME" = "PLATZHALTER" ]; then
-  rot "tiles/region.json enthaelt noch den Platzhalter."
-  rot "Bitte Name und bbox des Museumsorts eintragen, dann erneut ausfuehren."
+if [ "$NAME" = "PLACEHOLDER" ]; then
+  red "tiles/region.json still holds the placeholder."
+  red "Please enter the name and bbox of the museum's place, then run it again."
   exit 1
 fi
 
 info "Region: $NAME"
-info "Ausschnitt: $BBOX  (bis Zoom $MAXZOOM)"
+info "Extent: $BBOX  (up to zoom $MAXZOOM)"
 
-mkdir -p "$ZIEL/tiles" "$ZIEL/basemaps"
+mkdir -p "$TARGET/tiles" "$TARGET/basemaps"
 
-# --- Kacheln ----------------------------------------------------------------
+# --- tiles ------------------------------------------------------------------
 #
-# Aus dem oeffentlichen Protomaps-Tagesbuild wird per Range-Request nur der Ausschnitt
-# herausgeschnitten, der uns interessiert. Der Planet wird dabei nicht heruntergeladen.
+# Only the extent we care about is cut out of the public Protomaps daily build, by range request.
+# The planet is not downloaded on the way.
 
-DATUM="${PROTOMAPS_BUILD:-$(date -u -v-2d +%Y%m%d 2>/dev/null || date -u -d '2 days ago' +%Y%m%d)}"
-QUELLE="https://build.protomaps.com/${DATUM}.pmtiles"
+DAY="${PROTOMAPS_BUILD:-$(date -u -v-2d +%Y%m%d 2>/dev/null || date -u -d '2 days ago' +%Y%m%d)}"
+SOURCE="https://build.protomaps.com/${DAY}.pmtiles"
 
-info "Kacheln aus dem Tagesbuild vom $DATUM schneiden ..."
-pmtiles extract "$QUELLE" "$ZIEL/tiles/map.pmtiles" \
+info "Cutting tiles out of the daily build of $DAY ..."
+pmtiles extract "$SOURCE" "$TARGET/tiles/map.pmtiles" \
   --bbox="$BBOX" \
   --maxzoom="$MAXZOOM"
 
-cp "$REGION" "$ZIEL/tiles/region.json"
-# Auch ins Datenverzeichnis: dort kommt das Backend im Container heran und prueft damit, ob eine
-# Verortung aus dem "Hilf mit"-Bereich ueberhaupt in der Region liegt.
-mkdir -p "$WURZEL/data"
-cp "$REGION" "$WURZEL/data/region.json"
+cp "$REGION" "$TARGET/tiles/region.json"
+# Into the data directory as well: that is where the backend reaches it inside the container, and
+# checks with it whether a location from the "Hilf mit" panel lies in the region at all.
+mkdir -p "$ROOT/data"
+cp "$REGION" "$ROOT/data/region.json"
 
-# --- Schriften und Symbole --------------------------------------------------
+# --- fonts and sprites ------------------------------------------------------
 
-if [ -d "$ZIEL/basemaps/fonts" ] && [ "${ERNEUERN:-}" != "1" ]; then
-  info "Schriften und Symbole liegen bereits vor (ERNEUERN=1 erzwingt neues Laden)."
+if [ -d "$TARGET/basemaps/fonts" ] && [ "${REFRESH:-}" != "1" ]; then
+  info "Fonts and sprites are already there (REFRESH=1 forces a new download)."
 else
-  info "Schriften und Symbole holen ..."
+  info "Fetching fonts and sprites ..."
   TMP=$(mktemp -d)
   trap 'rm -rf "$TMP"' EXIT
   curl -fsSL "$ASSETS_URL" -o "$TMP/assets.zip"
   unzip -q "$TMP/assets.zip" -d "$TMP"
-  rm -rf "$ZIEL/basemaps/fonts" "$ZIEL/basemaps/sprites"
-  mv "$TMP/basemaps-assets-main/fonts" "$ZIEL/basemaps/fonts"
-  mv "$TMP/basemaps-assets-main/sprites" "$ZIEL/basemaps/sprites"
-  # Die Lizenz des Archivs mitnehmen. Dass die Schriften belegt sind, war bisher Zufall: Ihre
-  # OFL.txt liegt *innerhalb* von fonts/. Die Symbole (MIT, abgeleitet von tangrams/icons) hatten
-  # gar keinen Text dabei, weil hier nur die zwei Ordner herausgeholt wurden und der Rest mit dem
-  # Temporaerverzeichnis verschwand. Siehe docs/licensing.md.
-  for LIZENZ in "$TMP/basemaps-assets-main"/LICENSE*; do
-    [ -f "$LIZENZ" ] && cp "$LIZENZ" "$ZIEL/basemaps/"
+  rm -rf "$TARGET/basemaps/fonts" "$TARGET/basemaps/sprites"
+  mv "$TMP/basemaps-assets-main/fonts" "$TARGET/basemaps/fonts"
+  mv "$TMP/basemaps-assets-main/sprites" "$TARGET/basemaps/sprites"
+  # Take the licence of the archive along. That the fonts were covered was luck so far: their
+  # OFL.txt lies *inside* fonts/. The sprites (MIT, derived from tangrams/icons) carried no text
+  # at all, because only the two folders were pulled out here and the rest vanished with the
+  # temporary directory. See docs/licensing.md.
+  for LICENCE in "$TMP/basemaps-assets-main"/LICENSE*; do
+    [ -f "$LICENCE" ] && cp "$LICENCE" "$TARGET/basemaps/"
   done
 fi
 
-# --- Ergebnis ---------------------------------------------------------------
+# --- result -----------------------------------------------------------------
 
 echo
-info "Fertig."
-du -sh "$ZIEL/tiles/map.pmtiles" "$ZIEL/basemaps" 2>/dev/null || true
+info "Done."
+du -sh "$TARGET/tiles/map.pmtiles" "$TARGET/basemaps" 2>/dev/null || true
 echo
-echo "Probe aufs Exempel: 'make dev' starten, dann im Browser das WLAN abschalten"
-echo "und die Karte bewegen. Beschriftungen muessen sichtbar bleiben."
+echo "The test: start 'make dev', then switch the wifi off in the browser and move the map."
+echo "The labels have to stay visible."

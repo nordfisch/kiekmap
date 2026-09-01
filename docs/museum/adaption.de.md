@@ -1,11 +1,12 @@
-# Kiekmap für einen anderen Ort oder eine andere Sprache
+<!-- translated-from: docs/museum/adaption.md -->
+<!-- source-sha: 27b574c8eca3f392fd888c07fb2f081a2750728a919124f784d7e48acb36c1ba -->
 
-Die kurze Antwort vorweg:
+# Kiekmap für einen anderen Ort oder eine andere Sprache
 
 | Vorhaben | Aufwand |
 |---|---|
 | **Anderer deutschsprachiger Ort** | reine Konfiguration — kein Fork, kein Codeeingriff |
-| **Andere Sprache** | überschaubarer Umbau, siehe unten. Bis dahin ein Fork. |
+| **Andere Sprache** | eine Zeile in der `.env` — siehe unten |
 
 Das ist kein Zufall, sondern eine Entscheidung, die sich durchzieht: **nichts Ortsspezifisches steht
 im Code.** Der Ausschnitt wird zur Laufzeit aus `region.json` geholt, die Kartendatei ist ein
@@ -18,7 +19,7 @@ erhalten — sie ist der Grund, warum ein zweites Museum keinen zweiten Zweig br
 
 ### 1. Region festlegen
 
-Nur eine Datei: [`tiles/region.json`](../tiles/region.json).
+Nur eine Datei: [`tiles/region.json`](../../tiles/region.json).
 
 ```json
 {
@@ -36,7 +37,7 @@ Nur eine Datei: [`tiles/region.json`](../tiles/region.json).
 die dem `center` nächsten. Der Ortsindex darf weiter reichen; was darüber hinaus liegt, wird auf
 der Karte angetippt. **Eine Anzahl und kein Radius**, weil sie das Knopfbudget unabhängig davon
 hält, wie dicht ein Ort bebaut ist: 80 Straßen passen in zwei Fragen mit je höchstens zehn Knöpfen
-(siehe [decisions.md](decisions.md), Punkt 24). Fehlt der Schlüssel, gilt 80.
+(siehe [decisions.md](../developer/decisions.md), Punkt 24). Fehlt der Schlüssel, gilt 80.
 
 **Der Wert ist zu prüfen, nicht zu übernehmen** — wie, steht in
 [Schritt 3](#3-die-straßenauswahl-prüfen).
@@ -94,9 +95,6 @@ Auf einem 1080p-Display ist die Kartenfläche etwa 1500 × 920 px breit. `minZoo
 Ausschnitt auf einmal sichtbar ist. `maxZoom` bleibt bei 15 — das ist die Grenze des
 Protomaps-Tagesbuilds, darüber hinaus wird überzoomt und bleibt trotzdem scharf.
 
-**Jahrzehnte** an die Sammlung anpassen: Ein Museum, dessen ältester Abzug von 1890 ist, gewinnt
-nichts durch einen 1860er-Knopf.
-
 ### 2. Kartendaten und Ortsindex bauen
 
 ```bash
@@ -108,10 +106,11 @@ Beides braucht Internet und läuft auf dem Entwicklungsrechner, nicht auf dem Pi
 eine Gemeinde mit 5 km Umkreis: 4–5 MB Kacheln, 14 MB Schriften und Symbole, rund achttausend Orte
 (`places.json` ~1,5 MB).
 
-Der Löwenanteil sind **Adressen** — für Holm 7686 von 8513 Einträgen. Sie machen die Verortung
-haus- statt straßengenau; ohne sie bekäme jedes Foto einer 800 m langen Straße denselben Punkt. Wer
-den Ortsindex klein halten will, kann die beiden `addr:`-Zeilen in `tiles/build-places.py`
-auskommentieren; die Oberfläche überspringt den Hausnummernschritt dann von allein.
+Den größten Teil machen **Adressen** aus — für Holm 7686 von 8513 Einträgen. Sie machen die
+Verortung haus- statt straßengenau; ohne sie bekäme jedes Foto einer 800 m langen Straße denselben
+Punkt. Wer den Ortsindex klein halten will, kann die beiden `addr:`-Zeilen in
+`tiles/build-places.py` auskommentieren; die Oberfläche überspringt den Hausnummernschritt dann
+von allein.
 
 `make tiles` legt `region.json` zusätzlich unter `data/` ab — dort liest das Backend sie und prüft
 damit, ob eine Verortung aus dem „Hilf mit"-Bereich überhaupt in der Region liegt. **Ohne diese
@@ -122,7 +121,7 @@ Datei greift der Schutz nicht** (er lässt dann alles durch, statt grundlos abzu
 Der „Hilf mit"-Bereich fragt nach dem Ort eines Fotos, und der **Hauptweg dorthin sind Knöpfe**:
 erst der Anfangsbuchstabe, dann die Straße, dann die Hausnummer. Ein Suchfeld gibt es dort nicht —
 die Besucheransicht hat überhaupt kein Eingabefeld, weil am Kiosk keine Tastatur steht (siehe
-[decisions.md](decisions.md), Punkt 24). Ob dieser Weg trägt, entscheidet sich am Ortsindex, und
+[decisions.md](../developer/decisions.md), Punkt 24). Ob dieser Weg trägt, entscheidet sich am Ortsindex, und
 das lässt sich vor dem ersten Besucher nachsehen.
 
 **Woher die Straßen kommen.** Aus `make places`: Das Skript fragt einmal die Overpass-API nach
@@ -162,7 +161,7 @@ braucht einen kleineren Wert, ein weitläufiger verträgt einen größeren — n
 mit derselben Abfrage oben: Kommen mehr als etwa hundert Straßen zusammen, gerät die dritte Stufe
 zum Regelfall, und der Weg zur Hausnummer wird lang.
 
-**Was schiefgehen kann, und beides fällt erst am Gerät auf:**
+**Was schiefgehen kann, beides ohne Fehlermeldung:**
 
 - **Die `bbox` ist zu eng gesetzt.** Der Ortsindex reicht nur so weit wie sie; Randstraßen fehlen
   dann ganz und stehen weder in der Suche noch auf einem Knopf.
@@ -177,10 +176,10 @@ und findet ihn nicht, ist die `bbox` der erste Verdacht, nicht der Code.
 ### 4. Wappen einsetzen
 
 **Mitgeliefert wird ein Platzhalter, kein Wappen** — ein schlichtes Schild aus
-[`tools/build_logo.py`](../tools/build_logo.py). Warum kein echtes, steht in
-[decisions.md](decisions.md), Punkt 21.
+[`tools/build_logo.py`](../../tools/build_logo.py). Warum kein echtes, steht in
+[decisions.md](../developer/decisions.md), Punkt 21.
 
-[`frontend/public/logo.png`](../frontend/public/logo.png) durch das eigene ersetzen — gleicher
+[`frontend/public/logo.png`](../../frontend/public/logo.png) durch das eigene ersetzen — gleicher
 Dateiname, sonst nichts. Das Bild liegt über der linken oberen Ecke der Karte und ist zugleich der
 Weg in den Admin-Bereich. Im Code steht nirgends, was darauf zu sehen ist; die Beschriftung für
 Vorlesewerkzeuge setzt sich aus `name` in der `region.json` zusammen.
@@ -229,7 +228,7 @@ KIEKMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
 ```
 
 `exif_date_max_year` hochsetzen, falls die Sammlung auch echte Digitalfotos enthält — sonst
-verlieren die ihr Aufnahmedatum. Herunterlassen, wenn ausschließlich Scans erwartet werden. Wo
+verlieren die ihr Aufnahmedatum. Heruntersetzen, wenn ausschließlich Scans erwartet werden. Wo
 die Datei ihr Gerät nennt, entscheidet ohnehin das: Ein Scanner datiert nie, eine Kamera immer.
 Der Wert greift nur für Dateien ohne Geräteangabe.
 
@@ -278,59 +277,81 @@ Kein Codeeingriff, kein Fork, kein neuer Zweig. Wer beim Anpassen feststellt, da
 ändern muss, hat einen Fehler gefunden — dann gehört der Wert nach `region.json` oder in die `.env`,
 nicht in eine Kopie des Projekts.
 
-Ausgenommen sind kosmetische Reste: ein Kommentar in `app/api/places.py` und das Beispiel in der
-OpenAPI-Beschreibung nennen Holm. Beides ist Dokumentation, keine Logik.
+Ausgenommen sind kosmetische Reste: Kommentare im Backend nennen Holm, wo ein Beispiel den Fall
+konkret macht. Das ist Dokumentation, keine Logik.
 
 ---
 
 ## Andere Sprache
 
-Hier ist ein Fork heute noch der ehrliche Weg — nicht weil es viel Arbeit wäre, sondern weil an
-einer Stelle eine bewusste Entscheidung im Weg steht.
+Eine Einstellung, und sie steht dort, wo alle Einstellungen der Instanz stehen:
 
-### Was schon vorbereitet ist
-
-Alle Oberflächentexte stehen in [`frontend/src/text/de.ts`](../frontend/src/text/de.ts), im Code
-stehen nur Schlüssel. Eine zweite Sprache ist dort eine Datei:
-
-```ts
-// frontend/src/text/en.ts
-export const t = { app: { title: "Pictures from our village", … } } as const;
+```bash
+# .env
+KIEKMAP_LANGUAGE=en
 ```
 
-Dazu ein Umschalter, wo `de` importiert wird — oder ein `index.ts`, das je nach Konfiguration das
-eine oder andere Modul weiterreicht.
+Danach den Dienst neu starten. **Ein neuer Bau ist nicht nötig** — das Frontend holt die Sprache
+beim Start über `GET /api/config`. Zulässig sind `de` und `en`; ein anderer Wert bricht den Start
+ab, statt still auf Deutsch zurückzufallen.
 
-### Was im Weg steht: serverseitige Datumsbeschriftung
+Umgestellt wird damit alles, was ein Mensch am Gerät liest: Besucheransicht, Verwaltung,
+Fehlermeldungen der API, das Import-Protokoll, die Meldungen der Sicherung, die Datumsbeschriftung
+und das Zahlenformat.
 
-`date_label` (`"1920er"`, `"Juni 1955"`, `"Jahr unbekannt"`) wird **im Backend** gebildet, in
-[`app/services/dates.py`](../backend/app/services/dates.py). Das war Absicht — das Frontend soll
-keine Datumsarithmetik betreiben — ist aber für Mehrsprachigkeit die falsche Stelle.
+**Nicht umgestellt wird die Karte darunter.** Sie beschriftet ihre Orte in jeder Einstellung
+deutsch, denn die Beschriftungssprache ist eine Eigenschaft des Ortes und nicht des Lesers — in
+Holm heißt die Straße in jeder Sprache Mühlenweg. Für ein Museum außerhalb des deutschen
+Sprachraums ist das die falsche Antwort, und es ist offene Arbeit:
+[Issue #33](https://github.com/nordfisch/kiekmap/issues/33).
 
-Der Umbau, falls er ansteht:
+### Wo die Texte stehen
 
-1. `PhotoMarker` und `PhotoDetail` liefern statt `date_label` die Rohwerte, die ohnehin schon da
-   sind: `date_from`, `date_to`, `date_precision`.
-2. Die Formatierung wandert ins Frontend, neben die Textbausteine. Die Logik ist klein — fünf Fälle,
-   nachzulesen in `format_label`.
-3. `MONTH_NAMES` und `"Jahr unbekannt"` entfallen im Backend.
+Zwei Kataloge, gleich gebaut:
 
-Das ist ein halber Tag, kein Projekt. Wer die Zweisprachigkeit von Anfang an braucht, sollte es
-zuerst tun.
-
-### Was sonst noch deutsch ist
-
-| Ort | Was | Bemerkung |
+| | Oberfläche | Backend |
 |---|---|---|
-| Fehlermeldungen der API | `HTTPException`-Texte | erreichen Besucher und Kuratoren direkt |
-| Import-Protokoll | `ImportOutcome.message` | „Aufgenommen, es fehlt noch: Ort und Jahr" |
-| Ordnernamen im Eingang | `_erledigt`, `_problem` | sieht das Museumsteam im Dateimanager |
-| Ortsarten | `strasse`, `gebaeude`, `flur` … | kommen so aus `tiles/build-places.py`; die Anzeige übersetzt sie in `t.location.kinds` |
-| Doku und Commit-Nachrichten | alles unter `docs/` | bewusst so, siehe [development.md](development.md) |
+| Ort | [`frontend/src/text/`](../../frontend/src/text/) | [`backend/app/text/`](../../backend/app/text/) |
+| Deutsch | `de.ts` | `de.py` |
+| Englisch | `en.ts` | `en.py` |
+
+**Ein fehlender Eintrag bricht den Bau, nicht das Museum.** Im Frontend ist der Typ der Kataloge
+`typeof de`, also lehnt `tsc` eine unvollständige Übersetzung ab. Im Backend sind es eingefrorene
+Dataclasses, und eine fehlende Angabe ist ein `TypeError` beim Start.
+
+### Eine dritte Sprache
+
+Dieselbe Konstruktion trägt sie ohne Umbau: eine Datei je Katalog, ein Wert mehr in
+`KIEKMAP_LANGUAGE`. Bei drei Sprachen lohnt sich allerdings ein Übersetzungsdienst — siehe
+[decisions.md](../developer/decisions.md).
+
+Die Sprache ist eine **Einstellung der Instanz, keine Wahl der Besucher**. Das Gerät steht in einem
+Museum und spricht dessen Sprache. Ein Umschalter auf dem Touchscreen wäre eine Bedienungsfrage für
+Besucher, die oft älter sind, und keine Erleichterung.
+
+### Was in jeder Sprache deutsch bleibt
+
+| Ort | Was | Warum |
+|---|---|---|
+| Ortsarten | `strasse`, `gebaeude`, `flur` … | Schlüssel aus `tiles/build-places.py`; angezeigt wird, was `t.location.kinds` daraus macht |
+| Straßen- und Ortsnamen | aus OpenStreetMap | ein Eigenname wird nicht übersetzt |
+| Ältere Einträge im Import-Protokoll | `ImportLog.message` | festgehalten, was das Gerät damals gesagt hat |
+| `*.de.md` und `docs/archive/history.de.md` | Doku für Museum und Betrieb | als Übersetzung geführt, siehe [development.md](../developer/development.md#language) |
 
 Die Ortsarten sind der einzige Fall, der nach einer Falle aussieht und keine ist: In der Datenbank
-stehen deutsche Schlüsselwörter, aber angezeigt wird, was das Textmodul daraus macht. Eine
-englische Fassung mappt dieselben Schlüssel auf `"Street"`, `"Building"` und so weiter.
+stehen deutsche Schlüsselwörter, angezeigt wird die Übersetzung. `en.ts` bildet dieselben Schlüssel
+auf `"Street"`, `"Building"` und so weiter ab.
+
+Das Import-Protokoll ist der zweite. Es berichtet, was bei einem Import geschah, und der Satz wurde
+damals geschrieben und gespeichert. Neue Einträge folgen der eingestellten Sprache; die alten
+bleiben, wie sie lauteten.
+
+### Was englisch festgelegt ist und nicht mitwandert
+
+Die Ordner `_done` und `_problem` im Eingang, der Sicherungsordner `kiekmap-backup/` samt allem
+darin, und der `status` von `/health`. Die ersten beiden sind Namen im Dateisystem: Folgten sie der
+Einstellung, müsste ein Umstellen Ordner umbenennen — auf dem Gerät und auf jedem schon
+geschriebenen Stick. Der dritte ist ein Maschinenwert, den der Kiosk-Dienst liest.
 
 ---
 

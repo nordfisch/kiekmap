@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Names, errors and the two or three things every part of the backup needs.
 
 No logic of its own -- it exists so that the modules beside it do not have to import each other
@@ -13,14 +10,18 @@ from collections.abc import Callable
 
 from app.config import Settings
 from app.services import dates
+from app.text import texts
 
 log = logging.getLogger(__name__)
 
-# German names: the museum team sees these in a file manager on any computer.
-BACKUP_DIR_NAME = "kiekmap-sicherung"
-MANIFEST_NAME = "sicherung.json"
-SET_ASIDE_PREFIX = "vorher-"
-RESTORE_WORK_DIR = "wiederherstellung"
+# Fixed English, not translated. These are names in a file system: were they to follow
+# ``KIEKMAP_LANGUAGE``, changing that setting would have to rename folders on the device and on
+# every stick already written. The museum team sees them in a file manager, and the manual names
+# them.
+BACKUP_DIR_NAME = "kiekmap-backup"
+MANIFEST_NAME = "backup.json"
+SET_ASIDE_PREFIX = "before-"
+RESTORE_WORK_DIR = "restore"
 
 #: Where the date of the last backup is noted. In the data directory, but deliberately *not* part
 #: of the backup: it says something about this device, not about the collection.
@@ -67,12 +68,13 @@ def place_name(settings: Settings) -> str:
 
 
 class BackupError(Exception):
-    """Something the person at the screen has to know. The message is German."""
+    """Something the person at the screen has to know, in the language of the instance."""
 
 
 def human_size(size: int) -> str:
-    """German, with a comma -- this text ends up on the screen."""
-    for unit, factor in (("GB", 1000**3), ("MB", 1000**2), ("kB", 1000)):
-        if size >= factor:
-            return f"{size / factor:.1f}".replace(".", ",") + f" {unit}"
-    return f"{size} Bytes"
+    """A size for a sentence on the screen -- "3,4 MB" or "3.4 MB", by the setting.
+
+    Also used in log lines, where the format then follows the instance rather than the reader.
+    That is the smaller oddity: one formatter, and every size in the same run reads alike.
+    """
+    return texts().backup.size(size)

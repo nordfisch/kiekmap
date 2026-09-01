@@ -1,3 +1,6 @@
+<!-- translated-from: docs/museum/licensing.md -->
+<!-- source-sha: 4c9d89f4ed474486dac6b0d58bf8908aca2b34557e7de977e972ae4ee3538d48 -->
+
 # Weitergabe
 
 Was weitergegeben werden darf, und unter welchen Bedingungen. Diese Datei liest, wer das Projekt
@@ -10,27 +13,28 @@ Recht der Bestand im Museum steht.
 ## Kiekmap selbst
 
 **Apache-Lizenz 2.0**, Copyright 2026 Kalle Erlhoff. Der Text steht in
-[../LICENSE](../LICENSE), die Namensnennung in [../NOTICE](../NOTICE). Beide gelten für Code,
+[../LICENSE](../../LICENSE), die Namensnennung in [../NOTICE](../../NOTICE). Beide gelten für Code,
 Dokumentation und die erfundenen Beispielbilder unter `seed/` — eine Lizenz für alles, ohne
-Abgrenzungsfragen. Warum diese und nicht MIT: [decisions.md](decisions.md), Punkt 62.
+Abgrenzungsfragen. Warum diese und nicht MIT: [decisions.md](../developer/decisions.md), Punkt 62.
 
 Der Lizenztext ist **wörtlich der von apache.org** und wird nicht angefasst. Der Platzhalter
 `Copyright [yyyy] [name of copyright owner]` in seinem Anhang ist die Vorlage für Dateiköpfe, kein
 Feld zum Ausfüllen — ein geänderter Text wird von den üblichen Erkennungswerkzeugen nicht mehr als
 Apache-2.0 erkannt.
 
-## Die vier Flächen, über die etwas weggeht
+## Die Wege, auf denen etwas weggeht
 
 Die Pflichten hängen nicht am Projekt, sondern daran, **was jemand in die Hand bekommt**:
 
-| Fläche | Was darin steckt | Was mitgehen muss |
+| Weg | Was darin steckt | Was mitgehen muss |
 |---|---|---|
 | **Das Repo** | eigener Code, Doku, Beispielbilder | `LICENSE`, `NOTICE` — liegen an der Wurzel |
 | **Die Container-Abbilder** | dazu 37 npm- und 26 Python-Pakete, Schriften, Symbole | `THIRD-PARTY.txt` je Abbild, die Lizenzdateien unter `basemaps/` |
 | **Der Update-Stick** | dazu Kartendatei und Ortsindex | zusätzlich der ODbL-Hinweis |
 | **Der Bildschirm im Museum** | die laufende Karte | „© OpenStreetMap-Mitwirkende, ODbL" — steht unten rechts |
+| **Die Doku-Website** | die Dateien unter `docs/`, dazu MkDocs Material | die Fußzeile nennt beide Lizenzen; sonst reist nichts mit |
 
-## Die Abhängigkeiten: 169 Pakete, alle permissiv
+## Die Abhängigkeiten, alle permissiv
 
 Gemessen am 20. August 2026 an den **installierten** Paketen, nicht an den Manifestdateien.
 
@@ -46,7 +50,7 @@ Bauzeit-Datenbank von browserslist, die in keinem Artefakt landet. Nichts schrä
 eigenen Lizenz ein, und nichts steht einer Veröffentlichung im Weg.
 
 **Die Namen und ihre Lizenztexte stehen in `THIRD-PARTY.txt`**, erzeugt von
-[../tools/build_notices.py](../tools/build_notices.py) und eingecheckt wie eine Sperrdatei. Warum
+[../tools/build_notices.py](../../tools/build_notices.py) und eingecheckt wie eine Sperrdatei. Warum
 erzeugt und nicht gepflegt: Eine handgeschriebene Liste ist in drei Monaten falsch, und zwar in der
 Richtung, die niemand prüft. `make notices` schreibt sie, `make check` merkt, wenn sie veraltet
 ist.
@@ -54,10 +58,10 @@ ist.
 **Für das Backend kommt die Liste seit dem 25. August 2026 aus `backend/requirements.lock`**, weil
 das Abbild genau daraus installiert. Vorher lief das Werkzeug die Abhängigkeiten von
 `pyproject.toml` aus selbst ab, mit einer handgeschriebenen Ergänzung für das, was
-`uvicorn[standard]` nachzieht — ein nachgebauter Auflöser, der still veraltet wäre. **Er hatte
-schon ein Loch:** `greenlet`, das SQLAlchemy auf Linux mitbringt, war in keiner Hinweisdatei, weil
-es auf dem Entwicklungs-Mac gar nicht installiert wird. Die Umgebungsmarker der Lockdatei werden
-jetzt gegen **beide Zielplattformen** ausgewertet, aarch64 und x86_64.
+`uvicorn[standard]` nachzieht — ein nachgebauter Auflöser, der still veraltet wäre. **Ein Paket
+fehlte bereits:** `greenlet`, das SQLAlchemy auf Linux mitbringt, stand in keiner Hinweisdatei,
+weil es auf dem Entwicklungs-Mac gar nicht installiert wird. Die Umgebungsmarker der Lockdatei
+werden jetzt gegen **beide Zielplattformen** ausgewertet, aarch64 und x86_64.
 
 Drei npm-Pakete nennen ihre Lizenz nur in der `package.json` und legen keinen Text bei
 (`@protomaps/basemaps`, `pmtiles`, `murmurhash-js`). Sie bekommen die Standardfassung ihrer
@@ -80,7 +84,7 @@ Angabe bricht den Lauf ab.
 **Die Tabelle `places` ist die Stelle, die man übersieht.** Sie steht in `kiekmap.db` und damit in
 jeder Sicherung. Für den Museumsbetrieb folgenlos; wer die Datenbank an Dritte weitergibt, gibt
 ODbL-Material mit und muss es kenntlich machen. Derselbe Satz steht in
-[usermanual.md](usermanual.md).
+[usermanual.de.md](usermanual.de.md).
 
 ## Was **nicht** von der Lizenz erfasst ist
 
@@ -99,7 +103,7 @@ Entscheidung.
 
 **Das Gemeindewappen.** Urheberrechtlich gemeinfrei (§ 5 Abs. 1 UrhG), in der *Führung* aber als
 Hoheitszeichen beschränkt. Deshalb liegt im Repo ein gezeichneter Platzhalter und nicht das Wappen.
-Ausführlich in [decisions.md](decisions.md), Punkt 21, und in [adaption.md](adaption.md).
+Ausführlich in [decisions.md](../developer/decisions.md), Punkt 21, und in [adaption.de.md](adaption.de.md).
 
 ## Basis-Abbilder und der Verbreitungsweg
 
@@ -109,19 +113,19 @@ darauf, er ist nicht damit verbunden. Es begründet aber Pflichten für den, der
 Abbild** weitergibt.
 
 **Deshalb: Dockerfiles veröffentlichen, keine gebauten Abbilder.** Dann baut jeder Betreiber
-selbst, und die Pflichten bleiben, wo sie hingehören. Der Weg über `abbilder.tar` in
+selbst, und die Pflichten bleiben, wo sie hingehören. Der Weg über `images.tar` in
 `deploy/pi/update.sh` bleibt für das eigene Gerät richtig; er gehört nur nicht in ein Release.
 
 ## Wie das Projekt entstanden ist
 
-Kiekmap ist von einer Person zusammen mit einem Sprachmodell gebaut worden; die Commits tragen es
-als `Co-Authored-By`. Das ist hier vermerkt, weil Verschweigen der schlechtere Umgang damit wäre.
+Eine Person hat Kiekmap zusammen mit einem Sprachmodell gebaut; die Commits tragen es als
+`Co-Authored-By`. Das ist hier vermerkt, weil Verschweigen der schlechtere Umgang damit wäre.
 
 Für die Rechtslage folgt daraus wenig und nichts Überraschendes: Rein maschinell Erzeugtes ist
 keine persönliche geistige Schöpfung (§ 2 Abs. 2 UrhG) und damit nicht geschützt; geschützt ist die
 Auswahl-, Anordnungs- und Bearbeitungsleistung. Die liegt in diesem Repo offen zutage — in
-[decisions.md](decisions.md) stehen die Entscheidungen mit ihren Begründungen, in
-[history.md](history.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
+[decisions.md](../developer/decisions.md) stehen die Entscheidungen mit ihren Begründungen, in
+[archive/history.de.md](../developer/archive/history.de.md) die Fälle, in denen der erste Vorschlag verworfen wurde.
 
 Praktisch heißt das nur eines: **den Anspruch nicht übertreiben.** Die Copyright-Zeile ist
 richtig; ein Satz, jede Zeile sei eigenes Werk, wäre es nicht. Wo einzelne Zeilen keine
@@ -138,5 +142,5 @@ Was das Risiko klein hält, ist deshalb nicht die Klausel, sondern die **Unentge
 verschenkt, haftet im Kern nur für Vorsatz und grobe Fahrlässigkeit. Daraus folgt eine einzige
 Verhaltensregel: **keine Zusicherungen machen.** Nicht versprechen, dass der Bestand sicher ist,
 dass die Sicherung funktioniert, dass das Gerät durchläuft. Was das Programm kann, steht im
-Änderungsprotokoll; was ungeprüft ist, steht im [backlog.md](backlog.md) und in
-[index.md](index.md). Diese Ehrlichkeit ist nicht nur guter Stil, sie ist der eigentliche Schutz.
+Änderungsprotokoll; was ungeprüft ist, steht in den [Issues](https://github.com/nordfisch/kiekmap/issues) und in
+[index.de.md](index.de.md).

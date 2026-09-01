@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Fuzzy dating.
 
 For historical photos, "the 1920s" or "around 1930" is the normal case, not the exception. Each
@@ -16,22 +13,7 @@ import calendar
 from datetime import UTC, date, datetime
 
 from app.models import DatePrecision
-
-#: German month names -- these end up in user-facing labels.
-MONTH_NAMES = (
-    "Januar",
-    "Februar",
-    "März",
-    "April",
-    "Mai",
-    "Juni",
-    "Juli",
-    "August",
-    "September",
-    "Oktober",
-    "November",
-    "Dezember",
-)
+from app.text import texts
 
 #: Widths a bar of the histogram may have, in years. Readable steps, no odd ones.
 BAR_WIDTHS = (1, 5, 10, 25, 50)
@@ -109,30 +91,38 @@ def date_range(
 
 
 def format_label(start: date | None, end: date | None, precision: str | DatePrecision) -> str:
-    """How the dating is shown to the visitor. German, because it reaches the screen."""
+    """How the dating is shown to the visitor, in the language of the instance.
+
+    Formatted here and not in the browser, although it reaches a screen: the label is part of the
+    photo the API hands out, and the map, the detail view and the contribution panel all show the
+    same one. ``docs/adaption.md`` used to name this as what stood in the way of a second language.
+    That was true while the backend had no notion of one; ``KIEKMAP_LANGUAGE`` removed the
+    premise.
+    """
+    dates = texts().dates
     if start is None:
-        return "Jahr unbekannt"
+        return dates.year_unknown
 
     match DatePrecision(precision):
         case DatePrecision.DAY:
-            return f"{start.day}. {MONTH_NAMES[start.month - 1]} {start.year}"
+            return dates.day(start.day, start.month, start.year)
         case DatePrecision.MONTH:
-            return f"{MONTH_NAMES[start.month - 1]} {start.year}"
+            return dates.month(start.month, start.year)
         case DatePrecision.YEAR:
             return str(start.year)
         case DatePrecision.DECADE:
-            return f"{start.year}er"
+            return dates.decade(start.year)
         case _:
             # Should not occur with start != None; better something usable than nothing.
             return (
                 str(start.year)
                 if end is None or end.year == start.year
-                else f"{start.year}–{end.year}"
+                else dates.span(start.year, end.year)
             )
 
 
 def format_short(start: date | None, precision: str | DatePrecision) -> str:
-    """The dating as it fits under a thumbnail on the map. German, empty where nothing is known.
+    """The dating as it fits under a thumbnail on the map. Empty where nothing is known.
 
     Three differences to :func:`format_label`, and each answers something the map does badly:
 
@@ -148,7 +138,7 @@ def format_short(start: date | None, precision: str | DatePrecision) -> str:
     if start is None:
         return ""
     if DatePrecision(precision) is DatePrecision.DECADE:
-        return f"{start.year}er"
+        return texts().dates.decade(start.year)
     return str(start.year)
 
 
@@ -158,7 +148,7 @@ def overlaps(
     """Pure-Python counterpart to the SQL query -- for tests and as documentation.
 
     Two intervals overlap when neither lies entirely before the other. An undated photo never
-    overlaps: it appears in no time selection, but in the "Hilf mit" panel instead.
+    overlaps: it appears in no time selection, but in the contribution panel instead.
     """
     if start is None or end is None:
         return False

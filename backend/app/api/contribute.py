@@ -1,7 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
-"""The "Hilf mit" panel: visitors fill in missing statements.
+"""The contribution panel: visitors fill in missing statements.
 
 For historical scans, place and year are nowhere in the file. Someone who knows the village often
 knows them at a glance. This path is therefore not a side feature but the main way the system
@@ -37,9 +34,10 @@ from app.services import places
 from app.services.dates import date_range, format_label
 from app.services.needs import NEEDS, Need, open_filter
 from app.services.places import ACCURACY_ADDRESS_M
+from app.text import texts
 
 log = logging.getLogger(__name__)
-router = APIRouter(prefix="/contribute", tags=["hilf mit"])
+router = APIRouter(prefix="/contribute", tags=["contribute"])
 
 
 @router.get("/next", response_model=TaskResponse, summary="A photo that is missing something")
@@ -146,7 +144,7 @@ def photo_housenumbers(
     """
     photo = session.get(Photo, photo_id)
     if photo is None:
-        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     if not _refinable(session, photo):
         return []
     return [
@@ -167,7 +165,7 @@ def _require_in_region(settings: Settings, lat: float, lon: float) -> None:
         return
     min_lon, min_lat, max_lon, max_lat = bbox
     if not (min_lat <= lat <= max_lat and min_lon <= lon <= max_lon):
-        raise HTTPException(422, "Dieser Ort liegt ausserhalb der Karte.")
+        raise HTTPException(422, texts().contribute.outside_the_map)
 
 
 def _require_empty(photo: Photo, field: str) -> None:
@@ -178,16 +176,13 @@ def _require_empty(photo: Photo, field: str) -> None:
     """
     taken = photo.lat is not None if field == "location" else photo.date_from is not None
     if taken:
-        raise HTTPException(
-            409,
-            "Dieses Foto hat inzwischen schon eine Angabe bekommen. Vielen Dank trotzdem!",
-        )
+        raise HTTPException(409, texts().contribute.already_stated)
 
 
 def _get_open_photo(session: Session, photo_id: int, field: str) -> Photo:
     photo = session.get(Photo, photo_id)
     if photo is None:
-        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     _require_empty(photo, field)
     return photo
 
@@ -280,18 +275,15 @@ def add_housenumber(
     """
     photo = session.get(Photo, photo_id)
     if photo is None:
-        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     if not _refinable(session, photo):
-        raise HTTPException(
-            409,
-            "Dieses Foto hat inzwischen schon eine genauere Angabe bekommen. Vielen Dank trotzdem!",
-        )
+        raise HTTPException(409, texts().contribute.already_more_precise)
 
     address = session.get(Place, contribution.place_id)
     if address is None or address.kind != "adresse":
-        raise HTTPException(404, "Diese Hausnummer steht nicht im Ortsverzeichnis.")
+        raise HTTPException(404, texts().contribute.housenumber_unknown)
     if address.street != photo.place_name:
-        raise HTTPException(422, "Diese Hausnummer gehoert nicht zu dieser Strasse.")
+        raise HTTPException(422, texts().contribute.housenumber_wrong_street)
 
     _require_in_region(settings, address.lat, address.lon)
 

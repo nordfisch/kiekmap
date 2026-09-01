@@ -1,92 +1,90 @@
-# Beispielbestand
+# The sample collection
 
-Ein kleiner Fotobestand zum Entwickeln und Ausprobieren. Er ersetzt das, was vorher jeder für sich
-von Hand in `data/` zusammengeklickt hat — und was niemand sonst hatte.
+A small photo collection for developing and trying things out. It replaces what everybody used to
+click together by hand in `data/` — and what nobody else had.
 
 ```bash
-make seed        # Bestand aus diesem Ordner herstellen (loescht den vorhandenen!)
-make seed-save   # den laufenden Bestand hierher sichern
+make seed        # build the collection from this folder (deletes the current one!)
+make seed-save   # save the running collection here
 ```
 
-## Alles hier ist erfunden
+## Everything here is invented
 
-> **Die Bilder sind gezeichnet, die Menschen ausgedacht.** Familie Wendt, Gasthof Petersen,
-> Ladengeschäft Rohlf, „Foto: A. Brahms" — nichts davon hat es gegeben. Ebenso die Bildnachweise,
-> die Herkunftsangaben und die Besucherbeiträge.
+> **The pictures are drawn, the people made up.** Familie Wendt, Gasthof Petersen, Ladengeschäft
+> Rohlf, "Foto: A. Brahms" — none of them existed. The same goes for the credits, the provenance
+> notes and the visitor contributions.
 
-**Echt sind nur die Straßennamen und die Koordinaten**, und das muss so sein: Die Punkte müssen in
-der `bbox` aus `tiles/region.json` liegen, sonst zeigt die Karte nichts, und `place_name` muss zum
-gebauten Ortsindex passen, sonst findet die Ortssuche im „Hilf mit"-Bereich nichts — und genau die
-ist das Herzstück der Vorführung. Straßen und Koordinaten sind ohnehin öffentliche Geografie aus
-OpenStreetMap, die mit `make places` in jedes Gerät wandert.
+**Only the street names and the coordinates are real**, and they have to be: the points have to lie
+inside the `bbox` from `tiles/region.json`, or the map shows nothing, and `place_name` has to match
+the place index that was built, or the place search in the contribution panel finds nothing — and
+that search is the heart of the demonstration. Streets and coordinates are public geography from
+OpenStreetMap anyway, which `make places` puts on every device.
 
-**Ein Personenbezug entstünde erst dadurch, Namen an Adressen zu binden — und diese Bindung ist
-frei erfunden.**
+**A link to a real person would only arise from tying names to addresses — and that tie is
+invented.**
 
-Der Grund für den Aufwand: Die echten Aufnahmen gehören dem Heimatmuseum. Sie in einem Repo
-mitzuliefern, das jemand klonen kann, ist etwas anderes, als sie im Museum zu zeigen. Dasselbe gilt
-für das Ortswappen — siehe [decisions.md](../docs/decisions.md), Punkt 21.
+The reason for the effort: the real pictures belong to the local history museum. Shipping them in a
+repository anybody can clone is a different thing from showing them in the museum. The same holds
+for the village coat of arms — see [decisions.md](../docs/developer/decisions.md), point 21.
 
-## Was hier liegt
+## What lies here
 
 | | |
 |---|---|
-| `fotos/` | die Bilddateien |
-| `seed.json` | alles Übrige: Titel, Datierung, Ort, Schlagwörter, Bildnachweis, Herkunft, Status — und die Besucherbeiträge, die zu jedem Foto gehören |
+| `photos/` | the image files |
+| `seed.json` | everything else: title, dating, place, keywords, credit, provenance, status — and the visitor contributions belonging to each photo |
 
-Beides erzeugt [`tools/build_seed.py`](../tools/build_seed.py) aus einer Tabelle im Skript. Wer den
-Bestand ändern will, ändert die Tabelle und lässt das Skript laufen — nicht die Dateien hier:
+Both are produced by [`tools/build_seed.py`](../tools/build_seed.py) from a table inside the script.
+Whoever wants to change the collection changes the table and runs the script — not the files here:
 
 ```bash
 python3 tools/build_seed.py
 ```
 
-Der Lauf ist **deterministisch**: derselbe Aufruf erzeugt denselben Bestand, Byte für Byte.
+The run is **deterministic**: the same call produces the same collection, byte for byte.
 
-**Bilder und JSON statt eines Datenbankabzugs**, und das ist die eigentliche Entscheidung: Ein
-Abzug ist wertlos, sobald eine Spalte dazukommt. Hier kostet eine neue Spalte eine Zeile je Foto,
-und der Bestand muss nicht neu kuratiert werden. Ausserdem geht `make seed` durch die echte
-Import-Pipeline — es erzeugt also die Vorschaubilder, füllt das Import-Protokoll und prüft den
-Import gleich mit.
+**Pictures and JSON rather than a database dump**, and that is the real decision: a dump is
+worthless as soon as a column is added. Here a new column costs one line per photo, and the
+collection does not have to be curated again. On top of that `make seed` goes through the real
+import pipeline — so it builds the thumbnails, fills the import log and checks the import along the
+way.
 
-Was **nicht** in `seed.json` steht, steht mit Absicht nicht darin: Dateigröße, Abmessungen und
-MIME-Typ werden beim Einlesen aus dem Bild gelesen. Eine Kopie davon könnte nur veralten. Der
-SHA-256 ist die einzige Ausnahme — er dient allein der Warnung, falls sich eine Datei seit dem
-Erzeugen geändert hat.
+What is **not** in `seed.json` is left out on purpose: file size, dimensions and MIME type are read
+from the image while it is taken in. A copy of them could only go stale. The SHA-256 is the one
+exception — it serves only to warn when a file has changed since it was built.
 
-## Der Bestand ist absichtlich lückenhaft
+## The collection has gaps on purpose
 
-Ein Bestand, in dem alles vollständig ist, prüft die Hälfte des Programms nicht. Deshalb stehen
-darin Fotos ohne Jahr, Fotos ohne Ort und eines ohne beides — sonst hätte der „Hilf mit"-Bereich
-nichts vorzulegen:
+A collection in which everything is complete leaves half the program unchecked. So it holds photos
+without a year, photos without a place and one without either — otherwise the contribution panel
+would have nothing to offer:
 
 | | |
 |---|---|
-| ohne Jahr | 3 |
-| ohne Ort | 2 — davon **eines ohne beides** |
-| nur straßengenau | 2 — für die Nachschärf-Frage |
-| gelöscht | 2, für die Liste, die es dafür gibt |
-| Besucherbeiträge | 8, davon **2 zurückgenommen** |
-| ohne Bildnachweis | 1 |
+| without a year | 3 |
+| without a place | 2 — one of them **without either** |
+| street-accurate only | 2 — for the refinement question |
+| deleted | 2, for the list that exists for them |
+| visitor contributions | 8, **2 of them taken back** |
+| without a credit | 1 |
 
-**Warum es bei den straßengenauen zwei sind und nicht eines:** Die Nummernauswahl hat zwei Wege,
-und ein einziges Foto prüfte immer nur einen davon. „Gasthof Petersen mit Kastanie" liegt an der
-Hauptstraße (76 Adressen, 39 Knöpfe nach dem Zusammenfassen) — dort kommt der Abschnittsschritt
-davor. „Schulstraße, heutiger Zustand" liegt an der Schulstraße (26 Adressen, 11 Knöpfe) — dort
-fällt er weg und die Nummern stehen sofort da.
+**Why there are two street-accurate ones and not one:** the number picker has two routes, and a
+single photo would only ever exercise one of them. "Gasthof Petersen mit Kastanie" stands on
+Hauptstraße (76 addresses, 39 buttons after grouping) — there the section step comes first.
+"Schulstraße, heutiger Zustand" stands on Schulstraße (26 addresses, 11 buttons) — there it falls
+away and the numbers appear at once.
 
-Die beiden unterscheiden sich auch in der **Quelle**: das eine kommt von einem Besucher, der
-„Reicht so — die Straße genügt" gedrückt hat, das andere vom Kurator. Dass auch eine
-Kuratorenangabe nachgeschärft werden darf, ist die Aufweichung aus
-[decisions.md](../docs/decisions.md), Punkt 32 — sie gehört im Bestand sichtbar.
+The two also differ in their **source**: one comes from a visitor who pressed "Reicht so — die
+Straße genügt", the other from the curator. That a curator's statement may be refined as well is
+the softening from [decisions.md](../docs/developer/decisions.md), point 32 — it belongs in the collection
+where it can be seen.
 
-Dazu unterschiedlich lange Beschreibungen, Hoch- und Querformate und ein paar unaufgeräumte
-Dateinamen. `build_seed.py` zählt diese Lücken nach jedem Lauf und **bricht ab, wenn eine fehlt.**
-Sie sind kein Versäumnis.
+Beside that: descriptions of different lengths, portrait and landscape formats, and a few untidy
+file names. `build_seed.py` counts these gaps after every run and **aborts when one is missing.**
+They are not an oversight.
 
-## Für die Entwicklung mit echten Fotos
+## Developing against real photos
 
-Wer einen echten Bestand hat, sichert ihn mit `make seed-save` hierher — **aber committet ihn
-nicht.** Der erfundene Bestand ist Teil des Repos; ihn durch echte Aufnahmen zu ersetzen ist genau
-der Weg, auf dem Museumsfotos doch noch veröffentlicht würden. `make seed-save` sagt das bei jedem
-Lauf.
+Whoever has a real collection saves it here with `make seed-save` — **but does not commit it.** The
+invented collection is part of the repository; replacing it with real pictures is exactly the way
+museum photos would end up published after all. `make seed-save` says so on every run.

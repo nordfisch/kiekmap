@@ -1,79 +1,76 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { watchForIdle } from "./idle";
 
-describe("Leerlauf-Erkennung", () => {
+describe("idle detection", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  function aufbau() {
-    const ziel = new EventTarget();
-    const geschehen = vi.fn();
-    const aufhoeren = watchForIdle(ziel, 1000, geschehen);
-    return { ziel, geschehen, aufhoeren };
+  function setUp() {
+    const target = new EventTarget();
+    const happened = vi.fn();
+    const stop = watchForIdle(target, 1000, happened);
+    return { target, happened, stop };
   }
 
-  it("meldet sich, wenn niemand mehr da ist", () => {
-    const { geschehen } = aufbau();
+  it("speaks up when nobody is there any more", () => {
+    const { happened } = setUp();
 
     vi.advanceTimersByTime(1000);
 
-    expect(geschehen).toHaveBeenCalledTimes(1);
+    expect(happened).toHaveBeenCalledTimes(1);
   });
 
-  it("schweigt, solange jemand tippt", () => {
-    const { ziel, geschehen } = aufbau();
+  it("stays silent while somebody is tapping", () => {
+    const { target, happened } = setUp();
 
     for (let i = 0; i < 5; i++) {
       vi.advanceTimersByTime(900);
-      ziel.dispatchEvent(new Event("pointerdown"));
+      target.dispatchEvent(new Event("pointerdown"));
     }
     vi.advanceTimersByTime(900);
 
-    expect(geschehen).not.toHaveBeenCalled();
+    expect(happened).not.toHaveBeenCalled();
   });
 
-  it("meldet sich nur einmal je Ruhephase", () => {
-    // Sonst setzte sich ein unberuehrtes Geraet die ganze Nacht alle fuenf Minuten zurueck --
-    // jedes Mal mit einer Runde Anfragen an einen Pi, der nichts zu tun hat.
-    const { geschehen } = aufbau();
+  it("speaks up only once per quiet spell", () => {
+    // Otherwise an untouched device would reset itself every five minutes all night -- each
+    // time with a round of requests to a Pi that has nothing to do.
+    const { happened } = setUp();
 
     vi.advanceTimersByTime(10_000);
 
-    expect(geschehen).toHaveBeenCalledTimes(1);
+    expect(happened).toHaveBeenCalledTimes(1);
   });
 
-  it("faengt nach der naechsten Beruehrung wieder an", () => {
-    const { ziel, geschehen } = aufbau();
+  it("starts again after the next touch", () => {
+    const { target, happened } = setUp();
     vi.advanceTimersByTime(1000);
 
-    ziel.dispatchEvent(new Event("touchstart"));
+    target.dispatchEvent(new Event("touchstart"));
     vi.advanceTimersByTime(1000);
 
-    expect(geschehen).toHaveBeenCalledTimes(2);
+    expect(happened).toHaveBeenCalledTimes(2);
   });
 
-  it("laesst sich eine Mausbewegung nicht als Anwesenheit verkaufen", () => {
-    // Ein Touchscreen kennt kein Schweben, und ein vom Ärmel angestossener Zeiger haelt den
-    // Kiosk sonst die ganze Nacht wach.
-    const { ziel, geschehen } = aufbau();
+  it("does not accept a mouse movement as presence", () => {
+    // A touchscreen knows no hovering, and a pointer nudged by a sleeve would otherwise keep
+    // the kiosk awake all night.
+    const { target, happened } = setUp();
 
     vi.advanceTimersByTime(900);
-    ziel.dispatchEvent(new Event("pointermove"));
+    target.dispatchEvent(new Event("pointermove"));
     vi.advanceTimersByTime(200);
 
-    expect(geschehen).toHaveBeenCalledTimes(1);
+    expect(happened).toHaveBeenCalledTimes(1);
   });
 
-  it("hoert auf, wenn man sie beendet", () => {
-    const { geschehen, aufhoeren } = aufbau();
+  it("stops when it is stopped", () => {
+    const { happened, stop } = setUp();
 
-    aufhoeren();
+    stop();
     vi.advanceTimersByTime(10_000);
 
-    expect(geschehen).not.toHaveBeenCalled();
+    expect(happened).not.toHaveBeenCalled();
   });
 });

@@ -1,22 +1,19 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
+"""Builds the test images in this directory.
 
-"""Erzeugt die Testbilder in diesem Verzeichnis.
+Call: ``python tests/fixtures/build_test_images.py``
 
-Aufruf: ``python tests/fixtures/build_test_images.py``
+The images deliberately cover the cases where an import fails or -- worse -- silently does
+something wrong:
 
-Die Bilder decken bewusst die Faelle ab, an denen ein Import scheitert oder -- schlimmer -- still
-etwas Falsches tut:
-
-    scan_ohne_exif.jpg      der Normalfall: ein Scan ohne jede Angabe
-    scan_mit_scandatum.jpg  EXIF-Datum von 2019, obwohl das Foto historisch ist
-    scan_vom_scanner.jpg    dasselbe, aber das Geraet nennt sich: "HP Scanjet 3670"
-    kamerafoto.jpg          Kamera und Datum von 2014 -- ein echtes Aufnahmedatum
-    foto_mit_gps.jpg        echtes Digitalfoto mit Koordinaten und Aufnahmedatum
-    hochkant.jpg            Ausrichtung steht im EXIF, nicht in den Pixeln
-    graustufen.tif          TIFF ohne Farbe, wie es Buchscanner liefern
-    cmyk.tif                CMYK -- WebP kennt diesen Farbraum nicht
-    kein_bild.txt           Textdatei mit Bildendung
+    scan_ohne_exif.jpg      the normal case: a scan without any entry at all
+    scan_mit_scandatum.jpg  EXIF date of 2019, although the photo is historic
+    scan_vom_scanner.jpg    the same, but the device names itself: "HP Scanjet 3670"
+    kamerafoto.jpg          camera and a date of 2014 -- a genuine capture date
+    foto_mit_gps.jpg        a genuine digital photo with coordinates and a capture date
+    hochkant.jpg            the orientation stands in the EXIF, not in the pixels
+    graustufen.tif          TIFF without colour, the way book scanners deliver it
+    cmyk.tif                CMYK -- WebP does not know this colour space
+    not_an_image.txt           a text file with an image suffix
 """
 
 import io
@@ -25,51 +22,51 @@ from pathlib import Path
 import piexif
 from PIL import Image, ImageDraw
 
-HIER = Path(__file__).parent
+HERE = Path(__file__).parent
 
 
-def _bild(breite: int, hoehe: int, text: str, farbe: str = "#c8bfae") -> Image.Image:
-    bild = Image.new("RGB", (breite, hoehe), farbe)
-    zeichner = ImageDraw.Draw(bild)
-    zeichner.rectangle([8, 8, breite - 8, hoehe - 8], outline="#3a3128", width=3)
-    zeichner.text((20, hoehe // 2), text, fill="#3a3128")
-    return bild
+def _image(width: int, height: int, text: str, colour: str = "#c8bfae") -> Image.Image:
+    image = Image.new("RGB", (width, height), colour)
+    draw = ImageDraw.Draw(image)
+    draw.rectangle([8, 8, width - 8, height - 8], outline="#3a3128", width=3)
+    draw.text((20, height // 2), text, fill="#3a3128")
+    return image
 
 
-def _mit_exif(bild: Image.Image, ziel: Path, exif_dict: dict) -> None:
-    puffer = io.BytesIO()
-    bild.save(puffer, "JPEG", quality=90)
-    piexif.insert(piexif.dump(exif_dict), puffer.getvalue(), str(ziel))
+def _with_exif(image: Image.Image, target: Path, exif_dict: dict) -> None:
+    buffer = io.BytesIO()
+    image.save(buffer, "JPEG", quality=90)
+    piexif.insert(piexif.dump(exif_dict), buffer.getvalue(), str(target))
 
 
-def _grad_nach_dms(grad: float) -> tuple:
-    grad = abs(grad)
-    d = int(grad)
-    m = int((grad - d) * 60)
-    s = round((grad - d - m / 60) * 3600, 4)
+def _degrees_to_dms(degrees: float) -> tuple:
+    degrees = abs(degrees)
+    d = int(degrees)
+    m = int((degrees - d) * 60)
+    s = round((degrees - d - m / 60) * 3600, 4)
     return ((d, 1), (m, 1), (int(s * 10000), 10000))
 
 
 def main() -> None:
-    # 1. Der Normalfall: gescannter Papierabzug, keinerlei Metadaten.
-    _bild(900, 640, "Scan ohne EXIF").save(HIER / "scan_ohne_exif.jpg", "JPEG", quality=90)
+    # 1. The normal case: a scanned paper print, no metadata whatsoever.
+    _image(900, 640, "Scan ohne EXIF").save(HERE / "scan_ohne_exif.jpg", "JPEG", quality=90)
 
-    # 2. Der gefaehrliche Fall: das EXIF traegt das Datum des Scanvorgangs. Wuerde es uebernommen,
-    #    laege ein Foto von 1932 auf der Zeitleiste bei 2019 -- und wuerde nie nachgefragt.
-    _mit_exif(
-        _bild(900, 640, "Scan, EXIF = Scandatum 2019"),
-        HIER / "scan_mit_scandatum.jpg",
+    # 2. The dangerous case: the EXIF carries the date of the scanning run. If it were adopted, a
+    #    photo from 1932 would sit at 2019 on the timeline -- and would never be asked about.
+    _with_exif(
+        _image(900, 640, "Scan, EXIF = Scandatum 2019"),
+        HERE / "scan_mit_scandatum.jpg",
         {
             "0th": {piexif.ImageIFD.ImageDescription: b"Kirchweih an der Muehle"},
             "Exif": {piexif.ExifIFD.DateTimeOriginal: b"2019:03:14 11:22:33"},
         },
     )
 
-    # 2b. Derselbe Fall, aber die Datei sagt, womit sie entstanden ist. Der Geraetename entscheidet
-    #     dann statt der Jahresgrenze -- und "unbekannt" als Fotograf ist kein Bildnachweis.
-    _mit_exif(
-        _bild(900, 640, "Scan vom Flachbettscanner, 2015"),
-        HIER / "scan_vom_scanner.jpg",
+    # 2b. The same case, but the file says what it was made with. The device name then decides
+    #     instead of the year boundary -- and "unbekannt" as a photographer is no credit.
+    _with_exif(
+        _image(900, 640, "Scan vom Flachbettscanner, 2015"),
+        HERE / "scan_vom_scanner.jpg",
         {
             "0th": {
                 piexif.ImageIFD.Make: b"HP",
@@ -80,11 +77,11 @@ def main() -> None:
         },
     )
 
-    # 2c. Die Gegenrichtung: eine Kamera. Ihr Datum ist ein Aufnahmedatum, auch wenn es weit hinter
-    #     exif_date_max_year liegt -- die Jahresgrenze ist nur der Ersatz fuer eine Geraeteangabe.
-    _mit_exif(
-        _bild(900, 640, "Kamerafoto 2014", farbe="#b6c8b0"),
-        HIER / "kamerafoto.jpg",
+    # 2c. The other direction: a camera. Its date is a capture date even when it lies far beyond
+    #     exif_date_max_year -- the year boundary is only the stand-in for a device entry.
+    _with_exif(
+        _image(900, 640, "Kamerafoto 2014", colour="#b6c8b0"),
+        HERE / "kamerafoto.jpg",
         {
             "0th": {
                 piexif.ImageIFD.Make: b"OLYMPUS IMAGING CORP.",
@@ -95,41 +92,41 @@ def main() -> None:
         },
     )
 
-    # 3. Echtes Digitalfoto: Datum und Ort duerfen uebernommen werden. Koordinaten in Holm.
-    _mit_exif(
-        _bild(900, 640, "Digitalfoto mit GPS", farbe="#b6c8b0"),
-        HIER / "foto_mit_gps.jpg",
+    # 3. A genuine digital photo: date and place may be adopted. Coordinates in Holm.
+    _with_exif(
+        _image(900, 640, "Digitalfoto mit GPS", colour="#b6c8b0"),
+        HERE / "foto_mit_gps.jpg",
         {
             "Exif": {piexif.ExifIFD.DateTimeOriginal: b"1975:06:21 14:05:00"},
             "GPS": {
                 piexif.GPSIFD.GPSLatitudeRef: b"N",
-                piexif.GPSIFD.GPSLatitude: _grad_nach_dms(53.62053),
+                piexif.GPSIFD.GPSLatitude: _degrees_to_dms(53.62053),
                 piexif.GPSIFD.GPSLongitudeRef: b"E",
-                piexif.GPSIFD.GPSLongitude: _grad_nach_dms(9.67601),
+                piexif.GPSIFD.GPSLongitude: _degrees_to_dms(9.67601),
             },
         },
     )
 
-    # 4. Hochkant gescannt: die Pixel sind quer, die Ausrichtung steht im EXIF. Ohne Beachtung
-    #    liegen Vorschaubild und gespeicherte Masse falsch herum.
-    _mit_exif(
-        _bild(900, 600, "hochkant (Orientation 6)"),
-        HIER / "hochkant.jpg",
+    # 4. Scanned in portrait: the pixels are landscape, the orientation stands in the EXIF.
+    #    Ignored, the thumbnail and the stored dimensions end up the wrong way round.
+    _with_exif(
+        _image(900, 600, "hochkant (Orientation 6)"),
+        HERE / "hochkant.jpg",
         {"0th": {piexif.ImageIFD.Orientation: 6}},
     )
 
-    # 5. Graustufen-TIFF, wie es Buchscanner liefern.
-    _bild(800, 600, "Graustufen").convert("L").save(HIER / "graustufen.tif", "TIFF")
+    # 5. A greyscale TIFF, the way book scanners deliver it.
+    _image(800, 600, "Graustufen").convert("L").save(HERE / "graustufen.tif", "TIFF")
 
-    # 6. CMYK -- diesen Farbraum kann WebP nicht speichern.
-    _bild(800, 600, "CMYK").convert("CMYK").save(HIER / "cmyk.tif", "TIFF")
+    # 6. CMYK -- WebP cannot store this colour space.
+    _image(800, 600, "CMYK").convert("CMYK").save(HERE / "cmyk.tif", "TIFF")
 
-    # 7. Keine Bilddatei, trotz Endung.
-    (HIER / "kein_bild.txt").write_text("Das hier ist kein Bild.\n", encoding="utf-8")
+    # 7. Not an image file, despite the suffix.
+    (HERE / "not_an_image.txt").write_text("This is not an image.\n", encoding="utf-8")
 
-    for pfad in sorted(HIER.iterdir()):
-        if pfad.name != Path(__file__).name:
-            print(f"  {pfad.name:28} {pfad.stat().st_size:>8} Bytes")
+    for path in sorted(HERE.iterdir()):
+        if path.name != Path(__file__).name:
+            print(f"  {path.name:28} {path.stat().st_size:>8} Bytes")
 
 
 if __name__ == "__main__":

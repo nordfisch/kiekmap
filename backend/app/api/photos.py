@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Query and serve photos."""
 
 import logging
@@ -23,9 +20,10 @@ from app.services.storage import (
     suffix_for_mime,
     thumbnail_path,
 )
+from app.text import texts
 
 log = logging.getLogger(__name__)
-router = APIRouter(prefix="/photos", tags=["fotos"])
+router = APIRouter(prefix="/photos", tags=["photos"])
 
 #: Upper bound per query. More markers than this make no sense on a map anyway, and the response
 #: should go through in one go on a Pi.
@@ -40,9 +38,10 @@ class Viewport:
     """Map viewport and time range as they arrive in the query string.
 
     Note on the language of error messages, here and elsewhere: the rule is "could this reach
-    the kiosk or the admin area? then German, otherwise English". The bbox errors below can
-    only ever be seen by someone working against the API -- the frontend always sends a valid
-    one. The 404 further down, by contrast, shows up in the visitor's photo overlay.
+    the kiosk or the admin area? then out of ``app.text``, otherwise English in place". The bbox
+    errors below can only ever be seen by someone working against the API -- the frontend always
+    sends a valid one. The 404 further down, by contrast, shows up in the visitor's photo
+    overlay.
     """
 
     def __init__(
@@ -239,7 +238,7 @@ def _get_photo(session: Session, photo_id: int) -> Photo:
         select(Photo).where(Photo.id == photo_id).options(selectinload(Photo.tags))
     )
     if photo is None:
-        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     return photo
 
 
@@ -265,7 +264,7 @@ def thumbnail(
     if not path.is_file():
         # A database row without files points to an incompletely restored backup.
         log.error("Thumbnail missing: %s", path)
-        raise HTTPException(404, "Vorschaubild fehlt")
+        raise HTTPException(404, texts().photos.thumbnail_missing)
 
     return FileResponse(path, media_type="image/webp", headers={"Cache-Control": CACHE_IMMUTABLE})
 
@@ -283,12 +282,12 @@ def image(
         # A row like that has no file to point at, so the visitor gets the same answer as for a
         # missing one -- and the log says which it was.
         log.error("Photo %s carries an unknown MIME type: %s", photo.id, photo.mime)
-        raise HTTPException(404, "Originaldatei fehlt")
+        raise HTTPException(404, texts().photos.original_missing)
 
     path = original_path(settings.photos_dir, photo.sha256, suffix)
     if not path.is_file():
         log.error("Original file missing: %s", path)
-        raise HTTPException(404, "Originaldatei fehlt")
+        raise HTTPException(404, texts().photos.original_missing)
 
     return FileResponse(path, media_type=photo.mime, headers={"Cache-Control": CACHE_IMMUTABLE})
 

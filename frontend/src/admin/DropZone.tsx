@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The area below the two source tiles.
  *
@@ -13,7 +10,7 @@
 
 import { type ReactNode, useRef, useState } from "react";
 
-import { t } from "../text/de";
+import { t } from "../text";
 
 /** The same formats the file field accepts. */
 const ACCEPT = "image/jpeg,image/png,image/tiff,image/webp";

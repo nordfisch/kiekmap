@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * "Where is this?" -- locating a photo by a visitor.
  *
@@ -29,7 +26,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { type Place, fetchHouseNumbers, fetchStreets } from "../api/client";
 import { useContribute } from "../store/contribute";
-import { t } from "../text/de";
+import { t } from "../text";
 import { HouseNumberPicker } from "./HouseNumberPicker";
 import { BackIcon, CheckIcon, CrosshairIcon } from "./icons";
 import { type StreetGroup, groupStreets } from "./streetGroups";

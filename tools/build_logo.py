@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Builds the placeholder emblem at ``frontend/public/logo.png``.
 
     python3 tools/build_logo.py
 
 **Why a script for one file that never changes:** so that its origin is checkable. A municipal
 coat of arms is an official emblem -- copyright-free under § 5 UrhG, but restricted in its use
-regardless (see docs/decisions.md). What ships with this repo must therefore belong to nobody,
-and the shortest proof of that is the code that draws it.
+regardless (see docs/developer/decisions.md). What ships with this repo must therefore belong to
+nobody, and the shortest proof of that is the code that draws it.
 
-The museum replaces the file on its own device; see docs/adaption.md, "Wappen austauschen".
+The museum replaces the file on its own device; see docs/museum/adaption.md, "Putting the coat
+of arms in".
 """
 
 from pathlib import Path
@@ -75,7 +73,7 @@ def main() -> int:
         )
 
     image.resize((WIDTH, HEIGHT), Image.LANCZOS).save(TARGET, "PNG", optimize=True)
-    print(f"{TARGET.relative_to(ROOT)} geschrieben ({TARGET.stat().st_size // 1024} KB).")
+    print(f"{TARGET.relative_to(ROOT)} written ({TARGET.stat().st_size // 1024} KB).")
     return 0
 
 

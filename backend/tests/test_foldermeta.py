@@ -1,22 +1,19 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
+"""Tests of the path layer: what the folder structure says about a photo.
 
-"""Tests der Pfad-Schicht: was die Ordnerstruktur ueber ein Foto sagt.
+A museum archive is sorted, and the sorting is a statement. Discarding it would mean asking
+visitors for the place of a photo whose address stands in its folder name.
 
-Ein Museumsarchiv ist sortiert, und die Sortierung ist eine Aussage. Sie zu verwerfen hiesse,
-Besucher nach dem Ort eines Fotos zu fragen, dessen Adresse im Ordnernamen steht.
+Three mistakes happen silently there, and each has its test here:
 
-Drei Fehler passieren dabei still, und jeder hat hier seinen Test:
+  1. "10 H Brahms" becomes house number 10h. There is no such number -- the photo lands on the
+     street instead of at the house, and nobody sees that anything went wrong.
+  2. The **street centre** overwrites a coordinate from the file. At 150 m it is coarser than the
+     point it replaces: the photo becomes less precise, and it looks like a refinement.
+  3. A statement made by a person is overwritten. Only the EXIF gives way -- and only since it was
+     measured that these coordinates were typed in rather than recorded.
 
-  1. Aus "10 H Brahms" wird die Hausnummer 10h. Die gibt es nicht -- das Foto landet auf der
-     Strasse statt am Haus, und niemand sieht, dass etwas schiefging.
-  2. Die **Strassenmitte** ueberschreibt eine Koordinate aus der Datei. Sie ist mit 150 m groeber
-     als der Punkt, den sie ersetzt: Das Foto wird ungenauer, und es sieht nach Praezisierung aus.
-  3. Eine Angabe von Menschen wird ueberschrieben. Nur das EXIF gibt nach -- und das erst, seit
-     nachgemessen ist, dass diese Koordinaten eingetragen und nicht gemessen wurden.
-
-Die Regel unter 2 und 3 lief bis August 2026 andersherum: Das EXIF schlug den Ordner immer. Warum
-sie gedreht wurde, steht im Modul-Docstring von ``services/foldermeta.py``.
+The rule under 2 and 3 ran the other way round until August 2026: the EXIF always beat the folder.
+Why it was turned around stands in the module docstring of ``services/foldermeta.py``.
 """
 
 import pytest
@@ -32,7 +29,7 @@ from app.services.foldermeta import (
 from app.services.importer import import_file
 
 
-def _ort(session, name, kind, lat=53.62, lon=9.676, street=None, housenumber=None):
+def _place(session, name, kind, lat=53.62, lon=9.676, street=None, housenumber=None):
     session.add(
         Place(
             name=name,
@@ -46,397 +43,393 @@ def _ort(session, name, kind, lat=53.62, lon=9.676, street=None, housenumber=Non
     )
 
 
-def _strasse(session, name):
-    _ort(session, name, "strasse")
+def _street(session, name):
+    _place(session, name, "strasse")
 
 
 @pytest.fixture
-def ortsindex(session):
-    """Eine Strasse aus Holm mit einigen Hausnummern -- und einer, die fehlt."""
-    _ort(session, "Hauptstrasse", "strasse", lat=53.6200, lon=9.6760)
-    _ort(session, "Hoernstrasse", "strasse", lat=53.6210, lon=9.6770)
-    for nummer in ("10", "14", "9a"):
-        _ort(
+def place_index(session):
+    """One street from Holm with a few house numbers -- and one that is missing."""
+    _place(session, "Hauptstrasse", "strasse", lat=53.6200, lon=9.6760)
+    _place(session, "Hoernstrasse", "strasse", lat=53.6210, lon=9.6770)
+    for number in ("10", "14", "9a"):
+        _place(
             session,
-            f"Hauptstrasse {nummer}",
+            f"Hauptstrasse {number}",
             "adresse",
             lat=53.6205,
             lon=9.6765,
             street="Hauptstrasse",
-            housenumber=nummer,
+            housenumber=number,
         )
     session.commit()
     return session
 
 
-class TestHausnummerLesen:
-    def test_name_steht_neben_der_nummer(self):
+class TestReadingAHouseNumber:
+    def test_a_name_stands_beside_the_number(self):
         assert split_housenumber("14 Gasthof Petersen") == ("14", "Gasthof Petersen")
 
-    def test_buchstabe_zaehlt_nur_ohne_leerzeichen(self):
-        """Der stille Fehler: "10 H Brahms" ist Nummer 10, Familie Brahms.
+    def test_a_letter_counts_only_without_a_space(self):
+        """The silent error: "10 H Brahms" is number 10, the Brahms family.
 
-        Als "10h" gelesen findet die Adresse sich im Ortsindex nicht, das Foto rutscht auf den
-        Strassenpunkt -- und dass es genauer haette liegen koennen, sieht danach niemand mehr.
+        Read as "10h" the address is not found in the place index, the photo slides onto the street
+        point -- and afterwards nobody sees that it could have lain more precisely.
         """
         assert split_housenumber("10 H Brahms") == ("10", "H Brahms")
         assert split_housenumber("25a Zahnarztpraxis") == ("25a", "Zahnarztpraxis")
 
-    def test_fuehrende_nullen_sind_ablage_keine_adresse(self):
+    def test_leading_zeros_are_filing_not_an_address(self):
         assert split_housenumber("009a") == ("9a", None)
         assert split_housenumber("001") == ("1", None)
 
-    def test_bei_einer_spanne_zaehlt_die_erste_nummer(self):
+    def test_with_a_range_the_first_number_counts(self):
         assert split_housenumber("099-105 Weltweit") == ("99", "Weltweit")
-        assert split_housenumber("2-6 Hans Hinrich Petersen") == ("2", "Hans Hinrich Petersen")
+        assert split_housenumber("2-6 Gasthof Petersen") == ("2", "Gasthof Petersen")
         assert split_housenumber("011-011a Neubau") == ("11", "Neubau")
 
-    def test_ordner_ohne_nummer_ist_nur_ein_name(self):
+    def test_a_folder_without_a_number_is_only_a_name(self):
         assert split_housenumber("Glasfaser") == (None, "Glasfaser")
 
-    def test_lauter_nullen_sind_keine_hausnummer(self):
-        """ "00" ist der Ablagekorb des Archivs fuer alles ohne Adresse, nicht das Haus Nummer 0.
+    def test_nothing_but_zeros_is_no_house_number(self):
+        """ "00" is the archive's catch-all for everything without an address, not house number 0.
 
-        Als Nummer gelesen bekaeme das Foto den Ortsnamen "Lehmweg 0" -- eine Adresse, die es
-        nirgends gibt. Und weil in dem Namen eine Ziffer steht, wuerde der "Hilf mit"-Bereich
-        auch nie anbieten, sie richtigzustellen (siehe services/needs.py).
+        Read as a number the photo would get the place name "Lehmweg 0" -- an address that exists
+        nowhere. And because that name holds a digit, the contribution panel would never offer to
+        put it right either (see services/needs.py).
         """
         assert split_housenumber("00 div") == (None, "div")
         assert split_housenumber("00") == (None, None)
 
-    def test_zahlname_wird_kein_titel(self, ortsindex):
-        """ "049" ist eine Hausnummer, kein Name -- ein Foto darunter bekommt keinen Titel.
+    def test_a_number_as_a_name_does_not_become_a_title(self, place_index):
+        """ "049" is a house number, not a name -- a photo under it gets no title.
 
-        Sonst hiesse es "Hauptstrasse 49, 049" oder, seit dem 16. August 2026, schlicht "049".
+        Otherwise it would read "Hauptstrasse 49, 049" or, since 16 August 2026, simply "049".
         """
         assert split_housenumber("049") == ("49", None)
 
-        angabe = parse_path(("Hauptstrasse", "049"), street_names(ortsindex))
-        assert (angabe.address, angabe.name) == ("Hauptstrasse 49", None)
+        found = parse_path(("Hauptstrasse", "049"), street_names(place_index))
+        assert (found.address, found.name) == ("Hauptstrasse 49", None)
 
 
-class TestPfadLesen:
-    def test_der_ortsindex_erkennt_die_strasse_nicht_der_ordnername(self, ortsindex):
-        """Es gibt keinen "Strassen"-Schalter im Code -- sonst waere Holm darin verdrahtet."""
-        strassen = street_names(ortsindex)
+class TestReadingThePath:
+    def test_the_place_index_recognises_the_street_not_the_folder_name(self, place_index):
+        """There is no "streets" switch in the code -- otherwise Holm would be wired into it."""
+        streets = street_names(place_index)
 
-        angabe = parse_path(("Strassen", "Hauptstrasse", "14 Gasthof Petersen"), strassen)
+        found = parse_path(("Strassen", "Hauptstrasse", "14 Gasthof Petersen"), streets)
 
-        assert angabe.street == "Hauptstrasse"
-        assert angabe.housenumber == "14"
-        assert angabe.name == "Gasthof Petersen"
-        assert angabe.address == "Hauptstrasse 14"
+        assert found.street == "Hauptstrasse"
+        assert found.housenumber == "14"
+        assert found.name == "Gasthof Petersen"
+        assert found.address == "Hauptstrasse 14"
 
-    def test_ohne_bekannte_strasse_sagt_der_pfad_nichts(self, ortsindex):
-        angabe = parse_path(("Urlaub", "2019"), street_names(ortsindex))
+    def test_without_a_known_street_the_path_says_nothing(self, place_index):
+        found = parse_path(("Urlaub", "2019"), street_names(place_index))
 
-        assert angabe.street is None
-        assert angabe.address is None
+        assert found.street is None
+        assert found.address is None
 
-    def test_ein_verkuerzter_ordnername_findet_die_strasse(self, session):
-        """Das Archiv kuerzt: Ordner "Wiesengrund", Strasse "Im Wiesengrund"."""
-        _strasse(session, "Im Wiesengrund")
+    def test_a_shortened_folder_name_finds_the_street(self, session):
+        """The archive shortens: folder "Wiesengrund", street "Im Wiesengrund"."""
+        _street(session, "Im Wiesengrund")
         session.commit()
 
-        angabe = parse_path(("Wiesengrund", "07"), street_names(session))
+        found = parse_path(("Wiesengrund", "07"), street_names(session))
 
-        assert angabe.street == "Im Wiesengrund"
+        assert found.street == "Im Wiesengrund"
 
-    def test_bei_zwei_moeglichen_strassen_wird_nicht_geraten(self, session):
-        """ "Deelenweg" steckt in "Deelenweg I" und "Deelenweg II".
+    def test_with_two_possible_streets_nothing_is_guessed(self, session):
+        """ "Deelenweg" sits inside "Deelenweg I" and "Deelenweg II".
 
-        Geraten laendeten die Fotos womoeglich am anderen Ende des Dorfes -- und weil sie dann
-        als verortet gelten, sieht das nie jemand. Lieber unverortet und im "Hilf mit"-Bereich.
+        Guessed, the photos might land at the other end of the village -- and because they then
+        count as located, nobody ever sees it. Better unlocated and in the contribution panel.
         """
-        _strasse(session, "Deelenweg I")
-        _strasse(session, "Deelenweg II")
+        _street(session, "Deelenweg I")
+        _street(session, "Deelenweg II")
         session.commit()
 
-        angabe = parse_path(("Deelenweg", "10 Deelenhof"), street_names(session))
+        found = parse_path(("Deelenweg", "10 Deelenhof"), street_names(session))
 
-        assert angabe.street is None
+        assert found.street is None
 
-    def test_eine_hausnummer_ist_kein_strassenname(self, session):
-        """Im Ortsindex steht "Kolonie Autal 2" als Strasse -- und der Hausnummernordner "2"
-        traf sie, eindeutig und voellig falsch.
+    def test_a_house_number_is_not_a_street_name(self, session):
+        """The place index holds "Kolonie Autal 2" as a street -- and the house-number folder "2"
+        matched it, unambiguously and completely wrongly.
 
-        Die beiden Fotos aus "Achter de Moehl/2" landeten damit am anderen Ende des Dorfes,
-        ohne Hausnummer und mit falschem Strassennamen. Nur ein Name ist eine Strasse.
+        The two photos from "Achter de Moehl/2" thereby landed at the other end of the village,
+        without a house number and with the wrong street name. Only a name is a street.
         """
-        _strasse(session, "Achter de Moehl")
-        _strasse(session, "Kolonie Autal 2")
+        _street(session, "Achter de Moehl")
+        _street(session, "Kolonie Autal 2")
         session.commit()
 
-        angabe = parse_path(("Achter de Moehl", "2"), street_names(session))
+        found = parse_path(("Achter de Moehl", "2"), street_names(session))
 
-        assert (angabe.street, angabe.housenumber) == ("Achter de Moehl", "2")
+        assert (found.street, found.housenumber) == ("Achter de Moehl", "2")
 
-    def test_ein_teilwort_ist_kein_strassenname(self, session):
-        """Wortweise, nicht als Zeichenkette: "Horn" ist nicht die "Bredhornstrasse"."""
-        _strasse(session, "Bredhornstrasse")
+    def test_a_part_of_a_word_is_not_a_street_name(self, session):
+        """Word by word, not as a string: "Horn" is not the "Bredhornstrasse"."""
+        _street(session, "Bredhornstrasse")
         session.commit()
 
         assert parse_path(("Horn",), street_names(session)).street is None
 
-    def test_ein_unterordner_darf_die_strasse_wiederholen(self, ortsindex):
-        """Das Archiv legt einen Ordner "Hauptstrasse 14" unter "Hauptstrasse" ab.
+    def test_a_subfolder_may_repeat_the_street(self, place_index):
+        """The archive files a folder "Hauptstrasse 14" under "Hauptstrasse".
 
-        Ungelesen wird daraus kein Haus, sondern ein Name -- und damit ein Titel "Hauptstrasse 14"
-        ueber der Zeile "Hauptstrasse". Genau der Adressabklatsch, den decisions.md, Punkt 48,
-        gerade abgeschafft hat.
+        Unread that becomes not a house but a name -- and thereby a title "Hauptstrasse 14" above
+        the line "Hauptstrasse". Exactly the echo of the address that decisions.md, point 48, has
+        just abolished.
         """
-        angabe = parse_path(("Hauptstrasse", "Hauptstrasse 14"), street_names(ortsindex))
+        found = parse_path(("Hauptstrasse", "Hauptstrasse 14"), street_names(place_index))
 
-        assert (angabe.street, angabe.housenumber, angabe.name) == ("Hauptstrasse", "14", None)
+        assert (found.street, found.housenumber, found.name) == ("Hauptstrasse", "14", None)
 
-    def test_ein_aehnlicher_name_wird_nicht_zerschnitten(self, session):
-        """Die Gegenprobe: Der Vorsatz allein reicht nicht als Grund zum Abschneiden.
+    def test_a_similar_name_is_not_cut_apart(self, session):
+        """The counter-check: the prefix alone is not reason enough to cut.
 
-        Unter der Strasse "Twiete" liegt ein Ordner "Twietenhof". Nur nach dem Vorsatz gekuerzt
-        bliebe "nhof" stehen -- ein Name, den es nie gab.
+        Under the street "Twiete" lies a folder "Twietenhof". Shortened by the prefix alone,
+        "nhof" would remain -- a name that never existed.
         """
-        _strasse(session, "Twiete")
+        _street(session, "Twiete")
         session.commit()
 
-        angabe = parse_path(("Twiete", "Twietenhof"), street_names(session))
+        found = parse_path(("Twiete", "Twietenhof"), street_names(session))
 
-        assert (angabe.housenumber, angabe.name) == (None, "Twietenhof")
+        assert (found.housenumber, found.name) == (None, "Twietenhof")
 
-    def test_die_strasse_darf_der_gewaehlte_ordner_selbst_sein(self, ortsindex):
-        """Am Stick waehlt der Ehrenamtliche den Ordner -- oft die Strasse."""
-        angabe = parse_path(("Hauptstrasse", "14 Museum"), street_names(ortsindex))
+    def test_the_street_may_be_the_chosen_folder_itself(self, place_index):
+        """On the stick the volunteer chooses the folder -- often the street."""
+        found = parse_path(("Hauptstrasse", "14 Museum"), street_names(place_index))
 
-        assert (angabe.street, angabe.housenumber) == ("Hauptstrasse", "14")
+        assert (found.street, found.housenumber) == ("Hauptstrasse", "14")
 
 
-class TestWasAmFotoLandet:
-    def _importiere(
-        self, session, settings, sample_image, unterpfad: str, bild="scan_ohne_exif.jpg"
-    ):
-        wurzel = settings.data_dir / "archiv"
-        ziel = wurzel / unterpfad
-        ziel.parent.mkdir(parents=True, exist_ok=True)
-        ziel.write_bytes(sample_image(bild).read_bytes())
+class TestWhatEndsUpOnThePhoto:
+    def _import(self, session, settings, sample_image, subpath: str, image="scan_ohne_exif.jpg"):
+        root = settings.data_dir / "archiv"
+        target = root / subpath
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(sample_image(image).read_bytes())
 
-        outcome = import_file(session, ziel, settings)
+        outcome = import_file(session, target, settings)
         assert outcome.photo is not None
-        apply_folder_meta(session, outcome.photo, ziel, wurzel, settings)
+        apply_folder_meta(session, outcome.photo, target, root, settings)
         return outcome.photo
 
-    def test_die_hausnummer_verortet_das_foto_am_haus(
-        self, session, settings, sample_image, ortsindex
+    def test_the_house_number_places_the_photo_at_the_house(
+        self, session, settings, sample_image, place_index
     ):
-        foto = self._importiere(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
+        photo = self._import(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
 
-        assert (foto.lat, foto.lon) == (53.6205, 9.6765)
-        assert foto.place_name == "Hauptstrasse 14"
-        assert foto.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
-        assert foto.title == "Museum"
+        assert (photo.lat, photo.lon) == (53.6205, 9.6765)
+        assert photo.place_name == "Hauptstrasse 14"
+        assert photo.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
+        assert photo.title == "Museum"
 
-    def test_der_titel_wiederholt_die_adresse_nicht(
-        self, session, settings, sample_image, ortsindex
+    def test_the_title_does_not_repeat_the_address(
+        self, session, settings, sample_image, place_index
     ):
-        """Der Titel steht in der Detailansicht ueber der Adresse, nicht statt ihrer.
+        """The title stands above the address in the detail view, not instead of it.
 
-        Bis zum 16. August 2026 hiess dieses Foto "Hauptstrasse 14, Museum" -- und darunter stand
-        noch einmal "Hauptstrasse 14". Punkt 41 hat 815 solcher Titel von Hand auseinandergenommen,
-        der naechste Import schrieb 323 davon zurueck. Wo der Ordner nur eine Nummer nennt, bleibt
-        der Titel leer: Eine Zeile, die nur die naechste wiederholt, ist keine.
+        Until 16 August 2026 this photo was called "Hauptstrasse 14, Museum" -- and below it stood
+        "Hauptstrasse 14" once more. Point 41 took 815 such titles apart by hand, and the next
+        import wrote 323 of them back. Where the folder names only a number, the title stays empty:
+        a line that only repeats the next one is not a line.
         """
-        mit_namen = self._importiere(
-            session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg"
-        )
-        assert mit_namen.title == "Museum"
-        assert mit_namen.place_name == "Hauptstrasse 14"
+        with_name = self._import(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
+        assert with_name.title == "Museum"
+        assert with_name.place_name == "Hauptstrasse 14"
 
-        # Ein anderes Bild, sonst erkennt der Import es am SHA-256 als Dublette und liefert das
-        # erste Foto zurueck -- der zweite Teil des Tests pruefte dann sich selbst.
-        ohne_namen = self._importiere(
+        # A different image, otherwise the import recognises it by its SHA-256 as a duplicate and
+        # returns the first photo -- the second half of the test would then check itself.
+        without_name = self._import(
             session, settings, sample_image, "Hauptstrasse/10/b.jpg", "hochkant.jpg"
         )
-        assert ohne_namen.title is None
-        assert ohne_namen.place_name == "Hauptstrasse 10"
+        assert without_name.title is None
+        assert without_name.place_name == "Hauptstrasse 10"
 
-    def test_ordner_ohne_hausnummer_setzt_das_foto_auf_die_strasse(
-        self, session, settings, sample_image, ortsindex
+    def test_a_folder_without_a_house_number_puts_the_photo_on_the_street(
+        self, session, settings, sample_image, place_index
     ):
-        """Bis August 2026 blieb so ein Foto unverortet -- 72 Stueck im Erstbestand.
+        """Until August 2026 such a photo stayed unlocated -- 72 of them in the initial collection.
 
-        Die Begruendung dafuer war, dass der Strassenpunkt wie eine Antwort aussieht und das Foto
-        damit aus "Wo ist das?" fiele. Das galt, solange es zwei Fragen gab. Seit es die dritte
-        gibt, faellt es nicht heraus, sondern in die genauere Frage hinein: Genau ein
-        strassengenaues Foto ohne Hausnummer ist es, wonach das Nachschaerfen sucht.
+        The reason was that the street point looks like an answer and the photo would thereby drop
+        out of "where is this?". That held while there were two questions. Since there is a third,
+        it does not drop out but falls into the more precise question: exactly one street-accurate
+        photo without a house number is what the refinement looks for.
 
-        Die 150 m sagen weiterhin, was der Punkt wert ist. Als Schlagwort bleibt die Strasse
-        ebenfalls stehen.
+        The 150 m still say what the point is worth. The street also stays as a tag.
         """
-        foto = self._importiere(session, settings, sample_image, "Hauptstrasse/119.jpg")
+        photo = self._import(session, settings, sample_image, "Hauptstrasse/119.jpg")
 
-        assert not foto.needs_location
-        assert (foto.lat, foto.lon) == (53.6200, 9.6760)
-        assert foto.location_accuracy_m == place_service.ACCURACY_STREET_M
-        assert foto.location_source == "curator"
-        assert "Hauptstrasse" in {schlagwort.name for schlagwort in foto.tags}
+        assert not photo.needs_location
+        assert (photo.lat, photo.lon) == (53.6200, 9.6760)
+        assert photo.location_accuracy_m == place_service.ACCURACY_STREET_M
+        assert photo.location_source == "curator"
+        assert "Hauptstrasse" in {tag.name for tag in photo.tags}
 
-    def test_unbekannte_hausnummer_faellt_auf_die_strasse_zurueck(
-        self, session, settings, sample_image, ortsindex
+    def test_an_unknown_house_number_falls_back_to_the_street(
+        self, session, settings, sample_image, place_index
     ):
-        """Die Nummer steht nicht in OpenStreetMap, und auch keine mit derselben fuehrenden Zahl.
+        """The number is not in OpenStreetMap, and neither is one with the same leading digits.
 
-        Dann zaehlt der Strassenpunkt, und die 150 m sagen, was er wert ist. Der Name behaelt die
-        Adresse, die uns genannt wurde: Die Beschriftung ist genauer als der Punkt.
+        Then the street point counts, and the 150 m say what it is worth. The name keeps the
+        address we were given: the label is more precise than the point.
         """
-        foto = self._importiere(session, settings, sample_image, "Hauptstrasse/77 Meyer/a.jpg")
+        photo = self._import(session, settings, sample_image, "Hauptstrasse/77 Timm/a.jpg")
 
-        assert (foto.lat, foto.lon) == (53.6200, 9.6760)
-        assert foto.place_name == "Hauptstrasse 77"
-        assert foto.location_accuracy_m == place_service.ACCURACY_STREET_M
+        assert (photo.lat, photo.lon) == (53.6200, 9.6760)
+        assert photo.place_name == "Hauptstrasse 77"
+        assert photo.location_accuracy_m == place_service.ACCURACY_STREET_M
 
-    def test_umnummerierte_hausnummer_landet_beim_nachbarn(
-        self, session, settings, sample_image, ortsindex
+    def test_a_renumbered_house_number_lands_at_the_neighbour(
+        self, session, settings, sample_image, place_index
     ):
-        """Das Archiv sagt "9", der Ortsindex kennt nur "9a" -- dasselbe Haus, aufgeteilt.
+        """The archive says "9", the place index knows only "9a" -- the same house, split up.
 
-        Ohne diese Ruecknahme laegen 57 Fotos des Erstbestands auf der Strassenmitte, darunter 38
-        an einer einzigen Adresse. Der Name behaelt die Nummer, die uns genannt wurde; nur der
-        Punkt kommt vom Nachbarn.
+        Without this fallback 57 photos of the initial collection would lie on the street centre,
+        38 of them at a single address. The name keeps the number we were given; only the point
+        comes from the neighbour.
         """
-        foto = self._importiere(session, settings, sample_image, "Hauptstrasse/9 Meyer/a.jpg")
+        photo = self._import(session, settings, sample_image, "Hauptstrasse/9 Timm/a.jpg")
 
-        assert (foto.lat, foto.lon) == (53.6205, 9.6765)
-        assert foto.place_name == "Hauptstrasse 9"
-        assert foto.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
+        assert (photo.lat, photo.lon) == (53.6205, 9.6765)
+        assert photo.place_name == "Hauptstrasse 9"
+        assert photo.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
 
-    def _mit_gps(self, session, settings, sample_image, unterpfad: str):
-        wurzel = settings.data_dir / "archiv"
-        ziel = wurzel / unterpfad
-        ziel.parent.mkdir(parents=True, exist_ok=True)
-        ziel.write_bytes(sample_image("foto_mit_gps.jpg").read_bytes())
+    def _with_gps(self, session, settings, sample_image, subpath: str):
+        root = settings.data_dir / "archiv"
+        target = root / subpath
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(sample_image("foto_mit_gps.jpg").read_bytes())
 
-        outcome = import_file(session, ziel, settings)
+        outcome = import_file(session, target, settings)
         assert outcome.photo is not None
-        apply_folder_meta(session, outcome.photo, ziel, wurzel, settings)
+        apply_folder_meta(session, outcome.photo, target, root, settings)
         return outcome.photo
 
-    def test_ordneradresse_schlaegt_die_exif_koordinate(
-        self, session, settings, sample_image, ortsindex
+    def test_the_folder_address_beats_the_exif_coordinate(
+        self, session, settings, sample_image, place_index
     ):
-        """Umgekehrt als bis August 2026 -- und der Grund ist nachgemessen.
+        """The other way round than until August 2026 -- and the reason is measured.
 
-        Die alte Regel las sich als Messung gegen Ablage. Im Holmer Bestand ist sie das nicht:
-        278 der 413 EXIF-verorteten Fotos teilen ihre Koordinate mit einem anderen, und an einem
-        Punkt haengen 20 Fotos von **vier verschiedenen Tagen**. Sechs gleiche Nachkommastellen an
-        vier Tagen liefert kein Empfaenger -- das ist eingetragen, nicht gemessen. Also steht eine
-        Ablage gegen die andere, und nur eine davon macht sich am Ortsindex fest. 349 Fotos sassen
-        so da, bis zu 700 m von der Adresse entfernt, die ihr eigener Ordner nannte.
+        The old rule read as measurement against filing. In the Holm collection it is not that: 278
+        of the 413 EXIF-located photos share their coordinate with another one, and at one point
+        hang 20 photos from **four different days**. Six identical decimal places on four days is
+        what no receiver delivers -- that is typed in, not measured. So one filing stands against
+        another, and only one of them is anchored to the place index. 349 photos sat like that, up
+        to 700 m away from the address their own folder named.
         """
-        foto = self._mit_gps(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
+        photo = self._with_gps(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
 
-        assert (foto.lat, foto.lon) == (53.6205, 9.6765)
-        assert foto.place_name == "Hauptstrasse 14"
-        assert foto.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
-        assert foto.location_source == "curator"
+        assert (photo.lat, photo.lon) == (53.6205, 9.6765)
+        assert photo.place_name == "Hauptstrasse 14"
+        assert photo.location_accuracy_m == place_service.ACCURACY_ADDRESS_M
+        assert photo.location_source == "curator"
 
-    def test_strassenmitte_schlaegt_die_exif_koordinate_nicht(
-        self, session, settings, sample_image, ortsindex
+    def test_the_street_centre_does_not_beat_the_exif_coordinate(
+        self, session, settings, sample_image, place_index
     ):
-        """Der Fehlerfall, wenn die Regel zu weit ginge.
+        """The failure case if the rule went too far.
 
-        Ohne Hausnummer bleibt nur der Strassenpunkt, und der ist mit 150 m **groeber** als die
-        Messung, die er ersetzen wuerde. Im Erstbestand traefe das 82 Fotos: Sie wuerden ungenauer,
-        und niemand saehe es.
+        Without a house number only the street point remains, and at 150 m it is **coarser** than
+        the measurement it would replace. In the initial collection that would hit 82 photos: they
+        would become less precise, and nobody would see it.
         """
-        foto = self._mit_gps(session, settings, sample_image, "Hauptstrasse/a.jpg")
+        photo = self._with_gps(session, settings, sample_image, "Hauptstrasse/a.jpg")
 
-        assert foto.lat == pytest.approx(53.62053)
-        assert foto.lon == pytest.approx(9.67601)
-        assert foto.location_accuracy_m is None
-        # Betiteln, benennen und beschlagworten darf der Ordner trotzdem.
-        assert foto.place_name == "Hauptstrasse"
+        assert photo.lat == pytest.approx(53.62053)
+        assert photo.lon == pytest.approx(9.67601)
+        assert photo.location_accuracy_m is None
+        # Titling, naming and tagging by the folder is still allowed.
+        assert photo.place_name == "Hauptstrasse"
 
-    def test_eine_menschliche_angabe_wird_nicht_ueberschrieben(
-        self, session, settings, sample_image, ortsindex
+    def test_a_statement_by_a_person_is_not_overwritten(
+        self, session, settings, sample_image, place_index
     ):
-        """Nur das EXIF gibt nach. Was ein Kurator oder ein Besucher gesagt hat, bleibt stehen."""
-        wurzel = settings.data_dir / "archiv"
-        ziel = wurzel / "Hauptstrasse" / "14 Museum" / "a.jpg"
-        ziel.parent.mkdir(parents=True, exist_ok=True)
-        ziel.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
+        """Only the EXIF gives way. What a curator or a visitor said stays."""
+        root = settings.data_dir / "archiv"
+        target = root / "Hauptstrasse" / "14 Museum" / "a.jpg"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
 
-        outcome = import_file(session, ziel, settings)
+        outcome = import_file(session, target, settings)
         outcome.photo.lat, outcome.photo.lon = 53.5, 9.5
         outcome.photo.location_source = "visitor"
-        apply_folder_meta(session, outcome.photo, ziel, wurzel, settings)
+        apply_folder_meta(session, outcome.photo, target, root, settings)
 
         assert (outcome.photo.lat, outcome.photo.lon) == (53.5, 9.5)
 
-    def test_die_strasse_steht_beim_foto_als_name(self, session, settings, sample_image, ortsindex):
-        """Der Name traegt die Strasse ohne Nummer -- daran erkennt das Nachschaerfen sein Foto.
+    def test_the_street_stands_at_the_photo_as_its_name(
+        self, session, settings, sample_image, place_index
+    ):
+        """The name carries the street without a number -- that is how the refinement finds it.
 
-        Eine Ziffer im Namen hiesse, die Hausnummer sei bekannt, und die Frage entfiele. Siehe
-        ``open_filter("housenumber")`` in ``services/needs.py``.
+        A digit in the name would mean the house number is known, and the question would fall away.
+        See ``open_filter("housenumber")`` in ``services/needs.py``.
         """
-        foto = self._importiere(session, settings, sample_image, "Hauptstrasse/119.jpg")
+        photo = self._import(session, settings, sample_image, "Hauptstrasse/119.jpg")
 
-        assert foto.place_name == "Hauptstrasse"
-        assert not any(zeichen.isdigit() for zeichen in foto.place_name)
+        assert photo.place_name == "Hauptstrasse"
+        assert not any(char.isdigit() for char in photo.place_name)
 
-    def test_die_herkunft_zeigt_auf_das_archiv(
-        self, session, settings, sample_image, ortsindex, monkeypatch
+    def test_the_provenance_points_at_the_archive(
+        self, session, settings, sample_image, place_index, monkeypatch
     ):
         monkeypatch.setattr(settings, "import_provenance", "Archiv, Verzeichnis 01 Orte/")
 
-        foto = self._importiere(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
+        photo = self._import(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
 
-        assert foto.provenance == "Archiv, Verzeichnis 01 Orte/Hauptstrasse/14 Museum/a.jpg"
+        assert photo.provenance == "Archiv, Verzeichnis 01 Orte/Hauptstrasse/14 Museum/a.jpg"
 
-    def test_der_archivpfad_kommt_zu_dem_dazu_was_die_datei_sagt(
-        self, session, settings, sample_image, ortsindex, monkeypatch
+    def test_the_archive_path_is_added_to_what_the_file_says(
+        self, session, settings, sample_image, place_index, monkeypatch
     ):
-        """265 Fotos hatten den Pfad nie bekommen, weil ihre Datei schon eine Herkunft nannte.
+        """265 photos never got the path, because their file already named a provenance.
 
-        Wer ein Foto geliehen hat und wo es im Archiv lag, sind zwei Antworten auf zwei Fragen.
-        Die erste steht in der Datei, die zweite nur im Pfad -- und die zweite laesst sich aus dem
-        Bild nie wieder herstellen. Bis zum 16. August 2026 fuellte diese Zeile nur ein leeres
-        Feld und liess den Pfad in genau den Faellen weg, in denen ohnehin schon jemand
-        mitgedacht hatte.
+        Who lent a photo and where it lay in the archive are two answers to two questions. The
+        first stands in the file, the second only in the path -- and the second can never be
+        recovered from the image. Until 16 August 2026 this line filled only an empty field and
+        left the path out in exactly the cases where somebody had already thought along.
         """
         monkeypatch.setattr(settings, "import_provenance", "Archiv, Verzeichnis 01 Orte/")
 
-        wurzel = settings.data_dir / "archiv"
-        ziel = wurzel / "Hauptstrasse/14 Museum/a.jpg"
-        ziel.parent.mkdir(parents=True, exist_ok=True)
-        ziel.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
-        foto = import_file(session, ziel, settings).photo
-        foto.provenance = "Familie Rissler"
+        root = settings.data_dir / "archiv"
+        target = root / "Hauptstrasse/14 Museum/a.jpg"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
+        photo = import_file(session, target, settings).photo
+        photo.provenance = "Familie Wendt"
 
-        apply_folder_meta(session, foto, ziel, wurzel, settings)
+        apply_folder_meta(session, photo, target, root, settings)
 
-        assert foto.provenance == (
-            "Familie Rissler, Archiv, Verzeichnis 01 Orte/Hauptstrasse/14 Museum/a.jpg"
+        assert photo.provenance == (
+            "Familie Wendt, Archiv, Verzeichnis 01 Orte/Hauptstrasse/14 Museum/a.jpg"
         )
 
-    def test_ohne_eingestellten_vorspann_bleibt_die_herkunft_leer(
-        self, session, settings, sample_image, ortsindex
+    def test_without_a_configured_prefix_the_provenance_stays_empty(
+        self, session, settings, sample_image, place_index
     ):
-        """Nichts Ortsspezifisches im Code: ohne Einstellung wird nichts erfunden."""
-        foto = self._importiere(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
+        """Nothing place-specific in the code: without the setting nothing is invented."""
+        photo = self._import(session, settings, sample_image, "Hauptstrasse/14 Museum/a.jpg")
 
-        assert foto.provenance is None
+        assert photo.provenance is None
 
-    def test_herkunft_wird_auch_ohne_erkannte_strasse_vermerkt(
-        self, session, settings, sample_image, ortsindex, monkeypatch
+    def test_the_provenance_is_recorded_even_without_a_recognised_street(
+        self, session, settings, sample_image, place_index, monkeypatch
     ):
-        """Drei Fotos des Erstbestands hatten gar keine Herkunft -- und keinen Fehler dabei.
+        """Three photos of the initial collection had no provenance at all -- and no error with it.
 
-        Die Herkunft haengt am Pfad, nicht an der Strasse. Wurde keine erkannt, stieg
-        ``apply_folder_meta`` aber schon vorher aus und nahm sie mit: zwei Fotos lagen lose in der
-        Importwurzel, eines unter einem mehrdeutigen Strassennamen. Gerade dort ist der Pfad das
-        Einzige, was von der Ablage uebrig bleibt.
+        The provenance hangs on the path, not on the street. When none was recognised,
+        ``apply_folder_meta`` bailed out earlier and took the provenance with it: two photos lay
+        loose in the import root, one under an ambiguous street name. It is precisely there that
+        the path is the only thing left of the filing.
         """
         monkeypatch.setattr(settings, "import_provenance", "Archiv, Verzeichnis 01 Orte/")
 
-        foto = self._importiere(session, settings, sample_image, "Irgendwas/lose.jpg")
+        photo = self._import(session, settings, sample_image, "Irgendwas/lose.jpg")
 
-        assert foto.place_name is None, "ohne Strasse wird weiterhin nicht verortet"
-        assert foto.provenance == "Archiv, Verzeichnis 01 Orte/Irgendwas/lose.jpg"
+        assert photo.place_name is None, "without a street it is still not located"
+        assert photo.provenance == "Archiv, Verzeichnis 01 Orte/Irgendwas/lose.jpg"

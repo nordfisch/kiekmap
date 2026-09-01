@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The import log.
  *
@@ -11,24 +8,29 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { fetchImportLog } from "../api/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { formatLogTime } from "./format";
 import { Pager } from "./Pager";
 import { clampOffset } from "./pagination";
 import { useLoaded } from "./useLoaded";
 
-const RESULTS: { value: string; label: string }[] = [
-  { value: "", label: t.admin.imports.all },
-  { value: "imported", label: t.admin.imports.imported },
-  { value: "duplicate", label: t.admin.imports.duplicate },
-  { value: "rejected", label: t.admin.imports.rejected },
-];
+/** Functions, not constants: `t` is only resolved after this module has been imported. */
+function results(): { value: string; label: string }[] {
+  return [
+    { value: "", label: t.admin.imports.all },
+    { value: "imported", label: t.admin.imports.imported },
+    { value: "duplicate", label: t.admin.imports.duplicate },
+    { value: "rejected", label: t.admin.imports.rejected },
+  ];
+}
 
-const LABELS: Record<string, string> = {
-  imported: t.admin.imports.imported,
-  duplicate: t.admin.imports.duplicate,
-  rejected: t.admin.imports.rejected,
-};
+function labels(): Record<string, string> {
+  return {
+    imported: t.admin.imports.imported,
+    duplicate: t.admin.imports.duplicate,
+    rejected: t.admin.imports.rejected,
+  };
+}
 
 export function ImportLog() {
   const [result, setResult] = useState("");
@@ -38,7 +40,10 @@ export function ImportLog() {
   useEffect(() => setOffset(0), [result]);
 
   const { data, error, loading } = useLoaded(
-    useCallback(() => fetchImportLog(result || undefined, offset), [result, offset]),
+    useCallback(
+      () => fetchImportLog(result || undefined, offset),
+      [result, offset],
+    ),
   );
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export function ImportLog() {
       <h3 className="admin__heading">{t.admin.imports.title}</h3>
 
       <div className="tabs tabs--filters">
-        {RESULTS.map((option) => (
+        {results().map((option) => (
           <button
             key={option.value}
             type="button"
@@ -64,24 +69,30 @@ export function ImportLog() {
 
       {error && <p className="admin__error">{error}</p>}
       {loading && !data && <p className="admin__note">{t.admin.loading}</p>}
-      {data && data.entries.length === 0 && <p className="admin__note">{t.admin.imports.none}</p>}
+      {data && data.entries.length === 0 && (
+        <p className="admin__note">{t.admin.imports.none}</p>
+      )}
 
       {data && data.entries.length > 0 && (
         <ul className="log-rows">
           {data.entries.map((entry) => (
             <li key={entry.id} className="log-row">
               <span className={`flag flag--${entry.result}`}>
-                {LABELS[entry.result] ?? entry.result}
+                {labels()[entry.result] ?? entry.result}
               </span>
               <span className="log-row__filename">{entry.filename}</span>
               <span className="log-row__message">{entry.message}</span>
-              <span className="log-row__time">{formatLogTime(entry.created_at)}</span>
+              <span className="log-row__time">
+                {formatLogTime(entry.created_at)}
+              </span>
             </li>
           ))}
         </ul>
       )}
 
-      {data && <Pager total={data.total} offset={offset} onOffset={setOffset} />}
+      {data && (
+        <Pager total={data.total} offset={offset} onOffset={setOffset} />
+      )}
     </div>
   );
 }

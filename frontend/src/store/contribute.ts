@@ -1,8 +1,5 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
- * State of the "Hilf mit" panel.
+ * State of the contribution panel.
  *
  * Kept apart from the map state because both run independently: the visitor can explore the map
  * while a question stands on the right, and the other way round.
@@ -25,7 +22,7 @@ import {
   postHouseNumber,
   postLocation,
 } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { useKiosk } from "./kiosk";
 
 /** How long the thank-you note stays before the next question arrives. */
@@ -37,15 +34,16 @@ const THANKS_MS = 2200;
  * Distinguishes visitors at the same device without identifying them: a random value per page
  * load, stored nowhere. The curator can tell whether ten statements came from one person or from
  * ten -- and should not be able to do more than that.
+ *
+ * **`Math.random` on purpose, and this is not a security context.** The key travels in the
+ * request body and the server stores what it is given: it is a label the client asserts about
+ * itself, not a credential. Nothing authenticates on it, and anyone writing their own client
+ * sends whatever value they like however it was generated here. A stronger source would buy
+ * nothing and would drag a crypto polyfill into the test environment behind it. CodeQL reports
+ * this as `js/insecure-randomness`; the alert is dismissed with this reasoning.
  */
 const SESSION_ID = Math.random().toString(36).slice(2, 12);
 
-/**
- * Remember only the last few skipped photos, otherwise nothing would be left to show.
- *
- * One list for both questions, not one each: a photo somebody has just waved away should not come
- * straight back with the other question on it. That would read as "you were not listening".
- */
 const SKIP_MEMORY = 20;
 
 type ContributeState = {

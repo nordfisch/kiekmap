@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * "Zurück · Seite 2 von 8 · Weiter" underneath a list.
  *
@@ -11,7 +8,7 @@
  * should not look like records management.
  */
 
-import { t } from "../text/de";
+import { t } from "../text";
 import { PAGE_SIZE, pageCount, pageNumber } from "./pagination";
 
 export function Pager({

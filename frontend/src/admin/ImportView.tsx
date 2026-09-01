@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Taking photos in -- from the computer or from a USB stick.
  *
@@ -31,7 +28,7 @@ import {
   uploadPhoto,
 } from "../api/admin";
 import type { PhotoDetail } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { titleFromFilename } from "./filename";
 import { type YearInput, fromPhoto, toDate } from "./yearInput";
 import { FileDropZone } from "./DropZone";

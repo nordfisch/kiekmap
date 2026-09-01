@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 from datetime import UTC, date, datetime, timedelta
 
 import pytest
@@ -17,74 +14,73 @@ from app.services.dates import (
 )
 
 
-class TestBalkenbreite:
-    """Wie viele Jahre ein Balken des Zeitschiebers umfasst.
+class TestBarWidth:
+    """How many years one bar of the time slider covers.
 
-    Die Regel schuetzt vor einem stillen Fehler in der *Anzeige*: Ein auf "1920er" datiertes Foto
-    traegt ``date_from = 1920-01-01``, und in Jahresbalken tuermten sich dann zehn Jahrgaenge auf
-    einem einzigen Balken.
+    The rule guards against a silent error in the *display*: a photo dated "1920er" carries
+    ``date_from = 1920-01-01``, and with year bars all ten years of it would land on a single bar.
     """
 
-    def test_jahrgenauer_bestand_bekommt_jahresbalken(self):
+    def test_a_year_precise_collection_gets_year_bars(self):
         assert bar_width(span_years=15, finest=1) == 1
 
-    def test_ein_jahrzehnt_im_bestand_verbietet_jahresbalken(self):
-        """Auch bei kurzer Spanne -- die Genauigkeit entscheidet, nicht die Laenge."""
+    def test_one_decade_in_the_collection_forbids_year_bars(self):
+        """Even for a short span -- the precision decides, not the length."""
         assert bar_width(span_years=15, finest=10) == 10
 
-    def test_lange_spanne_wird_gebuendelt(self):
-        """Sonst stuenden 130 Balken nebeneinander: eine Hecke, kein Bild."""
-        breite = bar_width(span_years=130, finest=1)
+    def test_a_long_span_is_bundled(self):
+        """Otherwise 130 bars would stand side by side, too narrow to read."""
+        width = bar_width(span_years=130, finest=1)
 
-        assert breite > 1
-        assert 130 / breite <= MAX_BARS
+        assert width > 1
+        assert 130 / width <= MAX_BARS
 
-    def test_die_spanne_passt_immer_in_dreissig_balken(self):
-        for spanne in (0, 1, 29, 30, 31, 200, 500):
-            breite = bar_width(span_years=spanne, finest=1)
-            assert spanne / breite <= MAX_BARS, f"Spanne {spanne} sprengt die Leiste"
+    def test_the_span_always_fits_in_thirty_bars(self):
+        for span in (0, 1, 29, 30, 31, 200, 500):
+            width = bar_width(span_years=span, finest=1)
+            assert span / width <= MAX_BARS, f"span {span} exceeds the bar limit"
 
-    def test_sehr_alte_sammlung_sprengt_die_breiten_nicht(self):
-        """Jenseits der breitesten Stufe wird nicht gerechnet, sondern genommen, was da ist."""
+    def test_a_very_old_collection_stays_within_the_widths(self):
+        """Beyond the widest step nothing is calculated; the widest one is taken as it is."""
         assert bar_width(span_years=5000, finest=1) == 50
 
-    def test_leere_sammlung_bleibt_beim_jahr(self):
-        """Ohne Datierungen ist die Spanne null -- das darf keine Division sprengen."""
+    def test_an_empty_collection_stays_with_the_year(self):
+        """Without datings the span is zero -- that must not become a division by zero."""
         assert bar_width(span_years=0, finest=1) == 1
 
 
-class TestZeitraum:
-    def test_tag(self):
+class TestDateRange:
+    def test_day(self):
         assert date_range(1932, 5, 14) == (date(1932, 5, 14), date(1932, 5, 14), DatePrecision.DAY)
 
-    def test_monat_endet_am_letzten_tag(self):
-        assert date_range(1932, 2)[1] == date(1932, 2, 29), "1932 war ein Schaltjahr"
+    def test_a_month_ends_on_its_last_day(self):
+        assert date_range(1932, 2)[1] == date(1932, 2, 29), "1932 was a leap year"
         assert date_range(1933, 2)[1] == date(1933, 2, 28)
 
-    def test_jahr(self):
+    def test_year(self):
         assert date_range(1932) == (date(1932, 1, 1), date(1932, 12, 31), DatePrecision.YEAR)
 
-    def test_jahrzehnt_rundet_auf_den_beginn_ab(self):
-        # "Irgendwann in den Dreissigern" wird als 1934 eingegeben -- gemeint ist 1930-1939.
-        von, bis, _ = date_range(1934, precision=DatePrecision.DECADE)
-        assert (von, bis) == (date(1930, 1, 1), date(1939, 12, 31))
+    def test_a_decade_rounds_down_to_its_beginning(self):
+        # "Irgendwann in den Dreissigern" is entered as 1934 -- what is meant is 1930-1939.
+        start, end, _ = date_range(1934, precision=DatePrecision.DECADE)
+        assert (start, end) == (date(1930, 1, 1), date(1939, 12, 31))
 
-    def test_ohne_jahr_bleibt_alles_offen(self):
+    def test_without_a_year_everything_stays_open(self):
         assert date_range(None) == (None, None, DatePrecision.UNKNOWN)
 
-    def test_genauigkeit_ergibt_sich_aus_der_angabe(self):
+    def test_precision_follows_from_what_was_given(self):
         assert date_range(1932)[2] == DatePrecision.YEAR
         assert date_range(1932, 5)[2] == DatePrecision.MONTH
         assert date_range(1932, 5, 14)[2] == DatePrecision.DAY
 
-    def test_unvollstaendige_angabe_wird_abgelehnt(self):
+    def test_an_incomplete_entry_is_rejected(self):
         with pytest.raises(ValueError):
             date_range(1932, precision=DatePrecision.DAY)
 
 
-class TestBeschriftung:
+class TestLabel:
     @pytest.mark.parametrize(
-        ("jahr", "monat", "tag", "genauigkeit", "erwartet"),
+        ("year", "month", "day", "precision", "expected"),
         [
             (1932, 5, 14, None, "14. Mai 1932"),
             (1932, 5, None, None, "Mai 1932"),
@@ -93,21 +89,21 @@ class TestBeschriftung:
             (None, None, None, None, "Jahr unbekannt"),
         ],
     )
-    def test_format_label(self, jahr, monat, tag, genauigkeit, erwartet):
-        von, bis, g = date_range(jahr, monat, tag, genauigkeit)
-        assert format_label(von, bis, g) == erwartet
+    def test_format_label(self, year, month, day, precision, expected):
+        start, end, found = date_range(year, month, day, precision)
+        assert format_label(start, end, found) == expected
 
 
-class TestKurzeBeschriftung:
-    """Was unter einem Vorschaubild auf der Karte steht.
+class TestShortLabel:
+    """What stands under a thumbnail on the map.
 
-    Drei Unterschiede zur ausgeschriebenen Form, und jeder behebt etwas, was die Karte schlecht
-    kann. Der Tag gehoert nicht unter ein 160 px breites Bild; ein Jahrzehnt bleibt eines; und
-    „Jahr unbekannt" siebenhundertmal untereinander sagt ueber siebenhundert Bilder nichts.
+    Three differences from the written-out form, and each one fixes something the map does badly.
+    The day does not belong under an image 160 px wide; a decade stays a decade; and „Jahr
+    unbekannt" seven hundred times below one another says nothing about seven hundred images.
     """
 
     @pytest.mark.parametrize(
-        ("jahr", "monat", "tag", "genauigkeit", "erwartet"),
+        ("year", "month", "day", "precision", "expected"),
         [
             (2014, 3, 22, None, "2014"),
             (1955, 6, None, None, "1955"),
@@ -116,82 +112,82 @@ class TestKurzeBeschriftung:
             (None, None, None, None, ""),
         ],
     )
-    def test_format_short(self, jahr, monat, tag, genauigkeit, erwartet):
-        von, _, g = date_range(jahr, monat, tag, genauigkeit)
-        assert format_short(von, g) == erwartet
+    def test_format_short(self, year, month, day, precision, expected):
+        start, _, found = date_range(year, month, day, precision)
+        assert format_short(start, found) == expected
 
-    def test_das_jahrzehnt_wird_nicht_zum_jahr_verkuerzt(self):
-        """Der Fall, der still eine Genauigkeit erfaende, die es nicht gibt.
+    def test_a_decade_is_not_shortened_to_a_year(self):
+        """The case that would silently invent a precision that does not exist.
 
-        „1930er" auf „1930" zu kuerzen sieht nach Aufraeumen aus und behauptet ein Jahr, das
-        niemand kennt -- derselbe Fehler, dessentwegen das ganze Datenmodell mit Intervallen
-        arbeitet.
+        Shortening „1930er" to „1930" looks like tidying up and claims a year nobody knows -- the
+        same mistake the whole data model works with intervals to avoid.
         """
-        von, _, g = date_range(1937, None, None, DatePrecision.DECADE)
+        start, _, found = date_range(1937, None, None, DatePrecision.DECADE)
 
-        assert format_short(von, g) == "1930er"
+        assert format_short(start, found) == "1930er"
 
-    def test_ohne_datierung_bleibt_die_zeile_leer(self):
-        # Nicht „Jahr unbekannt": Unter dem Bild steht dann die Adresse allein, und das ist eine
-        # Auskunft statt einer Fehlanzeige.
+    def test_without_a_dating_the_line_stays_empty(self):
+        # Not „Jahr unbekannt": the address then stands under the image on its own, and that is
+        # information rather than a notice of absence.
         assert format_short(None, DatePrecision.UNKNOWN) == ""
 
 
-class TestUeberlappung:
-    """Der Fall, der bei naiver Datumsabfrage still falsch wird."""
+class TestOverlap:
+    """The case that goes silently wrong with a naive date query."""
 
-    def test_jahrzehnt_erscheint_bei_auswahl_mittendrin(self):
-        # Ein auf "1920er" datiertes Foto MUSS erscheinen, wenn der Besucher 1925-1930 waehlt.
-        # Genau das geht verloren, wenn man einen einzelnen Datumswert vergleicht.
-        von, bis, _ = date_range(1920, precision=DatePrecision.DECADE)
-        assert overlaps(von, bis, date(1925, 1, 1), date(1930, 12, 31))
+    def test_a_decade_appears_when_the_selection_starts_inside_it(self):
+        # A photo dated "1920er" MUST appear when the visitor selects 1925-1930. That is exactly
+        # what is lost by comparing a single date value.
+        start, end, _ = date_range(1920, precision=DatePrecision.DECADE)
+        assert overlaps(start, end, date(1925, 1, 1), date(1930, 12, 31))
 
-    def test_beruehrung_am_rand_zaehlt(self):
-        von, bis, _ = date_range(1920, precision=DatePrecision.DECADE)
-        assert overlaps(von, bis, date(1929, 12, 31), date(1950, 1, 1))
-        assert overlaps(von, bis, date(1900, 1, 1), date(1920, 1, 1))
+    def test_touching_at_the_edge_counts(self):
+        start, end, _ = date_range(1920, precision=DatePrecision.DECADE)
+        assert overlaps(start, end, date(1929, 12, 31), date(1950, 1, 1))
+        assert overlaps(start, end, date(1900, 1, 1), date(1920, 1, 1))
 
-    def test_ausserhalb_erscheint_nicht(self):
-        von, bis, _ = date_range(1920, precision=DatePrecision.DECADE)
-        assert not overlaps(von, bis, date(1940, 1, 1), date(1950, 1, 1))
+    def test_outside_does_not_appear(self):
+        start, end, _ = date_range(1920, precision=DatePrecision.DECADE)
+        assert not overlaps(start, end, date(1940, 1, 1), date(1950, 1, 1))
 
-    def test_undatiertes_foto_erscheint_in_keiner_auswahl(self):
-        # Solche Fotos gehoeren in den "Hilf mit"-Bereich, nicht auf die Karte.
+    def test_an_undated_photo_appears_in_no_selection(self):
+        # Such photos belong in the contribution panel, not on the map.
         assert not overlaps(None, None, date(1900, 1, 1), date(2000, 1, 1))
 
 
-class TestTageSeitdem:
-    """Kalendertage, nicht 24-Stunden-Bloecke -- die Uebersicht liest das Ergebnis als Satz vor."""
+class TestDaysSince:
+    """Calendar days, not 24-hour blocks -- the overview reads the result out as a sentence."""
 
     @staticmethod
-    def _gespeichert(zeitpunkt: datetime) -> datetime:
-        """Wie das Geraet einen Zeitpunkt ablegt: UTC, ohne Zeitzonenkennung."""
-        return zeitpunkt.astimezone(UTC).replace(tzinfo=None)
+    def _stored(moment: datetime) -> datetime:
+        """How the device files a point in time: UTC, without a time zone marker."""
+        return moment.astimezone(UTC).replace(tzinfo=None)
 
-    def test_gestern_mittag_ist_ein_tag_her(self):
-        """Der Fall, der in 24-Stunden-Bloecken still zur Null wird.
+    def test_yesterday_noon_is_one_day_ago(self):
+        """The case that silently becomes zero in 24-hour blocks.
 
-        Zwanzig Stunden sind weniger als ein Tag -- gemeint ist trotzdem "gestern", und genau das
-        steht dann auf der Kachel.
+        Twenty hours are less than a day -- what is meant is still "yesterday", and that is what
+        the tile then says.
         """
-        heute_frueh = datetime.now().astimezone().replace(hour=8, minute=0, second=0, microsecond=0)
-        gestern_mittag = heute_frueh - timedelta(hours=20)
+        now = datetime.now().astimezone()
+        this_morning = now.replace(hour=8, minute=0, second=0, microsecond=0)
+        yesterday_noon = this_morning - timedelta(hours=20)
 
-        assert days_since(self._gespeichert(gestern_mittag), heute_frueh.astimezone(UTC)) == 1
+        assert days_since(self._stored(yesterday_noon), this_morning.astimezone(UTC)) == 1
 
-    def test_heute_ist_null(self):
-        jetzt = datetime.now().astimezone().replace(hour=14, minute=0, second=0, microsecond=0)
-        vorhin = jetzt - timedelta(hours=3)
+    def test_today_is_zero(self):
+        now = datetime.now().astimezone().replace(hour=14, minute=0, second=0, microsecond=0)
+        earlier = now - timedelta(hours=3)
 
-        assert days_since(self._gespeichert(vorhin), jetzt.astimezone(UTC)) == 0
+        assert days_since(self._stored(earlier), now.astimezone(UTC)) == 0
 
-    def test_abends_gespeichertes_gehoert_noch_zum_selben_tag(self):
-        """Die Tagesgrenze ist die deutsche, nicht die von Greenwich.
+    def test_saved_in_the_evening_still_belongs_to_the_same_day(self):
+        """The day boundary is the German one, not the one at Greenwich.
 
-        Um 23:30 Uhr Ortszeit ist es in UTC schon der naechste Tag. Wer stur in UTC rechnet,
-        macht daraus einen Tag Unterschied.
+        At 23:30 local time it is already the next day in UTC. Calculating strictly in UTC turns
+        that into a difference of one day.
         """
-        spaet = datetime.now().astimezone().replace(hour=23, minute=30, second=0, microsecond=0)
-        kurz_danach = spaet + timedelta(minutes=15)
+        late = datetime.now().astimezone().replace(hour=23, minute=30, second=0, microsecond=0)
+        shortly_after = late + timedelta(minutes=15)
 
-        assert days_since(self._gespeichert(spaet), kurz_danach.astimezone(UTC)) == 0
+        assert days_since(self._stored(late), shortly_after.astimezone(UTC)) == 0

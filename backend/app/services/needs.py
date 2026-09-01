@@ -1,7 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
-"""What the "Hilf mit" panel can ask about, and in which order.
+"""What the contribution panel can ask about, and in which order.
 
 One module rather than a condition per endpoint, because the same question is asked in three
 places: how many photos are still open, which photo to put up next, and -- in the panel -- what to

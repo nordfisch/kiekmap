@@ -1,14 +1,11 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
+"""Runs the *real* ``alembic/env.py``.
 
-"""Faehrt die *echte* ``alembic/env.py``.
-
-Der Sinn der Probe ist, jene Datei zu pruefen -- eine eigene Umgebung mit einer eigenen Kopie der
-Fremdschluessel-Regel wuerde nur sich selbst bestaetigen. Deshalb wird hier nichts nachgebaut,
-sondern das Original ausgefuehrt; von der Probe kommt allein das ``versions``-Verzeichnis daneben.
+The point of the sample is to check that file -- an environment of its own with its own copy of the
+foreign-key rule would only confirm itself. So nothing is rebuilt here; the original is executed,
+and the sample contributes only the ``versions`` directory beside it.
 """
 
 from pathlib import Path
 
-_echte_umgebung = Path(__file__).resolve().parents[3] / "alembic" / "env.py"
-exec(compile(_echte_umgebung.read_text(encoding="utf-8"), str(_echte_umgebung), "exec"))  # noqa: S102
+_real_environment = Path(__file__).resolve().parents[3] / "alembic" / "env.py"
+exec(compile(_real_environment.read_text(encoding="utf-8"), str(_real_environment), "exec"))  # noqa: S102

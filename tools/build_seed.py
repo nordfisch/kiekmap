@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Builds the sample collection under ``seed/`` -- pictures and metadata, all of it invented.
 
     python3 tools/build_seed.py
@@ -11,7 +8,7 @@
 the collections and provenances are made up. Street names and coordinates are genuine, and they
 have to be: the coordinates must lie inside the ``bbox`` from ``tiles/region.json`` or the map
 shows nothing, and ``place_name`` must match the built gazetteer or the place search in the
-"Hilf mit" panel finds nothing -- and that search is the heart of the demonstration. Streets and
+contribution panel finds nothing -- and that search is the heart of the demonstration. Streets and
 coordinates are public geography out of OpenStreetMap anyway. **A personal reference would only
 arise from tying names to addresses, and that tie is invented.**
 
@@ -20,7 +17,7 @@ just committed files: so that the collection can be adjusted without anybody hav
 again, and so its origin stays checkable.
 
 **The gaps are the point.** A collection in which everything is complete exercises half the
-program. See ``LUECKEN`` below and ``seed/README.md``.
+program. See ``GAPS`` below and ``seed/README.md``.
 """
 
 import hashlib
@@ -34,7 +31,7 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 SEED_DIR = ROOT / "seed"
-IMAGE_DIR = SEED_DIR / "fotos"
+IMAGE_DIR = SEED_DIR / "photos"
 
 # The backend rounds a decade down; a seed that disagreed with it would contradict itself the
 # moment somebody opened the editor. So the same function decides here -- and the same constant:
@@ -384,17 +381,17 @@ CONTRIBUTIONS = [
 ]
 
 #: What must survive any edit to this collection -- checked at the end of every run.
-LUECKEN = {
-    "ohne Jahr": 3,
-    "ohne Ort": 2,
-    "ohne beides": 1,
+GAPS = {
+    "without a year": 3,
+    "without a place": 2,
+    "without either": 1,
     # The fourth gap, added on 10 August 2026. Two, because the number picker has two routes and
     # a single photo would only ever exercise one of them -- see ``STREETS``.
-    "nur strassengenau": 2,
-    "geloescht": 2,
-    "Beitraege": 8,
-    "zurueckgenommen": 2,
-    "ohne Bildnachweis": 1,
+    "street-accurate only": 2,
+    "deleted": 2,
+    "contributions": 8,
+    "withdrawn": 2,
+    "without a credit": 1,
 }
 
 
@@ -405,52 +402,52 @@ def main() -> int:
         old.unlink()
 
     photos = []
-    for foto in COLLECTION:
-        path = IMAGE_DIR / foto.file
-        picture = _picture(rng, foto.portrait)
+    for photo in COLLECTION:
+        path = IMAGE_DIR / photo.file
+        picture = _picture(rng, photo.portrait)
         picture.save(path, "JPEG", quality=82, optimize=True)
 
         entry: dict = {
-            "file": foto.file,
+            "file": photo.file,
             # The change detector of seed.load. Without it every load warns about all eighteen
             # files -- and a warning that always fires is one nobody reads any more.
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-            "title": foto.title,
+            "title": photo.title,
             "title_source": "curator",
-            "description": foto.description,
-            "credit": foto.credit,
-            "provenance": foto.provenance,
-            "tags": list(foto.tags),
-            "status": foto.status,
+            "description": photo.description,
+            "credit": photo.credit,
+            "provenance": photo.provenance,
+            "tags": list(photo.tags),
+            "status": photo.status,
         }
-        if foto.year is not None:
-            start, end, resolved = date_range(foto.year, precision=foto.precision)
+        if photo.year is not None:
+            start, end, resolved = date_range(photo.year, precision=photo.precision)
             entry |= {
                 "date_from": start.isoformat(),
                 "date_to": end.isoformat(),
                 "date_precision": resolved,
                 "date_source": "curator",
             }
-        if foto.address is not None:
-            lat, lon = ADDRESSES[foto.address]
+        if photo.address is not None:
+            lat, lon = ADDRESSES[photo.address]
             entry |= {
                 "lat": lat,
                 "lon": lon,
-                "place_name": foto.address,
+                "place_name": photo.address,
                 "location_accuracy_m": 15,
-                "location_source": foto.location_source,
+                "location_source": photo.location_source,
             }
-        elif foto.street is not None:
-            lat, lon = STREETS[foto.street]
+        elif photo.street is not None:
+            lat, lon = STREETS[photo.street]
             entry |= {
                 "lat": lat,
                 "lon": lon,
-                "place_name": foto.street,
+                "place_name": photo.street,
                 "location_accuracy_m": ACCURACY_STREET_M,
-                "location_source": foto.location_source,
+                "location_source": photo.location_source,
             }
 
-        contributions = [c for c in CONTRIBUTIONS if c[0] == foto.file]
+        contributions = [c for c in CONTRIBUTIONS if c[0] == photo.file]
         if contributions:
             entry["changes"] = [
                 {
@@ -483,30 +480,31 @@ def main() -> int:
 
 
 def _report(photos: list[dict]) -> int:
-    gezaehlt = {
-        "ohne Jahr": sum(1 for p in photos if "date_from" not in p),
-        "ohne Ort": sum(1 for p in photos if "lat" not in p),
-        "ohne beides": sum(1 for p in photos if "date_from" not in p and "lat" not in p),
-        "nur strassengenau": sum(
+    counted = {
+        "without a year": sum(1 for p in photos if "date_from" not in p),
+        "without a place": sum(1 for p in photos if "lat" not in p),
+        "without either": sum(1 for p in photos if "date_from" not in p and "lat" not in p),
+        "street-accurate only": sum(
             1 for p in photos if p.get("location_accuracy_m") == ACCURACY_STREET_M
         ),
-        "geloescht": sum(1 for p in photos if p["status"] != "published"),
-        "Beitraege": sum(len(p.get("changes", [])) for p in photos),
-        "zurueckgenommen": sum(1 for p in photos for c in p.get("changes", []) if c["reverted"]),
-        "ohne Bildnachweis": sum(1 for p in photos if not p["credit"]),
+        "deleted": sum(1 for p in photos if p["status"] != "published"),
+        "contributions": sum(len(p.get("changes", [])) for p in photos),
+        "withdrawn": sum(1 for p in photos for c in p.get("changes", []) if c["reverted"]),
+        "without a credit": sum(1 for p in photos if not p["credit"]),
     }
-    groesse = sum(f.stat().st_size for f in IMAGE_DIR.iterdir()) // 1024
+    size = sum(f.stat().st_size for f in IMAGE_DIR.iterdir()) // 1024
 
     print(
-        f"{len(photos)} Bilder nach {IMAGE_DIR.relative_to(ROOT)} ({groesse} KB), "
-        f"seed.json geschrieben."
+        f"{len(photos)} pictures written to {IMAGE_DIR.relative_to(ROOT)} ({size} KB), "
+        f"seed.json written."
     )
-    for name, soll in LUECKEN.items():
-        ist = gezaehlt[name]
-        print(f"  {name:20} {ist:2}   erwartet {soll:2}   {'ok' if ist == soll else '<-- FEHLT'}")
-    if gezaehlt != LUECKEN:
-        print("\nDie Luecken stimmen nicht mehr. Sie sind kein Versaeumnis, sondern der Grund,")
-        print("warum dieser Bestand das halbe Programm ueberhaupt pruefbar macht.")
+    for name, wanted in GAPS.items():
+        actual = counted[name]
+        state = "ok" if actual == wanted else "<-- MISSING"
+        print(f"  {name:22} {actual:2}   expected {wanted:2}   {state}")
+    if counted != GAPS:
+        print("\nThe gaps no longer add up. They are not an oversight but the reason this")
+        print("collection makes half the program testable at all.")
         return 1
     return 0
 

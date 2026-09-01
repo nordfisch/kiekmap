@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Choosing a folder on a plugged-in USB stick.
  *
@@ -22,7 +19,7 @@ import {
   fetchImportFolders,
   fetchJob,
 } from "../api/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { DropZone } from "./DropZone";
 
 /** Is one plugged in? Faster while reading, so the bar keeps moving. */

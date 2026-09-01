@@ -1,3 +1,6 @@
+<!-- translated-from: docs/museum/usermanual.md -->
+<!-- source-sha: f1bd28600e0930cb0ed0678b6fffe6d5ca6a839c70aadb2b117fcee3bd77bb0a -->
+
 # Anleitung für das Museumsteam
 
 > Zum Ausdrucken und Neben-das-Gerät-Legen gedacht — Bildschirmfotos folgen, wenn das Gerät im
@@ -15,8 +18,6 @@ Zurück zur Karte kommen Sie jederzeit über **„Verwaltung beenden"** oben rec
 vergessen, meldet sich das Gerät nach einer halben Stunde von selbst ab.
 
 ## Fotos hinzufügen
-
-Zwei Wege führen zum selben Ergebnis:
 
 Verwaltung → **Importieren**. Die Seite fragt zwei Dinge, in dieser Reihenfolge:
 
@@ -44,7 +45,7 @@ Dann **„Importieren"**. Das Gerät zeigt, bei welchem Bild es gerade ist.
 
 > **Es gibt noch einen dritten Weg, ganz ohne Verwaltung:** die Bilder am Rechner in den Ordner
 > `incoming` kopieren. Das Gerät nimmt sie von allein auf und legt die Dateien danach in den
-> Unterordner `_erledigt`. Gelöscht wird auch dort nichts.
+> Unterordner `_done`. Gelöscht wird auch dort nichts.
 
 ### Nach dem Importieren
 
@@ -81,7 +82,7 @@ oder suchen Sie etwas, fängt es wieder bei Seite 1 an.
 „Bearbeiten" öffnet das Formular. Zum **Ort** gibt es eine Suche nach Straßennamen; sie funktioniert
 ohne Internet.
 
-Zwei Dinge sind wichtig zu wissen:
+Zwei Besonderheiten:
 
 - Ein **leeres Jahresfeld heißt „unbekannt"**. Wenn Sie eine falsche Jahreszahl herauslöschen und
   speichern, gilt das Bild wieder als undatiert — und wird Besuchern erneut vorgelegt. Das ist so
@@ -130,7 +131,7 @@ dazugekommen ist. Steht am Ende „Neue Bilder gab es nicht", ist das kein Fehle
 Es war schon alles auf dem Stick.
 
 Denselben Stick können Sie immer wieder verwenden. Auf ihm liegt ein Ordner
-`kiekmap-sicherung` — den können Sie an jedem Rechner öffnen, die Bilder liegen dort als ganz
+`kiekmap-backup` — den können Sie an jedem Rechner öffnen, die Bilder liegen dort als ganz
 normale Dateien.
 
 > **Wenn kein Stick erscheint:** Steckt er richtig? Manche sehr alten Sticks werden nicht erkannt.
@@ -148,10 +149,10 @@ Wenn kein Stick zur Hand ist, geht es auch über den Rechner, an dem Sie gerade 
 → **Sicherung** → Kachel **„Als eine Datei"** → **„Sicherung herunterladen"**. Sie bekommen den
 ganzen Bestand als eine ZIP-Datei.
 
-**Der Stick bleibt trotzdem der bessere Weg**, und dafür gibt es zwei handfeste Gründe: Auf den
-Stick schreibt das Gerät beim zweiten Mal nur, was neu ist — die Datei enthält jedes Mal alles und
-dauert entsprechend. Und wenn der Download abbricht, ist die Datei unbrauchbar, während eine
-abgebrochene Sicherung auf dem Stick es nicht ist.
+**Der Stick bleibt trotzdem der bessere Weg**, aus zwei Gründen: Auf den Stick schreibt das Gerät
+beim zweiten Mal nur, was neu ist — die Datei enthält jedes Mal alles und dauert entsprechend.
+Und wenn der Download abbricht, ist die Datei unbrauchbar, während eine abgebrochene Sicherung
+auf dem Stick es nicht ist.
 
 Die Datei ist also die Ergänzung, nicht der Ersatz. Für die Sicherung, die im Museum bleibt,
 nehmen Sie den Stick.
@@ -159,7 +160,7 @@ nehmen Sie den Stick.
 > **Wie kommt so eine Datei wieder ins Gerät?** Auf zwei Wegen. Am Rechner: die ZIP-Datei in den
 > Ordner `incoming` legen. Das Gerät erkennt sie von allein und fragt im Sicherungsbereich nach,
 > ob sie eingespielt werden soll — **von selbst passiert nichts.** Oder über den Stick: die Datei
-> so entpacken, dass dort der Ordner `kiekmap-sicherung` liegt, Stick einstecken, und dann wie
+> so entpacken, dass dort der Ordner `kiekmap-backup` liegt, Stick einstecken, und dann wie
 > im nächsten Abschnitt vorgehen.
 
 ## Eine Sicherung zurückspielen
@@ -209,4 +210,4 @@ Bestand nichts. Von allein passiert dasselbe, sobald das Gerät fünf Minuten un
 über Nacht steht es also morgens ohnehin frisch da.
 
 Bleibt es dabei, hilft nur jemand mit Zugang zum Gerät weiter. Was er wissen muss, steht in
-[operations.md](operations.md).
+[operations.de.md](operations.de.md).

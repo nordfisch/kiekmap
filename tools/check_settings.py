@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Do the settings of ``config.py`` reach the container?
 
 The check exists because of a failure that produced no error message at all. Until 14 August 2026
@@ -72,7 +69,7 @@ def settings_names() -> set[str]:
                 for item in node.body
                 if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name)
             }
-    raise SystemExit(f"Keine Klasse Settings in {CONFIG.relative_to(ROOT)} gefunden.")
+    raise SystemExit(f"No class Settings in {CONFIG.relative_to(ROOT)}.")
 
 
 def backend_service() -> str:
@@ -80,7 +77,7 @@ def backend_service() -> str:
     text = COMPOSE.read_text(encoding="utf-8")
     match = re.search(r"^  backend:\n(.*?)(?=^  \w+:|\Z)", text, re.M | re.S)
     if match is None:
-        raise SystemExit(f"Kein Dienst backend: in {COMPOSE.relative_to(ROOT)} gefunden.")
+        raise SystemExit(f"No service backend: in {COMPOSE.relative_to(ROOT)}.")
     return match.group(1)
 
 
@@ -121,14 +118,14 @@ def main() -> int:
 
     # 1. Reachable?
     if has_env_file:
-        print("  env_file        vorhanden -- die ganze .env erreicht den Container")
+        print("  env_file        present -- the whole .env reaches the container")
     else:
         unreachable = sorted(known - in_environment)
-        print("  env_file        FEHLT")
+        print("  env_file        MISSING")
         if unreachable:
             problems.append(
-                "Ohne env_file fallen diese Einstellungen im Container still auf ihre "
-                "Vorgabe zurueck:\n    " + "\n    ".join(unreachable)
+                "Without env_file these settings fall back to their default inside the "
+                "container, silently:\n    " + "\n    ".join(unreachable)
             )
 
     # 2. and 3. Names that lead nowhere.
@@ -138,35 +135,35 @@ def main() -> int:
     ):
         if unknown := sorted(names - allowed):
             problems.append(
-                f"In {label} stehen Namen, die keine Einstellung sind (Tippfehler wirkt "
-                "folgenlos):\n    " + "\n    ".join(unknown)
+                f"{label} names things that are not settings (a typo has no effect):"
+                "\n    " + "\n    ".join(unknown)
             )
 
     # 4. The unversioned .env -- the one file nobody else reviews.
     if ENV_LOCAL.is_file():
         local = all_names(ENV_LOCAL.read_text(encoding="utf-8"))
         allowed = known | COMPOSE_ONLY
-        bekannt = len(local & allowed)
-        print(f"  .env            vorhanden, {bekannt} von {len(local)} Schluesseln bekannt")
-        if verirrt := strayed(local, allowed):
+        recognised = len(local & allowed)
+        print(f"  .env            present, {recognised} of {len(local)} keys known")
+        if strays := strayed(local, allowed):
             problems.append(
-                "In der .env stehen Einstellungen unter einem Praefix, den es nicht mehr gibt. "
-                "Sie werden gelesen wie Luft, und alles faellt still auf seine Vorgabe "
-                "zurueck:\n    " + "\n    ".join(verirrt)
+                "The .env holds settings under a prefix that no longer exists. They are read "
+                "as thin air, and everything falls back to its default, silently:"
+                "\n    " + "\n    ".join(strays)
             )
         ours = {name for name in local if name.startswith("KIEKMAP_")}
         if unknown := sorted(ours - allowed):
             problems.append(
-                "In der .env stehen Namen mit richtigem Praefix, die keine Einstellung sind "
-                "(Tippfehler wirkt folgenlos):\n    " + "\n    ".join(unknown)
+                "The .env holds names with the right prefix that are not settings "
+                "(a typo has no effect):\n    " + "\n    ".join(unknown)
             )
     else:
-        print("  .env            nicht vorhanden -- uebersprungen")
+        print("  .env            not present -- skipped")
 
-    print(f"  Einstellungen   {len(known)} in config.py, {len(in_environment)} fest gesetzt")
+    print(f"  settings        {len(known)} in config.py, {len(in_environment)} set explicitly")
 
     if not problems:
-        print("Jede Einstellung erreicht den Container.")
+        print("Every setting reaches the container.")
         return 0
     print()
     for problem in problems:

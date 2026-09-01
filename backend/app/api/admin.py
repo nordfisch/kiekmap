@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """The admin area.
 
 Used once or twice a year, by volunteers, on the same touchscreen the visitors use. That shapes
@@ -8,8 +5,8 @@ three decisions:
 
   * A PIN instead of a password -- there is no keyboard. See app/services/auth.py for what makes
     a short secret defensible.
-  * Every message in here is German. By the rule in CLAUDE.md this is admin-facing text, so it is
-    written for the person at the screen, not for whoever calls the API.
+  * Every message in here comes from ``app.text``. This is admin-facing text, so it is written
+    for the person at the screen and follows ``KIEKMAP_LANGUAGE``, not for whoever calls the API.
   * Nothing is really deleted. "Loeschen" sets a status, a visitor contribution can be taken
     back -- both are reversible, and neither loses the file. See models.PhotoStatus.
 """
@@ -56,6 +53,7 @@ from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
 from app.services.importer import apply_batch_defaults, import_upload, upload_name
 from app.services.places import ACCURACY_STREET_M
+from app.text import texts
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -76,7 +74,7 @@ def require_admin(
     """Guard for everything below. Renews the session on the way through."""
     session = auth.sessions.renew(token) if token else None
     if session is None:
-        raise HTTPException(401, "Die Anmeldung ist abgelaufen. Bitte noch einmal anmelden.")
+        raise HTTPException(401, texts().admin.session_expired)
     return session
 
 
@@ -88,19 +86,15 @@ Config = Annotated[Settings, Depends(get_settings)]
 @router.post("/login", response_model=LoginResponse, summary="Sign in with the PIN")
 def login(request: LoginRequest, settings: Config) -> LoginResponse:
     if not settings.admin_pin_hash:
-        raise HTTPException(
-            503,
-            "Es ist noch keine PIN eingerichtet. Sie wird am Rechner gesetzt, "
-            "mit: python -m app.cli pin",
-        )
+        raise HTTPException(503, texts().admin.no_pin_configured)
 
     if (locked := auth.attempts.locked_for()) > 0:
-        raise HTTPException(429, f"Zu viele Versuche. Bitte {locked} Sekunden warten.")
+        raise HTTPException(429, texts().admin.too_many_attempts(locked))
 
     if not auth.verify_pin(request.pin, settings.admin_pin_hash):
         if locked := auth.attempts.record_failure():
-            raise HTTPException(429, f"Zu viele Versuche. Bitte {locked} Sekunden warten.")
-        raise HTTPException(401, "Die PIN stimmt nicht.")
+            raise HTTPException(429, texts().admin.too_many_attempts(locked))
+        raise HTTPException(401, texts().admin.wrong_pin)
 
     auth.attempts.reset()
     session = auth.sessions.issue()
@@ -240,7 +234,7 @@ def _get_photo(session: Session, photo_id: int) -> Photo:
         select(Photo).where(Photo.id == photo_id).options(selectinload(Photo.tags))
     )
     if photo is None:
-        raise HTTPException(404, f"Kein Foto mit der Nummer {photo_id}")
+        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     return photo
 
 
@@ -312,7 +306,7 @@ def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) 
                     DatePrecision(update.date.precision),
                 )
             except ValueError:
-                raise HTTPException(422, "Dieses Datum gibt es nicht.") from None
+                raise HTTPException(422, texts().admin.no_such_date) from None
             photo.date_from, photo.date_to, photo.date_precision = start, end, precision
             photo.date_source = Source.CURATOR
         _record(
@@ -487,33 +481,23 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail
     """
     change = session.get(Change, change_id)
     if change is None:
-        raise HTTPException(404, f"Kein Eintrag mit der Nummer {change_id}")
+        raise HTTPException(404, texts().admin.no_such_entry(change_id))
     if change.source != Source.VISITOR:
-        raise HTTPException(409, "Das ist keine Angabe von Besuchern und bleibt daher stehen.")
+        raise HTTPException(409, texts().admin.not_from_a_visitor)
     if change.reverted_at is not None:
-        raise HTTPException(409, "Das ist bereits geschehen.")
+        raise HTTPException(409, texts().admin.already_taken_back)
 
     photo = _get_photo(session, change.photo_id)
     if not _still_from_visitor(photo, change.field):
-        raise HTTPException(
-            409,
-            "Die Angabe ist inzwischen von Hand bearbeitet worden und bleibt daher stehen.",
-        )
+        raise HTTPException(409, texts().admin.edited_by_hand)
 
     if not _is_newest(session, change):
-        raise HTTPException(
-            409,
-            "Zu diesem Foto gibt es eine neuere Angabe. Bitte diese zuerst zuruecknehmen.",
-        )
+        raise HTTPException(409, texts().admin.a_newer_statement_exists)
 
     if change.field == "housenumber":
         street = places.street_named(session, change.old_value or "")
         if street is None:
-            raise HTTPException(
-                409,
-                "Die Strasse aus dieser Angabe steht nicht mehr im Ortsverzeichnis. "
-                "Der Ort bleibt daher stehen.",
-            )
+            raise HTTPException(409, texts().admin.street_gone_from_the_index)
         photo.lat = street.lat
         photo.lon = street.lon
         photo.place_name = street.name

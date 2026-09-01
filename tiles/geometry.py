@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """The arithmetic behind the gazetteer: grouping ways of equal name and finding their point.
 
 Its own module because both mistakes that lurk here happen **silently** -- the index gets built,

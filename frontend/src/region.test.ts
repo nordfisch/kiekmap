@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { loadRegion } from "./region";
@@ -9,19 +6,19 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function antworte(status: number, koerper?: unknown) {
+function respond(status: number, body?: unknown) {
   vi.stubGlobal(
     "fetch",
     vi.fn(async () => ({
       ok: status >= 200 && status < 300,
       status,
-      json: async () => koerper,
+      json: async () => body,
     })),
   );
 }
 
 describe("loadRegion", () => {
-  it("liest die Regionsdefinition", async () => {
+  it("reads the region definition", async () => {
     const region = {
       name: "Musterhausen",
       bbox: [9.9, 51.4, 10.3, 51.7],
@@ -30,15 +27,15 @@ describe("loadRegion", () => {
       minZoom: 10,
       maxZoom: 15,
     };
-    antworte(200, region);
+    respond(200, region);
 
     await expect(loadRegion()).resolves.toEqual(region);
   });
 
-  it("nennt bei fehlender Datei den Grund und den Ausweg", async () => {
-    // Der haeufigste Fall bei einem frischen Clone: 'make tiles' wurde noch nicht ausgefuehrt.
-    // Eine nackte Fehlermeldung wuerde hier niemandem weiterhelfen.
-    antworte(404);
+  it("names the reason and the way out when the file is missing", async () => {
+    // The most frequent case with a fresh clone: 'make tiles' has not been run yet. A bare
+    // error message would help nobody here.
+    respond(404);
 
     await expect(loadRegion()).rejects.toThrow(/make tiles/);
   });

@@ -1,23 +1,23 @@
 Kiekmap
 =======
 
-Kalle Erlhoff — Idee, Entwicklung, Museumsbezug
+Kalle Erlhoff — idea, development, the museum side
 
-Wer etwas beiträgt, trägt sich hier ein. Der Rechteinhaber steht in NOTICE, die Bedingungen in
-LICENSE; ein Eintrag hier ändert daran nichts.
+Whoever contributes something adds themselves here. The rights holder is named in NOTICE, the terms
+in LICENSE; an entry here changes neither.
 
-Wie das Projekt entstanden ist
-------------------------------
+How the project came about
+--------------------------
 
-Kiekmap ist mit Unterstützung eines KI-Assistenten gebaut worden; die Commits tragen das als
-Co-Authored-By. Rein maschinell Erzeugtes ist nicht urheberrechtlich geschützt — geschützt ist die
-Auswahl- und Anordnungsleistung, und die liegt in den begründeten Entscheidungen unter
-docs/decisions.md offen zutage. Der Anspruch geht deshalb nicht weiter als das: eine
-Copyright-Zeile, nicht der Satz „jede Zeile ist mein Werk". Ausführlich in docs/licensing.md.
+Kiekmap was built with the help of an AI assistant; the commits carry that as Co-Authored-By. What
+is produced purely by machine is not protected by copyright — what is protected is the work of
+selection and arrangement, and that lies open in the reasoned decisions under docs/decisions.md.
+The claim therefore goes no further than that: a copyright line, not the sentence "every line is my
+work". At length in docs/licensing.md.
 
-Bestandteile Dritter
---------------------
+Third-party components
+----------------------
 
-Die Karte stammt aus OpenStreetMap, die Schriften vom Noto Project, die Symbole aus
-protomaps/basemaps-assets. Sie sind in NOTICE genannt; die vollständigen Lizenztexte aller
-mitgelieferten Pakete entstehen beim Bauen als THIRD-PARTY.txt.
+The map comes from OpenStreetMap, the fonts from the Noto Project, the sprites from
+protomaps/basemaps-assets. They are named in NOTICE; the full licence texts of every bundled
+package are produced at build time as THIRD-PARTY.txt.

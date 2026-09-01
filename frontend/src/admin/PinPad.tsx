@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The number pad.
  *
@@ -12,7 +9,7 @@
 import { useState } from "react";
 
 import { useAdmin } from "../store/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 
 const MIN_LENGTH = 4;
 const MAX_LENGTH = 12;

@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The region of the museum's village.
  *
@@ -9,7 +6,7 @@
  * viewport can be adjusted on the Pi without rebuilding the frontend.
  */
 
-import { t } from "./text/de";
+import { t } from "./text";
 
 export type Region = {
   name: string;

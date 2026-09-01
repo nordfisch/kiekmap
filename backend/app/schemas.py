@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """API payload shapes."""
 
 from datetime import UTC, date, datetime
@@ -55,7 +52,8 @@ class PhotoMarker(BaseModel):
     title: str | None
     #: The address, as it stands under the thumbnail. Absent for a photo located from EXIF alone.
     place_name: str | None
-    #: Ready-made German label ("1932", "1920er") so the frontend does no date arithmetic.
+    #: Ready-made label ("1932", "1920er") so the frontend does no date arithmetic. Formatted
+    #: in the language of the instance -- see services/dates.format_label.
     #: Spelled out, for screen readers -- what is *shown* is ``date_short``.
     date_label: str
     #: The same dating as it fits on a map: the year, a decade as "1930er", undated empty.
@@ -210,7 +208,7 @@ class Histogram(BaseModel):
     #: How many years one bar covers. Follows the collection rather than being fixed at a decade --
     #: see ``bar_width`` in services/dates.py for why that matters.
     step: int
-    #: Photos without a date. In no time selection, but in the "Hilf mit" panel.
+    #: Photos without a date. In no time selection, but in the contribution panel.
     undated: int
     #: Span of the whole collection, deliberately **not** of the viewport: the slider axis must not
     #: move under the visitor's hand while they pan the map. See frontend kiosk/timeAxis.ts.
@@ -259,7 +257,7 @@ class DateInput(BaseModel):
     precision: DatePrecision = DatePrecision.YEAR
 
 
-# --- the "Hilf mit" panel ---------------------------------------------------
+# --- the contribution panel ---------------------------------------------------
 
 
 class LocationContribution(BaseModel):
@@ -346,7 +344,7 @@ class PhotoUpdate(BaseModel):
     date: DateInput | None = None
     location: LocationUpdate | None = None
     tags: list[str] | None = None
-    #: Hidden photos disappear from the map and the "Hilf mit" panel, but are not deleted.
+    #: Hidden photos disappear from the map and the contribution panel, but are not deleted.
     status: PhotoStatus | None = None
 
 
@@ -549,7 +547,7 @@ class JobState(BaseModel):
     phase: str
     done: int
     total: int
-    #: German -- goes straight onto the screen.
+    #: From the text catalogue -- goes straight onto the screen.
     message: str
     error: str | None
     #: Rows for the review table, when the finished job produced few enough to be worth showing.
@@ -585,7 +583,7 @@ class UploadItem(BaseModel):
 
     filename: str
     result: str
-    #: German -- this text goes straight into the admin's upload list.
+    #: From the text catalogue -- this text goes straight into the admin's upload list.
     message: str
     #: Set for imported files and for duplicates; the duplicate points at the photo already there.
     photo: PhotoDetail | None
@@ -597,3 +595,14 @@ class UploadResult(BaseModel):
     #: Named rather than silently skipped: "3 waren schon da" is information, silence is not.
     duplicates: int
     rejected: int
+
+
+class InstanceConfig(BaseModel):
+    """What the device is, as far as the interface needs to know.
+
+    ``language`` decides which text catalogue the frontend loads; ``version`` is the same number
+    ``/health`` reports and is here so the admin view can show it without a second call.
+    """
+
+    language: str
+    version: str

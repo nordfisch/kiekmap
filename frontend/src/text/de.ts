@@ -1,15 +1,17 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
- * Every piece of text that reaches a visitor's eyes.
+ * Every piece of text that reaches a visitor's eyes, in German. `en.ts` is the translation.
  *
  * Kept in one place rather than inline, for two reasons: the museum team can have wording changed
- * without anyone hunting through components, and a second language would later be one more file
- * instead of a refactoring.
+ * without anyone hunting through components, and a second language stayed a small job rather than
+ * a refactoring.
  *
- * One caveat for that second language: date labels ("1920er", "Juni 1955") are formatted on the
- * server. Making the kiosk bilingual would mean moving that formatting to the client.
+ * **No `as const`, and that is deliberate.** `Texts` in `types.ts` is `typeof de`, and with
+ * `as const` every string would be its own literal type -- an English catalogue would then have to
+ * carry the German wording to typecheck. Without it the type says "a string here, a function of
+ * two numbers there", which is exactly the promise `en.ts` has to keep.
+ *
+ * The date labels ("1920er", "Juni 1955") are still formatted on the server, and that is now
+ * right rather than a limitation: `KIEKMAP_LANGUAGE` reaches `services/dates.py` too.
  */
 
 // The only import here, and type-only: it is what makes the compiler insist that every question
@@ -30,16 +32,32 @@ function since(days: number | null, what: string, done: string): string {
   return `${days === 1 ? "Tag" : "Tage"} seit ${what}`;
 }
 
-export const t = {
+export const de = {
+  /**
+   * What `Intl` is asked for -- number grouping, decimal comma, month names of a date.
+   *
+   * Part of the language, not of the text: "3,4 MB" against "3.4 MB", "3. Juni" against
+   * "3 June". `admin/format.ts` reads it, and lazily, because it must not be captured before
+   * `setLanguage` has run.
+   */
+  locale: "de-DE",
+
   app: {
     /**
-     * The title above the "Hilf mit" panel, two lines beside the coat of arms.
+     * The title above the contribution panel, two lines beside the coat of arms.
      *
      * The place name deliberately does not stand here but comes from `region.json` -- otherwise
      * the one spot in the project where "Holm" sat in the code would be the largest type on the
      * screen.
      */
     titleLead: "Bilder aus",
+    /**
+     * What stands in the browser tab. Set by `main.tsx`, because `index.html` is written before
+     * the language is known.
+     *
+     * No place name: like `titleLead` it would be the one spot where "Holm" sat in the code.
+     */
+    documentTitle: "Bilder aus unserem Ort",
     /**
      * The arms, which since 9 August 2026 reload instead of opening the admin area.
      *
@@ -94,6 +112,15 @@ export const t = {
     pinLabel: "Gesetzter Ort, verschiebbar",
     untitled: "Ohne Titel",
     photoAlt: "Historisches Foto",
+    /**
+     * The credit at the bottom right of the map -- HTML, because the ODbL asks for the link.
+     *
+     * It is a text on the screen and therefore belongs here, not in `kiosk/mapStyle.ts` where it
+     * stood until 1 September 2026 and stayed German in the English instance. What it has to say
+     * is in docs/licensing.md.
+     */
+    attribution:
+      '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, ODbL',
   },
 
   overlay: {
@@ -556,7 +583,19 @@ export const t = {
       page: (current: number, count: number) => `Seite ${current} von ${count}`,
     },
 
+    /**
+     * The three words `admin/format.ts` puts around its numbers.
+     *
+     * The edges get a word instead of a number: "0 Tage seit der letzten Sicherung" is a puzzle
+     * for somebody who walks up to this device twice a year.
+     */
+    format: {
+      never: "Noch nie",
+      today: "Heute",
+      bytes: "Bytes",
+    },
+
     loading: "Wird geladen …",
     expired: "Die Anmeldung ist abgelaufen.",
   },
-} as const;
+};

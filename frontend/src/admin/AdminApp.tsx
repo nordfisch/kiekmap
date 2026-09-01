@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The admin area.
  *
@@ -15,7 +12,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { type Selection } from "../api/admin";
 import { useAdmin } from "../store/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { Backup } from "./Backup";
 import { Changes } from "./Changes";
 import { ImportLog } from "./ImportLog";
@@ -28,16 +25,26 @@ import { ScrollAreaProvider } from "./scrollArea";
  * The order is deliberate: first tending the collection, then adding to it, then the technical
  * part. "Moderation" sits beside "Fotos" because both are work on content.
  */
-type Section = "overview" | "photos" | "moderation" | "import" | "log" | "backup";
+type Section =
+  "overview" | "photos" | "moderation" | "import" | "log" | "backup";
 
-const SECTIONS: { value: Section; label: string }[] = [
-  { value: "overview", label: t.admin.shell.sections.overview },
-  { value: "photos", label: t.admin.shell.sections.photos },
-  { value: "moderation", label: t.admin.shell.sections.moderation },
-  { value: "import", label: t.admin.shell.sections.import },
-  { value: "log", label: t.admin.shell.sections.log },
-  { value: "backup", label: t.admin.shell.sections.backup },
-];
+/**
+ * A function, not a constant -- and that is not style.
+ *
+ * `t` is resolved in `main.tsx`, after every module has been imported. A `const` built at module
+ * level would freeze the German labels into an English device, silently: the array is filled once
+ * and never looked at again.
+ */
+function sections(): { value: Section; label: string }[] {
+  return [
+    { value: "overview", label: t.admin.shell.sections.overview },
+    { value: "photos", label: t.admin.shell.sections.photos },
+    { value: "moderation", label: t.admin.shell.sections.moderation },
+    { value: "import", label: t.admin.shell.sections.import },
+    { value: "log", label: t.admin.shell.sections.log },
+    { value: "backup", label: t.admin.shell.sections.backup },
+  ];
+}
 
 const TICK_MS = 10_000;
 
@@ -56,7 +63,9 @@ export function AdminApp() {
   const [target] = useState(() => useAdmin.getState().editPhotoId);
   useEffect(() => clearTarget(), [clearTarget]);
 
-  const [section, setSection] = useState<Section>(target === null ? "overview" : "photos");
+  const [section, setSection] = useState<Section>(
+    target === null ? "overview" : "photos",
+  );
   const [photoFilter, setPhotoFilter] = useState<Selection>("all");
   const [minutes, setMinutes] = useState<number | null>(null);
   const body = useRef<HTMLElement>(null);
@@ -100,15 +109,21 @@ export function AdminApp() {
       <header className="admin__header">
         <h1 className="admin__title">{t.admin.shell.title}</h1>
         {minutes !== null && (
-          <span className="admin__remaining">{t.admin.shell.remaining(minutes)}</span>
+          <span className="admin__remaining">
+            {t.admin.shell.remaining(minutes)}
+          </span>
         )}
-        <button type="button" className="button admin__leave" onClick={() => void leave()}>
+        <button
+          type="button"
+          className="button admin__leave"
+          onClick={() => void leave()}
+        >
           {t.admin.shell.leave}
         </button>
       </header>
 
       <nav className="tabs">
-        {SECTIONS.map((entry) => (
+        {sections().map((entry) => (
           <button
             key={entry.value}
             type="button"
@@ -126,11 +141,17 @@ export function AdminApp() {
           {section === "overview" && <Overview onNavigate={navigate} />}
           {/* Remounted when the filter changes, so the list starts on the right one. */}
           {section === "photos" && (
-            <PhotoCare key={photoFilter} initialFilter={photoFilter} openPhotoId={target} />
+            <PhotoCare
+              key={photoFilter}
+              initialFilter={photoFilter}
+              openPhotoId={target}
+            />
           )}
           {section === "import" && (
             <ImportView
-              onReview={() => navigate({ section: "photos", filter: "without_location" })}
+              onReview={() =>
+                navigate({ section: "photos", filter: "without_location" })
+              }
             />
           )}
           {section === "moderation" && <Changes />}

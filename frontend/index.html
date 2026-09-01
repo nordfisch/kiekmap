@@ -1,14 +1,16 @@
 <!doctype html>
-<html lang="de">
+<!-- No lang and no title here: both are set by main.tsx, from KIEKMAP_LANGUAGE. What stands in
+     the tab until the backend has answered is the file name, and nobody reads it. -->
+<html>
   <head>
     <meta charset="UTF-8" />
-    <!-- user-scalable=no: auf der Karte wird gezoomt, nicht auf der Seite. Ohne das verrutscht
-         am Touchscreen beim Zwei-Finger-Zoom das gesamte Layout. -->
+    <!-- user-scalable=no: the map is what gets zoomed, not the page. Without this the whole
+         layout slips on a touchscreen during a two-finger zoom. -->
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Bilder aus unserem Ort</title>
+    <title>Kiekmap</title>
   </head>
   <body>
     <div id="root"></div>

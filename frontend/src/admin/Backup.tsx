@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Backup onto a USB stick or into one file, and restoring from a stick.
  *
@@ -34,7 +31,7 @@ import {
   startBackup,
   startRestore,
 } from "../api/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { formatBytes, formatCount, formatDate } from "./format";
 
 /** While idle: has a stick appeared? While running: how far along is it? */

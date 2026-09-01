@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * State of the visitor view.
  *
@@ -340,7 +337,7 @@ export const useKiosk = create<KioskState>((set, get) => {
     /**
      * Reload after something outside the map changed the collection.
      *
-     * The "Hilf mit" panel is the case this exists for. It promises "Das Foto ist jetzt auf der
+     * The contribution panel is the case this exists for. It promises "Das Foto ist jetzt auf der
      * Karte" -- and without this the promise only came true once somebody happened to pan the
      * map, which is exactly what the older visitors it is written for do not do.
      *

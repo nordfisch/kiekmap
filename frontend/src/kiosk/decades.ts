@@ -1,8 +1,5 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
- * Which decades the "Hilf mit" panel offers.
+ * Which decades the contribution panel offers.
  *
  * They follow from the **collection**, not from a setting: what a collection spans is something
  * the collection itself knows best. This used to sit in `region.json` -- a file where every other

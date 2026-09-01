@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
-"""Build the register at the top of ``docs/history.md`` -- one dated row per section.
+"""Build the register at the top of the history -- one dated row per section.
 
     python3 tools/build_register.py            # write it
     python3 tools/build_register.py --check     # fail if it is out of date
@@ -38,7 +35,7 @@ from pathlib import Path
 from check_anchors import slug
 
 ROOT = Path(__file__).resolve().parent.parent
-HISTORY = ROOT / "docs" / "history.md"
+HISTORY = ROOT / "docs" / "developer" / "archive" / "history.de.md"
 
 BEGIN = "<!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand ändern -->"
 END = "<!-- register:ende -->"
@@ -122,9 +119,17 @@ def register(text: str) -> str:
     undated, order = [], []
     part: Entry | None = None
 
+    # The chronicle starts after the generated block. Everything before it carries no dates: the
+    # title, the table of neighbouring files, the note that the file is closed, the number register
+    # -- and the block's own heading, which would otherwise count as a section. A list of headings
+    # to exclude by name would have to grow with every one of them.
+    chronicle = lines.index(END)
+
     for index, line in enumerate(lines):
+        if index < chronicle:
+            continue
         match = re.match(r"^(#{1,2}) (.+)$", line)
-        if not match or match.group(2) in ("Entstehung", "Register"):
+        if not match:
             continue
         level, heading = match.group(1), match.group(2)
         date = date_below(lines, index)
@@ -147,15 +152,15 @@ def register(text: str) -> str:
 
     if undated:
         raise SystemExit(
-            "Ohne Datum, und damit ohne Platz im Register:\n  "
+            "No date, and therefore no place in the register:\n  "
             + "\n  ".join(undated)
-            + "\n\nJeder Abschnitt nennt sein Datum in den ersten Zeilen darunter, etwa\n"
+            + "\n\nEvery section names its date in the first lines below it, for example\n"
             "  `38ead98` · 19. August 2026."
         )
 
     for (earlier, first), (later, second) in zip(order, order[1:], strict=False):
         if later < earlier:
-            print(f"  Hinweis: {second!r} steht vor {first!r}, ist aber aelter.", file=sys.stderr)
+            print(f"  Note: {second!r} stands before {first!r} but is older.", file=sys.stderr)
 
     rows = []
     for entry in entries:
@@ -173,7 +178,7 @@ def register(text: str) -> str:
         [
             BEGIN,
             "",
-            "## Register",
+            "## Änderungsregister",
             "",
             f"{len(rows)} Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —",
             "die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die",
@@ -191,7 +196,7 @@ def register(text: str) -> str:
 def replaced(text: str, table: str) -> str:
     """The file with its register brought up to date."""
     if BEGIN not in text:
-        raise SystemExit(f"{HISTORY.name} hat keine Marke {BEGIN!r} -- einmal von Hand setzen.")
+        raise SystemExit(f"{HISTORY.name} carries no marker {BEGIN!r} -- set it once by hand.")
     head, rest = text.split(BEGIN, 1)
     _, tail = rest.split(END, 1)
     return head + table + tail
@@ -199,7 +204,7 @@ def replaced(text: str, table: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="nur pruefen, nichts schreiben")
+    parser.add_argument("--check", action="store_true", help="only check, write nothing")
     args = parser.parse_args()
 
     text = HISTORY.read_text(encoding="utf-8")
@@ -207,13 +212,13 @@ def main() -> int:
 
     if args.check:
         if wanted != text:
-            print("Das Register in docs/history.md ist nicht mehr aktuell: make register")
+            print(f"The register in {HISTORY.relative_to(ROOT)} is out of date: make register")
             return 1
-        print("Register aktuell.")
+        print("The register is up to date.")
         return 0
 
     HISTORY.write_text(wanted, encoding="utf-8")
-    print(f"Register geschrieben: {register(text).count(chr(10) + chr(124)) - 2} Eintraege.")
+    print(f"Register written: {register(text).count(chr(10) + chr(124)) - 2} entries.")
     return 0
 
 

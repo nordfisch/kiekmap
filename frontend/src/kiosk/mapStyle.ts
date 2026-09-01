@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * How the map looks.
  *
@@ -18,6 +15,7 @@ import { type Flavor, layers, namedFlavor } from "@protomaps/basemaps";
 import type maplibregl from "maplibre-gl";
 
 import type { Region } from "../region";
+import { t } from "../text";
 
 /**
  * Fonts and icons live locally under /basemaps/.
@@ -175,8 +173,7 @@ export function buildStyle(region: Region): maplibregl.StyleSpecification {
         // The licence belongs beside the name, not only the name: vector tiles are a derivative
         // database in the sense of the ODbL, which asks that they be recognisable as one.
         // See docs/licensing.md.
-        attribution:
-          '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, ODbL',
+        attribution: t.map.attribution,
       },
     },
     layers: layers("protomaps", flavor, { lang: "de" })

@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Time range slider, built like the trim control of a video editor.
  *
@@ -33,7 +30,7 @@ import {
 } from "react";
 
 import { useKiosk } from "../store/kiosk";
-import { t } from "../text/de";
+import { t } from "../text";
 import {
   axisBounds,
   barHeight,

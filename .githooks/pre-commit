@@ -1,47 +1,47 @@
 #!/bin/sh
 #
-# Die sechs Pruefungen, die kein Test je ausfuehrt -- Sprachregelung, Verweise in docs/, der Weg
-# jeder Einstellung in den Container, die Buchfuehrung des Backlogs ueber seine Nummern, und das
-# Register der Historie, und die eine Versionsnummer in ihren zwei Dateien.
+# The checks no test ever runs. Which ones they are stands at the bottom of this file, and that
+# list counts itself -- see docs/developer/decisions.md, point 59.
 #
-# Absichtlich **ohne** die Testreihe: Die laeuft ohnehin, weil `make test` und `make check` sie
-# ausfuehren und niemand sie vergisst. Vergessen werden die sechs hier, und die sind zusammen unter
-# einer Sekunde durch -- ein Hook, den man merkt, wird abgeschaltet.
+# Deliberately **without** the test suite: that runs anyway, because `make test` and `make check`
+# execute it and nobody forgets it. What does get forgotten is what stands below, and together it
+# is done in under a second -- a hook you notice is a hook that gets switched off.
 #
-# Eingeschaltet wird er einmal je Klon:
+# Switched on once per clone:
 #
 #     git config core.hooksPath .githooks
 #
-# Umgangen wird er mit `git commit --no-verify`, was fuer einen halbfertigen Zwischenstand in
-# Ordnung ist. Vor dem Push gehoert `make check` gelaufen.
+# Bypassed with `git commit --no-verify`, which is fine for a half-finished state in between.
+# Before a push, `make check` belongs to have run.
 
 set -e
 
 cd "$(git rev-parse --show-toplevel)"
 
 if ! command -v python3 >/dev/null 2>&1; then
-    echo "Hinweis: python3 fehlt, die sechs Pruefungen entfallen." >&2
+    echo "Note: python3 is missing, the checks below are skipped." >&2
     exit 0
 fi
 
-# Eine Funktion statt einer Schleife ueber Namen, seit eine der Pruefungen ein Argument braucht.
-pruefe() {
-    skript="$1"
+# A function rather than a loop over names, since one of the checks needs an argument.
+check() {
+    script="$1"
     shift
-    if ! python3 "tools/$skript.py" "$@" >/dev/null; then
+    if ! python3 "tools/$script.py" "$@" >/dev/null; then
         echo "" >&2
-        echo "  tools/$skript.py meldet etwas. Im Klartext:" >&2
+        echo "  tools/$script.py has something to say. In full:" >&2
         echo "" >&2
-        python3 "tools/$skript.py" "$@" >&2 || true
+        python3 "tools/$script.py" "$@" >&2 || true
         echo "" >&2
-        echo "  (Zum Umgehen: git commit --no-verify)" >&2
+        echo "  (To bypass: git commit --no-verify)" >&2
         exit 1
     fi
 }
 
-pruefe language_check
-pruefe check_anchors
-pruefe check_settings
-pruefe check_numbers
-pruefe build_register --check
-pruefe set_version --check
+check language_check
+check check_anchors
+check check_settings
+check check_numbers
+check check_translations
+check build_register --check
+check set_version --check

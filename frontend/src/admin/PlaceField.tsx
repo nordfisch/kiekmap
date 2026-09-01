@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Pick a place from the gazetteer.
  *
@@ -12,7 +9,7 @@
 import { useEffect, useId, useState } from "react";
 
 import { type Place, searchPlaces } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 
 const DEBOUNCE_MS = 250;
 const MIN_QUERY = 2;

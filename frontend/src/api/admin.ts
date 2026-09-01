@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Backend access for the admin area. The types mirror backend/app/schemas.py.
  *
@@ -10,7 +7,7 @@
  */
 
 import { PAGE_SIZE } from "../admin/pagination";
-import { t } from "../text/de";
+import { t } from "../text";
 import { type PhotoDetail, readError } from "./client";
 
 export type AdminSession = { token: string; expires_in_s: number };

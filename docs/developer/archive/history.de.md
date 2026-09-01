@@ -9,20 +9,91 @@ Drei Dateien beschreiben dasselbe Projekt und beantworten drei verschiedene Frag
 
 | Datei | Frage |
 |---|---|
-| [../CHANGELOG.md](../CHANGELOG.md) | *Was kann das Programm?* — sortiert nach Keep a Changelog |
-| [decisions.md](decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
-| [architecture.md](architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
-| **history.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
-| [backlog.md](backlog.md) | *Was fehlt noch?* |
+| [../CHANGELOG.md](../../CHANGELOG.md) | *Was kann das Programm?* — sortiert nach Keep a Changelog |
+| [decisions.md](../decisions.md) | *Warum ist es technisch so gebaut?* — die Grundsatzentscheidungen |
+| [architecture.md](../architecture.md) | *Woraus besteht es, und wie greift es ineinander?* |
+| **history.de.md** | *Wie ist es dazu gekommen?* — die Reihenfolge und die Überraschungen |
+| [Issues](https://github.com/nordfisch/kiekmap/issues) | *Was fehlt noch?* |
 
 Die Überraschungen sind das, was sonst niemand aufschreibt. Sie stehen hier als
 *„Was der Plan nicht wusste"* und sind der eigentliche Grund für diese Datei.
 
+## Diese Datei ist abgeschlossen
+
+Sie endet am 25. August 2026 mit der Veröffentlichung und der Fassung v0.8.0. Was danach kam, steht
+in den Commits, in den Pull Requests und in den geschlossenen Issues — dort entsteht es ohnehin.
+
+**Sie bleibt deutsch.** Übersetzt wäre sie eine zweite Fassung, die veraltet, und ihr Wert liegt in
+der Nuance. Vier Monate Arbeitstagebuch bleiben also, wie sie sind.
+
+**Eine Nachfolgerin gibt es nicht.** Was die Arbeit lehrt, wird ein Punkt in
+[decisions.md](../decisions.md) mit kurzer Begründung; wie es verlief, steht in den Commits und den
+geschlossenen Issues.
+
+Ein neuer Abschnitt hier macht `python3 tools/build_register.py --check` rot, weil das
+Änderungsregister dann nicht mehr stimmt. Das ist die beabsichtigte Reibung. Eine Änderung an
+vorhandener Prosa fängt das Werkzeug nicht — dafür gibt es das Review.
+
+## Nummernregister
+
+Die Punktnummern des damaligen Backlogs. **„Punkt N" meint hier nie ein Issue.** Die Zählung
+reicht bis 66, wurde nie neu vergeben und endete am 31. August 2026 mit dem Umzug in die
+[GitHub-Issues](https://github.com/nordfisch/kiekmap/issues). Zu Issue-Nummern konnten die Nummern
+nicht werden, weil GitHub einen Zähler mit den Pull Requests teilt; die Begründung steht in
+[decisions.md](../decisions.md), Punkt 69.
+
+### Offen beim Abschluss — vierzehn Punkte
+
+| Punkt | Issue |
+|---|---|
+| 8 | [#15 · Historische Karte als umschaltbare Grundkarte](https://github.com/nordfisch/kiekmap/issues/15) |
+| 9 | [#16 · Bilder in Bewegung: Diashow, Ken-Burns-Effekt, Attract-Mode](https://github.com/nordfisch/kiekmap/issues/16) |
+| 14 | [#17 · Bedienbarkeitstest mit der echten Zielgruppe](https://github.com/nordfisch/kiekmap/issues/17) |
+| 15 | [#18 · Abnahme auf dem ersten Pi](https://github.com/nordfisch/kiekmap/issues/18) |
+| 18 | [#19 · Wiederherstellung wirklich proben](https://github.com/nordfisch/kiekmap/issues/19) |
+| 19 | [#20 · Displayauflösung und -orientierung des Museumsgeräts](https://github.com/nordfisch/kiekmap/issues/20) |
+| 20 | [#21 · Das Gerät muss einen Stromausfall überstehen](https://github.com/nordfisch/kiekmap/issues/21) |
+| 21 | [#22 · Deployment auf einem Webserver evaluieren](https://github.com/nordfisch/kiekmap/issues/22) |
+| 30 | [#23 · Die Karte nach Schlagwörtern filtern](https://github.com/nordfisch/kiekmap/issues/23) |
+| 31 | [#24 · Einstellungen in der Verwaltung pflegen statt in der `.env`](https://github.com/nordfisch/kiekmap/issues/24) |
+| 34 | [#25 · Eine Karte in der Nachbearbeitung des Imports](https://github.com/nordfisch/kiekmap/issues/25) |
+| 40 | [#26 · Ein Durchgang über die ganze Oberfläche](https://github.com/nordfisch/kiekmap/issues/26) |
+| 43 | [#27 · Der Zeitschieber soll jahrgenau zählen, nicht jahrzehntgenau](https://github.com/nordfisch/kiekmap/issues/27) |
+| 54 | [#28 · Das Layout der Detailansicht dem Bildformat folgen lassen](https://github.com/nordfisch/kiekmap/issues/28) |
+
+### Vergriffen — zweiundfünfzig Nummern
+
+Erledigt, aufgelöst oder gestrichen. Wo ein Abschnitt dieser Datei die Nummer im Titel führt, steht
+er dabei:
+
+- **1** — [Punkt 1: der Erstbestand, in zehn Schritten durchgesehen](#punkt-1-der-erstbestand-in-zehn-schritten-durchgesehen)
+- **22** — [Punkt 22: der Weg nach draussen, an einem Tag](#punkt-22-der-weg-nach-draussen-an-einem-tag)
+- **23** — [Punkt 23: die Lizenz war die kleinere Hälfte](#punkt-23-die-lizenz-war-die-kleinere-hälfte)
+- **39** — [Punkt 39: der Durchgang von aussen](#punkt-39-der-durchgang-von-aussen)
+- **41** — [Der Rest von Punkt 41: Text stand in den falschen Feldern](#der-rest-von-punkt-41-text-stand-in-den-falschen-feldern)
+- **42** — [Punkt 42: 44 Gruppen, und die Maschine durfte nicht entscheiden](#punkt-42-44-gruppen-und-die-maschine-durfte-nicht-entscheiden)
+- **55** — [Punkt 55, beantwortet mit Nein](#punkt-55-beantwortet-mit-nein)
+- **56** — [Punkt 56: der aufgehende Cluster, und zwei stille Nachbarn](#punkt-56-der-aufgehende-cluster-und-zwei-stille-nachbarn)
+- **57** — [Punkt 57, 58 und 59, behoben am selben Tag](#punkt-57-58-und-59-behoben-am-selben-tag)
+- **58** — [Punkt 57, 58 und 59, behoben am selben Tag](#punkt-57-58-und-59-behoben-am-selben-tag)
+- **59** — [Punkt 57, 58 und 59, behoben am selben Tag](#punkt-57-58-und-59-behoben-am-selben-tag)
+- **60** — [Punkt 60: 938 Zeilen in zehn Dateien, und die Tests merken nichts davon](#punkt-60-938-zeilen-in-zehn-dateien-und-die-tests-merken-nichts-davon)
+- **61** — [Punkt 61: zwei Regeln, und beide lagen anders als notiert](#punkt-61-zwei-regeln-und-beide-lagen-anders-als-notiert)
+- **62** — [Punkt 62: die vierte Prüfung prüft etwas anderes als geplant](#punkt-62-die-vierte-prüfung-prüft-etwas-anderes-als-geplant)
+- **63** — [Punkt 63: eine Frage, und die Antwort stand längst im Repo](#punkt-63-eine-frage-und-die-antwort-stand-längst-im-repo)
+- **64** — [Punkt 64, Abschnitt 1: die Namen aus dem Repo](#punkt-64-abschnitt-1-die-namen-aus-dem-repo)
+- **65** — [Punkt 65: veröffentlicht](#punkt-65-veröffentlicht)
+- **66** — [Punkt 66: sechs Meldungen, ein Haken](#punkt-66-sechs-meldungen-ein-haken)
+
+Die übrigen — 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 16, 17, 24, 25, 26, 27, 28, 29, 32, 33, 35, 36, 37,
+38, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53 — sind weiter unten unter ihrem Datum beschrieben, ohne
+die Nummer in der Überschrift zu führen. `grep -n "Punkt 44" docs/history.de.md` findet die Stelle.
+
 <!-- register:anfang -- erzeugt von tools/build_register.py, nicht von Hand ändern -->
 
-## Register
+## Änderungsregister
 
-92 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
+95 Einträge. **Gesucht wird hier meist ein Datum**, nicht ein Titel —
 die Titel sind Merkhilfen. Für ein Stichwort ist `grep` das bessere Werkzeug; die
 Datei ist ausführlich genug dafür.
 
@@ -61,7 +132,7 @@ Datei ist ausführlich genug dafür.
 | 31. Juli 2026 | [5. Fotos am selben Ort](#5-fotos-am-selben-ort) |
 | 31. Juli 2026 | [6. Das Foto im Beitragsbereich groß ansehen](#6-das-foto-im-beitragsbereich-groß-ansehen) |
 | 31. Juli – 2. August 2026 | **[Teil V — Nachbesserungen an der Besucheransicht](#teil-v--nachbesserungen-an-der-besucheransicht)** |
-| 2. August – 22. August 2026 | **[Teil VI — Einzelne Punkte aus dem Backlog](#teil-vi--einzelne-punkte-aus-dem-backlog)** |
+| 2. August – 25. August 2026 | **[Teil VI — Einzelne Punkte aus dem Backlog](#teil-vi--einzelne-punkte-aus-dem-backlog)** |
 | 2. August 2026 | [Verwaltung verlassen lädt die Besucheransicht neu](#verwaltung-verlassen-lädt-die-besucheransicht-neu) |
 | 2. August 2026 | [Der Bearbeitungsdialog fängt oben an](#der-bearbeitungsdialog-fängt-oben-an) |
 | 2. August 2026 | [Gleichnamige Straßen werden nicht mehr verschmolzen](#gleichnamige-straßen-werden-nicht-mehr-verschmolzen) |
@@ -120,6 +191,9 @@ Datei ist ausführlich genug dafür.
 | 21. August 2026 | [Punkt 64, Abschnitt 2: CLAUDE.md war zur Hälfte ein Tagebuch](#punkt-64-abschnitt-2-claudemd-war-zur-hälfte-ein-tagebuch) |
 | 21. August 2026 | [Punkt 64, Abschnitt 3: die Historie war nicht zu lang, sie hatte keinen Eingang](#punkt-64-abschnitt-3-die-historie-war-nicht-zu-lang-sie-hatte-keinen-eingang) |
 | 22. August 2026 | [Punkt 64, Abschnitt 4: die Regel stand da und wurde nicht geprüft](#punkt-64-abschnitt-4-die-regel-stand-da-und-wurde-nicht-geprüft) |
+| 25. August 2026 | [Punkt 22: der Weg nach draussen, an einem Tag](#punkt-22-der-weg-nach-draussen-an-einem-tag) |
+| 25. August 2026 | [Punkt 66: sechs Meldungen, ein Haken](#punkt-66-sechs-meldungen-ein-haken) |
+| 25. August 2026 | [Punkt 65: veröffentlicht](#punkt-65-veröffentlicht) |
 
 <!-- register:ende -->
 ---
@@ -298,7 +372,7 @@ ohne das Zweite fiele ein schreibgeschützter Stick erst auf, nachdem jemand den
 die Wiederherstellung auf einem zweiten, leeren Gerät nachweislich funktioniert.* — Die Funktion
 ist gegen einen echten eingehängten Datenträger erprobt (sichern, inkrementell erneuern,
 zurückspielen, Beiseitelegen). **Beide Hälften des Kriteriums brauchen aber das Gerät und die
-Zielgruppe und stehen deshalb im [backlog](backlog.md).**
+Zielgruppe und standen deshalb im Backlog.**
 
 ## Vormerkung erledigt: „Weiß ich nicht" wechselt die Frage
 
@@ -377,7 +451,7 @@ startet systemd ihn neu.
 *Fertig, wenn: der Pi nach einem Kaltstart ohne Tastatur von selbst in der Karte landet — und nach
 einem gezogenen Netzstecker genauso wieder hochkommt.* — **Gebaut und dokumentiert, aber auf
 keinem Pi gelaufen**; es gab beim Bauen kein Gerät. Geprüft sind der Leerlauf-Reset und die
-Shell-Syntax aller Skripte. Alles andere steht im [backlog](backlog.md).
+Shell-Syntax aller Skripte. Alles andere stand im Backlog.
 
 ## Vormerkung erledigt: Import vom USB-Stick
 
@@ -544,7 +618,7 @@ der Gesamtbestand, im Museum also ständig.
 zeigen den Ausschnitt. Damit verschwindet auch die Ursache dahinter: Vorher bedeutete dieselbe
 Stelle des Schiebers nach jedem Zoom ein anderes Jahr. Zusätzlich ist die Positionsrechnung auf
 0…1 geklammert — der bauliche Riegel, falls Achse und Auswahl je wieder auseinanderlaufen. Steht
-in [decisions.md](decisions.md), Punkt 14.
+in [decisions.md](../decisions.md), Punkt 14.
 
 ## 3. Jahrzehnte kommen aus dem Bestand
 
@@ -596,7 +670,7 @@ Fotos auf demselben Punkt werden seither **vor** dem Clustern zu einem Eintrag z
 supercluster sieht gar keine Dubletten mehr; der Stapel ist auf jeder Zoomstufe ein Marker, so
 dargestellt wie ein einzelnes Foto, mit einer Anzahl in der Ecke. Ein Tipp öffnet die
 Vollbildansicht mit zwei großen Blätterknöpfen. Das Denkmodell bleibt *ein Ort = ein Marker = die
-Fotos von dort*. Steht in [decisions.md](decisions.md), Punkt 15.
+Fotos von dort*. Steht in [decisions.md](../decisions.md), Punkt 15.
 
 Gruppiert wird auf fünf Nachkommastellen, rund einen Meter — das trifft den tatsächlichen Fall:
 Über die Ortssuche verortete Fotos tragen exakt dieselbe Koordinate der Straße. Wer den Punkt von
@@ -658,7 +732,7 @@ Pin bleibt dabei erhalten: Er liegt im Store, nicht in der Ansicht.
 
 # Teil VI — Einzelne Punkte aus dem Backlog
 
-Ab hier keine Blöcke mehr, sondern einzeln aufgegriffene Einträge aus [backlog.md](backlog.md).
+Ab hier keine Blöcke mehr, sondern einzeln aufgegriffene Einträge aus dem Backlog.
 
 ## Verwaltung verlassen lädt die Besucheransicht neu
 
@@ -779,7 +853,7 @@ drittes Ziel bekommen. Der Grund ist derselbe wie überall in diesem Projekt: Be
 Aus „Verstecken" wurde „Löschen": derselbe Status unter dem Wort, unter dem das Museumsteam ihn
 sucht. Bedient wird es im Editor und in jeder Zeile der Fotoliste, beide mit Rückfrage; gelöschte
 Fotos zählen in keiner Kachel mehr mit und stehen in keiner Liste ausser „Gelöscht". Die
-Begründung steht als Punkt 16 in [decisions.md](decisions.md).
+Begründung steht als Punkt 16 in [decisions.md](../decisions.md).
 
 **Der eigentliche Fund war die Migration.** Sie benennt den Wert `hidden` in `deleted` um, und
 weil SQLite einen Check-Constraint nicht ändern kann, baut Alembic die Tabelle `photos` dazu neu:
@@ -1120,7 +1194,7 @@ Fläche an fester Stelle. Der Stick steht links, weil er die bessere Sicherung i
 Zwei Sätze stehen dabei bewusst auf dem Bildschirm und nicht nur in der Dokumentation. Der erste
 ordnet den Weg ein: Das Archiv ist nicht inkrementell, und ein abgebrochener Download ist
 wertlos — beides Eigenschaften, die genau die Begründung für „Ordner statt ZIP" waren
-([decisions.md](decisions.md), Punkt 11). Der zweite sagt, wie eine solche Datei wieder ins Gerät
+([decisions.md](../decisions.md), Punkt 11). Der zweite sagt, wie eine solche Datei wieder ins Gerät
 kommt; ohne ihn sähe die fehlende Rückrichtung wie ein Fehler aus.
 
 Am echten Bestand nachgemessen: 31 MB in 132 Stücken, entpackt 18 Fotos, 36 Vorschaubilder, eine
@@ -1395,7 +1469,7 @@ Erlaubnis, das Zeichen an jeden weiterzugeben, der ein Repo klont.
 
 Der Tausch selbst kostete eine Datei und keine Zeile Logik — weil im Code nirgends steht, was auf
 dem Bild zu sehen ist. Dieselbe Eigenschaft, die ein zweites Museum ohne Fork auskommen lässt, hat
-hier ein Rechtsproblem auf einen Dateitausch reduziert. Begründung: [decisions.md](decisions.md),
+hier ein Rechtsproblem auf einen Dateitausch reduziert. Begründung: [decisions.md](../decisions.md),
 Punkt 21.
 
 ### Der Rewrite: erst „später", nach einer Prüfung „sofort"
@@ -1407,7 +1481,7 @@ keinen Remote, einen Branch, eine Arbeitskopie.** Es war nie irgendwohin gepusht
 keinen fremden Klon, der zerbrechen konnte — und der Preis stieg mit jeder Woche.
 
 Der Preis war die Dokumentation, und er war messbar: **83 der 97 Kurz-Hashes änderten sich, 61
-Zitate in drei Dateien wurden ungültig**, allein `history.md` nennt 71 Commits. Genau diese
+Zitate in drei Dateien wurden ungültig**, allein `history.de.md` nennt 71 Commits. Genau diese
 Verweise machen die Historie hier wertvoll; sie aufzugeben wäre der eigentliche Verlust gewesen.
 Sie sind mitgezogen: `filter-branch` lässt die alte Historie unter `refs/original/` stehen, alt und
 neu ließen sich Position für Position paaren, gegengeprüft an den Betreffzeilen — 97 von 97
@@ -1454,7 +1528,7 @@ der Datei und beschrieb ihr eigenes Problem: Sie mischte auf 405 Zeilen Fehler, 
 Entscheidungsfragen und Ideen in einer Gliederung, die nur nach Bereich sortierte, und kein Punkt
 war zitierbar, weil es ihn nur unter seiner Überschrift gab.
 
-Was daraus wurde, steht in [decisions.md](decisions.md), Punkt 22: vier Arten, zwei Achsen, eine
+Was daraus wurde, steht in [decisions.md](../decisions.md), Punkt 22: vier Arten, zwei Achsen, eine
 Nummer je Punkt, alles in einer Übersichtstabelle am Dateianfang. Erwartet war Aufräumarbeit.
 Herausgekommen sind zwei Dinge, die die Datei vorher nicht gesagt hatte.
 
@@ -1656,7 +1730,7 @@ sähe nicht nach Fehler aus, sondern nach Befund.
 
 Also **nie feiner als die gröbste Datierung im Bestand**, dazu eine Breite, die in dreißig Balken
 passt. Heute ergibt das Jahresbalken, morgen Jahrzehnte — und der Umschwung kommt genau in dem
-Moment, in dem er muss. Begründung in [decisions.md](decisions.md), Punkt 25.
+Moment, in dem er muss. Begründung in [decisions.md](../decisions.md), Punkt 25.
 
 ### Zwei Fehler, die nur der laufende Kiosk zeigte
 
@@ -1853,7 +1927,7 @@ liegt.
 ## Die Straßenauswahl in der Adaptionsanleitung
 
 9. August 2026. Punkt 37, und der günstigste des Tages: reine Dokumentation. Die
-[adaption.md](adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Straßenauswahl
+[adaption.md](../../museum/adaption.md) sagt einem zweiten Museum, was es anfassen muss — die Straßenauswahl
 kam dort seit dem 8. August nur als eine Zeile zu `streetChoice` vor, obwohl sie inzwischen der
 Hauptweg zur Verortung ist.
 
@@ -2021,7 +2095,7 @@ von 3 auf 3,5 rem wuchs. Drei Rechnungen, die auseinanderlaufen konnten, sind je
 gemeinsame Mittellinie: `align-items: center` im Titelfeld, `justify-content: center` im
 Schieberfeld. Nachgemessen liegen alle drei Mitten auf demselben Pixel — 84.
 
-**Und damit hat sich [Punkt 19](backlog.md#19--displayauflösung-und--orientierung-des-museumsgeräts)
+**Und damit hat sich [Punkt 19](https://github.com/nordfisch/kiekmap/issues/20)
 zur Hälfte erledigt**, ohne dass jemand die Frage beantwortet hätte. Er stand als Blocker für
 den Kopfbereich, weil dort `--crest` schrumpfte und der Schieber nicht. Eine Mittellinie gilt in
 jeder Breite. Wo eine Abhängigkeit von einer offenen Frage verschwindet, sobald man die Stelle
@@ -2251,7 +2325,7 @@ Die Frage war, welche Seite irrt. Beantwortet hat sie eine Abfrage von drei Zeil
 teilen ihre Koordinate mit einem anderen Foto**, an einem Punkt hängen 20 Fotos von vier
 verschiedenen Tagen. Sechs gleiche Nachkommastellen an vier Tagen liefert kein Empfänger. Die
 Werte sind eingetragen worden, nicht gemessen — es stand also nie Messung gegen Ablage, sondern
-eine Ablage gegen eine andere. Siehe [decisions.md](decisions.md), Punkt 34.
+eine Ablage gegen eine andere. Siehe [decisions.md](../decisions.md), Punkt 34.
 
 **Das ist beim Vorlegen aufgefallen, nicht beim Planen.** Der Plan hatte die Zahl 331 und den Satz
 „die GPS-Angabe ist echt"; beides war falsch, und beides stand schon im Plan, bevor jemand
@@ -2267,7 +2341,7 @@ das?".
 Der Grund stand in `NEEDS`: `location, date, housenumber`. Eine Frage wird erst erreicht, wenn die
 vor ihr **leer** ist — und 673 undatierte Fotos laufen nie leer. Die dritte Frage wäre nie
 gestellt worden, und der ganze Aufwand von Punkt 36 hätte brachgelegen. Die Reihenfolge ist
-umgedreht; die Begründung steht in [decisions.md](decisions.md), Punkt 35.
+umgedreht; die Begründung steht in [decisions.md](../decisions.md), Punkt 35.
 
 **Und die Reihenfolge liess sich vertauschen, ohne dass im Backend ein Test fiel.** Gemerkt hat es
 allein einer im Frontend, wo dieselbe Liste ein zweites Mal steht — genau die Doppelung, die sonst
@@ -2306,7 +2380,7 @@ Bild. Unter einem Hof des 19. Jahrhunderts hätte dann „P 35" gestanden.
 `provenance` ist das Feld dafür, und der Grund steht seit Stufe 8 im Docstring von `PhotoDetail`:
 Das öffentliche Schema hat kein Feld dafür, *damit* die Angabe nicht auf den Schirm im
 Ausstellungsraum gerät. Nachgeprüft nach dem Umräumen: `/api/photos/247` liefert 28 Felder, und
-keines davon enthält das Wort „Signatur". Siehe [decisions.md](decisions.md), Punkt 36.
+keines davon enthält das Wort „Signatur". Siehe [decisions.md](../decisions.md), Punkt 36.
 
 ### Zwei Anläufe, das Datieren zu automatisieren, und beide waren falsch
 
@@ -2327,7 +2401,7 @@ Regalnummern („P 37" -> 1937) und Hausnummern („Friedhofsweg 30" -> 1930) ni
 Am Ende: **52 datiert, 17 Vorschläge verworfen.** Und das Verworfene ist die teurere Hälfte der
 Entscheidung — ein verworfener Vorschlag kostet nichts, das Foto bleibt in „Wann war das?". Ein
 angenommener falscher macht das Foto datiert, nimmt es aus der Frage und legt es an die falsche
-Stelle der Zeitleiste, wo es niemand mehr ansieht. Siehe [decisions.md](decisions.md), Punkt 37.
+Stelle der Zeitleiste, wo es niemand mehr ansieht. Siehe [decisions.md](../decisions.md), Punkt 37.
 
 ### Was man am Ende sehen konnte
 
@@ -2385,7 +2459,7 @@ Jetzt stehen dort bis zu drei Knöpfe, und ein Tipp gibt Foto und Frage an den B
 Server lernte dafür einen `photo_id`-Parameter -- **einen Wunsch, keine Anweisung**: Er prüft ihn
 gegen dieselbe Bedingung wie jedes andere Foto und fällt sonst auf die Zufallswahl zurück. Alles
 danach ist der gewöhnliche Ablauf; `contribute()` blieb unangetastet. Siehe
-[decisions.md](decisions.md), Punkt 38.
+[decisions.md](../decisions.md), Punkt 38.
 
 ### Der Fund beim Abnehmen: seit zwei Tagen ging kein Beitrag mehr durch
 
@@ -2406,8 +2480,8 @@ Sicherung vom 5. August, also von vor der Migration. **Eine Sicherung bringt ihr
 `_swap_in` tauscht `kiekmap.db` im Ganzen aus, `_reopen_database` hängt das laufende Programm nur
 neu an sie. Migrationen laufen beim *Start*, und eine Wiederherstellung ist kein Start.
 
-Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](usermanual.md) als Einschränkung und
-in [operations.md](operations.md) mit Diagnose und Abhilfe -- samt dem umgekehrten, schlimmeren
+Ein Neustart behebt es. Das steht jetzt im [Benutzerhandbuch](../../museum/usermanual.md) als Einschränkung und
+in [operations.md](../../museum/operations.md) mit Diagnose und Abhilfe -- samt dem umgekehrten, schlimmeren
 Fall: Eine Sicherung, die *neuer* ist als das Programm, lässt das Gerät gar nicht erst hochkommen.
 
 Dass es niemandem auffiel, hat einen zweiten Grund, und der ist der unangenehmere: **Alles Prüfen
@@ -2439,7 +2513,7 @@ zwanzigmal „Hauptstraße Nr. ?", vierzehnmal „Hörnstraße 9".
 was einen Tag zuvor für 815 Fotos entfernt worden war. Dazu zwei Folgen, die erst beim Aufschreiben
 sichtbar wurden: Ein kopierter Titel veraltet, sobald ein Besucher die Hausnummer nachschärft. Und
 die Unterscheidung „hat einen Titel" verschwände -- danach hätten alle 929 einen, und
-[Punkt 1](backlog.md) hätte seine Arbeitsgrundlage verloren.
+Punkt 1 hätte seine Arbeitsgrundlage verloren.
 
 Gebaut wurde deshalb die Hälfte, die Zugewinn ist: **75 Titel aus Beschreibungen geschrieben**,
 zusammengefasst statt abgeschnitten -- „Errichtung des Funkmastes" wurde „Funkmast". Die 152
@@ -2475,7 +2549,7 @@ Abschnitte. **Das Suchmuster muss bei `##` genauso halten wie bei `###`.**
 
 *14. August 2026.* Punkt 17. `make prod` war nie gelaufen -- beim Bauen stand kein Docker zur
 Verfügung. Auf dem Pi ist das der einzige Betriebsmodus, und
-[Punkt 21](backlog.md) begründete sich ausdrücklich mit „es läuft schon in Containern": genau
+[Punkt 21](https://github.com/nordfisch/kiekmap/issues/22) begründete sich ausdrücklich mit „es läuft schon in Containern": genau
 der Satz, den niemand geprüft hatte.
 
 Der Entwicklungsmac taugte dafür besser als erwartet. Docker Server 27.4 auf `linux/arm64` ist
@@ -2512,8 +2586,8 @@ Metadaten der Datei selbst. Erst der Blick in `docker exec … env` zeigte, dass
 `deploy/docker-compose.mac.yml`, das genau diese beiden Einhängungen ersetzt und sonst nichts.
 **Der USB-Weg der Sicherung bleibt damit ungeprüft** -- gerade der Fall, den `rshared` lösen
 soll, nämlich ein erst nach dem Start eingesteckter Stick. Er ist nach
-[Punkt 18](backlog.md) gewandert, das Verhalten nach Stromausfall und Neustart nach
-[Punkt 15](backlog.md). Wer später „Container sind geprüft" zitiert, soll die zwei Lücken
+[Punkt 18](https://github.com/nordfisch/kiekmap/issues/19) gewandert, das Verhalten nach Stromausfall und Neustart nach
+[Punkt 15](https://github.com/nordfisch/kiekmap/issues/18). Wer später „Container sind geprüft" zitiert, soll die zwei Lücken
 mitlesen.
 
 ### Und ein Fehler von mir, der lehrreicher war als das Ergebnis
@@ -2546,7 +2620,7 @@ aussehend wie eine richtige Sicherung.
 
 Der Docstring von `find_drives` benannte diesen Fall bereits als den, den die Einhängeprüfung
 verhindern soll. Der Symlink war das Loch darin. Behoben in zwei Zeilen, festgehalten als
-[Punkt 40](decisions.md).
+[Punkt 40](../decisions.md).
 
 **Zwei Dinge daran sind das Aufschreiben wert.** Erstens: Der Fund kam aus dem Rest, den ich als
 ungeprüft stehengelassen hatte. Eine ehrlich benannte Lücke ist mehr wert als eine, die man
@@ -2609,7 +2683,7 @@ einstellbar. Aufgefallen ist das nicht mir, sondern dem Werkzeug, beim ersten La
 
 *15. August 2026.* Punkt 48. Der bisherige Name beschrieb, was das Programm tut; **Kiekmap** —
 plattdeutsch *kieken* — sagt, was es ist, und nennt dabei keinen Ort. Warum das keine Geschmacks-,
-sondern eine Bauentscheidung ist, steht als [Punkt 41](decisions.md) daneben: Das zweite Museum
+sondern eine Bauentscheidung ist, steht als [Punkt 41](../decisions.md) daneben: Das zweite Museum
 soll eine eigene `region.json` brauchen und keinen Fork, und ein Ortsname im Paket hätte dieser
 Zusage widersprochen, lange bevor jemand sie technisch verletzt.
 
@@ -2730,7 +2804,7 @@ Chromium nicht — ein Pixel entschied.
 Jetzt messen sich Wappen und Titel an der Breite ihrer eigenen Zelle (`cqi`), nicht am
 Ansichtsfenster. Es gibt keine Schwelle mehr, an der etwas kippen könnte, und über den ganzen
 Bereich von 1024 bis 2560 px bleiben 25 bis 56 Prozent Luft. Als
-[Punkt 43](decisions.md) festgehalten.
+[Punkt 43](../decisions.md) festgehalten.
 
 ### Der Prüfstein war nicht „Bilder aus", sondern der Ortsname
 
@@ -2778,7 +2852,7 @@ Bild, wo eben noch „Nächstes" stand.
 
 Jetzt sind sie senkrecht verankert und stehen waagerecht weiter mittig **unter dem Bild**. Nach dem
 Umbau: **0 px Sprung** bei jedem geprüften Format, und die Mitte der Knopfzeile liegt auf die
-Pixel genau auf der Bildmitte. Als [Punkt 44](decisions.md) festgehalten, samt der Regel dahinter:
+Pixel genau auf der Bildmitte. Als [Punkt 44](../decisions.md) festgehalten, samt der Regel dahinter:
 Was der Besucher trifft, steht still; was er ansieht, darf sich bewegen.
 
 Dass Bild und Text weiter **in einer Flucht** anfangen, ist dabei erhalten geblieben -- das war
@@ -2806,7 +2880,7 @@ an, was schon stimmte.
 **Der zweite Weg aus dem Eintrag -- das Layout dem Bildformat folgen lassen -- ist nicht gebaut**,
 und das war Absicht: Er stellt bei 884 von 929 Fotos die Ansicht um und will auf einem echten
 Gerät beurteilt werden, nicht im Browser. Er bleibt der nächste Schritt, wenn
-[Punkt 19](backlog.md) die Auflösung geklärt hat.
+[Punkt 19](https://github.com/nordfisch/kiekmap/issues/20) die Auflösung geklärt hat.
 
 ### Der Schließen-Knopf und die Rollenfrage
 
@@ -2854,7 +2928,7 @@ für den die Frage gebaut wurde.
 
 Die Bedingung nennt jetzt, was sie meint -- auf der Karte, nicht schon hausgenau, Straßenname ohne
 Ziffer, Adressen im Ortsindex. **Die Frage wächst von 70 auf 116 Fotos, 46 kommen dazu, 30 davon
-mit bekanntem Jahr, keines fällt weg.** Als [Punkt 45](decisions.md) festgehalten.
+mit bekanntem Jahr, keines fällt weg.** Als [Punkt 45](../decisions.md) festgehalten.
 
 ### Der Test, der seinen eigenen Namen nicht hielt
 
@@ -2963,7 +3037,7 @@ einzeln zurücknehmbar.
 
 **Drei Fotos blieben liegen, mit Namen und Grund** -- sie stehen jetzt in Punkt 1. Bei Foto 17
 setzt das Archiv nur die Adresse dagegen, die ohnehin am Foto steht; bei 218 sind wir genauer als
-das Archiv; bei 398 liest das Archiv den Namen anders („Kuncke" statt „Runcke") und hängt eine
+das Archiv; bei 398 liest das Archiv den Namen anders („Harmsen" statt „Harms") und hängt eine
 Leihgeberadresse an, die nach Punkt 36 in die Herkunft gehört.
 
 ### Was der Bestand jetzt ist
@@ -3530,7 +3604,7 @@ Aufgefallen ist es **nicht beim Lesen, sondern beim Messen**: ein Absturzschalte
 „Timer gesetzt", direkt danach „unmount, Timer war 3". Nach dem Fangen baut React den Baum von
 Grund auf neu und nimmt die Fehlergrenze mit; das Aufräumen löschte also jedes Mal genau die
 Selbstheilung, um derentwillen es sie gibt. Warum der Zeitgeber jetzt stehen bleibt, steht als
-Punkt 57 in [decisions.md](decisions.md).
+Punkt 57 in [decisions.md](../decisions.md).
 
 Nachgemessen im Browser, nicht angesehen: `timeOrigin` der neu geladenen Seite minus dem Vermerk
 über den letzten Versuch ergab **8003 ms**, und der Navigationstyp war `reload`. Der zweite
@@ -3624,7 +3698,7 @@ liegen jetzt in `admin/format.ts`, mit der Tabelle oben als Kommentar, damit der
 
 Ihre Tests prüfen deshalb nicht, wie ein Datum in Berlin aussieht, sondern **was jede Form
 weglässt** — und laufen damit in jeder Zeitzone. Die Zone selbst ist seit
-[Punkt 58](decisions.md) kein Thema dieser Funktionen mehr.
+[Punkt 58](../decisions.md) kein Thema dieser Funktionen mehr.
 
 **Ein Backlogeintrag ist eine Notiz, kein Befund.** Beide Hälften dieses Punktes sahen beim
 Aufschreiben anders aus als beim Aufgreifen, und in beiden Fällen war das Nachsehen billiger als
@@ -3844,7 +3918,7 @@ jetzt ein Satz im Handbuch, in der Sprache, in der das Handbuch geschrieben ist.
 **Apache-2.0**, entschieden an §4.2: Das Projekt ist zum Übernehmen gebaut, und geänderte Dateien
 müssen als geändert gekennzeichnet sein — eine missratene Übernahme bleibt damit sichtbar eine
 Übernahme. Die Begründung samt der verworfenen Alternativen steht in
-[decisions.md](decisions.md), Punkt 62.
+[decisions.md](../decisions.md), Punkt 62.
 
 `tools/build_notices.py` erzeugt die Hinweisdateien und ist dabei dreimal an sich selbst
 gescheitert, jedes Mal an derselben Sorte Fehler: **eine Zeichenkette, die fast richtig zerlegt
@@ -3906,8 +3980,17 @@ Abschnitt.
 
 Am selben Tag ist `git filter-repo --replace-text --replace-message` über die 180 Commits gelaufen,
 nach zwei Sicherungen und einem Probelauf auf einer Kopie. Der Baum von `HEAD` ist danach
-**byte-gleich** mit dem davor — dieselbe Prüfsumme —, alle Commits sind erhalten, und weder in einer
-Dateifassung noch in einer Commit-Nachricht steht noch einer der Namen.
+**byte-gleich** mit dem davor — dieselbe Prüfsumme —, alle Commits sind erhalten, und keiner der
+gefundenen Namen steht noch in einer Dateifassung oder einer Commit-Nachricht.
+
+> **Nachtrag vom 25. August 2026.** *„Der gefundenen"* ist die richtige Einschränkung, und sie war
+> beim Schreiben nicht gemeint. Ein letzter Durchgang vor der Veröffentlichung fand **drei
+> weitere** — ein Nachname, ein Hausname, ein Fototitel. Der Lauf vom 21. August suchte nach Namen,
+> die die Datenbank als Namen kennt; diese drei standen in **Prosa**, in Beispielen, nicht in
+> Datenfeldern. Im Arbeitsbaum sind sie ersetzt. **Im Verlauf bleiben sie stehen** — bewusst: Ein
+> vierter Rewrite an einem Tag hätte alle Hashes erneut verschoben, die zitierten Kennungen erneut
+> nachzuziehen verlangt und den Tag `v0.8.0` gekostet, und das für drei Namen, die nur in
+> Beispielsätzen alter Commits stehen und die kein Leser der aktuellen Dateien je zu sehen bekommt.
 
 **Möglich war das ohne Kosten, weil es keinen Remote gibt.** Niemand hatte eine Kopie, die
 unbrauchbar werden konnte. Nach der Veröffentlichung wäre derselbe Lauf ein Bruch für jeden, der
@@ -3991,7 +4074,7 @@ geordnet — sie zeigt ihre Ordnung nur nicht.** Die Datumsangaben lagen in der 
 sie erreicht.
 
 Und dann die Zahl, die den Ausschlag gab: **31 Verweise aus anderen Dateien zeigen hierher, 30
-davon ohne Anker.** Auf 3.858 Zeilen. Wer aus `decisions.md` einem „siehe history.md" folgt,
+davon ohne Anker.** Auf 3.858 Zeilen. Wer aus `decisions.md` einem „siehe history.de.md" folgt,
 landet in Zeile 1 und hat nichts gewonnen. Das ist der Befund, nicht die Länge — eine Datei, die
 niemand von vorn liest, darf lang sein; ein Verweis, der nichts eingrenzt, ist kaum einer.
 
@@ -4016,7 +4099,7 @@ zum Wiedererkennen, nicht zum Suchen: Man kann nicht nach einem Fehler suchen, d
 benennen kann. Dafür gibt es `grep`, und die Datei ist ausführlich genug dafür.
 
 **Acht Verweise haben ein Ziel bekommen**, die, die erkennbar eine Stelle meinten. Einer davon war
-schon von aussen sichtbar schief: `[Punkt 62](history.md)` — eine Beschriftung, die einen Punkt
+schon von aussen sichtbar schief: `[Punkt 62](history.de.md)` — eine Beschriftung, die einen Punkt
 nennt, und ein Ziel, das die ganze Datei ist. Die übrigen 22 meinen wirklich die Datei und bleiben.
 
 ### Die Gewohnheit war eingeschlafen
@@ -4077,12 +4160,12 @@ Praxis anzupassen sei. Gemessen fiel die Frage weg:
 | | Umlaute | umschrieben |
 |---|--:|--:|
 | `decisions.md` | 830 | **338** |
-| `history.md` | 1.252 | **568** |
+| `history.de.md` | 1.252 | **568** |
 | die neun übrigen Dateien zusammen | 1.936 | **8** |
 
 **Elf von dreizehn Dateien halten die Regel makellos ein.** Die Regel ist nicht aus der Zeit
 gefallen; zwei Dateien sind es. Und innerhalb von ihnen ist die Drift nicht gleichmäßig: In
-`history.md` steht das erste Drittel bei 713 zu 16, das mittlere bei 192 zu 352. Das ist keine
+`history.de.md` steht das erste Drittel bei 713 zu 16, das mittlere bei 192 zu 352. Das ist keine
 Gewohnheit, die nachlässt, sondern eine Strecke Arbeit, in der die Regel für Quelltext auf die
 Dokumentation übergriff.
 
@@ -4116,7 +4199,7 @@ Testnamen, und das Beispiel in CLAUDE.md, das eine umschriebene Meldung *zeigt* 
 
 ### Die Prüfung, die schon versprochen war
 
-Und hier der eigentliche Fund. In [development.md](development.md) steht seit Monaten, direkt
+Und hier der eigentliche Fund. In [development.md](../development.md) steht seit Monaten, direkt
 unter dem Absatz über Umlaute: *„Ob eine Datei sich daran hält, beantwortet
 `tools/language_check.py`."* **Das tat sie nicht.** Das Werkzeug las `.py`, `.ts` und `.tsx` und
 beantwortete eine andere Frage — in welcher Sprache ein Kommentar geschrieben ist. Die Umlautfrage
@@ -4163,7 +4246,7 @@ ohne Anmeldung, der Beitragsweg ohne Ratenbegrenzung, der unverschlüsselte Best
 
 Eine Vorlage hätte beinahe eine Adresse erfunden, die es nicht gibt: GitHub verlangt für
 Verweise in `config.yml` eine absolute Adresse, und die des Repos steht erst mit
-[Punkt 22](backlog.md) fest. Der Verweis ist weggeblieben, mit einem Kommentar an seiner Stelle.
+Punkt 22 fest. Der Verweis ist weggeblieben, mit einem Kommentar an seiner Stelle.
 
 ### Und der CHANGELOG sortierte seit zwei Wochen alles unter „Behoben"
 
@@ -4180,3 +4263,227 @@ neun Hinzufügungen verteilt.
 
 **Damit ist Punkt 64 vollständig** und aus dem Backlog gezogen. Was von der Durchsicht bleibt, ist
 kein Punkt mehr, sondern eine Prüfung mehr in `make check`.
+
+---
+
+## Punkt 22: der Weg nach draussen, an einem Tag
+
+`eb98f12` · 25. August 2026.
+
+Punkt 22 hiess „Versionierung, Releaseprozess und Veröffentlichung" und war der letzte offene
+Punkt vor dem Schritt nach draussen. Vier seiner fünf Teile sind an diesem Tag gebaut worden; der
+fünfte, die Veröffentlichung selbst, ist keine Arbeit, sondern eine Entscheidung und zieht als
+Punkt 65 weiter.
+
+### Erst die Frist, dann alles andere
+
+Die Reihenfolge kam nicht aus der Grösse der Teile, sondern aus ihrer Umkehrbarkeit. **Genau ein
+Schritt hatte eine Frist:** Solange es keinen Remote gibt, kostet ein Umschreiben des Verlaufs
+nichts.
+
+Gemessen trugen 185 Commits **drei** Identitäten. `user.name` und `user.email` waren nirgends
+gesetzt, also baute Git die Adresse aus Konto- und Rechnernamen — und der Rechnerwechsel Anfang
+August erzeugte von selbst eine dritte. Zwei der drei Adressen waren keine Postfächer, sondern
+Auskunft über die Arbeitsumgebung. Kein Commit war signiert, kein Schlüssel lag vor.
+
+Beides ist an diesem Tag bereinigt worden, in zwei Rewrites: eine Identität für alle, und alle 188
+signiert, auch die aus der Zeit vor dem Schlüssel. Die Begründung dafür steht in
+[decisions.md](../decisions.md), Punkt 67 — samt des Preises, den man kennen muss.
+
+### Der Rewrite hing nicht an der Dauer, sondern an einer Rückfrage
+
+Der erste Versuch lief zwei Minuten in ein Zeitlimit. Der Verdacht fiel auf die 3,2 GB
+unversionierter Fotos im Arbeitsbaum, durch die Git beim Aufräumen läuft. Tatsächlich fragte
+`filter-repo` wegen des Laufs vom 21. August **interaktiv** nach — *„Treat this run as a
+continuation (Y/N)?"* —, und `--force` deckt diese Frage nicht ab. Nach dem Beiseitelegen des alten
+Datensatzes: 0,28 Sekunden.
+
+### Ein Verweis war schon vorher kaputt
+
+Der Nachlauf über die zitierten Kurz-Hashes förderte einen zutage, der keinen Commit mehr traf:
+`6eb4c69` im CHANGELOG. Er stammte aus der Zeit **vor** dem Rewrite vom 21. August, und dessen
+Nachlauf hatte nur `docs/` geprüft. Über beide Zuordnungstabellen liess er sich verketten. Die
+Gegenprobe läuft seither über jeden siebenstelligen Hash in `docs/`, `CHANGELOG`, `README` und
+`CLAUDE.md`.
+
+### Das Branch-Modell, und eine Korrektur nach einer Stunde
+
+Zwei langlebige Zweige: `develop` für den Alltag, `main` für den Stand, der ausgeliefert ist. Das
+ist **nicht** GitHub Flow, auch wenn es so aussieht — die Begründung steht in
+[decisions.md](../decisions.md), Punkt 66.
+
+Darin stand zunächst „`feature/*` → `develop` per Rebase". **Der erste Pull Request hat das
+widerlegt.** Ein Rebase erzeugt die Commits neu, GitHub baut sie auf dem Server, und dort liegt
+kein Schlüssel: Die drei Commits kamen **unsigniert** heraus. 190 signierte und drei Löcher.
+
+Das Argument im Punkt sprach gegen *Squash*, nicht für Rebase — ein gewöhnlicher Merge erhält jeden
+Commit genauso einzeln. Rebase war eine Voreinstellung, die ich mitgebracht und nicht am Projekt
+geprüft hatte. Seither: Merge-Commit in beide Richtungen, und Rebase-Merge ist auch in den
+Repo-Einstellungen abgeschaltet. Die drei Löcher sind nachsigniert.
+
+### Was ein Release erst zu einem Release macht
+
+**Die Versionsnummer stand an fünf Stellen, nicht an zwei.** Die fünfte war die wichtigste und
+wäre am ehesten liegengeblieben: `__version__` in `app/__init__.py` ist das, was `/api/health`
+antwortet. Alle fünf standen auf `0.1.0`. Das Gerät hätte dauerhaft die falsche Fassung von sich
+behauptet, während der Image-Tag weiterzählt — und die eine Frage, für die es die Gesundheitsabfrage
+gibt, hätte eine falsche Antwort bekommen.
+
+**Die Abhängigkeiten sind festgenagelt**, und dabei fiel eine Lizenzlücke auf, die still offen war:
+`build_notices.py` las die Paketliste vom Entwicklungs-venv ab. `greenlet`, das SQLAlchemy auf
+Linux mitbringt, wird auf einem Mac nie installiert und fehlte deshalb in `THIRD-PARTY.txt`. Jetzt
+kommt die Liste aus der Lockdatei — sie *ist* die Liste dessen, was ins Abbild kommt — und die
+Umgebungsmarker werden gegen beide Zielplattformen ausgewertet. Der laufende Container hat es
+bestätigt.
+
+Nebenbei: **`pip install .` im Dockerfile tat nie, was es aussieht.** `app/` wird erst danach
+kopiert, die Paketsuche fand also nichts und installierte eine Distribution ohne Inhalt. Gezogen
+wurden immer nur die Abhängigkeiten.
+
+**`make release`** baut den Ordner, den `deploy/pi/update.sh` erwartet. Von Hand waren das vier
+Befehle aus `operations.md`, und der vergessene ist die `version`-Datei: Ohne sie bleibt
+`KIEKMAP_VERSION` in der `.env` des Pi stehen, und der nächste Start zieht das **alte** Abbild
+wieder hoch. Das Gerät liefe dann mit der alten Software und sagte es nirgends. Geprüft wurde nicht
+nur der Bau, sondern der Weg, den der Pi geht: bauen, sichern, Abbilder lokal löschen, laden,
+starten — `{"status":"bereit","version":"0.8.0"}`.
+
+### Die CI hat sich in ihrer ersten Stunde bezahlt gemacht
+
+Drei Läufe, zwei echte Fehler, beide unsichtbar auf dem Entwicklungsrechner:
+
+**`make check` wäre unter Node 22 gebrochen** — also bei der Fassung, zu der das Makefile selbst
+rät. Die Node-Versionsprüfung trug Backslash-Zeilenenden innerhalb einfacher Anführungszeichen, wo
+die Shell sie nicht entfernt. Node 18 verzieh den durchgereichten Backslash, Node 22 wertet `-e`
+durch einen TypeScript-fähigen Parser aus und bricht ab.
+
+**`build_notices.py` importiert seit der Marker-Auswertung `packaging`**, wurde aber mit dem
+System-Python aufgerufen. Der Entwicklungsrechner bringt es zufällig mit, eine frische Umgebung
+nicht. Es läuft jetzt mit dem Python des venv — als einziges der sieben Werkzeuge, und das ist
+keine Notlösung: Die sechs Prüfungen daneben sind reine Leser, dieses hier liest Paket-Metadaten
+und braucht das venv ohnehin. Es hatte nur so getan, als bräuchte es keins.
+
+Dazu ein Grenzfall, den die Umlautprüfung an sich selbst fand: `.github/` stand als Ganzes in ihrer
+Prosa-Liste. **Ein Workflow ist Quelltext**, näher an einem Shell-Skript als an einer Anleitung.
+
+### Zwei Hürden, die nicht im Drehbuch standen
+
+**GitHub lehnte den Push ab** — `GH007: Your push would publish a private email address`. Der
+Schutz bewachte genau die Entscheidung, die bewusst gefallen war: eine dedizierte Adresse, die in
+den Commits stehen *darf*. Er ist abgeschaltet.
+
+**Branch-Schutz gibt es auf einem privaten Repo im Gratistarif nicht.** Beide Wege antworten mit
+`403 Upgrade to GitHub Pro or make this repository public` — der klassische und der neuere über
+Rulesets. Er zieht damit in die Veröffentlichung um.
+
+### Und der Tag
+
+`develop` → `main` als Merge-Commit, **lokal gemacht statt über den Knopf**: GitHubs Nachricht
+hiesse „Merge pull request #6 from kerlhoff/develop", und für den einen Commit, auf den `main`
+zeigt und an dem der Tag hängt, ist das zu wenig. Danach `v0.8.0`, signiert.
+
+**Nicht `1.0.0`**, weil das unter SemVer eine stabile öffentliche Schnittstelle zusagt: Alles unter
+`deploy/pi/` ist ungeprüft, die Abnahme auf dem ersten Gerät steht aus. Die `1.0.0` wird nach
+[Punkt 15](https://github.com/nordfisch/kiekmap/issues/18) vergeben — das macht aus ihm einen Meilenstein statt einer Fussnote.
+
+---
+
+## Punkt 66: sechs Meldungen, ein Haken
+
+25. August 2026.
+
+Der erste Push nach GitHub brachte eine Beigabe mit: **sechs Schwachstellen, eine als kritisch
+eingestuft.** Der Reflex wäre gewesen, sie der Reihe nach abzuarbeiten. Nachgezählt hingen alle
+sechs an **einem** Paket.
+
+### Erst messen, wieder einmal
+
+`npm audit --omit=dev` meldete **null**. Alle sechs waren `devDependencies`, keine stand in
+`frontend/public/THIRD-PARTY.txt` — auf dem Pi läuft nginx mit dem gebauten Bundle, vite, vitest
+und esbuild sind Werkzeug und keine Ware.
+
+Die kritische betraf die Vitest-Oberfläche, *„when Vitest UI server is listening"*. Hier läuft
+`vitest run`, headless; `@vitest/ui` war nicht einmal installiert. Der verwundbare Dienst wird nie
+gestartet.
+
+**Und die übrigen kamen aus einer zweiten Ebene.** Direkt installiert waren `vite 6.4.3` und
+`esbuild 0.25.12`, beide längst gepatcht. Daneben lagen:
+
+```
+node_modules/vitest/node_modules/vite      5.4.21
+node_modules/vitest/node_modules/esbuild   0.21.5
+```
+
+Vitest 2 brachte seine eigenen alten Kopien mit. Ein Hauptversionssprung war also nicht die
+gründlichere von mehreren Möglichkeiten, sondern die einzige.
+
+### Der Sprung kostete nichts
+
+Der beste Fall für einen Hauptversionswechsel: **keine Testkonfiguration**, reine Logiktests, kein
+jsdom — die Angriffsfläche war klein. Nach `vitest@^3` liefen 189 von 189 Tests, der Typprüfer war
+still, das Bundle baute. Im Baum liegt jetzt je ein `vite` und ein `esbuild`; die Sperrdatei ist
+dabei um rund neunhundert Zeilen geschrumpft.
+
+Übrig blieb eine Meldung, `nanoid` über `vite → postcss`, und die war mit `npm audit fix` erledigt.
+**Null.**
+
+### Zwei Dinge nebenbei
+
+Beim Neuberechnen des Baums meldete npm, ein Paket verlange Node ≥ 22, während hier 18 läuft.
+Nachgesehen war es `@mapbox/jsonlint-lines-primitives`, eine transitive Abhängigkeit von
+**maplibre-gl** — vorbestanden, nur durch die Neuberechnung sichtbar geworden, und nichts, was der
+Sprung verursacht hätte.
+
+Und `THIRD-PARTY.txt` blieb auf beiden Seiten **unverändert**. Das ist die Gegenprobe zur ganzen
+Einschätzung: Was sich hier bewegt hat, wird nicht ausgeliefert.
+
+**Der Grund, es trotzdem vor der Veröffentlichung zu tun**, war nie das Risiko. Es war die rote
+Fahne, die sonst am ersten Tag am Repo gehangen hätte — und die Fragen aufwirft, die die Antwort
+nicht wert sind.
+
+---
+
+## Punkt 65: veröffentlicht
+
+25. August 2026.
+
+Das Repo liegt öffentlich unter `github.com/nordfisch/kiekmap`. Der Schritt selbst war ein Schalter;
+was daran hing, war die Liste dahinter — und drei Punkte davon **gab es vorher gar nicht.**
+
+### Was erst öffentlich existiert
+
+**Der Meldeweg aus `SECURITY.md`.** Beide Dateien, `SECURITY.md` und `CODE_OF_CONDUCT.md`,
+verweisen auf die private Sicherheitsmeldung bei GitHub als *den* vertraulichen Kanal. Den Schalter
+dafür gibt es nur auf öffentlichen Repos — solange das Repo privat war, zeigte die Zusage ins Leere.
+Jetzt steht sie.
+
+**Der Branch-Schutz.** Am selben Tag noch mit `403 Upgrade to GitHub Pro or make this repository
+public` abgewiesen, klassisch wie über Rulesets. Jetzt: beide Zweige ohne Force-Push und ohne
+Löschen, `develop` mit `make check` als Pflichtprüfung, `main` mit Pull Request und null Freigaben.
+`enforce_admins` bleibt aus, damit der Release-Merge weiter lokal gemacht werden kann — der eine
+Commit, auf den `main` zeigt, soll die Signatur des Betreuers tragen und keine Nachricht der Form
+„Merge pull request".
+
+**Und das Abzeichen im README**, das vorher nur ein kaputtes Bild gewesen wäre.
+
+### Eine Einstellung, die beim Nachsehen auffiel
+
+`secret_scanning` stand auf `disabled`. Auf öffentlichen Repos ist es kostenlos, und es bewacht
+genau das, was vor der Veröffentlichung von Hand geprüft worden war: Zugangsdaten im Baum und im
+Verlauf. Zusammen mit dem Push-Schutz eingeschaltet — die Handprüfung sagt etwas über einen
+Zeitpunkt, der Scanner über jeden künftigen Push.
+
+### Ein Release ohne Abbilder
+
+`v0.8.0` als GitHub-Release, mit dem Quelltext, den GitHub selbst beilegt, und **ohne gebaute
+Abbilder**. Ein Abbild aus `python:3.12-slim` oder `nginx:1.27-alpine` enthält GPL-lizenziertes
+Userland; wer es weitergibt, übernimmt dessen Pflichten. Wer die Dockerfiles veröffentlicht, lässt
+sie dort, wo sie hingehören. Der Weg über `abbilder.tar` bleibt für das eigene Gerät richtig — siehe
+[licensing.md](../../museum/licensing.md).
+
+### Womit Punkt 22 vollständig ist
+
+Fünf Teile, an einem Tag: Identität und Signatur, Branch-Modell, Versionierung, Releaseprozess,
+CI — und jetzt die Veröffentlichung. Was bleibt, steht in
+[Punkt 15](https://github.com/nordfisch/kiekmap/issues/18): Das Gerät im Museum fehlt noch, und mit ihm die Abnahme, an der die `1.0.0`
+hängt.
+

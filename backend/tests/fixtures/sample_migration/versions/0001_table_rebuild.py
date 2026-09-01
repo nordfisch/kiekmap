@@ -1,13 +1,10 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
+"""Rebuilds ``photos`` without changing anything else.
 
-"""Baut ``photos`` neu, ohne sonst etwas zu aendern.
+``recreate="always"`` forces exactly the path that once cost data: create a copy, drop the
+original, rename. Without forcing it, Alembic would decide for itself whether a rebuild is needed
+-- and the sample would eventually check nothing at all.
 
-``recreate="always"`` erzwingt genau den Weg, der einmal Daten gekostet hat: Kopie anlegen,
-Original loeschen, umbenennen. Ohne das Erzwingen entschiede Alembic je nach Aenderung selbst, ob
-ein Neubau noetig ist -- und die Probe pruefte irgendwann nichts mehr.
-
-Diese Revision ist kein Teil des Schemas. Sie liegt unter ``tests/fixtures/`` und laeuft nur in
+This revision is no part of the schema. It lies under ``tests/fixtures/`` and runs only in
 ``tests/test_migrations.py``.
 """
 

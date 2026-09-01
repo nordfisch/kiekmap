@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Gazetteer: loading and search.
 
 Replaces Nominatim for the single purpose we have -- answering "where is this?" with a street

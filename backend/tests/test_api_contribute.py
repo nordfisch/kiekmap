@@ -1,11 +1,8 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
+"""Tests of the contribution panel.
 
-"""Tests des "Hilf mit"-Bereichs.
-
-Der Kernpunkt: Beitraege werden direkt uebernommen, aber sie duerfen nur fuellen, was leer ist.
-Ohne diesen Schutz koennte ein Besucher am oeffentlichen Touchscreen eine kuratierte Angabe
-ueberschreiben -- und der naechste Besucher die des vorherigen.
+The core point: contributions are taken over directly, but they may only fill what is empty.
+Without that protection a visitor at the public touchscreen could overwrite a curated entry -- and
+the next visitor the one before them.
 """
 
 import json
@@ -24,8 +21,8 @@ IN_HOLM = {"lat": 53.6205, "lon": 9.676}
 WEIT_WEG = {"lat": 48.1372, "lon": 11.5756}  # München
 
 
-class TestNaechsteAufgabe:
-    def test_liefert_foto_ohne_ort(self, client: TestClient, session, make_photo):
+class TestTheNextTask:
+    def test_offers_a_photo_without_a_place(self, client: TestClient, session, make_photo):
         make_photo(lat=None, lon=None, title="Ohne Ort", sha="a" * 64)
         make_photo(title="Vollstaendig", sha="b" * 64)
         session.commit()
@@ -36,7 +33,7 @@ class TestNaechsteAufgabe:
         assert daten["open_count"] == 1
         assert daten["photo"]["needs_location"] is True
 
-    def test_liefert_foto_ohne_jahr(self, client: TestClient, session, make_photo):
+    def test_offers_a_photo_without_a_year(self, client: TestClient, session, make_photo):
         make_photo(year=None, title="Ohne Jahr", sha="a" * 64)
         make_photo(year=1932, title="Datiert", sha="b" * 64)
         session.commit()
@@ -46,7 +43,7 @@ class TestNaechsteAufgabe:
         assert daten["photo"]["title"] == "Ohne Jahr"
         assert daten["photo"]["date_label"] == "Jahr unbekannt"
 
-    def test_weggetipptes_erscheint_nicht_sofort_wieder(
+    def test_a_skipped_photo_does_not_come_straight_back(
         self, client: TestClient, session, make_photo
     ):
         erst = make_photo(lat=None, lon=None, title="A", sha="a" * 64)
@@ -59,18 +56,20 @@ class TestNaechsteAufgabe:
 
         assert daten["photo"]["title"] == "B"
 
-    def test_faengt_von_vorn_an_wenn_alles_durch_ist(self, client: TestClient, session, make_photo):
-        """Lieber wiederholen als "nichts mehr da" melden, solange etwas offen ist."""
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+    def test_starts_over_when_everything_has_been_seen(
+        self, client: TestClient, session, make_photo
+    ):
+        """Better to repeat than to report "nothing left" while something is still open."""
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
         daten = client.get(
-            "/api/contribute/next", params={"need": "location", "exclude": str(foto.id)}
+            "/api/contribute/next", params={"need": "location", "exclude": str(photo.id)}
         ).json()
 
-        assert daten["photo"]["id"] == foto.id
+        assert daten["photo"]["id"] == photo.id
 
-    def test_nichts_offen(self, client: TestClient, session, make_photo):
+    def test_nothing_open(self, client: TestClient, session, make_photo):
         make_photo(sha="a" * 64)
         session.commit()
 
@@ -79,7 +78,7 @@ class TestNaechsteAufgabe:
         assert daten["photo"] is None
         assert daten["open_count"] == 0
 
-    def test_verstecktes_foto_wird_nicht_vorgelegt(self, client: TestClient, session, make_photo):
+    def test_a_deleted_photo_is_not_offered(self, client: TestClient, session, make_photo):
         make_photo(lat=None, lon=None, status=PhotoStatus.DELETED, sha="a" * 64)
         session.commit()
 
@@ -88,16 +87,16 @@ class TestNaechsteAufgabe:
         )
 
 
-class TestEineDefinitionJeFrage:
-    """Die SQL-Abfrage und die Eigenschaft am Foto muessen dasselbe sagen.
+class TestOneDefinitionPerQuestion:
+    """The SQL query and the property on the photo have to say the same thing.
 
-    Sie waren einmal zwei getrennte Formulierungen: ``_missing_filter`` im Endpunkt und
-    ``needs_location`` am Modell. Beide sahen fuer sich richtig aus -- und genau so ein Paar
-    laeuft auseinander, ohne dass es jemandem auffaellt. Die Zahl im Bereich stimmte dann nicht
-    mehr mit den Fotos ueberein, die er vorlegt.
+    They were once two separate formulations: ``_missing_filter`` in the endpoint and
+    ``needs_location`` on the model. Each looked right on its own -- and exactly such a pair drifts
+    apart without anyone noticing. The count in the panel then no longer matched the photos it
+    offers.
     """
 
-    def test_die_offene_zahl_zaehlt_genau_die_fotos_die_die_eigenschaft_meldet(
+    def test_the_open_count_counts_exactly_the_photos_the_property_reports(
         self, client: TestClient, session, make_photo
     ):
         make_photo(lat=None, lon=None, sha="a" * 64)
@@ -107,42 +106,42 @@ class TestEineDefinitionJeFrage:
         make_photo(lat=None, lon=None, status=PhotoStatus.DELETED, sha="e" * 64)
         session.commit()
 
-        fotos = session.scalars(select(Photo).where(Photo.status == PhotoStatus.PUBLISHED)).all()
+        photos = session.scalars(select(Photo).where(Photo.status == PhotoStatus.PUBLISHED)).all()
 
-        for frage, eigenschaft in (("location", "needs_location"), ("date", "needs_date")):
-            gemeldet = client.get("/api/contribute/next", params={"need": frage}).json()
-            erwartet = sum(1 for foto in fotos if getattr(foto, eigenschaft))
-            assert gemeldet["open_count"] == erwartet, frage
+        for question, property_name in (("location", "needs_location"), ("date", "needs_date")):
+            reported = client.get("/api/contribute/next", params={"need": question}).json()
+            expected = sum(1 for photo in photos if getattr(photo, property_name))
+            assert reported["open_count"] == expected, question
 
 
-class TestGewuenschtesFoto:
-    """``photo_id`` legt ein benanntes Foto vor -- der Weg aus der Detailansicht in den Bereich.
+class TestARequestedPhoto:
+    """``photo_id`` offers a named photo -- the way from the detail view into the panel.
 
-    Ein Wunsch, keine Anweisung: Geprueft wird er gegen dieselbe Bedingung wie jedes andere Foto,
-    und wo er nicht traegt, laeuft die gewoehnliche Zufallswahl.
+    A wish, not an instruction: it is checked against the same condition as any other photo, and
+    where it does not hold, the ordinary random choice runs.
     """
 
-    def test_legt_das_gewuenschte_foto_vor(self, client: TestClient, session, make_photo):
-        gewuenscht = make_photo(year=None, title="Das hier", sha="a" * 64)
+    def test_offers_the_requested_photo(self, client: TestClient, session, make_photo):
+        requested = make_photo(year=None, title="Das hier", sha="a" * 64)
         for buchstabe in "bcdefghij":
             make_photo(year=None, title="Irgendeins", sha=buchstabe * 64)
         session.commit()
 
         daten = client.get(
-            "/api/contribute/next", params={"need": "date", "photo_id": gewuenscht.id}
+            "/api/contribute/next", params={"need": "date", "photo_id": requested.id}
         ).json()
 
         assert daten["photo"]["title"] == "Das hier"
 
-    def test_faellt_zurueck_wenn_das_foto_nichts_mehr_braucht(
+    def test_falls_back_when_the_photo_needs_nothing_more(
         self, client: TestClient, session, make_photo
     ):
-        """Der stille Fehler, den diese Pruefung verhindert.
+        """The silent error this check prevents.
 
-        Zwischen dem Tippen in der Detailansicht und dieser Anfrage kann jemand anders geantwortet
-        haben. Ohne die Pruefung stuende eine Frage auf dem Schirm, die schon beantwortet ist --
-        und der Schreibweg wiese die Antwort mit 409 ab, was klingt, als sei der Besucher zu
-        langsam gewesen.
+        Between the tap in the detail view and this request somebody else may have answered.
+        Without the check a question would stand on the screen that is already answered -- and the
+        write path would reject the answer with a 409, which sounds as though the visitor had been
+        too slow.
         """
         datiert = make_photo(year=1932, title="Schon datiert", sha="a" * 64)
         make_photo(year=None, title="Braucht noch", sha="b" * 64)
@@ -154,35 +153,33 @@ class TestGewuenschtesFoto:
 
         assert daten["photo"]["title"] == "Braucht noch"
 
-    def test_uebergeht_die_ausschlussliste(self, client: TestClient, session, make_photo):
-        """Wer ein Foto ausdruecklich aufruft, hat es womoeglich vorher weggewischt."""
-        gewuenscht = make_photo(year=None, title="Doch nochmal", sha="a" * 64)
+    def test_overrides_the_skip_list(self, client: TestClient, session, make_photo):
+        """Whoever calls up a photo explicitly may well have swiped it away before."""
+        requested = make_photo(year=None, title="Doch nochmal", sha="a" * 64)
         make_photo(year=None, title="Anderes", sha="b" * 64)
         session.commit()
 
         daten = client.get(
             "/api/contribute/next",
-            params={"need": "date", "photo_id": gewuenscht.id, "exclude": str(gewuenscht.id)},
+            params={"need": "date", "photo_id": requested.id, "exclude": str(requested.id)},
         ).json()
 
         assert daten["photo"]["title"] == "Doch nochmal"
 
-    def test_zaehlt_weiterhin_alle_offenen(self, client: TestClient, session, make_photo):
-        """Die Zahl im Bereich meint den Bestand, nicht das eine Foto -- sonst stuende dort 1."""
-        gewuenscht = make_photo(year=None, sha="a" * 64)
+    def test_still_counts_every_open_one(self, client: TestClient, session, make_photo):
+        """The count means the collection, not the one photo -- otherwise it would read 1."""
+        requested = make_photo(year=None, sha="a" * 64)
         make_photo(year=None, sha="b" * 64)
         make_photo(year=None, sha="c" * 64)
         session.commit()
 
         daten = client.get(
-            "/api/contribute/next", params={"need": "date", "photo_id": gewuenscht.id}
+            "/api/contribute/next", params={"need": "date", "photo_id": requested.id}
         ).json()
 
         assert daten["open_count"] == 3
 
-    def test_ein_unbekanntes_foto_liefert_trotzdem_eine_aufgabe(
-        self, client: TestClient, session, make_photo
-    ):
+    def test_an_unknown_photo_still_yields_a_task(self, client: TestClient, session, make_photo):
         make_photo(year=None, title="Da", sha="a" * 64)
         session.commit()
 
@@ -193,34 +190,34 @@ class TestGewuenschtesFoto:
         assert daten["photo"]["title"] == "Da"
 
 
-class TestRangfolge:
-    """Die Reihenfolge in ``NEEDS`` ist der Rang, und sie ist nur hier festgehalten.
+class TestTheRanking:
+    """The order in ``NEEDS`` is the ranking, and it is recorded only here.
 
-    Ohne diesen Test liess sich die Reihenfolge vertauschen, ohne dass im Backend ein Test fiel --
-    nachgeprueft am 11. August 2026, als sie tatsaechlich vertauscht wurde. Gemerkt hat es allein
-    ein Test im Frontend, wo dieselbe Liste ein zweites Mal steht.
+    Without this test the order could be swapped without a single backend test failing -- verified
+    on 11 August 2026, when it actually was swapped. The only thing that noticed was a test in the
+    frontend, where the same list stands a second time.
     """
 
-    def test_der_ort_steht_vor_allem_anderen(self):
-        """Ein Foto, das auf keiner Karte steht, ist die teuerste Luecke."""
+    def test_the_place_comes_before_everything_else(self):
+        """A photo that stands on no map is the most expensive gap."""
         assert NEEDS[0] == "location"
 
-    def test_die_hausnummer_steht_vor_dem_jahr(self):
-        """Aus einer Zahl entschieden, nicht aus dem Gefuehl.
+    def test_the_house_number_comes_before_the_year(self):
+        """Decided from a number, not from a feeling.
 
-        Ein Jahr ist mehr wert als eine Hausnummer -- danach gefragt wird trotzdem spaeter. Eine
-        Frage wird erst erreicht, wenn die vor ihr **leer** ist, und im Erstbestand stehen 673
-        undatierte Fotos gegen 71 nachzuschaerfende. Hinter dem Jahr waere die dritte Frage nie
-        erreicht worden: Der Bereich truege eine Frage, die niemand je gestellt bekommt.
+        A year is worth more than a house number -- and is still asked for later. A question is only
+        reached once the one before it is **empty**, and in the initial collection 673 undated
+        photos stand against 71 that could be refined. Behind the year the third question would
+        never have been reached: the panel would carry a question nobody is ever asked.
         """
         assert NEEDS.index("housenumber") < NEEDS.index("date")
 
 
 @pytest.fixture
-def strassen(session):
-    """Zwei Strassen, nur eine davon mit Adressen -- der Unterschied traegt einen ganzen Test."""
+def streets(session):
+    """Two streets, only one of them with addresses -- the difference carries a whole test."""
 
-    def anlegen(name, kind, street=None, housenumber=None):
+    def create_place(name, kind, street=None, housenumber=None):
         session.add(
             Place(
                 name=name,
@@ -233,26 +230,27 @@ def strassen(session):
             )
         )
 
-    anlegen("Am Kamp", "strasse")
-    for nummer in ("1", "2", "3"):
-        anlegen(f"Am Kamp {nummer}", "adresse", street="Am Kamp", housenumber=nummer)
-    # Eine Strasse ohne eine einzige Adresse -- davon hat der Ortsindex 141 von 486.
-    anlegen("Feldweg", "strasse")
-    anlegen("Strasse des 17. Juni", "strasse")
-    anlegen("Strasse des 17. Juni 4", "adresse", street="Strasse des 17. Juni", housenumber="4")
+    create_place("Am Kamp", "strasse")
+    for number in ("1", "2", "3"):
+        create_place(f"Am Kamp {number}", "adresse", street="Am Kamp", housenumber=number)
+    # A street without a single address -- the place index holds 141 of 486 such.
+    create_place("Feldweg", "strasse")
+    create_place("Strasse des 17. Juni", "strasse")
+    create_place(
+        "Strasse des 17. Juni 4", "adresse", street="Strasse des 17. Juni", housenumber="4"
+    )
     session.commit()
     return session
 
 
-class TestNachschaerfen:
-    """Wer bekommt die Frage „Genauer: welche Hausnummer?" vorgelegt.
+class TestRefining:
+    """Who gets asked for the house number.
 
-    Der Bereich fragte bisher nur nach dem, was *fehlt*. Ein Foto auf der Mitte einer 800-m-Strasse
-    galt als verortet und kam nie wieder -- dabei ist das der Fall, in dem jemand, der jeden Tag
-    daran vorbeigeht, das Haus nennen koennte.
-    """
+    The panel used to ask only about what is *missing*. A photo on the middle of an 800 m street
+    counted as located and never came back -- and yet that is the case where somebody who walks
+    past it every day could name the house."""
 
-    def _strassengenau(self, make_photo, **felder):
+    def _street_accurate(self, make_photo, **felder):
         return make_photo(
             place_name="Am Kamp",
             accuracy=150,
@@ -260,549 +258,537 @@ class TestNachschaerfen:
             **felder,
         )
 
-    def test_strassengenaues_foto_ohne_hausnummer_wird_vorgelegt(
-        self, client: TestClient, strassen, make_photo
+    def test_a_street_accurate_photo_without_a_house_number_is_offered(
+        self, client: TestClient, streets, make_photo
     ):
-        self._strassengenau(make_photo, title="Nur die Strasse", sha="a" * 64)
-        strassen.commit()
+        self._street_accurate(make_photo, title="Nur die Strasse", sha="a" * 64)
+        streets.commit()
 
         daten = client.get("/api/contribute/next", params={"need": "housenumber"}).json()
 
         assert daten["photo"]["title"] == "Nur die Strasse"
         assert daten["open_count"] == 1
 
-    def test_foto_mit_hausnummer_im_namen_wird_nicht_vorgelegt(
-        self, client: TestClient, strassen, make_photo
+    def test_a_photo_with_a_house_number_in_its_name_is_not_offered(
+        self, client: TestClient, streets, make_photo
     ):
-        """Die 58 aus dem Erstbestand: Die Nummer ist bekannt, nur ihre Koordinate fehlt.
+        """The 58 from the initial collection: the number is known, only its coordinate is missing.
 
-        Sie steht nicht im Ortsindex, weil das Haus aufgeteilt oder neu nummeriert wurde. Eine
-        Nummernauswahl boete hier lauter Nummern an -- nur nicht die gesuchte. Das ist Arbeit fuer
-        die Maschine, keine Frage an einen Besucher (siehe Backlog, Punkt 41).
+        It is not in the place index because the house was split up or renumbered. A choice of
+        numbers would offer plenty of numbers here -- just not the one wanted. That is work for the
+        machine, not a question for a visitor (see point 41).
         """
         make_photo(place_name="Am Kamp 11a", accuracy=150, sha="b" * 64)
-        strassen.commit()
+        streets.commit()
 
         assert (
             client.get("/api/contribute/next", params={"need": "housenumber"}).json()["open_count"]
             == 0
         )
 
-    def test_hausgenaues_foto_wird_nicht_vorgelegt(self, client: TestClient, strassen, make_photo):
-        """Dieses Foto unterscheidet sich von einem nachschaerfbaren **nur** in der Genauigkeit.
+    def test_a_house_accurate_photo_is_not_offered(self, client: TestClient, streets, make_photo):
+        """This photo differs from a refinable one **only** in its precision.
 
-        Der naheliegende Aufbau -- „Am Kamp 1", 15 m -- pruefte die Genauigkeit gar nicht: Das
-        Foto fiele schon an der Ziffernregel heraus. Ein Gebaeudename fiele an der Adressbedingung
-        heraus. Beides deckte die Gegenprobe auf, die die Genauigkeitsbedingung entfernte und alles
-        gruen liess. Deshalb steht hier der blanke Strassenname bei 15 m: So haelt allein die
-        Genauigkeit das Foto aus der Frage.
+        The obvious setup -- a house name at 15 m -- would not check the precision at all: the
+        photo would already drop out on the digit rule. A building name would drop out on the
+        address condition. Both were exposed by the counter-check that removed the precision
+        condition and left everything green. That is why the bare street name at 15 m stands here:
+        this way the precision alone keeps the photo out of the question.
 
-        Der Fall entsteht, wenn ein Kurator die Koordinate von Hand genau setzt und den
-        Strassennamen stehen laesst.
-        """
+        The case arises when a curator sets the coordinate precisely by hand and leaves the street
+        name standing."""
         make_photo(place_name="Am Kamp", accuracy=15, sha="c" * 64)
-        strassen.commit()
+        streets.commit()
 
         assert (
             client.get("/api/contribute/next", params={"need": "housenumber"}).json()["open_count"]
             == 0
         )
 
-    def test_foto_ohne_strassennamen_wird_nicht_vorgelegt(
-        self, client: TestClient, strassen, make_photo
+    def test_a_photo_without_a_street_name_is_not_offered(
+        self, client: TestClient, streets, make_photo
     ):
-        """Ohne Strasse gaebe es gar keine Nummern anzubieten.
+        """Without a street there would be no numbers to offer at all.
 
-        Dieser Test hiess bis zum 16. August 2026 ``..._aus_dem_exif_...`` und behauptete, den
-        EXIF-Fall abzudecken -- sein Foto hatte aber gar keinen Strassennamen und fiel schon an
-        dieser Bedingung heraus. **Ein Test, dessen Name etwas anderes sagt als sein Aufbau, deckt
-        eine Luecke zu, statt sie zu schliessen:** Der EXIF-Fall stand zwei Wochen ungeprueft da,
-        und Backlog-Punkt 53 kam daraus. Er hat jetzt seinen eigenen Test, gleich darunter.
+        Until 16 August 2026 this test was called ``..._aus_dem_exif_...`` and claimed to cover the
+        EXIF case -- but its photo had no street name at all and dropped out on this condition
+        already. **A test whose name says something other than its setup covers a gap instead of
+        closing it:** the EXIF case stood unchecked for two weeks, and point 53 came out of it. It
+        now has a test of its own, immediately below.
         """
         make_photo(place_name=None, accuracy=None, sha="d" * 64)
-        strassen.commit()
+        streets.commit()
 
         assert (
             client.get("/api/contribute/next", params={"need": "housenumber"}).json()["open_count"]
             == 0
         )
 
-    def test_foto_mit_strasse_und_exif_koordinate_wird_vorgelegt(
-        self, client: TestClient, strassen, make_photo
+    def test_a_photo_with_a_street_and_an_exif_coordinate_is_offered(
+        self, client: TestClient, streets, make_photo
     ):
-        """Der Fall, der zu Punkt 53 gefuehrt hat -- 53 Fotos des Erstbestands.
+        """The case that led to point 53 -- 53 photos of the initial collection.
 
-        Sie tragen einen Strassennamen aus dem Archivordner und eine Koordinate aus ihrem EXIF,
-        also **gar keine** Genauigkeit. Bis zum 16. August 2026 verlangte die Bedingung
-        ausdruecklich 150 m und liess sie damit draussen. Begruendet war das mit „das Geraet weiss,
-        wo der Fotograf stand" -- eine Annahme, die vier Tage zuvor widerlegt worden war: 278 von
-        413 EXIF-Koordinaten des Erstbestands teilten sich zwei Fotos, es sind eingetragene Werte
-        und keine Messungen (decisions.md, Punkt 34).
+        They carry a street name from the archive folder and a coordinate from their EXIF, so **no**
+        precision at all. Until 16 August 2026 the condition explicitly demanded 150 m and thereby
+        left them out. The reason given was that the device knows where the photographer stood -- an
+        assumption that had been refuted four days earlier: 278 of 413 EXIF coordinates of the
+        initial collection were shared by two photos, so they are typed-in values and not
+        measurements (decisions.md, point 34).
 
-        Aufgefallen ist es als etwas anderes: In der Detailansicht schien der Knopf zu fehlen,
-        sobald das Jahr bekannt war. Das war eine Verwechslung von Ursache und Begleitung -- unter
-        den Fotos mit blossem Strassennamen sind die mit Jahr ueberwiegend gerade die aus dem EXIF.
+        It surfaced as something else: in the detail view the button seemed to be missing as soon
+        as the year was known. That was a confusion of cause and company -- among the photos with a
+        bare street name, those with a year are predominantly the ones from the EXIF.
         """
         make_photo(place_name="Am Kamp", accuracy=None, location_source=Source.EXIF, sha="f" * 64)
-        strassen.commit()
+        streets.commit()
 
         daten = client.get("/api/contribute/next", params={"need": "housenumber"}).json()
 
         assert daten["open_count"] == 1
 
-    def test_foto_ohne_koordinate_wird_nicht_vorgelegt(
-        self, client: TestClient, strassen, make_photo
+    def test_a_photo_without_a_coordinate_is_not_offered(
+        self, client: TestClient, streets, make_photo
     ):
-        """Ein Foto ohne Ort schuldet seine Antwort der **ersten** Frage, nicht dieser.
+        """A photo without a place owes its answer to the **first** question, not this one.
 
-        In der Detailansicht stehen alle drei Knoepfe nebeneinander; ohne diese Bedingung stuenden
-        dort „Wo ist das?" und „Welche Hausnummer?" zugleich und baeten darum, dasselbe Foto zweimal
-        zu verorten.
-        """
+        In the detail view all three buttons stand side by side; without this condition the
+        question about the place and the question about the house number would stand there at once
+        and ask for the same photo to be located twice."""
         make_photo(place_name="Am Kamp", lat=None, lon=None, accuracy=None, sha="g" * 64)
-        strassen.commit()
+        streets.commit()
 
         assert (
             client.get("/api/contribute/next", params={"need": "housenumber"}).json()["open_count"]
             == 0
         )
 
-    def test_strasse_ohne_adressen_wird_nicht_vorgelegt(
-        self, client: TestClient, strassen, make_photo
+    def test_a_street_without_addresses_is_not_offered(
+        self, client: TestClient, streets, make_photo
     ):
-        """Der stille Fehler: eine Frage auf dem Schirm, unter der kein einziger Knopf steht.
+        """The silent error: a question on the screen with not a single button under it.
 
-        141 der 486 Strassen im Ortsindex halten keine einzige Adresse. Ohne diese Bedingung
-        stuende der Besucher vor „Genauer: welche Hausnummer?" und haette nichts zu tippen.
+        141 of the 486 streets in the place index hold not one address. Without this condition the
+        visitor would face the house-number question with nothing to tap.
         """
         make_photo(place_name="Feldweg", accuracy=150, sha="e" * 64)
-        strassen.commit()
+        streets.commit()
 
         assert (
             client.get("/api/contribute/next", params={"need": "housenumber"}).json()["open_count"]
             == 0
         )
 
-    def test_kuratorenangabe_wird_ebenfalls_vorgelegt(
-        self, client: TestClient, strassen, make_photo
-    ):
-        """Bewusst entschieden: Ein Anwohner kennt das Haus oft besser als das Archiv.
+    def test_a_curator_entry_is_offered_as_well(self, client: TestClient, streets, make_photo):
+        """Decided deliberately: a resident often knows the house better than the archive does.
 
-        Das weicht die Regel aus decisions.md Punkt 5 auf -- deshalb stellt die Ruecknahme die
-        alte Quelle wieder her, statt aus Kuratorenwissen stillschweigend einen Besucherbeitrag
-        zu machen.
+        That softens the rule from decisions.md point 5 -- which is why a revert restores the old
+        source instead of silently turning curator knowledge into a visitor contribution.
         """
         make_photo(place_name="Am Kamp", accuracy=150, location_source=Source.CURATOR, sha="f" * 64)
-        strassen.commit()
+        streets.commit()
 
         assert (
             client.get("/api/contribute/next", params={"need": "housenumber"}).json()["open_count"]
             == 1
         )
 
-    def test_strasse_mit_ziffer_im_namen_wird_nicht_vorgelegt(
-        self, client: TestClient, strassen, make_photo
+    def test_a_street_with_a_digit_in_its_name_is_not_offered(
+        self, client: TestClient, streets, make_photo
     ):
-        """Die Ziffernregel irrt hier -- und zwar in die harmlose Richtung.
+        """The digit rule is wrong here -- and it is wrong in the harmless direction.
 
-        „Strasse des 17. Juni" traegt eine Ziffer, ohne dass es eine Hausnummer waere. Das Foto
-        wird deshalb nicht gefragt, obwohl es koennte. Lieber eine Frage zu wenig als eine
-        Nummernauswahl vor jemandem, dessen Nummer laengst feststeht.
-        """
+        A street named after a date carries a digit without that being a house number. The photo is
+        therefore not asked about, although it could be. Better one question too few than a choice
+        of numbers in front of somebody whose number has long been settled."""
         make_photo(place_name="Strasse des 17. Juni", accuracy=150, sha="g" * 64)
-        strassen.commit()
+        streets.commit()
 
         assert (
             client.get("/api/contribute/next", params={"need": "housenumber"}).json()["open_count"]
             == 0
         )
 
-    def test_offene_andere_zaehlt_alle_uebrigen_fragen(
-        self, client: TestClient, strassen, make_photo
+    def test_the_other_count_counts_every_remaining_question(
+        self, client: TestClient, streets, make_photo
     ):
-        """``open_other`` entscheidet, ob „Weiss ich nicht" noch irgendwohin fuehrt.
+        """``open_other`` decides whether the "I do not know" button still leads anywhere.
 
-        Mit drei Fragen muss es alle uebrigen zusammenzaehlen. Zaehlte es nur eine, verschwaende
-        der Knopf, obwohl noch etwas offen ist.
+        With three questions it has to add up all the remaining ones. If it counted only one, the
+        button would vanish although something is still open.
         """
         make_photo(lat=None, lon=None, sha="h" * 64)
         make_photo(year=None, sha="i" * 64)
-        strassen.commit()
+        streets.commit()
 
         daten = client.get("/api/contribute/next", params={"need": "housenumber"}).json()
 
         assert daten["open_other"] == 2
 
 
-class TestNummernZumFoto:
-    """Was der Endpunkt anbietet -- und wann er bewusst nichts anbietet.
+class TestTheNumbersForAPhoto:
+    """What the endpoint offers -- and when it deliberately offers nothing.
 
-    Die leere Liste ist das Tor: Die Detailansicht zeigt die Auswahl, wenn hier etwas steht, und
-    braucht keine eigene Regel. Eine Regel an zwei Stellen ist eine Regel, die sich irgendwann
-    selbst widerspricht.
+    The empty list is the gate: the detail view shows the choice when something stands here, and
+    needs no rule of its own. A rule in two places is a rule that eventually contradicts itself.
     """
 
-    def test_liefert_die_nummern_der_strasse_des_fotos(
-        self, client: TestClient, strassen, make_photo
+    def test_returns_the_numbers_of_the_photos_street(
+        self, client: TestClient, streets, make_photo
     ):
-        foto = make_photo(place_name="Am Kamp", accuracy=150, sha="a" * 64)
-        strassen.commit()
+        photo = make_photo(place_name="Am Kamp", accuracy=150, sha="a" * 64)
+        streets.commit()
 
-        nummern = client.get(f"/api/contribute/{foto.id}/housenumbers").json()
+        numbers = client.get(f"/api/contribute/{photo.id}/housenumbers").json()
 
-        assert [eintrag["housenumber"] for eintrag in nummern] == ["1", "2", "3"]
-        assert all(eintrag["accuracy_m"] == 15 for eintrag in nummern)
+        assert [entry["housenumber"] for entry in numbers] == ["1", "2", "3"]
+        assert all(entry["accuracy_m"] == 15 for entry in numbers)
 
-    def test_liefert_nichts_fuer_ein_bereits_hausgenaues_foto(
-        self, client: TestClient, strassen, make_photo
+    def test_returns_nothing_for_an_already_house_accurate_photo(
+        self, client: TestClient, streets, make_photo
     ):
-        # Sonst bekaeme die Detailansicht Knoepfe fuer eine Frage, die keine ist.
-        foto = make_photo(place_name="Am Kamp", accuracy=15, sha="b" * 64)
-        strassen.commit()
+        # Otherwise the detail view would get buttons for a question that is none.
+        photo = make_photo(place_name="Am Kamp", accuracy=15, sha="b" * 64)
+        streets.commit()
 
-        assert client.get(f"/api/contribute/{foto.id}/housenumbers").json() == []
+        assert client.get(f"/api/contribute/{photo.id}/housenumbers").json() == []
 
-    def test_liefert_nichts_fuer_eine_strasse_ohne_adressen(
-        self, client: TestClient, strassen, make_photo
+    def test_returns_nothing_for_a_street_without_addresses(
+        self, client: TestClient, streets, make_photo
     ):
-        foto = make_photo(place_name="Feldweg", accuracy=150, sha="c" * 64)
-        strassen.commit()
+        photo = make_photo(place_name="Feldweg", accuracy=150, sha="c" * 64)
+        streets.commit()
 
-        assert client.get(f"/api/contribute/{foto.id}/housenumbers").json() == []
+        assert client.get(f"/api/contribute/{photo.id}/housenumbers").json() == []
 
-    def test_unbekanntes_foto(self, client: TestClient, strassen):
+    def test_an_unknown_photo(self, client: TestClient, streets):
         assert client.get("/api/contribute/999/housenumbers").status_code == 404
 
 
-class TestHausnummerNachschaerfen:
-    """Die Ausnahme zu „Besucher fuellen nur Leeres" -- und warum sie eine eigene Tuer hat.
+class TestRefiningToAHouseNumber:
+    """The exception to "visitors fill only what is empty" -- and why it has a door of its own.
 
-    Der Endpunkt nimmt **keine Koordinate** entgegen, nur eine Nummer aus dem Ortsverzeichnis. Bei
-    ``/location`` ist die vom Client behauptete Genauigkeit harmlos, *weil* das Feld ohnehin leer
-    sein muss. Sobald sie darueber entschiede, was ueberschrieben werden darf, waere sie ein
-    Schluessel -- und den haelt der Client.
-    """
+    The endpoint accepts **no coordinate**, only a number from the place index. At ``/location``
+    the precision claimed by the client is harmless, *because* the field has to be empty anyway.
+    The moment it decided what may be overwritten, it would be a key -- and the client holds it."""
 
-    def _foto(self, make_photo, **felder):
+    def _photo(self, make_photo, **felder):
         return make_photo(place_name="Am Kamp", accuracy=150, sha="a" * 64, **felder)
 
-    def _nummer(self, session, housenumber="2"):
+    def _number(self, session, housenumber="2"):
         return session.scalar(
             select(Place).where(Place.kind == "adresse", Place.housenumber == housenumber)
         )
 
-    def test_schaerft_die_strasse_zur_hausnummer(self, client: TestClient, strassen, make_photo):
-        foto = self._foto(make_photo)
-        strassen.commit()
-        nummer = self._nummer(strassen)
+    def test_refines_the_street_to_the_house_number(self, client: TestClient, streets, make_photo):
+        photo = self._photo(make_photo)
+        streets.commit()
+        number = self._number(streets)
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": nummer.id}
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id}
         )
 
-        assert antwort.status_code == 200
-        assert antwort.json()["place_name"] == "Am Kamp 2"
-        assert antwort.json()["location_accuracy_m"] == 15
+        assert response.status_code == 200
+        assert response.json()["place_name"] == "Am Kamp 2"
+        assert response.json()["location_accuracy_m"] == 15
 
-    def test_nimmt_koordinate_und_genauigkeit_aus_dem_ortsverzeichnis(
-        self, client: TestClient, strassen, make_photo
+    def test_takes_the_coordinate_and_the_precision_from_the_place_index(
+        self, client: TestClient, streets, make_photo
     ):
-        """Der Angriffsfall: Der Client bestimmt nichts.
+        """The attack case: the client determines nothing.
 
-        Zusaetzliche Felder im Rumpf werden nicht gelesen -- Koordinate und Genauigkeit kommen aus
-        der Zeile, die der Server nachschlaegt. Ginge das anders, koennte ein Aufruf mit
-        ``accuracy_m: 1`` jede Angabe ersetzen.
+        Additional fields in the body are not read -- coordinate and precision come from the row
+        the server looks up. If it were otherwise, a call with ``accuracy_m: 1`` could replace any
+        entry.
         """
-        foto = self._foto(make_photo)
-        strassen.commit()
-        nummer = self._nummer(strassen)
+        photo = self._photo(make_photo)
+        streets.commit()
+        number = self._number(streets)
 
         client.post(
-            f"/api/contribute/{foto.id}/housenumber",
-            json={"place_id": nummer.id, "lat": 48.13, "lon": 11.57, "accuracy_m": 1},
+            f"/api/contribute/{photo.id}/housenumber",
+            json={"place_id": number.id, "lat": 48.13, "lon": 11.57, "accuracy_m": 1},
         )
-        strassen.refresh(foto)
+        streets.refresh(photo)
 
-        assert (foto.lat, foto.lon) == (nummer.lat, nummer.lon)
-        assert foto.location_accuracy_m == 15
+        assert (photo.lat, photo.lon) == (number.lat, number.lon)
+        assert photo.location_accuracy_m == 15
 
-    def test_wird_mit_der_strasse_als_altwert_protokolliert(
-        self, client: TestClient, strassen, make_photo
+    def test_is_logged_with_the_street_as_the_old_value(
+        self, client: TestClient, streets, make_photo
     ):
-        # Der Altwert ist zugleich der Schluessel, mit dem die Ruecknahme die Strassenmitte
-        # wiederfindet -- bei den beiden anderen Wegen ist er zu Recht leer.
-        foto = self._foto(make_photo, location_source=Source.CURATOR)
-        strassen.commit()
-        nummer = self._nummer(strassen)
+        # The old value is at the same time the key with which a revert finds the street centre
+        # again -- on the other two paths it is rightly empty.
+        photo = self._photo(make_photo, location_source=Source.CURATOR)
+        streets.commit()
+        number = self._number(streets)
 
-        client.post(f"/api/contribute/{foto.id}/housenumber", json={"place_id": nummer.id})
+        client.post(f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id})
 
-        eintrag = strassen.scalar(select(Change).where(Change.field == "housenumber"))
-        assert eintrag.old_value == "Am Kamp"
-        assert eintrag.new_value == "Am Kamp 2"
-        assert eintrag.old_source == Source.CURATOR
+        entry = streets.scalar(select(Change).where(Change.field == "housenumber"))
+        assert entry.old_value == "Am Kamp"
+        assert entry.new_value == "Am Kamp 2"
+        assert entry.old_source == Source.CURATOR
 
-    def test_hausnummer_einer_fremden_strasse_wird_abgewiesen(
-        self, client: TestClient, strassen, make_photo
+    def test_a_house_number_of_another_street_is_rejected(
+        self, client: TestClient, streets, make_photo
     ):
-        foto = self._foto(make_photo)
-        strassen.commit()
-        fremd = strassen.scalar(
+        photo = self._photo(make_photo)
+        streets.commit()
+        fremd = streets.scalar(
             select(Place).where(Place.kind == "adresse", Place.street == "Strasse des 17. Juni")
         )
 
-        antwort = client.post(f"/api/contribute/{foto.id}/housenumber", json={"place_id": fremd.id})
-
-        assert antwort.status_code == 422
-
-    def test_eine_strasse_ist_keine_hausnummer(self, client: TestClient, strassen, make_photo):
-        foto = self._foto(make_photo)
-        strassen.commit()
-        strasse = strassen.scalar(select(Place).where(Place.name == "Am Kamp"))
-
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": strasse.id}
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": fremd.id}
         )
 
-        assert antwort.status_code == 404
+        assert response.status_code == 422
 
-    def test_bereits_hausgenaues_foto_wird_nicht_ueberschrieben(
-        self, client: TestClient, strassen, make_photo
-    ):
-        foto = make_photo(place_name="Am Kamp 1", accuracy=15, sha="b" * 64)
-        strassen.commit()
-        nummer = self._nummer(strassen)
+    def test_a_street_is_not_a_house_number(self, client: TestClient, streets, make_photo):
+        photo = self._photo(make_photo)
+        streets.commit()
+        street_place = streets.scalar(select(Place).where(Place.name == "Am Kamp"))
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": nummer.id}
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": street_place.id}
         )
 
-        assert antwort.status_code == 409
-        strassen.refresh(foto)
-        assert foto.place_name == "Am Kamp 1"
+        assert response.status_code == 404
 
-    def test_unverortetes_foto_wird_nicht_geschaerft(
-        self, client: TestClient, strassen, make_photo
+    def test_an_already_house_accurate_photo_is_not_overwritten(
+        self, client: TestClient, streets, make_photo
     ):
-        # Es gehoert in „Wo ist das?", nicht hierher -- und hat keine Strasse, zu der die Nummer
+        photo = make_photo(place_name="Am Kamp 1", accuracy=15, sha="b" * 64)
+        streets.commit()
+        number = self._number(streets)
+
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id}
+        )
+
+        assert response.status_code == 409
+        streets.refresh(photo)
+        assert photo.place_name == "Am Kamp 1"
+
+    def test_an_unlocated_photo_is_not_refined(self, client: TestClient, streets, make_photo):
+        # It belongs in the first question, not here -- and has no street the number
         # passen koennte.
-        foto = make_photo(lat=None, lon=None, place_name=None, sha="c" * 64)
-        strassen.commit()
-        nummer = self._nummer(strassen)
+        photo = make_photo(lat=None, lon=None, place_name=None, sha="c" * 64)
+        streets.commit()
+        number = self._number(streets)
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": nummer.id}
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id}
         )
 
-        assert antwort.status_code == 409
+        assert response.status_code == 409
 
-    def test_zweiter_besucher_kann_die_hausnummer_nicht_ersetzen(
-        self, client: TestClient, strassen, make_photo
+    def test_a_second_visitor_cannot_replace_the_house_number(
+        self, client: TestClient, streets, make_photo
     ):
-        """Die Regel „genauer darf ungenauer ersetzen, nie umgekehrt" -- in der Richtung, die
-        weh tut.
+        """The rule that a more precise entry may replace a less precise one, never the other way
+        round -- in the direction that hurts.
 
-        Ohne sie ueberschriebe der zweite Besucher den ersten, und genau das ist der Grund, warum
-        Beitraege ueberhaupt ohne Moderation durchgehen duerfen.
-        """
-        foto = self._foto(make_photo)
-        strassen.commit()
-        erste = self._nummer(strassen, "1")
-        zweite = self._nummer(strassen, "3")
+        Without it the second visitor would overwrite the first, and that is exactly why
+        contributions may go through without moderation at all."""
+        photo = self._photo(make_photo)
+        streets.commit()
+        erste = self._number(streets, "1")
+        zweite = self._number(streets, "3")
 
-        client.post(f"/api/contribute/{foto.id}/housenumber", json={"place_id": erste.id})
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/housenumber", json={"place_id": zweite.id}
+        client.post(f"/api/contribute/{photo.id}/housenumber", json={"place_id": erste.id})
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": zweite.id}
         )
 
-        assert antwort.status_code == 409
-        strassen.refresh(foto)
-        assert foto.place_name == "Am Kamp 1"
+        assert response.status_code == 409
+        streets.refresh(photo)
+        assert photo.place_name == "Am Kamp 1"
 
 
-class TestOrtErgaenzen:
-    def test_uebernimmt_sofort(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+class TestAddingAPlace:
+    def test_takes_it_at_once(self, client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/location",
+        response = client.post(
+            f"/api/contribute/{photo.id}/location",
             json={**IN_HOLM, "place_name": "Mühlenweg"},
         )
 
-        assert antwort.status_code == 200
-        daten = antwort.json()
+        assert response.status_code == 200
+        daten = response.json()
         assert daten["needs_location"] is False
         assert daten["place_name"] == "Mühlenweg"
         assert daten["location_source"] == Source.VISITOR
 
-    def test_erscheint_danach_auf_der_karte(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, year=1932, sha="a" * 64)
+    def test_appears_on_the_map_afterwards(self, client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None, year=1932, sha="a" * 64)
         session.commit()
         assert (
             client.get("/api/photos", params={"bbox": "9.60,53.57,9.75,53.67"}).json()["total"] == 0
         )
 
-        client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
+        client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
 
-        # Der unmittelbare Effekt ist der Reiz fuer den Besucher:
+        # The immediate effect is what makes it appealing to the visitor:
         # "mein Wissen ist jetzt auf der Karte".
         assert (
             client.get("/api/photos", params={"bbox": "9.60,53.57,9.75,53.67"}).json()["total"] == 1
         )
 
-    def test_wird_protokolliert(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+    def test_is_logged(self, client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
-        client.post(f"/api/contribute/{foto.id}/location", json={**IN_HOLM, "session_id": "abc"})
+        client.post(f"/api/contribute/{photo.id}/location", json={**IN_HOLM, "session_id": "abc"})
 
-        eintrag = session.scalars(select(Change).where(Change.photo_id == foto.id)).one()
-        assert eintrag.field == "location"
-        assert eintrag.source == Source.VISITOR
-        assert eintrag.session_id == "abc"
-        assert "53.62" in eintrag.new_value
+        entry = session.scalars(select(Change).where(Change.photo_id == photo.id)).one()
+        assert entry.field == "location"
+        assert entry.source == Source.VISITOR
+        assert entry.session_id == "abc"
+        assert "53.62" in entry.new_value
 
-    def test_besetztes_feld_wird_nicht_ueberschrieben(
-        self, client: TestClient, session, make_photo
-    ):
-        """Was ein Kurator gesetzt hat, ist unantastbar -- und der zweite Besucher darf den
-        ersten nicht ueberschreiben."""
-        foto = make_photo(lat=53.61, lon=9.66, sha="a" * 64)
+    def test_a_filled_field_is_not_overwritten(self, client: TestClient, session, make_photo):
+        """What a curator has set is untouchable -- and the second visitor must not overwrite the
+        first."""
+        photo = make_photo(lat=53.61, lon=9.66, sha="a" * 64)
         session.commit()
 
-        antwort = client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
+        response = client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
 
-        assert antwort.status_code == 409
-        session.refresh(foto)
-        assert foto.lat == 53.61
-        # Die Meldung soll den Besucher nicht als Stoerenfried behandeln.
-        assert "Dank" in antwort.json()["detail"]
+        assert response.status_code == 409
+        session.refresh(photo)
+        assert photo.lat == 53.61
+        # The message should not treat the visitor as a nuisance.
+        assert "Dank" in response.json()["detail"]
 
-    def test_ort_ausserhalb_der_region(self, client: TestClient, session, settings, make_photo):
+    def test_a_place_outside_the_region(self, client: TestClient, session, settings, make_photo):
         (settings.data_dir / "region.json").write_text(
             json.dumps({"bbox": [9.60028, 53.57561, 9.75174, 53.66545]}), encoding="utf-8"
         )
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
-        antwort = client.post(f"/api/contribute/{foto.id}/location", json=WEIT_WEG)
+        response = client.post(f"/api/contribute/{photo.id}/location", json=WEIT_WEG)
 
-        assert antwort.status_code == 422
-        assert "ausserhalb" in antwort.json()["detail"].lower()
+        assert response.status_code == 422
+        assert "ausserhalb" in response.json()["detail"].lower()
 
-    def test_ohne_hinterlegte_region_wird_nicht_geprueft(
+    def test_without_a_configured_region_nothing_is_checked(
         self, client: TestClient, session, make_photo
     ):
-        # Kein region.json vorhanden: dann lieber annehmen als grundlos ablehnen.
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+        # No region.json present: then rather accept than refuse without reason.
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 
-        assert client.post(f"/api/contribute/{foto.id}/location", json=WEIT_WEG).status_code == 200
+        assert client.post(f"/api/contribute/{photo.id}/location", json=WEIT_WEG).status_code == 200
 
-    def test_unbekanntes_foto(self, client: TestClient):
+    def test_an_unknown_photo(self, client: TestClient):
         assert client.post("/api/contribute/9999/location", json=IN_HOLM).status_code == 404
 
 
-class TestJahrErgaenzen:
-    def test_jahresangabe(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=None, sha="a" * 64)
+class TestAddingAYear:
+    def test_a_year_entry(self, client: TestClient, session, make_photo):
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         daten = client.post(
-            f"/api/contribute/{foto.id}/date", json={"year": 1932, "precision": "year"}
+            f"/api/contribute/{photo.id}/date", json={"year": 1932, "precision": "year"}
         ).json()
 
         assert daten["date_label"] == "1932"
         assert daten["needs_date"] is False
         assert daten["date_source"] == Source.VISITOR
 
-    def test_jahrzehnt_wird_zum_intervall(self, client: TestClient, session, make_photo):
-        """ "Irgendwann in den Zwanzigern" ist die haeufigste ehrliche Antwort."""
-        foto = make_photo(year=None, sha="a" * 64)
+    def test_a_decade_becomes_an_interval(self, client: TestClient, session, make_photo):
+        """ "Irgendwann in den Zwanzigern" is the most frequent honest answer."""
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         daten = client.post(
-            f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"}
+            f"/api/contribute/{photo.id}/date", json={"year": 1924, "precision": "decade"}
         ).json()
 
         assert daten["date_label"] == "1920er"
         assert daten["date_from"] == "1920-01-01"
         assert daten["date_to"] == "1929-12-31"
 
-    def test_so_datiertes_foto_erscheint_bei_ueberlappender_auswahl(
+    def test_a_photo_dated_that_way_appears_for_an_overlapping_selection(
         self, client, session, make_photo
     ):
-        foto = make_photo(year=None, sha="a" * 64)
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
-        client.post(f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"})
+        client.post(f"/api/contribute/{photo.id}/date", json={"year": 1924, "precision": "decade"})
 
-        antwort = client.get(
+        response = client.get(
             "/api/photos",
             params={"bbox": "9.60,53.57,9.75,53.67", "from_year": 1925, "to_year": 1930},
         )
 
-        assert antwort.json()["total"] == 1
+        assert response.json()["total"] == 1
 
-    def test_bereits_datiertes_foto(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=1932, sha="a" * 64)
+    def test_an_already_dated_photo(self, client: TestClient, session, make_photo):
+        photo = make_photo(year=1932, sha="a" * 64)
         session.commit()
 
-        antwort = client.post(
-            f"/api/contribute/{foto.id}/date", json={"year": 1800, "precision": "year"}
+        response = client.post(
+            f"/api/contribute/{photo.id}/date", json={"year": 1800, "precision": "year"}
         )
 
-        assert antwort.status_code == 409
-        session.refresh(foto)
-        assert foto.date_from == date(1932, 1, 1)
+        assert response.status_code == 409
+        session.refresh(photo)
+        assert photo.date_from == date(1932, 1, 1)
 
-    def test_unsinniges_jahr_wird_abgewiesen(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=None, sha="a" * 64)
+    def test_a_nonsensical_year_is_rejected(self, client: TestClient, session, make_photo):
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
 
         assert (
             client.post(
-                f"/api/contribute/{foto.id}/date", json={"year": 3000, "precision": "year"}
+                f"/api/contribute/{photo.id}/date", json={"year": 3000, "precision": "year"}
             ).status_code
             == 422
         )
 
-    def test_wird_protokolliert(self, client: TestClient, session, make_photo):
-        foto = make_photo(year=None, sha="a" * 64)
+    def test_is_logged(self, client: TestClient, session, make_photo):
+        photo = make_photo(year=None, sha="a" * 64)
         session.commit()
 
-        client.post(f"/api/contribute/{foto.id}/date", json={"year": 1924, "precision": "decade"})
+        client.post(f"/api/contribute/{photo.id}/date", json={"year": 1924, "precision": "decade"})
 
-        eintrag = session.scalars(select(Change).where(Change.field == "date")).one()
-        assert eintrag.new_value == "1920er"
-        assert eintrag.source == Source.VISITOR
+        entry = session.scalars(select(Change).where(Change.field == "date")).one()
+        assert entry.new_value == "1920er"
+        assert entry.source == Source.VISITOR
 
 
-class TestZusammenspiel:
-    def test_beide_luecken_nacheinander_fuellen(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, year=None, sha="a" * 64)
+class TestTheTwoTogether:
+    def test_filling_both_gaps_one_after_the_other(self, client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None, year=None, sha="a" * 64)
         session.commit()
 
-        client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
-        client.post(f"/api/contribute/{foto.id}/date", json={"year": 1955, "precision": "year"})
+        client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
+        client.post(f"/api/contribute/{photo.id}/date", json={"year": 1955, "precision": "year"})
 
-        daten = client.get(f"/api/photos/{foto.id}").json()
+        daten = client.get(f"/api/photos/{photo.id}").json()
         assert daten["needs_location"] is False
         assert daten["needs_date"] is False
         assert len(session.scalars(select(Change)).all()) == 2
 
-    def test_offene_zahl_sinkt(self, client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None, sha="a" * 64)
+    def test_the_open_count_goes_down(self, client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None, sha="a" * 64)
         make_photo(lat=None, lon=None, sha="b" * 64)
         session.commit()
 
         assert client.get("/api/contribute/next?need=location").json()["open_count"] == 2
-        client.post(f"/api/contribute/{foto.id}/location", json=IN_HOLM)
+        client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
         assert client.get("/api/contribute/next?need=location").json()["open_count"] == 1
 
 
-class TestOrtssuche:
-    def _lege_orte_an(self, session):
+class TestPlaceSearch:
+    def _create_places(self, session):
         from app.models import Place
         from app.services.places import normalize
 
@@ -817,38 +803,38 @@ class TestOrtssuche:
             )
         session.commit()
 
-    def test_findet_trotz_fehlendem_umlaut(self, client: TestClient, session):
-        self._lege_orte_an(session)
+    def test_finds_it_despite_a_missing_umlaut(self, client: TestClient, session):
+        self._create_places(session)
 
         namen = [o["name"] for o in client.get("/api/places", params={"q": "muhlen"}).json()]
 
         assert "Mühlenweg" in namen
 
-    def test_wortanfang_steht_vorn(self, client: TestClient, session):
-        """Wer "Muhl" tippt, meint den Mühlenweg, nicht die Alte Mühlenstraße."""
-        self._lege_orte_an(session)
+    def test_a_word_beginning_comes_first(self, client: TestClient, session):
+        """Whoever types "Muhl" means the Mühlenweg, not the Alte Mühlenstraße."""
+        self._create_places(session)
 
         namen = [o["name"] for o in client.get("/api/places", params={"q": "muhl"}).json()]
 
         assert namen[0] == "Mühlenweg"
         assert "Alte Mühlenstraße" in namen
 
-    def test_scharfes_s(self, client: TestClient, session):
-        self._lege_orte_an(session)
+    def test_the_sharp_s(self, client: TestClient, session):
+        self._create_places(session)
 
         namen = [o["name"] for o in client.get("/api/places", params={"q": "hauptstrasse"}).json()]
 
         assert namen == ["Hauptstraße"]
 
-    def test_zu_kurze_eingabe_liefert_nichts(self, client: TestClient, session):
-        self._lege_orte_an(session)
+    def test_too_short_an_input_returns_nothing(self, client: TestClient, session):
+        self._create_places(session)
 
         assert client.get("/api/places", params={"q": "m"}).json() == []
         assert client.get("/api/places").json() == []
 
 
-class TestOrtsverzeichnisLaden:
-    def test_aus_datei(self, session, settings):
+class TestLoadingThePlaceIndex:
+    def test_from_a_file(self, session, settings):
         from app.services.places import load_from_file
 
         settings.places_file.write_text(
@@ -866,28 +852,28 @@ class TestOrtsverzeichnisLaden:
             encoding="utf-8",
         )
 
-        anzahl = load_from_file(session, settings.places_file)
+        count = load_from_file(session, settings.places_file)
 
-        assert anzahl == 1
+        assert count == 1
         from app.models import Place
 
-        ort = session.scalars(select(Place)).one()
-        # Die Normalisierung wird neu berechnet: eine aeltere Datei wuerde die Suche sonst
+        place = session.scalars(select(Place)).one()
+        # The normalisation is recomputed: an older file would otherwise leave the search
         # stillschweigend leer laufen lassen.
-        assert ort.name_normalized == "suderstrasse"
+        assert place.name_normalized == "suderstrasse"
 
-    def test_fehlende_datei_ist_kein_fehler(self, session, settings):
+    def test_a_missing_file_is_not_an_error(self, session, settings):
         from app.services.places import load_from_file
 
         assert load_from_file(session, settings.data_dir / "gibtsnicht.json") == 0
 
 
-class TestLetzteAufgabe:
-    def test_zaehlt_auch_die_andere_frage(self, client: TestClient, session, make_photo):
-        """Davon haengt ab, ob "Weiss ich nicht" ueberhaupt noch irgendwohin fuehrt.
+class TestTheLastTask:
+    def test_counts_the_other_question_too(self, client: TestClient, session, make_photo):
+        """On this hangs whether the "I do not know" button still leads anywhere at all.
 
-        Ist sonst nichts offen, kaeme dasselbe Foto zurueck -- dann steht der Knopf besser gar
-        nicht da.
+        If nothing else is open, the same photo would come back -- then the button had better not
+        be there.
         """
         make_photo(lat=None, lon=None, sha="a" * 64)
         make_photo(year=None, sha="b" * 64)
@@ -899,7 +885,7 @@ class TestLetzteAufgabe:
         assert daten["open_count"] == 1, "ein Foto ohne Ort"
         assert daten["open_other"] == 2, "zwei ohne Jahr"
 
-    def test_letzte_aufgabe_hat_nichts_daneben(self, client: TestClient, session, make_photo):
+    def test_the_last_task_has_nothing_beside_it(self, client: TestClient, session, make_photo):
         make_photo(lat=None, lon=None, sha="a" * 64)
         session.commit()
 

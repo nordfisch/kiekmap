@@ -1,8 +1,5 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
- * The "Hilf mit" panel along the right edge.
+ * The contribution panel along the right edge.
  *
  * For historical scans, place and year are nowhere in the file -- whoever knows the village often
  * knows them at a glance. This panel is therefore not a side feature but the main way the system
@@ -13,7 +10,7 @@ import { useEffect, useRef } from "react";
 
 import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
-import { t } from "../text/de";
+import { t } from "../text";
 import { DateTask } from "./DateTask";
 import { HouseNumberTask } from "./HouseNumberTask";
 import { LocationTask } from "./LocationTask";

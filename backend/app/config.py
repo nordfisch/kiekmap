@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Configuration.
 
 Every path hangs off a single root directory, ``data_dir``. That is deliberate: the entire mutable
@@ -10,6 +7,7 @@ state lives underneath it, so that backing up means "copy one folder".
 import json
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -24,6 +22,17 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    #: Which language the device speaks -- interface, messages, date labels.
+    #:
+    #: A property of the instance, not a choice for the visitor: the device stands in one museum
+    #: and speaks its language. Read by the backend directly and by the frontend through
+    #: ``GET /api/config``, so that switching it on the Pi needs no new build.
+    #:
+    #: ``Literal`` rather than ``str``: an unknown value aborts at startup instead of falling back
+    #: to German in silence. A device that speaks the wrong language is noticed; one that ignores
+    #: the setting is not.
+    language: Literal["de", "en"] = "de"
 
     #: Root of all runtime data. Bind-mounted to /data inside the container.
     data_dir: Path = PROJECT_ROOT / "data"
@@ -41,7 +50,7 @@ class Settings(BaseSettings):
     #:
     #: Historical photos are scans; their EXIF carries the date of the scanning run. Adopting it
     #: would place a photo from 1932 at 2019 on the timeline -- and it would count as dated, so
-    #: it would never surface in the "Hilf mit" panel where someone could correct it.
+    #: it would never surface in the contribution panel where someone could correct it.
     #: Raise this if the collection also holds genuine digital photographs.
     exif_date_max_year: int = 1990
 
@@ -139,7 +148,7 @@ class Settings(BaseSettings):
             return None
 
     def street_choice(self) -> int:
-        """How many streets the "Hilf mit" panel offers as buttons -- the nearest ones.
+        """How many streets the contribution panel offers as buttons -- the nearest ones.
 
         See the comment in ``tiles/region.json``. The fallback keeps a village without the key
         usable rather than leaving the panel empty.

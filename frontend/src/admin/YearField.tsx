@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Year and precision, side by side and equally wide.
  *
@@ -14,7 +11,7 @@
 
 import { useId } from "react";
 
-import { t } from "../text/de";
+import { t } from "../text";
 import { type Precision, type YearInput, decadeAllowed, withYear } from "./yearInput";
 
 export function YearField({

@@ -1,37 +1,34 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
- * Tests der Oberflaechentexte.
+ * Tests of the interface texts.
  *
- * Geprueft wird nicht der Wortlaut -- der darf sich aendern -- sondern eine Zusage, die beim
- * Umformulieren still bricht: Kein Text setzt einen Artikel vor einen Strassennamen.
+ * What is checked is not the wording -- that may change -- but a promise that breaks silently
+ * while rephrasing: no text puts an article in front of a street name.
  */
 
 import { describe, expect, it } from "vitest";
 
-import { t } from "./de";
+import { de as t } from "./de";
 
-describe("Fragen mit einem Strassennamen darin", () => {
-  /** Alle drei Geschlechter, wie sie in Holm nebeneinander vorkommen. */
-  const strassen = ["Mühlenweg", "Hauptstraße", "Achter de Möhl"];
+describe("questions with a street name in them", () => {
+  /** All three genders, as they occur side by side in Holm. */
+  const streets = ["Mühlenweg", "Hauptstraße", "Achter de Möhl"];
 
-  it("stellt den Strassennamen voran, statt ihn in den Satz zu setzen", () => {
+  it("puts the street name first instead of into the sentence", () => {
     /**
-     * Der Fehler, um den es geht: "In welchem Abschnitt vom Hauptstraße?" stand so im Kiosk. Ein
-     * deutscher Strassenname kann maennlich, weiblich oder saechlich sein, ein fester Artikel
-     * davor ist also bei zwei Dritteln falsch. Eine Geschlechterliste waere genau das Ortswissen,
-     * das nicht in den Code gehoert -- deshalb weicht der Satz dem Fall aus, indem der Name
-     * vornansteht. Steht er vorn, kann nichts vor ihm falsch gebeugt sein.
+     * The error at issue: "In welchem Abschnitt vom Hauptstraße?" stood like that in the kiosk. A
+     * German street name can be masculine, feminine or neuter, so a fixed article in front of it
+     * is wrong two thirds of the time. A list of genders would be exactly the local knowledge that
+     * does not belong in the code -- so the sentence sidesteps the case by putting the name first.
+     * Standing first, nothing before it can be inflected wrongly.
      */
-    for (const strasse of strassen) {
-      for (const frage of [t.location.askHouseNumber(strasse), t.location.askArea(strasse)]) {
-        expect(frage.startsWith(strasse)).toBe(true);
+    for (const street of streets) {
+      for (const question of [t.location.askHouseNumber(street), t.location.askArea(street)]) {
+        expect(question.startsWith(street)).toBe(true);
       }
     }
   });
 
-  it("nennt die Strasse und fragt danach", () => {
+  it("names the street and asks afterwards", () => {
     expect(t.location.askHouseNumber("Hauptstraße")).toBe("Hauptstraße — welche Hausnummer?");
     expect(t.location.askArea("Hauptstraße")).toBe("Hauptstraße — welcher Abschnitt?");
   });

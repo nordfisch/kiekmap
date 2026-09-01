@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Watching the inbox folder.
 
 Whatever is copied in here ends up in the database -- no login, no interface. For the museum team
@@ -112,9 +109,9 @@ class IncomingWatcher:
                 )
                 self._sizes.pop(path, None)
                 # Per file, not once for the whole sweep -- and that is not a matter of taste.
-                # ``import_file`` moves the file to ``_erledigt/`` inside itself, before anything
+                # ``import_file`` moves the file to ``_done/`` inside itself, before anything
                 # is written down. Committed at the end, an exception on the fifth file would take
-                # the rows of the first four with it while their sources lie in ``_erledigt/`` --
+                # the rows of the first four with it while their sources lie in ``_done/`` --
                 # and the import log along with them, because its entries hang in the same
                 # transaction. The one record that would have shown it is the one that is lost.
                 # ``importer.import_from_folder`` has always done it this way.

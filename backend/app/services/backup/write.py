@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Writing the collection onto a stick.
 
 A folder, not a ZIP: an interrupted backup is then partly usable instead of entirely worthless,
@@ -31,12 +28,13 @@ from app.services.backup.common import (
 from app.services.backup.drives import Drive
 from app.services.backup.manifest import write_manifest
 from app.services.backup.state import record_backup
+from app.text import texts
 
 log = logging.getLogger(__name__)
 
 
 def run_backup(session: Session, settings: Settings, drive: Drive, report: Report) -> str:
-    """Write the collection onto the stick. Returns the German closing message."""
+    """Write the collection onto the stick. Returns the closing message for the screen."""
     target = drive.path / BACKUP_DIR_NAME
     target.mkdir(parents=True, exist_ok=True)
 
@@ -45,11 +43,10 @@ def run_backup(session: Session, settings: Settings, drive: Drive, report: Repor
         # Checked against the full size, not against what is still missing: an incremental backup
         # that only just fits today has no room for next year's photographs.
         raise BackupError(
-            f"Auf dem Stick ist zu wenig Platz. Gebraucht werden {human_size(needed)}, "
-            f"frei sind {human_size(drive.free_bytes)}."
+            texts().backup.no_room_on_the_stick(human_size(needed), human_size(drive.free_bytes))
         )
 
-    report(0, photos, "Die Angaben werden gesichert")
+    report(0, photos, texts().backup.saving_the_records)
     _backup_database(session, settings, target)
 
     written = 0
@@ -65,7 +62,7 @@ def run_backup(session: Session, settings: Settings, drive: Drive, report: Repor
             written += copy_if_new(thumb, target / "thumbs" / relative)
 
         done += 1
-        report(done, photos, f"Sichere Foto {done} von {photos}")
+        report(done, photos, texts().backup.saving_photo(done, photos))
 
     for name in LOOSE_FILES:
         loose = settings.data_dir / name
@@ -78,12 +75,7 @@ def run_backup(session: Session, settings: Settings, drive: Drive, report: Repor
     log.info("Backup finished: %s photos, %s written to %s", photos, human_size(written), target)
     # The database is rewritten every time -- the statements about the photos change even when the
     # photos do not. Only the images are incremental, and only about them can we say "nothing new".
-    dazu = f"Neu dazugekommen: {human_size(written)}." if written else "Neue Bilder gab es nicht."
-    # Every German message in this module is phrased so that it needs no umlaut -- they end up on
-    # the screen, where "Sie koennen den Stick abziehen" would simply look wrong. See CLAUDE.md.
-    return (
-        f"{photos} Fotos und alle Angaben gesichert. {dazu} Der Stick kann jetzt abgezogen werden."
-    )
+    return texts().backup.backup_done(photos, human_size(written) if written else None)
 
 
 def _backup_database(session: Session, settings: Settings, target: Path) -> None:

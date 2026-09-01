@@ -1,7 +1,10 @@
+<!-- translated-from: docs/museum/operations.md -->
+<!-- source-sha: 5a2df922ffca1d488dcfbc17fca46b3c1cfa5c4a522fd2a47a146052ffac8830 -->
+
 # Betriebshandbuch
 
-Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung für das
-Museumsteam steht in der [Kuratoren-Anleitung](usermanual.md); hier steht die Technik.
+Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung steht in der
+[Anleitung für das Museumsteam](usermanual.de.md); hier steht die Technik.
 
 > **Auf einem echten Pi noch nicht erprobt.** Die Dateien unter `deploy/pi/` sind sorgfältig
 > geschrieben und syntaktisch geprüft, aber nie gelaufen — es gab beim Bauen kein Gerät. Was
@@ -32,7 +35,7 @@ rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
 ```
 
 **Das Wappen kommt denselben Weg.** Im Repo liegt nur ein Platzhalter — ein Gemeindewappen darf
-dort nicht liegen, siehe [decisions.md](decisions.md), Punkt 21. Auf dem Gerät gehört das echte
+dort nicht liegen, siehe [decisions.md](../developer/decisions.md), Punkt 21. Auf dem Gerät gehört das echte
 hin:
 
 ```bash
@@ -42,7 +45,7 @@ rsync -a wappen.png pi:/opt/kiekmap/frontend/public/logo.png
 Danach das Frontend neu bauen (`make prod` baut die Images ohnehin neu) — die Datei wird beim Bau
 in das Abbild aufgenommen, nicht zur Laufzeit gelesen. Das Holmer Wappen liegt unter
 `~/Developer/Museum/Wappen/holm-wappen.png` auf dem Entwicklungsrechner; Quelle und
-Rechtelage stehen in [adaption.md](adaption.md), Abschnitt „Wappen einsetzen".
+Rechtelage stehen in [adaption.de.md](adaption.de.md), Abschnitt „Wappen einsetzen".
 
 ---
 
@@ -73,8 +76,8 @@ curl -sf http://localhost/api/health && echo " API antwortet"
 
 ## Wartungsausgang
 
-Der Kiosk kennt keine Tastenkombination zum Beenden — das ist Absicht, ein Besucher soll nicht
-versehentlich herausfallen. Der Weg hinaus geht über SSH:
+Der Kiosk kennt keine Tastenkombination zum Beenden — das ist Absicht, damit ein Besucher die
+Ausstellung nicht versehentlich verlässt. Der Weg hinaus geht über SSH:
 
 ```bash
 sudo systemctl stop kiekmap-kiosk     # Bildschirm wird schwarz, Dienste laufen weiter
@@ -91,17 +94,17 @@ hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
 Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
 
 ```bash
-make release nach=/Volumes/STICK/kiekmap-update
-make release nach=/Volumes/STICK/kiekmap-update karte=1   # falls sich die Region geändert hat
+make release to=/Volumes/STICK/kiekmap-update
+make release to=/Volumes/STICK/kiekmap-update map=1   # falls sich die Region geändert hat
 ```
 
-Das Ziel baut beide Abbilder, sichert sie als `abbilder.tar` und schreibt die `version`-Datei
+Das Ziel baut beide Abbilder, sichert sie als `images.tar` und schreibt die `version`-Datei
 daneben. **Es bricht ab, wenn der Arbeitsbaum nicht sauber ist oder der passende Tag fehlt** — ein
 Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen.
 
 Vorher also: `make version v=0.9.0`, committen, `git tag -s v0.9.0 -m v0.9.0`.
 
-Von Hand war das vier Befehle, und der, den man vergisst, ist die `version`-Datei: Die Abbilder
+Von Hand waren das vier Befehle. Der, den man vergisst, schreibt die `version`-Datei: Die Abbilder
 laden, `KIEKMAP_VERSION` bleibt in der `.env` stehen, und der nächste Start zieht das **alte**
 Abbild wieder hoch. Das Gerät läuft dann mit der alten Software und sagt es nirgends.
 
@@ -185,17 +188,28 @@ Bedienung; jede Aktion schiebt sie hinaus, und ein Neustart des Dienstes beendet
 
 Die `.env` im Projektverzeichnis ist auch im Betrieb die Stelle, an der Einstellungen stehen. Sie
 liegt bewusst **nicht** im Abbild — das Abbild ist die Software, die `.env` ist der Ort — und wird
-in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml) als `env_file` eingelesen. Wer dort
+in [`deploy/docker-compose.yml`](../../deploy/docker-compose.yml) als `env_file` eingelesen. Wer dort
 etwas ändert, startet danach die Container neu:
 
 ```bash
 cd /opt/kiekmap && docker compose up -d
 ```
 
+**Die Sprache des Geräts** steht ebenfalls hier:
+
+```bash
+KIEKMAP_LANGUAGE=de     # oder en
+```
+
+Sie schaltet Besucheransicht, Verwaltung, Meldungen und Datumsbeschriftung um. **Ein neuer Bau ist
+nicht nötig** — nach dem Neustart der Container gilt der neue Wert. Ein anderer Wert als `de` oder
+`en` bricht den Start ab, statt still auf Deutsch zurückzufallen; im Protokoll steht dann eine
+Zeile von Pydantic. Mehr in [adaption.de.md](adaption.de.md#andere-sprache).
+
 **Vier Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
 `KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
 beschreiben den Container, nicht den Ort — innen heißen die Verzeichnisse immer `/data` und
-`/media`, gleichgültig wo sie aussen liegen. Ein `KIEKMAP_MEDIA_DIR=/Volumes` in der `.env` des
+`/media`, gleichgültig wo sie außen liegen. Ein `KIEKMAP_MEDIA_DIR=/Volumes` in der `.env` des
 Entwicklungsmacs stört den Betrieb deshalb nicht.
 
 **Warum das hier steht:** Bis zum 14. August 2026 reichte die Compose-Datei nur einzelne Werte
@@ -230,7 +244,7 @@ Zwei Fallstricke stecken darin, beide still:
 **Der Container sieht den Stick nicht.** Ein Docker-Bind-Mount zeigt nur, was beim Start des
 Containers schon eingehängt war. Ein später eingesteckter Stick bleibt unsichtbar — ohne
 Fehlermeldung, der Ordner ist einfach leer. Dagegen steht `:rshared` an der Zeile `/media:/media`
-in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml). Fehlt es, hilft auch kein Neustart
+in [`deploy/docker-compose.yml`](../../deploy/docker-compose.yml). Fehlt es, hilft auch kein Neustart
 des Containers zur richtigen Zeit.
 
 **Der Stick ist da, aber schreibgeschützt.** FAT- und exFAT-Sticks kennen keine Besitzer; ohne
@@ -248,7 +262,7 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 > **In `/Volumes` liegt immer ein Symlink auf `/`**, benannt nach dem internen Volume — das legt
 > macOS selbst an. Bis zum 14. August 2026 galt er als Datenträger, und die Sicherung landete
 > dahinter, im laufenden Datenverzeichnis. Seither werden Symlinks übersprungen
-> ([decisions.md](decisions.md), Punkt 40); die Liste ist auf einem Mac ohne angestecktes
+> ([decisions.md](../developer/decisions.md), Punkt 40); die Liste ist auf einem Mac ohne angestecktes
 > Laufwerk jetzt leer, und genau das ist richtig.
 
 ---
@@ -256,14 +270,15 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 ## Der Schemastand einer zurückgespielten Sicherung
 
 **Seit dem 15. August 2026 regelt das die Wiederherstellung selbst** — dieser Abschnitt beschreibt,
-*wie*, und was zu tun ist, wenn doch etwas hakt. Für das Museumsteam steht der kurze Weg im
-[Benutzerhandbuch](usermanual.md#wenn-die-sicherung-älter-ist-als-das-programm).
+*wie*, und was zu tun ist, wenn doch etwas hakt. Der kurze Weg für das Team steht in der
+[Anleitung](usermanual.de.md#wenn-die-sicherung-älter-ist-als-das-programm).
 
 **Warum es überhaupt eine Frage ist.** Eine Sicherung enthält `kiekmap.db` genau so, wie die Datei
 damals aussah — mitsamt ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird
-die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`); danach hängt sich das
-laufende Programm nur neu an sie (`_reopen_database`). Migrationen laufen dabei nicht von selbst:
-Sie laufen beim *Start* (`backend/docker-entrypoint.sh`), und eine Wiederherstellung ist kein Start.
+die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`); danach hängt
+sich das laufende Programm nur neu an sie (`_reopen_database`). Migrationen laufen dabei nicht von
+selbst: Sie laufen beim *Start* (`backend/docker-entrypoint.sh`), und eine Wiederherstellung ist
+kein Start.
 
 **Was jetzt passiert**, und die Reihenfolge ist der ganze Punkt (`services/schema.py`):
 
@@ -287,8 +302,10 @@ docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/d
 docker compose exec backend alembic heads
 ```
 
-Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand — bei Schreibfehlern im
-Betrieb der erste Blick. Auf dem Entwicklungsrechner dasselbe ohne Container:
+Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand. Das ist bei
+Schreibfehlern im Betrieb der erste Blick, und der Zustand ist von außen nicht zu sehen: Die
+Ausstellung zeigt Fotos, Karte und Zeitleiste wie immer, nur **jeder Schreibzugriff** scheitert
+mit HTTP 500. Auf dem Entwicklungsrechner dasselbe ohne Container:
 
 ```bash
 sqlite3 data/kiekmap.db "select * from alembic_version;"
@@ -301,20 +318,13 @@ Und die Reparatur von Hand:
 make migrate
 ```
 
-**Was der alte Fehler war**, weil er in Protokollen von vor dem 15. August 2026 auftaucht: Fehlte
-dem Schema eine Spalte, die das heutige Programm schreiben will, sah die Ausstellung völlig normal
-aus — Fotos, Karte, Zeitleiste —, aber **jeder Schreibzugriff** scheiterte mit HTTP 500 und im
-Protokoll stand `sqlite3.OperationalError: table changes has no column named old_source`. Ein
-Neustart behob es. Dass ein solcher Zustand überhaupt entstehen konnte, war
-[Punkt 47](backlog.md).
-
 ## Wo die Sicherung liegt
 
-Auf dem Stick im Ordner `kiekmap-sicherung/`:
+Auf dem Stick im Ordner `kiekmap-backup/`:
 
 ```
-kiekmap-sicherung/
-  sicherung.json     Datum, Anzahl, Ortsname
+kiekmap-backup/
+  backup.json        Datum, Anzahl, Ortsname
   kiekmap.db        die Angaben, mit VACUUM INTO konsistent herausgeschrieben
   photos/            die Originale, nach ihrem Hash abgelegt
   thumbs/            die Vorschaubilder
@@ -325,13 +335,13 @@ kiekmap-sicherung/
 Ordner statt Archiv: Eine abgebrochene Sicherung ist so teilweise brauchbar statt komplett
 wertlos, und die Bilder lassen sich an jedem Rechner ansehen.
 
-Nach einer **Wiederherstellung** liegt der bisherige Stand unter `data/vorher-<Datum>/` — inklusive
+Nach einer **Wiederherstellung** liegt der bisherige Stand unter `data/before-<Datum>/` — inklusive
 Datenbank und Write-Ahead-Log. Er wird nie automatisch gelöscht. Wenn feststeht, dass alles stimmt:
 
 ```bash
-rm -rf data/vorher-2026-07-29-1115
+rm -rf data/before-2026-07-29-1115
 ```
 
 Das ist der einzige Ort, an dem die SD-Karte unbemerkt volllaufen kann.
 
-Das Gerät für einen anderen Ort einrichten: [adaption.md](adaption.md).
+Das Gerät für einen anderen Ort einrichten: [adaption.de.md](adaption.de.md).

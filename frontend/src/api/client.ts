@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /** Backend access. The types mirror backend/app/schemas.py. */
 
 export type PhotoMarker = {
@@ -70,7 +67,7 @@ export type Histogram = {
    * a year, the bars are yearly. See `bar_width` in `app/services/dates.py`.
    */
   step: number;
-  /** Photos without a date: not on the timeline, but in the "Hilf mit" panel. */
+  /** Photos without a date: not on the timeline, but in the contribution panel. */
   undated: number;
   /**
    * Span of the whole collection -- the axis of the time slider.

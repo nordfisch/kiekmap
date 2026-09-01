@@ -1,7 +1,7 @@
-# Der zweite Verweis, auf docs/adaption.md, fehlt hier mit Absicht: GitHub verlangt für
-# contact_links eine absolute Adresse, und die des Repos steht erst mit Punkt 22 fest.
+# The second link, to docs/adaption.md, is deliberately missing here: GitHub demands an absolute
+# address for contact_links, and the repository's own was only settled with point 22.
 blank_issues_enabled: true
 contact_links:
-  - name: Sicherheitslücke
+  - name: Security vulnerability
     url: https://docs.github.com/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability
-    about: Bitte nicht öffentlich melden — der Weg steht in SECURITY.md.
+    about: Please do not report it publicly — the way is described in SECURITY.md.

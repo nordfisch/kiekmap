@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """File storage.
 
 Images are named after the SHA-256 of their content. That solves four things at once: no name

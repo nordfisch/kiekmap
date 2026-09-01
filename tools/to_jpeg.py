@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-# SPDX-License-Identifier: Apache-2.0
-
 """Builds a copy of an archive folder in which every picture is a JPEG.
 
     python3 tools/to_jpeg.py "~/Museum/Neue Fotos" "~/Museum/Neue Fotos zwecks Import/Straßen"
@@ -28,7 +25,7 @@ second time.
 
 **What the file says about itself comes along**: EXIF, the IPTC block and the XMP packet. It did
 not until 16 August 2026, and twelve photographs paid for it -- they lost their photographer
-("Hubert Wulf"), a caption and a date, and carried the collection's default credit instead. A
+("A. Brahms"), a caption and a date, and carried the collection's default credit instead. A
 wrong attribution is worse than none: it looks like an answer.
 
     That does move the goalposts of the promise above, and the shift is worth naming. Two runs of
@@ -218,7 +215,7 @@ def build(source_root: Path, target_root: Path, dry_run: bool = False) -> Counte
             continue
         suffix = path.suffix.lower()
         if suffix not in KEPT | CONVERTED:
-            counts["uebergangen"] += 1
+            counts["skipped"] += 1
             continue
 
         target = target_root / path.relative_to(source_root)
@@ -226,57 +223,57 @@ def build(source_root: Path, target_root: Path, dry_run: bool = False) -> Counte
             target = target.with_suffix(".jpg")
 
         if dry_run:
-            counts["kopiert" if suffix in KEPT else "umgewandelt"] += 1
+            counts["copied" if suffix in KEPT else "converted"] += 1
             continue
 
         target.parent.mkdir(parents=True, exist_ok=True)
         if suffix in KEPT:
             shutil.copy2(path, target)
-            counts["kopiert"] += 1
+            counts["copied"] += 1
         else:
             try:
                 to_jpeg(path, target)
             except Exception as error:  # noqa: BLE001 -- one bad file must not stop the run
                 print(f"  ! {path.relative_to(source_root)}: {error}", file=sys.stderr)
                 target.unlink(missing_ok=True)
-                counts["gescheitert"] += 1
+                counts["failed"] += 1
                 continue
             # The file date is the archive's, and sometimes the only date a picture has.
             shutil.copystat(path, target)
-            counts["umgewandelt"] += 1
+            counts["converted"] += 1
     return counts
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="python3 tools/to_jpeg.py",
-        description="Einen Archivordner als JPEG-Kopie herstellen.",
+        description="Build a JPEG copy of an archive folder.",
     )
-    parser.add_argument("quelle", type=Path, help="Der Ordner des Archivs, bleibt unveraendert")
-    parser.add_argument("ziel", type=Path, help="Wohin die Kopie soll, darf noch nicht bestehen")
-    parser.add_argument("--probelauf", action="store_true", help="Nur zaehlen, nichts schreiben")
+    parser.add_argument("source", type=Path, help="the archive folder, left untouched")
+    parser.add_argument("target", type=Path, help="where the copy goes, must not exist yet")
+    parser.add_argument("--dry-run", action="store_true", help="only count, write nothing")
     args = parser.parse_args(argv)
 
-    source = args.quelle.expanduser().resolve()
-    target = args.ziel.expanduser().resolve()
+    source = args.source.expanduser().resolve()
+    target = args.target.expanduser().resolve()
     if not source.is_dir():
-        print(f"Kein Verzeichnis: {source}", file=sys.stderr)
+        print(f"Not a directory: {source}", file=sys.stderr)
         return 1
-    if target.exists() and any(target.iterdir()) and not args.probelauf:
-        print(f"Das Ziel ist nicht leer: {target}", file=sys.stderr)
+    if target.exists() and any(target.iterdir()) and not args.dry_run:
+        print(f"The target is not empty: {target}", file=sys.stderr)
         return 1
     if target == source or source in target.parents:
-        print("Das Ziel darf nicht in der Quelle liegen.", file=sys.stderr)
+        print("The target must not lie inside the source.", file=sys.stderr)
         return 1
 
-    counts = build(source, target, dry_run=args.probelauf)
-    print(f"\n{sum(counts.values())} Dateien angesehen:")
-    print(f"  kopiert      {counts['kopiert']}")
-    print(f"  umgewandelt  {counts['umgewandelt']}")
-    print(f"  uebergangen  {counts['uebergangen']}")
-    if counts["gescheitert"]:
-        print(f"  gescheitert  {counts['gescheitert']}")
-    return 1 if counts["gescheitert"] else 0
+    counts = build(source, target, dry_run=args.dry_run)
+    print(f"\n{sum(counts.values())} files looked at:")
+    print(f"  copied     {counts['copied']}")
+    print(f"  converted  {counts['converted']}")
+    print(f"  skipped    {counts['skipped']}")
+    if counts["failed"]:
+        print(f"  failed     {counts['failed']}")
+    return 1 if counts["failed"] else 0
 
 
 if __name__ == "__main__":

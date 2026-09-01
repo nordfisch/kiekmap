@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Picking a house number: the block first where the street is long, then the number.
  *
@@ -20,7 +17,7 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import type { Place } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { type NumberBlock, blocksOf, groupByBase } from "./houseNumbers";
 import { BackIcon } from "./icons";
 

@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Kalle Erlhoff
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * The admin area's start page: what is there, what is missing, and when something last happened.
  *
@@ -17,7 +14,7 @@ import { useCallback } from "react";
 
 import { type Selection, fetchOverview } from "../api/admin";
 import { useAdmin } from "../store/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { formatDaysSince } from "./format";
 import { useLoaded } from "./useLoaded";
 
