@@ -131,18 +131,32 @@ mkdocs build --strict
 second lives at `/kiekmap/de/usermanual/`. The hook rewrites both at build time, so the markdown
 stays correct for whoever reads it on GitHub — which is most people.
 
-**`docs/archive/` is not published.** The history is a closed German record of how the thing was
-built, and the directory name carries that: `exclude_docs` names the directory, not the file.
-Links into it become links to the repository, like `../LICENSE`.
+**`docs/developer/` is not published**, the history included. `docs_dir` names `docs/museum/` and
+nothing else, so there is no exclusion list to keep. Links out of it become links to the
+repository, like `../../LICENSE`.
 
 **The site builds from the newest tag**, not from `develop` — the museum reads the documentation
 for the version it is running. `.github/workflows/pages.yml` does that on a `v*` tag; a
 `workflow_dispatch` builds a preview from any ref, and a pull request touching the docs builds
-without deploying. Only `develop` may deploy: the `github-pages` environment allows that one
-branch, so a pull request cannot publish anything.
+without deploying.
 
-**Until v0.9.0 the newest tag has no `mkdocs.yml`**, and a dispatch without a ref stops with a
-message saying so. Run it with `ref: develop` until then.
+#### Two settings that decide whether a deploy works, and neither is in this repository
+
+They live in the repository's settings on GitHub. Nothing here can check them, so they are written
+down instead — and both have already cost a failed deploy.
+
+| Setting | Has to be |
+|---|---|
+| Pages source | **GitHub Actions**, not a branch. A branch source would build with Jekyll, and Jekyll cannot do i18n here |
+| `github-pages` environment, deployment branches | **`develop`** (branch) **and `v*`** (tag) |
+
+**The tag rule is the one that gets forgotten.** The environment starts out allowing the default
+branch alone, and a tag is not a branch — so the release path this workflow is built for could not
+deploy at all. The build succeeds, the deploy job fails before its first step, and the run says
+only that the branch is not allowed. The symptom is a green `build` beside a red `deploy` with no
+step in it; the cause is here. Found on 2 September 2026, when v0.9.0 was tagged.
+
+The `develop` rule is what keeps a pull request from publishing anything, and it stays.
 
 ### The two catalogues
 
@@ -631,6 +645,22 @@ umlauts no longer applies to new messages.
 SemVer tags, Conventional Commits, one repository for frontend and backend. Frontend and backend
 are versioned together — for a single-device system separate versioning is only ballast, and API
 compatibility is guaranteed by it.
+
+The road, in order:
+
+```bash
+make version v=0.9.0        # the number in all five places
+make check                  # before anything is committed
+                            # commit, then develop into main by pull request
+git tag -s v0.9.0 -m v0.9.0 # on main -- every commit there carries a tag
+git push origin v0.9.0      # this is what deploys the documentation site
+python3 tools/build_release.py --notes > notes.md
+gh release create v0.9.0 --notes-file notes.md
+```
+
+**Pushing the tag is what publishes the documentation**, so the two settings under
+[The documentation site](#the-documentation-site) have to be right before it goes. The release body
+comes out of both changelogs, English first.
 
 ### One number, five places
 
