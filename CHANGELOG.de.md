@@ -1,90 +1,66 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 28aa8a18810204ea83664039993de05c3ceb9f0a9545dfcaaa479c5f20d5c302 -->
+<!-- source-sha: 3ceeb9548830f3fc5e53e96a6c67658e4ba084f6ad12d3c7597d674d8cba4a54 -->
 
 # Änderungen
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach SemVer.
 
-## [Unveröffentlicht]
+## [0.9.0] — 2. September 2026
+
+**Das Gerät spricht zwei Sprachen, und die Dokumentation hat eine Adresse.** An der Arbeit eines
+Museums mit seinen Fotos hat sich nichts geändert; geändert hat sich, wer Gerät und Dokumentation
+lesen kann.
 
 ### Hinzugefügt
 
-- **Das Gerät spricht Deutsch oder Englisch**, entschieden von `KIEKMAP_LANGUAGE` in der `.env`.
-  Umgestellt werden Besucheransicht, Verwaltung, Meldungen, Import-Protokoll, Datumsbeschriftung
-  und Zahlenformat. **Kein neuer Bau** — das Frontend holt die Sprache beim Start. Ein unbekannter
-  Wert bricht den Start ab, statt still zurückzufallen. Ein Museum, das kein Deutsch spricht,
-  braucht keinen Fork mehr. Siehe [Punkt 73](docs/developer/decisions.md)
+- **Deutsch oder Englisch, gesetzt über `KIEKMAP_LANGUAGE`** in der `.env`. Umgestellt werden
+  Besucheransicht, Verwaltung, Meldungen, Import-Protokoll, Datumsbeschriftung und Zahlenformat.
+  **Kein neuer Bau** — das Frontend holt die Sprache beim Start, die Einstellung lässt sich also auf
+  dem Pi selbst ändern. Ein unbekannter Wert bricht den Start ab, statt still zurückzufallen. Ein
+  Museum, das kein Deutsch spricht, braucht keinen Fork mehr. Siehe
+  [Punkt 73](docs/developer/decisions.md)
 - **Eine Doku-Website**, [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in
   beiden Sprachen und gebaut vom neuesten Tag: Das Museum liest die Doku zu der Fassung, die es
-  betreibt. MkDocs Material, ausgeliefert über Actions. Siehe [Punkt 72](docs/developer/decisions.md)
-- **`tools/check_translations.py`** — jede deutsche Datei trägt den Hash des englischen Textes, aus
-  dem sie entstand, und die Prüfung meldet, was auseinandergelaufen ist. Sie ist die Bedingung,
-  unter der das Projekt einen Text überhaupt zweimal führt
-- **Das Repo ist öffentlich** — `github.com/nordfisch/kiekmap`, Apache-2.0, dazu die private
-  Sicherheitsmeldung bei GitHub, Branch-Schutz für `main` und `develop`, Secret-Scanning und ein
-  Abzeichen im README
+  betreibt. Siehe [Punkt 72](docs/developer/decisions.md)
 
 ### Geändert
 
-- **Das Repository spricht Englisch; Deutsch ist eine Übersetzung und wird als solche geführt.**
-  Die Sprachgrenze verlief bisher nach Publikum durch das Repo; sie verläuft jetzt zwischen dem
-  Repo und dem, was daraus veröffentlicht wird. `operations.de.md` ist deutsch, `operations.md`
-  englisch — der Dateiname trägt die Regel, es gibt keine Liste zu pflegen. Issues, Labels,
-  Commit-Nachrichten ab dem 30. August 2026 und jeder Testname sind englisch. Siehe
+- **Das Repository spricht Englisch; Deutsch wird als Übersetzung geführt.** Quelltext, Tests,
+  Werkzeuge, CLI-Ausgabe, `Makefile`, Workflows, Issues und die Entwicklerdoku sind englisch. Was
+  ein Museum liest — die vier Handbücher, das README, diese Datei — gibt es zweimal, und der
+  Dateiname trägt die Regel: `operations.de.md` ist die deutsche Hälfte von `operations.md`.
+  `check_translations.py` meldet, wenn eine Übersetzung von ihrer Quelle abgewichen ist,
+  `language_check.py` prüft beide Seiten in jedem Format. Siehe
   [Punkt 71](docs/developer/decisions.md)
-- **`docs/archive/history.de.md` ist abgeschlossen, und eine Nachfolgerin gibt es nicht.** Sie endet am
-  25. August 2026 mit v0.8.0 und bleibt deutsch. Was die Arbeit lehrt, wird ein Punkt in
-  `decisions.md`; wie sie verlief, steht in den Commits und den geschlossenen Issues
-- **Die offenen Punkte sind GitHub-Issues**, `docs/backlog.md` ist weg. Das **Nummernregister**
-  steht jetzt in `history.de.md` und löst jedes „Punkt N" auf — die offenen auf ihr Issue, die
-  übrigen auf den Abschnitt unter ihrem Datum. Zu Issue-Nummern konnten sie nicht werden, weil
-  GitHub einen Zähler mit den Pull Requests teilt; „Punkt 15" wurde Issue #18. Siehe
-  [Punkt 69](docs/developer/decisions.md)
-- **Die Entwicklerdoku ist englisch** — `architecture`, `development`, `decisions`, `CONTRIBUTING`
-  und `CLAUDE.md`, rund 24.000 Wörter. `decisions.md` ist vorher zusammengefasst worden: alle 67
-  Punkte bleiben, der Text ist ein Drittel kürzer
-- **Der `0.8.0`-Block unten ist zusammengefasst**, nach Bereichen geordnet statt nach
-  Arbeitsschritt. Das Kleinteilige steht in `history.de.md` und in den Commits
-- **`tools/language_check.py` prüft beide Seiten** und jedes Format, nicht nur `.py`, `.ts` und
-  `.tsx`: deutsche Doku auf umschriebene Umlaute, englische auf deutsche Absätze, dazu die
-  Kommentare von CSS, Dockerfiles, Shell-Skripten und Konfigurationsdateien
-- **Die Doku trennt sich nach Publikum, und die Website veröffentlicht eine Hälfte.**
+- **Die Dokumentation trennt sich nach Publikum**, und die Website veröffentlicht eine Hälfte.
   `docs/museum/` ist, was ein Museum braucht, um das Gerät zu benutzen, zu betreiben, zu übernehmen
-  und weiterzugeben — und genau das liefert
-  [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/) aus: eine Begrüßungsseite und
-  vier Dokumente. `docs/developer/` wird im Repo gelesen, neben dem Code, den es beschreibt. Die
-  Startseite der Website begrüßt einen Betreiber, statt Dateien aufzuzählen. Siehe
-  [Punkt 75](docs/developer/decisions.md)
-- **Die Museumsdoku ist zweisprachig.** `usermanual`, `operations`, `adaption`, `licensing`,
-  `index`, README und CHANGELOG gibt es als englisches Original und deutsche Übersetzung. Die
-  Prüfung der deutschen Quellen gegen die Schreibregeln förderte vorher vier Fehler zutage,
-  darunter eine Paketzahl, die ihrer eigenen Tabelle widersprach, und eine Anleitung für eine
-  Einstellung, die es nicht mehr gibt
-- **CLI, Werkzeuge, `Makefile`, `deploy/` und die Workflows sind englisch**, Ausgabe eingeschlossen:
-  aus `dubletten` wird `duplicates`, aus `--abstand` wird `--distance`. Die Ordner im Eingang
-  heißen in beiden Sprachen `_done` und `_problem` — sie sind Namen im Dateisystem, und eine
-  geänderte Einstellung darf keine Ordner umbenennen müssen
-- **`tools/check_anchors.py` liest auch `CLAUDE.md` und `CONTRIBUTING.md`**
-- **Die Zahl vor einer Liste ist weg**, wo die Liste direkt darunter steht. Vier Dateien sagten
-  „fünf" und zählten sechs auf; eine Zahl in Prosa altert still. Siehe
-  [Punkt 59](docs/developer/decisions.md)
+  und weiterzugeben; `docs/developer/` wird im Repo gelesen, neben dem Code, den es beschreibt.
+  Siehe [Punkt 75](docs/developer/decisions.md)
+- **Die Historie ist abgeschlossen, die offene Arbeit steht in Issues.**
+  [docs/developer/archive/history.de.md](docs/developer/archive/history.de.md) endet mit 0.8.0 und
+  bleibt deutsch; ihr Nummernregister löst jedes „Punkt N" auf. `docs/backlog.md` ist weg. Was die
+  Arbeit lehrt, wird ein Punkt in `decisions.md`. Siehe [Punkt 69](docs/developer/decisions.md)
+- **Das Repository ist abgesichert**: Branch-Schutz für `main` und `develop`, Secret-Scanning,
+  CodeQL und die private Sicherheitsmeldung statt einer Adresse in einer Datei
 - **Vitest von 2 auf 3.** Nicht wegen einer Funktion: Vitest 2 brachte eigene, alte Kopien von
   `vite` und `esbuild` mit, und daran hingen fünf von sechs Dependabot-Meldungen
 
 ### Behoben
 
-- **Die Kartenzuschreibung blieb in der englischen Instanz deutsch.** Sie stand fest verdrahtet im
-  Kartenstil statt im Textkatalog
-- **Zwanzig Oberflächentexte blieben in der englischen Instanz deutsch**, weil sie auf Modulebene
-  gelesen wurden, bevor die Sprache aufgelöst war. Ein Test geht die Quellen jetzt mit dem
-  TypeScript-Parser durch und schlägt bei jedem Zugriff außerhalb einer Funktion fehl
+- **Die Bereitschaftsprüfung meldete, woran sie scheiterte.** `/health` ist der einzige Endpunkt,
+  der ohne PIN antwortet, und er gab den Datenbankfehler wörtlich zurück. Die Ursache geht jetzt
+  ins Protokoll, wo sie auch länger überlebt als eine curl-Antwort
+- **Die englische Instanz zeigte auf zwei Wegen Deutsch:** die Kartenzuschreibung, die im
+  Kartenstil statt im Textkatalog stand, und zwanzig Oberflächentexte, die gelesen wurden, bevor
+  die Sprache aufgelöst war. Ein Test geht die Quellen jetzt mit dem TypeScript-Parser durch und
+  schlägt bei jedem Zugriff außerhalb einer Funktion fehl
 
 ### Entfernt
 
-- **Die SPDX-Kopfzeilen sind aus jeder Quelldatei weg.** Zwei Zeilen Lizenzbuchführung über jedem
-  Docstring; die Lizenz verlangt sie nicht, und keine Prüfung erzwang sie. `LICENSE` und `NOTICE`
-  decken jede Weitergabe des Repos ab. Eine einzeln herauskopierte Datei trägt danach keinen
-  Hinweis mehr — der Preis steht in [Punkt 70](docs/developer/decisions.md)
+- **Die SPDX-Kopfzeilen**, zwei Zeilen über jedem Docstring in 153 Dateien. Die Lizenz verlangt sie
+  nicht, und keine Prüfung erzwang sie; `LICENSE` und `NOTICE` decken jede Weitergabe des Repos ab.
+  Eine einzeln herauskopierte Datei trägt jetzt keinen Lizenzhinweis mehr — der Preis steht in
+  [Punkt 70](docs/developer/decisions.md)
 
 ## [0.8.0] — 2026-08-25
 

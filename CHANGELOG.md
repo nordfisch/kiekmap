@@ -2,82 +2,58 @@
 
 Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning after SemVer.
 
-## [Unreleased]
+## [0.9.0] — 2026-09-02
+
+**The device speaks two languages, and the documentation has an address.** Nothing changed about
+how a museum works with its photos; what changed is who can read the device and its documentation.
 
 ### Added
 
-- **The device speaks German or English**, decided by `KIEKMAP_LANGUAGE` in the `.env`. It switches
-  the visitor view, the admin area, the messages, the import log, the date labels and the number
-  format. **No new build** — the frontend fetches the language at startup. An unknown value aborts
-  the start instead of falling back in silence. A museum that does not speak German no longer needs
-  a fork. See [point 73](docs/developer/decisions.md)
-- **A documentation site**, [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/),
-  in both languages and built from the newest tag: the museum reads the documentation for the
-  version it runs. MkDocs Material, deployed by Actions. See [point 72](docs/developer/decisions.md)
-- **`tools/check_translations.py`** — every German file carries the hash of the English text it was
-  made from, and the check reports what has drifted apart. It is the condition under which the
-  project keeps a text twice at all
-- **The repository is public** — `github.com/nordfisch/kiekmap`, Apache-2.0, with GitHub's private
-  security reporting, branch protection for `main` and `develop`, secret scanning, and a badge in
-  the README
+- **German or English, set by `KIEKMAP_LANGUAGE`** in the `.env`. It switches the visitor view, the
+  admin area, the messages, the import log, the date labels and the number format. **No new build**
+  — the frontend fetches the language at startup, so the setting can be changed on the Pi itself.
+  An unknown value aborts the start instead of falling back in silence. A museum that does not
+  speak German no longer needs a fork. See [point 73](docs/developer/decisions.md)
+- **A documentation site**, [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in
+  both languages and built from the newest tag: the museum reads the documentation for the version
+  it runs. See [point 72](docs/developer/decisions.md)
 
 ### Changed
 
-- **The repository speaks English; German is a translation and is marked as one.** The boundary
-  used to run through the repository by audience; it now runs between the repository and what is
-  published from it. `operations.de.md` is German, `operations.md` is English — the file name
-  carries the rule, so there is no list to keep. Issues, labels, commit messages from 30 August
-  2026, and every test name are English. See [point 71](docs/developer/decisions.md)
-- **`docs/archive/history.de.md` is closed, and nothing succeeds it.** It ends on 25 August 2026 with
-  v0.8.0 and stays German. What the work teaches becomes a point in `decisions.md`; how it went
-  stays in the commits and the closed issues
-- **The open items are GitHub issues**, `docs/backlog.md` is gone. The **number register** now sits
-  in `history.de.md` and resolves every "Punkt N" — the open ones to their issue, the rest to the
-  section under their date. They could not become issue numbers, because GitHub shares one counter
-  with the pull requests; "Punkt 15" became issue #18. See [point 69](docs/developer/decisions.md)
-- **The developer documentation is English** — `architecture`, `development`, `decisions`,
-  `CONTRIBUTING` and `CLAUDE.md`, about 24,000 words. `decisions.md` was consolidated first: all 67
-  points stay, the text is a third shorter
-- **The `0.8.0` block below was condensed**, grouped by area rather than by working step. The
-  detail is in `history.de.md` and in the commits
-- **`tools/language_check.py` checks both sides** and every format, not only `.py`, `.ts` and
-  `.tsx`: German documentation for transcribed umlauts, English documentation for German
-  paragraphs, and the comments of CSS, Dockerfiles, shell scripts and configuration files
-- **The documentation splits by audience, and the site publishes one half.** `docs/museum/` is
-  what a museum needs in order to use, run, adapt and pass on the device, and it is what
-  [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/) serves: a welcome page and
-  four documents. `docs/developer/` is read in the repository, beside the code it describes. The
-  front page of the site greets an operator instead of listing files. See
-  [point 75](docs/developer/decisions.md)
-- **The museum documentation is bilingual.** `usermanual`, `operations`, `adaption`, `licensing`,
-  `index`, the README and the CHANGELOG exist as an English original and a German translation.
-  Checking the German sources against the writing rules first turned up four errors, among them a
-  package count contradicting its own table and an instruction for a setting that no longer exists
-- **The CLI, the tools, the `Makefile`, `deploy/` and the workflows are English**, output included:
-  `dubletten` is `duplicates`, `--abstand` is `--distance`. The folders in the inbox are `_done`
-  and `_problem` in both languages — they are names in the file system, and a changed setting must
-  not have to rename folders
-- **`tools/check_anchors.py` reads `CLAUDE.md` and `CONTRIBUTING.md` as well**
-- **A count in front of a list is gone** wherever the list stands right below it. Four files said
-  "five" and listed six; a number in prose goes stale in silence. See
-  [point 59](docs/developer/decisions.md)
-- **Vitest from 2 to 3.** Not for a feature: Vitest 2 brought its own old copies of `vite` and
+- **The repository speaks English; German is kept as a translation.** Source, tests, tools, CLI
+  output, `Makefile`, workflows, issues and the developer documentation are English. What a museum
+  reads — the four manuals, the README, this file — exists twice, and the file name carries the
+  rule: `operations.de.md` is the German half of `operations.md`. `check_translations.py` reports
+  when a translation has drifted from its source, `language_check.py` checks both sides in every
+  format. See [point 71](docs/developer/decisions.md)
+- **The documentation is split by audience**, and the site publishes one half. `docs/museum/` is
+  what a museum needs in order to use, run, adapt and pass on the device; `docs/developer/` is read
+  in the repository, beside the code it describes. See [point 75](docs/developer/decisions.md)
+- **The history is closed and the open work lives in issues.**
+  [docs/developer/archive/history.de.md](docs/developer/archive/history.de.md) ends with 0.8.0 and
+  stays German; its number register resolves every "Punkt N". `docs/backlog.md` is gone. What the
+  work teaches becomes a point in `decisions.md`. See [point 69](docs/developer/decisions.md)
+- **The repository is guarded**: branch protection for `main` and `develop`, secret
+  scanning, CodeQL, and private security reporting instead of an address in a file
+- **Vitest from 2 to 3.** Not for a feature: Vitest 2 carried its own old copies of `vite` and
   `esbuild`, and five of six Dependabot reports hung on those
 
 ### Fixed
 
-- **The map credit was German in the English instance.** It stood hard-wired in the map style
-  instead of the text catalogue
-- **Twenty interface texts stayed German in the English instance**, because they were read at
-  module level before the language was resolved. A test now walks the sources with the TypeScript
-  parser and fails on any read outside a function
+- **The readiness probe reported why it failed.** `/health` is the one endpoint that answers
+  without a PIN, and it returned the database error word for word. The cause goes to the log now,
+  where it also survives longer than a curl response
+- **The English instance showed German in two ways:** the map credit, which was written into the
+  map style instead of the text catalogue, and twenty interface texts that were read before the
+  language had been resolved. A test now walks the sources with the TypeScript parser and fails on
+  any read outside a function
 
 ### Removed
 
-- **The SPDX headers are gone from every source file.** Two lines of licence bookkeeping above each
-  docstring; the licence does not demand them and no check enforced them. `LICENSE` and `NOTICE`
-  cover every distribution of the repository. A single file copied out on its own now carries no
-  notice — the price is in [point 70](docs/developer/decisions.md)
+- **The SPDX headers**, two lines above every docstring in 153 files. The licence does not demand
+  them and no check enforced them; `LICENSE` and `NOTICE` cover every distribution of the
+  repository. A single file copied out on its own now carries no notice — the price is in
+  [point 70](docs/developer/decisions.md)
 
 ## [0.8.0] — 2026-08-25
 
