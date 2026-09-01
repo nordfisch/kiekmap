@@ -46,6 +46,8 @@ export const en: Texts = {
     pinLabel: "Marked place, can be moved",
     untitled: "Untitled",
     photoAlt: "Historic photo",
+    attribution:
+      '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL',
   },
 
   overlay: {

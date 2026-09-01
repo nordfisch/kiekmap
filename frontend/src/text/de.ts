@@ -112,6 +112,15 @@ export const de = {
     pinLabel: "Gesetzter Ort, verschiebbar",
     untitled: "Ohne Titel",
     photoAlt: "Historisches Foto",
+    /**
+     * The credit at the bottom right of the map -- HTML, because the ODbL asks for the link.
+     *
+     * It is a text on the screen and therefore belongs here, not in `kiosk/mapStyle.ts` where it
+     * stood until 1 September 2026 and stayed German in the English instance. What it has to say
+     * is in docs/licensing.md.
+     */
+    attribution:
+      '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, ODbL',
   },
 
   overlay: {
