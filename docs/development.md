@@ -138,7 +138,11 @@ Links into it become links to the repository, like `../LICENSE`.
 **The site builds from the newest tag**, not from `develop` — the museum reads the documentation
 for the version it is running. `.github/workflows/pages.yml` does that on a `v*` tag; a
 `workflow_dispatch` builds a preview from any ref, and a pull request touching the docs builds
-without deploying.
+without deploying. Only `develop` may deploy: the `github-pages` environment allows that one
+branch, so a pull request cannot publish anything.
+
+**Until v0.9.0 the newest tag has no `mkdocs.yml`**, and a dispatch without a ref stops with a
+message saying so. Run it with `ref: develop` until then.
 
 ### The two catalogues
 
