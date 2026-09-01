@@ -11,6 +11,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from app.services.backup.common import BackupError, JobResult, Report
+from app.text import texts
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class Job:
         with self._lock:
             if self._status.phase == "running":
                 return False
-            self._status = JobStatus(kind=kind, phase="running", message="Wird vorbereitet")
+            self._status = JobStatus(kind=kind, phase="running", message=texts().backup.preparing)
 
         def run() -> None:
             try:
@@ -76,7 +77,7 @@ class Job:
                 self._fail(str(error))
             except Exception as error:  # noqa: BLE001 -- the screen must not just stop moving
                 log.exception("%s failed", kind)
-                self._fail(f"Es ist etwas schiefgegangen: {error}")
+                self._fail(texts().backup.something_went_wrong(str(error)))
 
         self._thread = threading.Thread(target=run, name=f"kiekmap-{kind}", daemon=True)
         self._thread.start()

@@ -2,7 +2,7 @@
 
 For people who work on Kiekmap. Why things are the way they are is in
 [decisions.md](decisions.md); what the system is made of is in
-[architecture.md](architecture.md); how it came about is in [history.md](history.md); what is
+[architecture.md](architecture.md); how it came about is in [archive/history.de.md](archive/history.de.md); what is
 still open is in the [issues](https://github.com/nordfisch/kiekmap/issues); how to work on it is here.
 
 ## Setup
@@ -52,68 +52,175 @@ Settings: interpreter on `backend/.venv/bin/python`, mark `backend` as sources r
 
 ## Language
 
-**Every text exists exactly once, in the language of its readers.** Do not translate, separate.
-Duplicate content in two languages is the expensive kind of mistake: the second copy goes stale
-and nobody notices.
+**The repository speaks English. German is a translation, and it is marked as one.**
 
-The axis is the audience, not the language:
+The boundary used to run through the repository, file by file, by audience. It now runs between
+the repository and what is published from it. Everything a contributor touches is English;
+everything a museum needs to run the device exists in German as well, under a `.de.md` name and
+watched for drift.
 
-| What | Language | Readers |
-|---|---|---|
-| Interface, CLI, messages in the visitor view and the admin view | German | visitors, volunteers |
-| [usermanual.md](usermanual.md), [operations.md](operations.md), [adaption.md](adaption.md) | German | museum team, a second museum |
-| [README](../README.md), [CHANGELOG](../CHANGELOG.md) | German | operators |
-| GitHub issues | German | whoever plans here |
-| Labels on issues and pull requests | English | see [point 69](decisions.md) |
-| Test files — name, docstring, comment | German | see below |
-| Identifiers, code comments, docstrings | English | developers |
-| [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | English | developers |
-| Commit messages from 30 August 2026 on | English | developers |
-| [history.md](history.md) up to v0.8.0 | German, frozen | a report stays in its language |
-| Title and body of a pull request | English | the same readers as the commits it summarises |
+| What | Language |
+|---|---|
+| Identifiers, code comments, docstrings | English |
+| Test files — name, docstring, comment | English |
+| [architecture.md](architecture.md), this file, [decisions.md](decisions.md), [CONTRIBUTING](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md) | English |
+| [README](../README.md), [CHANGELOG](../CHANGELOG.md), `SECURITY`, `CODE_OF_CONDUCT`, `AUTHORS`, `NOTICE` | English |
+| `README.de.md`, `CHANGELOG.de.md` | German, kept as a translation |
+| GitHub issues, issue and pull request templates | English |
+| `Makefile`, `deploy/`, GitHub workflows — comments | English |
+| CLI — commands, switches and output | English |
+| Commit messages from 30 August 2026 on | English |
+| Title and body of a pull request | English |
+| Interface, messages in the visitor view and the admin view | **both**, by `KIEKMAP_LANGUAGE` |
+| `*.de.md` | German, kept as a translation |
+| [archive/history.de.md](archive/history.de.md) up to v0.8.0 | German, frozen |
+| Values from OSM (`kind`: `strasse`, `flur` …) | German, as delivered |
 
-**Why the developer half is English:** `def zeitraum(...) -> DatePrecision` creates a break at
-every boundary between our own code and a library. Coding agents and later contributors stumble
-over mixed code measurably more often.
+**The file name carries the rule.** `operations.de.md` is German, `operations.md` is English.
+Until 31 August 2026 this was two hand-kept lists in `language_check.py`, and a new file belonged
+to whichever one somebody remembered to add it to. A suffix cannot be forgotten.
 
-**Why the product stays German:** the interface, the CLI and the admin view are built for people
-in Holm. A museum that does not speak German cannot run Kiekmap today anyway, so the museum
-documentation has no English audience.
+**Why the code is English:** `def zeitraum(...) -> DatePrecision` creates a break at every boundary
+between our own code and a library. Coding agents and later contributors stumble over mixed code
+measurably more often.
+
+**Why German survives anyway:** the museum team, the operator and a second museum read German, and
+their documents are the ones that matter in practice — the handbook printed beside the device, the
+Pi setup, the guide to adopting the project elsewhere. Those exist in both languages and are
+delivered bilingually; see [point 71](decisions.md).
 
 **German examples inside English texts are wanted** wherever they explain the case. They are the
 subject the text talks about, not the prose.
 
-**One rule of thumb for messages:** *Can it appear in the visitor view or the admin view? Then
-German, otherwise English.*
-
-| Message | Who sees it | Language |
-|---|---|---|
-| „Dieses Foto hat inzwischen schon eine Angabe bekommen." | a visitor at the device | German |
-| „Kein Foto mit der Nummer 42" | a visitor in the photo overlay | German |
-| „Aufgenommen, es fehlt noch: Ort und Jahr" | a curator in the import log | German |
-| `bbox is inverted: min must be smaller than max` | only whoever calls the API directly | English |
-| `No thumbnail size 999; available sizes are [240, 1200]` | likewise | English |
-| OpenAPI `summary`/`description` under `/api/docs` | developers, next to `open_count` and friends | English |
-
-The CLI is the exception to the exception: the museum team also runs
-`python -m app.cli import` when filling the device for the first time, so its output stays German.
-
-**Test files stay German throughout** — name, docstring, comment. A test name is not an identifier
-in the usual sense but a sentence of specification: `test_scandatum_datiert_das_foto_nicht` says at
-once which promise the test protects, and the docstring below it carries the why. Translated, that
-would lose its edge. On top of that the domain terms — Flurname, Hausnummer, Ortsteil — have no
-good English equivalent.
+**Messages that reach a screen come from a catalogue**, not from the code around them:
+`frontend/src/text/` in the frontend, `backend/app/text/` in the backend, both selected by
+`KIEKMAP_LANGUAGE`. Messages that only ever surface when calling the API directly stay English in
+place — `bbox is inverted: min must be smaller than max` has no other reader.
 
 Umlauts are transcribed (`ue`, `oe`, `ae`, `ss`) in German prose inside source code and in shell
-scripts, and written out in texts for people. **A GitHub workflow counts as source code**, the
-issue templates next to it count as texts for people. **Quotations and data values keep them**:
+scripts, and written out in texts for people. **Quotations and data values keep them**:
 `"Mühlenweg"` as an example in a comment, `["Gebäude"]` as a setting value, `"März"` in the month
 list — without the umlaut they would simply be wrong. For commit messages the rule is moot since
 the switch to English.
 
 `python3 tools/language_check.py` checks both sides: transcribed umlauts in German documentation,
-German paragraphs in English documentation. A file being translated right now is in neither list —
-it is half of each, and both checks would be right to complain.
+German paragraphs in English documentation. Its `IN_TRANSITION` tuple holds what has not made the
+switch yet — a file that is half of each is checked in neither language. It was the progress bar
+of [issue #31](https://github.com/nordfisch/kiekmap/issues/31) and is empty again, kept for the
+next conversion.
+
+### The documentation site
+
+`mkdocs.yml` builds everything under `docs/` into
+[nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in both languages. The
+plugin is `mkdocs-static-i18n`, and its configuration is one line: `docs_structure: suffix`. It
+reads the file name exactly as `language_check.py` does — `operations.de.md` is the German half of
+`operations.md` — so there is no second list to keep in step.
+
+```bash
+pip install -r docs/requirements.txt
+mkdocs serve      # http://localhost:8000, both languages
+mkdocs build --strict
+```
+
+**`--strict` is the point of it.** A link that goes nowhere fails the build, and that catches what
+`check_anchors.py` cannot see: what becomes of a repository link once it is a web page.
+
+`tools/mkdocs_hooks.py` reconciles the two readings a link has. In the repository
+`../LICENSE` and `usermanual.de.md` are right; on the site the first is not a page at all and the
+second lives at `/kiekmap/de/usermanual/`. The hook rewrites both at build time, so the markdown
+stays correct for whoever reads it on GitHub — which is most people.
+
+**`docs/archive/` is not published.** The history is a closed German record of how the thing was
+built, and the directory name carries that: `exclude_docs` names the directory, not the file.
+Links into it become links to the repository, like `../LICENSE`.
+
+**The site builds from the newest tag**, not from `develop` — the museum reads the documentation
+for the version it is running. `.github/workflows/pages.yml` does that on a `v*` tag; a
+`workflow_dispatch` builds a preview from any ref, and a pull request touching the docs builds
+without deploying. Only `develop` may deploy: the `github-pages` environment allows that one
+branch, so a pull request cannot publish anything.
+
+**Until v0.9.0 the newest tag has no `mkdocs.yml`**, and a dispatch without a ref stops with a
+message saying so. Run it with `ref: develop` until then.
+
+### The two catalogues
+
+Both are built the same way, and the construction is the point: **a missing entry has to stop the
+build, not the museum.**
+
+| | Frontend | Backend |
+|---|---|---|
+| Where | `frontend/src/text/` | `backend/app/text/` |
+| The shape | `types.ts` — `type Texts = typeof de` | `catalogue.py` — frozen dataclasses |
+| The source text | `de.ts` | `de.py` |
+| The translation | `en.ts` | `en.py` |
+| A missing entry | `tsc` refuses to build | `TypeError` when `en.py` is imported |
+| Resolved | once in `main.tsx`, before the first render | per call, through the cached settings |
+
+`de.ts` deliberately has no `as const`. With it every string would be its own literal type, and the
+English catalogue would have to carry the German wording to typecheck.
+
+**Parameterised texts are functions, not templates with placeholders.** "3 von 12" and "3 of 12"
+would survive a format string; "Aufgenommen, es fehlt noch: Ort und Jahr" against "Taken in, still
+missing: a place and a year" would not — singular, plural and word order all hang on the language.
+
+**Nothing reads `t` at module level.** A `const` beside the imports is evaluated before `main.tsx`
+has asked `/api/config`, so it freezes the default catalogue in — the interface works and the words
+are wrong. `tsc` cannot see it, because both catalogues have the same type. It happened on
+31 August 2026 in four files of the admin area; `text/moduleLevel.test.ts` walks the sources with
+the TypeScript parser and keeps it from happening again.
+
+**No i18n library.** `i18next` and `react-intl` bring lazy loading, ICU plural rules and switching
+at runtime. A kiosk with two languages and one fixed setting needs none of it, and every dependency
+is one more dependency in offline operation.
+
+**Three things are English in both languages, and are not translations.** The directory names
+`_done` and `_problem`, the backup folder `kiekmap-backup/` with everything under it, and the
+`status` of `/health`. The first two are names in a file system: were they to follow the setting,
+changing it would have to rename folders on the device and on every stick already written. The
+third is a machine value the kiosk service reads.
+
+## Glossary
+
+The subject is a German village museum, and the words for it were German first. **One German term
+gets exactly one English word here**, so that the same thing is not called three things in three
+files. Where the translation is not obvious, the reason is beside it.
+
+| German | English | Note |
+|---|---|---|
+| Bestand | **collection** | the whole set of photos, not one folder of it |
+| Eingangsordner | **inbox** | the directory is `data/incoming/` |
+| Dublette | **duplicate** | same SHA-256, therefore the same image |
+| Scandatum | **scan date** | the date the paper was scanned, not the date of the shot |
+| Datierung | **dating** | what a photo says about when it was taken |
+| Spanne, Zeitraum | **range** | `date_from`/`date_to`; a dating is a range, never a point |
+| Überlappung | **overlap** | the filter asks for overlap, not for containment |
+| Genauigkeit | **precision** | `DatePrecision`: day, month, year, decade |
+| Jahrzehnt | **decade** | |
+| Zeitschieber | **time slider** | |
+| Stapel | **stack** | photos sharing one spot on the map |
+| Beitrag | **contribution** | what a visitor adds; the panel is the *contribution panel* |
+| Sicherung | **backup** | |
+| Wappen | **coat of arms** | the way into the admin view |
+| Vorlegen | **to offer** | the panel offers a photo that is missing something |
+| Abweisen | **to reject** | `ImportResult.REJECTED` |
+
+**Place kinds keep their German keys**, because that is how `tiles/build-places.py` writes them into
+the database and how OSM delivers them. Only the display is translated:
+
+| Key | English |
+|---|---|
+| `strasse` | Street |
+| `ortsteil` | District |
+| `gebaeude` | Building |
+| `natur` | Nature |
+| `flur` | Field name |
+| `adresse` | Address |
+
+`Flur` is the one with no ready equivalent: a named stretch of open land, older than the streets
+around it. **Field name** carries it; *locality* would be vaguer and *parcel* would be a land
+registry term this project does not mean.
 
 ## Writing rules
 
@@ -128,27 +235,31 @@ the case concrete. **Names** from Holm do not: no families, no farms, no compani
 not in a comment, not in the documentation.
 
 The sample collection provides the cast, and it is enough for everything: **Gasthof Petersen**,
-**Hof Sieveking**, **Familie Wendt**, **Familie Boysen**, **A. Brahms**, plus **Timm**,
-**Möller**, **Harms** and **Ohlsen**. Whoever needs another one invents it and adds it here.
+**Hof Sieveking**, **Ladengeschäft Rohlf**, **Familie Wendt**, **Familie Boysen**, **A. Brahms**,
+plus **Timm**, **Möller**, **Harms** and **Ohlsen**. Whoever needs another one invents it and adds
+it here.
 
 **The reason is not caution but that it costs nothing.** An invented name shows whatever the
 example is meant to show: that a year beside a name is the archive's date and not the date of the
 shot does not depend on who the person was. On 21 August 2026, 87 occurrences in 15 files were
 replaced this way, and not one example lost its edge. The occasion is in
-[history.md](history.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), point 64, section 1.
+[archive/history.de.md](archive/history.de.md#punkt-64-abschnitt-1-die-namen-aus-dem-repo), point 64, section 1.
 
-**Three slipped through** back then and were caught up on 25 August 2026: a surname as an example
-of a misread archive entry, a house name in a comment, and a photo title that is a person's name.
-All three stood in examples that an invented name carries just as well. **What lost them in the
-first pass:** it searched for names the database knows as names; these three stood in prose, not
-in a name field. The counter-check before a release therefore matches the patterns names take in
-the collection — *Familie X*, *Hof X*, *A. Surname*, north German endings — not only the fields.
+**Some slipped through** and were caught up afterwards: a surname as an example of a misread
+archive entry, a house name in a comment, a photo title that is a person's name, and — found on
+31 August 2026 while translating the tests — a photographer's name in a docstring and in three test
+values. Each stood in an example that an invented name carries just as well. **What loses them:**
+a search for names the database knows as names. They stand in prose and in literals, not in a name
+field. The counter-check before a release therefore matches the patterns names take in the
+collection — *Familie X*, *Hof X*, *A. Surname*, north German endings — across prose and test
+values, not only the fields. **No number is given here on purpose:** it was wrong within a week,
+and a count that has to be maintained is a promise that quietly expires.
 
-**Those three are still in the git history**, and that is decided, not overlooked: a fourth
-rewrite in one day would have moved every hash again, demanded another pass over the cited
-identifiers and cost the `v0.8.0` tag — for three names in example sentences of old commits that
-nobody sees who reads today's files. **The promise is therefore exactly this:** the current state
-names nobody from the collection; the history before 25 August 2026 names three.
+**They are still in the git history**, and that is decided, not overlooked: a further
+rewrite would have moved every hash again, demanded another pass over the cited
+identifiers and cost the `v0.8.0` tag — for names in example sentences of old commits that nobody
+sees who reads today's files. **The promise is therefore exactly this:** the current state names
+nobody from the collection; the git history and `history.de.md` still do.
 
 ## Testing
 
@@ -169,6 +280,7 @@ python3 tools/check_anchors.py    # do the links in docs/ still point somewhere?
                                   #   (across files too, since 15 August 2026)
 python3 tools/check_settings.py   # does every setting reach the container?
 python3 tools/check_numbers.py    # does the backlog's bookkeeping about its numbers add up?
+python3 tools/check_translations.py       # does every translation still match its source?
 python3 tools/build_register.py --check   # is the register of the history still complete?
 python3 tools/set_version.py --check      # do all five places name the same version?
 ```
@@ -201,8 +313,28 @@ the one promise the numbering still makes: the points of `decisions.md` ascend a
 occurs twice. **What it deliberately does not do is count numbers in running text**; why that would
 be wrong is in [decisions.md](decisions.md), point 59.
 
+**`check_translations.py` joined on 31 August 2026**, and it is the condition under which the
+project keeps a text twice at all. Point 68 had rejected bilingual documentation for one reason:
+*"the second copy goes stale and nobody notices."* Point 71 does not deny that -- it answers it.
+Every `*.de.md` beside an English file of the same name carries the hash of that file in two HTML
+comments, and the check compares them.
+
+**The file names decide what is checked, not a list**, exactly as with the language rule. A
+`*.de.md` with no English neighbour is a German original: `history.de.md` is frozen and takes
+no further entries. It cannot forget a marker it never needed.
+
+An HTML comment and not YAML front matter, although front matter is the usual carrier: GitHub
+renders front matter as a table at the top of the page, and these files are read in the repository
+as well as on the documentation site. What it reports is drift, not wrongness -- a typo fixed in
+the English source turns it red although the German needs no change. Somebody has to look, decide,
+and then run `--update`.
+
+`tools/build_release.py --notes` assembles the body of a GitHub release out of both changelogs:
+English first, German below a rule. A release has one text field and no language variants, so both
+go into it.
+
 **`build_register.py` joined on 21 August 2026**, together with the register at the top of
-[history.md](history.md). It is really a generator — `make register` writes the table, `--check`
+[archive/history.de.md](archive/history.de.md). It is really a generator — `make register` writes the table, `--check`
 only says that it no longer matches. Both need the same promise: **every section of the history
 states its date in the first lines below its heading.** Whoever forgets learns about it at commit
 time, not half a year later at a table with holes.
@@ -437,11 +569,11 @@ notices would then not be those of the image.
 make version v=0.9.0                 # set the number
 git commit -am "chore: version 0.9.0"
 git tag -s v0.9.0 -m v0.9.0          # signed, tag.gpgsign is set
-make release nach=/Volumes/STICK/kiekmap-update
+make release to=/Volumes/STICK/kiekmap-update
 ```
 
-`tools/build_release.py` builds both images, saves them as `abbilder.tar`, writes the `version`
-file next to them and on request (`karte=1`) takes the map file and place index along — exactly
+`tools/build_release.py` builds both images, saves them as `images.tar`, writes the `version`
+file next to them and on request (`map=1`) takes the map file and place index along — exactly
 the folder `deploy/pi/update.sh` expects.
 
 **It aborts on a dirty working tree or a missing tag**, and there is no `--force` against that: a
@@ -474,7 +606,7 @@ faster.
 
 ### Squash merge is disabled here, and there is a reason
 
-`history.md` cites **individual commits by hash** — over eighty occurrences. A squash merge
+`history.de.md` cites **individual commits by hash** — over eighty occurrences. A squash merge
 collapses the commits of a branch and destroys exactly the ones the documentation points at. That
 is not a matter of style but data loss in a file whose value hangs on those references.
 

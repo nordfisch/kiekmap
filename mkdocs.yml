@@ -1,0 +1,97 @@
+# The documentation site: https://nordfisch.github.io/kiekmap/
+#
+# It serves what is in docs/ -- the same files the repository shows, in both languages. The
+# README stays on the repository start page and is not part of the site; the two are joined by
+# links and by the "Website" field of the repository.
+#
+# Built by .github/workflows/pages.yml from the newest tag, not from develop: the museum reads
+# the documentation for the version it is running.
+
+site_name: Kiekmap
+site_description: A touchscreen kiosk that shows historic photos of a village on a map.
+site_url: https://nordfisch.github.io/kiekmap/
+repo_url: https://github.com/nordfisch/kiekmap
+edit_uri: edit/develop/docs/
+copyright: Copyright 2026 Kalle Erlhoff · Apache-2.0
+
+docs_dir: docs
+
+# Neither is a page. The history is a closed German record of how the thing was built, forty
+# thousand words for whoever works on it -- it stays in the repository and is not published.
+# The directory name carries that, so nothing has to remember it.
+exclude_docs: |
+  requirements.txt
+  archive/
+
+# Links out of docs/ point at files in the repository, which are no pages here.
+hooks:
+  - tools/mkdocs_hooks.py
+
+theme:
+  name: material
+  language: en
+  # System fonts. Material fetches Google Fonts by default, which would have every reader of this
+  # site call fonts.gstatic.com -- for a project whose first rule is that the device asks nothing
+  # foreign, that is the wrong note to end on.
+  font: false
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.action.edit
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: { icon: material/weather-night, name: Dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: { icon: material/weather-sunny, name: Light mode }
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  # GitHub's rule for anchors, not MkDocs': letters stay letters, umlauts included. Without this
+  # every heading with an umlaut gets a different anchor here than in the repository, and the
+  # links that check_anchors.py has verified would break on the site alone.
+  - toc:
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify { kwds: { case: lower } }
+
+plugins:
+  - search
+  # The suffix is the whole configuration: adaption.de.md is the German half of adaption.md.
+  # The same rule the language check reads, and there is no second list to keep.
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+          nav:
+            - Documentation: index.md
+            - Using and running it:
+                - Guide for the museum team: usermanual.md
+                - Operations manual: operations.md
+                - Another place or language: adaption.md
+                - Passing it on: licensing.md
+            - Understanding and changing it:
+                - Architecture: architecture.md
+                - Development: development.md
+                - Decisions: decisions.md
+        - locale: de
+          name: Deutsch
+          build: true
+          site_name: Kiekmap
+          nav:
+            - Dokumentation: index.md
+            - Benutzen und betreiben:
+                - Anleitung für das Museumsteam: usermanual.md
+                - Betriebshandbuch: operations.md
+                - Anderer Ort oder andere Sprache: adaption.md
+                - Weitergabe: licensing.md
+            - Verstehen und anpassen:
+                - Architektur: architecture.md
+                - Entwicklung: development.md
+                - Entscheidungen: decisions.md

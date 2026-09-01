@@ -8,12 +8,12 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY tsconfig.json vite.config.ts index.html ./
 COPY src ./src
-# public/ enthaelt die Schriften und Symbole der Karte (Teil der Software, kommt ins Image).
-# public/tiles/map.pmtiles ist per .dockerignore ausgeschlossen: die Kartendatei gehoert zum Ort,
-# nicht zur Software, ist gross und wird zur Laufzeit eingehaengt.
+# public/ holds the fonts and sprites of the map (part of the software, goes into the image).
+# public/tiles/map.pmtiles is excluded by .dockerignore: the map file belongs to the place, not to
+# the software, is large, and is mounted at runtime.
 COPY public ./public
 
-# Frueh und deutlich scheitern statt spaeter im Museum eine Karte ohne Beschriftungen zu haben.
+# Fail early and plainly instead of having a map without labels in the museum later.
 RUN test -d public/basemaps/fonts || { \
       echo "FEHLER: public/basemaps/fonts fehlt. Bitte zuerst 'make tiles' ausfuehren."; \
       exit 1; \

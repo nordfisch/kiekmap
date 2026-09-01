@@ -1,9 +1,9 @@
 /**
- * Tests der Strassenwahl ohne Tastatur.
+ * Tests of choosing a street without a keyboard.
  *
- * Der teuerste Fehler waere still: Eine Strasse, die durch das Raster faellt, ist fuer den
- * Besucher nicht verschwunden, sondern gar nicht erst da -- und niemand vermisst sie, weil
- * niemand die Liste kennt. Deshalb steht der Vollstaendigkeitstest am Ende.
+ * The most expensive error would be a silent one: a street that falls through the grid has not
+ * vanished for the visitor, it was never there -- and nobody misses it, because nobody knows the
+ * list. That is why the completeness test stands at the end.
  */
 
 import { describe, expect, it } from "vitest";
@@ -11,46 +11,48 @@ import { describe, expect, it } from "vitest";
 import type { Place } from "../api/client";
 import { MAX_BUTTONS, groupStreets } from "./streetGroups";
 
-/** Nur der Name zaehlt fuer die Gruppierung -- der Rest kommt vom Backend unveraendert mit. */
-function strassen(...namen: string[]): Place[] {
-  return namen.map(
+/** Only the name counts for the grouping -- the rest comes from the backend unchanged. */
+function streetsNamed(...names: string[]): Place[] {
+  return names.map(
     (name, i) => ({ id: i + 1, name, lat: 53.62, lon: 9.676, kind: "strasse" }) as Place,
   );
 }
 
-/** Wie das Backend sie liefert: alphabetisch ohne Ruecksicht auf Umlaute. */
-function sortiert(liste: Place[]): Place[] {
-  return [...liste].sort((a, b) => a.name.localeCompare(b.name, "de"));
+/** The way the backend delivers them: alphabetically, without regard for umlauts. */
+function sorted(list: Place[]): Place[] {
+  return [...list].sort((a, b) => a.name.localeCompare(b.name, "de"));
 }
 
-describe("Strassen zur Auswahl gruppieren", () => {
-  it("laesst eine kurze Liste ungeteilt", () => {
-    // Ein Dorf mit acht Strassen braucht keinen Buchstabenschritt. Genau wie bei den Hausnummern
-    // faellt die Frage weg, statt mit einem einzigen Knopf dazustehen.
-    const wenige = strassen("Aweg", "Bweg", "Cweg", "Dweg", "Eweg", "Fweg", "Gweg", "Hweg");
+describe("grouping streets for the choice", () => {
+  it("leaves a short list undivided", () => {
+    // A village with eight streets needs no letter step. Just as with the house numbers the
+    // question falls away instead of standing there with a single button.
+    const few = streetsNamed("Aweg", "Bweg", "Cweg", "Dweg", "Eweg", "Fweg", "Gweg", "Hweg");
 
-    const gruppen = groupStreets(wenige);
+    const groups = groupStreets(few);
 
-    expect(gruppen).toHaveLength(1);
-    expect(gruppen[0]!.label).toBe("");
-    expect(gruppen[0]!.streets).toHaveLength(8);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]!.label).toBe("");
+    expect(groups[0]!.streets).toHaveLength(8);
   });
 
-  it("teilt erst, wenn es nicht mehr auf eine Seite passt", () => {
-    const zehn = strassen(...Array.from({ length: MAX_BUTTONS }, (_, i) => `Strasse ${i}`));
-    const elf = strassen(...Array.from({ length: MAX_BUTTONS + 1 }, (_, i) => `Weg ${i}`));
+  it("only divides once it no longer fits on one page", () => {
+    const ten = streetsNamed(...Array.from({ length: MAX_BUTTONS }, (_, i) => `Strasse ${i}`));
+    const eleven = streetsNamed(
+      ...Array.from({ length: MAX_BUTTONS + 1 }, (_, i) => `Weg ${i}`),
+    );
 
-    expect(groupStreets(zehn)).toHaveLength(1);
-    expect(groupStreets(elf).length).toBeGreaterThan(1);
+    expect(groupStreets(ten)).toHaveLength(1);
+    expect(groupStreets(eleven).length).toBeGreaterThan(1);
   });
 
-  it("verschmilzt duenne Buchstaben mit dem Nachbarn", () => {
+  it("merges thin letters with their neighbour", () => {
     /**
-     * Ein Dorf hat vier Strassen auf M und keine auf Q. Ein Knopf je Buchstabe verschenkte die
-     * Flaeche an leere -- deshalb wird zusammengelegt, bis hoechstens zehn Knoepfe bleiben.
+     * A village has four streets under M and none under Q. One button per letter would give the
+     * space away to empty ones -- so they are merged until at most ten buttons remain.
      */
-    const bestand = sortiert(
-      strassen(
+    const collection = sorted(
+      streetsNamed(
         ...Array.from({ length: 14 }, (_, i) => `Am Feld ${i}`),
         "Birkenweg",
         "Deelenweg",
@@ -68,22 +70,22 @@ describe("Strassen zur Auswahl gruppieren", () => {
       ),
     );
 
-    const etiketten = groupStreets(bestand).map((gruppe) => gruppe.label);
+    const labels = groupStreets(collection).map((group) => group.label);
 
-    expect(etiketten.length).toBeLessThanOrEqual(MAX_BUTTONS);
-    // Das A traegt allein 14 Strassen und bleibt deshalb fuer sich.
-    expect(etiketten).toContain("A");
-    // Irgendwo muessen die duennen Buchstaben zusammengefasst worden sein.
-    expect(etiketten.some((etikett) => etikett.includes("–"))).toBe(true);
+    expect(labels.length).toBeLessThanOrEqual(MAX_BUTTONS);
+    // A alone carries 14 streets and therefore stays on its own.
+    expect(labels).toContain("A");
+    // Somewhere the thin letters must have been merged.
+    expect(labels.some((label) => label.includes("–"))).toBe(true);
   });
 
-  it("gibt einem Umlaut am Anfang keinen eigenen Knopf", () => {
+  it("gives an umlaut at the start no button of its own", () => {
     /**
-     * Der Fall, den Holm nicht hat und das zweite Museum still bekommt: Ohne Entschaerfung
-     * stuende der Oelmuehlenweg unter einem einsamen "Ö" -- und zwar hinter dem Z.
+     * The case Holm does not have and the second museum silently gets: without defusing it, the
+     * Ölmühlenweg would stand under a lonely "Ö" -- and behind the Z at that.
      */
-    const bestand = sortiert(
-      strassen(
+    const collection = sorted(
+      streetsNamed(
         "Ölmühlenweg",
         "Ostweg",
         "Osterende",
@@ -91,23 +93,23 @@ describe("Strassen zur Auswahl gruppieren", () => {
       ),
     );
 
-    const gruppen = groupStreets(bestand);
-    const mitOel = gruppen.find((gruppe) =>
-      gruppe.streets.some((strasse) => strasse.name === "Ölmühlenweg"),
+    const groups = groupStreets(collection);
+    const withUmlaut = groups.find((group) =>
+      group.streets.some((street) => street.name === "Ölmühlenweg"),
     )!;
 
-    expect(mitOel.label.startsWith("O")).toBe(true);
-    expect(mitOel.streets.map((strasse) => strasse.name)).toContain("Ostweg");
-    expect(gruppen.map((gruppe) => gruppe.label)).not.toContain("Ö");
+    expect(withUmlaut.label.startsWith("O")).toBe(true);
+    expect(withUmlaut.streets.map((street) => street.name)).toContain("Ostweg");
+    expect(groups.map((group) => group.label)).not.toContain("Ö");
   });
 
-  it("teilt eine grosse Gruppe am zweiten Wort weiter", () => {
+  it("divides a large group further at the second word", () => {
     /**
-     * 29 Strassen, die alle mit "Am " anfangen -- in Holm ist das der Regelfall hinter dem A.
-     * Ein fester Schnitt nach einem Zeichen brachte hier gar nichts; der Schnitt folgt den Namen.
+     * 29 streets all beginning with "Am " -- in Holm that is the normal case behind the A. A fixed
+     * cut after one character achieved nothing here; the cut follows the names.
      */
-    const amStrassen = sortiert(
-      strassen(
+    const amStreets = sorted(
+      streetsNamed(
         ...["Bullensee", "Burggraben", "Felde", "Freibad", "Hang", "Kamp", "Knick", "Lohhof"].map(
           (rest) => `Am ${rest}`,
         ),
@@ -117,36 +119,36 @@ describe("Strassen zur Auswahl gruppieren", () => {
       ),
     );
 
-    const gruppen = groupStreets(amStrassen);
+    const groups = groupStreets(amStreets);
 
-    expect(gruppen.length).toBeGreaterThan(1);
-    // Alle Etiketten fangen mit "Am " an -- der Schnitt sitzt hinter dem gemeinsamen Wort.
-    for (const gruppe of gruppen) expect(gruppe.label.startsWith("Am ")).toBe(true);
+    expect(groups.length).toBeGreaterThan(1);
+    // Every label begins with "Am " -- the cut sits behind the shared word.
+    for (const group of groups) expect(group.label.startsWith("Am ")).toBe(true);
   });
 
-  it("laesst keine Strasse fallen", () => {
+  it("drops no street", () => {
     /**
-     * Der Test, der zaehlt. Ueber zwei Ebenen hinweg muessen am Ende genau die Strassen stehen,
-     * die hineingegangen sind -- keine doppelt, keine fehlend.
+     * The test that counts. Across two levels, exactly the streets that went in have to stand at
+     * the end -- none twice, none missing.
      */
-    const bestand = sortiert(
-      strassen(
+    const collection = sorted(
+      streetsNamed(
         ...Array.from({ length: 80 }, (_, i) => {
-          const buchstabe = "ABCDEFGHIKLMNOPRSTWZ"[i % 20];
-          return `${buchstabe}${"m".repeat((i % 3) + 1)}strasse ${i}`;
+          const letter = "ABCDEFGHIKLMNOPRSTWZ"[i % 20];
+          return `${letter}${"m".repeat((i % 3) + 1)}strasse ${i}`;
         }),
       ),
     );
 
-    const blaetter: string[] = [];
-    for (const oben of groupStreets(bestand)) {
-      expect(oben.streets.length).toBeGreaterThan(0);
-      for (const unten of groupStreets(oben.streets)) {
-        expect(unten.streets.length).toBeLessThanOrEqual(MAX_BUTTONS);
-        blaetter.push(...unten.streets.map((strasse) => strasse.name));
+    const leaves: string[] = [];
+    for (const upper of groupStreets(collection)) {
+      expect(upper.streets.length).toBeGreaterThan(0);
+      for (const lower of groupStreets(upper.streets)) {
+        expect(lower.streets.length).toBeLessThanOrEqual(MAX_BUTTONS);
+        leaves.push(...lower.streets.map((street) => street.name));
       }
     }
 
-    expect(blaetter.sort()).toEqual(bestand.map((strasse) => strasse.name).sort());
+    expect(leaves.sort()).toEqual(collection.map((street) => street.name).sort());
   });
 });

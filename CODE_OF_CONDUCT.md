@@ -1,25 +1,24 @@
-# Umgangston
+# How we talk to each other
 
-Kurz, weil das Projekt klein ist und ein langer Text ohne jemanden, der ihn durchsetzt, eine
-Zusage ohne Deckung wäre.
+Short, because the project is small and a long text with nobody to enforce it would be a promise
+without cover.
 
-**Was hier erwartet wird.** Sachlich bleiben, auch wenn etwas nicht funktioniert. Davon ausgehen,
-dass die andere Seite es gut meint und weniger Zusammenhang kennt als man selbst. Kritik an der
-Sache, nicht an der Person. Wer die Zeit anderer in Anspruch nimmt, macht es ihnen leicht: nachlesen,
-was schon dasteht, und eine Meldung so schreiben, dass man ihr folgen kann.
+**What is expected here.** Stay factual, even when something does not work. Assume the other side
+means well and knows less of the context than you do. Criticise the matter, not the person. Whoever
+takes up somebody else's time makes it easy for them: read what already stands there, and write a
+report that can be followed.
 
-**Was hier nicht geht.** Beleidigungen, Herabsetzung, Anmache, das Verbreiten fremder
-persönlicher Daten. Und das Beharren auf einer Sache, die entschieden ist — die Begründungen
-stehen in [decisions.md](docs/decisions.md), und eine neue Begründung ist willkommen, ein
-Wiederholen nicht.
+**What does not go here.** Insults, belittling, harassment, spreading somebody else's personal
+data. And insisting on a matter that is decided — the reasoning is in
+[decisions.md](docs/decisions.md), and a new reason is welcome, a repetition is not.
 
-**Ein Museumsprojekt hat eine besondere Zumutung**, und die gilt hier auch: Auf den Fotos sind
-Menschen und ihre Häuser. Über sie wird geredet wie über Nachbarn, nicht wie über Datensätze.
+**A museum project makes one particular demand**, and it holds here too: the photos show people and
+their houses. They are talked about like neighbours, not like records.
 
-**Wenn etwas schiefgeht**, wendet man sich über die private Meldung bei GitHub an den Betreuer
-(Reiter „Security", „Report a vulnerability" — der Weg taugt auch dafür, weil er nicht öffentlich
-ist). Der Betreuer entscheidet, was geschieht; das reicht von einer Bitte bis zum Ausschluss.
-Dass es nur einen gibt, ist der wunde Punkt dieses Kodex und der Grund für seine Kürze.
+**When something goes wrong**, write to the maintainer through GitHub's private report (the
+"Security" tab, "Report a vulnerability" — that way works for this as well, because it is not
+public). The maintainer decides what happens; that ranges from a request to exclusion. That there
+is only one is the weak point of this code and the reason for its brevity.
 
-**Wenn hier je eine Gemeinschaft entsteht**, tritt der [Contributor Covenant](https://www.contributor-covenant.org)
-an diese Stelle. Das ist dann kein Bruch, sondern der nächste Schritt.
+**If a community ever forms here**, the [Contributor Covenant](https://www.contributor-covenant.org)
+takes this place. That will be no break, but the next step.

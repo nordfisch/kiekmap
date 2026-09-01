@@ -40,10 +40,11 @@ important ones:
 
 - **`make check` before every commit.** Style, checks, tests. The hook under `.githooks/` takes
   the fast ones off your hands: `git config core.hooksPath .githooks`.
-- **Language by audience.** Every text exists once, in the language of its readers. German: the
-  interface, the CLI, the documentation for museum and operation, issues, test files. English:
-  identifiers, comments, developer documentation and commit messages. Umlauts are written out in
-  German texts for people and transcribed in source code.
+- **The repository is English.** Identifiers, comments, tests, developer documentation, commit
+  messages, issues. German survives as a *translation*, under a `.de.md` name and watched for
+  drift: the handbook, the operations guide, the adoption guide. The device itself speaks either
+  language, set by `KIEKMAP_LANGUAGE`. Umlauts are written out in German texts for people and
+  transcribed in source code. The map is in [development.md](docs/development.md#language).
 - **Every domain decision gets a test that describes the failure case.** The most valuable tests
   here cover mistakes that would happen *silently*.
 - **Nothing place-specific in the code.** No coordinate, no place name, no number that depends on
@@ -56,13 +57,14 @@ important ones:
 ## An idea or a bug
 
 First check the [open issues](https://github.com/nordfisch/kiekmap/issues) for the same thing, and
-[history.md](docs/history.md) for whether it has been tried before. Then open an issue; the
-templates ask for what is needed. **Issues are written in German** — the subject matter is a German
-museum.
+[history.de.md](docs/archive/history.de.md) for whether it has been tried before. Then open an issue; the
+templates ask for what is needed. **Issues are written in English**, like everything else in the
+repository. Write in German if that is easier for you — nobody will send it back. The
+[discussions](https://github.com/nordfisch/kiekmap/discussions) take either language too.
 
 **The documentation cites older items as „Punkt N".** Those numbers are not issue numbers and
 cannot become them; the number register in
-[history.md](docs/history.md#nummernregister) resolves them.
+[history.de.md](docs/archive/history.de.md#nummernregister) resolves them.
 
 ## The path of a contribution
 

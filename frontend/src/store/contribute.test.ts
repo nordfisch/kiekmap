@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// `importOriginal` statt einer vollständigen Attrappe, und zwar wegen genau einer Zeile: `NEEDS`
-// ist die Rangfolge der drei Fragen. Als abgeschriebene Liste im Test wäre sie eine zweite
-// Wahrheit — die Reihenfolge in `client.ts` ließe sich vertauschen, ohne dass ein Test es merkt.
-// Nachgeprüft: mit einer Kopie fiel bei vertauschter Reihenfolge keiner.
+// `importOriginal` instead of a complete mock, and that because of exactly one line: `NEEDS` is
+// the ranking of the three questions. Copied into the test as a list it would be a second truth --
+// the order in `client.ts` could be swapped without a test noticing. Verified: with a copy, not one
+// failed when the order was swapped.
 vi.mock("../api/client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api/client")>()),
   fetchTask: vi.fn(),
   postLocation: vi.fn(),
   postDate: vi.fn(),
   postHouseNumber: vi.fn(),
-  // Der Kiosk-Store haengt an derselben Schicht -- ein Beitrag laesst ihn nachladen.
+  // The kiosk store hangs off the same layer -- a contribution makes it reload.
   fetchPhotos: vi.fn(),
   fetchHistogram: vi.fn(),
 }));
@@ -26,51 +26,51 @@ import {
   postHouseNumber,
   postLocation,
 } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { useContribute } from "./contribute";
 import { useKiosk } from "./kiosk";
 
-const geholt = vi.mocked(fetchTask);
-const fotosGeholt = vi.mocked(fetchPhotos);
-const histogrammGeholt = vi.mocked(fetchHistogram);
-const ortGesendet = vi.mocked(postLocation);
-const jahrGesendet = vi.mocked(postDate);
-const nummerGesendet = vi.mocked(postHouseNumber);
+const fetched = vi.mocked(fetchTask);
+const photosFetched = vi.mocked(fetchPhotos);
+const histogramFetched = vi.mocked(fetchHistogram);
+const locationPosted = vi.mocked(postLocation);
+const datePosted = vi.mocked(postDate);
+const housenumberPosted = vi.mocked(postHouseNumber);
 
-function aufgabe(need: Need, fotoId: number | null, offen = 3, andere = 3): Task {
+function task(need: Need, photoId: number | null, open = 3, other = 3): Task {
   return {
     need,
-    open_count: fotoId === null ? 0 : offen,
-    open_other: andere,
-    photo: fotoId === null ? null : ({ id: fotoId, title: `Foto ${fotoId}` } as PhotoDetail),
+    open_count: photoId === null ? 0 : open,
+    open_other: other,
+    photo: photoId === null ? null : ({ id: photoId, title: `Photo ${photoId}` } as PhotoDetail),
   };
 }
 
 /**
- * Antwortet je nach gefragter Art -- so wie der Bestand im Museum es tut.
+ * Answers according to the kind asked for -- the way the collection in the museum does.
  *
- * Die Nachschärf-Frage ist standardmäßig leer. Wer sie prüfen will, gibt sie ausdrücklich an —
- * sonst prüfte jeder Test nebenbei eine Frage, um die es ihm gar nicht geht.
+ * The refinement question is empty by default. Whoever wants to check it states it explicitly --
+ * otherwise every test would incidentally check a question it is not about.
  */
-function bestand(nachOrt: Task, nachJahr: Task, nachNummer = aufgabe("housenumber", null)) {
-  geholt.mockImplementation((need: Need) =>
-    Promise.resolve(need === "location" ? nachOrt : need === "date" ? nachJahr : nachNummer),
+function collection(forPlace: Task, forYear: Task, forNumber = task("housenumber", null)) {
+  fetched.mockImplementation((need: Need) =>
+    Promise.resolve(need === "location" ? forPlace : need === "date" ? forYear : forNumber),
   );
 }
 
 beforeEach(() => {
-  geholt.mockReset();
-  fotosGeholt.mockReset().mockResolvedValue({ photos: [], total: 0, truncated: false });
-  histogrammGeholt.mockReset().mockResolvedValue({
+  fetched.mockReset();
+  photosFetched.mockReset().mockResolvedValue({ photos: [], total: 0, truncated: false });
+  histogramFetched.mockReset().mockResolvedValue({
     bars: [],
     step: 1,
     undated: 0,
     collection_from: null,
     collection_to: null,
   });
-  ortGesendet.mockReset().mockResolvedValue({ id: 1 } as PhotoDetail);
-  jahrGesendet.mockReset().mockResolvedValue({ id: 1, needs_date: false } as PhotoDetail);
-  nummerGesendet.mockReset().mockResolvedValue({ id: 1, place_name: "Am Kamp 12" } as PhotoDetail);
+  locationPosted.mockReset().mockResolvedValue({ id: 1 } as PhotoDetail);
+  datePosted.mockReset().mockResolvedValue({ id: 1, needs_date: false } as PhotoDetail);
+  housenumberPosted.mockReset().mockResolvedValue({ id: 1, place_name: "Am Kamp 12" } as PhotoDetail);
 
   useContribute.setState({
     need: "location",
@@ -83,16 +83,16 @@ beforeEach(() => {
     pin: null,
     pinLabel: null,
   });
-  // Ein Ausschnitt muss stehen, sonst gaebe es nichts nachzuladen.
+  // A viewport has to be set, otherwise there would be nothing to reload.
   useKiosk.setState({ bbox: [9.6, 53.57, 9.75, 53.67] });
 });
 
-describe("„Weiß ich nicht“", () => {
-  it("wechselt die Frage statt nur das Foto", async () => {
-    // Wer einen Ort nicht erkennt, weiß vielleicht trotzdem das Jahrzehnt. Dieselbe Frage noch
-    // einmal ist der Grund, warum jemand nach drei Bildern aufhört.
-    bestand(aufgabe("location", 1), aufgabe("date", 2));
-    useContribute.setState({ need: "location", task: aufgabe("location", 1) });
+describe("the I do not know button", () => {
+  it("changes the question, not only the photo", async () => {
+    // Somebody who does not recognise a place may still know the decade. The same question
+    // over again is the reason somebody stops after three images.
+    collection(task("location", 1), task("date", 2));
+    useContribute.setState({ need: "location", task: task("location", 1) });
 
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().need).toBe("date"));
@@ -100,38 +100,38 @@ describe("„Weiß ich nicht“", () => {
     expect(useContribute.getState().task?.photo?.id).toBe(2);
   });
 
-  it("wechselt auch wieder zurück", async () => {
-    bestand(aufgabe("location", 1), aufgabe("date", 2));
-    useContribute.setState({ need: "date", task: aufgabe("date", 2) });
+  it("changes back again too", async () => {
+    collection(task("location", 1), task("date", 2));
+    useContribute.setState({ need: "date", task: task("date", 2) });
 
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().need).toBe("location"));
   });
 
-  it("merkt sich das weggetippte Foto", async () => {
-    bestand(aufgabe("location", 1), aufgabe("date", 2));
-    useContribute.setState({ need: "location", task: aufgabe("location", 7) });
+  it("remembers the photo that was skipped", async () => {
+    collection(task("location", 1), task("date", 2));
+    useContribute.setState({ need: "location", task: task("location", 7) });
 
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().need).toBe("date"));
 
-    // Die Liste gilt für alle Fragearten: einmal weggetippt ist weggetippt. Geprüft über *jeden*
-    // Aufruf statt über einen benannten — welche Frage als nächste drankommt, sagt die Rangfolge,
-    // und die ist hier nicht das Thema.
+    // The list applies to every kind of question: skipped once is skipped. Checked over *every*
+    // call rather than a named one -- which question comes next is decided by the ranking, and
+    // that is not the subject here.
     expect(useContribute.getState().skipped).toEqual([7]);
-    for (const [, uebersprungen] of geholt.mock.calls) {
-      expect(uebersprungen).toEqual([7]);
+    for (const [, skippedIds] of fetched.mock.calls) {
+      expect(skippedIds).toEqual([7]);
     }
   });
 });
 
-describe("Rückfall, wenn eine Frage leerläuft", () => {
-  it("bleibt bei der bisherigen Frage, wenn die andere nichts mehr hat", async () => {
-    // Der Fall, der den Wechsel sonst kaputtmacht: In einer Sammlung, in der jedes Foto verortet
-    // ist, aber die Hälfte kein Jahr hat, stünde sonst „alles vollständig" auf dem Schirm --
-    // während Hunderte Fotos auf eine Jahreszahl warten.
-    bestand(aufgabe("location", 5), aufgabe("date", null));
-    useContribute.setState({ need: "location", task: aufgabe("location", 4) });
+describe("falling back when a question runs dry", () => {
+  it("stays with the current question when the other has nothing left", async () => {
+    // The case that otherwise breaks the switch: in a collection where every photo is located
+    // but half have no year, the screen would otherwise read "everything complete" -- while
+    // hundreds of photos wait for a year.
+    collection(task("location", 5), task("date", null));
+    useContribute.setState({ need: "location", task: task("location", 4) });
 
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().task?.photo?.id).toBe(5));
@@ -139,10 +139,10 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
     expect(useContribute.getState().need).toBe("location");
   });
 
-  it("meldet erst Vollständigkeit, wenn alle drei Fragen leer sind", async () => {
-    // Der stille Fehler wäre, „alles vollständig" zu melden, während noch nachzuschärfen ist.
-    bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", null));
-    useContribute.setState({ need: "location", task: aufgabe("location", 1) });
+  it("reports completeness only once all three questions are empty", async () => {
+    // The silent error would be to report everything complete while refinement is still open.
+    collection(task("location", null), task("date", null), task("housenumber", null));
+    useContribute.setState({ need: "location", task: task("location", 1) });
 
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().loading).toBe(false));
@@ -150,9 +150,9 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
     expect(useContribute.getState().task?.photo).toBeNull();
   });
 
-  it("greift auch beim ersten Laden", async () => {
-    // Eine Sammlung, in der noch nichts datiert ist: die Startfrage muss trotzdem etwas zeigen.
-    bestand(aufgabe("location", null), aufgabe("date", 9));
+  it("takes hold on the first load too", async () => {
+    // A collection where nothing is dated yet: the opening question still has to show something.
+    collection(task("location", null), task("date", 9));
 
     await useContribute.getState().load("location");
 
@@ -161,14 +161,14 @@ describe("Rückfall, wenn eine Frage leerläuft", () => {
   });
 });
 
-describe("Die Rangfolge der drei Fragen", () => {
-  it("kommt zum Nachschaerfen, wenn nach dem Ort nichts mehr offen ist", async () => {
+describe("the ranking of the three questions", () => {
+  it("reaches the refinement when nothing is open after the place", async () => {
     /**
-     * Ein Foto irgendwohin zu setzen ist mehr wert, als eines von der Straßenmitte an sein Haus zu
-     * rücken — und diese Rangfolge steckt allein in der Reihenfolge von `NEEDS`, nicht in einer
-     * Fallunterscheidung.
+     * Putting a photo somewhere at all is worth more than moving one from the middle of the street
+     * to its house -- and that ranking sits solely in the order of `NEEDS`, not in a case
+     * distinction.
      */
-    bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", 12));
+    collection(task("location", null), task("date", null), task("housenumber", 12));
 
     await useContribute.getState().load("location");
 
@@ -176,18 +176,18 @@ describe("Die Rangfolge der drei Fragen", () => {
     expect(useContribute.getState().task?.photo?.id).toBe(12);
   });
 
-  it("nimmt die Hausnummer vor dem Jahr, wenn beide etwas haetten", async () => {
+  it("takes the house number before the year when both have something", async () => {
     /**
-     * Der Test, der die Reihenfolge in `NEEDS` wirklich prüft: Beide Fragen könnten liefern, und
-     * nur die Position im Tupel entscheidet. Ohne ihn ließe sich „housenumber" und „date"
-     * vertauschen, ohne dass ein Test es merkte — nachgeprüft, es fiel keiner.
+     * The test that really checks the order in `NEEDS`: both questions could deliver, and only the
+     * position in the tuple decides. Without it, "housenumber" and "date" could be swapped without
+     * a test noticing -- verified, not one failed.
      *
-     * Dass die Hausnummer vorn steht, ist am 11. August 2026 aus einer Zahl entschieden worden
-     * und nicht aus dem Gefühl: Ein Jahr ist mehr wert als eine Hausnummer, aber im Bestand
-     * stehen 673 undatierte Fotos gegen 71 nachzuschärfende. Hinter dem Jahr wäre die dritte
-     * Frage nie erreicht worden — siehe `services/needs.py`.
+     * That the house number comes first was decided on 11 August 2026 from a number and not from a
+     * feeling: a year is worth more than a house number, but the collection holds 673 undated
+     * photos against 71 that could be refined. Behind the year the third question would never have
+     * been reached -- see `services/needs.py`.
      */
-    bestand(aufgabe("location", null), aufgabe("date", 8), aufgabe("housenumber", 12));
+    collection(task("location", null), task("date", 8), task("housenumber", 12));
 
     await useContribute.getState().load("location");
 
@@ -195,20 +195,20 @@ describe("Die Rangfolge der drei Fragen", () => {
     expect(useContribute.getState().task?.photo?.id).toBe(12);
   });
 
-  it("laesst das Nachschaerfen liegen, solange ein Foto ohne Ort dasteht", async () => {
-    // Die Gegenrichtung: Es genügt *ein* unverortetes Foto, damit die feinere Frage wartet.
-    bestand(aufgabe("location", 3), aufgabe("date", null), aufgabe("housenumber", 12));
+  it("leaves the refinement alone while a photo without a place stands there", async () => {
+    // The other direction: *one* unlocated photo is enough to make the finer question wait.
+    collection(task("location", 3), task("date", null), task("housenumber", 12));
 
     await useContribute.getState().load("location");
 
     expect(useContribute.getState().need).toBe("location");
   });
 
-  it("erreicht das Nachschaerfen von der Jahresfrage aus", async () => {
-    // Die Ausnahme gilt nur für die Frage, die nachgeschärft wird — von „Wann war das?" aus ist
-    // der Weg offen, sonst wäre die dritte Frage aus dem Bereich heraus nie erreichbar.
-    bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", 12));
-    useContribute.setState({ need: "date", task: aufgabe("date", 8) });
+  it("reaches the refinement from the year question", async () => {
+    // The exception applies only to the question being refined -- from the year question the way
+    // is open, otherwise the third question would never be reachable from inside the panel.
+    collection(task("location", null), task("date", null), task("housenumber", 12));
+    useContribute.setState({ need: "date", task: task("date", 8) });
 
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().need).toBe("housenumber"));
@@ -217,18 +217,18 @@ describe("Die Rangfolge der drei Fragen", () => {
   });
 });
 
-describe("Die scharfe Karte faellt zurueck", () => {
+describe("the sharpened map falls back", () => {
   /**
-   * Der Kartentipp ist nur nach ausdruecklicher Ansage scharf — und diese Ansage gilt fuer
-   * *dieses* Foto. Ueberlebte sie den Wechsel, verortete der naechste Tipp ein Foto, das der
-   * Besucher noch gar nicht angesehen hat.
+   * A tap on the map only counts after an explicit announcement -- and that announcement applies
+   * to *this* photo. If it survived the switch, the next tap would locate a photo the visitor has
+   * not even looked at yet.
    */
   beforeEach(() => {
-    bestand(aufgabe("location", 5), aufgabe("date", 6));
+    collection(task("location", 5), task("date", 6));
   });
 
-  it("beim naechsten Foto", async () => {
-    useContribute.setState({ need: "location", task: aufgabe("location", 4), pickingOnMap: true });
+  it("on the next photo", async () => {
+    useContribute.setState({ need: "location", task: task("location", 4), pickingOnMap: true });
 
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().loading).toBe(false));
@@ -236,15 +236,15 @@ describe("Die scharfe Karte faellt zurueck", () => {
     expect(useContribute.getState().pickingOnMap).toBe(false);
   });
 
-  it("auch dann, wenn die Frage dieselbe bleibt", async () => {
+  it("even when the question stays the same", async () => {
     /**
-     * Der Weg, der die Komponente stehen laesst: Hat die andere Frage nichts mehr, faellt
-     * ``load`` auf die urspruengliche zurueck. ``need`` bleibt „location", ``LocationTask``
-     * bleibt montiert — ein ``useState`` in der Komponente wuerde hier nicht zurueckfallen.
-     * Genau deshalb wohnt der Schalter im Store.
+     * The path that leaves the component standing: if the other question has nothing left,
+     * ``load`` falls back to the original one. ``need`` stays "location", ``LocationTask`` stays
+     * mounted -- a ``useState`` inside the component would not reset here. That is exactly why the
+     * switch lives in the store.
      */
-    bestand(aufgabe("location", 5), aufgabe("date", null));
-    useContribute.setState({ need: "location", task: aufgabe("location", 4), pickingOnMap: true });
+    collection(task("location", 5), task("date", null));
+    useContribute.setState({ need: "location", task: task("location", 4), pickingOnMap: true });
 
     useContribute.getState().skip();
     await vi.waitFor(() => expect(useContribute.getState().task?.photo?.id).toBe(5));
@@ -253,22 +253,22 @@ describe("Die scharfe Karte faellt zurueck", () => {
     expect(useContribute.getState().pickingOnMap).toBe(false);
   });
 
-  it("bei jedem Laden, nicht nur auf den beiden bequemen Wegen", async () => {
+  it("on every load, not only on the two convenient paths", async () => {
     /**
-     * ``skip`` und ``contribute`` setzen selbst zurueck — deshalb faellt es nicht auf, wenn
-     * ``load`` es nicht taete. ``load`` ist aber die Stelle, die *jeden* Fotowechsel sieht, auch
-     * den aus der Detailansicht und den beim ersten Aufbau des Bereichs. Dieser Test deckt genau
-     * die Zeile, die den beiden anderen sonst nur hinterherraeumt.
+     * ``skip`` and ``contribute`` reset it themselves -- which is why it would not be noticed if
+     * ``load`` did not. But ``load`` is the place that sees *every* change of photo, including the
+     * one from the detail view and the one when the panel is first built. This test covers exactly
+     * the line that otherwise only tidies up after the other two.
      */
-    useContribute.setState({ need: "location", task: aufgabe("location", 4), pickingOnMap: true });
+    useContribute.setState({ need: "location", task: task("location", 4), pickingOnMap: true });
 
     await useContribute.getState().load();
 
     expect(useContribute.getState().pickingOnMap).toBe(false);
   });
 
-  it("nach einem Beitrag", async () => {
-    useContribute.setState({ need: "location", task: aufgabe("location", 4), pickingOnMap: true });
+  it("after a contribution", async () => {
+    useContribute.setState({ need: "location", task: task("location", 4), pickingOnMap: true });
     useContribute.getState().setPin({ lat: 53.62, lon: 9.676 });
 
     await useContribute.getState().submitLocation();
@@ -276,61 +276,62 @@ describe("Die scharfe Karte faellt zurueck", () => {
     expect(useContribute.getState().pickingOnMap).toBe(false);
   });
 
-  it("ist von vornherein aus", () => {
-    // Wer nur schauen will, soll die Frage nicht versehentlich beantworten.
+  it("is off from the start", () => {
+    // Somebody who only wants to look should not answer the question by accident.
     expect(useContribute.getInitialState().pickingOnMap).toBe(false);
   });
 });
 
-describe("Karte und Zeitleiste nach einem Beitrag", () => {
+describe("map and timeline after a contribution", () => {
   beforeEach(() => {
-    bestand(aufgabe("location", 2), aufgabe("date", 3));
+    collection(task("location", 2), task("date", 3));
     useContribute.setState({
       need: "location",
-      task: aufgabe("location", 1),
+      task: task("location", 1),
       pin: { lat: 53.62, lon: 9.676 },
     });
   });
 
-  it("laedt beide nach, sobald ein Beitrag angekommen ist", async () => {
-    // Der Dank verspricht „Das Foto ist jetzt auf der Karte". Ohne dieses Nachladen wurde das
-    // erst wahr, wenn jemand die Karte verschob -- also gerade bei den aelteren Besuchern, fuer
-    // die der Bereich gebaut ist, gar nicht.
+  it("reloads both as soon as a contribution has arrived", async () => {
+    // The thank-you promises that the photo is now on the map. Without this reload that only
+    // became true once somebody panned the map -- so for the older visitors the panel is built
+    // for, not at all.
     await useContribute.getState().submitLocation();
 
-    expect(fotosGeholt).toHaveBeenCalled();
-    // Das Histogramm gehoert dazu: ein verortetes Foto wandert aus "ohne Ort" heraus, ein
-    // datiertes aus "ohne Jahr" in einen Jahrzehnt-Balken.
-    expect(histogrammGeholt).toHaveBeenCalled();
+    expect(photosFetched).toHaveBeenCalled();
+    // The histogram belongs with it: a located photo moves out of "without a place", a dated
+    // one out of "without a year" into a decade bar.
+    expect(histogramFetched).toHaveBeenCalled();
   });
 
-  it("laedt nicht nach, wenn der Beitrag abgelehnt wurde", async () => {
-    // Haeufigster Fall: jemand anders war schneller (HTTP 409). Dann hat sich nichts geaendert,
-    // und ein Nachladen waere nur Last auf dem Pi.
-    ortGesendet.mockRejectedValue(new Error("Dieses Foto hat inzwischen schon eine Angabe."));
+  it("does not reload when the contribution was rejected", async () => {
+    // The most frequent case: somebody else was faster (HTTP 409). Then nothing has changed, and
+    // a reload would only be load on the Pi.
+    locationPosted.mockRejectedValue(new Error("Dieses Foto hat inzwischen schon eine Angabe."));
 
     await useContribute.getState().submitLocation();
 
     expect(useContribute.getState().error).toContain("inzwischen");
-    expect(fotosGeholt).not.toHaveBeenCalled();
+    expect(photosFetched).not.toHaveBeenCalled();
   });
 
-  it("laedt nicht nach, solange kein Ausschnitt bekannt ist", async () => {
-    // Vor dem ersten Kartenaufbau gibt es keine bbox -- dann gibt es auch nichts abzufragen.
+  it("does not reload while no viewport is known", async () => {
+    // Before the map is first built there is no bbox -- then there is nothing to query either.
     useKiosk.setState({ bbox: null });
 
     await useContribute.getState().submitLocation();
 
-    expect(fotosGeholt).not.toHaveBeenCalled();
+    expect(photosFetched).not.toHaveBeenCalled();
   });
 });
 
-describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
+describe("after a contribution: the same photo, the other question", () => {
   /**
-   * Ein frisch eingelesener Scan hat oft weder Ort noch Jahr — im Museumsbestand sind das 673
-   * Fotos ohne Jahr und 77 ohne Ort. Welche Frage zuerst kommt, entscheidet der Zufall.
+   * A freshly imported scan often has neither a place nor a year -- in the museum collection that
+   * is 673 photos without a year and 77 without a place. Which question comes first is decided by
+   * chance.
    */
-  const datiertOhneOrt = {
+  const datedWithoutPlace = {
     id: 1,
     lat: null,
     lon: null,
@@ -338,7 +339,7 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
     needs_date: false,
   } as PhotoDetail;
 
-  const verortetOhneJahr = {
+  const locatedWithoutYear = {
     id: 1,
     lat: 53.62,
     lon: 9.676,
@@ -346,7 +347,7 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
     needs_date: true,
   } as PhotoDetail;
 
-  const vollstaendig = {
+  const complete = {
     id: 1,
     lat: 53.62,
     lon: 9.676,
@@ -356,23 +357,23 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
-    // Die Aufgaben, die der Bestand von sich aus liefern würde: Foto 2 und Foto 3. Kommt statt
-    // ihrer die 1, hat die Kette gegriffen.
-    bestand(aufgabe("location", 2), aufgabe("date", 3));
+    // The tasks the collection would deliver of its own accord: photo 2 and photo 3. If 1 comes
+    // instead of them, the chain has taken hold.
+    collection(task("location", 2), task("date", 3));
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it("dankt ohne Versprechen, solange der Ort fehlt", async () => {
+  it("thanks without a promise while the place is missing", async () => {
     /**
-     * Der Fehler, um den es hier geht. „Das Foto ist jetzt auf der Zeitleiste" war eine Zusage,
-     * die die Ansicht nicht einlösen kann: Ein Foto ohne Ort steht auf keiner Karte, der Fokus
-     * bleibt stehen, und der Besucher liest einen Satz und sieht nichts.
+     * The error at issue here. Promising that the photo is now on the timeline was a pledge the
+     * view cannot redeem: a photo without a place stands on no map, the focus stays where it was,
+     * and the visitor reads a sentence and sees nothing.
      */
-    useContribute.setState({ need: "date", task: aufgabe("date", 1) });
-    jahrGesendet.mockResolvedValue(datiertOhneOrt);
+    useContribute.setState({ need: "date", task: task("date", 1) });
+    datePosted.mockResolvedValue(datedWithoutPlace);
 
     await useContribute.getState().submitDate(1930, "decade");
 
@@ -380,11 +381,11 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
     expect(useContribute.getState().thanks).toBe(t.help.thanksAsk.location);
   });
 
-  it("legt dasselbe Foto zur Ortsfrage vor, wenn es datiert wurde", async () => {
-    // Wer gerade gesagt hat, wann das war, kennt das Foto — und schaut es an. Ein zufälliges
-    // anderes vorzulegen verschenkt genau diesen Moment.
-    useContribute.setState({ need: "date", task: aufgabe("date", 1) });
-    jahrGesendet.mockResolvedValue(datiertOhneOrt);
+  it("offers the same photo for the place question once it was dated", async () => {
+    // Somebody who has just said when it was knows the photo -- and is looking at it. Offering a
+    // random other one throws exactly that moment away.
+    useContribute.setState({ need: "date", task: task("date", 1) });
+    datePosted.mockResolvedValue(datedWithoutPlace);
 
     await useContribute.getState().submitDate(1930, "decade");
     await vi.advanceTimersByTimeAsync(2200);
@@ -393,14 +394,14 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
     expect(useContribute.getState().task?.photo?.id).toBe(1);
   });
 
-  it("legt dasselbe Foto zur Jahresfrage vor, wenn es verortet wurde", async () => {
-    // Dieselbe Regel in die andere Richtung, damit sie eine Regel bleibt und kein Sonderfall.
+  it("offers the same photo for the year question once it was located", async () => {
+    // The same rule in the other direction, so that it stays a rule and not a special case.
     useContribute.setState({
       need: "location",
-      task: aufgabe("location", 1),
+      task: task("location", 1),
       pin: { lat: 53.62, lon: 9.676 },
     });
-    ortGesendet.mockResolvedValue(verortetOhneJahr);
+    locationPosted.mockResolvedValue(locatedWithoutYear);
 
     await useContribute.getState().submitLocation();
     expect(useContribute.getState().thanks).toBe(t.help.thanksAsk.date);
@@ -411,39 +412,39 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
     expect(useContribute.getState().task?.photo?.id).toBe(1);
   });
 
-  it("verspricht die Karte erst, wenn das Foto darauf zu sehen ist", async () => {
-    // Der alte Satz bleibt — nur dort, wo er stimmt.
+  it("promises the map only once the photo can be seen on it", async () => {
+    // The old sentence stays -- only where it is true.
     useContribute.setState({
       need: "location",
-      task: aufgabe("location", 1),
+      task: task("location", 1),
       pin: { lat: 53.62, lon: 9.676 },
     });
-    ortGesendet.mockResolvedValue(vollstaendig);
+    locationPosted.mockResolvedValue(complete);
 
     await useContribute.getState().submitLocation();
 
     expect(useContribute.getState().thanks).toBe(t.help.thanks.location);
   });
 
-  it("fragt nach „Reicht so“ nicht sofort nach der Hausnummer", async () => {
+  it("does not ask for the house number straight after good enough", async () => {
     /**
-     * Die eine echte Ausnahme von der reinen Rangfolge, und sie haengt am *Beantworten*. Wer
-     * gerade „Reicht so — die Straße genügt" gedrückt und den Ort bestätigt hat, hat die Frage
-     * nach dem genauen Haus schon beantwortet; sie im selben Atemzug noch einmal zu stellen liest
-     * sich, als hätte niemand zugehört.
+     * The one real exception to the pure ranking, and it hangs on the *answering*. Somebody who has
+     * just pressed "good enough -- the street will do" and confirmed the place has already answered
+     * the question about the exact house; asking it again in the same breath reads as though
+     * nobody had listened.
      *
-     * Ohne die `refines`-Zeile führte die Kette hier zu „housenumber", weil nach dem Ort und dem
-     * Jahr nichts mehr offen ist.
+     * Without the `refines` line the chain would lead to "housenumber" here, because nothing is
+     * open after the place and the year.
      */
-    bestand(aufgabe("location", null), aufgabe("date", null), aufgabe("housenumber", 12));
+    collection(task("location", null), task("date", null), task("housenumber", 12));
     useContribute.setState({
       need: "location",
-      task: aufgabe("location", 12),
+      task: task("location", 12),
       pin: { lat: 53.62, lon: 9.676 },
       pinLabel: "Am Kamp",
       pinAccuracy: 150,
     });
-    ortGesendet.mockResolvedValue(vollstaendig);
+    locationPosted.mockResolvedValue(complete);
 
     await useContribute.getState().submitLocation();
     await vi.advanceTimersByTimeAsync(2200);
@@ -451,14 +452,14 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
     expect(useContribute.getState().need).not.toBe("housenumber");
   });
 
-  it("geht zum naechsten Foto, wenn nichts mehr fehlt", async () => {
-    // Die Kette muss enden, sonst bekäme der Besucher dasselbe Foto ein zweites Mal vorgelegt.
+  it("moves to the next photo when nothing is missing any more", async () => {
+    // The chain has to end, otherwise the visitor would be offered the same photo a second time.
     useContribute.setState({
       need: "location",
-      task: aufgabe("location", 1),
+      task: task("location", 1),
       pin: { lat: 53.62, lon: 9.676 },
     });
-    ortGesendet.mockResolvedValue(vollstaendig);
+    locationPosted.mockResolvedValue(complete);
 
     await useContribute.getState().submitLocation();
     await vi.advanceTimersByTimeAsync(2200);
@@ -468,43 +469,42 @@ describe("Nach einem Beitrag: dasselbe Foto, die andere Frage", () => {
   });
 });
 
-describe("Die Karte beim Verorten", () => {
+describe("the map while locating", () => {
   beforeEach(() => {
     useKiosk.setState({ focus: null, rangeBefore: null, bbox: [9.6, 53.57, 9.75, 53.67] });
   });
 
-  it("holt bei einem Treffer der Ortssuche heran", () => {
-    // Der Besucher hat den Punkt nicht selbst gesetzt -- er will sehen, wo er gelandet ist.
+  it("zooms in on a hit from the place search", () => {
+    // The visitor did not set the point themselves -- they want to see where it landed.
     useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
 
-    // Der Ausschnitt legt sich um den Punkt -- eine eigene Koordinate traegt der Focus nicht,
-    // die Karte liest allein `bounds`.
-    const [[west, sued], [ost, nord]] = useKiosk.getState().focus!.bounds;
-    expect(53.62).toBeGreaterThan(sued);
-    expect(53.62).toBeLessThan(nord);
+    // The viewport wraps around the point -- the focus carries no coordinate of its own, the map
+    // reads `bounds` alone.
+    const [[west, south], [east, north]] = useKiosk.getState().focus!.bounds;
+    expect(53.62).toBeGreaterThan(south);
+    expect(53.62).toBeLessThan(north);
     expect(9.676).toBeGreaterThan(west);
-    expect(9.676).toBeLessThan(ost);
+    expect(9.676).toBeLessThan(east);
   });
 
-  it("laesst sie bei einem auf die Karte getippten Punkt stehen", () => {
-    // Dort hat er gerade gezielt. Eine Karte, die unter dem Finger wegspringt, fuehlt sich an wie
-    // ein Verrutschen.
+  it("leaves it alone for a point tapped on the map", () => {
+    // That is where they just aimed. A map that jumps away under the finger feels like a slip.
     useContribute.getState().setPin({ lat: 53.62, lon: 9.676 });
 
     expect(useKiosk.getState().focus).toBeNull();
   });
 
-  it("faehrt zurueck, wenn der Punkt entfernt wird", () => {
+  it("travels back when the point is removed", () => {
     useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
     useContribute.getState().setPin(null);
 
     expect(useKiosk.getState().focus).toBeNull();
   });
 
-  it("gibt nur der Ortssuche ein Etikett mit", () => {
-    // Daran unterscheidet die Hausnummern-Auswahl einen Tipp auf die Karte von ihrem eigenen
-    // Treffer: Nur beim eigenen steht ein Etikett. Faellt diese Zusage, bliebe das Knopfraster
-    // nach einem Kartentipp stehen und wuerfe den eben gesetzten Punkt beim naechsten Tipp weg.
+  it("gives a label only to the place search", () => {
+    // This is how the house-number choice tells a tap on the map from a hit of its own: only its
+    // own carries a label. If that promise broke, the grid of buttons would stay after a tap on
+    // the map and throw the point just set away on the next tap.
     useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
     expect(useContribute.getState().pinLabel).toBe("Mühlenweg");
 
@@ -512,7 +512,7 @@ describe("Die Karte beim Verorten", () => {
     expect(useContribute.getState().pinLabel).toBeNull();
   });
 
-  it("laesst den Zeitraum in Ruhe, solange nichts beigetragen ist", () => {
+  it("leaves the range alone while nothing has been contributed", () => {
     useKiosk.setState({ timeRange: { from: 1950, to: 1959 }, fullRange: { from: 1920, to: 2019 } });
 
     useContribute.getState().setPin({ lat: 53.62, lon: 9.676 }, { label: "Mühlenweg" });
@@ -522,23 +522,23 @@ describe("Die Karte beim Verorten", () => {
   });
 });
 
-describe("Aus einem Foto heraus fragen", () => {
+describe("asking from inside a photo", () => {
   /**
-   * Der Weg aus der Detailansicht: Wer ein Foto groß ansieht und dort „Wann war das?" tippt, meint
-   * genau dieses Foto. Der Wunsch geht an den Server, der ihn gegen dieselbe Bedingung prüft wie
-   * jedes andere Foto — siehe `api/contribute.py`.
+   * The way out of the detail view: somebody looking at a photo full size and tapping the year
+   * question there means exactly that photo. The wish goes to the server, which checks it against
+   * the same condition as any other photo -- see `api/contribute.py`.
    */
-  function bestandMitWunsch(nachOrt: Task, nachJahr: Task, gewuenscht?: Task) {
-    geholt.mockImplementation((need: Need, _uebersprungen: number[], fotoId?: number | null) => {
-      if (fotoId != null && gewuenscht && gewuenscht.need === need) {
-        return Promise.resolve(gewuenscht);
+  function collectionWithWish(forPlace: Task, forYear: Task, requested?: Task) {
+    fetched.mockImplementation((need: Need, _skippedIds: number[], photoId?: number | null) => {
+      if (photoId != null && requested && requested.need === need) {
+        return Promise.resolve(requested);
       }
-      return Promise.resolve(need === "location" ? nachOrt : nachJahr);
+      return Promise.resolve(need === "location" ? forPlace : forYear);
     });
   }
 
-  it("stellt das gewuenschte Foto zur gewuenschten Frage", async () => {
-    bestandMitWunsch(aufgabe("location", 3), aufgabe("date", 8), aufgabe("date", 42));
+  it("puts the requested photo to the requested question", async () => {
+    collectionWithWish(task("location", 3), task("date", 8), task("date", 42));
 
     await useContribute.getState().askAbout(42, "date");
 
@@ -546,23 +546,23 @@ describe("Aus einem Foto heraus fragen", () => {
     expect(useContribute.getState().task?.photo?.id).toBe(42);
   });
 
-  it("reicht die Foto-Nummer nur bei der gewuenschten Frage weiter", async () => {
-    // Der Rückfall gilt einer *anderen* Frage. Ein Wunsch, der dort mitliefe, hiesse: „lege mir
-    // dieses Foto zu einer Frage vor, zu der es nichts zu sagen hat."
-    bestandMitWunsch(aufgabe("location", 3), aufgabe("date", 8), aufgabe("date", 42));
+  it("passes the photo id on only for the requested question", async () => {
+    // The fallback applies to a *different* question. A wish travelling along there would mean:
+    // offer me this photo for a question it has nothing to say about.
+    collectionWithWish(task("location", 3), task("date", 8), task("date", 42));
 
     await useContribute.getState().askAbout(42, "date");
 
-    expect(geholt).toHaveBeenCalledWith("date", [], 42, expect.anything());
+    expect(fetched).toHaveBeenCalledWith("date", [], 42, expect.anything());
   });
 
-  it("faellt auf die Rangfolge zurueck, wenn das Foto nichts mehr braucht", async () => {
+  it("falls back to the ranking when the photo needs nothing more", async () => {
     /**
-     * Zwischen dem Tippen und dem Laden kann jemand anders geantwortet haben. Der Server legt dann
-     * ein anderes Foto vor — und der Bereich macht weiter, statt mit einer beantworteten Frage
-     * dazustehen.
+     * Between the tap and the load, somebody else may have answered. The server then offers a
+     * different photo -- and the panel carries on instead of standing there with a question that
+     * is already answered.
      */
-    bestandMitWunsch(aufgabe("location", 3), aufgabe("date", 8));
+    collectionWithWish(task("location", 3), task("date", 8));
 
     await useContribute.getState().askAbout(42, "date");
 
@@ -570,14 +570,14 @@ describe("Aus einem Foto heraus fragen", () => {
     expect(useContribute.getState().task?.photo?.id).toBe(8);
   });
 
-  it("geht danach den gewohnten Weg", async () => {
+  it("takes the usual path afterwards", async () => {
     /**
-     * Der Test, der festhält, dass hier **keine** Sonderregel gebaut wurde: Nach der Antwort
-     * kommen Dank und Kette wie nach jedem anderen Beitrag. Wer aus einem Foto heraus antwortet,
-     * ist im Beitragsbereich gelandet, und dort gehört die nächste Frage hin.
+     * The test that records that **no** special rule was built here: after the answer, the thanks
+     * and the chain follow as after any other contribution. Whoever answers from inside a photo has
+     * landed in the contribution panel, and that is where the next question belongs.
      */
-    bestandMitWunsch(aufgabe("location", 3), aufgabe("date", 8), aufgabe("date", 42));
-    jahrGesendet.mockResolvedValue({
+    collectionWithWish(task("location", 3), task("date", 8), task("date", 42));
+    datePosted.mockResolvedValue({
       id: 42,
       needs_date: false,
       needs_location: true,
@@ -586,7 +586,7 @@ describe("Aus einem Foto heraus fragen", () => {
     await useContribute.getState().askAbout(42, "date");
     await useContribute.getState().submitDate(1932, "year");
 
-    // Der Dank fragt nach dem, was diesem Foto noch fehlt -- und das ist der Ort.
+    // The thanks asks for what this photo is still missing -- and that is the place.
     expect(useContribute.getState().thanks).toBe(t.help.thanksAsk.location);
   });
 });

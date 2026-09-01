@@ -8,23 +8,23 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /srv
 
-# Abhaengigkeiten zuerst, damit Codeaenderungen die Installationsschicht nicht ungueltig machen.
-# Auf dem Pi ist das der Unterschied zwischen Sekunden und Minuten pro Neubau.
+# Dependencies first, so that a change to the code does not invalidate the install layer. On the
+# Pi that is the difference between seconds and minutes per rebuild.
 #
-# Aus der Lockdatei, nicht aus pyproject.toml: Dort stehen nur untere Schranken, und ein Neubau in
-# einem Jahr zoege andere Versionen als der heutige. Bei einem Geraet, das offline steht und einmal
-# im Jahr angefasst wird, faellt so etwas erst im Museum auf. Erzeugt mit `make lock`.
+# From the lock file, not from pyproject.toml: that names lower bounds only, and a rebuild in a
+# year would pull different versions than today's. On a device that stands offline and is touched
+# once a year, something like that shows up only in the museum. Built with `make lock`.
 #
-# `pip install .` stand hier vorher und tat weniger, als es aussieht: `app/` wird erst weiter unten
-# kopiert, die Paketsuche fand also nichts und installierte eine Distribution ohne Inhalt. Gezogen
-# wurden immer nur die Abhaengigkeiten -- genau das tut die Zeile jetzt, nur nachvollziehbar.
+# `pip install .` stood here before and did less than it looks like: `app/` is copied further down,
+# so the package search found nothing and installed a distribution without content. What was ever
+# pulled were the dependencies -- which is what this line does now, only traceably.
 COPY requirements.lock ./
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip && pip install -r requirements.lock
 
-# Die Lizenzhinweise gehoeren ins Abbild, nicht nur ins Repo: Sie muessen mit jeder Kopie
-# mitgehen. Erzeugt von tools/build_notices.py, eingecheckt, damit dieser Kontext fuer sich
-# vollstaendig ist -- die LICENSE der Projektwurzel liegt ausserhalb davon.
+# The licence notices belong in the image, not only in the repository: they have to travel with
+# every copy. Built by tools/build_notices.py and checked in, so that this build context is
+# complete in itself -- the LICENSE at the project root lies outside it.
 COPY THIRD-PARTY.txt ./
 COPY app ./app
 COPY alembic ./alembic
@@ -32,8 +32,8 @@ COPY alembic.ini ./
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Nicht als root laufen. Die UID muss zu den Dateirechten von ./data auf dem Host passen --
-# auf Raspberry Pi OS ist der erste Benutzer 1000, deshalb genau diese Nummer.
+# Do not run as root. The UID has to match the file permissions of ./data on the host -- on
+# Raspberry Pi OS the first user is 1000, hence exactly this number.
 RUN useradd --uid 1000 --create-home kiekmap
 USER kiekmap
 

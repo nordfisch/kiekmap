@@ -11,7 +11,7 @@
 
 import { useId } from "react";
 
-import { t } from "../text/de";
+import { t } from "../text";
 import { type Precision, type YearInput, decadeAllowed, withYear } from "./yearInput";
 
 export function YearField({

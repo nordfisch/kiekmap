@@ -20,7 +20,7 @@
  * docs/adaption.md.
  */
 
-import { t } from "../text/de";
+import { t } from "../text";
 
 export function Crest({ regionName }: { regionName: string }) {
   return (

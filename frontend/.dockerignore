@@ -2,6 +2,6 @@ node_modules/
 dist/
 .vite/
 
-# Die Kartendatei und die Regionsdefinition gehoeren zum Ort, nicht zur Software: gross, selten
-# geaendert, und pro Museum verschieden. Sie werden zur Laufzeit eingehaengt (docker-compose.yml).
+# The map file and the region definition belong to the place, not to the software: large, rarely
+# changed, and different per museum. They are mounted at runtime (docker-compose.yml).
 public/tiles/

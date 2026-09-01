@@ -7,6 +7,7 @@ state lives underneath it, so that backing up means "copy one folder".
 import json
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,6 +22,17 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    #: Which language the device speaks -- interface, messages, date labels.
+    #:
+    #: A property of the instance, not a choice for the visitor: the device stands in one museum
+    #: and speaks its language. Read by the backend directly and by the frontend through
+    #: ``GET /api/config``, so that switching it on the Pi needs no new build.
+    #:
+    #: ``Literal`` rather than ``str``: an unknown value aborts at startup instead of falling back
+    #: to German in silence. A device that speaks the wrong language is noticed; one that ignores
+    #: the setting is not.
+    language: Literal["de", "en"] = "de"
 
     #: Root of all runtime data. Bind-mounted to /data inside the container.
     data_dir: Path = PROJECT_ROOT / "data"

@@ -30,7 +30,7 @@ import {
 } from "react";
 
 import { useKiosk } from "../store/kiosk";
-import { t } from "../text/de";
+import { t } from "../text";
 import {
   axisBounds,
   barHeight,

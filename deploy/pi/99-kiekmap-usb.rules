@@ -1,16 +1,16 @@
-# USB-Datentraeger unter /media einhaengen.
+# Mount USB volumes under /media.
 #
-# Nach /etc/udev/rules.d/ kopieren, dann:  sudo udevadm control --reload
+# Copy to /etc/udev/rules.d/, then:  sudo udevadm control --reload
 #
-# Ohne diese Regel passiert auf Raspberry Pi OS Lite beim Einstecken eines Sticks gar nichts --
-# es gibt dort keinen Desktop und damit keinen Automounter. Der Admin-Bereich saehe nie einen
-# Stick und meldete ewig "Bitte USB-Stick einstecken".
+# Without this rule nothing at all happens on Raspberry Pi OS Lite when a stick is plugged in --
+# there is no desktop there and therefore no automounter. The admin area would never see a stick
+# and would report "please plug in a USB stick" for ever.
 #
-# ID_FS_USAGE=="filesystem" laesst nur Partitionen durch, auf denen wirklich ein Dateisystem
-# liegt: die Platte selbst (/dev/sda) und leere Partitionstabellen bleiben aussen vor.
+# ID_FS_USAGE=="filesystem" lets through only partitions that really carry a filesystem: the disk
+# itself (/dev/sda) and empty partition tables stay outside.
 
 ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{ID_FS_USAGE}=="filesystem", \
-    RUN+="/usr/local/sbin/kiekmap-usb-mount einhaengen %E{DEVNAME} %E{ID_FS_LABEL} %E{ID_FS_TYPE}"
+    RUN+="/usr/local/sbin/kiekmap-usb-mount mount %E{DEVNAME} %E{ID_FS_LABEL} %E{ID_FS_TYPE}"
 
 ACTION=="remove", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", \
-    RUN+="/usr/local/sbin/kiekmap-usb-mount aushaengen %E{DEVNAME}"
+    RUN+="/usr/local/sbin/kiekmap-usb-mount unmount %E{DEVNAME}"

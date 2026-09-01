@@ -7,32 +7,32 @@ from app.models import Photo
 from app.services.watcher import IncomingWatcher
 
 
-def test_wartet_bis_die_datei_fertig_geschrieben_ist(
+def test_waits_until_the_file_is_written_completely(
     session, settings, sample_image, fixtures_dir: Path
 ):
-    """Der Fall, der eine ereignisgesteuerte Ueberwachung stolpern laesst.
+    """The case that trips up an event-driven watch.
 
-    Ein grosses TIFF, ueber das Netz kopiert, existiert lange bevor es vollstaendig ist. Wer beim
-    ersten Lebenszeichen zugreift, importiert ein halbes Bild.
+    A large TIFF copied over the network exists long before it is complete. Whoever reaches for it
+    at the first sign of life imports half an image.
     """
     watcher = IncomingWatcher(settings, interval=0)
-    vollstaendig = (fixtures_dir / "scan_ohne_exif.jpg").read_bytes()
-    ziel = settings.incoming_dir / "wird_gerade_kopiert.jpg"
+    complete = (fixtures_dir / "scan_ohne_exif.jpg").read_bytes()
+    target = settings.incoming_dir / "wird_gerade_kopiert.jpg"
 
-    # Erst die Haelfte -- der Kopiervorgang laeuft noch.
-    ziel.write_bytes(vollstaendig[: len(vollstaendig) // 2])
-    assert watcher.scan_once() == 0, "unfertige Datei darf nicht angefasst werden"
+    # First half of it -- the copy is still running.
+    target.write_bytes(complete[: len(complete) // 2])
+    assert watcher.scan_once() == 0, "an unfinished file must not be touched"
 
-    # Naechster Blick: die Groesse hat sich geaendert, also weiter warten.
-    ziel.write_bytes(vollstaendig)
+    # Next look: the size has changed, so keep waiting.
+    target.write_bytes(complete)
     assert watcher.scan_once() == 0
 
-    # Jetzt ist die Groesse stabil.
+    # Now the size is stable.
     assert watcher.scan_once() == 1
-    assert session.scalar(select(Photo).where(Photo.original_filename == ziel.name))
+    assert session.scalar(select(Photo).where(Photo.original_filename == target.name))
 
 
-def test_leere_datei_wird_nie_importiert(session, settings):
+def test_an_empty_file_is_never_imported(session, settings):
     watcher = IncomingWatcher(settings, interval=0)
     (settings.incoming_dir / "leer.jpg").touch()
 
@@ -40,120 +40,120 @@ def test_leere_datei_wird_nie_importiert(session, settings):
     assert watcher.scan_once() == 0
 
 
-def test_leerer_ordner_ist_kein_fehler(session, settings):
+def test_an_empty_folder_is_not_an_error(session, settings):
     assert IncomingWatcher(settings, interval=0).scan_once() == 0
 
 
-def test_import_laeuft_ohne_zutun_durch(session, settings, fixtures_dir: Path):
+def test_the_import_runs_through_without_anyone_helping(session, settings, fixtures_dir: Path):
     watcher = IncomingWatcher(settings, interval=0)
     for name in ("scan_ohne_exif.jpg", "hochkant.jpg"):
         (settings.incoming_dir / name).write_bytes((fixtures_dir / name).read_bytes())
 
-    watcher.scan_once()  # Groessen merken
+    watcher.scan_once()  # remember the sizes
     assert watcher.scan_once() == 2
     assert len(session.scalars(select(Photo)).all()) == 2
 
 
-class TestEinAbbruchMittendrin:
-    """Was schon gelesen wurde, muss stehen bleiben -- Fehler 57.
+class TestAnAbortInTheMiddle:
+    """What has already been read has to stay -- error 57.
 
-    ``import_file`` schiebt jede Datei in sich selbst nach ``_erledigt/``, bevor irgendetwas
-    festgeschrieben ist. Wurde der ganze Durchgang erst am Ende gesichert, nahm eine Ausnahme
-    mittendrin die Zeilen aller vorher gelesenen Fotos mit -- und das Import-Protokoll gleich dazu,
-    weil dessen Eintraege in derselben Transaktion hingen. Die Quelldateien lagen dann in
-    ``_erledigt/``, und nichts sagte, dass es sie je gegeben hat.
+    ``import_file`` moves each file into ``_done/`` itself, before anything is committed. When
+    the whole run was only committed at the end, an exception in the middle took the rows of every
+    photo read before it along -- and the import log with them, because its entries hung in the
+    same transaction. The source files then lay in ``_done/``, and nothing said they had ever
+    existed.
 
-    ``_loop`` faengt die Ausnahme und macht beim naechsten Blick weiter, der Dienst laeuft also
-    unbeirrt vor sich hin. Genau deshalb faellt der Verlust niemandem auf.
+    ``_loop`` catches the exception and carries on at the next look, so the service runs on
+    undisturbed. That is exactly why the loss occurs to nobody.
     """
 
-    def _ablegen(self, settings, fixtures_dir: Path, name: str, quelle: str):
-        ziel = settings.incoming_dir / name
-        ziel.write_bytes((fixtures_dir / quelle).read_bytes())
+    def _place_in_inbox(self, settings, fixtures_dir: Path, name: str, source: str):
+        target = settings.incoming_dir / name
+        target.write_bytes((fixtures_dir / source).read_bytes())
 
-    def test_ein_fehler_beim_zweiten_foto_verliert_das_erste_nicht(
+    def test_an_error_on_the_second_photo_does_not_lose_the_first(
         self, session, settings, fixtures_dir: Path, monkeypatch
     ):
         from app.models import ImportLog
-        from app.services import watcher as watcher_modul
+        from app.services import watcher as watcher_module
 
-        self._ablegen(settings, fixtures_dir, "1_erstes.jpg", "scan_ohne_exif.jpg")
-        self._ablegen(settings, fixtures_dir, "2_zweites.jpg", "hochkant.jpg")
+        self._place_in_inbox(settings, fixtures_dir, "1_erstes.jpg", "scan_ohne_exif.jpg")
+        self._place_in_inbox(settings, fixtures_dir, "2_zweites.jpg", "hochkant.jpg")
 
-        echter_import = watcher_modul.import_file
+        real_import = watcher_module.import_file
 
-        def stolpert(session_, path, *args, **kwargs):
+        def stumbles(session_, path, *args, **kwargs):
             if path.name.startswith("2_"):
-                raise RuntimeError("etwas Unvorhergesehenes")
-            return echter_import(session_, path, *args, **kwargs)
+                raise RuntimeError("something unforeseen")
+            return real_import(session_, path, *args, **kwargs)
 
-        monkeypatch.setattr(watcher_modul, "import_file", stolpert)
+        monkeypatch.setattr(watcher_module, "import_file", stumbles)
 
         watcher = IncomingWatcher(settings, interval=0)
-        watcher.scan_once()  # Groessen merken
+        watcher.scan_once()  # remember the sizes
         with pytest.raises(RuntimeError):
             watcher.scan_once()
 
-        # Eine frische Sitzung, denn genau darum geht es: Steht es in der Datenbank oder nur im
-        # Gedaechtnis der abgebrochenen?
+        # A fresh session, because that is precisely the question: is it in the database, or only
+        # in the memory of the one that was aborted?
         import app.db
 
-        with app.db.SessionLocal() as frisch:
-            foto = frisch.scalar(select(Photo).where(Photo.original_filename == "1_erstes.jpg"))
-            assert foto is not None, "das erste Foto darf der Abbruch nicht mitnehmen"
-            eintraege = frisch.scalars(select(ImportLog)).all()
-            assert [eintrag.path for eintrag in eintraege] != [], "das Protokoll fehlt komplett"
-            assert any("1_erstes.jpg" in eintrag.path for eintrag in eintraege)
+        with app.db.SessionLocal() as fresh:
+            photo = fresh.scalar(select(Photo).where(Photo.original_filename == "1_erstes.jpg"))
+            assert photo is not None, "the abort must not take the first photo with it"
+            entries = fresh.scalars(select(ImportLog)).all()
+            assert [entry.path for entry in entries] != [], "the log is missing entirely"
+            assert any("1_erstes.jpg" in entry.path for entry in entries)
 
-        # Und die Quelldatei liegt weggeraeumt -- das ist der Zustand, zu dem die Zeile gehoert.
-        assert (settings.incoming_dir / "_erledigt" / "1_erstes.jpg").is_file()
+        # And the source file lies filed away -- that is the state the row belongs to.
+        assert (settings.incoming_dir / "_done" / "1_erstes.jpg").is_file()
 
-    def test_der_naechste_blick_holt_nach_was_liegen_blieb(
+    def test_the_next_look_picks_up_what_was_left_behind(
         self, session, settings, fixtures_dir: Path, monkeypatch
     ):
-        """Die zweite Haelfte der Zusage: Der Watcher gibt nicht auf.
+        """The second half of the promise: the watcher does not give up.
 
-        Die Datei, an der es scheiterte, liegt noch im Eingang und ihre Groesse steht noch im
-        Gedaechtnis -- beim naechsten Durchgang ist sie wieder an der Reihe.
+        The file it failed on is still in the inbox and its size is still remembered -- on the next
+        pass its turn comes round again.
         """
-        from app.services import watcher as watcher_modul
+        from app.services import watcher as watcher_module
 
-        self._ablegen(settings, fixtures_dir, "1_erstes.jpg", "scan_ohne_exif.jpg")
-        self._ablegen(settings, fixtures_dir, "2_zweites.jpg", "hochkant.jpg")
+        self._place_in_inbox(settings, fixtures_dir, "1_erstes.jpg", "scan_ohne_exif.jpg")
+        self._place_in_inbox(settings, fixtures_dir, "2_zweites.jpg", "hochkant.jpg")
 
-        echter_import = watcher_modul.import_file
-        gestolpert = []
+        real_import = watcher_module.import_file
+        stumbled = []
 
-        def stolpert_einmal(session_, path, *args, **kwargs):
-            if path.name.startswith("2_") and not gestolpert:
-                gestolpert.append(path)
-                raise RuntimeError("etwas Unvorhergesehenes")
-            return echter_import(session_, path, *args, **kwargs)
+        def stumbles_once(session_, path, *args, **kwargs):
+            if path.name.startswith("2_") and not stumbled:
+                stumbled.append(path)
+                raise RuntimeError("something unforeseen")
+            return real_import(session_, path, *args, **kwargs)
 
-        monkeypatch.setattr(watcher_modul, "import_file", stolpert_einmal)
+        monkeypatch.setattr(watcher_module, "import_file", stumbles_once)
 
         watcher = IncomingWatcher(settings, interval=0)
         watcher.scan_once()
         with pytest.raises(RuntimeError):
             watcher.scan_once()
 
-        assert watcher.scan_once() == 1, "das zweite Foto kommt beim naechsten Blick herein"
+        assert watcher.scan_once() == 1, "the second photo comes in at the next look"
         assert len(session.scalars(select(Photo)).all()) == 2
 
 
-class TestOrdnernamen:
-    """Der Eingangsordner ist der uebliche Weg des Museumsteams -- und las die Ordner nicht mit.
+class TestFolderNames:
+    """The inbox is the museum team's usual path -- and it did not read the folders.
 
-    929 Fotos kamen so herein: Strasse und Hausnummer standen im Pfad und danach nirgends in der
-    Datenbank. Kein Ort, kein Titel, keine Herkunft, keine Schlagwoerter. Aufgefallen ist es erst
-    an der fertigen Karte, weil die Metadaten-Schicht sauber lief und der Bestand deshalb nicht
-    kaputt *aussah* -- nur leer.
+    929 photos came in that way: street and house number stood in the path and nowhere in the
+    database afterwards. No place, no title, no provenance, no tags. It was noticed only on the
+    finished map, because the metadata layer ran cleanly and the collection therefore did not
+    *look* broken -- only empty.
 
-    Die Ursache war nicht die vergessene Zeile, sondern dass sie vergessen werden konnte: Die
-    Pfad-Schicht hing am Aufrufer. Sie haengt jetzt am ``root``-Parameter von ``import_file``.
+    The cause was not the forgotten line but that it could be forgotten: the path layer hung on
+    the caller. It now hangs on the ``root`` parameter of ``import_file``.
     """
 
-    def _strasse(self, session, name="Hauptstrasse", lat=53.62, lon=9.676):
+    def _street(self, session, name="Hauptstrasse", lat=53.62, lon=9.676):
         from app.models import Place
         from app.services.places import normalize
 
@@ -168,68 +168,72 @@ class TestOrdnernamen:
         )
         session.commit()
 
-    def _ablegen(self, settings, fixtures_dir: Path, unterpfad: str, quelle="scan_ohne_exif.jpg"):
-        ziel = settings.incoming_dir / unterpfad
-        ziel.parent.mkdir(parents=True, exist_ok=True)
-        ziel.write_bytes((fixtures_dir / quelle).read_bytes())
-        return ziel
+    def _place_in_inbox(
+        self, settings, fixtures_dir: Path, subpath: str, source="scan_ohne_exif.jpg"
+    ):
+        target = settings.incoming_dir / subpath
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((fixtures_dir / source).read_bytes())
+        return target
 
-    def test_der_eingangsordner_liest_die_ordnernamen_mit(
+    def test_the_inbox_reads_the_folder_names(
         self, session, settings, fixtures_dir: Path, monkeypatch
     ):
-        """Der Test, der gefehlt hat."""
+        """The test that was missing."""
         monkeypatch.setattr(settings, "import_provenance", "Archiv/")
-        self._strasse(session)
-        self._ablegen(settings, fixtures_dir, "Hauptstrasse/14 Museum/023.jpg")
+        self._street(session)
+        self._place_in_inbox(settings, fixtures_dir, "Hauptstrasse/14 Museum/023.jpg")
 
         watcher = IncomingWatcher(settings, interval=0)
         watcher.scan_once()
         assert watcher.scan_once() == 1
 
-        foto = session.scalars(select(Photo)).one()
-        assert foto.place_name == "Hauptstrasse 14"
-        assert (foto.lat, foto.lon) == (53.62, 9.676)
-        assert foto.title == "Museum"
-        assert foto.provenance == "Archiv/Hauptstrasse/14 Museum/023.jpg"
-        assert {"Hauptstrasse", "Museum"} <= {schlagwort.name for schlagwort in foto.tags}
+        photo = session.scalars(select(Photo)).one()
+        assert photo.place_name == "Hauptstrasse 14"
+        assert (photo.lat, photo.lon) == (53.62, 9.676)
+        assert photo.title == "Museum"
+        assert photo.provenance == "Archiv/Hauptstrasse/14 Museum/023.jpg"
+        assert {"Hauptstrasse", "Museum"} <= {tag.name for tag in photo.tags}
 
-    def test_das_protokoll_meldet_keinen_fehlenden_ort_den_es_gleich_ergaenzt(
+    def test_the_log_reports_no_missing_place_that_it_fills_in_at_once(
         self, session, settings, fixtures_dir: Path
     ):
-        """Sonst stuende im Import-Protokoll "es fehlt noch: Ort" fuer ein verortetes Foto.
+        """Otherwise the import log would say "es fehlt noch: Ort" for a located photo.
 
-        Die Meldung entsteht nach der Pfad-Schicht, nicht davor -- ein Ehrenamtlicher, der das
-        Protokoll durchsieht, soll darin keine Luecken suchen, die keine sind.
+        The message is built after the path layer, not before it -- a volunteer going through the
+        log should not be hunting for gaps that are none.
         """
         from app.models import ImportLog
 
-        self._strasse(session)
-        self._ablegen(settings, fixtures_dir, "Hauptstrasse/14 Museum/023.jpg")
+        self._street(session)
+        self._place_in_inbox(settings, fixtures_dir, "Hauptstrasse/14 Museum/023.jpg")
 
         watcher = IncomingWatcher(settings, interval=0)
         watcher.scan_once()
         watcher.scan_once()
 
-        eintrag = session.scalars(select(ImportLog)).one()
-        assert "Ort" not in eintrag.message
-        assert "Jahr" in eintrag.message
+        entry = session.scalars(select(ImportLog)).one()
+        assert "Ort" not in entry.message
+        assert "Jahr" in entry.message
 
-    def test_erledigte_dateien_behalten_ihren_ordner(self, session, settings, fixtures_dir: Path):
-        """Flach weggeraeumt ist ein sortierter Stapel ein einmaliger Versuch.
+    def test_filed_away_files_keep_their_folder(self, session, settings, fixtures_dir: Path):
+        """Filed away flat, a sorted stack becomes a one-off attempt.
 
-        Die Ordnernamen sind die Aussage ueber diese Fotos. Liegen sie hinterher alle nebeneinander
-        in _erledigt/, hat ein zweiter Lauf nichts mehr zu lesen -- und gleichnamige Dateien aus
-        verschiedenen Haeusern stapeln sich zu "023 (2).jpg".
+        The folder names are the statement about these photos. If they all end up side by side in
+        _done/, a second run has nothing left to read -- and files of the same name from
+        different houses pile up into "023 (2).jpg".
         """
-        self._strasse(session)
-        self._ablegen(settings, fixtures_dir, "Hauptstrasse/14 Museum/023.jpg")
-        self._ablegen(settings, fixtures_dir, "Hauptstrasse/16 Anders/023.jpg", "hochkant.jpg")
+        self._street(session)
+        self._place_in_inbox(settings, fixtures_dir, "Hauptstrasse/14 Museum/023.jpg")
+        self._place_in_inbox(
+            settings, fixtures_dir, "Hauptstrasse/16 Anders/023.jpg", "hochkant.jpg"
+        )
 
         watcher = IncomingWatcher(settings, interval=0)
         watcher.scan_once()
         assert watcher.scan_once() == 2
 
-        erledigt = settings.incoming_dir / "_erledigt"
-        assert (erledigt / "Hauptstrasse" / "14 Museum" / "023.jpg").is_file()
-        assert (erledigt / "Hauptstrasse" / "16 Anders" / "023.jpg").is_file()
-        assert not (erledigt / "023 (2).jpg").exists()
+        done = settings.incoming_dir / "_done"
+        assert (done / "Hauptstrasse" / "14 Museum" / "023.jpg").is_file()
+        assert (done / "Hauptstrasse" / "16 Anders" / "023.jpg").is_file()
+        assert not (done / "023 (2).jpg").exists()

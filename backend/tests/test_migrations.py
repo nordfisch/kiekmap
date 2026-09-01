@@ -1,24 +1,24 @@
-"""Dass eine Migration nichts mitreisst, was an den Tabellen haengt.
+"""That a migration takes nothing with it that hangs off the tables.
 
-Der Anlass ist ein echter Verlust: Die Migration, die ``hidden`` in ``deleted`` umbenannte, baute
-die Tabelle ``photos`` neu -- so muss man das in SQLite tun. Beim ersten Lauf nahm sie **alle
-Besucherbeitraege** mit, leerte ``photo_tags`` und loeste jede Verknuepfung des Import-Protokolls.
+The occasion is a real loss: the migration that renamed ``hidden`` to ``deleted`` rebuilt the
+``photos`` table -- which is how it has to be done in SQLite. On its first run it took **every
+visitor contribution** with it, emptied ``photo_tags`` and released every link of the import log.
 
-Der Weg dorthin ist tueckisch, weil nichts davon einen Fehler wirft:
+The path there is treacherous, because none of it raises an error:
 
-  * ``app/db.py`` schaltet ``PRAGMA foreign_keys=ON`` fuer jede Engine des Prozesses ein -- auch
-    fuer die von Alembic, weil ``env.py`` die Modelle importiert.
-  * Alembics Tabellenneubau loescht das Original und legt es neu an.
-  * ``changes`` haengt mit ON DELETE CASCADE daran, ``photo_tags`` ebenso, und ``import_log``
-    verliert seine Verknuepfung durch ON DELETE SET NULL.
+  * ``app/db.py`` switches ``PRAGMA foreign_keys=ON`` on for every engine of the process -- for
+    Alembic's too, because ``env.py`` imports the models.
+  * Alembic's table rebuild drops the original and creates it again.
+  * ``changes`` hangs off it with ON DELETE CASCADE, ``photo_tags`` likewise, and ``import_log``
+    loses its link through ON DELETE SET NULL.
 
-Ergebnis: eine gruen durchlaufende Migration und ein Bestand ohne Beitraege. Deshalb dieser Test.
+The result: a migration that runs green and a collection without contributions. Hence this test.
 
-**Warum eine Probe-Migration statt der echten.** Frueher zog dieser Test namentlich auf die
-Revision hoch, die den Schaden anrichtete. Beim Zusammenfassen der Migrationen zu einem
-Anfangsschema verschwand sie -- und mit ihr waere der einzige Schutz vor der Wiederholung
-gegangen. Die Probe unter ``tests/fixtures/sample_migration/`` haengt an keiner Revisionsnummer:
-sie baut ``photos`` neu, sonst nichts, und ihre ``env.py`` fuehrt die **echte** aus.
+**Why a sample migration instead of the real one.** This test used to upgrade by name to the
+revision that did the damage. When the migrations were squashed into an initial schema that
+revision disappeared -- and the only protection against a repeat would have gone with it. The
+sample under ``tests/fixtures/sample_migration/`` hangs off no revision number: it rebuilds
+``photos`` and nothing else, and its ``env.py`` runs the **real** one.
 """
 
 import sqlite3
@@ -29,24 +29,24 @@ from alembic.config import Config
 from alembic import command
 
 BACKEND = Path(__file__).resolve().parent.parent
-PROBE = Path(__file__).resolve().parent / "fixtures" / "sample_migration"
+SAMPLE = Path(__file__).resolve().parent / "fixtures" / "sample_migration"
 
 
-def _probe_config() -> Config:
-    """``env.py`` holt die URL aus ``app.config`` -- die ``settings``-Fixture zeigt dorthin."""
+def _sample_config() -> Config:
+    """``env.py`` takes the URL from ``app.config`` -- the ``settings`` fixture points there."""
     config = Config(str(BACKEND / "alembic.ini"))
-    config.set_main_option("script_location", str(PROBE))
+    config.set_main_option("script_location", str(SAMPLE))
     return config
 
 
-def test_tabellenneubau_nimmt_keine_besucherbeitraege_mit(session, settings):
-    # Das Schema kommt aus den Modellen, nicht aus der Migration: dann ist ``alembic_version``
-    # leer und die Probe faengt bei ihrer eigenen Revision an, statt an der echten haengenzubleiben.
+def test_a_table_rebuild_takes_no_visitor_contributions_with_it(session, settings):
+    # The schema comes from the models, not from the migration: then ``alembic_version`` is empty
+    # and the sample starts at its own revision instead of being stuck behind the real one.
     db = Path(settings.db_url.removeprefix("sqlite:///"))
     session.close()
 
-    verbindung = sqlite3.connect(db)
-    verbindung.executescript(
+    connection = sqlite3.connect(db)
+    connection.executescript(
         """
         INSERT INTO photos (sha256, original_filename, mime, bytes, width, height,
                             date_precision, status)
@@ -61,92 +61,92 @@ def test_tabellenneubau_nimmt_keine_besucherbeitraege_mit(session, settings):
         INSERT INTO photo_tags (photo_id, tag_id) VALUES (1, 1);
         """
     )
-    verbindung.commit()
-    verbindung.close()
+    connection.commit()
+    connection.close()
 
-    command.upgrade(_probe_config(), "head")
+    command.upgrade(_sample_config(), "head")
 
-    verbindung = sqlite3.connect(db)
-    beitraege = verbindung.execute("SELECT count(*) FROM changes").fetchone()[0]
-    schlagwoerter = verbindung.execute("SELECT count(*) FROM photo_tags").fetchone()[0]
-    verknuepft = verbindung.execute(
+    connection = sqlite3.connect(db)
+    contributions = connection.execute("SELECT count(*) FROM changes").fetchone()[0]
+    tags = connection.execute("SELECT count(*) FROM photo_tags").fetchone()[0]
+    linked = connection.execute(
         "SELECT count(*) FROM import_log WHERE photo_id IS NOT NULL"
     ).fetchone()[0]
-    fotos = verbindung.execute("SELECT count(*) FROM photos").fetchone()[0]
-    verbindung.close()
+    photos = connection.execute("SELECT count(*) FROM photos").fetchone()[0]
+    connection.close()
 
-    assert fotos == 1, "das Foto selbst hat den Neubau nicht ueberlebt"
-    assert beitraege == 1, "der Besucherbeitrag wurde beim Tabellenneubau mitgeloescht"
-    assert schlagwoerter == 1, "die Schlagwort-Zuordnung wurde mitgeloescht"
-    assert verknuepft == 1, "das Import-Protokoll hat seine Verknuepfung verloren"
+    assert photos == 1, "the photo itself did not survive the rebuild"
+    assert contributions == 1, "the visitor contribution was deleted along with the rebuild"
+    assert tags == 1, "the tag assignment was deleted along with it"
+    assert linked == 1, "the import log lost its link"
 
 
-def test_anfangsschema_laeuft_gegen_eine_leere_datenbank(settings):
-    """Dass die zusammengefasste Migration durchlaeuft -- auf dem Pi ist sie der Start."""
+def test_the_initial_schema_runs_against_an_empty_database(settings):
+    """That the squashed migration runs through -- on the Pi it is the starting point."""
     config = Config(str(BACKEND / "alembic.ini"))
     config.set_main_option("script_location", str(BACKEND / "alembic"))
 
     command.upgrade(config, "head")
 
     db = Path(settings.db_url.removeprefix("sqlite:///"))
-    verbindung = sqlite3.connect(db)
-    tabellen = {
-        name for (name,) in verbindung.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    connection = sqlite3.connect(db)
+    tables = {
+        name for (name,) in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")
     }
-    spalten = {zeile[1] for zeile in verbindung.execute("PRAGMA table_info(photos)")}
-    verbindung.close()
+    columns = {row[1] for row in connection.execute("PRAGMA table_info(photos)")}
+    connection.close()
 
-    assert {"photos", "tags", "photo_tags", "changes", "places", "import_log"} <= tabellen
-    assert {"credit", "provenance"} <= spalten
+    assert {"photos", "tags", "photo_tags", "changes", "places", "import_log"} <= tables
+    assert {"credit", "provenance"} <= columns
 
 
-def test_migrationen_und_modelle_beschreiben_dasselbe_schema(settings, tmp_path: Path):
-    """Der Test, der am 12. August 2026 gefehlt hat.
+def test_migrations_and_models_describe_the_same_schema(settings, tmp_path: Path):
+    """The test that was missing on 12 August 2026.
 
-    Die uebrigen Tests bauen ihr Schema aus den Modellen (``create_all``), nicht aus den
-    Migrationen. Sie koennen eine fehlende Migration deshalb **grundsaetzlich** nicht bemerken:
-    393 gruene Tests standen neben einer Datenbank, an der nichts mehr zu schreiben war.
+    The other tests build their schema from the models (``create_all``), not from the migrations.
+    They therefore **cannot in principle** notice a missing migration: 393 green tests stood beside
+    a database that could no longer be written to.
 
-    Also einmal beide Wege gehen und vergleichen. Das faengt beide Richtungen -- eine
-    Modelaenderung ohne Migration ebenso wie eine Migration, die an den Modellen vorbeigeht.
+    So walk both paths once and compare. That catches both directions -- a model change without a
+    migration as well as a migration that goes past the models.
 
-    **Verglichen werden Tabellen und Spaltennamen, nicht Typen und Indizes.** Die beiden Wege
-    unterscheiden sich dort in Kleinigkeiten, die nichts bedeuten -- SQLite kennt ohnehin nur
-    wenige Typen, und ein Test, der an solchen Unterschieden haengenbleibt, wird abgeschaltet
-    statt gelesen. Ein fehlender Spaltenname ist dagegen genau der Fehler, um den es geht.
+    **What is compared are tables and column names, not types and indexes.** The two paths differ
+    there in small ways that mean nothing -- SQLite knows only a few types anyway, and a test that
+    trips over such differences gets switched off rather than read. A missing column name, by
+    contrast, is exactly the error this is about.
     """
     from app.db import Base
-    from app.models import Photo  # noqa: F401 -- meldet jede Tabelle an Base an
+    from app.models import Photo  # noqa: F401 -- registers every table with Base
 
-    # Weg eins: die Migrationen, gegen die Datenbank der settings-Fixture.
+    # Path one: the migrations, against the database of the settings fixture.
     config = Config(str(BACKEND / "alembic.ini"))
     config.set_main_option("script_location", str(BACKEND / "alembic"))
     command.upgrade(config, "head")
-    aus_migrationen = _schema_von(Path(settings.db_url.removeprefix("sqlite:///")))
+    from_migrations = _schema_of(Path(settings.db_url.removeprefix("sqlite:///")))
 
-    # Weg zwei: die Modelle, gegen eine leere Datei daneben.
+    # Path two: the models, against an empty file beside it.
     from sqlalchemy import create_engine
 
-    zweite = tmp_path / "aus-modellen.db"
-    engine = create_engine(f"sqlite:///{zweite}")
+    second = tmp_path / "from-models.db"
+    engine = create_engine(f"sqlite:///{second}")
     Base.metadata.create_all(engine)
     engine.dispose()
-    aus_modellen = _schema_von(zweite)
+    from_models = _schema_of(second)
 
-    assert aus_migrationen == aus_modellen
+    assert from_migrations == from_models
 
 
-def _schema_von(datenbank: Path) -> dict[str, set[str]]:
-    """Tabellen und ihre Spaltennamen -- ohne die Buchhaltung von Alembic und SQLite."""
-    verbindung = sqlite3.connect(datenbank)
-    tabellen = {
+def _schema_of(database: Path) -> dict[str, set[str]]:
+    """Tables and their column names -- without the bookkeeping of Alembic and SQLite."""
+    connection = sqlite3.connect(database)
+    tables = {
         name
-        for (name,) in verbindung.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        for (name,) in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")
         if name not in {"alembic_version"} and not name.startswith("sqlite_")
     }
     schema = {
-        name: {zeile[1] for zeile in verbindung.execute(f"PRAGMA table_info({name})")}
-        for name in tabellen
+        name: {row[1] for row in connection.execute(f"PRAGMA table_info({name})")}
+        for name in tables
     }
-    verbindung.close()
+    connection.close()
     return schema

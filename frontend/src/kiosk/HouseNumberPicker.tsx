@@ -17,7 +17,7 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 import type { Place } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { type NumberBlock, blocksOf, groupByBase } from "./houseNumbers";
 import { BackIcon } from "./icons";
 

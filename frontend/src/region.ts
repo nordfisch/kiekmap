@@ -6,7 +6,7 @@
  * viewport can be adjusted on the Pi without rebuilding the frontend.
  */
 
-import { t } from "./text/de";
+import { t } from "./text";
 
 export type Region = {
   name: string;

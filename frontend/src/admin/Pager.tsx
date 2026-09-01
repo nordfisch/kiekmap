@@ -8,7 +8,7 @@
  * should not look like records management.
  */
 
-import { t } from "../text/de";
+import { t } from "../text";
 import { PAGE_SIZE, pageCount, pageNumber } from "./pagination";
 
 export function Pager({

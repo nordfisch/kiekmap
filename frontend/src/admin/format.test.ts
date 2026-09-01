@@ -9,71 +9,71 @@ import {
   formatWhen,
 } from "./format";
 
-describe("Groessenangaben", () => {
-  it("rechnet in Tausenderschritten, wie es auf der Packung steht", () => {
-    // Ein als "32 GB" verkaufter Stick soll auch als 32 GB dastehen, nicht als 29,8.
+describe("size figures", () => {
+  it("calculates in steps of a thousand, the way the packaging does", () => {
+    // A stick sold as "32 GB" should stand there as 32 GB too, not as 29.8.
     expect(formatBytes(32_000_000_000)).toBe("32 GB");
     expect(formatBytes(1_500_000)).toBe("1,5 MB");
     expect(formatBytes(2_400)).toBe("2,4 kB");
   });
 
-  it("schreibt Kleines ohne Einheitenakrobatik aus", () => {
+  it("writes small figures out without unit acrobatics", () => {
     expect(formatBytes(0)).toBe("0 Bytes");
     expect(formatBytes(999)).toBe("999 Bytes");
   });
 
-  it("setzt im Deutschen Komma und Punkt richtig", () => {
+  it("places the German comma and full stop correctly", () => {
     expect(formatCount(2150)).toBe("2.150");
     expect(formatBytes(28_400_000_000)).toBe("28,4 GB");
   });
 });
 
-describe("Tage seit dem letzten Mal", () => {
-  it("schreibt Heute statt null Tagen", () => {
-    // "0 Tage seit der letzten Sicherung" ist eine Denksportaufgabe, "Heute gesichert" nicht.
+describe("days since the last time", () => {
+  it("writes today instead of zero days", () => {
+    // "0 Tage seit der letzten Sicherung" is a puzzle, "Heute gesichert" is not.
     expect(formatDaysSince(0)).toBe("Heute");
   });
 
-  it("schreibt Noch nie, wenn es das Ereignis nie gab", () => {
+  it("writes never when the event never happened", () => {
     expect(formatDaysSince(null)).toBe("Noch nie");
   });
 
-  it("zaehlt sonst die Tage", () => {
+  it("counts the days otherwise", () => {
     expect(formatDaysSince(1)).toBe("1");
     expect(formatDaysSince(34)).toBe("34");
   });
 });
 
-describe("Die drei Datumsformen", () => {
-  // Ein Zeitpunkt im August: In welcher Zone der Test auch laeuft, das Jahr kippt nicht. Genau
-  // darum geht es hier -- geprueft wird, was jede Form **weglaesst**, nicht wie sie in Berlin
-  // aussieht. Die Zone benennt seit Punkt 58 das Backend.
-  const augusttag = "2026-08-05T12:00:00Z";
+describe("the three date forms", () => {
+  // A moment in August: whatever zone the test runs in, the year does not tip over. That is
+  // exactly the point here -- what is checked is what each form **leaves out**, not how it looks
+  // in Berlin. Since point 58 the backend names the zone.
+  const august_day = "2026-08-05T12:00:00Z";
 
-  it("laesst in der Sicherungskachel die Uhrzeit weg", () => {
-    // Eine Sicherung ist ein Tag, keine Minute.
-    expect(formatDate(augusttag)).not.toContain(":");
-    expect(formatDate(augusttag)).toContain("2026");
+  it("leaves the time of day out of the backup tile", () => {
+    // A backup is a day, not a minute.
+    expect(formatDate(august_day)).not.toContain(":");
+    expect(formatDate(august_day)).toContain("2026");
   });
 
-  it("laesst bei den Besucherbeitraegen das Jahr weg", () => {
-    // Die Liste zeigt, was in dieser Saison hereingekommen ist -- das Jahr waere Rauschen.
-    expect(formatWhen(augusttag)).not.toContain("2026");
-    expect(formatWhen(augusttag)).toContain(":");
+  it("leaves the year out of the visitor contributions", () => {
+    // The list shows what came in this season -- the year would be noise.
+    expect(formatWhen(august_day)).not.toContain("2026");
+    expect(formatWhen(august_day)).toContain(":");
   });
 
-  it("schreibt im Import-Protokoll den Monat als Zahl", () => {
-    // Die Spalte ist schmal und in tabular-nums gesetzt, damit die Zeilen untereinander stehen.
-    // Ein ausgeschriebener Monat zerstoert genau das.
-    const gesetzt = formatLogTime(augusttag);
+  it("writes the month as a number in the import log", () => {
+    // The column is narrow and set in tabular-nums so that the rows line up. A written-out
+    // month destroys exactly that.
+    const written = formatLogTime(august_day);
 
-    expect(gesetzt).toMatch(/^\d+\.\d+\.\d{4}/);
-    expect(gesetzt).toContain("2026");
-    expect(gesetzt).toContain(":");
+    expect(written).toMatch(/^\d+\.\d+\.\d{4}/);
+    expect(written).toContain("2026");
+    expect(written).toContain(":");
   });
 
-  it("schreibt den Monat aus, wo Platz dafuer ist", () => {
-    expect(formatDate(augusttag)).toMatch(/^\d+\. \p{L}+/u);
-    expect(formatWhen(augusttag)).toMatch(/^\d+\. \p{L}+/u);
+  it("writes the month out where there is room for it", () => {
+    expect(formatDate(august_day)).toMatch(/^\d+\. \p{L}+/u);
+    expect(formatWhen(august_day)).toMatch(/^\d+\. \p{L}+/u);
   });
 });

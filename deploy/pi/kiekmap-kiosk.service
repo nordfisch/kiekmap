@@ -1,15 +1,15 @@
-# Die Besucheransicht als Dienst.
+# The visitor view as a service.
 #
-# Nach /etc/systemd/system/ kopieren, dann:  sudo systemctl enable --now kiekmap-kiosk
+# Copy to /etc/systemd/system/, then:  sudo systemctl enable --now kiekmap-kiosk
 #
-# Warum ein Dienst und kein Autostart: systemd startet Chromium neu, wenn er abstuerzt, und das
-# Geraet kommt nach einem gezogenen Netzstecker in denselben Zustand zurueck. Ein Autostart im
-# Benutzerprofil kann beides nicht.
+# Why a service and not an autostart: systemd restarts Chromium when it crashes, and the device
+# comes back into the same state after a pulled power plug. An autostart in the user profile can
+# do neither.
 
 [Unit]
-Description=Kiekmap-Kiosk (cage + Chromium)
-# Erst wenn Docker laeuft -- sonst wartet das Startskript unnoetig auf eine API, die noch gar
-# nicht gestartet wurde.
+Description=Kiekmap kiosk (cage + Chromium)
+# Only once Docker runs -- otherwise the start script waits needlessly for an API that has not
+# been started at all yet.
 After=docker.service systemd-user-sessions.service
 Wants=docker.service
 
@@ -18,9 +18,9 @@ Type=simple
 User=kiekmap
 ExecStart=/usr/local/bin/kiekmap-kiosk
 
-# cage braucht eine echte Sitzung an einer Konsole, sonst findet es kein Ausgabegeraet. Die vier
-# Zeilen zusammen sind das, was aus einem Systemdienst eine sitzungsfaehige Anmeldung macht --
-# fehlt eine davon, startet cage mit "unable to open primary DRM device".
+# cage needs a real session on a console, otherwise it finds no output device. The four lines
+# together are what turns a system service into a session-capable login -- leave one of them out
+# and cage starts with "unable to open primary DRM device".
 PAMName=login
 TTYPath=/dev/tty1
 StandardInput=tty-fail

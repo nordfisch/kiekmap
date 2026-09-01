@@ -1,12 +1,11 @@
-"""Tests des Admin-Bereichs.
+"""Tests of the admin view.
 
-Zwei Zusagen tragen diesen Bereich, und beide brechen still, wenn sie brechen:
+Two promises carry this area, and both break silently when they break:
 
-  1. Beim Bearbeiten heisst *fehlendes* Feld "unveraendert lassen" und *leeres* Feld "loeschen".
-     Ohne diesen Unterschied liesse sich eine falsche Datierung nie wieder herausnehmen.
-  2. Hochgeladene Fotos sind sofort in der Datenbank, nicht erst nach "Uebernehmen". Ein
-     geschlossener Browser darf keine Uploads kosten.
-"""
+  1. When editing, a *missing* field means "leave unchanged" and an *empty* field means "delete".
+     Without that difference a wrong dating could never be taken out again.
+  2. Uploaded photos are in the database at once, not only after "Uebernehmen". A closed browser
+     must not cost uploads."""
 
 from datetime import UTC, datetime
 
@@ -29,139 +28,136 @@ from app.services.places import normalize
 HOLM = {"lat": 53.6205, "lon": 9.676}
 
 
-def _bild(fixtures_dir, name: str = "scan_ohne_exif.jpg") -> bytes:
+def _image(fixtures_dir, name: str = "scan_ohne_exif.jpg") -> bytes:
     return (fixtures_dir / name).read_bytes()
 
 
-class TestAnmeldung:
-    def test_ohne_token_kein_zugang(self, client: TestClient):
+class TestSigningIn:
+    def test_no_access_without_a_token(self, client: TestClient):
         assert client.get("/api/admin/overview").status_code == 401
 
     def test_ausgedachtes_token_kein_zugang(self, client: TestClient):
-        antwort = client.get("/api/admin/overview", headers={"X-Admin-Token": "ausgedacht"})
+        response = client.get("/api/admin/overview", headers={"X-Admin-Token": "ausgedacht"})
 
-        assert antwort.status_code == 401
+        assert response.status_code == 401
 
-    def test_ohne_eingerichtete_pin_sagt_das_geraet_es_deutlich(self, client: TestClient, settings):
-        """Ein leeres admin_pin_hash darf nicht als "jede PIN passt" durchgehen."""
+    def test_without_a_configured_pin_the_device_says_so_plainly(
+        self, client: TestClient, settings
+    ):
+        """An empty admin_pin_hash must not pass for "any PIN will do"."""
         settings.admin_pin_hash = ""
 
-        antwort = client.post("/api/admin/login", json={"pin": "4711"})
+        response = client.post("/api/admin/login", json={"pin": "4711"})
 
-        assert antwort.status_code == 503
-        assert "app.cli pin" in antwort.json()["detail"]
+        assert response.status_code == 503
+        assert "app.cli pin" in response.json()["detail"]
 
-    def test_falsche_pin(self, client: TestClient, admin_pin):
-        antwort = client.post("/api/admin/login", json={"pin": "0000"})
+    def test_a_wrong_pin(self, client: TestClient, admin_pin):
+        response = client.post("/api/admin/login", json={"pin": "0000"})
 
-        assert antwort.status_code == 401
+        assert response.status_code == 401
 
-    def test_zu_viele_versuche_sperren_das_tastenfeld(self, client: TestClient, admin_pin):
-        """Der eigentliche Schutz einer vierstelligen PIN."""
+    def test_too_many_attempts_lock_the_keypad(self, client: TestClient, admin_pin):
+        """The actual protection of a four-digit PIN."""
         for _ in range(5):
             client.post("/api/admin/login", json={"pin": "0000"})
 
-        # Auch die richtige PIN kommt jetzt nicht mehr durch.
-        antwort = client.post("/api/admin/login", json={"pin": admin_pin})
+        # Even the right PIN no longer gets through now.
+        response = client.post("/api/admin/login", json={"pin": admin_pin})
 
-        assert antwort.status_code == 429
-        assert "Sekunden" in antwort.json()["detail"]
+        assert response.status_code == 429
+        assert "Sekunden" in response.json()["detail"]
 
     def test_richtige_pin_gibt_ein_token(self, client: TestClient, admin_pin):
-        antwort = client.post("/api/admin/login", json={"pin": admin_pin})
+        response = client.post("/api/admin/login", json={"pin": admin_pin})
 
-        assert antwort.status_code == 200
-        assert antwort.json()["token"]
-        assert antwort.json()["expires_in_s"] > 0
+        assert response.status_code == 200
+        assert response.json()["token"]
+        assert response.json()["expires_in_s"] > 0
 
-    def test_abmelden_beendet_die_sitzung(self, admin_client: TestClient):
+    def test_signing_out_ends_the_session(self, admin_client: TestClient):
         assert admin_client.post("/api/admin/logout").status_code == 204
 
         assert admin_client.get("/api/admin/overview").status_code == 401
 
-    def test_sitzung_ueberlebt_das_neuladen_der_seite(self, admin_client: TestClient):
-        """Damit ein versehentliches Neuladen nicht die PIN-Eingabe von vorn verlangt."""
-        antwort = admin_client.get("/api/admin/session")
+    def test_the_session_survives_a_page_reload(self, admin_client: TestClient):
+        """So that an accidental reload does not demand the PIN all over again."""
+        response = admin_client.get("/api/admin/session")
 
-        assert antwort.status_code == 200
-        assert antwort.json()["expires_in_s"] > 0
+        assert response.status_code == 200
+        assert response.json()["expires_in_s"] > 0
 
 
-class TestUebersicht:
-    def test_zaehlt_was_fehlt(self, admin_client: TestClient, session, make_photo):
+class TestTheOverview:
+    def test_counts_what_is_missing(self, admin_client: TestClient, session, make_photo):
         make_photo(sha="a" * 64)
         make_photo(lat=None, lon=None, sha="b" * 64)
         make_photo(year=None, sha="c" * 64)
         make_photo(status=PhotoStatus.DELETED, sha="d" * 64)
         session.commit()
 
-        daten = admin_client.get("/api/admin/overview").json()
+        data = admin_client.get("/api/admin/overview").json()
 
-        # Geloeschtes gehoert nicht mehr zum Bestand: drei von vier Fotos, nicht vier.
-        assert daten["total"] == 3
-        assert daten["without_location"] == 1
-        assert daten["without_date"] == 1
-        # Auf der Karte: mit Ort und nicht geloescht. Das Foto ohne Jahr zaehlt mit.
-        assert daten["on_map"] == 2
-        assert daten["deleted"] == 1
+        # What is deleted no longer belongs to the collection: three of four photos, not four.
+        assert data["total"] == 3
+        assert data["without_location"] == 1
+        assert data["without_date"] == 1
+        # On the map: with a place and not deleted. The photo without a year counts too.
+        assert data["on_map"] == 2
+        assert data["deleted"] == 1
 
-    def test_foto_ohne_jahr_steht_auf_der_karte(
+    def test_a_photo_without_a_year_stands_on_the_map(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Undatiert ist nicht unsichtbar -- der Regelfall ist die Karte ohne Zeitfilter.
+        """Undated is not invisible -- the normal case is the map without a time filter.
 
-        Steht der Schieber auf der ganzen Achse, schickt der Kiosk gar keinen Zeitfilter, und
-        ``_viewport_filters`` haengt die Datumsbedingungen dann nicht an. Zaehlte die Kachel das
-        Jahr trotzdem mit, meldete sie dem Museumsteam beim Erstbestand 252 sichtbare Fotos, wo
-        854 sichtbar sind -- und schickte es datieren, was laengst auf der Karte liegt.
-        """
+        With the slider across the whole axis the kiosk sends no time filter at all, and
+        ``_viewport_filters`` then does not attach the date conditions. If the tile counted the
+        year all the same, it would report 252 visible photos of the initial collection where 854
+        are visible -- and send the team off to date what has long been on the map."""
         make_photo(year=None, sha="f" * 64)
         session.commit()
 
-        daten = admin_client.get("/api/admin/overview").json()
+        data = admin_client.get("/api/admin/overview").json()
 
-        assert daten["on_map"] == 1
-        assert daten["without_date"] == 1
+        assert data["on_map"] == 1
+        assert data["without_date"] == 1
 
-    def test_foto_ohne_ort_steht_nicht_auf_der_karte(
-        self, admin_client: TestClient, session, make_photo
-    ):
-        """Die Gegenprobe: Ohne Ort gibt es keinen Marker, mit Jahr oder ohne."""
+    def test_a_photo_without_a_place_does_not(self, admin_client: TestClient, session, make_photo):
+        """The counter-check: without a place there is no marker, year or no year."""
         make_photo(lat=None, lon=None, sha="g" * 64)
         session.commit()
 
         assert admin_client.get("/api/admin/overview").json()["on_map"] == 0
 
-    def test_geloeschtes_foto_zaehlt_in_keiner_arbeitskachel(
+    def test_a_deleted_photo_counts_in_no_work_tile(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Sonst schickte die Kachel jemanden in eine Liste, in der das Foto gar nicht steht.
+        """Otherwise the tile would send somebody into a list the photo does not stand in.
 
-        Ein geloeschtes Foto ohne Ort erfuellt beide Bedingungen -- ohne den Statusfilter zaehlte
-        es unter „Ohne Ort" mit, waehrend die Liste dahinter es weglaesst. Die Zahl und die Liste
-        muessen dasselbe sagen.
-        """
+        A deleted photo without a place meets both conditions -- without the status filter it would
+        count under "without a place" while the list behind it leaves it out. The number and the
+        list have to say the same thing."""
         make_photo(lat=None, lon=None, year=None, status=PhotoStatus.DELETED, sha="e" * 64)
         session.commit()
 
-        daten = admin_client.get("/api/admin/overview").json()
+        data = admin_client.get("/api/admin/overview").json()
 
-        assert daten["total"] == 0
-        assert daten["without_location"] == 0
-        assert daten["without_date"] == 0
-        assert daten["deleted"] == 1
+        assert data["total"] == 0
+        assert data["without_location"] == 0
+        assert data["without_date"] == 0
+        assert data["deleted"] == 1
 
-    def test_zurueckgenommener_beitrag_zaehlt_nicht_mehr(
+    def test_a_reverted_contribution_no_longer_counts(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Die Kachel fuehrt in die Moderation -- sie darf nichts melden, was dort nicht steht.
+        """The tile leads into moderation -- it must report nothing that does not stand there.
 
-        Sonst stuende "Heute gab es einen Besucherbeitrag" ueber einer leeren Liste.
-        """
-        foto = make_photo(sha="a" * 64)
+        Otherwise "there was a visitor contribution today" would stand above an empty list."""
+        photo = make_photo(sha="a" * 64)
         session.add(
             Change(
-                photo_id=foto.id,
+                photo_id=photo.id,
                 field="date",
                 old_value=None,
                 new_value="1932",
@@ -172,18 +168,18 @@ class TestUebersicht:
         )
         session.commit()
 
-        daten = admin_client.get("/api/admin/overview").json()
+        data = admin_client.get("/api/admin/overview").json()
 
-        assert daten["visitor_changes"] == 0
-        assert daten["days_since_change"] is None
+        assert data["visitor_changes"] == 0
+        assert data["days_since_change"] is None
 
-    def test_offener_beitrag_datiert_die_kachel(
+    def test_an_open_contribution_dates_the_tile(
         self, admin_client: TestClient, session, make_photo
     ):
-        foto = make_photo(sha="a" * 64)
+        photo = make_photo(sha="a" * 64)
         session.add(
             Change(
-                photo_id=foto.id,
+                photo_id=photo.id,
                 field="date",
                 old_value=None,
                 new_value="1932",
@@ -193,30 +189,29 @@ class TestUebersicht:
         )
         session.commit()
 
-        daten = admin_client.get("/api/admin/overview").json()
+        data = admin_client.get("/api/admin/overview").json()
 
-        assert daten["days_since_change"] == 0
+        assert data["days_since_change"] == 0
 
 
-class TestFotoliste:
-    def test_filter_ohne_ort_zeigt_nicht_die_ohne_jahr(
+class TestThePhotoList:
+    def test_the_place_filter_leaves_out_the_undated(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Der Grund fuer die Aufteilung.
+        """The reason for the split.
 
-        Verorten und Datieren sind zwei Arbeiten. Wer die Fotos ohne Ort abarbeitet, will die
-        ohne Jahr nicht dazwischen -- unter einem gemeinsamen "unvollstaendig" bekam er sie.
-        """
+        Locating and dating are two jobs. Whoever works through the photos without a place does not
+        want the ones without a year in between -- under a common "incomplete" they got them."""
         make_photo(title="Vollstaendig", sha="a" * 64)
         make_photo(title="Ohne Ort", lat=None, lon=None, sha="b" * 64)
         make_photo(title="Ohne Jahr", year=None, sha="c" * 64)
         session.commit()
 
-        daten = admin_client.get("/api/admin/photos", params={"show": "without_location"}).json()
+        data = admin_client.get("/api/admin/photos", params={"show": "without_location"}).json()
 
-        assert [foto["title"] for foto in daten["photos"]] == ["Ohne Ort"]
+        assert [photo["title"] for photo in data["photos"]] == ["Ohne Ort"]
 
-    def test_filter_ohne_jahr_zeigt_nicht_die_ohne_ort(
+    def test_the_year_filter_leaves_out_the_unplaced(
         self, admin_client: TestClient, session, make_photo
     ):
         make_photo(title="Vollstaendig", sha="a" * 64)
@@ -224,19 +219,18 @@ class TestFotoliste:
         make_photo(title="Ohne Jahr", year=None, sha="c" * 64)
         session.commit()
 
-        daten = admin_client.get("/api/admin/photos", params={"show": "without_date"}).json()
+        data = admin_client.get("/api/admin/photos", params={"show": "without_date"}).json()
 
-        assert [foto["title"] for foto in daten["photos"]] == ["Ohne Jahr"]
+        assert [photo["title"] for photo in data["photos"]] == ["Ohne Jahr"]
 
-    def test_geloeschtes_foto_steht_in_keiner_anderen_liste(
+    def test_a_deleted_photo_stands_in_no_other_list(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Sonst waere das Loeschen dort wirkungslos, wo ueberhaupt jemand hinsieht.
+        """Otherwise deleting would have no effect exactly where anybody looks.
 
-        Ein geloeschtes Foto ohne Ort und ohne Jahr erfuellt alle drei uebrigen Filter. Ohne den
-        Statusfilter legten die beiden Arbeitslisten es immer wieder zur Bearbeitung vor -- gerade
-        das Foto, das jemand eben aussortiert hat.
-        """
+        A deleted photo without a place and without a year meets all three remaining filters.
+        Without the status filter the two work lists would offer it for editing again and again --
+        the very photo somebody has just sorted out."""
         make_photo(title="Bleibt", sha="a" * 64)
         make_photo(
             title="Geloescht",
@@ -248,604 +242,593 @@ class TestFotoliste:
         )
         session.commit()
 
-        def titel(show: str) -> list[str]:
-            daten = admin_client.get("/api/admin/photos", params={"show": show}).json()
-            return [foto["title"] for foto in daten["photos"]]
+        def title(show: str) -> list[str]:
+            data = admin_client.get("/api/admin/photos", params={"show": show}).json()
+            return [photo["title"] for photo in data["photos"]]
 
-        assert titel("all") == ["Bleibt"]
-        assert titel("without_location") == []
-        assert titel("without_date") == []
-        assert titel("deleted") == ["Geloescht"]
+        assert title("all") == ["Bleibt"]
+        assert title("without_location") == []
+        assert title("without_date") == []
+        assert title("deleted") == ["Geloescht"]
 
-    def test_wiederhergestelltes_foto_taucht_wieder_auf(
-        self, admin_client: TestClient, session, make_photo
-    ):
-        """Loeschen muss umkehrbar sein -- ein Fehlgriff darf nicht endgueltig sein."""
-        foto = make_photo(title="Zurueck", status=PhotoStatus.DELETED, sha="a" * 64)
+    def test_a_restored_photo_shows_up_again(self, admin_client: TestClient, session, make_photo):
+        """Deleting has to be reversible -- a slip must not be final."""
+        photo = make_photo(title="Zurueck", status=PhotoStatus.DELETED, sha="a" * 64)
         session.commit()
 
-        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"status": "published"})
+        admin_client.patch(f"/api/admin/photos/{photo.id}", json={"status": "published"})
 
-        daten = admin_client.get("/api/admin/photos", params={"show": "all"}).json()
-        assert [f["title"] for f in daten["photos"]] == ["Zurueck"]
+        data = admin_client.get("/api/admin/photos", params={"show": "all"}).json()
+        assert [f["title"] for f in data["photos"]] == ["Zurueck"]
         assert (
             admin_client.get("/api/admin/photos", params={"show": "deleted"}).json()["total"] == 0
         )
 
-    def test_suche_findet_ueber_den_dateinamen(self, admin_client: TestClient, session, make_photo):
-        """Nach einem Stapel-Upload sucht man nach dem, was auf dem Scanner stand."""
+    def test_the_search_finds_by_file_name(self, admin_client: TestClient, session, make_photo):
+        """After a batch upload one searches for what stood on the scanner."""
         make_photo(title="Kirchweih 1932", sha="a" * 64)
         make_photo(title="Umzug", sha="b" * 64)
         session.commit()
 
-        daten = admin_client.get("/api/admin/photos", params={"q": "kirchweih"}).json()
+        data = admin_client.get("/api/admin/photos", params={"q": "kirchweih"}).json()
 
-        assert daten["total"] == 1
-        assert daten["photos"][0]["original_filename"] == "Kirchweih 1932.jpg"
+        assert data["total"] == 1
+        assert data["photos"][0]["original_filename"] == "Kirchweih 1932.jpg"
 
-    def test_ohne_anmeldung_keine_liste(self, client: TestClient):
+    def test_no_list_without_signing_in(self, client: TestClient):
         assert client.get("/api/admin/photos").status_code == 401
 
 
-class TestBlaettern:
-    """Die Gesamtzahl traegt die Seitenzahl.
+class TestPaging:
+    """The total carries the page count.
 
-    Wird sie aus der geblaetterten Abfrage genommen, steht ueberall "Seite 1 von 1" und niemand
-    kommt je auf Seite 2.
-    """
+    If it is taken from the paged query, "page 1 of 1" stands everywhere and nobody ever gets to
+    page 2."""
 
-    def test_gesamtzahl_zaehlt_ungeblaettert(self, admin_client: TestClient, session, make_photo):
-        for nummer in range(5):
-            make_photo(title=f"Foto {nummer}", sha=str(nummer) * 64)
+    def test_the_total_counts_without_paging(self, admin_client: TestClient, session, make_photo):
+        for number in range(5):
+            make_photo(title=f"Foto {number}", sha=str(number) * 64)
         session.commit()
 
-        daten = admin_client.get("/api/admin/photos", params={"limit": 2}).json()
+        data = admin_client.get("/api/admin/photos", params={"limit": 2}).json()
 
-        assert len(daten["photos"]) == 2
-        assert daten["total"] == 5
+        assert len(data["photos"]) == 2
+        assert data["total"] == 5
 
-    def test_zweite_seite_zeigt_andere_fotos(self, admin_client: TestClient, session, make_photo):
-        for nummer in range(5):
-            make_photo(title=f"Foto {nummer}", sha=str(nummer) * 64)
+    def test_the_second_page_shows_different_photos(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        for number in range(5):
+            make_photo(title=f"Foto {number}", sha=str(number) * 64)
         session.commit()
 
-        erste = admin_client.get("/api/admin/photos", params={"limit": 2}).json()["photos"]
-        zweite = admin_client.get("/api/admin/photos", params={"limit": 2, "offset": 2}).json()[
+        first = admin_client.get("/api/admin/photos", params={"limit": 2}).json()["photos"]
+        second = admin_client.get("/api/admin/photos", params={"limit": 2, "offset": 2}).json()[
             "photos"
         ]
 
-        assert {foto["id"] for foto in erste}.isdisjoint({foto["id"] for foto in zweite})
+        assert {photo["id"] for photo in first}.isdisjoint({photo["id"] for photo in second})
 
-    def test_zweite_seite_zeigt_andere_beitraege(
+    def test_the_second_page_shows_different_contributions(
         self, admin_client: TestClient, session, make_photo
     ):
-        for nummer in range(3):
-            foto = make_photo(lat=None, lon=None, sha=str(nummer) * 64)
+        for number in range(3):
+            photo = make_photo(lat=None, lon=None, sha=str(number) * 64)
             session.commit()
-            admin_client.post(f"/api/contribute/{foto.id}/location", json=HOLM)
+            admin_client.post(f"/api/contribute/{photo.id}/location", json=HOLM)
 
-        daten = admin_client.get("/api/admin/changes", params={"limit": 2, "offset": 2}).json()
+        data = admin_client.get("/api/admin/changes", params={"limit": 2, "offset": 2}).json()
 
-        assert daten["total"] == 3
-        assert len(daten["changes"]) == 1
+        assert data["total"] == 3
+        assert len(data["changes"]) == 1
 
-    def test_protokoll_blaettert_ebenfalls(self, admin_client: TestClient, session):
-        for nummer in range(4):
+    def test_the_log_pages_as_well(self, admin_client: TestClient, session):
+        for number in range(4):
             session.add(
                 ImportLog(
-                    path=f"/tmp/{nummer}.jpg",
+                    path=f"/tmp/{number}.jpg",
                     result=ImportResult.IMPORTED,
-                    created_at=datetime(2026, 3, nummer + 1, 12, 0),
+                    created_at=datetime(2026, 3, number + 1, 12, 0),
                 )
             )
         session.commit()
 
-        daten = admin_client.get("/api/admin/imports", params={"limit": 3, "offset": 3}).json()
+        data = admin_client.get("/api/admin/imports", params={"limit": 3, "offset": 3}).json()
 
-        assert daten["total"] == 4
-        assert [eintrag["filename"] for eintrag in daten["entries"]] == ["0.jpg"]
+        assert data["total"] == 4
+        assert [entry["filename"] for entry in data["entries"]] == ["0.jpg"]
 
 
-class TestFotoBearbeiten:
-    def test_fehlendes_feld_bleibt_unangetastet(
+class TestEditingAPhoto:
+    def test_a_missing_field_stays_untouched(self, admin_client: TestClient, session, make_photo):
+        """Whoever changes only the title must not lose the dating."""
+        photo = make_photo(title="Alt", year=1932)
+        session.commit()
+
+        data = admin_client.patch(f"/api/admin/photos/{photo.id}", json={"title": "Neu"}).json()
+
+        assert data["title"] == "Neu"
+        assert data["date_label"] == "1932"
+        assert data["lat"] is not None
+
+    def test_an_empty_field_clears_the_dating(self, admin_client: TestClient, session, make_photo):
+        """The opposite case -- an explicit null takes a wrong entry out.
+
+        Without that difference the curator could only replace a wrong year with another one, never
+        with "nobody knows"."""
+        photo = make_photo(year=1932)
+        session.commit()
+
+        data = admin_client.patch(f"/api/admin/photos/{photo.id}", json={"date": None}).json()
+
+        assert data["date_label"] == "Jahr unbekannt"
+        assert data["needs_date"] is True
+
+    def test_a_cleared_dating_offers_the_photo_again(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Wer nur den Titel aendert, darf die Datierung nicht verlieren."""
-        foto = make_photo(title="Alt", year=1932)
+        photo = make_photo(year=1932)
+        session.commit()
+        admin_client.patch(f"/api/admin/photos/{photo.id}", json={"date": None})
+
+        task = admin_client.get("/api/contribute/next", params={"need": "date"}).json()
+
+        assert task["photo"]["id"] == photo.id
+
+    def test_an_impossible_date_is_rejected(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo()
         session.commit()
 
-        daten = admin_client.patch(f"/api/admin/photos/{foto.id}", json={"title": "Neu"}).json()
-
-        assert daten["title"] == "Neu"
-        assert daten["date_label"] == "1932"
-        assert daten["lat"] is not None
-
-    def test_leeres_feld_loescht_die_datierung(self, admin_client: TestClient, session, make_photo):
-        """Der Gegenfall -- ausdrueckliches null nimmt eine falsche Angabe heraus.
-
-        Ohne diesen Unterschied koennte der Kurator eine falsche Jahreszahl nur durch eine andere
-        ersetzen, nie durch "weiss man nicht".
-        """
-        foto = make_photo(year=1932)
-        session.commit()
-
-        daten = admin_client.patch(f"/api/admin/photos/{foto.id}", json={"date": None}).json()
-
-        assert daten["date_label"] == "Jahr unbekannt"
-        assert daten["needs_date"] is True
-
-    def test_geloeschte_datierung_legt_das_foto_wieder_vor(
-        self, admin_client: TestClient, session, make_photo
-    ):
-        foto = make_photo(year=1932)
-        session.commit()
-        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"date": None})
-
-        aufgabe = admin_client.get("/api/contribute/next", params={"need": "date"}).json()
-
-        assert aufgabe["photo"]["id"] == foto.id
-
-    def test_unmoegliches_datum_wird_abgewiesen(
-        self, admin_client: TestClient, session, make_photo
-    ):
-        foto = make_photo()
-        session.commit()
-
-        antwort = admin_client.patch(
-            f"/api/admin/photos/{foto.id}",
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
             json={"date": {"year": 1932, "month": 2, "day": 30, "precision": "day"}},
         )
 
-        assert antwort.status_code == 422
+        assert response.status_code == 422
 
-    def test_jahrzehnt_wird_zum_intervall(self, admin_client: TestClient, session, make_photo):
-        foto = make_photo(year=None)
+    def test_a_decade_becomes_an_interval(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo(year=None)
         session.commit()
 
-        daten = admin_client.patch(
-            f"/api/admin/photos/{foto.id}",
+        data = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
             json={"date": {"year": 1934, "precision": "decade"}},
         ).json()
 
-        # Abgerundet auf den Anfang des Jahrzehnts, nicht 1934 bis 1943.
-        assert daten["date_from"] == "1930-01-01"
-        assert daten["date_to"] == "1939-12-31"
-        assert daten["date_label"] == "1930er"
+        # Rounded down to the start of the decade, not 1934 to 1943.
+        assert data["date_from"] == "1930-01-01"
+        assert data["date_to"] == "1939-12-31"
+        assert data["date_label"] == "1930er"
 
-    def test_bearbeitung_wird_protokolliert(self, admin_client: TestClient, session, make_photo):
-        foto = make_photo(title="Alt")
+    def test_an_edit_is_logged(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo(title="Alt")
         session.commit()
 
-        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"title": "Neu"})
+        admin_client.patch(f"/api/admin/photos/{photo.id}", json={"title": "Neu"})
 
-        eintrag = session.scalars(select(Change).where(Change.field == "title")).one()
-        assert (eintrag.old_value, eintrag.new_value) == ("Alt", "Neu")
-        assert eintrag.source == Source.CURATOR
+        entry = session.scalars(select(Change).where(Change.field == "title")).one()
+        assert (entry.old_value, entry.new_value) == ("Alt", "Neu")
+        assert entry.source == Source.CURATOR
 
-    def test_gleicher_wert_erzeugt_keinen_eintrag(
-        self, admin_client: TestClient, session, make_photo
-    ):
-        """Sonst ersaeuft die Beitragsliste in Eintraegen ohne Aussage."""
-        foto = make_photo(title="Alt")
+    def test_the_same_value_makes_no_entry(self, admin_client: TestClient, session, make_photo):
+        """Otherwise the contribution list drowns in entries that say nothing."""
+        photo = make_photo(title="Alt")
         session.commit()
 
-        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"title": "Alt"})
+        admin_client.patch(f"/api/admin/photos/{photo.id}", json={"title": "Alt"})
 
         assert session.scalars(select(Change)).all() == []
 
-    def test_kurator_darf_ausserhalb_der_region_verorten(
+    def test_a_curator_may_place_outside_the_region(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Anders als ein Besucher: der Kurator weiss vielleicht von einem Ausflug."""
-        foto = make_photo(lat=None, lon=None)
+        """Unlike a visitor: the curator may know about an outing."""
+        photo = make_photo(lat=None, lon=None)
         session.commit()
 
-        antwort = admin_client.patch(
-            f"/api/admin/photos/{foto.id}",
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
             json={"location": {"lat": 48.1372, "lon": 11.5756, "place_name": "Muenchen"}},
         )
 
-        assert antwort.status_code == 200
-        assert antwort.json()["location_source"] == "curator"
+        assert response.status_code == 200
+        assert response.json()["location_source"] == "curator"
 
-    def test_verstecktes_foto_verschwindet_von_der_karte(
+    def test_a_deleted_photo_vanishes_from_the_map(
         self, admin_client: TestClient, session, make_photo
     ):
-        foto = make_photo()
+        photo = make_photo()
         session.commit()
 
-        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"status": "deleted"})
+        admin_client.patch(f"/api/admin/photos/{photo.id}", json={"status": "deleted"})
 
-        karte = admin_client.get("/api/photos", params={"bbox": "9.5,53.5,9.8,53.7"}).json()
-        assert karte["total"] == 0
-        # Geloescht ist es nicht -- im Admin-Bereich bleibt es auffindbar.
-        assert admin_client.get(f"/api/admin/photos/{foto.id}").status_code == 200
+        map_photos = admin_client.get("/api/photos", params={"bbox": "9.5,53.5,9.8,53.7"}).json()
+        assert map_photos["total"] == 0
+        # It is not deleted -- in the admin view it stays findable.
+        assert admin_client.get(f"/api/admin/photos/{photo.id}").status_code == 200
 
-    def test_schlagworte_werden_ersetzt_nicht_ergaenzt(
-        self, admin_client: TestClient, session, make_photo
-    ):
-        foto = make_photo()
+    def test_tags_are_replaced_not_added_to(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo()
         session.commit()
-        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"tags": ["Muehle", "Umzug"]})
+        admin_client.patch(f"/api/admin/photos/{photo.id}", json={"tags": ["Muehle", "Umzug"]})
 
-        daten = admin_client.patch(f"/api/admin/photos/{foto.id}", json={"tags": ["Muehle"]}).json()
+        data = admin_client.patch(f"/api/admin/photos/{photo.id}", json={"tags": ["Muehle"]}).json()
 
-        assert daten["tags"] == ["Muehle"]
+        assert data["tags"] == ["Muehle"]
 
-    def test_unbekanntes_foto(self, admin_client: TestClient):
-        antwort = admin_client.patch("/api/admin/photos/9999", json={"title": "Neu"})
+    def test_an_unknown_photo(self, admin_client: TestClient):
+        response = admin_client.patch("/api/admin/photos/9999", json={"title": "Neu"})
 
-        assert antwort.status_code == 404
-        assert "9999" in antwort.json()["detail"]
+        assert response.status_code == 404
+        assert "9999" in response.json()["detail"]
 
 
-class TestBesucherbeitraege:
-    def _beitrag(self, client: TestClient, foto_id: int) -> int:
-        client.post(f"/api/contribute/{foto_id}/location", json=HOLM)
+class TestVisitorContributions:
+    def _contribution(self, client: TestClient, photo_id: int) -> int:
+        client.post(f"/api/contribute/{photo_id}/location", json=HOLM)
         return client.get("/api/admin/changes").json()["changes"][0]["id"]
 
-    def test_liste_zeigt_was_am_kiosk_passiert_ist(
+    def test_the_list_shows_what_happened_at_the_kiosk(
         self, admin_client: TestClient, session, make_photo
     ):
-        foto = make_photo(lat=None, lon=None, title="Ohne Ort")
+        photo = make_photo(lat=None, lon=None, title="Ohne Ort")
         session.commit()
-        admin_client.post(f"/api/contribute/{foto.id}/location", json=HOLM)
+        admin_client.post(f"/api/contribute/{photo.id}/location", json=HOLM)
 
-        daten = admin_client.get("/api/admin/changes").json()
+        data = admin_client.get("/api/admin/changes").json()
 
-        assert daten["total"] == 1
-        assert daten["changes"][0]["photo_title"] == "Ohne Ort"
-        assert daten["changes"][0]["field"] == "location"
-        assert daten["changes"][0]["revertable"] is True
+        assert data["total"] == 1
+        assert data["changes"][0]["photo_title"] == "Ohne Ort"
+        assert data["changes"][0]["field"] == "location"
+        assert data["changes"][0]["revertable"] is True
 
-    def test_zuruecknehmen_legt_das_foto_wieder_vor(
+    def test_reverting_offers_the_photo_again(self, admin_client: TestClient, session, make_photo):
+        """The point of the whole thing: a wrong entry becomes an open question again."""
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        contribution = self._contribution(admin_client, photo.id)
+
+        data = admin_client.post(f"/api/admin/changes/{contribution}/revert").json()
+
+        assert data["needs_location"] is True
+        assert data["lat"] is None
+        task = admin_client.get("/api/contribute/next", params={"need": "location"}).json()
+        assert task["photo"]["id"] == photo.id
+
+    def test_reverting_twice_is_not_possible(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        contribution = self._contribution(admin_client, photo.id)
+        admin_client.post(f"/api/admin/changes/{contribution}/revert")
+
+        response = admin_client.post(f"/api/admin/changes/{contribution}/revert")
+
+        assert response.status_code == 409
+
+    def test_what_was_edited_by_hand_is_not_reverted(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Der Sinn der Sache: eine falsche Angabe wird wieder zur offenen Frage."""
-        foto = make_photo(lat=None, lon=None)
+        """Otherwise the revert would throw the curator's work away with it."""
+        photo = make_photo(lat=None, lon=None)
         session.commit()
-        beitrag = self._beitrag(admin_client, foto.id)
-
-        daten = admin_client.post(f"/api/admin/changes/{beitrag}/revert").json()
-
-        assert daten["needs_location"] is True
-        assert daten["lat"] is None
-        aufgabe = admin_client.get("/api/contribute/next", params={"need": "location"}).json()
-        assert aufgabe["photo"]["id"] == foto.id
-
-    def test_zweimal_zuruecknehmen_geht_nicht(self, admin_client: TestClient, session, make_photo):
-        foto = make_photo(lat=None, lon=None)
-        session.commit()
-        beitrag = self._beitrag(admin_client, foto.id)
-        admin_client.post(f"/api/admin/changes/{beitrag}/revert")
-
-        antwort = admin_client.post(f"/api/admin/changes/{beitrag}/revert")
-
-        assert antwort.status_code == 409
-
-    def test_von_hand_bearbeitetes_wird_nicht_zurueckgenommen(
-        self, admin_client: TestClient, session, make_photo
-    ):
-        """Sonst wuerfe das Zuruecknehmen die Arbeit des Kurators mit weg."""
-        foto = make_photo(lat=None, lon=None)
-        session.commit()
-        beitrag = self._beitrag(admin_client, foto.id)
+        contribution = self._contribution(admin_client, photo.id)
         admin_client.patch(
-            f"/api/admin/photos/{foto.id}", json={"location": {"lat": 53.63, "lon": 9.68}}
+            f"/api/admin/photos/{photo.id}", json={"location": {"lat": 53.63, "lon": 9.68}}
         )
 
-        antwort = admin_client.post(f"/api/admin/changes/{beitrag}/revert")
+        response = admin_client.post(f"/api/admin/changes/{contribution}/revert")
 
-        assert antwort.status_code == 409
+        assert response.status_code == 409
         assert admin_client.get("/api/admin/changes").json()["changes"][0]["revertable"] is False
 
-    def test_kuratorenaenderung_steht_nicht_in_der_beitragsliste(
+    def test_a_curator_edit_does_not_stand_in_the_contribution_list(
         self, admin_client: TestClient, session, make_photo
     ):
-        """Die Liste ist zum Sichten dessen da, was Fremde eingetragen haben."""
-        foto = make_photo(title="Alt")
+        """The list is there for reviewing what strangers have entered."""
+        photo = make_photo(title="Alt")
         session.commit()
-        admin_client.patch(f"/api/admin/photos/{foto.id}", json={"title": "Neu"})
+        admin_client.patch(f"/api/admin/photos/{photo.id}", json={"title": "Neu"})
 
         assert admin_client.get("/api/admin/changes").json()["changes"] == []
 
-    def test_zurueckgenommenes_bleibt_auf_wunsch_sichtbar(
+    def test_what_was_reverted_stays_visible_on_request(
         self, admin_client: TestClient, session, make_photo
     ):
-        foto = make_photo(lat=None, lon=None)
+        photo = make_photo(lat=None, lon=None)
         session.commit()
-        beitrag = self._beitrag(admin_client, foto.id)
-        admin_client.post(f"/api/admin/changes/{beitrag}/revert")
+        contribution = self._contribution(admin_client, photo.id)
+        admin_client.post(f"/api/admin/changes/{contribution}/revert")
 
         assert admin_client.get("/api/admin/changes").json()["changes"] == []
-        mit_allem = admin_client.get("/api/admin/changes", params={"include_reverted": True}).json()
-        assert mit_allem["total"] == 1
-        assert mit_allem["changes"][0]["reverted_at"] is not None
+        with_everything = admin_client.get(
+            "/api/admin/changes", params={"include_reverted": True}
+        ).json()
+        assert with_everything["total"] == 1
+        assert with_everything["changes"][0]["reverted_at"] is not None
 
 
-class TestStapelUpload:
-    def test_ohne_anmeldung_kein_upload(self, client: TestClient, fixtures_dir):
-        antwort = client.post(
-            "/api/admin/upload", files=[("files", ("scan.jpg", _bild(fixtures_dir), "image/jpeg"))]
+class TestBatchUpload:
+    def test_no_upload_without_signing_in(self, client: TestClient, fixtures_dir):
+        response = client.post(
+            "/api/admin/upload", files=[("files", ("scan.jpg", _image(fixtures_dir), "image/jpeg"))]
         )
 
-        assert antwort.status_code == 401
+        assert response.status_code == 401
 
-    def test_foto_ist_schon_nach_dem_hochladen_in_der_datenbank(
+    def test_a_photo_is_in_the_database_right_after_uploading(
         self, admin_client: TestClient, session, fixtures_dir
     ):
-        """Kein Warteschlangenmodell: ein geschlossener Browser darf keine Uploads kosten.
+        """No queue model: a closed browser must not cost uploads.
 
-        Die Tabelle im Admin-Bereich ist eine Nacharbeitsliste. Was dort liegen bleibt, taucht im
-        "Hilf mit"-Bereich auf -- verloren ist es nie.
-        """
-        antwort = admin_client.post(
-            "/api/admin/upload", files=[("files", ("scan.jpg", _bild(fixtures_dir), "image/jpeg"))]
+        The table in the admin view is a follow-up list. Whatever is left lying there surfaces in
+        the contribution panel -- it is never lost."""
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("scan.jpg", _image(fixtures_dir), "image/jpeg"))]
         )
 
-        assert antwort.json()["imported"] == 1
+        assert response.json()["imported"] == 1
         session.expire_all()
         assert len(session.scalars(select(Photo)).all()) == 1
 
-    def test_jahr_gilt_fuer_den_ganzen_stapel(
+    def test_the_year_applies_to_the_whole_batch(
         self, admin_client: TestClient, session, fixtures_dir
     ):
-        antwort = admin_client.post(
+        response = admin_client.post(
             "/api/admin/upload",
             files=[
-                ("files", ("a.jpg", _bild(fixtures_dir, "scan_ohne_exif.jpg"), "image/jpeg")),
-                ("files", ("b.jpg", _bild(fixtures_dir, "hochkant.jpg"), "image/jpeg")),
+                ("files", ("a.jpg", _image(fixtures_dir, "scan_ohne_exif.jpg"), "image/jpeg")),
+                ("files", ("b.jpg", _image(fixtures_dir, "hochkant.jpg"), "image/jpeg")),
             ],
             data={"year": "1932"},
         )
 
-        daten = antwort.json()
-        assert daten["imported"] == 2
-        assert [eintrag["photo"]["date_label"] for eintrag in daten["items"]] == ["1932", "1932"]
+        data = response.json()
+        assert data["imported"] == 2
+        assert [entry["photo"]["date_label"] for entry in data["items"]] == ["1932", "1932"]
 
-    def test_ort_gilt_fuer_den_ganzen_stapel(self, admin_client: TestClient, session, fixtures_dir):
-        antwort = admin_client.post(
+    def test_the_place_applies_to_the_whole_batch(
+        self, admin_client: TestClient, session, fixtures_dir
+    ):
+        response = admin_client.post(
             "/api/admin/upload",
-            files=[("files", ("a.jpg", _bild(fixtures_dir), "image/jpeg"))],
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
             data={"lat": "53.6205", "lon": "9.676", "place_name": "Kirche"},
         )
 
-        foto = antwort.json()["items"][0]["photo"]
-        assert foto["place_name"] == "Kirche"
-        assert foto["location_source"] == "curator"
+        photo = response.json()["items"][0]["photo"]
+        assert photo["place_name"] == "Kirche"
+        assert photo["location_source"] == "curator"
 
-    def test_schlagwort_gilt_fuer_den_ganzen_stapel(
+    def test_the_tag_applies_to_the_whole_batch(
         self, admin_client: TestClient, session, fixtures_dir, settings, monkeypatch
     ):
-        """Wer hundert Fotos aus einem Ordner "Feuerwehr" hochlaedt, tippt es einmal.
+        """Whoever uploads a hundred photos out of one folder types it once.
 
-        Und anders als jede andere Stapelangabe **verdraengt** ein Schlagwort nichts: Es tritt
-        neben das, was in der Datei steht, und neben die Einstellung des Geraets. Ein Feld haelt
-        einen Wert, eine Schlagwortliste ist eine Menge.
-        """
+        And unlike every other batch entry, a tag **displaces** nothing: it stands beside what the
+        file says and beside the device setting. A field holds one value, a tag list is a set."""
         monkeypatch.setattr(settings, "import_tags", ["Gebäude"])
 
-        antwort = admin_client.post(
+        response = admin_client.post(
             "/api/admin/upload",
             files=[
-                ("files", ("a.jpg", _bild(fixtures_dir, "scan_ohne_exif.jpg"), "image/jpeg")),
-                ("files", ("b.jpg", _bild(fixtures_dir, "hochkant.jpg"), "image/jpeg")),
+                ("files", ("a.jpg", _image(fixtures_dir, "scan_ohne_exif.jpg"), "image/jpeg")),
+                ("files", ("b.jpg", _image(fixtures_dir, "hochkant.jpg"), "image/jpeg")),
             ],
             data={"tags": "Feuerwehr, Neubau"},
         )
 
-        assert antwort.json()["imported"] == 2
-        for foto in session.scalars(select(Photo)).all():
-            namen = {schlagwort.name for schlagwort in foto.tags}
-            assert {"Feuerwehr", "Neubau", "Gebäude"} <= namen
+        assert response.json()["imported"] == 2
+        for photo in session.scalars(select(Photo)).all():
+            names = {tag.name for tag in photo.tags}
+            assert {"Feuerwehr", "Neubau", "Gebäude"} <= names
 
-    def test_stapelangabe_ueberschreibt_nichts_vorhandenes(
+    def test_a_batch_entry_overwrites_nothing_that_exists(
         self, admin_client: TestClient, session, fixtures_dir
     ):
-        """Das Bild bringt GPS mit. Was die Datei weiss, schlaegt die Sammelangabe."""
-        antwort = admin_client.post(
+        """The image brings GPS with it. What the file knows beats the batch entry."""
+        response = admin_client.post(
             "/api/admin/upload",
-            files=[("files", ("gps.jpg", _bild(fixtures_dir, "foto_mit_gps.jpg"), "image/jpeg"))],
+            files=[("files", ("gps.jpg", _image(fixtures_dir, "foto_mit_gps.jpg"), "image/jpeg"))],
             data={"lat": "48.1372", "lon": "11.5756"},
         )
 
-        foto = antwort.json()["items"][0]["photo"]
-        assert abs(foto["lat"] - 53.62053) < 0.001
-        assert foto["location_source"] == "exif"
+        photo = response.json()["items"][0]["photo"]
+        assert abs(photo["lat"] - 53.62053) < 0.001
+        assert photo["location_source"] == "exif"
 
-    def test_dublette_wird_benannt_nicht_verschwiegen(
+    def test_a_duplicate_is_named_not_kept_quiet(
         self, admin_client: TestClient, session, fixtures_dir
     ):
-        """ "3 waren schon da" ist eine Auskunft, Schweigen ist keine."""
-        bild = _bild(fixtures_dir)
-        admin_client.post("/api/admin/upload", files=[("files", ("a.jpg", bild, "image/jpeg"))])
+        """ "3 were already there" is information, silence is not."""
+        image = _image(fixtures_dir)
+        admin_client.post("/api/admin/upload", files=[("files", ("a.jpg", image, "image/jpeg"))])
 
-        daten = admin_client.post(
-            "/api/admin/upload", files=[("files", ("nochmal.jpg", bild, "image/jpeg"))]
+        data = admin_client.post(
+            "/api/admin/upload", files=[("files", ("nochmal.jpg", image, "image/jpeg"))]
         ).json()
 
-        assert daten["duplicates"] == 1
-        assert daten["imported"] == 0
-        assert "Inhaltsgleich" in daten["items"][0]["message"]
-        # Das schon vorhandene Foto wird mitgeliefert -- der Admin soll sehen, welches gemeint ist.
-        assert daten["items"][0]["photo"] is not None
+        assert data["duplicates"] == 1
+        assert data["imported"] == 0
+        assert "Inhaltsgleich" in data["items"][0]["message"]
+        # The photo already present is delivered too -- the admin should see which one is meant.
+        assert data["items"][0]["photo"] is not None
 
-    def test_textdatei_wird_mit_begruendung_abgewiesen(
-        self, admin_client: TestClient, fixtures_dir
-    ):
-        daten = admin_client.post(
+    def test_a_text_file_is_rejected_with_a_reason(self, admin_client: TestClient, fixtures_dir):
+        data = admin_client.post(
             "/api/admin/upload",
-            files=[("files", ("liste.txt", _bild(fixtures_dir, "kein_bild.txt"), "text/plain"))],
+            files=[
+                ("files", ("a_list.txt", _image(fixtures_dir, "not_an_image.txt"), "text/plain"))
+            ],
         ).json()
 
-        assert daten["rejected"] == 1
-        assert "Kein lesbares Bild" in daten["items"][0]["message"]
+        assert data["rejected"] == 1
+        assert "Kein lesbares Bild" in data["items"][0]["message"]
 
-    def test_pfad_im_dateinamen_bleibt_ohne_wirkung(
+    def test_a_path_in_the_file_name_has_no_effect(
         self, admin_client: TestClient, settings, fixtures_dir
     ):
-        """Ein Dateiname aus dem Browser ist Eingabe, keine Wegbeschreibung."""
-        daten = admin_client.post(
+        """A file name from the browser is input, not a route description."""
+        data = admin_client.post(
             "/api/admin/upload",
-            files=[("files", ("../../boese.jpg", _bild(fixtures_dir), "image/jpeg"))],
+            files=[("files", ("../../boese.jpg", _image(fixtures_dir), "image/jpeg"))],
         ).json()
 
-        assert daten["items"][0]["filename"] == "boese.jpg"
+        assert data["items"][0]["filename"] == "boese.jpg"
         assert not (settings.data_dir.parent / "boese.jpg").exists()
 
-    def test_upload_landet_im_importprotokoll(
+    def test_an_upload_lands_in_the_import_log(
         self, admin_client: TestClient, session, fixtures_dir
     ):
         admin_client.post(
-            "/api/admin/upload", files=[("files", ("scan.jpg", _bild(fixtures_dir), "image/jpeg"))]
+            "/api/admin/upload", files=[("files", ("scan.jpg", _image(fixtures_dir), "image/jpeg"))]
         )
 
-        protokoll = admin_client.get("/api/admin/imports").json()
+        log = admin_client.get("/api/admin/imports").json()
 
-        assert protokoll["total"] == 1
-        # Nicht der Pfad im temporaeren Ordner, sondern der Name, den der Admin kennt.
-        assert protokoll["entries"][0]["filename"] == "scan.jpg"
-        assert protokoll["entries"][0]["result"] == "imported"
+        assert log["total"] == 1
+        # Not the path in the temporary folder but the name the admin knows.
+        assert log["entries"][0]["filename"] == "scan.jpg"
+        assert log["entries"][0]["result"] == "imported"
 
 
-class TestImportprotokoll:
-    def test_nur_abgewiesene_auf_wunsch(self, admin_client: TestClient, session, fixtures_dir):
+class TestTheImportLog:
+    def test_only_the_rejected_ones_on_request(
+        self, admin_client: TestClient, session, fixtures_dir
+    ):
         admin_client.post(
             "/api/admin/upload",
             files=[
-                ("files", ("gut.jpg", _bild(fixtures_dir), "image/jpeg")),
-                ("files", ("schlecht.txt", _bild(fixtures_dir, "kein_bild.txt"), "text/plain")),
+                ("files", ("gut.jpg", _image(fixtures_dir), "image/jpeg")),
+                ("files", ("bad.txt", _image(fixtures_dir, "not_an_image.txt"), "text/plain")),
             ],
         )
 
-        daten = admin_client.get("/api/admin/imports", params={"result": "rejected"}).json()
+        data = admin_client.get("/api/admin/imports", params={"result": "rejected"}).json()
 
-        assert [eintrag["filename"] for eintrag in daten["entries"]] == ["schlecht.txt"]
+        assert [entry["filename"] for entry in data["entries"]] == ["bad.txt"]
 
-    def test_neueste_zuerst(self, admin_client: TestClient, session):
+    def test_newest_first(self, admin_client: TestClient, session):
         from app.models import ImportLog, ImportResult
 
-        for nummer, tag in enumerate([1, 2, 3], start=1):
+        for number, tag in enumerate([1, 2, 3], start=1):
             session.add(
                 ImportLog(
-                    path=f"/tmp/{nummer}.jpg",
+                    path=f"/tmp/{number}.jpg",
                     result=ImportResult.IMPORTED,
                     created_at=datetime(2026, 3, tag, 12, 0),
                 )
             )
         session.commit()
 
-        daten = admin_client.get("/api/admin/imports").json()
+        data = admin_client.get("/api/admin/imports").json()
 
-        assert [eintrag["filename"] for eintrag in daten["entries"]] == ["3.jpg", "2.jpg", "1.jpg"]
+        assert [entry["filename"] for entry in data["entries"]] == ["3.jpg", "2.jpg", "1.jpg"]
 
 
-class TestUnberuehrteFelder:
-    def test_datierung_ohne_genauigkeit_wird_zum_jahr(
+class TestUntouchedFields:
+    def test_a_dating_without_precision_becomes_a_year(
         self, admin_client: TestClient, session, make_photo
     ):
-        foto = make_photo(year=None)
+        photo = make_photo(year=None)
         session.commit()
 
-        daten = admin_client.patch(
-            f"/api/admin/photos/{foto.id}", json={"date": {"year": 1955}}
+        data = admin_client.patch(
+            f"/api/admin/photos/{photo.id}", json={"date": {"year": 1955}}
         ).json()
 
-        assert daten["date_precision"] == DatePrecision.YEAR
-        assert daten["date_label"] == "1955"
+        assert data["date_precision"] == DatePrecision.YEAR
+        assert data["date_label"] == "1955"
 
 
-class TestNachweisUndHerkunft:
-    """Zwei Felder mit zwei verschiedenen Lesern -- und die Trennung ist die eigentliche Zusage.
+class TestCreditAndProvenance:
+    """Two fields with two different readers -- and the separation is the actual promise.
 
-    Der Bildnachweis steht im Museum neben dem Bild. Die Herkunft -- wer es abgegeben hat, ob eine
-    Freigabe vorliegt -- ist eine interne Notiz. Wuerde sie an den Besucherschirm durchgereicht,
-    stuende dort der Name eines Leihgebers, den nie jemand dafuer gefragt hat.
-    """
+    The credit stands beside the image in the museum. The provenance -- who handed it in, whether
+    a release exists -- is an internal note. Passed through to the visitor screen, the name of a
+    lender would stand there whom nobody ever asked about it."""
 
-    def test_beides_laesst_sich_setzen(self, admin_client: TestClient, session, make_photo):
-        foto = make_photo()
+    def test_both_can_be_set(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo()
         session.commit()
 
-        daten = admin_client.patch(
-            f"/api/admin/photos/{foto.id}",
+        data = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
             json={"credit": "Sammlung Heimatmuseum Holm", "provenance": "Leihgabe H. Meyer"},
         ).json()
 
-        assert daten["credit"] == "Sammlung Heimatmuseum Holm"
-        assert daten["provenance"] == "Leihgabe H. Meyer"
+        assert data["credit"] == "Sammlung Heimatmuseum Holm"
+        assert data["provenance"] == "Leihgabe H. Meyer"
 
-    def test_herkunft_erscheint_nicht_in_der_besucheransicht(
+    def test_the_provenance_does_not_appear_in_the_visitor_view(
         self, admin_client: TestClient, session, make_photo
     ):
-        foto = make_photo()
-        foto.credit = "Sammlung Heimatmuseum Holm"
-        foto.provenance = "Leihgabe H. Meyer, Freigabe liegt vor"
+        photo = make_photo()
+        photo.credit = "Sammlung Heimatmuseum Holm"
+        photo.provenance = "Leihgabe H. Meyer, Freigabe liegt vor"
         session.commit()
 
-        daten = admin_client.get(f"/api/photos/{foto.id}").json()
+        data = admin_client.get(f"/api/photos/{photo.id}").json()
 
-        assert daten["credit"] == "Sammlung Heimatmuseum Holm", "der Nachweis gehoert ans Bild"
-        assert "provenance" not in daten, "die Herkunft darf den Kiosk nie erreichen"
-        assert "Meyer" not in str(daten)
+        assert data["credit"] == "Sammlung Heimatmuseum Holm", "der Nachweis gehoert ans Bild"
+        assert "provenance" not in data, "die Herkunft darf den Kiosk nie erreichen"
+        assert "Meyer" not in str(data)
 
-    def test_leeres_feld_loescht_den_nachweis(self, admin_client: TestClient, session, make_photo):
-        """Wie ueberall im Editor: fehlendes Feld heisst unveraendert, leeres heisst loeschen."""
-        foto = make_photo()
-        foto.credit = "Falsche Angabe"
+    def test_an_empty_field_clears_the_credit(self, admin_client: TestClient, session, make_photo):
+        """As in the whole editor: a missing field means unchanged, an empty one means delete."""
+        photo = make_photo()
+        photo.credit = "Falsche Angabe"
         session.commit()
 
-        daten = admin_client.patch(f"/api/admin/photos/{foto.id}", json={"credit": None}).json()
+        data = admin_client.patch(f"/api/admin/photos/{photo.id}", json={"credit": None}).json()
 
-        assert daten["credit"] is None
+        assert data["credit"] is None
 
-    def test_stapel_upload_setzt_beides_fuer_alle(
+    def test_a_batch_upload_sets_both_for_all_of_them(
         self, admin_client: TestClient, session, fixtures_dir
     ):
-        antwort = admin_client.post(
+        response = admin_client.post(
             "/api/admin/upload",
-            files=[("files", ("a.jpg", _bild(fixtures_dir, "scan_ohne_exif.jpg"), "image/jpeg"))],
+            files=[("files", ("a.jpg", _image(fixtures_dir, "scan_ohne_exif.jpg"), "image/jpeg"))],
             data={"credit": "Sammlung Heimatmuseum Holm", "provenance": "Kiste Dachboden Petersen"},
         )
 
-        assert antwort.status_code == 200
-        foto = session.scalars(select(Photo)).one()
-        assert foto.credit == "Sammlung Heimatmuseum Holm"
-        assert foto.provenance == "Kiste Dachboden Petersen"
+        assert response.status_code == 200
+        photo = session.scalars(select(Photo)).one()
+        assert photo.credit == "Sammlung Heimatmuseum Holm"
+        assert photo.provenance == "Kiste Dachboden Petersen"
 
 
-class TestSucheUeberDenHash:
-    """Die acht Zeichen aus der Detailansicht muessen die Verwaltung wiederfinden.
+class TestSearchingByHash:
+    """The eight characters from the detail view have to lead back through the admin view.
 
-    Sonst stuende dort eine Kennung, die sich nirgends nachschlagen laesst -- Zierrat statt
-    Auskunft. Sie ist der Weg zurueck zu einem Foto, dessen Titel gerade das Falsche ist.
-    """
+    Otherwise an identifier would stand there that can be looked up nowhere -- decoration instead
+    of information. It is the way back to a photo whose title is exactly the wrong one."""
 
-    def test_findet_ein_foto_ueber_den_anfang_seines_hashes(
+    def test_finds_a_photo_by_the_start_of_its_hash(
         self, admin_client: TestClient, session, make_photo
     ):
         make_photo(sha="abc12345" + "0" * 56, title="Falsch beschriftet")
         make_photo(sha="f" * 64, title="Ein anderes")
         session.commit()
 
-        daten = admin_client.get("/api/admin/photos", params={"q": "abc12345"}).json()
+        data = admin_client.get("/api/admin/photos", params={"q": "abc12345"}).json()
 
-        assert daten["total"] == 1
-        assert daten["photos"][0]["title"] == "Falsch beschriftet"
+        assert data["total"] == 1
+        assert data["photos"][0]["title"] == "Falsch beschriftet"
 
-    def test_der_hash_steht_in_der_detailansicht(self, client: TestClient, session, make_photo):
-        # Und zwar in der oeffentlichen: Die Besucheransicht zeigt ihn unter dem Bildnachweis.
-        foto = make_photo(sha="abc12345" + "0" * 56)
+    def test_the_hash_stands_in_the_detail_view(self, client: TestClient, session, make_photo):
+        # And in the public one at that: the visitor view shows it under the credit.
+        photo = make_photo(sha="abc12345" + "0" * 56)
         session.commit()
 
-        assert client.get(f"/api/photos/{foto.id}").json()["sha256"].startswith("abc12345")
+        assert client.get(f"/api/photos/{photo.id}").json()["sha256"].startswith("abc12345")
 
 
 @pytest.fixture
-def am_kamp(session):
-    """Eine Strasse mit drei Hausnummern -- der Ortsindex, den das Nachschaerfen braucht."""
+def place_index(session):
+    """A street with three house numbers -- the place index the refinement needs."""
 
-    def anlegen(name, kind, street=None, housenumber=None, lat=53.62, lon=9.676):
+    def add(name, kind, street=None, housenumber=None, lat=53.62, lon=9.676):
         session.add(
             Place(
                 name=name,
@@ -858,128 +841,124 @@ def am_kamp(session):
             )
         )
 
-    anlegen("Am Kamp", "strasse", lat=53.6200, lon=9.6760)
-    for nummer, lat in (("1", 53.6201), ("2", 53.6202), ("3", 53.6203)):
-        anlegen(f"Am Kamp {nummer}", "adresse", street="Am Kamp", housenumber=nummer, lat=lat)
+    add("Am Kamp", "strasse", lat=53.6200, lon=9.6760)
+    for number, lat in (("1", 53.6201), ("2", 53.6202), ("3", 53.6203)):
+        add(f"Am Kamp {number}", "adresse", street="Am Kamp", housenumber=number, lat=lat)
     session.commit()
     return session
 
 
-class TestNachschaerfungZurueckhehmen:
-    """Zuruecknehmen heisst hier **zuruecksetzen**, nicht loeschen.
+class TestRevertingARefinement:
+    """Reverting here means **resetting**, not deleting.
 
-    Bei „Ort" und „Jahr" war der vorherige Wert immer nichts -- Besucher fuellen dort nur Leeres,
-    also *ist* Loeschen das Wiederherstellen. Die Hausnummer ersetzt. Wuerde sie beim Zuruecknehmen
-    geloescht, verloere das Foto seinen Ort ganz: eine Strafe fuer einen Beitrag, der lediglich zu
-    genau war.
-    """
+    With the place and the year the previous value was always nothing -- visitors fill only what is
+    empty there, so deleting *is* restoring. The house number replaces. If it were deleted on a
+    revert, the photo would lose its place entirely: a punishment for a contribution that was
+    merely too precise."""
 
-    def _schaerfen(self, client: TestClient, session, foto, nummer="2") -> int:
-        adresse = session.scalar(
-            select(Place).where(Place.kind == "adresse", Place.housenumber == nummer)
+    def _refine(self, client: TestClient, session, photo, number="2") -> int:
+        address = session.scalar(
+            select(Place).where(Place.kind == "adresse", Place.housenumber == number)
         )
-        client.post(f"/api/contribute/{foto.id}/housenumber", json={"place_id": adresse.id})
+        client.post(f"/api/contribute/{photo.id}/housenumber", json={"place_id": address.id})
         return client.get("/api/admin/changes").json()["changes"][0]["id"]
 
-    def _foto(self, make_photo, **felder):
-        return make_photo(place_name="Am Kamp", accuracy=150, lat=53.62, lon=9.676, **felder)
+    def _photo(self, make_photo, **fields):
+        return make_photo(place_name="Am Kamp", accuracy=150, lat=53.62, lon=9.676, **fields)
 
-    def test_zuruecknehmen_setzt_auf_die_strassenmitte_zurueck(
-        self, admin_client: TestClient, am_kamp, make_photo
+    def test_reverting_falls_back_to_the_street_centre(
+        self, admin_client: TestClient, place_index, make_photo
     ):
-        foto = self._foto(make_photo)
-        am_kamp.commit()
-        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+        photo = self._photo(make_photo)
+        place_index.commit()
+        contribution = self._refine(admin_client, place_index, photo)
 
-        daten = admin_client.post(f"/api/admin/changes/{beitrag}/revert").json()
+        data = admin_client.post(f"/api/admin/changes/{contribution}/revert").json()
 
-        assert daten["lat"] is not None, "das Foto behaelt seinen Ort"
-        assert daten["place_name"] == "Am Kamp"
-        assert daten["location_accuracy_m"] == 150
+        assert data["lat"] is not None, "das Foto behaelt seinen Ort"
+        assert data["place_name"] == "Am Kamp"
+        assert data["location_accuracy_m"] == 150
 
-    def test_zuruecknehmen_stellt_die_kuratorenquelle_wieder_her(
-        self, admin_client: TestClient, am_kamp, make_photo
+    def test_reverting_restores_the_curator_source(
+        self, admin_client: TestClient, place_index, make_photo
     ):
-        """Sonst wuerde aus Kuratorenwissen stillschweigend ein Besucherbeitrag.
+        """Otherwise curator knowledge would silently become a visitor contribution.
 
-        Und der naechste Besucher duerfte es erneut nachschaerfen, weil die Quelle es erlaubte.
+        And the next visitor could refine it again, because the source permitted it.
         """
-        foto = self._foto(make_photo, location_source=Source.CURATOR)
-        am_kamp.commit()
-        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+        photo = self._photo(make_photo, location_source=Source.CURATOR)
+        place_index.commit()
+        contribution = self._refine(admin_client, place_index, photo)
 
-        admin_client.post(f"/api/admin/changes/{beitrag}/revert")
-        am_kamp.refresh(foto)
+        admin_client.post(f"/api/admin/changes/{contribution}/revert")
+        place_index.refresh(photo)
 
-        assert foto.location_source == Source.CURATOR
+        assert photo.location_source == Source.CURATOR
 
-    def test_foto_wird_danach_wieder_nach_der_hausnummer_gefragt(
-        self, admin_client: TestClient, am_kamp, make_photo
+    def test_the_photo_is_asked_for_its_house_number_again(
+        self, admin_client: TestClient, place_index, make_photo
     ):
-        foto = self._foto(make_photo, location_source=Source.VISITOR)
-        am_kamp.commit()
-        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+        photo = self._photo(make_photo, location_source=Source.VISITOR)
+        place_index.commit()
+        contribution = self._refine(admin_client, place_index, photo)
 
-        admin_client.post(f"/api/admin/changes/{beitrag}/revert")
+        admin_client.post(f"/api/admin/changes/{contribution}/revert")
 
-        aufgabe = admin_client.get("/api/contribute/next", params={"need": "housenumber"}).json()
-        assert aufgabe["photo"]["id"] == foto.id
+        task = admin_client.get("/api/contribute/next", params={"need": "housenumber"}).json()
+        assert task["photo"]["id"] == photo.id
 
-    def test_aeltere_ortsangabe_erst_nach_der_neueren_zuruecknehmen(
-        self, admin_client: TestClient, am_kamp, make_photo
+    def test_an_older_place_entry_only_after_the_newer_one(
+        self, admin_client: TestClient, place_index, make_photo
     ):
-        """Der Zustand, den man sonst leise erzeugen kann.
+        """The state one can otherwise produce quietly.
 
-        Erst verortet ein Besucher das Foto, dann schaerft einer nach. Nimmt der Kurator die
-        *erste* Angabe zurueck, wird der Ort geleert -- und die zweite Ruecknahme stellt danach
-        eine Strasse wieder her, die niemand beigetragen hat. Von oben nach unten ist die einzige
-        Reihenfolge, die aufgeht.
-        """
-        foto = make_photo(lat=None, lon=None, place_name=None, accuracy=None, sha="z" * 64)
-        am_kamp.commit()
+        First a visitor locates the photo, then somebody refines it. If the curator reverts the
+        *first* entry, the place is emptied -- and the second revert then restores a street nobody
+        contributed. Top to bottom is the only order that works out."""
+        photo = make_photo(lat=None, lon=None, place_name=None, accuracy=None, sha="z" * 64)
+        place_index.commit()
         admin_client.post(
-            f"/api/contribute/{foto.id}/location",
+            f"/api/contribute/{photo.id}/location",
             json={"lat": 53.62, "lon": 9.676, "place_name": "Am Kamp", "accuracy_m": 150},
         )
-        aeltere = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
-        self._schaerfen(admin_client, am_kamp, foto)
+        older_one = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+        self._refine(admin_client, place_index, photo)
 
-        antwort = admin_client.post(f"/api/admin/changes/{aeltere}/revert")
+        response = admin_client.post(f"/api/admin/changes/{older_one}/revert")
 
-        assert antwort.status_code == 409
-        eintraege = admin_client.get("/api/admin/changes").json()["changes"]
-        aelterer = next(e for e in eintraege if e["id"] == aeltere)
-        assert aelterer["revertable"] is False, "kein Knopf, der nur 409 liefert"
+        assert response.status_code == 409
+        entries = admin_client.get("/api/admin/changes").json()["changes"]
+        older_entry = next(e for e in entries if e["id"] == older_one)
+        assert older_entry["revertable"] is False, "kein Knopf, der nur 409 liefert"
 
-    def test_ohne_die_strasse_im_ortsverzeichnis_wird_nicht_zurueckgenommen(
-        self, admin_client: TestClient, am_kamp, make_photo
+    def test_without_the_street_in_the_place_index_nothing_is_reverted(
+        self, admin_client: TestClient, place_index, make_photo
     ):
-        """Lieber verweigern als dem Foto den Ort ganz nehmen.
+        """Better to refuse than to take the photo's place away entirely.
 
-        Ein neu gebauter Ortsindex kann eine Strasse umbenannt haben; ``place_name`` ist eine
-        Zeichenkette und kein Fremdschluessel.
-        """
-        foto = self._foto(make_photo)
-        am_kamp.commit()
-        beitrag = self._schaerfen(admin_client, am_kamp, foto)
-        strasse = am_kamp.scalar(select(Place).where(Place.name == "Am Kamp"))
-        am_kamp.delete(strasse)
-        am_kamp.commit()
+        A newly built place index may have renamed a street; ``place_name`` is a string and not a
+        foreign key."""
+        photo = self._photo(make_photo)
+        place_index.commit()
+        contribution = self._refine(admin_client, place_index, photo)
+        street_name = place_index.scalar(select(Place).where(Place.name == "Am Kamp"))
+        place_index.delete(street_name)
+        place_index.commit()
 
-        antwort = admin_client.post(f"/api/admin/changes/{beitrag}/revert")
+        response = admin_client.post(f"/api/admin/changes/{contribution}/revert")
 
-        assert antwort.status_code == 409
-        am_kamp.refresh(foto)
-        assert foto.place_name == "Am Kamp 2", "die Angabe bleibt stehen"
+        assert response.status_code == 409
+        place_index.refresh(photo)
+        assert photo.place_name == "Am Kamp 2", "die Angabe bleibt stehen"
 
-    def test_von_hand_bearbeitete_hausnummer_bleibt_stehen(
-        self, admin_client: TestClient, am_kamp, make_photo
+    def test_a_house_number_edited_by_hand_stays(
+        self, admin_client: TestClient, place_index, make_photo
     ):
-        foto = self._foto(make_photo)
-        am_kamp.commit()
-        beitrag = self._schaerfen(admin_client, am_kamp, foto)
+        photo = self._photo(make_photo)
+        place_index.commit()
+        contribution = self._refine(admin_client, place_index, photo)
         admin_client.patch(
-            f"/api/admin/photos/{foto.id}", json={"location": {"lat": 53.63, "lon": 9.68}}
+            f"/api/admin/photos/{photo.id}", json={"location": {"lat": 53.63, "lon": 9.68}}
         )
 
-        assert admin_client.post(f"/api/admin/changes/{beitrag}/revert").status_code == 409
+        assert admin_client.post(f"/api/admin/changes/{contribution}/revert").status_code == 409

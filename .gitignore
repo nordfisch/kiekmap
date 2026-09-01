@@ -1,15 +1,15 @@
-# Laufzeitdaten — der gesamte veraenderliche Zustand, wird nie versioniert.
-# Der Ordner selbst bleibt im Repo, damit ein frischer Clone sofort startet.
+# Runtime data -- the whole mutable state, never versioned.
+# The folder itself stays in the repository, so that a fresh clone starts at once.
 /data/*
 !/data/.gitkeep
 
-# Der Beispielbestand unter seed/ liegt im Repo -- aber erfunden: gezeichnete Bilder,
-# ausgedachte Menschen. Erzeugt von tools/build_seed.py, siehe seed/README.md.
-# Wer mit echten Fotos entwickelt, holt sie sich ueber `make seed-save` und committet
-# sie nicht: die echten Aufnahmen gehoeren dem Museum.
+# The sample collection under seed/ is in the repository -- but invented: drawn pictures,
+# made-up people. Built by tools/build_seed.py, see seed/README.md.
+# Whoever develops against real photos takes them with `make seed-save` and does not commit
+# them: the real pictures belong to the museum.
 
-# Kartendaten: zu gross fuers Repo, werden per `make tiles` gebaut.
-# Versioniert wird nur das Bauskript und tiles/region.json.
+# Map data: too large for the repository, built with `make tiles`.
+# Only the build script and tiles/region.json are versioned.
 *.pmtiles
 /frontend/public/tiles/
 /frontend/public/basemaps/
@@ -18,13 +18,16 @@
 
 # Python
 .venv/
+# The environment for the documentation site, built by `make docs-serve`, and what it builds.
+/.venv-docs/
+/site/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
 .coverage
 htmlcov/
-# Bauartefakt der editierbaren Installation -- lag bis zum 15. August 2026 versehentlich im Repo.
+# Build artefact of the editable install -- sat in the repository by accident until 15 August 2026.
 *.egg-info/
 
 # Node
@@ -33,7 +36,7 @@ node_modules/
 /release/
 *.tsbuildinfo
 
-# Konfiguration mit Geheimnissen (PIN-Hash o. ae.)
+# Configuration holding secrets (the PIN hash and the like)
 .env
 .env.local
 

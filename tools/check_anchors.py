@@ -31,13 +31,18 @@ ROOT = Path(__file__).resolve().parent.parent
 #: had noticed, because until then nobody had linked into it or out of it by anchor.
 DOCUMENTS = (
     "docs/decisions.md",
-    "docs/history.md",
+    "docs/archive/history.de.md",
+    "docs/index.de.md",
     "docs/index.md",
     "docs/architecture.md",
+    "docs/adaption.de.md",
     "docs/adaption.md",
     "docs/development.md",
+    "docs/licensing.de.md",
     "docs/licensing.md",
+    "docs/operations.de.md",
     "docs/operations.md",
+    "docs/usermanual.de.md",
     "docs/usermanual.md",
     "README.md",
     "CLAUDE.md",
@@ -60,7 +65,7 @@ def headings_of(path: Path) -> set[str]:
     """The anchors a file offers.
 
     ``#`` counts. It used to start at ``##``, on the assumption that a level-one heading is a
-    document title and nothing links to it -- until the register in ``history.md`` linked to its
+    document title and nothing links to it -- until the register in ``history.de.md`` linked to its
     six parts and all six were reported dead. Only ever adds anchors, so nothing that passed
     before can fail now.
     """
@@ -95,9 +100,9 @@ def main() -> int:
         name = str(path.relative_to(ROOT))
         dead = check(path, headings)
         broken += len(dead)
-        print(f"  {name:20} {len(dead):2} tot {dead if dead else ''}")
+        print(f"  {name:20} {len(dead):2} dead {dead if dead else ''}")
 
-    print("Kein toter Anker." if not broken else f"{broken} tote Anker.")
+    print("No dead anchor." if not broken else f"{broken} dead anchors.")
     return 1 if broken else 0
 
 

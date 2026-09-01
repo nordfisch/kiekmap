@@ -8,7 +8,7 @@ never copied in.
 Files from the watched folder are moved aside afterwards, never deleted:
 
     data/incoming/            still to do
-    data/incoming/_erledigt/  imported
+    data/incoming/_done/      imported
     data/incoming/_problem/   unreadable or unsupported format
 """
 
@@ -32,11 +32,13 @@ from app.services import foldermeta, thumbnails
 from app.services.dates import date_range
 from app.services.storage import ALLOWED_FORMATS, original_path, sha256_of_file
 from app.services.tags import add_tags
+from app.text import texts
 
 log = logging.getLogger(__name__)
 
-# German directory names: the museum team sees these in the file manager.
-DONE_DIR = "_erledigt"
+# Fixed English, not translated: they are directory names, and a language setting that renamed
+# folders would be a setting that moves files. The museum team sees them in the file manager.
+DONE_DIR = "_done"
 PROBLEM_DIR = "_problem"
 #: Subfolders of the inbox that are not scanned themselves.
 SPECIAL_DIRS = {DONE_DIR, PROBLEM_DIR}
@@ -45,7 +47,7 @@ SPECIAL_DIRS = {DONE_DIR, PROBLEM_DIR}
 @dataclass
 class ImportOutcome:
     result: ImportResult
-    #: German -- this text reaches the curator through the import log.
+    #: From the text catalogue -- this text reaches the curator through the import log.
     message: str
     photo: Photo | None = None
     #: Where the image was stored. Only set when it was actually taken in.
@@ -89,10 +91,10 @@ def _free_name(target: Path) -> Path:
 
 
 def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
-    """File a finished photo away under ``_erledigt/`` or ``_problem/`` -- **keeping its folders**.
+    """File a finished photo away under ``_done/`` or ``_problem/`` -- **keeping its folders**.
 
-    ``incoming/Hauptstraße/14 Museum/x.jpg`` becomes ``_erledigt/Hauptstraße/14 Museum/x.jpg``,
-    not ``_erledigt/x.jpg``. Flattened, a stack filed by street was a one-way trip: the folder
+    ``incoming/Hauptstraße/14 Museum/x.jpg`` becomes ``_done/Hauptstraße/14 Museum/x.jpg``,
+    not ``_done/x.jpg``. Flattened, a stack filed by street was a one-way trip: the folder
     names are what say where those photos are (see foldermeta.py), so a second run or even a spot
     check afterwards had nothing left to read -- and equal file names from different houses piled
     up as "023 (2).jpg", "023 (3).jpg".
@@ -105,7 +107,7 @@ def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
 def move_to_done(path: Path, inbox: Path) -> None:
     """File a finished file away -- public, because the backup needs it too.
 
-    A restored archive moves to ``_erledigt`` like every photo that came through this folder. Its
+    A restored archive moves to ``_done`` like every photo that came through this folder. Its
     own name rather than a public ``move_aside``: a parameter of ``import_file`` is called that,
     and it would shadow the function inside its scope.
     """
@@ -207,7 +209,7 @@ def import_file(
     try:
         sha256 = sha256_of_file(path)
     except OSError as error:
-        outcome = ImportOutcome(ImportResult.REJECTED, f"Datei nicht lesbar: {error}")
+        outcome = ImportOutcome(ImportResult.REJECTED, texts().imports.unreadable_file(str(error)))
         _log_outcome(session, path, outcome)
         return outcome
 
@@ -215,7 +217,7 @@ def import_file(
     if existing:
         outcome = ImportOutcome(
             ImportResult.DUPLICATE,
-            f"Inhaltsgleich mit Foto {existing.id} ({existing.original_filename})",
+            texts().imports.same_content_as(existing.id, existing.original_filename),
             photo=existing,
         )
         _log_outcome(session, path, outcome, sha256)
@@ -227,7 +229,8 @@ def import_file(
     try:
         info = exif_service.read_image_info(path)
     except (UnidentifiedImageError, OSError, ValueError) as error:
-        outcome = ImportOutcome(ImportResult.REJECTED, f"Kein lesbares Bild: {error}")
+        message = texts().imports.no_readable_image(str(error))
+        outcome = ImportOutcome(ImportResult.REJECTED, message)
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
             _move_aside(path, inbox, PROBLEM_DIR)
@@ -236,8 +239,10 @@ def import_file(
     if info.format not in ALLOWED_FORMATS:
         outcome = ImportOutcome(
             ImportResult.REJECTED,
-            f"Format {info.format or 'unbekannt'} passt nicht "
-            f"(erlaubt sind: {', '.join(sorted(ALLOWED_FORMATS))})",
+            texts().imports.format_not_allowed(
+                info.format or texts().imports.unknown_format,
+                ", ".join(sorted(ALLOWED_FORMATS)),
+            ),
         )
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
@@ -307,12 +312,7 @@ def import_file(
     if root is not None:
         foldermeta.apply_folder_meta(session, photo, path, root, settings)
 
-    missing = [
-        label
-        for label, empty in (("Ort", photo.needs_location), ("Jahr", photo.needs_date))
-        if empty
-    ]
-    message = "Aufgenommen" + (f", es fehlt noch: {' und '.join(missing)}" if missing else "")
+    message = texts().imports.imported(photo.needs_location, photo.needs_date)
 
     outcome = ImportOutcome(ImportResult.IMPORTED, message, photo=photo, path=target)
     _log_outcome(session, path, outcome, sha256)
@@ -333,7 +333,7 @@ IMAGE_SUFFIXES = {suffix for _, suffix in ALLOWED_FORMATS.values()} | {".jpeg", 
 
 #: Folders never worth offering: our own backup, and what the operating systems leave behind.
 SKIPPED_FOLDERS = {
-    "kiekmap-sicherung",
+    "kiekmap-backup",
     "System Volume Information",
     ".Spotlight-V100",
     ".Trashes",
@@ -501,7 +501,7 @@ def import_from_folder(
 ) -> tuple[str, list[ImportOutcome]]:
     """Take in every image of one folder, subfolders included.
 
-    Returns the German closing message and what became of each file -- the caller decides whether
+    Returns the closing message and what became of each file -- the caller decides whether
     a list that long is still worth showing (see REVIEW_LIMIT in app/api/backup.py).
 
     Committed photo by photo, not at the end: a stick pulled out halfway then leaves behind what
@@ -524,18 +524,16 @@ def import_from_folder(
         outcomes.append(outcome)
         counts[outcome.result] += 1
         if report:
-            report(index, len(images), f"Lese Foto {index} von {len(images)}")
+            report(index, len(images), texts().imports.reading_photo(index, len(images)))
 
     log.info("Stick import from %s: %s", folder, dict(counts))
 
-    teile = [f"{counts[ImportResult.IMPORTED]} Fotos aufgenommen"]
-    if counts[ImportResult.DUPLICATE]:
-        waren = "war" if counts[ImportResult.DUPLICATE] == 1 else "waren"
-        teile.append(f"{counts[ImportResult.DUPLICATE]} {waren} schon da")
-    if counts[ImportResult.REJECTED]:
-        teile.append(f"{counts[ImportResult.REJECTED]} abgewiesen")
-
-    return ", ".join(teile) + ". Der Stick kann jetzt abgezogen werden.", outcomes
+    summary = texts().imports.stick_summary(
+        counts[ImportResult.IMPORTED],
+        counts[ImportResult.DUPLICATE],
+        counts[ImportResult.REJECTED],
+    )
+    return summary, outcomes
 
 
 def upload_name(filename: str) -> str:

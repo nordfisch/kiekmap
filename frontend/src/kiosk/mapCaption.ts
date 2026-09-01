@@ -12,7 +12,7 @@
  */
 
 import type { PhotoMarker } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 
 /**
  * Does this place name carry a house number?

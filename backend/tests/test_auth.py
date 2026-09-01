@@ -1,8 +1,8 @@
-"""Tests der Anmeldung am Admin-Bereich.
+"""Tests of signing in to the admin view.
 
-Der Kernpunkt: eine PIN ist ein kurzes Geheimnis. Vier Ziffern sind zehntausend Moeglichkeiten,
-die ein Skript in Sekunden durchprobiert haette. Was das aufwiegt, ist die Sperre nach wenigen
-Fehlversuchen -- deshalb steht sie hier im Mittelpunkt und nicht das Hashen.
+The core point: a PIN is a short secret. Four digits are ten thousand possibilities, which a
+script would have tried in seconds. What makes up for that is the lockout after a few failed
+attempts -- which is why it stands at the centre here and the hashing does not.
 """
 
 import pytest
@@ -11,75 +11,75 @@ from app.services import auth
 
 
 class TestPin:
-    def test_falsche_pin_wird_abgewiesen(self):
-        gespeichert = auth.hash_pin("4711")
+    def test_a_wrong_pin_is_rejected(self):
+        stored = auth.hash_pin("4711")
 
-        assert not auth.verify_pin("4712", gespeichert)
+        assert not auth.verify_pin("4712", stored)
 
-    def test_richtige_pin_wird_erkannt(self):
-        gespeichert = auth.hash_pin("4711")
+    def test_the_right_pin_is_recognised(self):
+        stored = auth.hash_pin("4711")
 
-        assert auth.verify_pin("4711", gespeichert)
+        assert auth.verify_pin("4711", stored)
 
-    def test_gleiche_pin_ergibt_verschiedene_hashes(self):
-        """Salz. Sonst verriete ein Blick in zwei .env-Dateien, dass beide dieselbe PIN haben."""
+    def test_the_same_pin_gives_different_hashes(self):
+        """Salt. Otherwise a glance at two .env files would reveal that both hold the same PIN."""
         assert auth.hash_pin("4711") != auth.hash_pin("4711")
 
-    def test_kaputter_hash_laesst_niemanden_hinein(self):
-        """Ein vertippter Eintrag in der .env darf nicht zufaellig zur offenen Tuer werden."""
-        for unbrauchbar in ("", "4711", "pbkdf2_sha256$abc", "md5$1$aa$bb"):
-            assert not auth.verify_pin("4711", unbrauchbar)
+    def test_a_broken_hash_lets_nobody_in(self):
+        """A mistyped entry in the .env must not turn into an open door by accident."""
+        for unusable in ("", "4711", "pbkdf2_sha256$abc", "md5$1$aa$bb"):
+            assert not auth.verify_pin("4711", unusable)
 
-    def test_pin_muss_aus_ziffern_bestehen(self):
-        """Auf dem Tastenfeld im Museum gibt es keine Buchstaben."""
+    def test_a_pin_has_to_be_digits(self):
+        """The keypad on the museum device has no letters."""
         assert auth.is_valid_pin("4711")
         assert not auth.is_valid_pin("47a1")
         assert not auth.is_valid_pin("471")
         assert not auth.is_valid_pin("4" * 13)
 
 
-class TestSitzungen:
-    def test_unbekanntes_token_gilt_nicht(self):
+class TestSessions:
+    def test_an_unknown_token_is_not_valid(self):
         store = auth.SessionStore()
 
-        assert store.renew("ausgedacht") is None
+        assert store.renew("invented") is None
 
-    def test_abgemeldetes_token_gilt_nicht_mehr(self):
+    def test_a_signed_out_token_is_no_longer_valid(self):
         store = auth.SessionStore()
-        sitzung = store.issue()
+        session = store.issue()
 
-        store.revoke(sitzung.token)
+        store.revoke(session.token)
 
-        assert store.renew(sitzung.token) is None
+        assert store.renew(session.token) is None
 
-    def test_sitzung_laeuft_ab(self, monkeypatch: pytest.MonkeyPatch):
-        """Ein am Abend vergessener Login darf nicht ueber Nacht offen bleiben."""
-        uhr = [1000.0]
-        monkeypatch.setattr(auth.time, "monotonic", lambda: uhr[0])
+    def test_a_session_expires(self, monkeypatch: pytest.MonkeyPatch):
+        """A login forgotten in the evening must not stay open overnight."""
+        clock = [1000.0]
+        monkeypatch.setattr(auth.time, "monotonic", lambda: clock[0])
         store = auth.SessionStore(lifetime_s=60)
-        sitzung = store.issue()
+        session = store.issue()
 
-        uhr[0] += 61
+        clock[0] += 61
 
-        assert store.renew(sitzung.token) is None
+        assert store.renew(session.token) is None
 
-    def test_jede_anfrage_schiebt_den_ablauf_hinaus(self, monkeypatch: pytest.MonkeyPatch):
-        """Sonst floege jemand mitten aus dem Bearbeiten heraus, nur weil das Tippen dauert."""
-        uhr = [1000.0]
-        monkeypatch.setattr(auth.time, "monotonic", lambda: uhr[0])
+    def test_every_request_pushes_the_expiry_back(self, monkeypatch: pytest.MonkeyPatch):
+        """Otherwise somebody would be thrown out mid-edit, only because typing takes time."""
+        clock = [1000.0]
+        monkeypatch.setattr(auth.time, "monotonic", lambda: clock[0])
         store = auth.SessionStore(lifetime_s=60)
-        sitzung = store.issue()
+        session = store.issue()
 
         for _ in range(10):
-            uhr[0] += 30
-            assert store.renew(sitzung.token) is not None
+            clock[0] += 30
+            assert store.renew(session.token) is not None
 
-        # Insgesamt 300 Sekunden vergangen, die Sitzung haelt 60 -- und lebt trotzdem noch.
-        assert uhr[0] == 1300.0
+        # 300 seconds have passed in total, the session lasts 60 -- and is still alive.
+        assert clock[0] == 1300.0
 
 
-class TestVersuchssperre:
-    def test_sperrt_nach_zu_vielen_fehlversuchen(self):
+class TestAttemptGuard:
+    def test_locks_after_too_many_failed_attempts(self):
         guard = auth.AttemptGuard(max_attempts=3, lockout_s=60)
 
         assert guard.record_failure() == 0
@@ -87,18 +87,18 @@ class TestVersuchssperre:
         assert guard.record_failure() == 60
         assert guard.locked_for() == 60
 
-    def test_sperre_laeuft_von_selbst_ab(self, monkeypatch: pytest.MonkeyPatch):
-        uhr = [1000.0]
-        monkeypatch.setattr(auth.time, "monotonic", lambda: uhr[0])
+    def test_the_lockout_expires_on_its_own(self, monkeypatch: pytest.MonkeyPatch):
+        clock = [1000.0]
+        monkeypatch.setattr(auth.time, "monotonic", lambda: clock[0])
         guard = auth.AttemptGuard(max_attempts=1, lockout_s=60)
         guard.record_failure()
 
-        uhr[0] += 61
+        clock[0] += 61
 
         assert guard.locked_for() == 0
 
-    def test_erfolgreiche_anmeldung_setzt_den_zaehler_zurueck(self):
-        """Sonst summierten sich Vertipper ueber Monate zu einer Sperre."""
+    def test_a_successful_sign_in_resets_the_counter(self):
+        """Otherwise typing errors would add up over months into a lockout."""
         guard = auth.AttemptGuard(max_attempts=3, lockout_s=60)
         guard.record_failure()
         guard.record_failure()

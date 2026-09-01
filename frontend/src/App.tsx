@@ -11,7 +11,7 @@ import { type Region, loadRegion } from "./region";
 import { useAdmin } from "./store/admin";
 import { useContribute } from "./store/contribute";
 import { useKiosk } from "./store/kiosk";
-import { t } from "./text/de";
+import { t } from "./text";
 
 function MapNotice() {
   const total = useKiosk((s) => s.total);

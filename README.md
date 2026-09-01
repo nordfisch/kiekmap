@@ -1,131 +1,139 @@
 # Kiekmap
 
 [![check](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml/badge.svg?branch=develop)](https://github.com/nordfisch/kiekmap/actions/workflows/check.yml)
-[![Lizenz: Apache 2.0](https://img.shields.io/badge/Lizenz-Apache%202.0-blue.svg)](LICENSE)
+[![Licence: Apache 2.0](https://img.shields.io/badge/Licence-Apache%202.0-blue.svg)](LICENSE)
 
-Historische Ortsfotos auf einer Karte entdecken, Jahrzehnt für Jahrzehnt. Ein Touchscreen-Kiosk
-fürs Heimatmuseum: Läuft offline auf einem Raspberry Pi, lässt sich an jeden Ort anpassen, und die
-Besucher ergänzen, was fehlt. Ein Freizeitprojekt von Kalle Erlhoff für das Heimatmuseum Holm,
-erstellt in Zusammenarbeit mit Anthropic Claude Code.
-
-> **Achtung: Arbeitsstand.** Was hier liegt, ist der Stand, der beim **Aufbau des Erstbestands**
-> entstanden ist — 929 historische Fotos, eingelesen, bereinigt und durchgesehen. Gelaufen ist das
-> bisher **ausschließlich lokal**: als Entwicklungsserver und in Containern, beides auf einem Mac.
+> **Documentation:** [nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/) — the
+> files under `docs/`, in both languages, built from the newest tag.
 >
-> **Auf einem Raspberry Pi oder einem Webserver wurde es bisher noch nicht installiert.** Alles
-> unter `deploy/pi/` ist ohne Gerät geschrieben — die Syntax stimmt, ausgeführt wurde nichts.
-> Ungeprüft sind damit der Kiosk-Betrieb, der USB-Weg der Sicherung und das Verhalten nach
-> Neustart und Stromausfall. Der erste echte Aufbau ist zugleich die Abnahme:
-> [Punkt 15](https://github.com/nordfisch/kiekmap/issues/18) und [Punkt 21](https://github.com/nordfisch/kiekmap/issues/22).
+> **Deutsch:** [README.de.md](README.de.md) · [Benutzung](docs/usermanual.de.md) ·
+> [Betrieb](docs/operations.de.md) · [Übernahme](docs/adaption.de.md)
+
+Discover historic pictures of a village on a map, decade by decade. A touchscreen kiosk for a local
+history museum: it runs offline on a Raspberry Pi, adapts to any place, and the visitors fill in
+what is missing. A spare-time project by Kalle Erlhoff for the Heimatmuseum Holm, built together
+with Anthropic Claude Code.
+
+> **Careful: work in progress.** What lies here is the state that came out of **building the
+> initial collection** — 929 historic photos, taken in, cleaned up and looked through. So far it
+> has run **locally only**: as a development server and in containers, both on a Mac.
 >
-> Geprüft ist, was sich ohne Gerät prüfen lässt: Die Container bauen und laufen, die Seite fragt
-> nichts Fremdes an, und 647 Tests laufen durch.
+> **It has not yet been installed on a Raspberry Pi or on a web server.** Everything under
+> `deploy/pi/` was written without a device — the syntax is right, nothing has been run. Kiosk
+> operation, the USB path of the backup and the behaviour after a restart or a power cut are
+> therefore unverified. The first real setup is at the same time the acceptance test:
+> [issue #18](https://github.com/nordfisch/kiekmap/issues/18) and
+> [issue #22](https://github.com/nordfisch/kiekmap/issues/22).
+>
+> What can be checked without a device is checked: the containers build and run, the page requests
+> nothing from a foreign origin, and the test suite is green.
 
-Das Gerät soll im Museum stehen, **vollständig offline** im Kiosk-Modus laufen und gesichert
-werden, indem man einen USB-Stick einsteckt und einen Knopf drückt.
+The device is meant to stand in the museum, run **entirely offline** in kiosk mode, and be backed
+up by plugging in a USB stick and pressing one button.
 
-## Was der Besucher sieht
+## What a visitor sees
 
-```
-┌──────────────┬────────────────────────────────────────┐
-│ [Wappen]     │  1920 ├──●━━━━━━━━━━━━━━━●──┤ 2019     │
-│ Bilder aus   │                                        │
-│ HOLM         │                                        │
-├──────────────┼────────────────────────────────────────┤
-│  HILF MIT:   │                                        │
-│              │         Karte des Ortes                │
-│  [Foto]      │         Fotos an ihrem Aufnahmeort     │
-│  "Wo ist     │         Tippen öffnet sie groß         │
-│   das?"      │                                        │
-│              │                                        │
-│  [Karte][×]  │                                        │
-└──────────────┴────────────────────────────────────────┘
-```
+![The visitor view: the „Hilf mit" panel on the left, the time slider and the map on the
+right](docs/images/kiosk-map.png)
 
-Karte zoomen und den Zeitraum-Schieber bewegen filtert die Fotos. Der Schieber steht über der
-Karte, die er filtert — nicht über dem Beitragsbereich. Links fragt der „Hilf mit"-Bereich nach
-fehlenden Angaben — *„Wo ist das?"*, *„Wann war das?"* —, denn bei historischen Scans steht das
-nirgends in der Datei. Wer den Ort kennt, ergänzt die Datenbank im Vorbeigehen. Ist nichts mehr
-offen, fällt der Bereich weg und die Karte nimmt die volle Breite.
+*The device in Holm, in German. `KIEKMAP_LANGUAGE=en` switches the same screen to English.*
 
-Das Wappen führt die linke Spalte an und ist zugleich der Weg in die Verwaltung.
+Zooming the map and moving the time slider filters the photos. The slider sits above the map it
+filters — not above the contribution panel. On the left, the „Hilf mit" panel asks for what is
+missing — *"Where is this?"*, *"When was this?"* — because with historic scans none of that stands
+in the file. Whoever knows the place fills the database in passing. Once nothing is open any more,
+the panel falls away and the map takes the full width.
 
-## Aufbau
+A tap opens a photo at full size, with everything known about it: the dating, the address, the
+keywords, the credit — and the identifier, so that it can be found again in the archive.
 
-| Ordner | Inhalt |
+![The detail view: the photo at full size, its statements beside it](docs/images/kiosk-detail.png)
+
+The coat of arms heads the left column and is at the same time the way into the admin area.
+
+Behind it lies the admin view, used once or twice a year by volunteers: what the collection holds,
+what is still missing, and how long ago the last backup was.
+
+![The admin view: nine tiles with the state of the collection](docs/images/admin-overview.png)
+
+## Layout
+
+| Folder | Content |
 |---|---|
-| `backend/` | FastAPI + SQLite: Fotos, Metadaten, Import, API |
-| `frontend/` | React + MapLibre: Besucheransicht (`src/kiosk/`) und Admin (`src/admin/`) |
-| `tiles/` | Skripte, die die Offline-Karte und die lokale Ortssuche bauen |
-| `deploy/` | Docker Compose und die Einrichtung des Raspberry Pi |
-| `docs/` | Die ganze Dokumentation — Wegweiser: [docs/index.md](docs/index.md) |
-| `data/` | Laufzeitdaten (nicht im Repo): Datenbank, Fotos, Thumbnails |
+| `backend/` | FastAPI + SQLite: photos, metadata, import, API |
+| `frontend/` | React + MapLibre: the visitor view (`src/kiosk/`) and the admin view (`src/admin/`) |
+| `tiles/` | Scripts that build the offline map and the local place search |
+| `deploy/` | Docker Compose and the setup of the Raspberry Pi |
+| `docs/` | All the documentation — signpost: [docs/index.md](docs/index.md) |
+| `data/` | Runtime data (not in the repository): database, photos, thumbnails |
 
-## Entwicklung
+## Development
 
-Voraussetzungen: Python 3.12+, Node 18+, optional Docker.
+Prerequisites: Python 3.12+, Node 18+, Docker optional.
 
 ```bash
 make dev
 ```
 
-Startet Backend (Port 8000, API-Doku unter `/api/docs`) und Frontend (Port 5173) mit Hot Reload.
-Vite leitet `/api` an das Backend weiter, sodass in Entwicklung und Betrieb dieselben Pfade gelten.
+Starts the backend (port 8000, API docs under `/api/docs`) and the frontend (port 5173) with hot
+reload. Vite passes `/api` on to the backend, so development and production share the same paths.
 
-`make` ohne Ziel zeigt alle Kommandos.
+`make` without a target lists every command.
 
-| Kommando | Zweck |
+| Command | Purpose |
 |---|---|
-| `make dev` | Backend und Frontend mit Hot Reload |
-| `make seed` | Beispielbestand aus `seed/` herstellen — [alles darin ist erfunden](seed/README.md) |
-| `make empty` | Den ganzen Fotobestand löschen. Fragt nach und ist nicht rückholbar |
-| `make test` | pytest und vitest |
-| `make tiles` | Offline-Karte und Ortsindex für die konfigurierte Region bauen |
-| `make prod` | Alles in Containern, so wie es auf dem Pi läuft |
+| `make dev` | backend and frontend with hot reload |
+| `make seed` | build the sample collection from `seed/` — [everything in it is invented](seed/README.md) |
+| `make empty` | delete the whole photo collection. It asks first, and there is no way back |
+| `make test` | pytest and vitest |
+| `make tiles` | build the offline map and the place index for the configured region |
+| `make prod` | everything in containers, the way it runs on the Pi |
 
-Einrichtung im Detail, Sprachregelung, Teststrategie und die Fallstricke, die Zeit gekostet haben:
-[docs/development.md](docs/development.md). Für Coding-Agents: [CLAUDE.md](CLAUDE.md).
+Setup in detail, the language rule, the testing strategy and the traps that cost time:
+[docs/development.md](docs/development.md). For coding agents: [CLAUDE.md](CLAUDE.md).
 
-**Für einen anderen Ort:** Es genügt, `tiles/region.json` anzupassen und `make tiles && make places`
-auszuführen — kein Fork, kein Codeeingriff. Schritt für Schritt in
-[docs/adaption.md](docs/adaption.md).
+**For a different place:** adjusting `tiles/region.json` and running `make tiles && make places` is
+enough — no fork, no change to the code. Step by step in [docs/adaption.md](docs/adaption.md).
 
-## Betrieb
+**For a different language:** one line in the `.env`. `KIEKMAP_LANGUAGE=en` switches the visitor
+view, the admin area, the messages and the date labels, without a new build.
 
-Der Pi bootet direkt in die Karte — kein Login, kein Desktop, keine Bedienung nötig.
-Einrichtung, Sicherung, Wiederherstellung und Fehlersuche stehen in
-[docs/operations.md](docs/operations.md). Die Kurzanleitung zum Ausdrucken für die Ehrenamtlichen
-ist [docs/usermanual.md](docs/usermanual.md).
+## Operation
 
-Woraus das System besteht und wie die Teile zusammenspielen, steht in
-[docs/architecture.md](docs/architecture.md); warum die Technik so gewählt ist, in
-[docs/decisions.md](docs/decisions.md); wie es dazu gekommen ist, in
-[docs/history.md](docs/history.md). Was noch offen ist, in den [Issues](https://github.com/nordfisch/kiekmap/issues).
-Welche Datei welche Frage beantwortet, sagt [docs/index.md](docs/index.md).
+The Pi boots straight into the map — no login, no desktop, nothing to operate. Setup, backup,
+restore and troubleshooting are in [docs/operations.md](docs/operations.md). The short guide to
+print out for the volunteers is [docs/usermanual.de.md](docs/usermanual.de.md), in German.
 
-## Mitwirken
+What the system is made of and how the parts fit together is in
+[docs/architecture.md](docs/architecture.md); why the technology was chosen this way, in
+[docs/decisions.md](docs/decisions.md); how it came about, in
+[docs/archive/history.de.md](docs/archive/history.de.md), in German. What is still open is in the
+[issues](https://github.com/nordfisch/kiekmap/issues). Which file answers which question is in
+[docs/index.md](docs/index.md).
 
-Wie man einsteigt, welche Regeln hier gelten und was man erwarten darf — ein Betreuer, nebenher,
-ohne zugesagte Antwortzeit —, steht in [CONTRIBUTING.md](CONTRIBUTING.md). Zum Umgangston:
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Eine Sicherheitslücke gehört **nicht** in eine
-öffentliche Meldung; der Weg steht in [SECURITY.md](SECURITY.md).
+## Contributing
 
-**Am meisten hilft ein zweites Museum, das es aufsetzt und berichtet.** Die Anleitung dafür ist
-ohne Gerät geschrieben worden; jeder Stolperstein daraus ist wertvoller als jede neue Funktion.
+How to get started, what rules apply here and what you may expect — one maintainer, on the side, no
+promised response time — is in [CONTRIBUTING.md](CONTRIBUTING.md). On the tone:
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). A security vulnerability does **not** belong in a public
+issue; the way is described in [SECURITY.md](SECURITY.md).
 
-## Lizenz
+**What helps most is a second museum that sets it up and reports back.** The guide for that was
+written without a device; every stumbling block from it is worth more than any new feature.
 
-Copyright 2026 Kalle Erlhoff, lizenziert unter der **Apache-Lizenz 2.0** (`SPDX-License-Identifier:
-Apache-2.0`). Der Lizenztext steht in [LICENSE](LICENSE), die Namensnennung in [NOTICE](NOTICE);
-beide reisen mit jeder Weitergabe mit.
+## Licence
 
-**Alle 169 verwendeten Fremdkomponenten sind permissiv lizenziert** — nachgezählt an den
-installierten Paketen, nicht an den Manifestdateien: MIT, ISC, BSD-2, BSD-3, Apache-2.0, HPND und
-PSF. Kein Copyleft, nichts, was einer Nutzung im Weg steht.
+Copyright 2026 Kalle Erlhoff, licensed under the **Apache License 2.0**
+(`SPDX-License-Identifier: Apache-2.0`). The licence text is in [LICENSE](LICENSE), the attribution
+in [NOTICE](NOTICE); both travel with every copy.
 
-**Die Kartendaten sind eine eigene Frage.** Sie stammen aus OpenStreetMap und stehen unter der
-**ODbL 1.0**; die Schriften unter der OFL 1.1, die Kartensymbole unter MIT. Was das für eine
-Weitergabe bedeutet — und was der Fotobestand des Museums damit zu tun hat, nämlich nichts —,
-steht in [docs/licensing.md](docs/licensing.md).
+**Every third-party component in use is permissively licensed** — counted against the installed
+packages, not against the manifest files: MIT, ISC, BSD-2, BSD-3, Apache-2.0, HPND and PSF. No
+copyleft, nothing that stands in the way of using it.
 
-Ohne Gewähr, ohne Haftung, wie in Abschnitt 7 und 8 der Lizenz beschrieben.
+**The map data is a question of its own.** It comes from OpenStreetMap and is under the
+**ODbL 1.0**; the fonts under the OFL 1.1, the map sprites under MIT. What that means for passing
+it on — and what the museum's photo collection has to do with it, namely nothing — is in
+[docs/licensing.md](docs/licensing.md).
+
+Without warranty and without liability, as described in sections 7 and 8 of the licence.

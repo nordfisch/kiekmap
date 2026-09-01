@@ -19,7 +19,7 @@ import { Marker } from "maplibre-gl";
 import { useEffect, useRef } from "react";
 
 import { useContribute } from "../store/contribute";
-import { t } from "../text/de";
+import { t } from "../text";
 
 export function PinLayer({ map }: { map: maplibregl.Map }) {
   const active = useContribute((s) => s.need === "location" && s.task?.photo != null && !s.thanks);

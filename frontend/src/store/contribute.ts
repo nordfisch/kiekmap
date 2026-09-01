@@ -22,7 +22,7 @@ import {
   postHouseNumber,
   postLocation,
 } from "../api/client";
-import { t } from "../text/de";
+import { t } from "../text";
 import { useKiosk } from "./kiosk";
 
 /** How long the thank-you note stays before the next question arrives. */

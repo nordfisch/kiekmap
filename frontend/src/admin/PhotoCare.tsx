@@ -8,7 +8,13 @@
  * is matching street names is in a different frame of mind from somebody estimating decades.
  */
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   type PhotoAdminDetail,
@@ -17,7 +23,7 @@ import {
   fetchAdminPhotos,
   patchPhoto,
 } from "../api/admin";
-import { t } from "../text/de";
+import { t } from "../text";
 import { Pager } from "./Pager";
 import { PhotoEditor } from "./PhotoEditor";
 import { clampOffset } from "./pagination";
@@ -26,12 +32,15 @@ import { useLoaded } from "./useLoaded";
 
 // Place and year kept apart: locating and dating are two jobs, and whoever is doing one does not
 // want the other in between.
-const FILTERS: { value: Selection; label: string }[] = [
-  { value: "all", label: t.admin.photos.filterAll },
-  { value: "without_location", label: t.admin.photos.filterWithoutLocation },
-  { value: "without_date", label: t.admin.photos.filterWithoutDate },
-  { value: "deleted", label: t.admin.photos.filterDeleted },
-];
+// A function, not a constant: `t` is only resolved after this module has been imported.
+function filters(): { value: Selection; label: string }[] {
+  return [
+    { value: "all", label: t.admin.photos.filterAll },
+    { value: "without_location", label: t.admin.photos.filterWithoutLocation },
+    { value: "without_date", label: t.admin.photos.filterWithoutDate },
+    { value: "deleted", label: t.admin.photos.filterDeleted },
+  ];
+}
 
 export function PhotoCare({
   initialFilter = "all",
@@ -57,7 +66,10 @@ export function PhotoCare({
   useEffect(() => setOffset(0), [show, debounced]);
 
   const { data, error, loading, reload } = useLoaded(
-    useCallback(() => fetchAdminPhotos(show, debounced, offset), [show, debounced, offset]),
+    useCallback(
+      () => fetchAdminPhotos(show, debounced, offset),
+      [show, debounced, offset],
+    ),
   );
 
   // Working through it makes the list shorter -- whoever locates the last entry of the last page
@@ -110,10 +122,16 @@ export function PhotoCare({
      should land in the same place.
 
      Only deleting asks back. Restoring breaks nothing. */
-  async function setDeleted(id: number, title: string | null, deleted: boolean) {
+  async function setDeleted(
+    id: number,
+    title: string | null,
+    deleted: boolean,
+  ) {
     if (
       deleted &&
-      !window.confirm(t.admin.editor.deleteConfirm(title || t.admin.photos.untitled))
+      !window.confirm(
+        t.admin.editor.deleteConfirm(title || t.admin.photos.untitled),
+      )
     ) {
       return;
     }
@@ -154,7 +172,7 @@ export function PhotoCare({
       />
 
       <div className="tabs tabs--filters">
-        {FILTERS.map((filter) => (
+        {filters().map((filter) => (
           <button
             key={filter.value}
             type="button"
@@ -171,14 +189,20 @@ export function PhotoCare({
 
       {data && (
         <>
-          <p className="admin__note">{t.admin.photos.found(data.photos.length, data.total)}</p>
+          <p className="admin__note">
+            {t.admin.photos.found(data.photos.length, data.total)}
+          </p>
           {data.photos.length === 0 ? (
             <p className="admin__note">{t.admin.photos.none}</p>
           ) : (
             <ul className="photo-rows">
               {data.photos.map((photo) => (
                 <li key={photo.id} className="photo-row">
-                  <img className="photo-row__thumb" src={photo.thumb_url} alt="" />
+                  <img
+                    className="photo-row__thumb"
+                    src={photo.thumb_url}
+                    alt=""
+                  />
                   <div className="photo-row__text">
                     <span className="photo-row__title">
                       {photo.title || t.admin.photos.untitled}
@@ -189,25 +213,37 @@ export function PhotoCare({
                     </span>
                     <span className="photo-row__flags">
                       {photo.needs_location && (
-                        <span className="flag">{t.admin.photos.missingLocation}</span>
+                        <span className="flag">
+                          {t.admin.photos.missingLocation}
+                        </span>
                       )}
                       {photo.needs_date && (
-                        <span className="flag">{t.admin.photos.missingDate}</span>
+                        <span className="flag">
+                          {t.admin.photos.missingDate}
+                        </span>
                       )}
                       {photo.status === "deleted" && (
-                        <span className="flag flag--muted">{t.admin.photos.deleted}</span>
+                        <span className="flag flag--muted">
+                          {t.admin.photos.deleted}
+                        </span>
                       )}
                     </span>
                   </div>
                   <div className="photo-row__actions">
-                    <button type="button" className="button" onClick={() => void open(photo.id)}>
+                    <button
+                      type="button"
+                      className="button"
+                      onClick={() => void open(photo.id)}
+                    >
                       {t.admin.photos.edit}
                     </button>
                     {photo.status === "deleted" ? (
                       <button
                         type="button"
                         className="button button--restore"
-                        onClick={() => void setDeleted(photo.id, photo.title, false)}
+                        onClick={() =>
+                          void setDeleted(photo.id, photo.title, false)
+                        }
                       >
                         {t.admin.photos.restore}
                       </button>
@@ -215,7 +251,9 @@ export function PhotoCare({
                       <button
                         type="button"
                         className="button button--danger"
-                        onClick={() => void setDeleted(photo.id, photo.title, true)}
+                        onClick={() =>
+                          void setDeleted(photo.id, photo.title, true)
+                        }
                       >
                         {t.admin.photos.delete}
                       </button>

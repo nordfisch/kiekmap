@@ -1,12 +1,12 @@
-"""Der Beispielbestand: sichern, wegwerfen, zurueckholen.
+"""The sample collection: save it, throw it away, fetch it back.
 
-Die eine Zusage, an der alles haengt: **Was gesichert wurde, kommt vollstaendig zurueck.** Ein
-Ausgangszustand, der bei jedem Zurueckholen ein wenig anders aussieht, ist keiner -- und der
-Unterschied faellt erst auf, wenn man einen Fehler sucht, den es gar nicht gibt.
+The one promise everything hangs on: **what was saved comes back complete.** A starting state that
+looks a little different after every restore is not one -- and the difference is only noticed while
+hunting a bug that does not exist.
 
-Der zweite Grund fuer diese Tests ist die Form: Bilddateien plus JSON statt eines
-Datenbankabzugs, damit eine neue Spalte den Bestand nicht wertlos macht. Die Kehrseite ist, dass
-das Auflegen der Metadaten Handarbeit im Code ist -- genau die Sorte Code, die still danebengreift.
+The second reason for these tests is the form: image files plus JSON instead of a database dump, so
+that a new column does not make the collection worthless. The other side of that is that applying
+the metadata is handwritten code -- exactly the kind that reaches silently past its target.
 """
 
 from datetime import date
@@ -17,27 +17,27 @@ from app.models import Change, Photo, PhotoStatus, Source, Tag
 from app.services import seed
 
 
-def _bestand(session, settings, sample_image, fixtures_dir) -> Photo:
-    """Ein Foto mit allem dran: Datierung, Ort, Schlagwoerter, Nachweis, Herkunft, Beitrag."""
+def _photo_with_everything(session, settings, sample_image, fixtures_dir) -> Photo:
+    """A photo with all of it: dating, place, tags, credit, provenance, contribution."""
     from app.services.importer import import_file
 
-    foto = import_file(session, sample_image("scan_ohne_exif.jpg"), settings).photo
-    assert foto is not None
-    foto.title = "Gasthof Petersen"
-    foto.description = "Blick von der Hauptstrasse."
-    foto.credit = "Sammlung Heimatmuseum Holm"
-    foto.provenance = "Leihgabe H. Meyer, Freigabe liegt vor"
-    foto.date_from, foto.date_to = date(1920, 1, 1), date(1929, 12, 31)
-    foto.date_precision = "decade"
-    foto.date_source = Source.CURATOR
-    foto.lat, foto.lon = 53.6196, 9.652
-    foto.place_name = "Hauptstrasse 14"
-    foto.location_source = Source.VISITOR
-    foto.location_accuracy_m = 15
-    foto.tags = [Tag(name="Gasthof"), Tag(name="ArchivHolm")]
+    photo = import_file(session, sample_image("scan_ohne_exif.jpg"), settings).photo
+    assert photo is not None
+    photo.title = "Gasthof Petersen"
+    photo.description = "Blick von der Hauptstrasse."
+    photo.credit = "Sammlung Heimatmuseum Holm"
+    photo.provenance = "Leihgabe H. Timm, Freigabe liegt vor"
+    photo.date_from, photo.date_to = date(1920, 1, 1), date(1929, 12, 31)
+    photo.date_precision = "decade"
+    photo.date_source = Source.CURATOR
+    photo.lat, photo.lon = 53.6196, 9.652
+    photo.place_name = "Hauptstrasse 14"
+    photo.location_source = Source.VISITOR
+    photo.location_accuracy_m = 15
+    photo.tags = [Tag(name="Gasthof"), Tag(name="ArchivHolm")]
     session.add(
         Change(
-            photo_id=foto.id,
+            photo_id=photo.id,
             field="location",
             old_value=None,
             new_value="53.6196,9.652 (Hauptstrasse 14)",
@@ -45,103 +45,103 @@ def _bestand(session, settings, sample_image, fixtures_dir) -> Photo:
         )
     )
     session.commit()
-    return foto
+    return photo
 
 
-class TestRundlauf:
-    def test_ausgangszustand_uebersteht_das_hin_und_zurueck(
+class TestRoundTrip:
+    def test_the_starting_state_survives_the_way_out_and_back(
         self, session, settings, sample_image, fixtures_dir, tmp_path
     ):
-        vorher = _bestand(session, settings, sample_image, fixtures_dir)
-        erwartet = {
-            feld: getattr(vorher, feld) for feld in (*seed.FIELDS, "sha256", "original_filename")
+        before = _photo_with_everything(session, settings, sample_image, fixtures_dir)
+        expected = {
+            field: getattr(before, field) for field in (*seed.FIELDS, "sha256", "original_filename")
         }
-        erwartete_tags = sorted(tag.name for tag in vorher.tags)
+        expected_tags = sorted(tag.name for tag in before.tags)
 
-        ziel = tmp_path / "seed"
-        seed.export(session, settings, ziel)
+        target = tmp_path / "seed"
+        seed.export(session, settings, target)
         session.commit()
 
-        seed.load(session, settings, ziel)
+        seed.load(session, settings, target)
         session.commit()
 
-        nachher = session.scalars(select(Photo)).one()
-        for feld, wert in erwartet.items():
-            assert getattr(nachher, feld) == wert, f"{feld} kam anders zurueck"
-        assert sorted(tag.name for tag in nachher.tags) == erwartete_tags
+        after = session.scalars(select(Photo)).one()
+        for field, value in expected.items():
+            assert getattr(after, field) == value, f"{field} came back different"
+        assert sorted(tag.name for tag in after.tags) == expected_tags
 
-    def test_besucherbeitrag_kommt_mit(
+    def test_the_visitor_contribution_comes_along(
         self, session, settings, sample_image, fixtures_dir, tmp_path
     ):
-        """Sonst waere die Sichtungsliste der Verwaltung nach jedem ``make seed`` leer."""
-        _bestand(session, settings, sample_image, fixtures_dir)
-        ziel = tmp_path / "seed"
+        """Otherwise the admin review list would be empty after every ``make seed``."""
+        _photo_with_everything(session, settings, sample_image, fixtures_dir)
+        target = tmp_path / "seed"
 
-        seed.export(session, settings, ziel)
+        seed.export(session, settings, target)
         session.commit()
-        seed.load(session, settings, ziel)
+        seed.load(session, settings, target)
         session.commit()
 
-        beitrag = session.scalars(select(Change)).one()
-        assert beitrag.source == Source.VISITOR
-        assert beitrag.new_value == "53.6196,9.652 (Hauptstrasse 14)"
-        assert beitrag.photo_id == session.scalars(select(Photo)).one().id
+        contribution = session.scalars(select(Change)).one()
+        assert contribution.source == Source.VISITOR
+        assert contribution.new_value == "53.6196,9.652 (Hauptstrasse 14)"
+        assert contribution.photo_id == session.scalars(select(Photo)).one().id
 
-    def test_geloeschtes_foto_bleibt_geloescht(
+    def test_a_deleted_photo_stays_deleted(
         self, session, settings, sample_image, fixtures_dir, tmp_path
     ):
-        """Dass zwei Fotos im Papierkorb liegen, gehoert zum Zustand -- sonst ist die Liste leer."""
-        foto = _bestand(session, settings, sample_image, fixtures_dir)
-        foto.status = PhotoStatus.DELETED
+        """Two photos in the bin are part of the state -- otherwise the list is empty."""
+        photo = _photo_with_everything(session, settings, sample_image, fixtures_dir)
+        photo.status = PhotoStatus.DELETED
         session.commit()
-        ziel = tmp_path / "seed"
+        target = tmp_path / "seed"
 
-        seed.export(session, settings, ziel)
+        seed.export(session, settings, target)
         session.commit()
-        seed.load(session, settings, ziel)
+        seed.load(session, settings, target)
         session.commit()
 
         assert session.scalars(select(Photo)).one().status == PhotoStatus.DELETED
 
-    def test_luecken_bleiben_luecken(self, session, settings, sample_image, tmp_path):
-        """Ein Foto ohne Ort und ohne Jahr ist der Fall, den der Hilf-mit-Bereich braucht.
+    def test_gaps_stay_gaps(self, session, settings, sample_image, tmp_path):
+        """A photo without a place and without a year is the case the contribution panel needs.
 
-        Beim Zurueckholen laeuft es durch den echten Import, und der liest aus der Datei, was er
-        findet. Wuerde er dabei etwas eintragen, verschwaende das Foto aus dem Beitragsbereich --
-        die Luecke muss also die staerkere Angabe sein.
+        On the way back it runs through the real import, and that reads from the file whatever it
+        finds. If it entered something there, the photo would vanish from the contribution panel --
+        so the gap has to be the stronger statement.
         """
-        foto = _bestand(session, settings, sample_image, None)
-        foto.date_from = foto.date_to = None
-        foto.date_precision = "unknown"
-        foto.date_source = None
-        foto.lat = foto.lon = None
-        foto.place_name = None
-        foto.location_source = None
+        photo = _photo_with_everything(session, settings, sample_image, None)
+        photo.date_from = photo.date_to = None
+        photo.date_precision = "unknown"
+        photo.date_source = None
+        photo.lat = photo.lon = None
+        photo.place_name = None
+        photo.location_source = None
         session.commit()
-        ziel = tmp_path / "seed"
+        target = tmp_path / "seed"
 
-        seed.export(session, settings, ziel)
+        seed.export(session, settings, target)
         session.commit()
-        seed.load(session, settings, ziel)
+        seed.load(session, settings, target)
         session.commit()
 
-        nachher = session.scalars(select(Photo)).one()
-        assert nachher.needs_date, "die fehlende Datierung wurde beim Einlesen zugeschuettet"
-        assert nachher.needs_location, "der fehlende Ort wurde beim Einlesen zugeschuettet"
+        after = session.scalars(select(Photo)).one()
+        assert after.needs_date, "the missing dating was filled in while reading back"
+        assert after.needs_location, "the missing place was filled in while reading back"
 
 
-class TestFehlenderBestand:
-    def test_ohne_seed_verzeichnis_gibt_es_eine_klare_meldung(self, session, settings, tmp_path):
-        """Kein Stapelauszug, sondern etwas Lesbares -- die CLI macht einen Satz daraus."""
+class TestAMissingCollection:
+    def test_without_a_seed_directory_there_is_a_clear_message(self, session, settings, tmp_path):
+        """Not a stack trace but something readable -- the CLI turns it into a sentence."""
         import pytest
 
         with pytest.raises(FileNotFoundError):
-            seed.load(session, settings, tmp_path / "gibt-es-nicht")
+            seed.load(session, settings, tmp_path / "does-not-exist")
 
-    def test_leeren_raeumt_fotos_und_vorschaubilder_weg(
+    def test_clearing_removes_photos_and_thumbnails(
         self, session, settings, sample_image, fixtures_dir
     ):
-        _bestand(session, settings, sample_image, fixtures_dir)
+        _photo_with_everything(session, settings, sample_image, fixtures_dir)
         assert list(settings.photos_dir.rglob("*.jpg"))
 
         seed.clear(session, settings)
@@ -152,59 +152,59 @@ class TestFehlenderBestand:
         assert list(settings.photos_dir.rglob("*.jpg")) == []
         assert list(settings.thumbs_dir.rglob("*.webp")) == []
 
-    def test_sichern_raeumt_geloeschte_dateien_weg(
+    def test_exporting_removes_deleted_files(
         self, session, settings, sample_image, fixtures_dir, tmp_path
     ):
-        """Sonst waere seed/ ein Ordner, der nur waechst -- und kein Abbild eines Zustands."""
+        """Otherwise seed/ would be a folder that only grows -- not the image of a state."""
         from app.services.importer import import_file
 
-        _bestand(session, settings, sample_image, fixtures_dir)
-        zweites = import_file(session, sample_image("hochkant.jpg"), settings).photo
+        _photo_with_everything(session, settings, sample_image, fixtures_dir)
+        second = import_file(session, sample_image("hochkant.jpg"), settings).photo
         session.commit()
-        ziel = tmp_path / "seed"
-        seed.export(session, settings, ziel)
-        assert (ziel / seed.IMAGE_DIR_NAME / "hochkant.jpg").exists()
+        target = tmp_path / "seed"
+        seed.export(session, settings, target)
+        assert (target / seed.IMAGE_DIR_NAME / "hochkant.jpg").exists()
 
-        session.delete(zweites)
+        session.delete(second)
         session.commit()
-        seed.export(session, settings, ziel)
+        seed.export(session, settings, target)
 
-        assert not (ziel / seed.IMAGE_DIR_NAME / "hochkant.jpg").exists()
-        assert (ziel / seed.IMAGE_DIR_NAME / "scan_ohne_exif.jpg").exists()
+        assert not (target / seed.IMAGE_DIR_NAME / "hochkant.jpg").exists()
+        assert (target / seed.IMAGE_DIR_NAME / "scan_ohne_exif.jpg").exists()
 
 
-class TestBestandLeeren:
-    """``make empty`` -- der einzige Befehl, aus dem kein Weg zurueckfuehrt.
+class TestEmptyingTheCollection:
+    """``make empty`` -- the only command with no way back.
 
-    ``seed-load`` wirft den Bestand auch weg, setzt aber etwas an seine Stelle. Dieser hier laesst
-    nichts. Der Fehlerfall ist deshalb nicht "es loescht nicht", sondern **"es loescht, obwohl
-    jemand etwas anderes gemeint hat"** -- und der faellt erst auf, wenn 929 Fotos weg sind.
+    ``seed-load`` throws the collection away too, but puts something in its place. This one leaves
+    nothing. The failure case is therefore not "it does not delete" but **"it deletes although
+    somebody meant something else"** -- and that is only noticed once 929 photos are gone.
     """
 
-    def test_eine_falsche_antwort_loescht_nichts(
+    def test_a_wrong_answer_deletes_nothing(
         self, session, settings, sample_image, fixtures_dir, monkeypatch, capsys
     ):
         from app.cli import main
 
-        _bestand(session, settings, sample_image, fixtures_dir)
+        _photo_with_everything(session, settings, sample_image, fixtures_dir)
         monkeypatch.setattr("builtins.input", lambda _: "ja")
 
         assert main(["empty"]) == 1
 
         assert len(session.scalars(select(Photo)).all()) == 1
         assert list(settings.photos_dir.rglob("*.jpg"))
-        assert "Abgebrochen" in capsys.readouterr().out
+        assert "Cancelled" in capsys.readouterr().out
 
-    def test_die_anzahl_der_fotos_ist_die_bestaetigung(
+    def test_the_number_of_photos_is_the_confirmation(
         self, session, settings, sample_image, fixtures_dir, monkeypatch
     ):
-        """Getippt werden muss die Zahl, die eine Zeile weiter oben steht.
+        """What has to be typed is the number standing one line above.
 
-        Ein "j/n" laesst sich beantworten, ohne gelesen zu haben. Eine Zahl nicht.
+        A "y/n" can be answered without having read. A number cannot.
         """
         from app.cli import main
 
-        _bestand(session, settings, sample_image, fixtures_dir)
+        _photo_with_everything(session, settings, sample_image, fixtures_dir)
         monkeypatch.setattr("builtins.input", lambda _: "1")
 
         assert main(["empty"]) == 0
@@ -212,44 +212,44 @@ class TestBestandLeeren:
         assert session.scalars(select(Photo)).all() == []
         assert list(settings.photos_dir.rglob("*.jpg")) == []
 
-    def test_ohne_rueckfrage_nur_mit_der_ausdruecklichen_option(
+    def test_no_prompt_only_with_the_explicit_option(
         self, session, settings, sample_image, fixtures_dir, monkeypatch
     ):
-        """--yes ist fuer Skripte. Wird es gesetzt, darf nichts mehr nachfragen."""
+        """--yes is for scripts. Once it is set, nothing may ask any more."""
         from app.cli import main
 
-        _bestand(session, settings, sample_image, fixtures_dir)
+        _photo_with_everything(session, settings, sample_image, fixtures_dir)
 
-        def keine_eingabe(_):
-            raise AssertionError("es wurde trotz --yes nachgefragt")
+        def no_input(_):
+            raise AssertionError("it asked despite --yes")
 
-        monkeypatch.setattr("builtins.input", keine_eingabe)
+        monkeypatch.setattr("builtins.input", no_input)
 
         assert main(["empty", "--yes"]) == 0
         assert session.scalars(select(Photo)).all() == []
 
-    def test_ein_leerer_bestand_fragt_gar_nicht_erst(self, session, settings, monkeypatch):
+    def test_an_empty_collection_does_not_even_ask(self, session, settings, monkeypatch):
         from app.cli import main
 
-        def keine_eingabe(_):
-            raise AssertionError("ein leerer Bestand braucht keine Bestaetigung")
+        def no_input(_):
+            raise AssertionError("an empty collection needs no confirmation")
 
-        monkeypatch.setattr("builtins.input", keine_eingabe)
+        monkeypatch.setattr("builtins.input", no_input)
 
         assert main(["empty"]) == 0
 
-    def test_der_ortsindex_bleibt_stehen(
+    def test_the_place_index_stays(
         self, session, settings, sample_image, fixtures_dir, monkeypatch
     ):
-        """Er kommt aus einem Overpass-Lauf und hat mit den Fotos nichts zu tun.
+        """It comes from an Overpass run and has nothing to do with the photos.
 
-        Mitgeloescht muesste er ueber `make places` neu gebaut werden -- mit Netz, das der Pi im
-        Museum nicht hat.
+        Deleted along with them it would have to be rebuilt through `make places` -- with the
+        internet, which the Pi in the museum does not have.
         """
         from app.cli import main
         from app.models import Place
 
-        _bestand(session, settings, sample_image, fixtures_dir)
+        _photo_with_everything(session, settings, sample_image, fixtures_dir)
         session.add(
             Place(
                 name="Hauptstrasse",
@@ -264,6 +264,6 @@ class TestBestandLeeren:
 
         assert main(["empty"]) == 0
 
-        # Erst wenn wirklich geloescht wurde, sagt der Ortsindex etwas aus.
+        # Only once something really was deleted does the place index say anything.
         assert session.scalars(select(Photo)).all() == []
         assert session.scalars(select(Place)).all() != []

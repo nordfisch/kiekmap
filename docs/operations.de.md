@@ -1,0 +1,347 @@
+<!-- translated-from: docs/operations.md -->
+<!-- source-sha: 11c73a87830f30bd71d39e1573e411eb1f5302144fd361a79a84d4a89db92cd1 -->
+
+# Betriebshandbuch
+
+Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung steht in der
+[Anleitung für das Museumsteam](usermanual.de.md); hier steht die Technik.
+
+> **Auf einem echten Pi noch nicht erprobt.** Die Dateien unter `deploy/pi/` sind sorgfältig
+> geschrieben und syntaktisch geprüft, aber nie gelaufen — es gab beim Bauen kein Gerät. Was
+> davon zuerst hakt, gehört in diese Datei, sobald der Pi dasteht.
+
+---
+
+## Einen neuen Pi einrichten
+
+Raspberry Pi OS **Lite** (64 Bit), kein Desktop. Dann:
+
+```bash
+sudo git clone <repo> /opt/kiekmap
+sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh
+```
+
+Das Skript installiert cage, Chromium und Docker, legt den Benutzer `kiekmap` an, richtet den
+Kiosk-Dienst und die USB-Regel ein und schaltet die Bildschirmabschaltung ab. Danach nennt es die
+vier Schritte, die es nicht selbst tun kann: `.env` anlegen, PIN setzen, Kartendaten kopieren,
+Container starten.
+
+**Kartendaten kommen vom Entwicklungsrechner**, nicht vom Pi. `make tiles` und `make places`
+brauchen Internet und Rechenzeit; auf den Pi gehören nur die Ergebnisse:
+
+```bash
+rsync -a frontend/public/tiles/ pi:/opt/kiekmap/frontend/public/tiles/
+rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
+```
+
+**Das Wappen kommt denselben Weg.** Im Repo liegt nur ein Platzhalter — ein Gemeindewappen darf
+dort nicht liegen, siehe [decisions.md](decisions.md), Punkt 21. Auf dem Gerät gehört das echte
+hin:
+
+```bash
+rsync -a wappen.png pi:/opt/kiekmap/frontend/public/logo.png
+```
+
+Danach das Frontend neu bauen (`make prod` baut die Images ohnehin neu) — die Datei wird beim Bau
+in das Abbild aufgenommen, nicht zur Laufzeit gelesen. Das Holmer Wappen liegt unter
+`~/Developer/Museum/Wappen/holm-wappen.png` auf dem Entwicklungsrechner; Quelle und
+Rechtelage stehen in [adaption.de.md](adaption.de.md), Abschnitt „Wappen einsetzen".
+
+---
+
+## Was beim Einschalten passiert
+
+Etwa 20 Sekunden, in dieser Reihenfolge:
+
+1. **Docker startet.** Die Container laufen mit `restart: unless-stopped` von selbst hoch. Beim
+   ersten Start nach einem Update laufen die Alembic-Migrationen — deshalb kann er länger dauern.
+2. **`kiekmap-kiosk.service` wartet auf `/api/health`.** Ohne das Warten sähen die ersten
+   Besucher ein paar Sekunden lang eine Fehlerseite — und die bliebe stehen, weil Chromium nicht
+   von allein neu lädt. Nach fünf Minuten startet der Dienst trotzdem: eine Fehlerseite, die
+   jemand sieht und meldet, ist besser als ein schwarzer Bildschirm.
+3. **`cage -- chromium --kiosk`** übernimmt den Bildschirm. Frisches Browserprofil bei jedem
+   Start, damit nach einem Stromausfall nichts von gestern übrig ist.
+4. **Stürzt Chromium ab, startet systemd ihn neu** (`Restart=always`, 5 s Pause).
+
+Woran man erkennt, dass etwas hakt:
+
+```bash
+systemctl status kiekmap-kiosk       # läuft der Kiosk?
+journalctl -u kiekmap-kiosk -n 50    # warum nicht?
+cd /opt/kiekmap/deploy && docker compose ps
+curl -sf http://localhost/api/health && echo " API antwortet"
+```
+
+---
+
+## Wartungsausgang
+
+Der Kiosk kennt keine Tastenkombination zum Beenden — das ist Absicht, damit ein Besucher die
+Ausstellung nicht versehentlich verlässt. Der Weg hinaus geht über SSH:
+
+```bash
+sudo systemctl stop kiekmap-kiosk     # Bildschirm wird schwarz, Dienste laufen weiter
+sudo systemctl start kiekmap-kiosk    # zurück in die Karte
+```
+
+Für Arbeiten am Gerät selbst genügt meist der Admin-Bereich über das Wappen — Fotos pflegen,
+hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
+
+---
+
+## Update ohne Internet
+
+Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
+
+```bash
+make release to=/Volumes/STICK/kiekmap-update
+make release to=/Volumes/STICK/kiekmap-update map=1   # falls sich die Region geändert hat
+```
+
+Das Ziel baut beide Abbilder, sichert sie als `images.tar` und schreibt die `version`-Datei
+daneben. **Es bricht ab, wenn der Arbeitsbaum nicht sauber ist oder der passende Tag fehlt** — ein
+Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen.
+
+Vorher also: `make version v=0.9.0`, committen, `git tag -s v0.9.0 -m v0.9.0`.
+
+Von Hand waren das vier Befehle. Der, den man vergisst, schreibt die `version`-Datei: Die Abbilder
+laden, `KIEKMAP_VERSION` bleibt in der `.env` stehen, und der nächste Start zieht das **alte**
+Abbild wieder hoch. Das Gerät läuft dann mit der alten Software und sagt es nirgends.
+
+Am Pi:
+
+```bash
+sudo sh /opt/kiekmap/deploy/pi/update.sh /media/STICK/kiekmap-update
+```
+
+Das Skript liest die Abbilder ein, trägt die Version in die `.env`, tauscht Kartendaten und
+Ortsindex, startet die Container neu und wartet, bis die API antwortet. **Der Bestand wird nicht
+angefasst** — Fotos und Angaben bleiben, wo sie sind.
+
+Zwei Feinheiten stecken darin: Die Kartendaten werden erst danebengelegt und dann umbenannt, damit
+ein abgebrochenes Kopieren keine halbe Kartendatei hinterlässt. Und der Ortsindex wird ausdrücklich
+neu eingelesen — beim Start lädt das Backend ihn nur, wenn die Tabelle leer ist.
+
+---
+
+## SD-Karte klonen
+
+Die vollständige Sicherung des Geräts, inklusive Betriebssystem. Einmal nach der Einrichtung und
+nach jedem größeren Update:
+
+```bash
+# Pi herunterfahren, Karte in den Entwicklungsrechner:
+sudo dd if=/dev/rdiskN bs=4m | gzip > holm-pi-2026-07-29.img.gz
+```
+
+Das ersetzt die Sicherung im Admin-Bereich **nicht** — die läuft im laufenden Betrieb und sichert
+den Bestand. Der Klon sichert das eingerichtete Gerät.
+
+---
+
+## Bildschirm bleibt schwarz
+
+In dieser Reihenfolge:
+
+1. `systemctl status kiekmap-kiosk` — läuft der Dienst?
+2. `journalctl -u kiekmap-kiosk -n 50` — meldet cage etwas? *„unable to open primary DRM device"*
+   heißt: Die Sitzung hat kein Ausgabegerät. Dann fehlt eine der vier Zeilen `PAMName`,
+   `TTYPath`, `StandardInput`, `UtmpIdentifier` in der Unit, oder der Benutzer ist nicht in den
+   Gruppen `video` und `render`.
+3. `docker compose ps` — laufen die Container? Wenn nicht: `docker compose logs backend`.
+4. Nach zehn Minuten schwarz, obwohl vorher alles lief: `consoleblank=0` fehlt in der
+   `cmdline.txt` (setzt `setup-pi.sh`, wirkt erst nach einem Neustart).
+
+---
+
+## Fehlersuche kurz
+
+| Beobachtung | Erster Verdacht |
+|---|---|
+| Karte ohne Beschriftung | `frontend/public/basemaps/` fehlt — `make tiles` lief nicht |
+| Karte grau, keine Kacheln | `frontend/public/tiles/map.pmtiles` fehlt oder ist halb kopiert |
+| Ortssuche findet nichts | `data/places.json` fehlt, oder `python -m app.cli places` lief nicht |
+| „Hilf mit" meldet stumm Fehler | Regionsprüfung ohne `data/region.json` — `make tiles` legt sie mit ab |
+| **Anzeige normal, aber nichts lässt sich speichern** | **Schema veraltet. Seit August 2026 zieht die Wiederherstellung es selbst nach — [siehe unten](#der-schemastand-einer-zurückgespielten-sicherung)** |
+| USB-Stick erscheint nicht | udev-Regel oder `:rshared` — siehe unten |
+| Anmeldung lehnt jede PIN ab | `KIEKMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
+| Importierte Fotos ohne Schlagwort oder Bildnachweis | Eine Einstellung erreicht den Container nicht — [siehe unten](#einstellungen-im-containerbetrieb) |
+
+---
+
+## Die PIN für den Admin-Bereich einrichten
+
+```bash
+cd backend && .venv/bin/python -m app.cli pin
+```
+
+Der Befehl fragt die PIN zweimal ab und gibt die Zeile aus, die in die `.env` gehört. Die PIN
+selbst wird nirgends gespeichert; vergessen heißt neu setzen. Danach den Dienst neu starten.
+
+Ist keine PIN eingerichtet, sagt das Zahlenfeld genau das — es lehnt nicht stumm jede Eingabe ab.
+Nach fünf Fehlversuchen sperrt es für eine Minute. Die Sitzung endet nach 30 Minuten ohne
+Bedienung; jede Aktion schiebt sie hinaus, und ein Neustart des Dienstes beendet jede Sitzung.
+
+---
+
+## Einstellungen im Containerbetrieb
+
+Die `.env` im Projektverzeichnis ist auch im Betrieb die Stelle, an der Einstellungen stehen. Sie
+liegt bewusst **nicht** im Abbild — das Abbild ist die Software, die `.env` ist der Ort — und wird
+in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml) als `env_file` eingelesen. Wer dort
+etwas ändert, startet danach die Container neu:
+
+```bash
+cd /opt/kiekmap && docker compose up -d
+```
+
+**Die Sprache des Geräts** steht ebenfalls hier:
+
+```bash
+KIEKMAP_LANGUAGE=de     # oder en
+```
+
+Sie schaltet Besucheransicht, Verwaltung, Meldungen und Datumsbeschriftung um. **Ein neuer Bau ist
+nicht nötig** — nach dem Neustart der Container gilt der neue Wert. Ein anderer Wert als `de` oder
+`en` bricht den Start ab, statt still auf Deutsch zurückzufallen; im Protokoll steht dann eine
+Zeile von Pydantic. Mehr in [adaption.de.md](adaption.de.md#andere-sprache).
+
+**Vier Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
+`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
+beschreiben den Container, nicht den Ort — innen heißen die Verzeichnisse immer `/data` und
+`/media`, gleichgültig wo sie außen liegen. Ein `KIEKMAP_MEDIA_DIR=/Volumes` in der `.env` des
+Entwicklungsmacs stört den Betrieb deshalb nicht.
+
+**Warum das hier steht:** Bis zum 14. August 2026 reichte die Compose-Datei nur einzelne Werte
+durch. Die übrigen fielen im Container still auf ihre Vorgaben zurück, und das traf ausgerechnet
+den Import: Fotos kamen an, aber ohne Schlagwort, ohne Bildnachweis und ohne Herkunftsangabe.
+Nichts schlug fehl, nichts stand im Protokoll. Wer heute eine neue Einstellung einführt, muss
+nichts weiter tun — sie kommt von selbst durch; geprüft ist das sowohl über den Eingangsordner als
+auch über den Stapel-Upload der Verwaltung.
+
+---
+
+## USB-Sticks sichtbar machen
+
+Raspberry Pi OS **Lite** hat keinen Desktop und damit keinen Automounter: Ein eingesteckter Stick
+taucht von allein nirgends auf. Der Admin-Bereich sähe nie einen und meldete ewig „Bitte USB-Stick
+einstecken".
+
+```bash
+sudo install -m 755 deploy/pi/kiekmap-usb-mount /usr/local/sbin/
+sudo install -m 644 deploy/pi/99-kiekmap-usb.rules /etc/udev/rules.d/
+sudo udevadm control --reload
+```
+
+Prüfen: Stick einstecken, dann
+
+```bash
+ls /media && findmnt /media/*
+```
+
+Zwei Fallstricke stecken darin, beide still:
+
+**Der Container sieht den Stick nicht.** Ein Docker-Bind-Mount zeigt nur, was beim Start des
+Containers schon eingehängt war. Ein später eingesteckter Stick bleibt unsichtbar — ohne
+Fehlermeldung, der Ordner ist einfach leer. Dagegen steht `:rshared` an der Zeile `/media:/media`
+in [`deploy/docker-compose.yml`](../deploy/docker-compose.yml). Fehlt es, hilft auch kein Neustart
+des Containers zur richtigen Zeit.
+
+**Der Stick ist da, aber schreibgeschützt.** FAT- und exFAT-Sticks kennen keine Besitzer; ohne
+`uid=1000` beim Einhängen gehören sie root, und der Dienst (UID 1000, siehe
+`backend/Dockerfile`) darf nicht schreiben. Das Skript setzt die Option — der Admin-Bereich
+blendet solche Laufwerke aber ohnehin aus, statt einen Knopf anzubieten, der später scheitert.
+
+**Auf dem Mac zum Entwickeln:** `KIEKMAP_MEDIA_DIR=/Volumes` in die `.env`. Ein Prüfvolumen
+entsteht mit
+
+```bash
+hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil attach teststick.dmg
+```
+
+> **In `/Volumes` liegt immer ein Symlink auf `/`**, benannt nach dem internen Volume — das legt
+> macOS selbst an. Bis zum 14. August 2026 galt er als Datenträger, und die Sicherung landete
+> dahinter, im laufenden Datenverzeichnis. Seither werden Symlinks übersprungen
+> ([decisions.md](decisions.md), Punkt 40); die Liste ist auf einem Mac ohne angestecktes
+> Laufwerk jetzt leer, und genau das ist richtig.
+
+---
+
+## Der Schemastand einer zurückgespielten Sicherung
+
+**Seit dem 15. August 2026 regelt das die Wiederherstellung selbst** — dieser Abschnitt beschreibt,
+*wie*, und was zu tun ist, wenn doch etwas hakt. Der kurze Weg für das Team steht in der
+[Anleitung](usermanual.de.md#wenn-die-sicherung-älter-ist-als-das-programm).
+
+**Warum es überhaupt eine Frage ist.** Eine Sicherung enthält `kiekmap.db` genau so, wie die Datei
+damals aussah — mitsamt ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird
+die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`); danach hängt
+sich das laufende Programm nur neu an sie (`_reopen_database`). Migrationen laufen dabei nicht von
+selbst: Sie laufen beim *Start* (`backend/docker-entrypoint.sh`), und eine Wiederherstellung ist
+kein Start.
+
+**Was jetzt passiert**, und die Reihenfolge ist der ganze Punkt (`services/schema.py`):
+
+| Die Sicherung ist … | … und dann |
+|---|---|
+| **älter** als das Programm | wird nach dem Tausch `alembic upgrade head` gefahren. Auf dem Balken steht „Der Schemastand wird nachgezogen" |
+| **auf dem gleichen Stand** | passiert nichts, der Aufruf ist folgenlos |
+| **neuer** als das Programm | **bricht ab, bevor irgendetwas getauscht ist** — der Bestand auf dem Gerät bleibt unangetastet |
+
+Die Ablehnung kommt **vor** dem Tausch, und das ist keine Feinheit: Eine Sicherung, die dieses
+Programm nicht lesen kann, darf das Gerät nicht halb ersetzt zurücklassen. Nach der Ablehnung liegt
+das Archiv weiterhin im Eingangsordner, der Arbeitsordner ist aufgeräumt.
+
+**Bei einer zu neuen Sicherung: erst das Programm aktualisieren, dann einspielen.** Siehe
+[Update ohne Internet](#update-ohne-internet).
+
+### Nachsehen, wo etwas steht
+
+```bash
+docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
+docker compose exec backend alembic heads
+```
+
+Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand. Das ist bei
+Schreibfehlern im Betrieb der erste Blick, und der Zustand ist von außen nicht zu sehen: Die
+Ausstellung zeigt Fotos, Karte und Zeitleiste wie immer, nur **jeder Schreibzugriff** scheitert
+mit HTTP 500. Auf dem Entwicklungsrechner dasselbe ohne Container:
+
+```bash
+sqlite3 data/kiekmap.db "select * from alembic_version;"
+cd backend && .venv/bin/alembic heads
+```
+
+Und die Reparatur von Hand:
+
+```bash
+make migrate
+```
+
+## Wo die Sicherung liegt
+
+Auf dem Stick im Ordner `kiekmap-backup/`:
+
+```
+kiekmap-backup/
+  backup.json        Datum, Anzahl, Ortsname
+  kiekmap.db        die Angaben, mit VACUUM INTO konsistent herausgeschrieben
+  photos/            die Originale, nach ihrem Hash abgelegt
+  thumbs/            die Vorschaubilder
+  region.json        Kartenausschnitt
+  places.json        Ortsverzeichnis
+```
+
+Ordner statt Archiv: Eine abgebrochene Sicherung ist so teilweise brauchbar statt komplett
+wertlos, und die Bilder lassen sich an jedem Rechner ansehen.
+
+Nach einer **Wiederherstellung** liegt der bisherige Stand unter `data/before-<Datum>/` — inklusive
+Datenbank und Write-Ahead-Log. Er wird nie automatisch gelöscht. Wenn feststeht, dass alles stimmt:
+
+```bash
+rm -rf data/before-2026-07-29-1115
+```
+
+Das ist der einzige Ort, an dem die SD-Karte unbemerkt volllaufen kann.
+
+Das Gerät für einen anderen Ort einrichten: [adaption.de.md](adaption.de.md).

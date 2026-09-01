@@ -8,7 +8,7 @@ not *why it is like this*, and not *how to work on it*:
 | **architecture.md** | *What* is there, and how does it fit together? |
 | [decisions.md](decisions.md) | *Why* is it this way and not another? |
 | [development.md](development.md) | *How* do you work on it? — setup, tests, conventions |
-| [history.md](history.md) | *How* did it come about? |
+| [archive/history.de.md](archive/history.de.md) | *How* did it come about? |
 | [operations.md](operations.md) | How does the device run in the museum? |
 
 The full overview is in [index.md](index.md).
@@ -161,7 +161,7 @@ Four ways, one destination — they all run through `import_file()` in
 `app/services/importer.py`, which always writes a row to the import log:
 
 1. **Watched incoming folder** — the watcher takes a file once it is fully written, then moves it
-   to `_erledigt/` or `_problem/`. Nothing is ever deleted. **One exception: it leaves ZIP files
+   to `_done/` or `_problem/`. Nothing is ever deleted. **One exception: it leaves ZIP files
    named like a backup alone** — those are not a photo but a whole collection, and they are only
    restored after a confirmation.
 2. **Upload in the admin view** — the way for forty selected files.
@@ -236,7 +236,7 @@ foreign origin. The one-liner for it is in [development.md](development.md).
 and with the check switched on that clears out whatever hangs off it. `alembic/env.py` therefore
 turns it off for the duration of a migration; in production it stays on. A test pins this down,
 and the story is in
-[history.md](history.md#fotos-löschen--und-ein-datenverlust-der-beinahe-unbemerkt-geblieben-wäre).
+[archive/history.de.md](archive/history.de.md#fotos-löschen--und-ein-datenverlust-der-beinahe-unbemerkt-geblieben-wäre).
 
 **The Pi has no browser controls.** No reload button, no address bar, no keyboard. That is why the
 idle reset after five minutes reloads the page instead of only resetting the state, and why

@@ -7,7 +7,7 @@
  */
 
 import { PAGE_SIZE } from "../admin/pagination";
-import { t } from "../text/de";
+import { t } from "../text";
 import { type PhotoDetail, readError } from "./client";
 
 export type AdminSession = { token: string; expires_in_s: number };

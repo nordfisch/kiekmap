@@ -77,7 +77,7 @@ def load_region() -> tuple[str, list[float], Point]:
     extent reaches beyond the village and holds neighbouring ones with the same street names.
     """
     region = json.loads(REGION.read_text(encoding="utf-8"))
-    if region["name"] == "PLATZHALTER":
+    if region["name"] == "PLACEHOLDER":
         sys.exit("tiles/region.json enthaelt noch den Platzhalter.")
     lon, lat = region["center"]
     return region["name"], region["bbox"], (lat, lon)
@@ -115,16 +115,16 @@ def ask_overpass(query: str, attempts: int = 3) -> dict:
             if error.code not in (429, 504) or attempt == attempts:
                 raise
             pause = 15 * attempt
-            print(f"  Overpass ist ausgelastet ({error.code}), warte {pause} s ...")
+            print(f"  Overpass is busy ({error.code}), waiting {pause} s ...")
             time.sleep(pause)
         except (urllib.error.URLError, TimeoutError) as error:
             if attempt == attempts:
                 raise
             pause = 10 * attempt
-            print(f"  Versuch {attempt} fehlgeschlagen ({error}), warte {pause} s ...")
+            print(f"  attempt {attempt} failed ({error}), waiting {pause} s ...")
             time.sleep(pause)
 
-    raise RuntimeError("nicht erreichbar")
+    raise RuntimeError("not reachable")
 
 
 def address_of(tags: dict) -> tuple[str, str] | None:
@@ -175,11 +175,11 @@ def in_region(point: Point, bbox: list[float]) -> bool:
 
 def main() -> int:
     name, bbox, centre = load_region()
-    print(f"Ortsindex fuer {name} bauen (Ortsmitte {centre[0]:.5f}, {centre[1]:.5f}) ...")
+    print(f"Building the place index for {name} (centre {centre[0]:.5f}, {centre[1]:.5f}) ...")
 
     response = ask_overpass(build_query(bbox))
     elements = response.get("elements", [])
-    print(f"  {len(elements)} Elemente von Overpass erhalten")
+    print(f"  {len(elements)} elements received from Overpass")
 
     street_pieces: dict[str, list[Line]] = {}
     addresses: dict[str, list[tuple[str, Point]]] = {}
@@ -262,9 +262,9 @@ def main() -> int:
 
     without_way = sorted(set(addresses) - set(street_pieces))
     if without_way:
-        print(f"  {len(without_way)} Strassen nur als Adresse bekannt, ohne Weg -- weggelassen")
+        print(f"  {len(without_way)} streets known only as an address, without a way -- left out")
     if foreign_housenumbers:
-        print(f"  {foreign_housenumbers} Hausnummern gleichnamiger Strassen anderer Orte entfernt")
+        print(f"  {foreign_housenumbers} house numbers of same-named streets elsewhere removed")
 
     TARGET.parent.mkdir(parents=True, exist_ok=True)
     TARGET.write_text(json.dumps(places, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -273,7 +273,7 @@ def main() -> int:
     for place in places:
         by_kind[place["kind"]] = by_kind.get(place["kind"], 0) + 1
 
-    print(f"\n{len(places)} Orte nach {TARGET.relative_to(ROOT)} geschrieben:")
+    print(f"\n{len(places)} places written to {TARGET.relative_to(ROOT)}:")
     for kind, count in sorted(by_kind.items(), key=lambda x: -x[1]):
         print(f"  {kind:12} {count}")
     return 0

@@ -231,12 +231,12 @@
   border-color: var(--accent);
 }
 
-/* Ein Auswahlfeld malt der Browser sonst selbst -- einen eigenen, kleineren Knopf in den Kasten
- * hinein. Der Kasten misst dann zwar dieselben 3 rem wie ein Textfeld, sichtbar ist aber ein
- * niedrigeres Feld daneben. Deshalb die eigene Darstellung samt Pfeil.
+/* A select is otherwise drawn by the browser itself -- a smaller button of its own inside the
+ * box. The box then measures the same 3 rem as a text field, but what is visible is a lower field
+ * beside it. Hence the appearance of our own, arrow included.
  *
- * Der Pfeil steckt als Daten-URI im Stil, nicht als Datei: das Geraet ist offline, und eine
- * Grafik, die nicht kommt, waere ein Auswahlfeld, dem man nicht ansieht, dass es eines ist. */
+ * The arrow sits in the stylesheet as a data URI rather than as a file: the device is offline, and
+ * a graphic that does not arrive would be a select nobody can tell is one. */
 select.field__input {
   appearance: none;
   padding-right: 2.2rem;
@@ -275,9 +275,9 @@ select.field__input {
   border-radius: 10px;
 }
 
-/* Jahreszahl und Genauigkeit gleich breit nebeneinander. Feste Spalten statt `1fr`, damit das
- * Auswahlfeld nicht auf halbe Formularbreite auflaeuft -- neben einer vierstelligen Zahl sieht
- * das aus wie ein anderes Feld. */
+/* Year and precision side by side, equally wide. Fixed columns rather than `1fr`, so that the
+ * select does not run up to half the width of the form -- beside a four-digit number that looks
+ * like a different kind of field. */
 .year-field {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 9rem));
@@ -359,9 +359,9 @@ select.field__input {
 
 /* --- overview ------------------------------------------------------------ */
 
-/* Feste drei Spalten statt auto-fill: Die Aufteilung in zwei Zeilen -- oben der Bestand, unten
- * die Arbeit -- ist eine Aussage. Mit auto-fill ordnet der Browser sie je nach Breite um und die
- * Aussage geht verloren. Auf schmalem Schirm bricht es auf eine Spalte. */
+/* Three fixed columns rather than auto-fill: the split into two rows -- the collection above, the
+ * work below -- is a statement. With auto-fill the browser rearranges them by width and the
+ * statement is lost. On a narrow screen it breaks to one column. */
 .overview__figures {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -388,8 +388,8 @@ select.field__input {
   color: inherit;
 }
 
-/* Jede Zahl, die irgendwohin fuehrt, sieht auch danach aus. "Auf der Karte zu sehen" bleibt eine
- * Anzeige -- ein Knopf, der nichts tut, ist schlimmer als kein Knopf. */
+/* Every number that leads somewhere looks like it. "Auf der Karte zu sehen" stays a display -- a
+ * button that does nothing is worse than no button. */
 .figure--link {
   border-color: var(--accent-light);
   cursor: pointer;
@@ -408,8 +408,8 @@ select.field__input {
   background: none;
 }
 
-/* Die Sicherung ist die einzige Kachel, die mahnen darf. Dieselbe Farbe wie zuvor der eigene
- * Erinnerungsknopf, den sie ersetzt. */
+/* The backup is the only tile allowed to nag. The same colour as the reminder button of its own
+ * that it replaces. */
 .figure--overdue {
   border-color: #a33;
 }
@@ -418,8 +418,8 @@ select.field__input {
   color: #a33;
 }
 
-/* Der Notausgang, wenn die Besucheransicht klemmt. Unten und still: Er wird selten gebraucht, und
- * wer ihn sucht, sucht ihn hier. */
+/* The emergency exit when the visitor view is stuck. At the bottom and quiet: it is rarely
+ * needed, and whoever looks for it looks here. */
 .overview__repair {
   margin-top: 2rem;
   padding-top: 1.25rem;
@@ -432,8 +432,8 @@ select.field__input {
   margin: 0;
 }
 
-/* Trennt den Bestand oben vom Betrieb unten. Beide Zeilen benutzen dasselbe Raster, damit die
- * Spalten bündig stehen und nicht nur ungefähr übereinander. */
+/* Separates the collection above from the operation below. Both rows use the same grid, so that
+ * the columns line up rather than standing roughly above one another. */
 .overview__rule {
   margin: 1.25rem 0;
   border: 0;
@@ -454,8 +454,8 @@ select.field__input {
   color: var(--muted);
 }
 
-/* Blaettern. Erscheint nur, wenn es mehr als eine Seite gibt -- bei siebenundzwanzig Fotos soll
- * die Verwaltung nicht nach Aktenverwaltung aussehen. */
+/* Paging. Appears only when there is more than one page -- with twenty-seven photos the admin
+ * area is not meant to look like records management. */
 .pager {
   display: flex;
   align-items: center;
@@ -464,8 +464,8 @@ select.field__input {
   margin: 1.25rem 0 0.5rem;
 }
 
-/* Ohne `flex: 0 0 auto` zieht die Grundbreite der Knöpfe (100 %) die Zeile auseinander und
- * quetscht "Seite 1 von 2" auf drei Zeilen. */
+/* Without `flex: 0 0 auto` the base width of the buttons (100 %) pulls the row apart and squeezes
+ * "Seite 1 von 2" onto three lines. */
 .pager .button {
   flex: 0 0 auto;
   width: auto;
@@ -611,8 +611,8 @@ select.field__input {
   display: block;
 }
 
-/* Der Knopf um das Vorschaubild bleibt unsichtbar -- es soll ein Bild bleiben, kein Knopf werden.
- * Dieselbe Bauform wie `help-panel__zoom` in der Besucheransicht. */
+/* The button around the thumbnail stays invisible -- it is meant to stay a picture, not become a
+ * button. The same build as `help-panel__zoom` in the visitor view. */
 .upload-row__zoom {
   display: block;
   flex: 0 0 auto;
@@ -625,11 +625,10 @@ select.field__input {
   transform: translateY(1px);
 }
 
-/* --- Ein Foto gross ansehen ---------------------------------------------- */
+/* --- Looking at a photo large -------------------------------------------- */
 
-/* Bewusst im Fenster statt in einem neuen Tab: Der Verwaltungsbereich laeuft auf demselben
- * Chromium wie der Kiosk, und der hat keine Tableiste -- wer dort einen zweiten Tab oeffnet, kommt
- * nicht mehr zurueck. */
+/* Deliberately in the window rather than in a new tab: the admin area runs on the same Chromium
+ * as the kiosk, and that has no tab bar -- whoever opens a second tab there does not get back. */
 .zoom {
   position: fixed;
   inset: 0;
@@ -660,7 +659,7 @@ select.field__input {
 
 .zoom__image {
   max-width: 100%;
-  /* Was nach Rand und Schliessen-Knopf uebrig bleibt. */
+  /* What is left after the margin and the close button. */
   max-height: calc(100vh - 4rem - 4rem);
   object-fit: contain;
   box-shadow: 0 6px 30px rgb(0 0 0 / 60%);
@@ -699,9 +698,9 @@ select.field__input {
   min-width: 12rem;
 }
 
-/* „Löschen" beziehungsweise „Wiederherstellen" -- an derselben Stelle, weil sie einander
- * abloesen. Abgesetzt von „Speichern" und „Abbrechen": In einer Reihe mit ihnen traefe den
- * Loeschen-Knopf irgendwann jemand im Vorbeigehen. */
+/* "Löschen" or else "Wiederherstellen" -- in the same place, because they replace one another.
+ * Set apart from "Speichern" and "Abbrechen": in a row with those, somebody would eventually hit
+ * the delete button in passing. */
 .editor__status {
   margin-left: auto;
 }
@@ -844,10 +843,10 @@ select.field__input {
   align-items: center;
 }
 
-/* --- Quelle des Imports -------------------------------------------------- */
+/* --- Where the import comes from ----------------------------------------- */
 
-/* Zwei gleichrangige Kacheln. Der Stick war vorher ein Nachtrag unter einer Trennlinie -- wer mit
- * einem Stick vor dem Geraet steht, soll ihn sofort sehen. */
+/* Two tiles of equal rank. The stick used to be an afterthought below a rule -- whoever stands in
+ * front of the device with a stick in their hand should see it at once. */
 .sources {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -890,13 +889,13 @@ select.field__input {
   color: var(--muted);
 }
 
-/* Die Flaeche unter den Quellenkacheln. Sie behaelt ihren Platz, egal welche Quelle gewaehlt ist,
- * und wechselt nur den Inhalt -- sonst springt die Maske beim Umschalten. Gestrichelt, solange
- * gewartet wird; mit Rand, sobald etwas da ist. Dieselbe Dramaturgie wie im Sicherungsbereich. */
+/* The area below the source tiles. It keeps its place whichever source is chosen and only
+ * changes its content -- otherwise the form jumps when switching. Dashed while waiting; with a
+ * border as soon as something is there. The same staging as in the backup section. */
 .dropzone {
-  /* Dieselben Innenabstaende wie die Quellenkacheln darueber, und derselbe Abstand nach unten wie
-   * der, den `.sources` nach oben laesst -- die Flaeche soll wie ein dritter Kasten derselben
-   * Familie sitzen, nicht wie ein Anhaengsel. */
+  /* The same padding as the source tiles above, and the same gap below as the one `.sources`
+   * leaves above -- the area is meant to sit like a third box of the same family, not like an
+   * appendage. */
   margin-bottom: 1rem;
   padding: 1rem;
   border: 2px dashed var(--line);
@@ -911,7 +910,7 @@ select.field__input {
   text-align: left;
 }
 
-/* Ohne sichtbare Antwort weiss niemand, ob das Fenster ueberhaupt annimmt. */
+/* Without a visible answer nobody knows whether the window accepts anything at all. */
 .dropzone--over {
   border-color: var(--accent);
   background: var(--accent-light);
@@ -942,14 +941,14 @@ select.field__input {
   margin: 0;
 }
 
-/* Die Trennlinie der letzten Zeile liefe sonst gegen den Rand des Kastens. */
+/* The rule of the last row would otherwise run against the edge of the box. */
 .dropzone .photo-row:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-/* Aus dem Bild, aber nicht aus dem Baum: Das Dateifeld wird vom Knopf daneben ausgeloest. Mit
- * `display: none` liesse es sich nicht mehr anklicken. */
+/* Out of sight, but not out of the tree: the file field is triggered by the button beside it.
+ * With `display: none` it could no longer be clicked. */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -959,15 +958,15 @@ select.field__input {
   white-space: nowrap;
 }
 
-/* Der Knopf klebte an den Kaesten darueber. */
+/* The button was stuck to the boxes above it. */
 .upload__start {
   margin-top: 1.5rem;
 }
 
-/* Jahr und Ort nebeneinander, beide im Rahmen mit Beschriftung auf der Linie. Das Jahr bekommt
- * damit dieselbe Wertigkeit wie der Ort statt eines nackten Eingabefelds. */
-/* Ohne die Dehnung stünde der kürzere Kasten hoch und die beiden sähen aus wie zwei Ränge. Sobald
- * ein Ort gewählt ist, wächst der rechte um eine Zeile -- der linke geht mit. */
+/* Year and place side by side, both framed with the label on the line. The year thereby carries
+ * the same weight as the place instead of being a bare input. */
+/* Without the stretch the shorter box would stand tall and the two would look like two ranks. As
+ * soon as a place is chosen the right one grows by a line -- the left one goes along. */
 .batch-fields {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -981,16 +980,17 @@ select.field__input {
   }
 }
 
-/* Der Rahmen laeuft durch die Mitte der Beschriftung auf der Linie, und deren untere Haelfte zaehlt
- * fuer den Browser schon als Inhalt. Ein Innenabstand von 1 rem stuende oben deshalb sichtbar
- * hoeher als unten -- der Kasten saehe aus, als haenge sein Inhalt. */
+/* The border runs through the middle of the label on the line, and its lower half already counts
+ * as content to the browser. A padding of 1 rem would therefore stand visibly higher at the top
+ * than at the bottom -- the box would look as though its content were hanging. */
 .batch-fields .field__group {
   margin: 0;
   padding-top: 0.25rem;
 }
 
-/* Die erste Beschriftung im Kasten bringt ihren eigenen Abstand mit (`.field__label`). Ohne diese
- * Zeile stuende oben 1,9 rem und unten 1 rem -- der Kasten saehe aus, als haenge sein Inhalt. */
+/* The first label in the box brings its own spacing along (`.field__label`). Without this line
+ * there would be 1.9 rem at the top and 1 rem at the bottom -- the box would look as though its
+ * content were hanging. */
 .batch-fields .year-field .field__label,
 .batch-fields .place-field > .field__label:first-child {
   margin-top: 0;

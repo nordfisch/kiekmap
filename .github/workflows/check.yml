@@ -1,24 +1,24 @@
-# Was vor jedem Commit ohnehin laufen soll -- nur an einem Ort, an dem niemand es vergessen kann.
+# What should run before every commit anyway -- in one place where nobody can forget it.
 #
-# Der Hook unter .githooks/ nimmt einem die sechs schnellen Pruefungen ab, aber nur, wer ihn
-# eingeschaltet hat. Und `make check` sagt heute nur, dass es bei *mir* gruen war; hier steht es
-# am Pull Request.
+# The hook under .githooks/ takes the six fast checks off your hands, but only for whoever
+# switched it on. And `make check` today says only that it was green on *my* machine; here it
+# stands on the pull request.
 #
-# Es beantwortet nebenbei die Frage aus Punkt 22, was mit THIRD-PARTY.txt passiert: Sie ist
-# erzeugt und eingecheckt, also aktuell -- aber nur, solange jemand `make check` laufen laesst.
+# It answers in passing the question from point 22, what happens to THIRD-PARTY.txt: it is
+# generated and checked in, therefore current -- but only as long as somebody runs `make check`.
 name: check
 
 on:
-  # Auf Feature-Zweigen greift der Pull Request; doppelt laufen muss nichts.
+  # On feature branches the pull request takes over; nothing needs to run twice.
   push:
     branches: [main, develop]
   pull_request:
 
-# Der Ablauf liest nur. Ein Marker, der nichts schreiben darf, kann auch nichts anrichten.
+# The workflow only reads. A token that may not write can do no damage.
 permissions:
   contents: read
 
-# Ein neuer Push loest den vorigen Lauf ab. Auf einem privaten Repo sind das gesparte Freiminuten.
+# A new push replaces the previous run. On a private repository that saves free minutes.
 concurrency:
   group: check-${{ github.ref }}
   cancel-in-progress: true
@@ -31,8 +31,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 3.12 wie in backend/pyproject.toml, 22 wie im Frontend-Abbild. Beides festgeschrieben:
-      # "neueste" waere eine Fassung, die sich unter der Hand aendert.
+      # 3.12 as in backend/pyproject.toml, 22 as in the frontend image. Both pinned: "latest"
+      # would be a version that changes behind your back.
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -43,19 +43,19 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - uses: astral-sh/setup-uv@v5
 
-      # npm ci statt npm install: Es haelt sich an package-lock.json, statt sie fortzuschreiben.
-      # Das touch bringt make dazu, das Verzeichnis als fertig anzusehen.
-      - name: Frontend-Pakete
+      # npm ci instead of npm install: it keeps to package-lock.json instead of writing it
+      # forward. The touch makes make regard the directory as finished.
+      - name: frontend packages
         run: |
           cd frontend
           npm ci --no-audit --no-fund
           touch node_modules
 
-      # deps-lock nach venv, und die Reihenfolge ist der Punkt: venv installiert aus
-      # pyproject.toml, also unpinned; deps-lock zieht die Versionen der Lockdatei darueber.
-      # Ohne das bricht build_notices.py ab -- und genau so soll es sein, denn dann waeren die
-      # Lizenzhinweise nicht die des Abbilds.
-      - name: Python-Umgebung
+      # deps-lock after venv, and the order is the point: venv installs from pyproject.toml,
+      # therefore unpinned; deps-lock pulls the versions of the lock file over it. Without that
+      # build_notices.py aborts -- and that is exactly right, because the licence notices would
+      # then not be those of the image.
+      - name: Python environment
         run: |
           make venv
           make deps-lock

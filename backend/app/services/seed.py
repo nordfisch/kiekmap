@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 #: Where the sample collection lives. Beside ``data/``, not inside it -- ``data/`` is what gets
 #: emptied, and a backup that lies in the thing it restores is none.
 SEED_DIR_NAME = "seed"
-IMAGE_DIR_NAME = "fotos"
+IMAGE_DIR_NAME = "photos"
 INDEX_NAME = "seed.json"
 
 #: Photo columns that belong to the collection rather than to this device. Everything about the
@@ -97,7 +97,7 @@ def _free_name(taken: set[str], name: str) -> str:
         candidate = f"{stem} ({counter}){suffix}"
         if candidate not in taken:
             return candidate
-    raise RuntimeError(f"kein freier Name fuer {name}")
+    raise RuntimeError(f"no free name for {name}")
 
 
 # --- writing out -------------------------------------------------------------
@@ -124,7 +124,7 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
 
         source = original_path(settings.photos_dir, photo.sha256, suffix)
         if not source.exists():
-            log.warning("Foto %s: die Datei %s fehlt -- uebersprungen", photo.id, source)
+            log.warning("Photo %s: the file %s is missing -- skipped", photo.id, source)
             continue
 
         name = _free_name(taken, photo.original_filename)
@@ -155,9 +155,9 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
     # What is no longer in the collection has no business here. Without this tidying every photo
     # ever deleted would stay behind as a file -- and a folder that only grows is no
     # Abbild eines Zustands mehr.
-    for datei in images.iterdir():
-        if datei.is_file() and datei.name not in taken:
-            datei.unlink()
+    for file_name in images.iterdir():
+        if file_name.is_file() and file_name.name not in taken:
+            file_name.unlink()
 
     index = {
         "created": datetime.now(UTC).replace(microsecond=0).isoformat(),
@@ -219,7 +219,7 @@ def load(session: Session, settings: Settings, source: Path) -> tuple[int, int]:
 
         photo = outcome.photo
         if photo.sha256 != entry.get("sha256"):
-            log.warning("%s hat sich seit dem Sichern geaendert", entry["file"])
+            log.warning("%s has changed since it was saved", entry["file"])
 
         # The import has read title, date and tags out of the file. What is noted here counts
         # more -- it is the curated statement, the file only ever held a guess.

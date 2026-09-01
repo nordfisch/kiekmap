@@ -2,7 +2,7 @@
 
 Why things are the way they are. Every point names the **decision**, its **reason** and its
 **consequence**. What the program can do is in the [changelog](../CHANGELOG.md); how the work went
-is in the commits and the closed issues, and up to v0.8.0 in [history.md](history.md).
+is in the commits and the closed issues, and up to v0.8.0 in [archive/history.de.md](archive/history.de.md).
 
 **A lesson is kept as the decision it led to, not as a lesson.** Whatever the work teaches ends up
 here in one point with a short reason, or it stays where it happened — in a commit message, in an
@@ -1452,7 +1452,7 @@ comes from a camera or a scanner; those write the wall clock of their location a
 Stamping UTC onto it shifts a scan by two hours and thereby invents a fact. **A timestamp carries
 not only a value but an origin.**
 
-**File names are the exception and carry local time.** The folder `vorher-…` and the name of the
+**File names are the exception and carry local time.** The folder `before-…` and the name of the
 downloaded archive are read by people in a file manager, not compared by a program. Somebody pulling
 a backup at half past midnight is looking for today's date.
 
@@ -1589,7 +1589,7 @@ the program, not the data. That, together with the ODbL question, is in
 *Extended by [point 68](#68-the-language-boundary-follows-the-audience-not-the-file-type): the file
 has been closed since 30 August 2026. It still was not split; it just no longer grows.*
 
-The question was whether `history.md` should be split — by year, by topic — or whether a file nobody
+The question was whether `history.de.md` should be split — by year, by topic — or whether a file nobody
 reads from the front may be long.
 
 **Measured, the length was not the problem.** Around ninety sections of medium length, all in an
@@ -1598,7 +1598,7 @@ the others: **the order.** And it would bring a question along with every append
 today — *into which file?* — whose wrong answer nobody notices.
 
 **The problem was a different one, and it was measurable:** of the references from other files to
-`history.md`, **almost none pointed at an anchor**, so each pointed at the whole file. A reference
+`history.de.md`, **almost none pointed at an anchor**, so each pointed at the whole file. A reference
 that narrows nothing is hardly a reference.
 
 **So indexed instead of split:** a register at the top, one row per section with date and anchor.
@@ -1625,7 +1625,7 @@ code. The documentation did not follow it, and the question was whether the rule
 practice.
 
 **No — measured, it was not the practice but two files.** Almost all documents keep the rule
-flawlessly; the drift sat in `decisions.md` and `history.md`, and in the history not even evenly but
+flawlessly; the drift sat in `decisions.md` and `history.de.md`, and in the history not even evenly but
 in one stretch of work where the rule for source code spilled over onto the documentation. **A rule
 that eleven files carry is not given up because of two.** The same holds for `ß`: the rule allows
 `ss` explicitly, but not *in the same paragraph as its opposite*.
@@ -1679,7 +1679,7 @@ against, instead of as a tag you have to know first.
 
 **No `release/*`, no `hotfix/*`.** With one maintainer that is effort without a return.
 
-**Squash merge is disabled, and that is the actual decision.** `history.md` cites **individual
+**Squash merge is disabled, and that is the actual decision.** `history.de.md` cites **individual
 commits by hash**, in dozens of places — a squash destroys exactly those, and it delivers **no**
 mapping table with which the citations could be caught up.
 
@@ -1768,7 +1768,7 @@ umlaut check for the wrong reason, because it has nothing German that could be t
 would move every hash the documentation cites — the same arithmetic as in point 66, and this time
 without a gain.
 
-**What follows, and what explicitly does not:** `history.md` is closed rather than translated, and
+**What follows, and what explicitly does not:** `history.de.md` is closed rather than translated, and
 nothing takes its place — what the work teaches becomes a decision here, and how it went stays in
 the commits and the issues. `decisions.md` is consolidated first and then translated.
 No GitHub wiki: `make check` does not reach into a second repository, and `operations.md` describes
@@ -1790,11 +1790,11 @@ instead of in it.
 requests, and the low numbers were used up by the first pull requests: „Punkt 15" could never become
 issue #15. The documentation cites points at over three hundred places, and one of the citing files
 is frozen. So the old numbering stays where it is, and
-[history.md](history.md#nummernregister) resolves it: the fourteen open points became issues #15 to
+[archive/history.de.md](archive/history.de.md#nummernregister) resolves it: the fourteen open points became issues #15 to
 #28, and every other number is described in that file under its date.
 
 **The register stands in the history, not in a file of its own.** That is where the numbers are
-cited — 186 of the three hundred citations are in `history.md` — and a register in a second file
+cited — 186 of the three hundred citations are in `history.de.md` — and a register in a second file
 would be one more thing to keep in step. It sits above the change register, under the note that the
 file is closed. New work is named by its issue number alone.
 
@@ -1839,3 +1839,140 @@ above the docstring in every file, and the docstring is the line that says what 
 copied file** carries with it. That was true and stays true. Pull `services/dates.py` into another
 project now and it arrives without a licence notice. The gap covers exactly that case; anyone who
 takes the repository, a release archive or a clone gets both files with it.
+
+## 71. The repository speaks English, German is a translation
+
+*Amends [point 68](#68-the-language-boundary-follows-the-audience-not-the-file-type) in four
+paragraphs: the museum documentation, the tests, the issues, and „why not bilingual".*
+
+Point 68 drew the boundary **by audience** and ran it through the repository, file by file. That was
+right for a project that had just been made public and had to stop mixing its languages at random.
+It stopped being enough for the same reason: the repository is public, and most of what a stranger
+sees first was German — `README`, `SECURITY`, `CHANGELOG`, the issue templates, and every one of the
+520 backend test names.
+
+**The boundary now runs between the repository and what is published from it.** Everything a
+contributor touches is English. Everything a museum needs in order to run the device exists in
+German as well, delivered through a bilingual documentation site.
+
+**The file name carries the rule.** `operations.de.md` is German, `operations.md` is English. Point
+68 left this to two hand-kept lists in `language_check.py`, and a new file belonged to whichever
+list somebody remembered to add it to. A suffix cannot be forgotten.
+
+**The price is the one point 68 named**, and it is paid deliberately: *„duplicate content in two
+languages is the expensive kind of mistake — the second copy goes stale and nobody notices."* That
+is still true. It is answered rather than ignored: every translated file carries the hash of the
+English source it was made from, and `tools/check_translations.py` reports what has drifted apart.
+The doubling is allowed because it is now watched, not because the risk went away.
+
+**One file is not doubled.** `history.de.md` stays German and frozen: 40,768 words whose value is
+in the nuance, in a file that takes no further entries. Everything else the museum reads exists
+twice, `usermanual` included — the printed handout for the team in Holm is the German half of a
+pair, not an original.
+
+**Why the tests turn.** Point 68 argued that a test name is a sentence of specification and that
+Flurname, Hausnummer and Ortsteil have no good English equivalent. The first half still holds — the
+names stay long and stay sentences. The second half was the weaker argument: a glossary settles the
+domain terms once, and 8,809 lines of German inside an otherwise English code base cost every
+contributor more than the translation costs once.
+
+**Why the issues turn.** A public repository takes reports from people who did not grow up with the
+subject. The labels were already English for that reason, and a German issue beside an English label
+was half a decision. Whoever prefers to write German still may; nothing is sent back for its
+language.
+
+**What point 68 keeps:** no Simplified Technical English, the writing rules for both languages,
+English commit messages from 30 August 2026, and `history` closed rather than translated.
+
+## 72. The documentation site is built from this repository, and from the newest tag
+
+Point 68 kept the museum documentation in the repository and left a documentation site as an
+option for later. Point 71 made that option necessary: two languages in one repository need
+somewhere to be delivered from, and a folder of `.md` files is not it.
+
+**Out of this repository, not a second one.** The drift checker needs both halves in view, and
+`make check` does not reach into a foreign repository. That is what the wiki failed at before
+(point 68), and nothing about it has changed.
+
+**From the newest tag, not from `develop`.** The museum reads the documentation for the version it
+is running. A site that ran ahead of the device would describe buttons that are not there yet,
+and the reader has no way to tell. `workflow_dispatch` builds a preview from any ref for whoever
+is working on the docs.
+
+**MkDocs Material with `mkdocs-static-i18n`, not GitHub's own build.** A branch plus `/docs` is the
+simple route and is not available: GitHub builds that with Jekyll, and Jekyll cannot do i18n there.
+The plugin needs one line — `docs_structure: suffix` reads the file name exactly as
+`language_check.py` does, so the suffix rule from point 71 carries the site as well and there is no
+second list.
+
+**No Crowdin and no Weblate.** Both have free licences for open source and can do exactly the right
+thing. For one target language and some 6,000 words they are too much apparatus, and the drift
+checker already answers the question they would answer. A third language changes that, and then
+Crowdin is the first choice.
+
+**`tools/mkdocs_hooks.py` exists because a link means two things.** `../LICENSE` and
+`usermanual.de.md` are correct in the repository and wrong on the site. Writing 61 absolute URLs
+into the markdown by hand, in two languages, and keeping them in step for ever was the
+alternative. The rule runs at build time instead, and the files stay readable where most people
+meet them.
+
+**`docs/archive/` is not published.** The history is a closed German record for whoever works on
+the project, and they are in the repository anyway. The directory name carries the exclusion, so
+nothing has to remember it.
+
+## 73. The interface is bilingual: one setting, two catalogues, resolved at startup
+
+`KIEKMAP_LANGUAGE` in the `.env`, where every other setting of the instance stands. The backend
+reads it directly; the frontend fetches it once through `GET /api/config`.
+
+**Not through a Vite variable**, although that would be simpler to build. Each language would then
+need its own build, and the principle of this project is that the device can be changed on the Pi
+without building anything. A wrong setting must cost a restart, not a toolchain.
+
+**Resolved once at startup, not through a React context.** The language is a property of the
+instance and never changes while the device runs. A context would also not work: eleven of the 31
+imports stand in modules that are not components, where no hook runs.
+
+**Typed modules instead of an i18n library.** `Texts = typeof de` in the frontend, frozen
+dataclasses in the backend. A missing key then breaks the build — `tsc` refuses, or the import
+raises `TypeError` — rather than showing a visitor an empty string. `i18next` brings lazy loading,
+ICU plural rules and runtime switching; a kiosk with two languages and a fixed setting needs none
+of them, and every dependency is one more thing that has to work offline.
+
+**The catalogue is the only place a screen text may live.** Two defects showed why. Twenty
+constants read the catalogue at module level, before the language was resolved, and stayed German
+in the English instance; `frontend/src/text/moduleLevel.test.ts` now walks the sources with the
+TypeScript parser and fails on any read outside a function. And the map credit stood hard-wired in
+`kiosk/mapStyle.ts` until 1 September 2026, for the simple reason that nobody thought of a map
+attribution as a text.
+
+**The language is a setting, not a choice for visitors.** The device stands in a museum and speaks
+that museum's language. A switch on the touchscreen would be one more thing to operate for
+visitors who are often elderly, and no relief.
+
+**What does not follow the setting** is named rather than left to chance: `_done` and `_problem`,
+`kiekmap-backup/` and the `status` of `/health`. The first three are names in the file system —
+were they to follow the language, changing it would have to rename folders on the device and on
+every stick already written. The last is a machine value the kiosk service reads.
+
+## 74. The date labels stay in the backend, and `adaption.md` said the opposite
+
+„1920er", „März 1932", „Jahr unbekannt" are built in `services/dates.py` and travel as finished
+strings. The frontend receives a label, not a date and a format.
+
+Until 31 August 2026 `adaption.md` named exactly this as the thing standing in the way of a second
+language, and recommended a fork to a museum that does not speak German. **That was right while the
+backend had no notion of language.** Point 73 removes the premise: `MONTH_NAMES` and „Jahr
+unbekannt" moved into the catalogue, and the setting reaches them like everything else.
+
+**Why the labels do not move to the frontend instead.** A dating here is an interval, not a point
+in time, and the label is a reading of that interval — „1920er" for a decade, a bare year for a
+year, „Jahr unbekannt" for the absence of one. Whoever formats it has to know the rule that
+produced it. Building it twice, once per client, is how the two readings drift apart; the same
+argument as for `t.map.markerLabel`, where one line has to serve the eye and the screen reader.
+
+**The map is the one thing the setting does not reach.** It labels its places in German whatever
+the setting says, because the label language is a property of the place and not of the reader — in
+Holm the street is called Mühlenweg in every language. For a museum outside the German-speaking
+area that is the wrong answer, and it is open work:
+[issue #33](https://github.com/nordfisch/kiekmap/issues/33).

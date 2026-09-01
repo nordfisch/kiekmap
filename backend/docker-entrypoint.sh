@@ -1,8 +1,8 @@
 #!/bin/sh
-# Schemastand nachziehen, bevor die Anwendung startet.
+# Bring the schema forward before the application starts.
 #
-# Das gehoert hierhin und nicht in ein Wartungsskript: auf dem Pi wird per USB-Stick aktualisiert,
-# und niemand vor Ort soll daran denken muessen, danach noch eine Migration von Hand anzustossen.
+# This belongs here and not in a maintenance script: the Pi is updated from a USB stick, and nobody
+# on site should have to remember to run a migration by hand afterwards.
 set -eu
 
 echo "Kiekmap: Schemastand pruefen ..."

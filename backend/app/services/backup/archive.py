@@ -92,7 +92,7 @@ def _add_to_archive(
 
 
 def archive_name(settings: Settings) -> str:
-    """``kiekmap-sicherung-holm-2026-08-03.zip``.
+    """``kiekmap-backup-holm-2026-08-03.zip``.
 
     Plain ASCII: it travels in an HTTP header and lands as a file name on somebody's computer.
 
