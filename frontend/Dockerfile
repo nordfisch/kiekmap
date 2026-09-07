@@ -15,7 +15,7 @@ COPY public ./public
 
 # Fail early and plainly instead of having a map without labels in the museum later.
 RUN test -d public/basemaps/fonts || { \
-      echo "FEHLER: public/basemaps/fonts fehlt. Bitte zuerst 'make tiles' ausfuehren."; \
+      echo "ERROR: public/basemaps/fonts is missing. Run 'make tiles' first."; \
       exit 1; \
     }
 

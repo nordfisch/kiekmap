@@ -109,6 +109,15 @@ switch yet — a file that is half of each is checked in neither language. It wa
 of [issue #31](https://github.com/nordfisch/kiekmap/issues/31) and is empty again, kept for the
 next conversion.
 
+**What it does not read: string literals.** In the `#` formats it classifies comments, not the text
+a script prints. `backend/docker-entrypoint.sh` and `frontend/Dockerfile` carried English comments
+and a German `echo` beside them for weeks, and every run stayed green — a file can be half of each
+and pass. Both messages are translated now; the gap is not closed. Whoever writes a message into a
+script writes it in English with nothing to remind them.
+[Issue #41](https://github.com/nordfisch/kiekmap/issues/41) holds the question of whether a literal
+can be classified reliably enough to check: a comment is prose, while a literal is often a path, a
+flag or a single word — and a check that cries wolf gets switched off.
+
 ### The documentation site
 
 `mkdocs.yml` builds everything under `docs/` into

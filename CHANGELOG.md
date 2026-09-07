@@ -21,6 +21,8 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   reads that switch by its presence. And a stick without a label shifted the arguments of the udev
   rule, so a FAT stick was mounted without `uid=1000` and the backup failed after somebody pressed
   the button. See [point 77](docs/developer/decisions.md)
+- **Two German messages in the container start and the frontend build**, both in English now. The
+  language checker reads comments, not the text a script prints, so both had passed every run
 
 ## [0.9.0] — 2026-09-02
 
