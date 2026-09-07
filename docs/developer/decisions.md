@@ -2059,3 +2059,41 @@ a proxy that compressed would take that away. `docker compose ps` shows host por
 **Not Traefik and not Keycloak.** Both were weighed in issue #22 and dropped: Traefik buys dynamic
 routing for a single fixed service, Keycloak buys user management for one shared password. Caddy is
 two files and one image.
+
+---
+
+## 77. Compose is started from the project root, with `-f` and `--env-file`
+
+Compose reads the `.env` from the directory it is started in. The `.env` lies in the project root,
+the compose file one level down in `deploy/` — so a `docker compose up -d` started from `deploy/`
+does not see it. Measured on 8 September 2026 with a probe of the same shape: from `deploy/` the
+image resolves to `kiekmap-backend:dev`, from the root with `--env-file .env` to the version the
+`.env` names.
+
+**What that costs on the device.** `update.sh` writes the new `KIEKMAP_VERSION` into the `.env` and
+then started Compose from `deploy/`. The value went unread, `${KIEKMAP_VERSION:-dev}` fell back to
+`dev`, and the freshly loaded image was not the one that started. On a device that has never seen a
+`dev` image, `build:` in the compose file would have taken over and the Pi would have built the
+frontend itself — npm, on four cores, from a stick. The update would have looked as if it had
+worked.
+
+`env_file: ../.env` is not affected: it is resolved against the compose file and delivers the
+settings either way. Only the `${…}` substitution goes wrong, and only for the two values that
+steer Compose itself. That is what makes the failure quiet.
+
+**Hence one form, everywhere:** `docker compose -f deploy/docker-compose.yml --env-file .env …`,
+started from the project root. The `Makefile` already did it that way; the Pi scripts and the
+operations manual now do too, `ps` and `logs` included. A short form that works for four commands
+and silently breaks the fifth is worse than a long one that always works.
+
+**This came out of a pass over `deploy/pi/` before the first device** (issue #38). It found four
+defects that need no hardware, and the first of them stopped the setup at its opening task:
+`setup-pi.sh` installed `chromium-browser`, which Raspberry Pi OS has called `chromium` since
+Bookworm, under `set -e`. The other three were this one, `--disable-pinch=false` — Chromium reads
+that switch by its presence, so it switched off the pinch zoom the map lives on — and an argument
+order in the udev rule that a stick without a label would have shifted, mounting a FAT stick
+without `uid=1000` so the backup failed after somebody pressed the button.
+
+**It replaces nothing.** [Issue #18](https://github.com/nordfisch/kiekmap/issues/18) stays: what
+needs a device is found on a device. `shellcheck` over all five scripts is clean, and that says
+nothing about whether they work.

@@ -35,7 +35,13 @@ while ! curl -sf --max-time 3 "$HEALTH" >/dev/null 2>&1; do
     sleep 2
 done
 
-exec cage -- chromium-browser \
+# Raspberry Pi OS Bookworm carries the Debian package: the program is called `chromium`.
+# `chromium-browser` was the name up to Bullseye and no longer exists -- an older device is the
+# only reason the second name is still tried.
+BROWSER=chromium
+command -v "$BROWSER" >/dev/null 2>&1 || BROWSER=chromium-browser
+
+exec cage -- "$BROWSER" \
     --kiosk "$ADDRESS" \
     --ozone-platform=wayland \
     --user-data-dir="$PROFILE" \
@@ -51,6 +57,6 @@ exec cage -- chromium-browser \
     `# A swipe to the right otherwise triggers "back". On a map that is swiped, that is a daily` \
     `# annoyance.` \
     --overscroll-history-navigation=0 \
-    `# Pinch zoom stays on -- the map lives on it.` \
-    --disable-pinch=false \
+    `# No --disable-pinch here. Chromium reads that switch by its presence, not by its value,` \
+    `# so --disable-pinch=false would have switched pinch zoom off -- and the map lives on it.` \
     --autoplay-policy=no-user-gesture-required

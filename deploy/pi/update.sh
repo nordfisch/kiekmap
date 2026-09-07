@@ -59,15 +59,22 @@ if [ -f "$SOURCE/places.json" ]; then
     cp "$SOURCE/places.json" "$ROOT/data/places.json"
 fi
 
+# From the project root and with --env-file, not from deploy/: Compose reads the .env from the
+# directory it is started in, and the .env lies one above the compose file. Started from deploy/
+# the KIEKMAP_VERSION just written would go unread, ${KIEKMAP_VERSION:-dev} would fall back to
+# `dev` -- and since the compose file carries a `build:`, a missing image would make the Pi build
+# the frontend itself, npm and all. Measured on 8 September 2026.
+COMPOSE="docker compose -f $ROOT/deploy/docker-compose.yml --env-file $ROOT/.env"
+
 echo "== restarting"
-cd "$ROOT/deploy"
-docker compose up -d
+cd "$ROOT"
+$COMPOSE up -d
 
 echo "== waiting for the API to answer"
 ATTEMPT=0
 until curl -sf --max-time 3 http://localhost/api/health >/dev/null 2>&1; do
     ATTEMPT=$((ATTEMPT + 1))
-    [ "$ATTEMPT" -gt 60 ] && { echo "The API does not come up -- see: docker compose logs" >&2; exit 1; }
+    [ "$ATTEMPT" -gt 60 ] && { echo "The API does not come up -- see: $COMPOSE logs" >&2; exit 1; }
     sleep 2
 done
 
@@ -75,7 +82,7 @@ done
 # places.json it has to be pulled in explicitly.
 if [ -f "$SOURCE/places.json" ]; then
     echo "== reading the place index in again"
-    docker compose exec -T backend python -m app.cli places
+    $COMPOSE exec -T backend python -m app.cli places
 fi
 
 echo "== restarting the kiosk"

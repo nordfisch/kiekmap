@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 6049f5171278c6066c9006e7e829f93afc5e228ae6a157244930511402e8cb62 -->
+<!-- source-sha: c1a65c12b38bd4c959c8df69656f70c53fea9c3bbe65c28bfa9007d31f5d1503 -->
 
 # Betriebshandbuch
 
@@ -23,8 +23,8 @@ sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh
 
 Das Skript installiert cage, Chromium und Docker, legt den Benutzer `kiekmap` an, richtet den
 Kiosk-Dienst und die USB-Regel ein und schaltet die Bildschirmabschaltung ab. Danach nennt es die
-vier Schritte, die es nicht selbst tun kann: `.env` anlegen, PIN setzen, Kartendaten kopieren,
-Container starten.
+Schritte, die es nicht selbst tun kann: `.env` anlegen, Abbilder und Kartendaten vom
+Entwicklungsrechner herüberholen, PIN setzen, neu starten.
 
 **Kartendaten kommen vom Entwicklungsrechner**, nicht vom Pi. `make tiles` und `make places`
 brauchen Internet und Rechenzeit; auf den Pi gehören nur die Ergebnisse:
@@ -68,7 +68,7 @@ Woran man erkennt, dass etwas hakt:
 ```bash
 systemctl status kiekmap-kiosk       # läuft der Kiosk?
 journalctl -u kiekmap-kiosk -n 50    # warum nicht?
-cd /opt/kiekmap/deploy && docker compose ps
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env ps
 curl -sf http://localhost/api/health && echo " API antwortet"
 ```
 
@@ -148,7 +148,8 @@ In dieser Reihenfolge:
    heißt: Die Sitzung hat kein Ausgabegerät. Dann fehlt eine der vier Zeilen `PAMName`,
    `TTYPath`, `StandardInput`, `UtmpIdentifier` in der Unit, oder der Benutzer ist nicht in den
    Gruppen `video` und `render`.
-3. `docker compose ps` — laufen die Container? Wenn nicht: `docker compose logs backend`.
+3. `docker compose ... ps` — laufen die Container? Wenn nicht: `... logs backend`. Der vollständige
+   Befehl steht unter [Einstellungen im Containerbetrieb](#einstellungen-im-containerbetrieb).
 4. Nach zehn Minuten schwarz, obwohl vorher alles lief: `consoleblank=0` fehlt in der
    `cmdline.txt` (setzt `setup-pi.sh`, wirkt erst nach einem Neustart).
 
@@ -175,6 +176,15 @@ In dieser Reihenfolge:
 cd backend && .venv/bin/python -m app.cli pin
 ```
 
+Das ist der Entwicklungsrechner. **Auf dem Gerät gibt es keine virtuelle Umgebung** — der Pi trägt
+die Software als Abbild, nicht als Python-Installation, deshalb läuft derselbe Befehl dort im
+Container:
+
+```bash
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env \
+    run --rm backend python -m app.cli pin
+```
+
 Der Befehl fragt die PIN zweimal ab und gibt die Zeile aus, die in die `.env` gehört. Die PIN
 selbst wird nirgends gespeichert; vergessen heißt neu setzen. Danach den Dienst neu starten.
 
@@ -192,8 +202,14 @@ in [`deploy/docker-compose.yml`](../../deploy/docker-compose.yml) als `env_file`
 etwas ändert, startet danach die Container neu:
 
 ```bash
-cd /opt/kiekmap && docker compose up -d
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env up -d
 ```
+
+**Aus `/opt/kiekmap` und mit `--env-file`, nicht aus `deploy/`.** Compose liest die `.env` aus dem
+Verzeichnis, in dem es gestartet wird, und die `.env` liegt eine Ebene über der Compose-Datei. Aus
+`deploy/` heraus fände es sie nicht: `KIEKMAP_VERSION` fiele auf `dev` zurück, und weil die
+Compose-Datei ein `build:` trägt, würde der Pi bei fehlendem Abbild das Frontend selbst bauen. Jeder
+`docker compose`-Befehl auf dem Gerät hat diese Form.
 
 **Die Sprache des Geräts** steht ebenfalls hier:
 
@@ -298,8 +314,8 @@ das Archiv weiterhin im Eingangsordner, der Arbeitsordner ist aufgeräumt.
 ### Nachsehen, wo etwas steht
 
 ```bash
-docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
-docker compose exec backend alembic heads
+docker compose -f deploy/docker-compose.yml --env-file .env exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
+docker compose -f deploy/docker-compose.yml --env-file .env exec backend alembic heads
 ```
 
 Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand. Das ist bei
