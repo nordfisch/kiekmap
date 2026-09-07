@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 5a2df922ffca1d488dcfbc17fca46b3c1cfa5c4a522fd2a47a146052ffac8830 -->
+<!-- source-sha: 6049f5171278c6066c9006e7e829f93afc5e228ae6a157244930511402e8cb62 -->
 
 # Betriebshandbuch
 
@@ -317,6 +317,68 @@ Und die Reparatur von Hand:
 ```bash
 make migrate
 ```
+
+## Die Online-Instanz
+
+Neben dem Pi gibt es einen zweiten Weg, dies zu betreiben: auf einem Webserver, von überall
+erreichbar, hinter einem Kennwort. Er ist für die Monate da, in denen das Museumsteam die Datenbank
+von zu Hause aus füllt, bevor ein Gerät im Ausstellungsraum steht.
+
+Dort laufen dieselben zwei Container wie auf dem Pi — dieselben Abbilder, dieselbe
+nginx-Konfiguration. Nur Caddy steht davor und kümmert sich um HTTPS und das Kennwort:
+
+```
+Internet --HTTPS--> Caddy --HTTP--> nginx (frontend) --> uvicorn (backend)
+```
+
+**Drei Zeilen in der `.env`**, sonst ist nichts anders:
+
+```bash
+KIEKMAP_WEB_DOMAIN=fotos.example.org
+KIEKMAP_WEB_USER=museum
+KIEKMAP_WEB_PASSWORD_HASH=$$2a$$14$$...
+```
+
+Der Hash entsteht auf dem Entwicklungsrechner:
+
+```bash
+docker run --rm caddy:2.11.4-alpine caddy hash-password --plaintext '<Kennwort>'
+```
+
+**Jedes `$` darin muss in der `.env` doppelt geschrieben werden.** Compose liest ein einzelnes als
+Anfang eines Variablennamens und verwirft, was darauf folgt — das Kennwort passt dann nie, und
+nichts sagt, warum. Danach:
+
+```bash
+make prod-web
+```
+
+**Das Kennwort schützt alles**, die Karte eingeschlossen und `/api/` ebenso. Wer es nicht hat,
+bekommt eine 401 und sieht nichts. Genau dafür ist diese Instanz da: Die Sammlung ist nicht
+öffentlich, solange sie aufgebaut wird.
+
+**Die Abbilder werden auf dem Entwicklungsrechner gebaut, nicht auf dem Server.** Ein kleiner
+Server hat zwei Kerne, und der Frontend-Bau ist ein npm-Bau — derselbe Weg wie beim Pi, mit
+`docker save` und `docker load`. Siehe [Update ohne Internet](#update-ohne-internet).
+
+**Die Sicherung ist der ZIP-Download.** Ein Server hat keine USB-Anschlüsse, der Sicherungsknopf im
+Admin-Bereich findet dort also kein Ziel. Stattdessen lädt jemand das Archiv im Admin-Bereich
+herunter, regelmäßig, und bewahrt es anderswo auf. Der Stick ist für das Gerät im Museum.
+
+**Die PIN bekommt mehr Ziffern.** Auf dem Pi reichen vier — wer davorsteht, steht im Museum. Online
+reichen vier nicht; die PIN erlaubt bis zu zwölf.
+
+**Vorher ausprobieren:** Mit `KIEKMAP_WEB_DOMAIN=localhost` stellt Caddy ein eigenes Zertifikat aus
+und braucht weder Domain noch öffentliche Adresse. Der Browser warnt einmal vor diesem Zertifikat.
+Das prüft Kennwort und Wegführung; es prüft nicht das Zertifikat von Let's Encrypt. Auf einem Mac
+muss die Überlagerung des Entwicklungsrechners mitkommen, weil es dort kein `/media` gibt:
+
+```bash
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.mac.yml \
+    -f deploy/docker-compose.web.yml --env-file .env up --build
+```
+
+---
 
 ## Wo die Sicherung liegt
 

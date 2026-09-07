@@ -312,6 +312,69 @@ And the repair by hand:
 make migrate
 ```
 
+## The online instance
+
+Beside the Pi there is a second way to run this: on a web server, reachable from anywhere, behind
+one password. It exists for the months in which the museum team fills the database from home,
+before a device stands in the exhibition room.
+
+The same two containers run there as on the Pi — the same images, the same nginx configuration.
+Only Caddy stands in front of them and takes care of HTTPS and the password:
+
+```
+Internet --HTTPS--> Caddy --HTTP--> nginx (frontend) --> uvicorn (backend)
+```
+
+**Three lines in the `.env`**, and nothing else differs:
+
+```bash
+KIEKMAP_WEB_DOMAIN=fotos.example.org
+KIEKMAP_WEB_USER=museum
+KIEKMAP_WEB_PASSWORD_HASH=$$2a$$14$$...
+```
+
+The hash is produced on the development machine:
+
+```bash
+docker run --rm caddy:2.11.4-alpine caddy hash-password --plaintext '<password>'
+```
+
+**Every `$` in the result has to be written twice** in the `.env`. Compose reads a single one as
+the start of a variable name and drops what follows it — the password then never matches, and
+nothing says why. Then:
+
+```bash
+make prod-web
+```
+
+**The password protects everything**, the map included and `/api/` as well. Whoever does not have
+it gets a 401 and sees nothing. That is the purpose of this instance: the collection is not public
+while it is being built.
+
+**Build the images on the development machine, not on the server.** A small server has two cores,
+and the frontend build is an npm build — the same way as for the Pi, with `docker save` and
+`docker load`. See [Updating without the internet](#updating-without-the-internet).
+
+**The backup is the ZIP download.** A server has no USB ports, so the backup button of the admin
+area finds no target there. Instead somebody downloads the archive from the admin area, regularly,
+and keeps it somewhere else. The stick is for the device in the museum.
+
+**Give the PIN more digits.** Four are enough on the Pi — whoever stands in front of it is standing
+in the museum. Online, four are not; the PIN allows up to twelve.
+
+**Trying it out beforehand:** with `KIEKMAP_WEB_DOMAIN=localhost` Caddy issues its own certificate
+and needs neither a domain nor a public address. The browser warns about that certificate once.
+This checks the password and the routing; it does not check the certificate from Let's Encrypt. On
+a Mac the overlay of the development machine has to come along, because `/media` does not exist
+there:
+
+```bash
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.mac.yml \
+    -f deploy/docker-compose.web.yml --env-file .env up --build
+```
+
+---
+
 ## Where the backup lies
 
 On the stick, in the folder `kiekmap-backup/`:

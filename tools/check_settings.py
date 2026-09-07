@@ -51,9 +51,16 @@ ENV_LOCAL = ROOT / ".env"
 #: Variables that belong to Compose itself, not to the application.
 #:
 #: ``KIEKMAP_VERSION`` picks the image tag, ``KIEKMAP_PROD_DATA`` the data directory of the Mac
-#: overlay. Both are read by Compose before a container exists, so ``config.py`` knows neither --
-#: and without this list they would be reported as typos.
-COMPOSE_ONLY = {"KIEKMAP_VERSION", "KIEKMAP_PROD_DATA"}
+#: overlay, and the three ``…_WEB_…`` configure Caddy in the web overlay. All of them are read by
+#: Compose before a container exists, so ``config.py`` knows none of them -- and without this list
+#: they would be reported as typos.
+COMPOSE_ONLY = {
+    "KIEKMAP_VERSION",
+    "KIEKMAP_PROD_DATA",
+    "KIEKMAP_WEB_DOMAIN",
+    "KIEKMAP_WEB_USER",
+    "KIEKMAP_WEB_PASSWORD_HASH",
+}
 
 
 def settings_names() -> set[str]:

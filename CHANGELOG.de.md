@@ -1,9 +1,18 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 3ceeb9548830f3fc5e53e96a6c67658e4ba084f6ad12d3c7597d674d8cba4a54 -->
+<!-- source-sha: 008cf6f05de305619498d6432308155cf9e20af51b3d015ae30fb1805d889270 -->
 
 # Änderungen
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach SemVer.
+
+## [Unveröffentlicht]
+
+### Hinzugefügt
+
+- **Die Sammlung kann online laufen, hinter einem Kennwort.** `make prod-web` stellt Caddy vor die
+  beiden Container, die auch auf dem Pi laufen: HTTPS und eine Anmeldung für das ganze Team — über
+  der Karte ebenso wie über der API. Damit kann das Museum die Datenbank von zu Hause aus füllen,
+  bevor ein Gerät im Ausstellungsraum steht. Siehe [Punkt 76](docs/developer/decisions.md)
 
 ## [0.9.0] — 2. September 2026
 
