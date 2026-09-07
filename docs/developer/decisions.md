@@ -2010,3 +2010,52 @@ before it could bite: the table of headings was keyed by file name, so two files
 would have silently checked each other's anchors — see the commit that fixed it. It repaid a
 third of `tools/mkdocs_hooks.py`: with the site reduced to one directory, "every link that leaves
 it points at the repository" replaced three separate rules.
+
+---
+
+## 76. The online instance is a doorman in front, not a login inside
+
+The museum needs to fill the database from home, months before a Pi stands in the exhibition room.
+`deploy/docker-compose.web.yml` is the third overlay for that, beside the one of the Pi and the one
+of the development Mac: it puts Caddy in front of the two containers and changes nothing about
+them.
+
+**The protection stands in front of the application, not inside it.** Caddy asks for one password
+over everything — the visitor view, the map, `/api/`. The alternative would have been a login in
+the application, and that would have bent the visitor view permanently for an operating mode that
+lasts a few months. The kiosk has no login by design: whoever stands in front of the device is
+standing in the museum.
+
+**The admin PIN stays as it is**, and so does the lockout in `backend/app/services/auth.py`. Behind
+one password there is no attacker to defend against. What changes is a line in the manual: online,
+the PIN gets more than four digits. `is_valid_pin` allows up to twelve, so no code is involved.
+
+**`ports: !reset []` on the frontend is the security-critical line, and `ports: []` is not enough.**
+Compose merges `ports` instead of replacing them. Measured on 7 September 2026 against the merged
+configuration: base alone publishes `80->80` on the frontend, base plus the overlay publishes
+nothing there and `80` and `443` only on Caddy — with a plain `ports: []` in the overlay the
+`80->80` stays. The doorman would then stand beside the door instead of in it, and
+`http://<address>/` would reach nginx directly. The failure is silent: everything works, and the
+password protects nothing.
+
+**Every `$` of the password hash is written twice in the `.env`.** Measured the same day: the value
+`$2a$14$abcDEF/ghi` arrives at the container as `$2a$14/ghi` — Compose read `$abcDEF` as a variable
+name and replaced it with nothing. Nothing fails, no message appears, and the password simply never
+matches. The doubling is in `deploy/.env.example` and in the manual.
+
+**The backup of the online instance is the ZIP download.** A server has no USB ports, `find_drives`
+returns an empty list, and the backup button has no target. That is not a defect and no reason to
+change the overlay — the manual says who downloads the archive and how often. The stick path
+belongs to the device in the museum.
+
+**The whole thing was proved on the development machine, before any capacity was booked.** With
+`KIEKMAP_WEB_DOMAIN=localhost` Caddy issues its own certificate and needs neither a domain nor a
+public address, so the two things the overlay exists for can be checked today. Measured on
+8 September 2026 against the running stack: the page answers 401 without a password and 200 with
+it, `/api/photos` answers 401 without one, a wrong password answers 401, `http://` answers 308 to
+HTTPS, and a range request on `map.pmtiles` still answers 206 — the map is read tile by tile, and
+a proxy that compressed would take that away. `docker compose ps` shows host ports on Caddy alone.
+
+**Not Traefik and not Keycloak.** Both were weighed in issue #22 and dropped: Traefik buys dynamic
+routing for a single fixed service, Keycloak buys user management for one shared password. Caddy is
+two files and one image.

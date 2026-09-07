@@ -2,7 +2,7 @@
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
         migrate revision seed seed-save empty lint docs-check notices notices-check check \
         tiles places build prod docs-serve docs-build \
-        prod-mac prod-down clean
+        prod-mac prod-web prod-down clean
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
@@ -229,6 +229,12 @@ prod: .env  ## everything in containers, the way it runs on the Pi
 # entrypoint pulls the schema forward on every start.
 prod-mac: .env  ## like prod, but with the paths of the development Mac
 	$(COMPOSE) -f deploy/docker-compose.mac.yml up --build
+
+# The online instance (issue #22). The three KIEKMAP_WEB_* stand in the .env; without them Compose
+# stops and says which one is missing. For a trial run on the development machine
+# KIEKMAP_WEB_DOMAIN=localhost is enough -- Caddy then issues the certificate itself.
+prod-web: .env  ## like prod, but behind Caddy with HTTPS and a password (web server)
+	$(COMPOSE) -f deploy/docker-compose.web.yml up --build
 
 prod-down: .env
 	$(COMPOSE) down

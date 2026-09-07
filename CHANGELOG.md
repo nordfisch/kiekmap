@@ -2,6 +2,15 @@
 
 Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning after SemVer.
 
+## [Unreleased]
+
+### Added
+
+- **The collection can run online, behind one password.** `make prod-web` puts Caddy in front of
+  the two containers that also run on the Pi: HTTPS, and one login for the whole team — over the
+  map and over the API alike. It exists so that the museum can fill the database from home before a
+  device stands in the exhibition room. See [point 76](docs/developer/decisions.md)
+
 ## [0.9.0] — 2026-09-02
 
 **The device speaks two languages, and the documentation has an address.** Nothing changed about

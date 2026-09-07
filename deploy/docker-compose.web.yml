@@ -1,0 +1,54 @@
+# Overlay for the online instance. To be used only together with docker-compose.yml, most easily
+# through `make prod-web`.
+#
+# Why it exists: while the museum builds the photo database, the team needs to work from home --
+# months before a Pi stands in the exhibition room. See issue #22.
+#
+# It changes one line of the frontend and puts Caddy beside it. Backend and nginx stay as they run
+# on the Pi: the same images, the same frontend/nginx.conf, the same entrypoint. Whatever is
+# checked here is therefore really checked and not bypassed.
+#
+#     Internet --HTTPS--> Caddy --HTTP--> nginx (frontend) --> uvicorn (backend)
+#                           |             unchanged            unchanged
+#                     Let's Encrypt
+#                     basic_auth
+#
+# IT FOLLOWS THAT: a VPS has no USB sticks. `find_drives` returns an empty list, the backup button
+# has no target, and the backup of the online instance is the ZIP download -- somebody has to pull
+# it. That is not a defect and not worth a change here; it stands in docs/museum/operations.md.
+
+services:
+  frontend:
+    # THE SECURITY-CRITICAL LINE. Compose merges `ports` instead of replacing them: without
+    # `!reset` the "80:80" from docker-compose.yml would stay, and http://<address>/ would reach
+    # nginx directly and bypass the doorman completely. Only Caddy publishes ports here.
+    ports: !reset []
+
+  caddy:
+    # Pinned, because the Caddyfile is written against this version: `basic_auth` is what the
+    # directive is called from 2.8 on, `basicauth` up to 2.7.
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    environment:
+      # No default: an empty domain would make Caddy answer on every name, an empty password would
+      # let everyone in. Compose stops instead and says which line is missing.
+      KIEKMAP_WEB_DOMAIN: ${KIEKMAP_WEB_DOMAIN:?please set it in the .env}
+      KIEKMAP_WEB_USER: ${KIEKMAP_WEB_USER:?please set it in the .env}
+      KIEKMAP_WEB_PASSWORD_HASH: ${KIEKMAP_WEB_PASSWORD_HASH:?please set it in the .env}
+    ports:
+      # 443 for the site, 80 for the certificate: Let's Encrypt asks over HTTP, and Caddy sends
+      # everything else on to HTTPS.
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # The certificates live here. Without this volume Caddy asks for a new one after every
+      # restart and runs into Let's Encrypt's rate limit.
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:
