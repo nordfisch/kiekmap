@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 008cf6f05de305619498d6432308155cf9e20af51b3d015ae30fb1805d889270 -->
+<!-- source-sha: e113fe2b92637e86a4c71ce14e65d2299a48190f164470c5779b88a30cd73512 -->
 
 # Änderungen
 
@@ -13,6 +13,18 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   beiden Container, die auch auf dem Pi laufen: HTTPS und eine Anmeldung für das ganze Team — über
   der Karte ebenso wie über der API. Damit kann das Museum die Datenbank von zu Hause aus füllen,
   bevor ein Gerät im Ausstellungsraum steht. Siehe [Punkt 76](docs/developer/decisions.md)
+
+### Behoben
+
+- **Vier Fehler in der Pi-Einrichtung, gefunden vor dem ersten Gerät.** `setup-pi.sh` installierte
+  `chromium-browser`, ein Paket, das Raspberry Pi OS seit Bookworm `chromium` nennt — unter `set -e`
+  starb die Einrichtung an ihrer ersten Aufgabe. `update.sh` startete Compose aus `deploy/`, wo die
+  `.env` nicht gelesen wird, sodass die eben geschriebene Version ungenutzt blieb und der Pi das
+  Frontend selbst gebaut hätte. `--disable-pinch=false` schaltete den Pinch-Zoom ab, weil Chromium
+  diesen Schalter über seine Anwesenheit liest. Und ein Stick ohne Bezeichnung verschob die
+  Argumente der udev-Regel, sodass ein FAT-Stick ohne `uid=1000` eingehängt wurde und die Sicherung
+  scheiterte, nachdem jemand den Knopf gedrückt hatte. Siehe
+  [Punkt 77](docs/developer/decisions.md)
 
 ## [0.9.0] — 2. September 2026
 

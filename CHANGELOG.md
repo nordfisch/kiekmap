@@ -11,6 +11,17 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   map and over the API alike. It exists so that the museum can fill the database from home before a
   device stands in the exhibition room. See [point 76](docs/developer/decisions.md)
 
+### Fixed
+
+- **Four defects in the Pi setup, found before the first device.** `setup-pi.sh` installed
+  `chromium-browser`, a package Raspberry Pi OS has called `chromium` since Bookworm — under
+  `set -e` the setup died at its opening task. `update.sh` started Compose from `deploy/`, where
+  the `.env` is not read, so the version it had just written went unused and the Pi would have
+  built the frontend itself. `--disable-pinch=false` switched the pinch zoom off, because Chromium
+  reads that switch by its presence. And a stick without a label shifted the arguments of the udev
+  rule, so a FAT stick was mounted without `uid=1000` and the backup failed after somebody pressed
+  the button. See [point 77](docs/developer/decisions.md)
+
 ## [0.9.0] — 2026-09-02
 
 **The device speaks two languages, and the documentation has an address.** Nothing changed about

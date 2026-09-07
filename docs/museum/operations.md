@@ -19,8 +19,9 @@ sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh
 ```
 
 The script installs cage, Chromium and Docker, creates the user `kiekmap`, sets up the kiosk
-service and the USB rule, and switches the screen blanking off. It then names the four steps it
-cannot do itself: create the `.env`, set the PIN, copy the map data, start the containers.
+service and the USB rule, and switches the screen blanking off. It then names the steps it
+cannot do itself: create the `.env`, bring images and map data over from the development machine,
+set the PIN, restart.
 
 **The map data comes from the development machine**, not from the Pi. `make tiles` and
 `make places` need the internet and processing time; only the results belong on the Pi:
@@ -64,7 +65,7 @@ How to tell that something is stuck:
 ```bash
 systemctl status kiekmap-kiosk       # is the kiosk running?
 journalctl -u kiekmap-kiosk -n 50    # why not?
-cd /opt/kiekmap/deploy && docker compose ps
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env ps
 curl -sf http://localhost/api/health && echo " the API answers"
 ```
 
@@ -144,7 +145,8 @@ In this order:
    device"* means: the session has no output device. Then one of the four lines `PAMName`,
    `TTYPath`, `StandardInput`, `UtmpIdentifier` is missing from the unit, or the user is not in
    the groups `video` and `render`.
-3. `docker compose ps` — are the containers running? If not: `docker compose logs backend`.
+3. `docker compose ... ps` — are the containers running? If not: `... logs backend`. The full
+   command is in [Settings in container operation](#settings-in-container-operation).
 4. Black after ten minutes although everything ran before: `consoleblank=0` is missing from
    `cmdline.txt` (`setup-pi.sh` sets it, and it takes effect only after a restart).
 
@@ -171,6 +173,15 @@ In this order:
 cd backend && .venv/bin/python -m app.cli pin
 ```
 
+That is the development machine. **On the device there is no virtual environment** — the Pi
+carries the software as an image, not as a Python installation, so there the same command runs in
+the container:
+
+```bash
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env \
+    run --rm backend python -m app.cli pin
+```
+
 The command asks for the PIN twice and prints the line that belongs in the `.env`. The PIN itself
 is stored nowhere; forgetting it means setting a new one. Restart the service afterwards.
 
@@ -188,8 +199,14 @@ and is read by [`deploy/docker-compose.yml`](../../deploy/docker-compose.yml) as
 changes something there restarts the containers afterwards:
 
 ```bash
-cd /opt/kiekmap && docker compose up -d
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env up -d
 ```
+
+**From `/opt/kiekmap` and with `--env-file`, not from `deploy/`.** Compose reads the `.env` from
+the directory it is started in, and the `.env` lies one above the compose file. Started from
+`deploy/` it would not find it: `KIEKMAP_VERSION` would fall back to `dev`, and since the compose
+file carries a `build:`, a missing image would make the Pi build the frontend itself. Every
+`docker compose` command on the device takes this form.
 
 **The language of the device** stands here too:
 
@@ -292,8 +309,8 @@ folder, and the working directory is tidied up.
 ### Looking up where things stand
 
 ```bash
-docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
-docker compose exec backend alembic heads
+docker compose -f deploy/docker-compose.yml --env-file .env exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
+docker compose -f deploy/docker-compose.yml --env-file .env exec backend alembic heads
 ```
 
 If the two values do not agree, the schema is not up to date. That is the first thing to look at
