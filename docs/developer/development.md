@@ -120,9 +120,11 @@ flag or a single word — and a check that cries wolf gets switched off.
 
 ### The documentation site
 
-`mkdocs.yml` builds everything under `docs/` into
-[nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in both languages. The
-plugin is `mkdocs-static-i18n`, and its configuration is one line: `docs_structure: suffix`. It
+`mkdocs.yml` builds everything under `docs/museum` into
+[nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in both languages —
+`docs/developer` is read in the repository and not published, see
+[decisions.md](decisions.md#75-the-documentation-splits-by-audience-and-only-one-half-is-published).
+The plugin is `mkdocs-static-i18n`, and its configuration is one line: `docs_structure: suffix`. It
 reads the file name exactly as `language_check.py` does — `operations.de.md` is the German half of
 `operations.md` — so there is no second list to keep in step.
 
