@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: e113fe2b92637e86a4c71ce14e65d2299a48190f164470c5779b88a30cd73512 -->
+<!-- source-sha: 13239ce16cfa1629cb283606ba5025f3bc32a7ea69148d26f4831a5c30c97a05 -->
 
 # Änderungen
 
@@ -25,6 +25,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Argumente der udev-Regel, sodass ein FAT-Stick ohne `uid=1000` eingehängt wurde und die Sicherung
   scheiterte, nachdem jemand den Knopf gedrückt hatte. Siehe
   [Punkt 77](docs/developer/decisions.md)
+- **Zwei deutsche Meldungen im Containerstart und im Frontend-Bau**, jetzt beide englisch. Der
+  Sprachprüfer liest Kommentare, nicht den Text, den ein Skript ausgibt — beide waren durch jeden
+  Lauf gekommen
 
 ## [0.9.0] — 2. September 2026
 
