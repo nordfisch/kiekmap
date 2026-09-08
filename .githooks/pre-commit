@@ -45,3 +45,8 @@ check check_numbers
 check check_translations
 check build_register --check
 check set_version --check
+
+# The only one that is not in `make docs-check`: it reads the index, not the tree. `make check`
+# answers whether the tree is right, this answers what the commit carries -- and on a machine that
+# sets a device up, the tree legitimately holds the real coat of arms.
+check check_logo
