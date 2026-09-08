@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 13239ce16cfa1629cb283606ba5025f3bc32a7ea69148d26f4831a5c30c97a05 -->
+<!-- source-sha: 040344779169d3ca174a400cc931e46d87982d30003dae19483ea0ac95036c9e -->
 
 # Änderungen
 
@@ -28,6 +28,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Zwei deutsche Meldungen im Containerstart und im Frontend-Bau**, jetzt beide englisch. Der
   Sprachprüfer liest Kommentare, nicht den Text, den ein Skript ausgibt — beide waren durch jeden
   Lauf gekommen
+- **Das Betriebshandbuch schickte das Wappen auf den Pi**, wo es niemand liest, und verlangte
+  danach einen Neubau auf dem Gerät. Es geht auf dem Entwicklungsrechner ins Frontend-Abbild
 
 ## [0.9.0] — 2. September 2026
 

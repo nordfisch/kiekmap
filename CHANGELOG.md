@@ -23,6 +23,8 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   the button. See [point 77](docs/developer/decisions.md)
 - **Two German messages in the container start and the frontend build**, both in English now. The
   language checker reads comments, not the text a script prints, so both had passed every run
+- **The operations manual sent the coat of arms to the Pi**, where nothing reads it, and then asked
+  for a rebuild on the device. It goes into the frontend image on the development machine
 
 ## [0.9.0] — 2026-09-02
 

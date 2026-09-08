@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: c1a65c12b38bd4c959c8df69656f70c53fea9c3bbe65c28bfa9007d31f5d1503 -->
+<!-- source-sha: fc99f7e1da892ec0efabe1b9118832e18984fbcadc049b16fd7fea816af31003 -->
 
 # Betriebshandbuch
 
@@ -34,18 +34,19 @@ rsync -a frontend/public/tiles/ pi:/opt/kiekmap/frontend/public/tiles/
 rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
 ```
 
-**Das Wappen kommt denselben Weg.** Im Repo liegt nur ein Platzhalter — ein Gemeindewappen darf
-dort nicht liegen, siehe [decisions.md](../developer/decisions.md), Punkt 21. Auf dem Gerät gehört das echte
-hin:
+**Das Wappen kommt nicht denselben Weg — es geht ins Abbild.** Im Repo liegt nur ein Platzhalter;
+ein Gemeindewappen darf dort nicht liegen, siehe [decisions.md](../developer/decisions.md),
+Punkt 21. Das echte wird beim Bau in das Frontend-Abbild aufgenommen und nicht zur Laufzeit
+gelesen, gehört also auf den **Entwicklungsrechner**, bevor die Abbilder gebaut werden:
 
 ```bash
-rsync -a wappen.png pi:/opt/kiekmap/frontend/public/logo.png
+cp ~/Developer/Museum/Wappen/holm-wappen.png frontend/public/logo.png
 ```
 
-Danach das Frontend neu bauen (`make prod` baut die Images ohnehin neu) — die Datei wird beim Bau
-in das Abbild aufgenommen, nicht zur Laufzeit gelesen. Das Holmer Wappen liegt unter
-`~/Developer/Museum/Wappen/holm-wappen.png` auf dem Entwicklungsrechner; Quelle und
-Rechtelage stehen in [adaption.de.md](adaption.de.md), Abschnitt „Wappen einsetzen".
+Das nächste `make release` trägt es dann im Abbild auf das Gerät. **Auf den Pi kopiert bewirkt es
+nichts**: Die Compose-Datei hängt `tiles/` wieder in den Container ein und sonst nichts, eine
+danebenliegende `logo.png` liest also niemand. Quelle und Rechtelage stehen in
+[adaption.de.md](adaption.de.md), Abschnitt „Wappen einsetzen".
 
 ---
 

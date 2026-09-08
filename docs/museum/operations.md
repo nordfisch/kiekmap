@@ -31,18 +31,20 @@ rsync -a frontend/public/tiles/ pi:/opt/kiekmap/frontend/public/tiles/
 rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
 ```
 
-**The coat of arms comes the same way.** Only a placeholder lies in the repository — a municipal
-coat of arms must not lie there, see [decisions.md](../developer/decisions.md), point 21. The real one belongs
-on the device:
+**The coat of arms does not come that way — it goes into the image.** Only a placeholder lies in
+the repository; a municipal coat of arms must not lie there, see
+[decisions.md](../developer/decisions.md), point 21. The real one is taken into the frontend image
+when it is built and is not read at run time, so it belongs on the **development machine** before
+the images are built:
 
 ```bash
-rsync -a wappen.png pi:/opt/kiekmap/frontend/public/logo.png
+cp ~/Developer/Museum/Wappen/holm-wappen.png frontend/public/logo.png
 ```
 
-Then build the frontend again (`make prod` rebuilds the images anyway) — the file is taken into
-the image at build time, not read at run time. The coat of arms of Holm lies under
-`~/Developer/Museum/Wappen/holm-wappen.png` on the development machine; its source and the rights
-to it are in [adaption.md](adaption.md), section "Putting the coat of arms in".
+The next `make release` then carries it to the device inside the image. **Copying it onto the Pi
+does nothing**: the compose file mounts `tiles/` back into the container and nothing else, so a
+`logo.png` lying beside it is read by nobody. Its source and the rights to it are in
+[adaption.md](adaption.md), section "Putting the coat of arms in".
 
 ---
 
