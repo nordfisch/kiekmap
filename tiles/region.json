@@ -18,7 +18,13 @@
     "most ten buttons each. The place index may reach further; everything beyond that is tapped",
     "on the map.",
     "",
-    "This file is all a different place has to adjust. See docs/adaption.md."
+    "labelLanguage is what the ground is called -- the language Protomaps labels countries,",
+    "waters and districts in. Not the language of the interface: that is KIEKMAP_LANGUAGE in",
+    "the .env, and the two agree here and part company for a museum elsewhere. It takes effect",
+    "at once, without a new 'make tiles': the tiles carry the names in every language, the style",
+    "picks one.",
+    "",
+    "This file is all a different place has to adjust. See docs/museum/adaption.md."
   ],
   "name": "Holm",
   "bbox": [9.60028, 53.57561, 9.75174, 53.66545],
@@ -26,5 +32,6 @@
   "defaultZoom": 14.8,
   "minZoom": 13,
   "maxZoom": 15,
-  "streetChoice": 80
+  "streetChoice": 80,
+  "labelLanguage": "de"
 }

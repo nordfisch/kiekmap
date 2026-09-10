@@ -15,7 +15,7 @@ import { type Flavor, layers, namedFlavor } from "@protomaps/basemaps";
 import type maplibregl from "maplibre-gl";
 
 import type { Region } from "../region";
-import { t } from "../text";
+import { language, t } from "../text";
 
 /**
  * Fonts and icons live locally under /basemaps/.
@@ -29,7 +29,11 @@ const GLYPHS = "/basemaps/fonts/{fontstack}/{range}.pbf";
 // MapLibre demands an absolute sprite URL -- it rejects relative paths. The origin comes from the
 // browser rather than from configuration, so the same build works on localhost, in the museum's
 // wifi and behind the Pi's nginx.
-const SPRITE = `${window.location.origin}/basemaps/sprites/v4/light`;
+//
+// Read inside `buildStyle` and not at module level: a module that touches `window` while it is
+// being imported cannot be imported anywhere else, and the language of the labels below is worth
+// a test.
+const sprite = () => `${window.location.origin}/basemaps/sprites/v4/light`;
 
 /**
  * "Papier" -- the map in the colours of the room around it.
@@ -165,7 +169,7 @@ export function buildStyle(region: Region): maplibregl.StyleSpecification {
   return {
     version: 8,
     glyphs: GLYPHS,
-    sprite: SPRITE,
+    sprite: sprite(),
     sources: {
       protomaps: {
         type: "vector",
@@ -176,7 +180,13 @@ export function buildStyle(region: Region): maplibregl.StyleSpecification {
         attribution: t.map.attribution,
       },
     },
-    layers: layers("protomaps", flavor, { lang: "de" })
+    // What the ground is called belongs to the place, so it comes from region.json; what the
+    // device says to its visitors is KIEKMAP_LANGUAGE. The two agree in Holm and are not the same
+    // question -- see docs/developer/decisions.md, point 79.
+    //
+    // Never left out: without `lang` the library returns 57 layers instead of 71, and not one of
+    // them carries a text field. A map without a single word on it, and nothing says why.
+    layers: layers("protomaps", flavor, { lang: region.labelLanguage ?? language })
       .filter((layer) => !OMITTED.has(layer.id))
       .map(calmRoads),
     ...{ maxzoom: region.maxZoom },

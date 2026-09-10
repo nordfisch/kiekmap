@@ -26,9 +26,18 @@ One file only: [`tiles/region.json`](../../tiles/region.json).
   "defaultZoom": 14.8,
   "minZoom": 13,
   "maxZoom": 15,
-  "streetChoice": 80
+  "streetChoice": 80,
+  "labelLanguage": "de"
 }
 ```
+
+`labelLanguage` is **what the ground is called** — the language the map labels countries, waters and
+districts in. It is not the language of the interface: that is `KIEKMAP_LANGUAGE` in the `.env`. The
+two agree in Holm and part company elsewhere, so **a museum outside the German-speaking area sets
+two things, not one**. It takes effect at once, without a new `make tiles` — the tiles carry the
+names in every language and the style picks one. Where a place has no name in the chosen language,
+the local name is used, which is why the streets read the same either way. If the key is missing,
+the interface language applies.
 
 `streetChoice` is the number of streets the contribution panel offers as buttons — the ones nearest
 to `center`. The place index may reach further; whatever lies beyond it is tapped on the map. **A

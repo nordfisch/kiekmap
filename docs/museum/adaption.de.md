@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/adaption.md -->
-<!-- source-sha: 27b574c8eca3f392fd888c07fb2f081a2750728a919124f784d7e48acb36c1ba -->
+<!-- source-sha: 8450a855db05ed2849a6f75a01e62dd9afa529ef657d2b88cdaa31e2dcf078b8 -->
 
 # Kiekmap für einen anderen Ort oder eine andere Sprache
 
@@ -29,9 +29,18 @@ Nur eine Datei: [`tiles/region.json`](../../tiles/region.json).
   "defaultZoom": 14.8,
   "minZoom": 13,
   "maxZoom": 15,
-  "streetChoice": 80
+  "streetChoice": 80,
+  "labelLanguage": "de"
 }
 ```
+
+`labelLanguage` ist, **wie der Boden heißt** — die Sprache, in der die Karte Länder, Gewässer und
+Landkreise beschriftet. Nicht die Sprache der Oberfläche: Die ist `KIEKMAP_LANGUAGE` in der `.env`.
+Beide stimmen in Holm überein und gehen anderswo auseinander, deshalb stellt **ein Museum außerhalb
+des deutschen Sprachraums zwei Dinge ein, nicht eines**. Es wirkt sofort, ohne neues `make tiles` —
+die Kacheln tragen die Namen in jeder Sprache, der Stil greift eine heraus. Wo ein Ort in der
+gewählten Sprache keinen Namen hat, steht der ortsübliche, weshalb die Straßen so oder so gleich
+heißen. Fehlt der Schlüssel, gilt die Sprache der Oberfläche.
 
 `streetChoice` ist die Anzahl der Straßen, die der „Hilf mit"-Bereich als Knöpfe zur Wahl stellt —
 die dem `center` nächsten. Der Ortsindex darf weiter reichen; was darüber hinaus liegt, wird auf
