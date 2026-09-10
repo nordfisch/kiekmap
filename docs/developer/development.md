@@ -316,13 +316,24 @@ packages and evaluates their environment markers with `packaging`, so it runs wi
 Python. `make notices` and `make check` know that.
 
 **And they hang in the git hook**, because "by hand" meant "not at all" in practice.
-`.githooks/pre-commit` runs exactly these, **not** the test suite: that one runs anyway, these
-were the ones being forgotten, and together they take under a second. Enable it once per clone;
+`.githooks/pre-commit` runs these and **not** the test suite: that one runs anyway, these were the
+ones being forgotten, and together they take under a second. Enable it once per clone;
 `--no-verify` bypasses it:
 
 ```bash
 git config core.hooksPath .githooks
 ```
+
+**One more runs only there: `tools/check_logo.py`.** It reads the **index**, not the working tree,
+and that is why it cannot join the list above. `frontend/public/logo.png` is a placeholder, and a
+machine that sets a device up replaces it with the real municipal coat of arms — rightly, because
+`make release` bakes it into the frontend image from there. What must not happen is that it travels
+into a commit: the municipality governs the use of its arms, and permission for one museum is not
+permission for everybody who clones this. A check on the tree would refuse every commit on that
+machine and be switched off within the day. So the check refuses a *staged* change to the file
+unless `tools/build_logo.py` is staged with it — the one legitimate reason for the placeholder to
+change. Nothing to keep in step, and no exception to remember. See
+[decisions.md](decisions.md#78-the-coat-of-arms-is-guarded-at-the-index-not-in-the-tree).
 
 **`check_settings.py` exists since 14 August 2026, and it has an occasion.** The compose file
 passed only four of eight settings through; the rest silently fell back to their defaults in the

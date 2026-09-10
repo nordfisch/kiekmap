@@ -25,6 +25,10 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   language checker reads comments, not the text a script prints, so both had passed every run
 - **The operations manual sent the coat of arms to the Pi**, where nothing reads it, and then asked
   for a rebuild on the device. It goes into the frontend image on the development machine
+- **The real coat of arms can no longer slip into a commit.** `tools/check_logo.py` runs in the git
+  hook and refuses a staged change to the placeholder unless the generator changed with it. It
+  reads the index, not the working tree — on a machine that sets a device up, the real crest
+  belongs in the tree. It had slipped in twice. See [point 78](docs/developer/decisions.md)
 
 ## [0.9.0] — 2026-09-02
 

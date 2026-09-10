@@ -2097,3 +2097,41 @@ without `uid=1000` so the backup failed after somebody pressed the button.
 **It replaces nothing.** [Issue #18](https://github.com/nordfisch/kiekmap/issues/18) stays: what
 needs a device is found on a device. `shellcheck` over all five scripts is clean, and that says
 nothing about whether they work.
+
+---
+
+## 78. The coat of arms is guarded at the index, not in the tree
+
+`frontend/public/logo.png` ships as a placeholder from `tools/build_logo.py`. A museum replaces it
+with its own arms, and from that moment it is a modified tracked file on that machine.
+
+**Why that matters:** a municipal coat of arms is free of copyright as an official work, but its
+use is governed by the municipality. Permission for the local museum is not permission for
+everybody who clones a public repository. [Point 21](#21-no-municipal-coat-of-arms-in-the-repository) settles
+that; this point is about why a written rule was not enough.
+
+**It happened twice.** `6d47d36` is titled "Wappen aus der Historie entfernt". On 8 September 2026
+it happened again: a `git add -A` swept the real crest into a commit that was pushed to the public
+repository, and it had to be taken back out and force-pushed. The warning in `adaption.md`
+prevented neither occasion. **A rule that only a document states is a rule that gets broken while
+somebody is doing something else** — which is the argument for every checker in `tools/`.
+
+**The check reads the index, not the working tree, and that is the whole design.** On a machine
+that sets a device up, the tree *should* hold the real crest: `make release` bakes it into the
+frontend image from there, and the manual says so. A check on the tree would refuse every commit on
+that machine and be switched off within the day. `tools/check_logo.py` therefore asks
+`git diff --cached` what the commit carries.
+
+**The way past it needs no exception.** A staged change to the file is allowed when
+`tools/build_logo.py` is staged with it — the one legitimate reason for the placeholder to change
+is that somebody improved the generator. The alternatives were worse: a recorded hash is a value to
+keep in step, and regenerating the PNG in the hook to compare bytes would break on the next Pillow
+release, since nothing promises byte-identical output across versions.
+
+**It guards against the accident, not against intent.** `git commit --no-verify` was always there,
+and staging both files deliberately would pass. That is the right level: the failure being
+prevented is a sweep of `git add -A`, twice now, not a decision.
+
+**It is the one check that is not in `make check`.** The other seven answer whether the tree is
+right, and they run in `make docs-check` and in the hook alike. This one answers what a commit
+carries, so it needs an index and lives in the hook alone.

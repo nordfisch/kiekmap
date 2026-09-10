@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 040344779169d3ca174a400cc931e46d87982d30003dae19483ea0ac95036c9e -->
+<!-- source-sha: 1d5e661a7cf4c05feea0460f2d7cf5b6b25585f4c2a2a3a1272e6fb8e251222f -->
 
 # Änderungen
 
@@ -30,6 +30,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Lauf gekommen
 - **Das Betriebshandbuch schickte das Wappen auf den Pi**, wo es niemand liest, und verlangte
   danach einen Neubau auf dem Gerät. Es geht auf dem Entwicklungsrechner ins Frontend-Abbild
+- **Das echte Wappen kann nicht mehr in einen Commit rutschen.** `tools/check_logo.py` läuft im
+  Git-Hook und lehnt eine vorgemerkte Änderung am Platzhalter ab, solange der Generator nicht
+  mitgeändert wurde. Es liest den Index, nicht das Arbeitsverzeichnis — auf einem Rechner, der ein
+  Gerät einrichtet, gehört das echte Wappen ins Arbeitsverzeichnis. Zweimal war es hineingerutscht.
+  Siehe [Punkt 78](docs/developer/decisions.md)
 
 ## [0.9.0] — 2. September 2026
 
