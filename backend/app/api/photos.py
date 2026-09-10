@@ -242,6 +242,14 @@ def _get_photo(session: Session, photo_id: int) -> Photo:
     return photo
 
 
+@router.get("/tags", response_model=list[str], summary="All tags in use")
+def tags(session: Annotated[Session, Depends(get_session)]) -> list[str]:
+    return list(session.scalars(select(Tag.name).order_by(Tag.name)).all())
+
+
+# Everything with a path parameter below this line. `photo_id` is an int, and FastAPI matches in
+# declaration order: put `/tags` after it and the parametrised route takes the request, fails to
+# read "tags" as a number and answers 422. The list is then unreachable and nothing says why.
 @router.get("/{photo_id}", response_model=PhotoDetail, summary="Everything known about one photo")
 def detail(photo_id: int, session: Annotated[Session, Depends(get_session)]) -> PhotoDetail:
     return PhotoDetail.from_photo(_get_photo(session, photo_id))
@@ -290,8 +298,3 @@ def image(
         raise HTTPException(404, texts().photos.original_missing)
 
     return FileResponse(path, media_type=photo.mime, headers={"Cache-Control": CACHE_IMMUTABLE})
-
-
-@router.get("/tags/alle", response_model=list[str], summary="All tags in use")
-def tags(session: Annotated[Session, Depends(get_session)]) -> list[str]:
-    return list(session.scalars(select(Tag.name).order_by(Tag.name)).all())

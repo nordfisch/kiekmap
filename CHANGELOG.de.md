@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 1d5e661a7cf4c05feea0460f2d7cf5b6b25585f4c2a2a3a1272e6fb8e251222f -->
+<!-- source-sha: cbf8e5b881b952e912a6ea799c597616c6e2ab197a043f9fdfd03b714b09b0e4 -->
 
 # Änderungen
 
@@ -35,6 +35,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   mitgeändert wurde. Es liest den Index, nicht das Arbeitsverzeichnis — auf einem Rechner, der ein
   Gerät einrichtet, gehört das echte Wappen ins Arbeitsverzeichnis. Zweimal war es hineingerutscht.
   Siehe [Punkt 78](docs/developer/decisions.md)
+- **Ein deutsches Segment in einem API-Pfad.** Aus `/api/photos/tags/alle` wird
+  `/api/photos/tags`. Das zweite Segment gab es, weil die Route hinter `/photos/{photo_id}` stand,
+  die einen `int` nimmt und `/photos/tags` mit einer 422 verschluckt — die Route ist nach oben
+  gewandert, und ein Test hält sie dort
 
 ## [0.9.0] — 2. September 2026
 
