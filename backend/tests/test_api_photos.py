@@ -492,3 +492,28 @@ class TestFileSuffix:
 
         assert response.status_code == 404
         assert response.json()["detail"] == "Originaldatei fehlt"
+
+
+class TestTheTagList:
+    """`/photos/tags` -- and why the route sits where it sits."""
+
+    def test_the_tag_list_answers_under_its_own_path(self, client: TestClient, session):
+        from app.models import Tag
+
+        session.add_all([Tag(name="Winter"), Tag(name="Fest")])
+        session.commit()
+
+        response = client.get("/api/photos/tags")
+
+        assert response.status_code == 200
+        assert response.json() == ["Fest", "Winter"]
+
+    def test_the_photo_route_does_not_swallow_it(self, client: TestClient):
+        """The trap that shaped this path, and the reason for a test with no data in it.
+
+        ``/photos/{photo_id}`` takes an ``int``. Declared before the tag list it matches
+        ``/photos/tags`` first, fails to read "tags" as a number and answers 422 -- the list is
+        then unreachable and nothing says why. Until 10 September 2026 the path avoided this by
+        carrying a second segment, and that segment was German: ``/photos/tags/alle``.
+        """
+        assert client.get("/api/photos/tags").status_code == 200
