@@ -24,7 +24,16 @@ const CATALOGUES: Record<Language, Texts> = { de, en };
 
 export let t: Texts = de;
 
+/**
+ * The bare code of that language -- "de", "en".
+ *
+ * `t.locale` is a locale ("de-DE") and right for formatting numbers and dates. What asks for a
+ * language rather than a locale gets this: the map style, which hands it to Protomaps.
+ */
+export let language: Language = "de";
+
 /** Everything the interface says, in one call. Before the first render, and never again. */
-export function setLanguage(language: Language): void {
-  t = CATALOGUES[language];
+export function setLanguage(chosen: Language): void {
+  language = chosen;
+  t = CATALOGUES[chosen];
 }

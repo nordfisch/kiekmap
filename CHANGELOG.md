@@ -10,6 +10,10 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   the two containers that also run on the Pi: HTTPS, and one login for the whole team — over the
   map and over the API alike. It exists so that the museum can fill the database from home before a
   device stands in the exhibition room. See [point 76](docs/developer/decisions.md)
+- **The map labels the ground in the language of the place.** `labelLanguage` in `region.json` says
+  what countries, waters and districts are called; `KIEKMAP_LANGUAGE` stays what the device says to
+  its visitors. The two agree in Holm and part company for a museum elsewhere. It takes effect
+  without a new `make tiles`. See [point 79](docs/developer/decisions.md)
 
 ### Fixed
 

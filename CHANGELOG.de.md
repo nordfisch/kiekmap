@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: cbf8e5b881b952e912a6ea799c597616c6e2ab197a043f9fdfd03b714b09b0e4 -->
+<!-- source-sha: 82dfcc0699f3f633dc7d5b3014b14f6f64217797e725d45d4946854aa7b3701a -->
 
 # Änderungen
 
@@ -13,6 +13,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   beiden Container, die auch auf dem Pi laufen: HTTPS und eine Anmeldung für das ganze Team — über
   der Karte ebenso wie über der API. Damit kann das Museum die Datenbank von zu Hause aus füllen,
   bevor ein Gerät im Ausstellungsraum steht. Siehe [Punkt 76](docs/developer/decisions.md)
+- **Die Karte beschriftet den Boden in der Sprache des Ortes.** `labelLanguage` in der
+  `region.json` sagt, wie Länder, Gewässer und Landkreise heißen; `KIEKMAP_LANGUAGE` bleibt das,
+  was das Gerät seinen Besuchern sagt. Beides stimmt in Holm überein und geht für ein Museum
+  anderswo auseinander. Wirkt ohne neues `make tiles`. Siehe
+  [Punkt 79](docs/developer/decisions.md)
 
 ### Behoben
 

@@ -2135,3 +2135,40 @@ prevented is a sweep of `git add -A`, twice now, not a decision.
 **It is the one check that is not in `make check`.** The other seven answer whether the tree is
 right, and they run in `make docs-check` and in the hook alike. This one answers what a commit
 carries, so it needs an index and lives in the hook alone.
+
+---
+
+## 79. The map label language belongs to the place, not to the reading language
+
+`tiles/region.json` gained `labelLanguage`. Until then the style asked Protomaps for German labels,
+hard-wired, so an instance with `KIEKMAP_LANGUAGE=en` turned every text on the screen English and
+went on naming its countries, waters and districts in German.
+
+**Why not simply the interface language.** The two are different questions. `KIEKMAP_LANGUAGE` says
+what the device says to its visitors; the label language says what the ground is called. They agree
+in Holm, and they part company for a museum in a place whose surroundings are named in one language
+while the museum speaks another. So the setting sits with the extent and the zoom levels, in the
+file that describes the place — the rule from CLAUDE.md, that nothing place-specific belongs in the
+code.
+
+**It changes little in Holm, and that is not an argument against it.** Protomaps coalesces the
+asked-for language with English and falls through to the local name, so `Mühlenweg` reads the same
+whatever is set: OpenStreetMap holds no `name:de` for it and no English name either. What changes
+are the objects that do carry translated names. The case this exists for is the second museum, which
+is what `adaption.md` is for.
+
+**Missing, it falls back to the interface language, and that choice is deliberate.** A device set up
+before the field existed carries a `region.json` without it, and an update must not take the labels
+off a running map. The interface language reproduces exactly what Holm has today.
+
+**`lang` is never left out.** Measured on 10 September 2026 against
+`@protomaps/basemaps`: with a language the library returns 71 layers of which 13 carry a text field;
+without one it returns 57 and **not a single label**. Nothing raises and nothing logs — the map
+would simply come up with no words on it, and on a kiosk nobody would trace that back to a missing
+setting. `frontend/src/kiosk/mapStyle.test.ts` holds that shut.
+
+**A trap in testing it.** Asserting that the style asks for `name:en` proves nothing: the library
+coalesces every language with English, so `name:en` stands in the expression whatever was asked
+for, a hard-wired `de` included. The test therefore asserts the **absence** of `name:de` under an
+English interface. Measured: `de` yields `name:de` and `name:en`, `en` only `name:en`, `fr`
+`name:fr` and `name:en`.

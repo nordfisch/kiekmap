@@ -16,6 +16,19 @@ export type Region = {
   defaultZoom: number;
   minZoom: number;
   maxZoom: number;
+  /**
+   * What the ground is called -- "de", "en", "fr". Not what the device says to its visitors.
+   *
+   * The two agree in Holm and part company elsewhere: a museum in France speaks French to its
+   * visitors *and* wants French labels, but a German-speaking museum near the border may want the
+   * ground named in the local language whatever the interface says. So the label language belongs
+   * to the place, and the place is described here.
+   *
+   * Optional, because a device set up before this field existed carries a `region.json` without
+   * it. Missing, it falls back to the language of the interface -- which is what the map did
+   * before, so an update cannot take the labels away from a running device.
+   */
+  labelLanguage?: string;
 };
 
 // Which decades the date question offers used to stand here too -- but that describes the
