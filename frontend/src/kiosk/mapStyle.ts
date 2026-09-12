@@ -12,7 +12,7 @@
  */
 
 import { type Flavor, layers, namedFlavor } from "@protomaps/basemaps";
-import type maplibregl from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
 
 import type { Region } from "../region";
 import { language, t } from "../text";

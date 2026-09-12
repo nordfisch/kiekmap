@@ -15,7 +15,7 @@
  * finger, and they would be a second way of answering -- one that reaches past the server's list.
  */
 
-import type maplibregl from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
 import { Marker } from "maplibre-gl";
 import { useEffect, useRef } from "react";
 

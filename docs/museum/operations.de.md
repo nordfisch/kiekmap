@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: fc99f7e1da892ec0efabe1b9118832e18984fbcadc049b16fd7fea816af31003 -->
+<!-- source-sha: 79c94120e08c922a1e345755316c3f37a576b0475342b5198f5152d5a40cf9ae -->
 
 # Betriebshandbuch
 
@@ -13,6 +13,9 @@ Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bed
 ---
 
 ## Einen neuen Pi einrichten
+
+Ein **Raspberry Pi 4 oder 5**. Die Karte braucht WebGL 2, und ein Pi 3 bietet das nicht: Die Karte
+bliebe dort grau.
 
 Raspberry Pi OS **Lite** (64 Bit), kein Desktop. Dann:
 

@@ -24,6 +24,11 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   area closes after two minutes without a touch, unless a backup, restore, import or upload is
   running. See [point 81](docs/developer/decisions.md)
 
+### Changed
+
+- **MapLibre 6.** The map now needs WebGL 2, so the device has to be a Raspberry Pi 4 or 5; a Pi 3
+  shows a grey map. See [point 82](docs/developer/decisions.md)
+
 ### Fixed
 
 - **Four defects in the Pi setup, found before the first device.** `setup-pi.sh` installed

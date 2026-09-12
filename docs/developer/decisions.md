@@ -2274,3 +2274,30 @@ minutes as well, so that it cannot keep the slide show from starting.
 **Open for the device (#18):** four moving tiles and a 3D turn over hours on a Pi. If the turn
 stutters, a crossfade is the fallback. A 4K screen doubles the tile, and then the 1200 px thumbnail
 only drifts; a 1600 px size would have to follow.
+
+## 82. MapLibre 6, with its worker bundled by hand
+
+MapLibre went from 5.24 to 6. Dependabot's pull request (#48) changed only the version and was
+closed: the update needs two changes in the code, and without the second the map stays grey with
+no message anywhere.
+
+**The default export is gone.** `import maplibregl from "maplibre-gl"` became
+`import * as maplibregl from "maplibre-gl"` in the five files that use it.
+
+**The worker has to be named.** MapLibre does its tile and font work in a web worker. Since version
+6 the worker is a file of its own, which MapLibre looks for beside its main module under a path it
+builds at runtime. Vite cannot follow such a path: in the dev server the file answered 404, and the
+production build did not contain it at all. Typecheck, tests and build all passed while the map
+showed no tiles, no labels and no photos. `maplibregl.setWorkerUrl()` in
+`frontend/src/kiosk/MapView.tsx` now takes a URL that Vite produces with `?worker&url`, bundling
+the worker with its imports. The frontend's Dockerfile refuses a build without the worker file, so
+the same mistake cannot reach a device unnoticed.
+
+**WebGL 2 is required.** MapLibre 6 dropped WebGL 1. A Raspberry Pi 4 or 5 offers WebGL 2; a Pi 3
+does not, and its map stays grey. The recommendation for the device was a Pi 4 or 5 already (#18);
+since this update it is a requirement, and `operations.md` says so.
+
+**Not checked one by one:** version 6 also changed how labels behave at strong overzoom
+(`zoomLevelsToOverscale`), how overlapping transparent lines render, and how icons with an offset
+scale. The map was looked at in the browser and showed no difference that stood out; the first Pi
+is the real test.

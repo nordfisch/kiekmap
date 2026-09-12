@@ -1,4 +1,5 @@
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Protocol } from "pmtiles";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +15,13 @@ import { PhotoLayer } from "./PhotoLayer";
 import { PinLayer } from "./PinLayer";
 import { IDLE_MS, watchForIdle } from "./idle";
 import { buildStyle } from "./mapStyle";
+
+// MapLibre does its tile and font work in a web worker, and since version 6 the worker is a file of
+// its own that it looks for beside its main module. Vite bundles neither the file nor the path to
+// it: without this line the worker answers 404 and the map stays grey -- in the dev server and in
+// the production build on the Pi alike, with no message in the console. `?worker&url` has Vite
+// bundle the worker with its imports and hand over the URL. See decisions.md, point 82.
+maplibregl.setWorkerUrl(workerUrl);
 
 // Once per page load: teaches MapLibre to read `pmtiles://` sources via HTTP range requests.
 // That is exactly what makes a tile server unnecessary -- nginx just serves a static file.

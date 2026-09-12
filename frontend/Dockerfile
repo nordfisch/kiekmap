@@ -21,6 +21,13 @@ RUN test -d public/basemaps/fonts || { \
 
 RUN npm run build
 
+# The map's web worker is a file of its own since MapLibre 6, and a build that misses it runs
+# without an error and shows a grey map. See the comment at `setWorkerUrl` in src/kiosk/MapView.tsx.
+RUN ls dist/assets/maplibre-gl-worker-*.js >/dev/null 2>&1 || { \
+      echo "ERROR: the MapLibre worker is missing from dist/assets. The map would stay grey."; \
+      exit 1; \
+    }
+
 
 FROM nginx:1.27-alpine AS runtime
 COPY --from=build /src/dist /usr/share/nginx/html
