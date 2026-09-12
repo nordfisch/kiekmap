@@ -7,8 +7,9 @@ still open is in the [issues](https://github.com/nordfisch/kiekmap/issues); how 
 
 ## Setup
 
-Requirements: Python 3.12+, Node 18+ (22 recommended), Git. Optionally Docker for the reality
-check, and `pmtiles` (via Homebrew) for building the map.
+Requirements: Python 3.12+, Node 22+, Git. Optionally Docker for the reality check, and `pmtiles`
+(via Homebrew) for building the map. Vitest 5 needs Node 22: under an older Node the frontend tests
+time out instead of reporting the version.
 
 ```bash
 git clone <repo> && cd kiekmap
