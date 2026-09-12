@@ -14,6 +14,9 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   what countries, waters and districts are called; `KIEKMAP_LANGUAGE` stays what the device says to
   its visitors. The two agree in Holm and part company for a museum elsewhere. It takes effect
   without a new `make tiles`. See [point 79](docs/developer/decisions.md)
+- **The map filters by keyword.** Buttons in its corner name the keywords the museum chose in
+  `KIEKMAP_MAP_TAGS`, one active at a time. A keyword in a photo's detail view filters the map too,
+  with time and place wide open. See [point 80](docs/developer/decisions.md)
 
 ### Fixed
 

@@ -517,3 +517,126 @@ class TestTheTagList:
         carrying a second segment, and that segment was German: ``/photos/tags/alle``.
         """
         assert client.get("/api/photos/tags").status_code == 200
+
+
+@pytest.fixture
+def tagged(session, make_photo):
+    """A photo with keywords -- ``make_photo`` builds none."""
+    from app.services.tags import add_tags
+
+    def create(names: list[str], **fields):
+        photo = make_photo(**fields)
+        session.flush()
+        add_tags(session, photo, names)
+        return photo
+
+    return create
+
+
+class TestKeywordFilter:
+    """The third sieve beside place and time. Only one keyword at a time."""
+
+    def test_a_photo_without_the_keyword_drops_out(self, client: TestClient, session, tagged):
+        tagged(["Gasthof"], title="Gasthof Petersen")
+        tagged(["Hof"], title="Hof Sieveking")
+        session.commit()
+
+        data = client.get("/api/photos", params={"bbox": BBOX, "tag": "Gasthof"}).json()
+
+        assert data["total"] == 1
+        assert data["photos"][0]["title"] == "Gasthof Petersen"
+
+    def test_keyword_and_time_range_hold_together(self, client: TestClient, session, tagged):
+        """The keyword narrows the time filter, it does not replace it -- and overlap still counts.
+
+        A decade photo has to stay in a selection that starts in the middle of its decade, keyword
+        or not.
+        """
+        tagged(["Winter"], year=1920, precision="decade", sha="a" * 64)
+        tagged(["Winter"], year=1960, sha="b" * 64)
+        tagged(["Gasthof"], year=1925, sha="c" * 64)
+        session.commit()
+
+        data = client.get(
+            "/api/photos",
+            params={
+                "bbox": BBOX,
+                "tag": "Winter",
+                "from_year": 1925,
+                "to_year": 1930,
+                "include_undated": False,
+            },
+        ).json()
+
+        assert data["total"] == 1
+
+    def test_an_unknown_keyword_yields_an_empty_map_not_an_error(
+        self, client: TestClient, session, tagged
+    ):
+        tagged(["Winter"])
+        session.commit()
+
+        response = client.get("/api/photos", params={"bbox": BBOX, "tag": "Sommer"})
+
+        assert response.status_code == 200
+        assert response.json()["total"] == 0
+
+    def test_the_histogram_counts_only_photos_with_the_keyword(
+        self, client: TestClient, session, tagged
+    ):
+        """Bars and the undated count follow the keyword.
+
+        Otherwise the slider would show bars for photos the map hides, and the switch beside it
+        would offer undated photos that do not appear when switched on.
+        """
+        tagged(["Winter"], year=1932, sha="a" * 64)
+        tagged(["Winter"], year=None, sha="b" * 64)
+        tagged(["Gasthof"], year=1950, sha="c" * 64)
+        tagged(["Gasthof"], year=None, sha="d" * 64)
+        session.commit()
+
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX, "tag": "Winter"}).json()
+
+        assert data["bars"] == [{"year": 1932, "count": 1}]
+        assert data["undated"] == 1
+
+    def test_the_axis_ignores_the_keyword(self, client: TestClient, session, tagged):
+        """The axis stays put when a keyword is chosen, as it does when the map moves."""
+        tagged(["Winter"], year=1932, sha="a" * 64)
+        tagged(["Gasthof"], year=1890, sha="b" * 64)
+        session.commit()
+
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX, "tag": "Winter"}).json()
+
+        assert data["collection_from"] == 1890
+
+
+class TestTheOfferedKeywords:
+    """`/photos/tags/offered` -- the buttons in the corner of the map."""
+
+    def test_the_configured_order_holds(self, client: TestClient, session, settings, tagged):
+        """Curated means the museum decides the order too. Alphabetical would undo that."""
+        tagged(["Winter", "Gasthof", "Hof"])
+        session.commit()
+        settings.map_tags = ["Winter", "Hof", "Gasthof"]
+
+        assert client.get("/api/photos/tags/offered").json() == ["Winter", "Hof", "Gasthof"]
+
+    def test_a_keyword_no_published_photo_carries_is_left_out(
+        self, client: TestClient, session, settings, tagged
+    ):
+        """A typo, or a keyword only a deleted photo still carries, would empty the map."""
+        from app.models import PhotoStatus
+
+        tagged(["Winter"], sha="a" * 64)
+        tagged(["Laden"], status=PhotoStatus.DELETED, sha="b" * 64)
+        session.commit()
+        settings.map_tags = ["Winter", "Laden", "Wintr"]
+
+        assert client.get("/api/photos/tags/offered").json() == ["Winter"]
+
+    def test_nothing_configured_offers_nothing(self, client: TestClient, session, tagged):
+        tagged(["Winter"])
+        session.commit()
+
+        assert client.get("/api/photos/tags/offered").json() == []

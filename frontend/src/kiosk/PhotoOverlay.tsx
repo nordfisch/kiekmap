@@ -47,6 +47,7 @@ export function PhotoOverlay() {
   const openIndex = useKiosk((s) => s.openIndex);
   const openPhoto = useKiosk((s) => s.openPhoto);
   const stepInStack = useKiosk((s) => s.stepInStack);
+  const filterByTag = useKiosk((s) => s.filterByTag);
   const [detail, setDetail] = useState<PhotoDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   /**
@@ -250,10 +251,21 @@ export function PhotoOverlay() {
                   photo is house-precise already, or its street has no addresses to offer. */}
               {numbers.length > 0 && question("housenumber")}
               {detail.description && <p className="overlay__description">{detail.description}</p>}
+              {/* A tap closes this view and filters the map by the keyword, with time and place
+                  wide open. That reaches keywords the corner of the map does not offer. */}
               {detail.tags.length > 0 && (
                 <ul className="overlay__tags">
                   {detail.tags.map((tag) => (
-                    <li key={tag}>{tag}</li>
+                    <li key={tag}>
+                      <button
+                        type="button"
+                        className="overlay__tag"
+                        aria-label={t.map.filterByKeyword(tag)}
+                        onClick={() => filterByTag(tag)}
+                      >
+                        {tag}
+                      </button>
+                    </li>
                   ))}
                 </ul>
               )}

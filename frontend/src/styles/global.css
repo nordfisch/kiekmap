@@ -798,6 +798,46 @@ button {
   color: #a03030;
 }
 
+/* --- keywords in the corner of the map ------------------------------------ */
+
+/* Top left: the zoom buttons hold the top right, the notices the bottom. A column, so a long
+ * keyword does not push the others off the map. */
+.keywords {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-height: calc(100% - 1.5rem);
+  overflow-y: auto;
+}
+
+.keywords__button {
+  min-height: 3rem;
+  padding: 0.4rem 1.1rem;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.keywords__button--on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.keywords__button:active {
+  transform: translateY(1px);
+}
+
 /* --- time slider --------------------------------------------------------- */
 
 /* Aligned to the top, not centred: the first line of the slider then sits at the same height as
@@ -1183,12 +1223,22 @@ button.timeline__undated:hover {
   list-style: none;
 }
 
-.overlay__tags li {
-  padding: 0.2rem 0.6rem;
+/* Buttons since the keyword filter: a tap filters the map. 48 px tall like every control a visitor
+ * touches, and still quieter than the questions above. */
+.overlay__tag {
+  min-height: 3rem;
+  padding: 0.2rem 1rem;
   border: 1px solid rgb(255 255 255 / 25%);
   border-radius: 999px;
-  font-size: 0.8rem;
+  background: transparent;
+  font: inherit;
+  font-size: 0.85rem;
   color: #d8d0c6;
+  cursor: pointer;
+}
+
+.overlay__tag:active {
+  transform: translateY(1px);
 }
 
 /* The credit stands last and quietest. It belongs there because it belongs to the picture -- but

@@ -35,6 +35,10 @@ export const en: Texts = {
 
   map: {
     noPhotos: "There are no photos here yet in the selected period.",
+    noPhotosWithTag: (tag: string) =>
+      `There are no photos about “${tag}” here in the selected period.`,
+    keywords: "Keywords",
+    filterByKeyword: (tag: string) => `Filter the map by “${tag}”`,
     tooMany: (count: number) =>
       `${count} photos in this view — zoom in closer for a better overview`,
     markerLabel: (caption: string) => `${caption} — show large`,

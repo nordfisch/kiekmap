@@ -18,10 +18,13 @@ function MapNotice() {
   const truncated = useKiosk((s) => s.truncated);
   const loading = useKiosk((s) => s.loading);
   const error = useKiosk((s) => s.error);
+  const tag = useKiosk((s) => s.tag);
 
   if (error) return <div className="notice notice--error">{error}</div>;
   if (truncated) return <div className="notice">{t.map.tooMany(total)}</div>;
-  if (!loading && total === 0) return <div className="notice">{t.map.noPhotos}</div>;
+  if (!loading && total === 0) {
+    return <div className="notice">{tag ? t.map.noPhotosWithTag(tag) : t.map.noPhotos}</div>;
+  }
   return null;
 }
 

@@ -228,6 +228,9 @@ KIEKMAP_ADMIN_PIN_HASH=...        # PIN for the admin area
 KIEKMAP_IMPORT_TAGS=["Gebäude"]                 # keywords for every imported photo
 KIEKMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # credit where the file names nobody
 KIEKMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
+
+# The keyword buttons on the map. Empty by default: no buttons.
+KIEKMAP_MAP_TAGS=["Gasthof","Winter"]
 ```
 
 Raise `exif_date_max_year` if the collection also holds genuine digital photographs — otherwise
@@ -240,6 +243,12 @@ JSON list; in Holm the stock is buildings, elsewhere it is costumes or ships.
 `KIEKMAP_IMPORT_PROVENANCE` is put verbatim in front of the file path in the import folder and
 therefore carries its own separator at the end — so the provenance of a photo leads back to the
 file in your own archive.
+
+`KIEKMAP_MAP_TAGS` names the keywords a visitor can filter the map by, in the order they appear.
+Choose them by hand. The most frequent keywords are usually the wrong ones: a keyword every photo
+carries filters nothing, and a street name repeats what the map already shows. A keyword that no
+published photo carries gets no button, and the backend log names it. Visitors reach every other
+keyword through the detail view of a photo.
 
 Whether the import reads the **folder names** need not be set anywhere: a path element counts as a
 street when the place index knows it. An archive filed by street and house number is placed by
