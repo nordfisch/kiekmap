@@ -198,6 +198,15 @@ export function fetchOfferedTags(signal?: AbortSignal): Promise<string[]> {
   return getJson<string[]>("/api/photos/tags/offered", signal);
 }
 
+/**
+ * Random photos for the slide show: landscape, placed, the large ones first.
+ *
+ * See `showcase` in `api/photos.py` for why there is no hard minimum size.
+ */
+export function fetchShowcase(count: number, signal?: AbortSignal): Promise<PhotoMarker[]> {
+  return getJson<PhotoMarker[]>(`/api/photos/showcase?count=${count}`, signal);
+}
+
 export function fetchPhoto(id: number, signal?: AbortSignal): Promise<PhotoDetail> {
   return getJson<PhotoDetail>(`/api/photos/${id}`, signal);
 }

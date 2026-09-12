@@ -21,6 +21,7 @@ import {
   fetchPhotos,
 } from "../api/client";
 import { boundsAround, rangeForPhoto } from "../kiosk/focus";
+import { useAdmin } from "./admin";
 import { axisBounds, clampRange } from "../kiosk/timeAxis";
 
 /** How long the map has to stand still before loading. */
@@ -107,6 +108,33 @@ type KioskState = {
    */
   overview: number;
 
+  /** Is the slide show running? See kiosk/AttractMode.tsx. */
+  attract: boolean;
+  /**
+   * The photo whose marker pulses once the detail view closes, and the one waiting for that.
+   *
+   * Set after a tap in the slide show: the detail view opens over the map, and when the visitor
+   * closes it the marker shows where the photo lies. It waits in `pulsePending` because a pulse
+   * under the detail view would run unseen.
+   */
+  pulse: number | null;
+  pulsePending: number | null;
+  /**
+   * While the page after a tap in the slide show is still building, what is ready -- or null.
+   *
+   * The screen stays covered until both the detail view's photo and the map behind it are drawn.
+   * Without the cover the visitor saw the start view and the bare map flash up between the slide
+   * show and the photo they had tapped.
+   */
+  handoff: { map: boolean; photo: boolean } | null;
+
+  /** Start the slide show -- never while the admin area or its number pad is open. */
+  startAttract: () => void;
+  /** After the reload that ended the slide show: open this photo, pulse its marker afterwards. */
+  openFromShowcase: (id: number) => void;
+  /** One part of the page after the reload is drawn. With both, the cover goes. */
+  handoffReady: (part: "map" | "photo") => void;
+
   setViewport: (bbox: Bbox) => void;
   setTimeRange: (timeRange: TimeRange) => void;
   setShowUndated: (on: boolean) => void;
@@ -149,6 +177,18 @@ type KioskState = {
 let photoAbort: AbortController | null = null;
 let histogramAbort: AbortController | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let pulseTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * The longest the cover may stand, whatever is still missing.
+ *
+ * A photo that fails to load or a map without tiles must not leave the screen dark. After this
+ * the visitor sees whatever there is.
+ */
+export const HANDOFF_COVER_MAX_MS = 6_000;
+
+/** Three pulses of 1.2 s. The CSS animation in global.css has the same numbers. */
+export const PULSE_MS = 3 * 1200;
 
 export function sameViewport(a: Bbox | null, b: Bbox | null): boolean {
   if (!a || !b) return a === b;
@@ -269,6 +309,32 @@ export const useKiosk = create<KioskState>((set, get) => {
     tagBefore: null,
     overview: 0,
     tag: null,
+    attract: false,
+    pulse: null,
+    pulsePending: null,
+    handoff: null,
+
+    startAttract() {
+      if (useAdmin.getState().view !== "kiosk") return;
+      set({ attract: true });
+    },
+
+    openFromShowcase(id) {
+      set({
+        openStack: [id],
+        openIndex: 0,
+        pulsePending: id,
+        handoff: { map: false, photo: false },
+      });
+      setTimeout(() => set({ handoff: null }), HANDOFF_COVER_MAX_MS);
+    },
+
+    handoffReady(part) {
+      const { handoff } = get();
+      if (!handoff) return;
+      const next = { ...handoff, [part]: true };
+      set({ handoff: next.map && next.photo ? null : next });
+    },
 
     setViewport(bbox) {
       if (sameViewport(get().bbox, bbox)) return;
@@ -335,6 +401,7 @@ export const useKiosk = create<KioskState>((set, get) => {
         rangeBefore: null,
         openStack: [],
         openIndex: 0,
+        pulsePending: null,
         overview: state.overview + 1,
       }));
       // The map reports its new viewport when it arrives. This load covers the case where the
@@ -345,7 +412,18 @@ export const useKiosk = create<KioskState>((set, get) => {
     },
 
     openPhoto(id) {
-      set({ openStack: id === null ? [] : [id], openIndex: 0 });
+      const { pulsePending } = get();
+      if (id !== null || pulsePending === null) {
+        set({ openStack: id === null ? [] : [id], openIndex: 0 });
+        return;
+      }
+      // Closing the photo the slide show opened: now the marker can be seen, so now it pulses.
+      set({ openStack: [], openIndex: 0, pulse: pulsePending, pulsePending: null });
+      if (pulseTimer) clearTimeout(pulseTimer);
+      pulseTimer = setTimeout(() => {
+        pulseTimer = null;
+        set({ pulse: null });
+      }, PULSE_MS);
     },
 
     openStackAt(ids, index = 0) {

@@ -1383,3 +1383,206 @@ button.timeline__undated:hover {
   width: 3rem;
   height: 3rem;
 }
+
+/* --- the slide show while nobody uses the device --------------------------- */
+
+/* Above everything, the detail view included: it starts over whatever the last visitor left
+ * open. The timing lives in kiosk/attract.ts; only the turn itself is a CSS transition here. */
+.attract {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  background: #1c1916;
+  animation: attract-in 800ms ease-out;
+}
+
+@keyframes attract-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* A few pixels larger than the screen on every side, so the shift below never shows an edge. */
+.attract__wall {
+  position: absolute;
+  inset: -10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  padding: 16px;
+  animation: attract-shift 240s ease-in-out infinite;
+}
+
+@keyframes attract-shift {
+  33% {
+    transform: translate(8px, -6px);
+  }
+  66% {
+    transform: translate(-6px, 8px);
+  }
+}
+
+.attract__tile {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  perspective: 1600px;
+  cursor: pointer;
+  transition: opacity 400ms ease;
+}
+
+/* The drift layer carries the fade, not the band: the band's breathing is an animation, and an
+ * animation overrides a transition on the same property. */
+.attract--leaving .attract__tile:not(.attract__tile--chosen),
+.attract--leaving .attract__drift {
+  opacity: 0;
+}
+
+/* The turn: 1.6 s, soft at both ends. The rotation is counted up in the component, so every turn
+ * goes the same way. */
+.attract__card {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 1600ms cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+.attract__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #2b2723;
+  backface-visibility: hidden;
+}
+
+.attract__face--back {
+  transform: rotateY(180deg);
+}
+
+.attract__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+.attract__caption {
+  position: absolute;
+  padding: 0.2rem 0.7rem;
+  border-radius: 4px;
+  background: rgb(20 16 12 / 55%);
+  font-size: 1rem;
+  color: #f3ece2;
+  opacity: 0;
+  transition: opacity 1200ms ease;
+}
+
+.attract__caption--on {
+  opacity: 1;
+}
+
+.attract__caption--0 {
+  left: 1rem;
+  bottom: 0.9rem;
+}
+
+.attract__caption--1 {
+  right: 1rem;
+  top: 0.9rem;
+}
+
+.attract__caption--2 {
+  right: 1rem;
+  bottom: 0.9rem;
+}
+
+.attract__caption--3 {
+  left: 1rem;
+  top: 0.9rem;
+}
+
+/* The band's resting place is the top left corner, less the margin; the two drift layers move it
+ * from there. 24px is BAND_MARGIN in kiosk/attract.ts. */
+.attract__drift {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+/* The only text that asks for something. It breathes rather than blinks, and it floats. */
+.attract__band {
+  margin: 0;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  background: rgb(250 248 244 / 92%);
+  font-size: 1.2rem;
+  color: var(--ink);
+  white-space: nowrap;
+  animation: attract-breathe 4s ease-in-out infinite;
+}
+
+@keyframes attract-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Between a tap in the slide show and the detail view: dark from the very first paint, until photo
+ * and map are drawn. The colour is the slide show's. See HandoffCover in App.tsx. */
+html[data-handoff] body,
+.handoff-cover {
+  background: #1c1916;
+}
+
+.handoff-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  transition: opacity 400ms ease;
+}
+
+.handoff-cover--gone {
+  opacity: 0;
+}
+
+/* The marker of the photo opened from the slide show, once its detail view closes: three soft
+ * rings. Three times 1.2 s is PULSE_MS in store/kiosk.ts. */
+.marker--pulse::after {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
+  border: 3px solid var(--accent);
+  border-radius: 12px;
+  pointer-events: none;
+  animation: marker-pulse 1200ms ease-out 3;
+}
+
+@keyframes marker-pulse {
+  from {
+    opacity: 0.9;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+/* A circle has no position of its own, and the ring needs one to sit on. */
+.cluster.marker--pulse {
+  position: relative;
+}
+
+.cluster.marker--pulse::after {
+  border-radius: 50%;
+}

@@ -170,6 +170,7 @@ function clusterElement(count: number, onSelect: () => void): HTMLElement {
 export function PhotoLayer({ map }: { map: maplibregl.Map }) {
   const photos = useKiosk((s) => s.photos);
   const openStackAt = useKiosk((s) => s.openStackAt);
+  const pulse = useKiosk((s) => s.pulse);
   const markers = useRef<Marker[]>([]);
 
   const index = useMemo(() => buildIndex(photos), [photos]);
@@ -216,7 +217,8 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
         zoom,
       );
 
-      const key = `${zoom}|${groups.map(groupKey).join(",")}`;
+      // The pulse is part of the key: the marker has to be drawn again to carry it.
+      const key = `${zoom}|${pulse}|${groups.map(groupKey).join(",")}`;
       if (key === drawn.current) return;
       drawn.current = key;
 
@@ -271,6 +273,16 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
               duration: 500,
             });
           });
+          // A photo opened from the slide show can sit inside a circle at the zoom the map opens
+          // with. Then the circle pulses: it is where the photo is.
+          if (
+            pulse !== null &&
+            index
+              .getLeaves(clusterId, Infinity)
+              .some((leaf) => leaf.properties.stack.photos.some((photo) => photo.id === pulse))
+          ) {
+            element.classList.add("marker--pulse");
+          }
           markers.current.push(
             new Marker({ element: enter(element) }).setLngLat([lon, lat]).addTo(map),
           );
@@ -279,6 +291,9 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
           const element = photoElement(stack, () =>
             openStackAt(stack.photos.map((photo) => photo.id)),
           );
+          if (pulse !== null && stack.photos.some((photo) => photo.id === pulse)) {
+            element.classList.add("marker--pulse");
+          }
           markers.current.push(
             // The marker sits with its lower edge on the location, like a pin.
             new Marker({ element: enter(element), anchor: "bottom" })
@@ -312,7 +327,7 @@ export function PhotoLayer({ map }: { map: maplibregl.Map }) {
       // and skip the work. Without this line an unchanged collection would leave an empty map.
       drawn.current = null;
     };
-  }, [map, index, openStackAt]);
+  }, [map, index, openStackAt, pulse]);
 
   return null;
 }

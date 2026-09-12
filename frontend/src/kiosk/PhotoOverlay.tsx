@@ -59,6 +59,7 @@ export function PhotoOverlay() {
    * stays reserved regardless, otherwise the view jumps.
    */
   const [loadedId, setLoadedId] = useState<number | null>(null);
+  const handoffReady = useKiosk((s) => s.handoffReady);
   /**
    * The house numbers this photo may be sharpened to.
    *
@@ -85,6 +86,8 @@ export function PhotoOverlay() {
       .catch((e: unknown) => {
         if (abort.signal.aborted) return;
         setError(e instanceof Error ? e.message : String(e));
+        // Nothing more is coming: the cover after a slide show tap must not wait for it.
+        handoffReady("photo");
       });
     return () => abort.abort();
   }, [openPhotoId]);
@@ -178,12 +181,18 @@ export function PhotoOverlay() {
               src={detail.thumb_url}
               alt={detail.title ?? t.map.photoAlt}
               style={{ aspectRatio: `${detail.width} / ${detail.height}` }}
-              onLoad={() => setLoadedId(detail.id)}
+              onLoad={() => {
+                setLoadedId(detail.id);
+                handoffReady("photo");
+              }}
               // Out of the cache the image may be complete before React can attach ``onLoad`` --
               // then it would stay invisible. Setting the same value again is a no-op for React,
               // so this does not loop.
               ref={(node) => {
-                if (node?.complete && node.naturalWidth > 0) setLoadedId(detail.id);
+                if (node?.complete && node.naturalWidth > 0) {
+                  setLoadedId(detail.id);
+                  handoffReady("photo");
+                }
               }}
             />
           )}

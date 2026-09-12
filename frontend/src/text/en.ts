@@ -24,7 +24,7 @@ export const en: Texts = {
   app: {
     titleLead: "Pictures from",
     documentTitle: "Pictures from our village",
-    resetHint: "Start again",
+    resetHint: "Start the slide show",
     loadingMap: "The map is loading …",
 
     crashTitle: "One moment, please",
@@ -52,6 +52,12 @@ export const en: Texts = {
     photoAlt: "Historic photo",
     attribution:
       '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL',
+  },
+
+  attract: {
+    band: (place: string) => `Pictures from ${place} — tap a photo`,
+    label: "Slide show",
+    tileLabel: (caption: string) => `${caption} — show on the map`,
   },
 
   overlay: {

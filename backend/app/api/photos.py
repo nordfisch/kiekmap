@@ -258,6 +258,41 @@ def _get_photo(session: Session, photo_id: int) -> Photo:
     return photo
 
 
+#: How many photos one showcase answer holds at most.
+SHOWCASE_MAX = 60
+
+#: The thumbnail width from which a photo can carry the slide show's zoom on a 1080p screen. Four
+#: tiles of 960 px each, zoomed to 1.25, need 1200 px. See frontend kiosk/attract.ts.
+SHOWCASE_WIDTH = 1200
+
+
+@router.get("/showcase", response_model=list[PhotoMarker], summary="Photos for the slide show")
+def showcase(
+    session: Annotated[Session, Depends(get_session)],
+    count: Annotated[int, Query(ge=1, le=SHOWCASE_MAX)] = 24,
+) -> list[PhotoMarker]:
+    """Random published photos for the slide show that runs while nobody uses the device.
+
+    Landscape only, because the tiles are landscape and a portrait photo would lose most of its
+    height to the crop. Placed only, because a tap on a tile opens the map around the photo.
+
+    **Large ones first, and no hard minimum.** Below 1200 px a photo cannot carry the full zoom, and
+    the frontend then zooms it less. A hard cut would empty the show for a collection of small
+    scans: the sample collection in ``seed/`` holds nothing wider than about 1000 px.
+    """
+    photos = session.scalars(
+        select(Photo)
+        .where(
+            Photo.status == PhotoStatus.PUBLISHED,
+            Photo.lat.is_not(None),
+            Photo.width > Photo.height,
+        )
+        .order_by((Photo.width >= SHOWCASE_WIDTH).desc(), func.random())
+        .limit(count)
+    ).all()
+    return [PhotoMarker.from_photo(photo) for photo in photos]
+
+
 @router.get("/tags", response_model=list[str], summary="All tags in use")
 def tags(session: Annotated[Session, Depends(get_session)]) -> list[str]:
     return list(session.scalars(select(Tag.name).order_by(Tag.name)).all())

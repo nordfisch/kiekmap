@@ -8,6 +8,8 @@ import type { Region } from "../region";
 import { useKiosk } from "../store/kiosk";
 import { HouseNumberLayer } from "./HouseNumberLayer";
 import { KeywordCorner } from "./KeywordCorner";
+import { boundsAround } from "./focus";
+import { HANDOFF_RADIUS_M, takeHandoff } from "./handoff";
 import { PhotoLayer } from "./PhotoLayer";
 import { PinLayer } from "./PinLayer";
 import { IDLE_MS, watchForIdle } from "./idle";
@@ -24,15 +26,22 @@ export function MapView({ region }: { region: Region }) {
   const setViewport = useKiosk((s) => s.setViewport);
   const focus = useKiosk((s) => s.focus);
   const overview = useKiosk((s) => s.overview);
+  const startAttract = useKiosk((s) => s.startAttract);
+  const handoffReady = useKiosk((s) => s.handoffReady);
 
   useEffect(() => {
     if (!container.current) return;
 
+    // A photo tapped in the slide show before the reload: the map opens around it instead of on
+    // the village centre. See kiosk/handoff.ts.
+    const handoff = takeHandoff();
+
     const instance = new maplibregl.Map({
       container: container.current,
       style: buildStyle(region),
-      center: region.center,
-      zoom: region.defaultZoom,
+      ...(handoff
+        ? { bounds: boundsAround(handoff.lat, handoff.lon, HANDOFF_RADIUS_M) }
+        : { center: region.center, zoom: region.defaultZoom }),
       minZoom: region.minZoom,
       // Beyond the region there are no tiles. Without this bound a visitor could wander into a
       // grey plane and would not find the way back on their own.
@@ -71,6 +80,8 @@ export function MapView({ region }: { region: Region }) {
       if (disposed) return;
       reportViewport();
       setMap(instance);
+      // The detail view is already open (main.tsx); the cover over it waits for the map as well.
+      if (handoff) instance.once("idle", () => handoffReady("map"));
     });
     // "moveend" rather than "move": loading is debounced anyway, and reporting new viewports
     // continuously while swiping achieves nothing.
@@ -81,23 +92,21 @@ export function MapView({ region }: { region: Region }) {
       instance.remove();
       setMap(null);
     };
-  }, [region, setViewport]);
+  }, [region, setViewport, handoffReady]);
 
   /**
-   * Back to the state the device should be in each morning.
+   * After five minutes without a touch, the slide show.
    *
-   * After five minutes without a touch the page is **reloaded**, not merely reset. The kiosk has
-   * no browser controls -- no reload button, no address bar, no keyboard (`--kiosk` under cage,
-   * see deploy/pi/kiekmap-kiosk). A stuck state would otherwise stand there until somebody
-   * pulled the plug. This way the device heals itself and nobody has to know about it.
-   *
-   * It costs nothing: the tiles are cached, and with no visitor around the reload disturbs
-   * nobody.
+   * Until September 2026 this reloaded the page, and the device then waited on its start view.
+   * The reload moved to the end of the slide show (kiosk/AttractMode.tsx): every way out of it
+   * reloads. The kiosk has no browser controls -- no reload button, no address bar, no keyboard
+   * (`--kiosk` under cage, see deploy/pi/kiekmap-kiosk) -- so a stuck state still heals with the
+   * next touch, and nobody has to know about it. See decisions.md, point 81.
    */
   useEffect(() => {
     if (!map) return;
-    return watchForIdle(window, IDLE_MS, () => window.location.reload());
-  }, [map]);
+    return watchForIdle(window, IDLE_MS, startAttract);
+  }, [map, startAttract]);
 
   /**
    * Remember the camera while a focus runs -- and travel back there at the end.

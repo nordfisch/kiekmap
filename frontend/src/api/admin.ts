@@ -412,6 +412,25 @@ export async function downloadBackupZip(): Promise<void> {
  * show nothing at all for minutes.
  */
 export function uploadPhoto(file: File, defaults: BatchDefaults): Promise<UploadResult> {
+  uploading += 1;
+  return sendPhoto(file, defaults).finally(() => {
+    uploading -= 1;
+  });
+}
+
+let uploading = 0;
+
+/**
+ * How many uploads the browser is still sending.
+ *
+ * The admin area stays open while this is above zero. An upload is the one piece of work that runs
+ * in the browser rather than as a job in the backend, so only the browser can tell.
+ */
+export function uploadsInFlight(): number {
+  return uploading;
+}
+
+function sendPhoto(file: File, defaults: BatchDefaults): Promise<UploadResult> {
   const form = new FormData();
   form.append("files", file, file.name);
   if (defaults.year !== undefined) {

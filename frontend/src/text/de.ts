@@ -64,7 +64,8 @@ export const de = {
      * Says what happens, not what it is: whoever hovers over a coat of arms and reads "Wappen"
      * learns nothing they could not see.
      */
-    resetHint: "Von vorn beginnen",
+    /** The coat of arms starts the slide show. */
+    resetHint: "Diashow starten",
     loadingMap: "Karte wird geladen …",
 
     /**
@@ -129,6 +130,13 @@ export const de = {
      */
     attribution:
       '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, ODbL',
+  },
+
+  attract: {
+    /** The band under the slide show. The place name comes from region.json. */
+    band: (place: string) => `Bilder aus ${place} — tippen Sie auf ein Foto`,
+    label: "Diashow",
+    tileLabel: (caption: string) => `${caption} — auf der Karte zeigen`,
   },
 
   overlay: {

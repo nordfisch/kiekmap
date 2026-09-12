@@ -6,10 +6,12 @@
  * be hit standing, with the pad of a finger, by someone wearing reading glasses.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useAdmin } from "../store/admin";
+import { watchForIdle } from "../kiosk/idle";
 import { t } from "../text";
+import { ADMIN_IDLE_MS } from "./leaveWhenIdle";
 
 const MIN_LENGTH = 4;
 const MAX_LENGTH = 12;
@@ -21,6 +23,10 @@ export function PinPad() {
   const busy = useAdmin((s) => s.busy);
   const error = useAdmin((s) => s.error);
   const [pin, setPin] = useState("");
+
+  // Left standing, the pad would keep the slide show from starting. Nothing is running here, so
+  // the plain idle timer does.
+  useEffect(() => watchForIdle(window, ADMIN_IDLE_MS, cancel), [cancel]);
 
   function press(digit: string) {
     setPin((current) => (current.length < MAX_LENGTH ? current + digit : current));

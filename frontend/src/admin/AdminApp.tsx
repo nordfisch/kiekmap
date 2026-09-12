@@ -10,13 +10,14 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { type Selection } from "../api/admin";
+import { type Selection, fetchJob, uploadsInFlight } from "../api/admin";
 import { useAdmin } from "../store/admin";
 import { t } from "../text";
 import { Backup } from "./Backup";
 import { Changes } from "./Changes";
 import { ImportLog } from "./ImportLog";
 import { ImportView } from "./ImportView";
+import { watchAdminIdle } from "./leaveWhenIdle";
 import { Overview, type Target } from "./Overview";
 import { PhotoCare } from "./PhotoCare";
 import { ScrollAreaProvider } from "./scrollArea";
@@ -87,6 +88,18 @@ export function AdminApp() {
     if (target.filter) setPhotoFilter(target.filter);
     setSection(target.section);
   }
+
+  // Two minutes without a touch, outside of any job, and the admin area closes. See
+  // leaveWhenIdle.ts.
+  useEffect(
+    () =>
+      watchAdminIdle(
+        window,
+        async () => uploadsInFlight() > 0 || (await fetchJob()).phase === "running",
+        () => void leave(),
+      ),
+    [leave],
+  );
 
   useEffect(() => {
     function tick() {

@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 7012362eaf95e1c05d88e59e1594fec505f0a933b3b324cf83b1caf5fe2f7f59 -->
+<!-- source-sha: ddd9f5f8f646a4baa6ef298f925f2c5ec4cf748562cf3bd361c82219416453f0 -->
 
 # Änderungen
 
@@ -22,6 +22,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   in `KIEKMAP_MAP_TAGS` gewählt hat, immer eines aktiv. Ein Stichwort in der Detailansicht eines
   Fotos filtert die Karte ebenfalls, mit weit geöffneter Zeit und ganzem Ort. Siehe
   [Punkt 80](docs/developer/decisions.md)
+- **Eine Diashow, wenn niemand das Gerät benutzt.** Nach fünf Minuten ohne Berührung, oder sofort
+  nach einem Tipp auf das Wappen, bewegen sich vier Fotos langsam, und alle fünf Sekunden blättert
+  eines zum nächsten um. Das Band, das zum Tippen einlädt, wandert über den Bildschirm, damit nichts
+  einbrennt. Ein Tipp auf ein Foto öffnet die Karte um dieses Foto herum, mit dem Foto groß. Die Verwaltung schließt nach zwei Minuten ohne Berührung, außer während einer Sicherung,
+  Rücksicherung, eines Imports oder Hochladens. Siehe [Punkt 81](docs/developer/decisions.md)
 
 ### Behoben
 
