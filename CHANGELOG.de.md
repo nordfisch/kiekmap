@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 82dfcc0699f3f633dc7d5b3014b14f6f64217797e725d45d4946854aa7b3701a -->
+<!-- source-sha: 7012362eaf95e1c05d88e59e1594fec505f0a933b3b324cf83b1caf5fe2f7f59 -->
 
 # Änderungen
 
@@ -18,6 +18,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   was das Gerät seinen Besuchern sagt. Beides stimmt in Holm überein und geht für ein Museum
   anderswo auseinander. Wirkt ohne neues `make tiles`. Siehe
   [Punkt 79](docs/developer/decisions.md)
+- **Die Karte filtert nach Stichwort.** Knöpfe in ihrer Ecke nennen die Stichwörter, die das Museum
+  in `KIEKMAP_MAP_TAGS` gewählt hat, immer eines aktiv. Ein Stichwort in der Detailansicht eines
+  Fotos filtert die Karte ebenfalls, mit weit geöffneter Zeit und ganzem Ort. Siehe
+  [Punkt 80](docs/developer/decisions.md)
 
 ### Behoben
 

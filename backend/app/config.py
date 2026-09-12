@@ -62,6 +62,15 @@ class Settings(BaseSettings):
     #: In the ``.env``: ``KIEKMAP_IMPORT_TAGS=["Gebäude"]``.
     import_tags: list[str] = []
 
+    #: The keywords the kiosk offers as filters in the corner of the map, in this order.
+    #:
+    #: Chosen by hand rather than taken from the most frequent ones. Frequency does not measure
+    #: meaning here: in Holm the three most frequent keywords are the import tag every photo
+    #: carries, a street the map already covers by place, and "Winter". A keyword no published
+    #: photo carries is left out, so a typo does not become a button that empties the map.
+    #: In the ``.env``: ``KIEKMAP_MAP_TAGS=["Gasthof","Winter"]``.
+    map_tags: list[str] = []
+
     #: Credit line for photos whose file names nobody -- "Sammlung Heimatmuseum Holm".
     #:
     #: The last resort, not the rule: whatever the file or the upload form says comes first. Empty

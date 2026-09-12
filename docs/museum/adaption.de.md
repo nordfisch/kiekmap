@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/adaption.md -->
-<!-- source-sha: 8450a855db05ed2849a6f75a01e62dd9afa529ef657d2b88cdaa31e2dcf078b8 -->
+<!-- source-sha: 2905e2379953d5726574365336e121106f105dcfea32cc592134d807aa99c2ca -->
 
 # Kiekmap für einen anderen Ort oder eine andere Sprache
 
@@ -234,6 +234,9 @@ KIEKMAP_ADMIN_PIN_HASH=...        # PIN für den Admin-Bereich
 KIEKMAP_IMPORT_TAGS=["Gebäude"]                 # Schlagwörter für jedes importierte Foto
 KIEKMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # Bildnachweis, wo die Datei niemanden nennt
 KIEKMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
+
+# Die Stichwort-Knöpfe auf der Karte. Leer voreingestellt: keine Knöpfe.
+KIEKMAP_MAP_TAGS=["Gasthof","Winter"]
 ```
 
 `exif_date_max_year` hochsetzen, falls die Sammlung auch echte Digitalfotos enthält — sonst
@@ -246,6 +249,13 @@ Die drei `IMPORT_`-Werte sind der Ort für das, was eine *Sammlung* ausmacht.
 aus Trachten oder Schiffen. `KIEKMAP_IMPORT_PROVENANCE` wird wörtlich vor den Dateipfad im
 Import-Ordner gesetzt und trägt darum sein eigenes Trennzeichen am Ende — so führt die
 Herkunftsangabe eines Fotos zurück auf die Datei im eigenen Archiv.
+
+`KIEKMAP_MAP_TAGS` nennt die Stichwörter, nach denen Besucher die Karte filtern können, in der
+Reihenfolge ihrer Knöpfe. Sie werden von Hand gewählt. Die häufigsten Stichwörter sind meist die
+falschen: Eines, das jedes Foto trägt, filtert nichts, und ein Straßenname wiederholt, was die
+Karte ohnehin zeigt. Ein Stichwort, das kein veröffentlichtes Foto trägt, bekommt keinen Knopf, und
+das Backend-Log nennt es. Alle übrigen Stichwörter erreichen Besucher über die Detailansicht eines
+Fotos.
 
 Ob der Import die **Ordnernamen** auswertet, muss nirgends eingestellt werden: Ein Pfadteil gilt
 als Straße, wenn der Ortsindex sie kennt. Ein Archiv, das nach Straße und Hausnummer abgelegt

@@ -2172,3 +2172,42 @@ coalesces every language with English, so `name:en` stands in the expression wha
 for, a hard-wired `de` included. The test therefore asserts the **absence** of `name:de` under an
 English interface. Measured: `de` yields `name:de` and `name:en`, `en` only `name:en`, `fr`
 `name:fr` and `name:en`.
+
+## 80. The keyword filter is curated, and holds one keyword
+
+The map gained a third filter beside place and time (#23): buttons with keywords in its top left
+corner, and the keywords in the detail view as a second way in.
+
+**The buttons come from a list, not from the collection.** The decades beside the slider are
+derived from the photos (`frontend/src/kiosk/decades.ts`), and the same rule was the obvious one
+here: offer the most frequent keywords. Counted on 8 September 2026 over the 1279 published photos,
+that yields the import tag every photo carries, a street name the map already covers through place,
+and "Winter". Frequency does not measure meaning in this collection. `KIEKMAP_MAP_TAGS` therefore
+names the buttons and their order. It sits beside `KIEKMAP_IMPORT_TAGS` and not in `region.json`,
+because it describes the collection and not the place.
+
+**A configured keyword no published photo carries is left out.** `/api/photos/tags/offered` drops
+it and logs a warning. Otherwise a typo in the `.env`, or a keyword curated away since, becomes a
+button that empties the map.
+
+**One keyword at a time.** A second tap on the active one switches it off, a tap on another replaces
+it. "And" and "or" are questions a visitor at a touchscreen should not have to answer, and a list of
+boxes to tick is not a kiosk control.
+
+**The detail view opens time and place wide.** The visitor who taps a keyword there asks what else
+carries it, not what else carries it in the current decade and viewport. The time range goes to the
+whole axis, the undated photos come back, and the map zooms out to the region, as far as `minZoom`
+allows. A keyword chosen this
+way that is not configured stands beside the configured buttons until it is switched off or
+replaced, so the filtered map always has a button that names the filter.
+
+**The histogram follows the keyword; the axis does not.** Bars and the undated count without the
+keyword would show photos the map hides. The axis stays the collection's, for the same reason it
+ignores the viewport.
+
+**A contribution's focus takes the keyword away if the photo does not carry it**, and gives it back
+with the time range. The thank-you says the photo is on the map now; a filter that hides it makes
+that untrue.
+
+**Whether the Holm collection carries the filter is curation.** 217 of 279 keywords sit on fewer than
+ten photos. The code does not change that; the choice of the list does.

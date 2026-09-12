@@ -83,6 +83,14 @@ export const de = {
 
   map: {
     noPhotos: "Hier gibt es noch keine Fotos im gewählten Zeitraum.",
+    noPhotosWithTag: (tag: string) => `Hier gibt es keine Fotos zu „${tag}“ im gewählten Zeitraum.`,
+    /** The group of keyword buttons in the corner of the map -- read out, not shown. */
+    keywords: "Stichwörter",
+    /**
+     * A keyword in the detail view. The keyword is its visible caption; this label says what a
+     * tap does, because it closes the view.
+     */
+    filterByKeyword: (tag: string) => `Karte nach „${tag}“ filtern`,
     tooMany: (count: number) =>
       `${count} Fotos in diesem Ausschnitt — für mehr Übersicht näher heranzoomen`,
     /**

@@ -3,7 +3,7 @@
  *
  * Two loops run here at different speeds:
  *
- *   slow  viewport or time range changes -> one query after a short pause
+ *   slow  viewport, time range or keyword changes -> one query after a short pause
  *   fast  the map is panned -> the photos already loaded are re-clustered
  *
  * Without that separation every twitch on the touchscreen would fire a request.
@@ -59,6 +59,14 @@ type KioskState = {
    */
   undatedByHand: boolean;
 
+  /**
+   * The keyword the map is filtered by, or null.
+   *
+   * One at most. Combining keywords with "and" or "or" is a question nobody at a touchscreen
+   * wants to answer. See decisions.md, point 80.
+   */
+  tag: string | null;
+
   photos: PhotoMarker[];
   total: number;
   truncated: boolean;
@@ -88,10 +96,29 @@ type KioskState = {
   } | null;
   /** The time range the visitor had set before the focus moved it. */
   rangeBefore: TimeRange | null;
+  /** The keyword the focus took away because the photo does not carry it, or null. */
+  tagBefore: string | null;
+
+  /**
+   * Counts up whenever the map should show the whole region -- and stay there.
+   *
+   * Not ``focus``: a focus travels back when it ends. A counter rather than a flag, so the same
+   * request twice moves the map twice.
+   */
+  overview: number;
 
   setViewport: (bbox: Bbox) => void;
   setTimeRange: (timeRange: TimeRange) => void;
   setShowUndated: (on: boolean) => void;
+  /** A keyword from the corner of the map: the same one again switches it off. */
+  setTag: (tag: string) => void;
+  /**
+   * The way in from the detail view: this keyword, with time and place wide open.
+   *
+   * Wide open because the visitor asks "what else is there with this keyword", not "what else is
+   * there with this keyword here and in this decade". Closes the detail view.
+   */
+  filterByTag: (tag: string) => void;
   /** A single photo -- the short form for a stack of length one. */
   openPhoto: (id: number | null) => void;
   openStackAt: (ids: number[], index?: number) => void;
@@ -146,7 +173,7 @@ export function queryTimeFilter(
 
 export const useKiosk = create<KioskState>((set, get) => {
   async function loadPhotos() {
-    const { bbox, timeRange, fullRange, showUndated } = get();
+    const { bbox, timeRange, fullRange, showUndated, tag } = get();
     if (!bbox) return;
 
     // Discard superseded requests: on a touchscreen people swipe in quick succession, and the
@@ -162,6 +189,7 @@ export const useKiosk = create<KioskState>((set, get) => {
         queryTimeFilter(timeRange, fullRange),
         MAX_PHOTOS,
         showUndated,
+        tag,
         signal,
       );
       set({
@@ -182,7 +210,7 @@ export const useKiosk = create<KioskState>((set, get) => {
     const signal = histogramAbort.signal;
 
     try {
-      const histogram = await fetchHistogram(bbox, signal);
+      const histogram = await fetchHistogram(bbox, get().tag, signal);
       if (signal.aborted) return;
 
       const { timeRange } = get();
@@ -238,6 +266,9 @@ export const useKiosk = create<KioskState>((set, get) => {
     openIndex: 0,
     focus: null,
     rangeBefore: null,
+    tagBefore: null,
+    overview: 0,
+    tag: null,
 
     setViewport(bbox) {
       if (sameViewport(get().bbox, bbox)) return;
@@ -280,6 +311,39 @@ export const useKiosk = create<KioskState>((set, get) => {
       scheduleLoad();
     },
 
+    setTag(tag) {
+      // A choice made during the thank-you is the visitor's, so the end of the focus must not
+      // bring back the keyword it had taken away.
+      set((state) => ({ tag: state.tag === tag ? null : tag, tagBefore: null }));
+      scheduleLoad();
+      const { bbox } = get();
+      if (bbox) void loadHistogram(bbox);
+    },
+
+    filterByTag(tag) {
+      const { fullRange, histogram } = get();
+      const axis = axisBounds(fullRange, histogram?.step);
+      set((state) => ({
+        tag,
+        tagBefore: null,
+        // The whole axis sends no time filter, and the undated photos belong to "wide open".
+        // ``undatedByHand`` stays as it is: this is not the visitor touching the switch.
+        timeRange: axis ? { from: axis.min, to: axis.max } : state.timeRange,
+        showUndated: true,
+        // A focus still running would take range and camera back at its end and undo this.
+        focus: null,
+        rangeBefore: null,
+        openStack: [],
+        openIndex: 0,
+        overview: state.overview + 1,
+      }));
+      // The map reports its new viewport when it arrives. This load covers the case where the
+      // region was already on screen and no "moveend" follows.
+      void loadPhotos();
+      const { bbox } = get();
+      if (bbox) void loadHistogram(bbox);
+    },
+
     openPhoto(id) {
       set({ openStack: id === null ? [] : [id], openIndex: 0 });
     },
@@ -309,10 +373,16 @@ export const useKiosk = create<KioskState>((set, get) => {
      * Map and time range are moved together and taken back together by ``releaseFocus``. A photo
      * without a place leaves both alone: it is on no map, and moving the slider would only hide
      * other photos.
+     *
+     * **The keyword goes too, if the photo does not carry it.** Otherwise the thank-you promises a
+     * photo on the map that the filter hides. It comes back with the range.
      */
     showPhoto(photo) {
       const range = rangeForPhoto(photo, get().fullRange);
       if (photo.lat === null || photo.lon === null) return;
+
+      const { tag, bbox } = get();
+      const hidesIt = tag !== null && !photo.tags.includes(tag);
 
       set((state) => ({
         focus: {
@@ -324,14 +394,23 @@ export const useKiosk = create<KioskState>((set, get) => {
         // visitor would end up with a decade they never set.
         rangeBefore: state.rangeBefore ?? state.timeRange,
         timeRange: range ?? state.timeRange,
+        ...(hidesIt ? { tag: null, tagBefore: state.tagBefore ?? tag } : {}),
       }));
       void loadPhotos();
+      if (hidesIt && bbox) void loadHistogram(bbox);
     },
 
     releaseFocus() {
-      const { rangeBefore } = get();
-      set({ focus: null, rangeBefore: null, ...(rangeBefore ? { timeRange: rangeBefore } : {}) });
-      if (rangeBefore) void loadPhotos();
+      const { rangeBefore, tagBefore, bbox } = get();
+      set({
+        focus: null,
+        rangeBefore: null,
+        tagBefore: null,
+        ...(rangeBefore ? { timeRange: rangeBefore } : {}),
+        ...(tagBefore !== null ? { tag: tagBefore } : {}),
+      });
+      if (rangeBefore || tagBefore !== null) void loadPhotos();
+      if (tagBefore !== null && bbox) void loadHistogram(bbox);
     },
 
     /**

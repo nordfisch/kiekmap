@@ -63,6 +63,9 @@ class Viewport:
             bool,
             Query(description="Keep photos that carry no date at all, whatever the time range"),
         ] = True,
+        tag: Annotated[
+            str | None, Query(description="Only photos carrying this keyword", max_length=80)
+        ] = None,
     ) -> None:
         parts = bbox.split(",")
         if len(parts) != 4:
@@ -79,6 +82,7 @@ class Viewport:
             from_year, to_year = to_year, from_year
         self.from_year, self.to_year = from_year, to_year
         self.include_undated = include_undated
+        self.tag = tag
 
     @property
     def time_range(self) -> tuple[date, date] | None:
@@ -87,8 +91,13 @@ class Viewport:
         return (date(self.from_year or 1800, 1, 1), date(self.to_year or 2100, 12, 31))
 
 
+def _tag_filter(viewport: Viewport):
+    """The keyword, as a condition -- none when no keyword is chosen."""
+    return [] if viewport.tag is None else [Photo.tags.any(Tag.name == viewport.tag)]
+
+
 def _viewport_filters(viewport: Viewport):
-    """Conditions for place and time.
+    """Conditions for place, time and keyword.
 
     The time filter queries for **overlap** of the intervals, not containment. Otherwise a photo
     dated "the 1920s" would vanish from the selection 1925-1930 -- precisely the loosely dated
@@ -105,6 +114,7 @@ def _viewport_filters(viewport: Viewport):
         Photo.lat.is_not(None),
         Photo.lat.between(viewport.min_lat, viewport.max_lat),
         Photo.lon.between(viewport.min_lon, viewport.max_lon),
+        *_tag_filter(viewport),
     ]
     if (selection := viewport.time_range) is not None:
         selected_start, selected_end = selection
@@ -164,6 +174,11 @@ def histogram(
     photos the viewport *holds*, not how many are currently shown -- and that count is what the
     switch beside the slider is labelled with. Counted out, the label would disappear along with
     the only way of switching them back on.
+
+    **The keyword stays in.** Bars and the undated count then show what exists *with that keyword*.
+    Without it the slider would draw bars for photos the map does not show, and the switch would
+    count them. The axis ignores the keyword, like the viewport, so it does not move when one is
+    chosen.
     """
     viewport.from_year = viewport.to_year = None
     viewport.include_undated = True
@@ -219,6 +234,7 @@ def histogram(
                 Photo.lat.between(viewport.min_lat, viewport.max_lat),
                 Photo.lon.between(viewport.min_lon, viewport.max_lon),
                 Photo.date_from.is_(None),
+                *_tag_filter(viewport),
             )
         )
         or 0
@@ -245,6 +261,30 @@ def _get_photo(session: Session, photo_id: int) -> Photo:
 @router.get("/tags", response_model=list[str], summary="All tags in use")
 def tags(session: Annotated[Session, Depends(get_session)]) -> list[str]:
     return list(session.scalars(select(Tag.name).order_by(Tag.name)).all())
+
+
+@router.get(
+    "/tags/offered", response_model=list[str], summary="The keywords the map offers as filters"
+)
+def offered_tags(
+    session: Annotated[Session, Depends(get_session)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> list[str]:
+    """``map_tags`` in its configured order, without the keywords no published photo carries.
+
+    A keyword that matches nothing would be a button that empties the map. It comes from a typo in
+    the ``.env`` or from a keyword curated away since, and the log names it.
+    """
+    carried = set(
+        session.scalars(
+            select(Tag.name)
+            .where(Tag.name.in_(settings.map_tags))
+            .where(Tag.photos.any(Photo.status == PhotoStatus.PUBLISHED))
+        ).all()
+    )
+    if missing := [name for name in settings.map_tags if name not in carried]:
+        log.warning("KIEKMAP_MAP_TAGS names keywords no published photo carries: %s", missing)
+    return [name for name in dict.fromkeys(settings.map_tags) if name in carried]
 
 
 # Everything with a path parameter below this line. `photo_id` is an int, and FastAPI matches in

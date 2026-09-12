@@ -7,6 +7,7 @@ import type { Bbox } from "../api/client";
 import type { Region } from "../region";
 import { useKiosk } from "../store/kiosk";
 import { HouseNumberLayer } from "./HouseNumberLayer";
+import { KeywordCorner } from "./KeywordCorner";
 import { PhotoLayer } from "./PhotoLayer";
 import { PinLayer } from "./PinLayer";
 import { IDLE_MS, watchForIdle } from "./idle";
@@ -22,6 +23,7 @@ export function MapView({ region }: { region: Region }) {
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const setViewport = useKiosk((s) => s.setViewport);
   const focus = useKiosk((s) => s.focus);
+  const overview = useKiosk((s) => s.overview);
 
   useEffect(() => {
     if (!container.current) return;
@@ -128,12 +130,33 @@ export function MapView({ region }: { region: Region }) {
     map.fitBounds(focus.bounds, { padding: 40, duration: 800 });
   }, [map, focus]);
 
+  /**
+   * The whole region, for a keyword chosen in the detail view.
+   *
+   * `minZoom` still holds. On a narrow screen that stops short of the region's edges, which is as
+   * far out as a visitor could zoom by hand.
+   *
+   * Declared after the focus effects on purpose. When this request ends a running focus, the
+   * focus cleanup starts its trip back first, and this `fitBounds` then replaces that trip.
+   */
+  useEffect(() => {
+    if (!map || overview === 0) return;
+    map.fitBounds(
+      [
+        [region.bbox[0], region.bbox[1]],
+        [region.bbox[2], region.bbox[3]],
+      ],
+      { duration: 800 },
+    );
+  }, [map, overview, region]);
+
   return (
     <div className="map">
       <div ref={container} className="map__canvas" />
       {map && <PhotoLayer map={map} />}
       {map && <PinLayer map={map} />}
       {map && <HouseNumberLayer map={map} />}
+      {map && <KeywordCorner />}
     </div>
   );
 }

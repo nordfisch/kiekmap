@@ -159,6 +159,7 @@ export function fetchPhotos(
   timeRange: TimeRange | null,
   limit: number,
   showUndated: boolean,
+  tag: string | null,
   signal?: AbortSignal,
 ): Promise<PhotoList> {
   const params = new URLSearchParams({ bbox: bboxParam(bbox), limit: String(limit) });
@@ -169,12 +170,32 @@ export function fetchPhotos(
   // Sent even when it is on, which is the default: the parameter is what the switch beside the
   // slider stands for, and a request that leaves it out says nothing about it either way.
   params.set("include_undated", String(showUndated));
+  if (tag !== null) params.set("tag", tag);
   return getJson<PhotoList>(`/api/photos?${params}`, signal);
 }
 
-/** Without a time range: the slider should show where anything is at all. */
-export function fetchHistogram(bbox: Bbox, signal?: AbortSignal): Promise<Histogram> {
-  return getJson<Histogram>(`/api/photos/histogram?bbox=${bboxParam(bbox)}`, signal);
+/**
+ * Without a time range: the slider should show where anything is at all.
+ *
+ * With the keyword, though. The bars should count what the map can show.
+ */
+export function fetchHistogram(
+  bbox: Bbox,
+  tag: string | null,
+  signal?: AbortSignal,
+): Promise<Histogram> {
+  const params = new URLSearchParams({ bbox: bboxParam(bbox) });
+  if (tag !== null) params.set("tag", tag);
+  return getJson<Histogram>(`/api/photos/histogram?${params}`, signal);
+}
+
+/**
+ * The keywords for the corner of the map, in the order the museum configured them.
+ *
+ * Keywords no published photo carries are already left out -- see `api/photos.py`.
+ */
+export function fetchOfferedTags(signal?: AbortSignal): Promise<string[]> {
+  return getJson<string[]>("/api/photos/tags/offered", signal);
 }
 
 export function fetchPhoto(id: number, signal?: AbortSignal): Promise<PhotoDetail> {
