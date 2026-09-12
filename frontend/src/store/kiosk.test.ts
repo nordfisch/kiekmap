@@ -6,7 +6,8 @@ vi.mock("../api/client", () => ({
 }));
 
 import { fetchHistogram, fetchPhotos } from "../api/client";
-import { queryTimeFilter, sameViewport, useKiosk } from "./kiosk";
+import { useAdmin } from "./admin";
+import { HANDOFF_COVER_MAX_MS, queryTimeFilter, sameViewport, useKiosk } from "./kiosk";
 
 describe("queryTimeFilter", () => {
   const fullRange = { from: 1900, to: 1980 };
@@ -369,5 +370,87 @@ describe("the keyword", () => {
 
       expect(useKiosk.getState().tag).toBe("Hof");
     });
+  });
+});
+
+describe("the slide show", () => {
+  beforeEach(() => {
+    useAdmin.setState({ view: "kiosk" });
+    useKiosk.setState({
+      attract: false,
+      openStack: [],
+      openIndex: 0,
+      pulse: null,
+      pulsePending: null,
+      handoff: null,
+    });
+  });
+
+  it("does not start over the admin area", () => {
+    useAdmin.setState({ view: "admin" });
+    useKiosk.getState().startAttract();
+
+    expect(useKiosk.getState().attract).toBe(false);
+  });
+
+  it("does not start over the number pad either", () => {
+    // Somebody is typing a PIN. A slide show over the pad would end in a reload.
+    useAdmin.setState({ view: "pin" });
+    useKiosk.getState().startAttract();
+
+    expect(useKiosk.getState().attract).toBe(false);
+  });
+
+  it("starts in the visitor view", () => {
+    useKiosk.getState().startAttract();
+
+    expect(useKiosk.getState().attract).toBe(true);
+  });
+
+  it("pulses the marker only once the detail view is closed", () => {
+    // A pulse under the detail view runs unseen, and by the time the view closes it is over.
+    useKiosk.getState().openFromShowcase(7);
+    expect(useKiosk.getState().openStack).toEqual([7]);
+    expect(useKiosk.getState().pulse).toBeNull();
+
+    useKiosk.getState().openPhoto(null);
+    expect(useKiosk.getState().pulse).toBe(7);
+  });
+
+  it("pulses once, not on every later close", () => {
+    useKiosk.getState().openFromShowcase(7);
+    useKiosk.getState().openPhoto(null);
+    useKiosk.getState().openPhoto(9);
+    useKiosk.setState({ pulse: null });
+
+    useKiosk.getState().openPhoto(null);
+
+    expect(useKiosk.getState().pulse).toBeNull();
+  });
+
+  it("keeps the screen covered until photo and map are both drawn", () => {
+    // Either one alone is the flash this exists against: the bare map, or a dark screen with a
+    // detail view that has no picture yet.
+    useKiosk.getState().openFromShowcase(7);
+
+    useKiosk.getState().handoffReady("photo");
+    expect(useKiosk.getState().handoff).not.toBeNull();
+
+    useKiosk.getState().handoffReady("map");
+    expect(useKiosk.getState().handoff).toBeNull();
+  });
+
+  it("does not leave the screen covered when something never arrives", () => {
+    vi.useFakeTimers();
+    try {
+      useKiosk.getState().openFromShowcase(7);
+      useKiosk.getState().handoffReady("map");
+
+      vi.advanceTimersByTime(HANDOFF_COVER_MAX_MS);
+
+      expect(useKiosk.getState().handoff).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

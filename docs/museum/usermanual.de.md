@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/usermanual.md -->
-<!-- source-sha: f1bd28600e0930cb0ed0678b6fffe6d5ca6a839c70aadb2b117fcee3bd77bb0a -->
+<!-- source-sha: 412874bed8573a4ccadb7547ae6ed4a8933cc3cfbd57955927e9b3dfeb375af7 -->
 
 # Anleitung für das Museumsteam
 
@@ -8,14 +8,26 @@
 
 ## In den Verwaltungsbereich kommen
 
-Oben links auf der Karte liegt das **Wappen**. Einmal darauf tippen, dann die **PIN** eingeben und
-auf „Weiter" tippen.
+Oben links, neben dem Wappen, einmal auf den **Titel** tippen. Dann die **PIN** eingeben und auf
+„Weiter" tippen. Ein Tipp auf das Wappen selbst startet die Diashow.
 
 Wer die PIN nicht kennt, kommt nicht hinein — das ist Absicht. Nach fünf falschen Eingaben wartet
 das Gerät eine Minute, bevor es die nächste annimmt.
 
 Zurück zur Karte kommen Sie jederzeit über **„Verwaltung beenden"** oben rechts. Wenn Sie das
-vergessen, meldet sich das Gerät nach einer halben Stunde von selbst ab.
+vergessen, verlässt das Gerät die Verwaltung nach **zwei Minuten ohne Berührung** von selbst.
+Während eine Sicherung, eine Rücksicherung, ein Import vom Stick oder ein Hochladen läuft, zählt
+diese Zeit nicht: Die zwei Minuten beginnen, wenn die Arbeit fertig ist.
+
+## Was das Gerät tut, wenn niemand es benutzt
+
+Nach fünf Minuten ohne Berührung zeigt der Bildschirm eine **Diashow**: vier Fotos aus der
+Sammlung, die sich langsam bewegen, und alle fünf Sekunden blättert eines davon zum nächsten um.
+Ein Tipp auf ein Foto öffnet die Karte um dieses Foto herum, mit dem Foto groß. Ein Tipp neben die
+Fotos führt zur Karte zurück. In beiden Fällen lädt die Seite neu; was der letzte Besucher offen
+gelassen hat, ist dann weg.
+
+Über der Verwaltung startet die Diashow nie.
 
 ## Fotos hinzufügen
 

@@ -650,6 +650,7 @@ settled on exactly one way.*
 | A pencil beside the title in the detail view | straight into editing **this** photo |
 
 **The coat of arms loses that job** and gets another: a tap on it reloads and resets the filters.
+Since point 81 it starts the slide show, whose end reloads.
 
 **Point 7 is not weakened by this.** What was decided there was not „exactly one way" but **„visible
 instead of hidden"**. Both new ways are visible and protected by the same PIN.
@@ -2211,3 +2212,65 @@ that untrue.
 
 **Whether the Holm collection carries the filter is curation.** 217 of 279 keywords sit on fewer than
 ten photos. The code does not change that; the choice of the list does.
+
+## 81. The idle device shows a wall of four turning photos, and the reload moved to its end
+
+After five minutes without a touch the device reloaded and waited on its start view. Now it shows
+a slide show (#16): four tiles, each photo on its own slow camera path, and every five seconds one
+tile turns over to the next photo. A tap on the coat of arms starts it at once.
+
+**Four tiles, not one photo on the whole screen.** Measured on 12 September 2026 over the 1279
+published photos: 606 cover 1920×1080 without any zoom, and a camera path needs room to zoom into.
+One photo on the whole screen therefore needs a thumbnail larger than the 1200 px one, which means
+recomputing every thumbnail and decoding several megabytes per photo on the Pi. A tile of 960×540
+is covered by the existing thumbnail with room for a zoom of 1.25 (960 × 1.25 = 1200), and 807
+landscape photos with a place qualify. A photo too small for the full zoom zooms less, down to
+drifting only; it never turns soft.
+
+**The timing.** A tile turns every 5 seconds, four tiles make a round of 20 seconds, and one camera
+path lasts 20 seconds. A photo moves from the moment it appears until it turns over. The turn itself
+takes 1.6 seconds, soft at both ends, and goes crosswise over the wall rather than in reading order.
+All of it stands as constants in `frontend/src/kiosk/attract.ts`, so it can be adjusted on the
+device.
+
+**Every camera path uses the whole room the zoom frees.** It goes into a corner, out of one, or
+across the photo at full zoom. The first version drew a random point inside the room; most such
+points lie near the middle, and the motion was too small to see.
+
+**Nothing bright stands in one place for long.** The band with "tippen Sie auf ein Foto" floats
+across the screen on two periods of 71 and 47 seconds. How far it may travel is measured against
+the screen and the band, so it stays whole on any screen and in any language. The year and place
+under a photo fade in after the turn and out after ten seconds, in a corner that changes per photo.
+The whole wall shifts by a few pixels over four minutes, so the dark joints move as well. All of it
+runs on `transform` and `opacity`.
+
+**The reload moved from the start of the idle time to the end of the slide show.** Every way out of
+the show reloads: a tap on a photo leaves a note in `sessionStorage` and reloads, and the new page
+opens the map 300 m around that photo with its detail view; a tap beside the photos lands on the
+start view. The self-healing stays: a stuck state heals with the next touch. What the
+show discards is what the reload after five minutes discarded before, no more.
+
+**The page after a tap stays dark until the detail view is ready.** The reload first drew the
+loading screen and the bare map, and the detail view opened only once the map had loaded: a flash
+between the slide show and the photo. Now `main.tsx` opens the detail view before the first render,
+and a cover in the slide show's colour stands until the photo and the map behind it are drawn. It
+gives up after six seconds, so a photo that fails to load does not leave the screen dark. Measured
+in the browser: dark after 55 ms, the photo after 820 ms, and no frame with the bare map between.
+
+**A tapped photo opens 300 m around it, and its marker pulses when the detail view closes.** The
+focus after a contribution uses 100 m. That suits a pin that was just set and is too close for
+somebody who has not looked at the map yet. The pulse waits for the detail view to close, because a
+pulse under it would run unseen.
+
+**The admin area closes after two minutes without a touch.** It stands on the screen visitors walk
+up to, and left open it offers the next one the photo editor with no PIN in between. The half-hour
+session was the only limit until now. **Time during a job does not count:** a backup,
+restore or import from a stick runs for minutes with nobody touching the screen, and closing means
+reloading in the middle of it. The backend runs all three as one job, and the watcher asks for its
+phase every five seconds; uploads run in the browser and are counted there. The two minutes start
+when the work ends, so a result on the screen stays readable. The number pad closes after two
+minutes as well, so that it cannot keep the slide show from starting.
+
+**Open for the device (#18):** four moving tiles and a 3D turn over hours on a Pi. If the turn
+stutters, a crossfade is the fallback. A 4K screen doubles the tile, and then the 1200 px thumbnail
+only drifts; a 1600 px size would have to follow.

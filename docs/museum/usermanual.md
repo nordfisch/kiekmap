@@ -5,14 +5,25 @@
 
 ## Getting into the admin area
 
-The **coat of arms** sits at the top left of the map. Tap it once, enter the **PIN** and tap
-"Continue".
+Tap the **title** at the top left, beside the coat of arms, once. Enter the **PIN** and tap
+"Continue". A tap on the coat of arms itself starts the slide show.
 
 Whoever does not know the PIN does not get in — that is deliberate. After five wrong entries the
 device waits a minute before it takes the next one.
 
 You can go back to the map at any time with **"Leave the admin area"** at the top right. If you
-forget, the device signs itself out after half an hour.
+forget, the device leaves the admin area by itself after **two minutes without a touch**. While a
+backup, a restore, an import from a stick or an upload is running, that time does not count: the
+two minutes start when the work is done.
+
+## What the device does when nobody uses it
+
+After five minutes without a touch the screen shows a **slide show**: four photos from the
+collection that move slowly, and every five seconds one of them turns over to the next. A tap on a
+photo opens the map around it, with the photo large. A tap beside the photos returns to the map.
+Either way the page loads fresh, so whatever the last visitor left open is gone.
+
+The slide show never starts over the admin area.
 
 ## Adding photos
 

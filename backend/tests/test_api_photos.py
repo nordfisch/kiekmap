@@ -640,3 +640,49 @@ class TestTheOfferedKeywords:
         session.commit()
 
         assert client.get("/api/photos/tags/offered").json() == []
+
+
+class TestTheShowcase:
+    """`/photos/showcase` -- the photos for the slide show while the device is idle."""
+
+    def test_portrait_unplaced_and_deleted_photos_stay_out(
+        self, client: TestClient, session, make_photo
+    ):
+        """A portrait photo loses most of itself to a landscape tile, and a tap on an unplaced one
+        would open a map with nothing to show."""
+        make_photo(title="Landscape", sha="a" * 64)
+        portrait = make_photo(title="Portrait", sha="b" * 64)
+        make_photo(title="Unplaced", lat=None, lon=None, sha="c" * 64)
+        make_photo(title="Deleted", status=PhotoStatus.DELETED, sha="d" * 64)
+        session.flush()
+        portrait.width, portrait.height = 640, 900
+        session.commit()
+
+        titles = [photo["title"] for photo in client.get("/api/photos/showcase").json()]
+
+        assert titles == ["Landscape"]
+
+    def test_large_photos_come_before_small_ones(self, client: TestClient, session, make_photo):
+        """Only the large ones carry the full zoom. The small ones fill up, they do not lead."""
+        for n in range(1, 6):
+            make_photo(title=f"Small {n}", sha=f"{n:064d}")
+        large = make_photo(title="Large", sha="f" * 64)
+        session.flush()
+        large.width, large.height = 1600, 1067
+        session.commit()
+
+        data = client.get("/api/photos/showcase", params={"count": 1}).json()
+
+        assert [photo["title"] for photo in data] == ["Large"]
+
+    def test_a_small_collection_still_has_a_show(self, client: TestClient, session, make_photo):
+        make_photo(title="Small")
+        session.commit()
+
+        assert len(client.get("/api/photos/showcase").json()) == 1
+
+    def test_the_count_is_bounded(self, client: TestClient):
+        assert client.get("/api/photos/showcase", params={"count": 1000}).status_code == 422
+
+    def test_the_photo_route_does_not_swallow_it(self, client: TestClient):
+        assert client.get("/api/photos/showcase").status_code == 200

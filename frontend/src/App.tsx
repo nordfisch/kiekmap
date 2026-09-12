@@ -5,6 +5,7 @@ import { PinPad } from "./admin/PinPad";
 import { Crest } from "./kiosk/Crest";
 import { HelpPanel } from "./kiosk/HelpPanel";
 import { MapView } from "./kiosk/MapView";
+import { AttractMode } from "./kiosk/AttractMode";
 import { PhotoOverlay } from "./kiosk/PhotoOverlay";
 import { TimeSlider } from "./kiosk/TimeSlider";
 import { type Region, loadRegion } from "./region";
@@ -12,6 +13,29 @@ import { useAdmin } from "./store/admin";
 import { useContribute } from "./store/contribute";
 import { useKiosk } from "./store/kiosk";
 import { t } from "./text";
+
+/**
+ * The dark cover between a tap in the slide show and the detail view it opens.
+ *
+ * It stands from the first render until the store says photo and map are drawn, then fades. The
+ * colour is the slide show's, so the reload between the two does not show.
+ */
+function HandoffCover() {
+  const active = useKiosk((s) => s.handoff !== null);
+  const [shown, setShown] = useState(active);
+
+  useEffect(() => {
+    if (active) return;
+    delete document.documentElement.dataset.handoff;
+    const timer = setTimeout(() => setShown(false), 400);
+    return () => clearTimeout(timer);
+  }, [active]);
+
+  if (!shown) return null;
+  return (
+    <div className={active ? "handoff-cover" : "handoff-cover handoff-cover--gone"} aria-hidden />
+  );
+}
 
 function MapNotice() {
   const total = useKiosk((s) => s.total);
@@ -55,7 +79,14 @@ export function App() {
   }, [restore]);
 
   if (error) return <div className="splash splash--error">{error}</div>;
-  if (!region) return <div className="splash">{t.app.loadingMap}</div>;
+  if (!region) {
+    return (
+      <>
+        <div className="splash">{t.app.loadingMap}</div>
+        <HandoffCover />
+      </>
+    );
+  }
 
   // The admin area replaces the kiosk rather than covering it: the map would keep loading tiles
   // behind it for nothing, and on a Pi that is not free.
@@ -115,6 +146,8 @@ export function App() {
 
       <PhotoOverlay />
       {view === "pin" && <PinPad />}
+      <AttractMode regionName={region.name} />
+      <HandoffCover />
     </>
   );
 }

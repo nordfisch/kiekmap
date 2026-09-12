@@ -17,6 +17,12 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **The map filters by keyword.** Buttons in its corner name the keywords the museum chose in
   `KIEKMAP_MAP_TAGS`, one active at a time. A keyword in a photo's detail view filters the map too,
   with time and place wide open. See [point 80](docs/developer/decisions.md)
+- **A slide show while nobody uses the device.** After five minutes without a touch, or at once
+  after a tap on the coat of arms, four photos drift and zoom slowly, and every five seconds one
+  turns over to the next. The band that invites a tap floats across the screen, so nothing burns
+  in. A tap on a photo opens the map around it with the photo large. The admin
+  area closes after two minutes without a touch, unless a backup, restore, import or upload is
+  running. See [point 81](docs/developer/decisions.md)
 
 ### Fixed
 

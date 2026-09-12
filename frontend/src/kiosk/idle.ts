@@ -1,6 +1,9 @@
 /**
  * The idle reset.
  *
+ * Since September 2026 it starts the slide show (kiosk/AttractMode.tsx), and every way out of the
+ * slide show reloads the page. The reason below still holds; only the moment of the reload moved.
+ *
  * Without it the device stands there each morning in the state the last visitor of the previous
  * evening left it: a photo open over the map, the time slider narrowed to 1932, the contribution
  * panel showing a picture somebody had already waved away. The next person has to undo all of
@@ -14,7 +17,7 @@
 /** How long the device has to be left alone. Long enough that nobody is interrupted mid-thought. */
 export const IDLE_MS = 5 * 60 * 1000;
 
-const ACTIVITY = ["pointerdown", "keydown", "wheel", "touchstart"] as const;
+export const ACTIVITY = ["pointerdown", "keydown", "wheel", "touchstart"] as const;
 
 /**
  * Call ``onIdle`` once the target has been quiet for ``idleMs``.
