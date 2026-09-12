@@ -7,7 +7,7 @@
  * zooming in dissolves them again. That is also the most natural gesture on a touchscreen.
  */
 
-import type maplibregl from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
 import { Marker } from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
 import Supercluster from "supercluster";

@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: ddd9f5f8f646a4baa6ef298f925f2c5ec4cf748562cf3bd361c82219416453f0 -->
+<!-- source-sha: 3495aa5a7a5a85a8bfebd7e6704b3b154a8020c61c7f6466430aabf6fae8d254 -->
 
 # Änderungen
 
@@ -27,6 +27,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   eines zum nächsten um. Das Band, das zum Tippen einlädt, wandert über den Bildschirm, damit nichts
   einbrennt. Ein Tipp auf ein Foto öffnet die Karte um dieses Foto herum, mit dem Foto groß. Die Verwaltung schließt nach zwei Minuten ohne Berührung, außer während einer Sicherung,
   Rücksicherung, eines Imports oder Hochladens. Siehe [Punkt 81](docs/developer/decisions.md)
+
+### Geändert
+
+- **MapLibre 6.** Die Karte braucht jetzt WebGL 2, das Gerät muss also ein Raspberry Pi 4 oder 5
+  sein; ein Pi 3 zeigt eine graue Karte. Siehe [Punkt 82](docs/developer/decisions.md)
 
 ### Behoben
 

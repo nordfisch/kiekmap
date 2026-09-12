@@ -11,6 +11,9 @@ the [guide for the museum team](usermanual.md); the technology is here.
 
 ## Setting up a new Pi
 
+A **Raspberry Pi 4 or 5**. The map needs WebGL 2, and a Pi 3 does not offer it: the map would stay
+grey there.
+
 Raspberry Pi OS **Lite** (64 bit), no desktop. Then:
 
 ```bash
