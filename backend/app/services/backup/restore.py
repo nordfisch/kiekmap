@@ -12,6 +12,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
+from app import db as database
 from app.config import Settings
 from app.services import schema
 from app.services.backup.collection import copy_if_new, forget_size
@@ -26,7 +27,7 @@ from app.services.backup.common import (
     human_size,
 )
 from app.services.backup.drives import Drive
-from app.services.backup.manifest import is_restorable, read_archive_manifest, read_manifest
+from app.services.backup.manifest import is_restorable, read_archive_manifest
 from app.text import texts
 
 log = logging.getLogger(__name__)
@@ -46,35 +47,57 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
     the end.
     """
     source = drive.path / BACKUP_DIR_NAME
-    if not is_restorable(source):
+    if any(_linked(path) for path in (source, source / "kiekmap.db")) or not is_restorable(source):
         raise BackupError(texts().backup.no_backup_on_the_stick)
 
-    manifest = read_manifest(source)
-    assert manifest is not None  # is_restorable checked it
+    work = _prepare_work_dir(settings, _size_on_stick(source))
 
-    work = _prepare_work_dir(settings, manifest.bytes)
-
-    total = sum(1 for path in (source / "photos").rglob("*") if path.is_file())
+    photos = _files_on_stick(source / "photos")
+    total = len(photos)
     report(0, total, texts().backup.first_the_records)
     shutil.copy2(source / "kiekmap.db", work / "kiekmap.db")
 
-    done = 0
-    for path in sorted((source / "photos").rglob("*")):
-        if not path.is_file():
-            continue
+    for done, path in enumerate(photos, start=1):
         copy_if_new(path, work / "photos" / path.relative_to(source / "photos"))
-        done += 1
         report(done, total, texts().backup.fetching_photo(done, total))
 
-    if (source / "thumbs").is_dir():
-        for path in sorted((source / "thumbs").rglob("*")):
-            if path.is_file():
-                copy_if_new(path, work / "thumbs" / path.relative_to(source / "thumbs"))
+    for path in _files_on_stick(source / "thumbs"):
+        copy_if_new(path, work / "thumbs" / path.relative_to(source / "thumbs"))
     for name in LOOSE_FILES:
-        if (source / name).is_file():
+        if (source / name).is_file() and not _linked(source / name):
             copy_if_new(source / name, work / name)
 
     return _swap_in(settings, work, total, report)
+
+
+def _linked(path: Path) -> bool:
+    return path.is_symlink()
+
+
+def _files_on_stick(folder: Path) -> list[Path]:
+    """The files below a folder on the stick, in stable order -- **none of them a symbolic link**.
+
+    The stick belongs to anybody. A link in ``photos/`` pointing at a file of the device was copied
+    as if it were a photo, and ``is_file()`` does not tell the two apart, because it follows the
+    link. ``rglob`` does not descend into a linked folder, but it starts in one: a linked
+    ``photos/`` itself counts as missing.
+    """
+    if _linked(folder) or not folder.is_dir():
+        return []
+    return sorted(path for path in folder.rglob("*") if path.is_file() and not _linked(path))
+
+
+def _size_on_stick(source: Path) -> int:
+    """What the copy onto the device will take: the files on the stick, measured.
+
+    Not the size the manifest states. The manifest is a file on a stick like any other, and a
+    number in it that is too small let the copy run until the SD card was full -- the card that
+    also holds the running collection.
+    """
+    files = [source / "kiekmap.db", *(source / name for name in LOOSE_FILES)]
+    files = [path for path in files if path.is_file() and not _linked(path)]
+    files += _files_on_stick(source / "photos") + _files_on_stick(source / "thumbs")
+    return sum(path.stat().st_size for path in files)
 
 
 def _prepare_work_dir(settings: Settings, needed: int) -> Path:
@@ -111,17 +134,28 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
         raise BackupError(texts().backup.backup_is_newer(str(ahead)))
 
     report(total, total, texts().backup.setting_the_old_state_aside)
-    set_aside = _set_aside(settings)
 
-    for name in ("photos", "thumbs", "kiekmap.db", *LOOSE_FILES):
-        moved = work / name
-        if moved.exists():
-            moved.replace(settings.data_dir / name)
+    # **Closed for the swap, and only for the swap.** The service answers 503 for these seconds
+    # instead of writing into the file that is about to be set aside; see ``app.db.DatabaseGate``.
+    # The migration runs inside as well: until it has run, the restored database is not one the
+    # program can use.
+    try:
+        with database.closed_for_swap():
+            set_aside = _set_aside(settings)
+
+            for name in ("photos", "thumbs", "kiekmap.db", *LOOSE_FILES):
+                moved = work / name
+                if moved.exists():
+                    moved.replace(settings.data_dir / name)
+
+            # Now, and not a step earlier: the file at the configured path is the restored one.
+            report(total, total, texts().backup.bringing_the_schema_forward)
+            schema.bring_up_to_date(settings.db_path)
+    except database.DatabaseInUse:
+        # Raised before anything was closed or moved, so the collection is as it was.
+        shutil.rmtree(work, ignore_errors=True)
+        raise BackupError(texts().backup.database_in_use) from None
     shutil.rmtree(work, ignore_errors=True)
-
-    # Now, and not a step earlier: the file at the configured path is the restored one.
-    report(total, total, texts().backup.bringing_the_schema_forward)
-    schema.bring_up_to_date(settings.db_path)
 
     # The collection is a different one now -- what was measured before says nothing any more.
     forget_size()
@@ -145,12 +179,17 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
     if info is None:
         raise BackupError(texts().backup.not_a_complete_backup)
 
-    work = _prepare_work_dir(settings, info.bytes)
     prefix = f"{BACKUP_DIR_NAME}/"
 
     with zipfile.ZipFile(archive) as opened:
         entries = [e for e in opened.infolist() if not e.is_dir() and e.filename.startswith(prefix)]
         total = sum(1 for e in entries if e.filename.startswith(f"{prefix}photos/"))
+
+        # **The room needed is the sum of the entries, not the size in the manifest.** The manifest
+        # is one entry of the archive, and a number in it that is too small let the unpacking run
+        # until the SD card was full. The sizes in the ZIP directory do hold: ``zipfile`` stops
+        # reading an entry at its declared size, so no entry unpacks to more than it claims.
+        work = _prepare_work_dir(settings, sum(entry.file_size for entry in entries))
 
         report(0, total, texts().backup.first_the_records)
         done = 0

@@ -1,6 +1,7 @@
+import struct
+import zlib
 from pathlib import Path
 
-import pytest
 from sqlalchemy import select
 
 from app.models import Photo
@@ -63,7 +64,7 @@ class TestAnAbortInTheMiddle:
     same transaction. The source files then lay in ``_done/``, and nothing said they had ever
     existed.
 
-    ``_loop`` catches the exception and carries on at the next look, so the service runs on
+    ``scan_once`` catches the exception per file and carries on, so the service runs on
     undisturbed. That is exactly why the loss occurs to nobody.
     """
 
@@ -91,8 +92,7 @@ class TestAnAbortInTheMiddle:
 
         watcher = IncomingWatcher(settings, interval=0)
         watcher.scan_once()  # remember the sizes
-        with pytest.raises(RuntimeError):
-            watcher.scan_once()
+        assert watcher.scan_once() == 1
 
         # A fresh session, because that is precisely the question: is it in the database, or only
         # in the memory of the one that was aborted?
@@ -134,11 +134,76 @@ class TestAnAbortInTheMiddle:
 
         watcher = IncomingWatcher(settings, interval=0)
         watcher.scan_once()
-        with pytest.raises(RuntimeError):
-            watcher.scan_once()
+        assert watcher.scan_once() == 1
 
         assert watcher.scan_once() == 1, "the second photo comes in at the next look"
         assert len(session.scalars(select(Photo)).all()) == 2
+
+    def test_a_file_that_fails_does_not_hold_up_the_ones_after_it(
+        self, session, settings, fixtures_dir: Path, monkeypatch
+    ):
+        """The failure sorts first, and it fails on every look.
+
+        When the exception left ``scan_once``, the sweep ended at the first file each time. The
+        second one was ready from the second look on and never came in.
+        """
+        from app.services import watcher as watcher_module
+
+        self._place_in_inbox(settings, fixtures_dir, "1_erstes.jpg", "scan_ohne_exif.jpg")
+        self._place_in_inbox(settings, fixtures_dir, "2_zweites.jpg", "hochkant.jpg")
+
+        real_import = watcher_module.import_file
+
+        def always_stumbles(session_, path, *args, **kwargs):
+            if path.name.startswith("1_"):
+                raise RuntimeError("something unforeseen")
+            return real_import(session_, path, *args, **kwargs)
+
+        monkeypatch.setattr(watcher_module, "import_file", always_stumbles)
+
+        watcher = IncomingWatcher(settings, interval=0)
+        watcher.scan_once()
+        assert watcher.scan_once() == 1
+        assert watcher.scan_once() == 0
+
+        assert (settings.incoming_dir / "_done" / "2_zweites.jpg").is_file()
+        assert (settings.incoming_dir / "1_erstes.jpg").is_file(), "the failed file stays put"
+
+
+def _png_claiming(width: int, height: int) -> bytes:
+    """A few hundred bytes whose header claims a size Pillow refuses to open."""
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        checksum = struct.pack(">I", zlib.crc32(kind + data))
+        return struct.pack(">I", len(data)) + kind + data + checksum
+
+    header = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", header)
+        + chunk(b"IDAT", zlib.compress(b"\x00" * 16))
+        + chunk(b"IEND", b"")
+    )
+
+
+def test_a_decompression_bomb_goes_to_the_problem_folder(session, settings, fixtures_dir: Path):
+    """The file itself, not a mocked exception.
+
+    ``DecompressionBombError`` derives from ``Exception``, not from ``OSError`` or ``ValueError``.
+    The import did not reject it but raised it, so it stayed in the inbox, failed on every look,
+    and a valid photo sorted after it never came in.
+    """
+    (settings.incoming_dir / "a_bomb.png").write_bytes(_png_claiming(20_000, 20_000))
+    (settings.incoming_dir / "b_photo.jpg").write_bytes(
+        (fixtures_dir / "scan_ohne_exif.jpg").read_bytes()
+    )
+
+    watcher = IncomingWatcher(settings, interval=0)
+    watcher.scan_once()
+    assert watcher.scan_once() == 1
+
+    assert (settings.incoming_dir / "_problem" / "a_bomb.png").is_file()
+    assert (settings.incoming_dir / "_done" / "b_photo.jpg").is_file()
 
 
 class TestFolderNames:

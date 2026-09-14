@@ -1,7 +1,9 @@
 """Query and serve photos."""
 
 import logging
+from collections.abc import Callable
 from datetime import date
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
@@ -249,13 +251,32 @@ def histogram(
     )
 
 
-def _get_photo(session: Session, photo_id: int) -> Photo:
+def _get_photo(session: Session, photo_id: int, *, deleted_too: bool = False) -> Photo:
+    """One photo -- **a deleted one answers 404 like one that never existed**.
+
+    Every route here answers without a PIN, and ids count up. Deleting takes a photo out of the
+    exhibition, and a curator may do it for a reason that must hold: the rights, or a person who
+    asked to be taken out. Without this check the original stayed one guessed number away.
+    """
     photo = session.scalar(
         select(Photo).where(Photo.id == photo_id).options(selectinload(Photo.tags))
     )
-    if photo is None:
+    if photo is None or (photo.status == PhotoStatus.DELETED and not deleted_too):
         raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     return photo
+
+
+def _file_of(photo: Photo, build: Callable[[], Path]) -> Path | None:
+    """The path of a photo's file, or None when its row carries no SHA-256.
+
+    Such a row did not come from the import. It came in with a restored database, and its answer
+    is the same 404 as a missing file -- with a log line that says which it was.
+    """
+    try:
+        return build()
+    except ValueError:
+        log.error("Photo %s carries no valid SHA-256: %r", photo.id, photo.sha256)
+        return None
 
 
 #: How many photos one showcase answer holds at most.
@@ -342,11 +363,15 @@ def thumbnail(
             422, f"No thumbnail size {size}; available sizes are {list(THUMBNAIL_SIZES)}"
         )
 
-    photo = _get_photo(session, photo_id)
-    path = thumbnail_path(settings.thumbs_dir, photo.sha256, size)
-    if not path.is_file():
+    # The one exception, and a known gap. The admin area shows deleted photos in „Gelöscht", in the
+    # editor and in the change log, through this route and plain <img> tags -- and an <img> sends
+    # no X-Admin-Token. Closing it needs a second way to authenticate an image; until then the
+    # thumbnail of a deleted photo stays readable, the original and its details do not.
+    photo = _get_photo(session, photo_id, deleted_too=True)
+    path = _file_of(photo, lambda: thumbnail_path(settings.thumbs_dir, photo.sha256, size))
+    if path is None or not path.is_file():
         # A database row without files points to an incompletely restored backup.
-        log.error("Thumbnail missing: %s", path)
+        log.error("Thumbnail missing: %s", path or photo.id)
         raise HTTPException(404, texts().photos.thumbnail_missing)
 
     return FileResponse(path, media_type="image/webp", headers={"Cache-Control": CACHE_IMMUTABLE})
@@ -367,9 +392,9 @@ def image(
         log.error("Photo %s carries an unknown MIME type: %s", photo.id, photo.mime)
         raise HTTPException(404, texts().photos.original_missing)
 
-    path = original_path(settings.photos_dir, photo.sha256, suffix)
-    if not path.is_file():
-        log.error("Original file missing: %s", path)
+    path = _file_of(photo, lambda: original_path(settings.photos_dir, photo.sha256, suffix))
+    if path is None or not path.is_file():
+        log.error("Original file missing: %s", path or photo.id)
         raise HTTPException(404, texts().photos.original_missing)
 
     return FileResponse(path, media_type=photo.mime, headers={"Cache-Control": CACHE_IMMUTABLE})

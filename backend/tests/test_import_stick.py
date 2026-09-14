@@ -305,6 +305,25 @@ class TestThroughTheApi:
         assert state["phase"] == "done"
         assert "2 Fotos aufgenommen" in state["message"]
 
+    @pytest.mark.parametrize("precision", ["month", "day", "unknown"])
+    def test_a_precision_finer_than_a_year_is_refused_before_the_job(
+        self, admin_client: TestClient, stick, images_on_the_stick, precision
+    ):
+        """The batch form holds a year and nothing finer.
+
+        "month" and "day" need parts it does not have. The job started, and the first photo ended it
+        with a ValueError from ``date_range``.
+        """
+        folder = images_on_the_stick()
+
+        response = admin_client.post(
+            "/api/admin/import/start",
+            json={"path": str(folder), "year": 1932, "precision": precision},
+        )
+
+        assert response.status_code == 422
+        assert admin_client.get("/api/admin/backup/status").json()["phase"] == "idle"
+
     def test_no_import_runs_beside_a_backup(
         self, admin_client: TestClient, stick, images_on_the_stick
     ):

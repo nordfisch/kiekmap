@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.config import Settings, get_settings
@@ -29,10 +29,10 @@ from app.models import (
     Photo,
     PhotoStatus,
     Source,
-    Tag,
 )
 from app.schemas import (
     BackupReminder,
+    BatchPrecision,
     ChangeItem,
     ChangeList,
     ImportLogItem,
@@ -53,6 +53,7 @@ from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
 from app.services.importer import apply_batch_defaults, import_upload, upload_name
 from app.services.places import ACCURACY_STREET_M
+from app.services.tags import tag_named
 from app.text import texts
 
 log = logging.getLogger(__name__)
@@ -88,11 +89,13 @@ def login(request: LoginRequest, settings: Config) -> LoginResponse:
     if not settings.admin_pin_hash:
         raise HTTPException(503, texts().admin.no_pin_configured)
 
-    if (locked := auth.attempts.locked_for()) > 0:
+    if locked := auth.attempts.admit():
         raise HTTPException(429, texts().admin.too_many_attempts(locked))
 
     if not auth.verify_pin(request.pin, settings.admin_pin_hash):
-        if locked := auth.attempts.record_failure():
+        # Already counted by ``admit``. If this attempt was the last one, say so now rather than
+        # letting the next one find out.
+        if locked := auth.attempts.locked_for():
             raise HTTPException(429, texts().admin.too_many_attempts(locked))
         raise HTTPException(401, texts().admin.wrong_pin)
 
@@ -343,9 +346,7 @@ def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) 
             ", ".join(sorted(tag.name for tag in photo.tags)) or None,
             ", ".join(sorted(names)) or None,
         )
-        photo.tags = [
-            session.scalar(select(Tag).where(Tag.name == name)) or Tag(name=name) for name in names
-        ]
+        photo.tags = [tag_named(session, name) for name in names]
 
     if "status" in supplied and update.status is not None:
         _record(session, photo, "status", photo.status, update.status)
@@ -412,6 +413,24 @@ def _is_newest(session: Session, change: Change) -> bool:
         or 0
     )
     return newer == 0
+
+
+def _as_checked(photo: Photo, field: str) -> list:
+    """The conditions that the photo's fields for ``field`` still hold what was read from it."""
+    if field in LOCATION_FIELDS:
+        return [
+            Photo.location_source == Source.VISITOR,
+            Photo.lat.is_not_distinct_from(photo.lat),
+            Photo.lon.is_not_distinct_from(photo.lon),
+            Photo.place_name.is_not_distinct_from(photo.place_name),
+            Photo.location_accuracy_m.is_not_distinct_from(photo.location_accuracy_m),
+        ]
+    return [
+        Photo.date_source == Source.VISITOR,
+        Photo.date_from.is_not_distinct_from(photo.date_from),
+        Photo.date_to.is_not_distinct_from(photo.date_to),
+        Photo.date_precision == photo.date_precision,
+    ]
 
 
 @router.get("/changes", response_model=ChangeList, summary="Visitor contributions")
@@ -498,24 +517,60 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail
         street = places.street_named(session, change.old_value or "")
         if street is None:
             raise HTTPException(409, texts().admin.street_gone_from_the_index)
-        photo.lat = street.lat
-        photo.lon = street.lon
-        photo.place_name = street.name
-        photo.location_accuracy_m = ACCURACY_STREET_M
-        # Back to whoever it belonged to. Without this a curator's statement would come back as a
-        # visitor's -- and the next visitor could sharpen it again.
-        photo.location_source = change.old_source
+        values = {
+            "lat": street.lat,
+            "lon": street.lon,
+            "place_name": street.name,
+            "location_accuracy_m": ACCURACY_STREET_M,
+            # Back to whoever it belonged to. Without this a curator's statement would come back as
+            # a visitor's -- and the next visitor could sharpen it again.
+            "location_source": change.old_source,
+        }
     elif change.field == "location":
-        photo.lat = photo.lon = None
-        photo.place_name = None
-        photo.location_accuracy_m = None
-        photo.location_source = None
+        values = {
+            "lat": None,
+            "lon": None,
+            "place_name": None,
+            "location_accuracy_m": None,
+            "location_source": None,
+        }
     else:
-        photo.date_from = photo.date_to = None
-        photo.date_precision = DatePrecision.UNKNOWN
-        photo.date_source = None
+        values = {
+            "date_from": None,
+            "date_to": None,
+            "date_precision": DatePrecision.UNKNOWN,
+            "date_source": None,
+        }
 
-    change.reverted_at = dates.utc_now()
+    # **The checks above read the photo and the log, and the write comes a moment later.** A
+    # visitor could sharpen the photo in between, or another curator take the same entry back;
+    # the revert then wrote over the newer statement and marked the entry taken back twice. So both
+    # writes carry what the checks found, as the contribution routes do (``_write_if`` in
+    # api/contribute.py): the entry is claimed first, and the photo only changes if its fields
+    # still hold exactly what they held when checked.
+    claimed = session.execute(
+        update(Change)
+        .where(Change.id == change.id, Change.reverted_at.is_(None))
+        .values(reverted_at=dates.utc_now())
+        .execution_options(synchronize_session=False)
+    )
+    if claimed.rowcount == 0:
+        session.rollback()
+        raise HTTPException(409, texts().admin.already_taken_back)
+
+    written = session.execute(
+        update(Photo)
+        .where(Photo.id == photo.id, *_as_checked(photo, change.field))
+        .values(**values)
+        .execution_options(synchronize_session=False)
+    )
+    if written.rowcount == 0:
+        # Rolled back, which also releases the entry. Read afresh to say what changed.
+        session.rollback()
+        if not _still_from_visitor(photo, change.field):
+            raise HTTPException(409, texts().admin.edited_by_hand)
+        raise HTTPException(409, texts().admin.a_newer_statement_exists)
+
     session.commit()
     session.refresh(photo)
     log.info("Curator reverted visitor contribution %s on photo %s", change.id, photo.id)
@@ -557,7 +612,7 @@ def upload(
     settings: Config,
     files: Annotated[list[UploadFile], File(description="One or more image files")],
     year: Annotated[int | None, Form(ge=1800, le=2100)] = None,
-    precision: Annotated[DatePrecision, Form()] = DatePrecision.YEAR,
+    precision: Annotated[BatchPrecision, Form()] = "year",
     lat: Annotated[float | None, Form(ge=-90, le=90)] = None,
     lon: Annotated[float | None, Form(ge=-180, le=180)] = None,
     place_name: Annotated[str | None, Form(max_length=300)] = None,

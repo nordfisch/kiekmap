@@ -7,7 +7,7 @@ Two promises carry this area, and both break silently when they break:
   2. Uploaded photos are in the database at once, not only after "Uebernehmen". A closed browser
      must not cost uploads."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 import pytest
 from fastapi.testclient import TestClient
@@ -67,6 +67,53 @@ class TestSigningIn:
 
         assert response.status_code == 429
         assert "Sekunden" in response.json()["detail"]
+
+    def test_parallel_attempts_do_not_get_past_the_limit(
+        self, client: TestClient, admin_pin, monkeypatch
+    ):
+        """Twenty requests at once, each held in the PIN check for as long as the hash takes.
+
+        The lock used to be checked before the hash and the failure counted after it. All twenty
+        found the pad open, and twenty PINs were checked where five are allowed.
+        """
+        import threading
+        import time
+
+        from app.services import auth
+
+        checked = []
+
+        def slow_and_wrong(pin, stored):
+            checked.append(pin)
+            time.sleep(0.2)
+            return False
+
+        monkeypatch.setattr(auth, "verify_pin", slow_and_wrong)
+        answers = []
+
+        def attempt():
+            answers.append(client.post("/api/admin/login", json={"pin": "0000"}).status_code)
+
+        threads = [threading.Thread(target=attempt) for _ in range(20)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        assert len(checked) == auth.MAX_ATTEMPTS
+        # Which of the checked ones answer 401 and which 429 depends on whether the pad locked
+        # while they were being checked. That none got in does not.
+        assert sorted(set(answers)) in ([401, 429], [429])
+
+    def test_the_right_pin_on_the_last_attempt_still_signs_in(self, client: TestClient, admin_pin):
+        """The attempt that reaches the limit is admitted and checked, so a right PIN still wins."""
+        from app.services import auth
+
+        for _ in range(auth.MAX_ATTEMPTS - 1):
+            client.post("/api/admin/login", json={"pin": "0000"})
+
+        assert client.post("/api/admin/login", json={"pin": admin_pin}).status_code == 200
+        assert client.post("/api/admin/login", json={"pin": admin_pin}).status_code == 200
 
     def test_richtige_pin_gibt_ein_token(self, client: TestClient, admin_pin):
         response = client.post("/api/admin/login", json={"pin": admin_pin})
@@ -586,6 +633,36 @@ class TestBatchUpload:
         assert data["imported"] == 2
         assert [entry["photo"]["date_label"] for entry in data["items"]] == ["1932", "1932"]
 
+    @pytest.mark.parametrize("precision", ["month", "day", "unknown"])
+    def test_a_precision_finer_than_a_year_is_refused_before_anything_is_stored(
+        self, admin_client: TestClient, session, settings, fixtures_dir, precision
+    ):
+        """The batch form holds a year and nothing finer.
+
+        "month" and "day" need parts it does not have. The file was stored and its thumbnails made
+        before ``date_range`` raised, and the upload answered 500 with the files left behind.
+        """
+        response = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
+            data={"year": "1932", "precision": precision},
+        )
+
+        assert response.status_code == 422
+        assert session.scalars(select(Photo)).all() == []
+        assert list(settings.photos_dir.rglob("*.*")) == []
+
+    def test_a_decade_applies_to_the_whole_batch(
+        self, admin_client: TestClient, session, fixtures_dir
+    ):
+        response = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
+            data={"year": "1934", "precision": "decade"},
+        )
+
+        assert response.json()["items"][0]["photo"]["date_label"] == "1930er"
+
     def test_the_place_applies_to_the_whole_batch(
         self, admin_client: TestClient, session, fixtures_dir
     ):
@@ -689,6 +766,200 @@ class TestBatchUpload:
         # Not the path in the temporary folder but the name the admin knows.
         assert log["entries"][0]["filename"] == "scan.jpg"
         assert log["entries"][0]["result"] == "imported"
+
+
+class TestTheUploadLimit:
+    """Starlette writes every uploaded file to a temporary file before any endpoint runs.
+
+    Without a limit in front of that, one request filled the SD card, and it did not even need a
+    PIN: the body was spooled in full before the 401. nginx has a limit, the development server
+    does not, and nginx answers with a page the admin area cannot show.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _small_limit(self, monkeypatch):
+        from app.api import body_limit
+
+        monkeypatch.setattr(body_limit, "MAX_UPLOAD_BYTES", 1_000)
+
+    def test_a_declared_size_over_the_limit_is_refused_before_reading(
+        self, admin_client: TestClient, session
+    ):
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("big.tif", b"x" * 5_000, "image/tiff"))]
+        )
+
+        assert response.status_code == 413
+        assert "zu gross" in response.json()["detail"]
+        assert session.scalars(select(Photo)).all() == []
+
+    def test_a_body_without_a_declared_size_is_counted_and_broken_off(
+        self, admin_client: TestClient, session
+    ):
+        """Chunked transfer sends no Content-Length, so the header alone cannot be the limit."""
+        boundary = "kiekmap"
+        head = (
+            f'--{boundary}\r\nContent-Disposition: form-data; name="files"; filename="big.tif"\r\n'
+            "Content-Type: image/tiff\r\n\r\n"
+        ).encode()
+
+        def chunks():
+            yield head
+            for _ in range(10):
+                yield b"x" * 500
+            yield f"\r\n--{boundary}--\r\n".encode()
+
+        response = admin_client.post(
+            "/api/admin/upload",
+            content=chunks(),
+            headers={"content-type": f"multipart/form-data; boundary={boundary}"},
+        )
+
+        assert response.status_code == 413
+        assert session.scalars(select(Photo)).all() == []
+
+    def test_the_limit_holds_before_the_pin(self, client: TestClient):
+        """A body over the limit is refused without being spooled, whoever sends it."""
+        response = client.post(
+            "/api/admin/upload", files=[("files", ("big.tif", b"x" * 5_000, "image/tiff"))]
+        )
+
+        assert response.status_code == 413
+
+    def test_an_upload_under_the_limit_is_not_touched(
+        self, admin_client: TestClient, monkeypatch, fixtures_dir
+    ):
+        from app.api import body_limit
+
+        monkeypatch.setattr(body_limit, "MAX_UPLOAD_BYTES", 10_000_000)
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("scan.jpg", _image(fixtures_dir), "image/jpeg"))]
+        )
+
+        assert response.status_code == 200
+        assert response.json()["imported"] == 1
+
+    def test_other_routes_are_not_limited(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}", json={"description": "x" * 5_000}
+        )
+
+        assert response.status_code == 200
+
+
+class TestRevertingWhileSomethingElseHappens:
+    """The revert checked the photo and the log, and wrote a moment later.
+
+    Whatever was committed in between was overwritten: a curator's correction, a visitor's newer
+    house number, or the same revert by a second curator. Each test commits that at exactly this
+    moment, after the checks and before the write.
+    """
+
+    @staticmethod
+    def _meanwhile(monkeypatch, commit):
+        from app.api import admin
+
+        is_newest = admin._is_newest
+
+        def after_the_checks(session, change):
+            answer = is_newest(session, change)
+            commit()
+            return answer
+
+        monkeypatch.setattr(admin, "_is_newest", after_the_checks)
+
+    @staticmethod
+    def _other_session():
+        import app.db
+
+        return app.db.SessionLocal()
+
+    def test_a_correction_by_hand_meanwhile_is_not_thrown_away(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        admin_client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930})
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def a_curator_corrects_it():
+            with self._other_session() as other:
+                edited = other.get(Photo, photo.id)
+                edited.date_from, edited.date_to = date(1950, 1, 1), date(1950, 12, 31)
+                edited.date_source = Source.CURATOR
+                other.commit()
+
+        self._meanwhile(monkeypatch, a_curator_corrects_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "von Hand" in response.json()["detail"]
+        session.expire_all()
+        assert session.get(Photo, photo.id).date_from == date(1950, 1, 1)
+        assert session.get(Change, entry).reverted_at is None, "the entry was marked taken back"
+
+    def test_a_newer_house_number_meanwhile_is_not_thrown_away(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        """Taken back in the wrong order, the location revert cleared the house as well."""
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        admin_client.post(
+            f"/api/contribute/{photo.id}/location",
+            json={**HOLM, "place_name": "Am Kamp", "accuracy_m": 150},
+        )
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def a_visitor_sharpens_it():
+            with self._other_session() as other:
+                sharpened = other.get(Photo, photo.id)
+                sharpened.place_name, sharpened.location_accuracy_m = "Am Kamp 2", 15
+                other.add(
+                    Change(
+                        photo_id=photo.id,
+                        field="housenumber",
+                        old_value="Am Kamp",
+                        old_source=Source.VISITOR,
+                        new_value="Am Kamp 2",
+                        source=Source.VISITOR,
+                    )
+                )
+                other.commit()
+
+        self._meanwhile(monkeypatch, a_visitor_sharpens_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "neuere Angabe" in response.json()["detail"]
+        session.expire_all()
+        assert session.get(Photo, photo.id).place_name == "Am Kamp 2"
+
+    def test_a_second_curator_taking_it_back_meanwhile_does_not_take_it_back_twice(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        admin_client.post(f"/api/contribute/{photo.id}/location", json=HOLM)
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def another_curator_reverts_it():
+            with self._other_session() as other:
+                reverted = other.get(Photo, photo.id)
+                reverted.lat = reverted.lon = reverted.location_source = None
+                other.get(Change, entry).reverted_at = datetime(2026, 9, 14, tzinfo=UTC)
+                other.commit()
+
+        self._meanwhile(monkeypatch, another_curator_reverts_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "bereits" in response.json()["detail"]
 
 
 class TestTheImportLog:

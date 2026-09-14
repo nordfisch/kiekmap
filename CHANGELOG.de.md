@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 3495aa5a7a5a85a8bfebd7e6704b3b154a8020c61c7f6466430aabf6fae8d254 -->
+<!-- source-sha: cfbd5b13683a7e607d642d9c4a474e159a3af4cdb824eafe9e329e9ccce01304 -->
 
 # Änderungen
 
@@ -58,6 +58,29 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   `/api/photos/tags`. Das zweite Segment gab es, weil die Route hinter `/photos/{photo_id}` stand,
   die einen `int` nimmt und `/photos/tags` mit einer 422 verschluckt — die Route ist nach oben
   gewandert, und ein Test hält sie dort
+- **Eine unlesbare Datei hält den Eingangsordner nicht mehr an** ([#59])
+- **Ein gelöschtes Foto ist unter seiner Nummer nicht mehr öffentlich** ([#60])
+- **Eine Angabe während einer Wiederherstellung geht nicht mehr verloren** ([#61])
+- **Gleichzeitige Anmeldeversuche kommen nicht mehr an der Sperre vorbei** ([#62])
+- **Zwei gleichzeitige Importe derselben Datei enden nicht mehr mit einem Fehler** ([#63])
+- **Hochladen oder Wiederherstellen kann die SD-Karte nicht mehr füllen** ([#64])
+- **Eine eingespielte Sicherung erreicht keine Dateien außerhalb der Sammlung mehr** ([#65])
+- **Zwei gleichzeitig antwortende Besucher überschreiben sich nicht mehr** ([#66])
+- **Ein unmögliches Datum eines Besuchers führt nicht mehr zu einem Serverfehler** ([#67])
+- **Das Zurücknehmen einer Besucherangabe überschreibt keine neuere mehr** ([#68])
+- **Ein Stapel nimmt als Genauigkeit nur Jahr oder Jahrzehnt an** ([#69])
+
+[#59]: https://github.com/nordfisch/kiekmap/issues/59
+[#60]: https://github.com/nordfisch/kiekmap/issues/60
+[#61]: https://github.com/nordfisch/kiekmap/issues/61
+[#62]: https://github.com/nordfisch/kiekmap/issues/62
+[#63]: https://github.com/nordfisch/kiekmap/issues/63
+[#64]: https://github.com/nordfisch/kiekmap/issues/64
+[#65]: https://github.com/nordfisch/kiekmap/issues/65
+[#66]: https://github.com/nordfisch/kiekmap/issues/66
+[#67]: https://github.com/nordfisch/kiekmap/issues/67
+[#68]: https://github.com/nordfisch/kiekmap/issues/68
+[#69]: https://github.com/nordfisch/kiekmap/issues/69
 
 ## [0.9.0] — 2. September 2026
 

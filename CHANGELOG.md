@@ -50,6 +50,29 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **A German segment in an API path.** `/api/photos/tags/alle` is `/api/photos/tags`. The second
   segment was there because the route stood after `/photos/{photo_id}`, which takes an `int` and
   swallows `/photos/tags` with a 422 — the route moved above it, and a test holds it there
+- **One unreadable file no longer stops the inbox** ([#59])
+- **A deleted photo is no longer public under its id** ([#60])
+- **A write during a restore is no longer lost** ([#61])
+- **Parallel sign-in attempts no longer get past the lockout** ([#62])
+- **Two imports of the same file at once no longer end in an error** ([#63])
+- **An upload or a restore can no longer fill the SD card** ([#64])
+- **A restored backup can no longer reach files outside the collection** ([#65])
+- **Two visitors answering at once no longer overwrite each other** ([#66])
+- **An impossible visitor date no longer causes a server error** ([#67])
+- **Taking back a visitor's statement no longer overwrites a newer one** ([#68])
+- **A batch accepts only a year or a decade as its precision** ([#69])
+
+[#59]: https://github.com/nordfisch/kiekmap/issues/59
+[#60]: https://github.com/nordfisch/kiekmap/issues/60
+[#61]: https://github.com/nordfisch/kiekmap/issues/61
+[#62]: https://github.com/nordfisch/kiekmap/issues/62
+[#63]: https://github.com/nordfisch/kiekmap/issues/63
+[#64]: https://github.com/nordfisch/kiekmap/issues/64
+[#65]: https://github.com/nordfisch/kiekmap/issues/65
+[#66]: https://github.com/nordfisch/kiekmap/issues/66
+[#67]: https://github.com/nordfisch/kiekmap/issues/67
+[#68]: https://github.com/nordfisch/kiekmap/issues/68
+[#69]: https://github.com/nordfisch/kiekmap/issues/69
 
 ## [0.9.0] — 2026-09-02
 

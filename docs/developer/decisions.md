@@ -2301,3 +2301,69 @@ since this update it is a requirement, and `operations.md` says so.
 (`zoomLevelsToOverscale`), how overlapping transparent lines render, and how icons with an offset
 scale. The map was looked at in the browser and showed no difference that stood out; the first Pi
 is the real test.
+
+---
+
+## 83. A deleted photo is gone from the public API, except for its thumbnail
+
+Every route under `/api/photos/` and `/api/contribute/` answers without a PIN, and photo ids count
+up. Until this point only the lists filtered deleted photos out. The routes by id served the
+details and the original of a deleted photo, and the contribution routes wrote to it. A curator
+deletes a photo for a reason that has to hold, such as its rights or a person who asked to be taken
+out. [Point 16](#16-deleting-means-taken-out-of-the-exhibition-not-removed-from-disk) keeps the file;
+it does not say the file stays reachable.
+
+**The routes by id now answer 404 for a deleted photo**, the same answer as for an id that does not
+exist, so the answer does not reveal that the photo exists. That covers `/api/photos/{id}`,
+`/api/photos/{id}/image` and all four routes under `/api/contribute/{id}/`.
+
+**`/api/photos/{id}/thumb` stays open, and that is a known gap.** The admin area shows deleted
+photos in „Gelöscht", in the editor and in the change log. It loads them through this route with
+plain `<img>` tags, and an `<img>` sends no `X-Admin-Token`. Closing the route needs a second way
+to authenticate an image. Two were weighed: a cookie limited to admin image routes, or `fetch()`
+with the header and a blob URL in the frontend. Both change more than this fix should. The
+thumbnail is at most 1200 px wide, which is enough to recognise the picture. A test in
+`tests/test_api_photos.py` keeps the route open on purpose, so that nobody closes it before the
+admin area has another way to its images.
+
+---
+
+## 84. A restore closes the database for the swap
+
+A restore renames `kiekmap.db` and moves the restored file into its place. Until this point it did
+that while the connection pool held connections open on the old file, and it rebuilt the engine
+only afterwards.
+
+**A write in between was lost.** A request that arrived during the swap used a pooled connection
+and wrote into the file that had just been set aside. The device answered 200. A test reproduced
+it with a visitor's dating.
+
+**Renaming a database file while a connection holds it is also on SQLite's list of ways to corrupt
+a database.** This point first said that closing the old connections afterwards would delete the
+restored file's `-wal` by its name. A test against SQLite 3.53.4 refuted that: the old connection
+was closed after the swap, and the `-wal` of the restored file and a write made after the swap both
+survived. No damage beyond the lost write is known. The connections are still closed before the
+rename, so that the restore does not depend on how SQLite handles the case its documentation warns
+about.
+
+**The swap now runs with the database closed.** `DatabaseGate` in `app/db.py` counts the sessions in
+use. `closed_for_swap` refuses new sessions, waits until none is in use, disposes the engine, lets
+the restore move the files and migrate, and reopens. Only after the wait is every connection back
+in the pool, so only then does `dispose()` close all of them.
+
+**The gate closes for seconds, not for the whole restore.** Copying from the stick takes minutes and
+runs with the database open. Requests during the swap get a 503 with `Retry-After`. The progress
+bar keeps working, because the job status needs no database.
+
+**What goes through the gate:** every request session, the readiness probe, the inbox watcher and
+the ZIP download. The watcher now opens one session per file, so that a restore waits for one
+import at most. The ZIP download holds its session for the whole transfer, which also stops a
+restore from swapping the photos out halfway through a download.
+
+**What does not, and why.** Backup and stick import open their sessions without the gate, because
+they share the one job with the restore and cannot run beside it. The CLI runs in a process of its
+own, which no lock in this one reaches; running `app.cli` during a restore stays unguarded.
+
+**The price:** a session that stays in use for 60 seconds (`CLOSE_TIMEOUT_S`) makes the restore
+give up, before anything was moved. In practice that is a running download. The admin area then
+says so, and the restore can be started again.

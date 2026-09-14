@@ -4,15 +4,18 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app import __version__
 from app.api import admin, backup, config, contribute, health, photos, places
+from app.api.body_limit import BodyLimit
 from app.config import get_settings
-from app.db import SessionLocal
+from app.db import DatabaseClosed, SessionLocal
 from app.services.places import load_if_empty as load_places_if_empty
 from app.services.watcher import IncomingWatcher
+from app.text import texts
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s %(name)s: %(message)s")
 log = logging.getLogger("kiekmap")
@@ -56,6 +59,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(BodyLimit)
+
+
+@app.exception_handler(DatabaseClosed)
+async def database_closed(request: Request, error: DatabaseClosed) -> JSONResponse:
+    """A restore is swapping the database file -- for seconds, see ``app.db.DatabaseGate``.
+
+    503 rather than a 500: nothing is broken, and the same request succeeds a moment later. The
+    body has the shape of an ``HTTPException``, so the screens show it like any other refusal.
+    """
+    return JSONResponse(
+        status_code=503,
+        content={"detail": texts().backup.restore_swapping},
+        headers={"Retry-After": "10"},
+    )
+
 
 app.include_router(health.router, prefix="/api")
 app.include_router(config.router, prefix="/api")

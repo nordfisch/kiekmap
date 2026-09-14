@@ -225,6 +225,11 @@ These three share **one** job (`Job` in `app/services/backup/job.py`). They run 
 report their progress, and only one can run at a time — two concurrent write runs against the same
 SQLite file would be a source of errors for no gain. The frontend polls the status once a second.
 
+**A restore closes the database for the swap.** Every session of the running service goes through
+`gate` in `app/db.py`. The restore closes it, waits until no session is in use, closes every
+connection, moves the files and reopens. Requests meanwhile get a 503. The job's own sessions skip
+the gate, because only one job runs at a time. See [decisions.md](decisions.md), point 84.
+
 ---
 
 ## What to know at the edges

@@ -13,6 +13,7 @@ Four promises carry this stage, and all four break silently:
 """
 
 import io
+import shutil
 import sqlite3
 import zipfile
 from datetime import UTC, datetime, timedelta
@@ -304,6 +305,207 @@ class TestRestoring:
 
         backup.run_restore(settings, _drive(settings), _report_nothing)
 
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+
+class TestTheSwap:
+    """The seconds in which the database file changes under the running service.
+
+    Before, the restore renamed the file while the pool held connections open on it, and only
+    reopened the engine afterwards. A request in between wrote into the file that had just been set
+    aside: the device answered 200, and the statement was gone. The database is closed for the swap
+    now; see ``app.db.DatabaseGate``.
+    """
+
+    def _make_backup(self, session, settings, collection):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+
+    def test_a_contribution_during_the_swap_is_refused_not_lost(
+        self, client, session, settings, stick, collection, make_photo, monkeypatch
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        self._make_backup(session, settings, collection)
+
+        answers = []
+        migrate = schema.bring_up_to_date
+
+        def a_visitor_taps_meanwhile(database):
+            # Inside the swap: the old file is set aside, the restored one is in place.
+            answers.append(client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930}))
+            return migrate(database)
+
+        monkeypatch.setattr(schema, "bring_up_to_date", a_visitor_taps_meanwhile)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert answers[0].status_code == 503, "the statement went into the set-aside file"
+        assert answers[0].headers["retry-after"]
+        assert "Sicherung" in answers[0].json()["detail"]
+
+    def test_the_service_answers_again_after_the_swap(
+        self, client, session, settings, stick, collection, make_photo
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        self._make_backup(session, settings, collection)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        response = client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930})
+        assert response.status_code == 200
+
+    def test_the_connections_are_closed_before_the_file_is_moved(
+        self, session, settings, stick, collection, monkeypatch
+    ):
+        """SQLite's documentation counts renaming a database file in use as a way to corrupt it.
+
+        A test against SQLite 3.53.4 found no damage from it beyond the lost write. The order still
+        holds, so that the restore does not depend on that. See decisions.md, point 84.
+        """
+        import app.db
+        from app.services.backup import restore
+
+        self._make_backup(session, settings, collection)
+        order = []
+        dispose, set_aside = app.db.engine.dispose, restore._set_aside
+        monkeypatch.setattr(app.db.engine, "dispose", lambda: (order.append("dispose"), dispose()))
+        monkeypatch.setattr(
+            restore, "_set_aside", lambda s: (order.append("set aside"), set_aside(s))[1]
+        )
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert order == ["dispose", "set aside"]
+
+    def test_a_session_that_stays_in_use_refuses_the_restore_and_changes_nothing(
+        self, client, session, settings, stick, collection, monkeypatch
+    ):
+        """A ZIP download holds its session for minutes. The restore must not swap under it."""
+        import app.db
+
+        self._make_backup(session, settings, collection)
+        monkeypatch.setattr(app.db, "CLOSE_TIMEOUT_S", 0.1)
+        database_before = settings.db_path.read_bytes()
+
+        with app.db.gate.use():
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert "in Gebrauch" in str(refusal.value)
+        assert settings.db_path.read_bytes() == database_before
+        assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+        assert client.get("/api/photos/tags").status_code == 200, "the gate is open again"
+
+
+class TestLinksOnTheStick:
+    """A stick belongs to anybody, and ``is_file()`` follows a symbolic link.
+
+    A link in the backup's ``photos/`` pointing at a file of the device was copied into the
+    collection as if it were a photo. A linked ``kiekmap.db`` was read in as the database.
+    """
+
+    def test_a_linked_file_is_not_copied(self, session, settings, stick, collection, tmp_path):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        device_file = tmp_path / "device_secret.jpg"
+        device_file.write_bytes(b"private")
+        link = stick / backup.BACKUP_DIR_NAME / "photos" / "ee" / "ee" / f"{'e' * 64}.jpg"
+        link.parent.mkdir(parents=True)
+        link.symlink_to(device_file)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert not original_path(settings.photos_dir, "e" * 64, ".jpg").exists()
+
+    def test_a_linked_photo_folder_counts_as_empty(
+        self, session, settings, stick, collection, tmp_path
+    ):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        elsewhere = tmp_path / "elsewhere"
+        (elsewhere / "ee" / "ee").mkdir(parents=True)
+        (elsewhere / "ee" / "ee" / f"{'e' * 64}.jpg").write_bytes(b"private")
+        photos = stick / backup.BACKUP_DIR_NAME / "photos"
+        shutil.rmtree(photos)
+        photos.symlink_to(elsewhere)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert not original_path(settings.photos_dir, "e" * 64, ".jpg").exists()
+
+    def test_a_linked_database_is_no_backup(self, session, settings, stick, collection, tmp_path):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        database = stick / backup.BACKUP_DIR_NAME / "kiekmap.db"
+        real = tmp_path / "somewhere.db"
+        database.replace(real)
+        database.symlink_to(real)
+
+        with pytest.raises(backup.BackupError):
+            backup.run_restore(settings, _drive(settings), _report_nothing)
+
+
+class TestRoomForARestore:
+    """A restore needs room for a second collection beside the first, on the same SD card.
+
+    The check compared free space with the size the manifest states. The manifest is one file
+    among those it describes, and a number in it that was too small let the copy run until the card
+    was full.
+    """
+
+    @staticmethod
+    def _little_room(monkeypatch, free: int):
+        from collections import namedtuple
+
+        from app.services.backup import restore
+
+        usage = namedtuple("usage", "total used free")
+        monkeypatch.setattr(restore.shutil, "disk_usage", lambda path: usage(free, 0, free))
+
+    def test_a_stick_whose_manifest_understates_its_size_is_refused(
+        self, session, settings, stick, collection, monkeypatch
+    ):
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        drive = _drive(settings)
+        manifest = stick / backup.BACKUP_DIR_NAME / backup.MANIFEST_NAME
+        manifest.write_text(manifest.read_text().replace('"bytes": ', '"bytes": 1, "was": '))
+        self._little_room(monkeypatch, free=1_000)
+
+        with pytest.raises(backup.BackupError) as refusal:
+            backup.run_restore(settings, drive, _report_nothing)
+
+        assert "zu wenig Platz" in str(refusal.value)
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+    def test_an_archive_whose_manifest_understates_its_size_is_refused(
+        self, session, settings, collection, monkeypatch
+    ):
+        collection(2)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        honest = settings.data_dir / "honest.zip"
+        with honest.open("wb") as target:
+            for part in backup.stream_archive(session, settings):
+                target.write(part)
+
+        archive = settings.incoming_dir / "kiekmap-backup-holm-2026-08-03.zip"
+        manifest_name = f"{backup.BACKUP_DIR_NAME}/{backup.MANIFEST_NAME}"
+        with zipfile.ZipFile(honest) as source, zipfile.ZipFile(archive, "w") as lying:
+            for entry in source.infolist():
+                data = source.read(entry)
+                if entry.filename == manifest_name:
+                    data = data.replace(b'"bytes": ', b'"bytes": 1, "was": ')
+                lying.writestr(entry, data)
+        self._little_room(monkeypatch, free=1_000)
+
+        with pytest.raises(backup.BackupError) as refusal:
+            backup.run_restore_from_archive(settings, archive, _report_nothing)
+
+        assert "zu wenig Platz" in str(refusal.value)
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
 
 

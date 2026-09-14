@@ -51,6 +51,7 @@ class ContributeTexts:
     already_more_precise: str
     housenumber_unknown: str
     housenumber_wrong_street: str
+    no_such_date: str
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,7 @@ class BackupTexts:
     #: The API refuses.
     stick_gone: str
     busy: str
+    restore_swapping: str
     file_gone_from_inbox: str
     not_a_complete_backup: str
     folder_gone_from_stick: str
@@ -86,6 +88,7 @@ class BackupTexts:
     no_room_on_the_stick: Callable[[str, str], str]
     no_room_here: Callable[[str, str], str]
     backup_is_newer: Callable[[str], str]
+    database_in_use: str
     unexpected_entry: str
     something_went_wrong: Callable[[str], str]
 
@@ -95,6 +98,8 @@ class ImportTexts:
     unreadable_file: Callable[[str], str]
     same_content_as: Callable[[int, str], str]
     no_readable_image: Callable[[str], str]
+    thumbnail_failed: Callable[[str], str]
+    upload_too_large: Callable[[str], str]
     unknown_format: str
     format_not_allowed: Callable[[str, str], str]
     imported: Callable[[bool, bool], str]

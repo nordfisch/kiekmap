@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/usermanual.md -->
-<!-- source-sha: 412874bed8573a4ccadb7547ae6ed4a8933cc3cfbd57955927e9b3dfeb375af7 -->
+<!-- source-sha: c01c6c871fb2adcce33e883f56f77be7444f13afc2dffa91e39cb6c6c532f7ae -->
 
 # Anleitung für das Museumsteam
 
@@ -187,6 +187,11 @@ ist. **Der jetzige Bestand wird dabei ersetzt.**
 Was vorher auf dem Gerät war, wird **nicht gelöscht**, sondern in einen Ordner mit dem heutigen
 Datum beiseitegelegt. Wer also versehentlich die falsche Sicherung einspielt, hat nichts verloren
 — sagen Sie in dem Fall jemandem Bescheid, der an das Gerät kann.
+
+Ganz am Ende tauscht das Gerät die Angaben aus. Für einige Sekunden lädt die Karte dann keine Fotos,
+und das Mitmachen speichert nichts; danach geht alles wieder. Läuft zur selben Zeit ein
+Herunterladen der Sicherung, bricht die Wiederherstellung mit einer Meldung ab und ändert nichts.
+Starten Sie sie erneut, sobald das Herunterladen fertig ist.
 
 ### Wenn die Sicherung älter ist als das Programm
 

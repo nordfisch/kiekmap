@@ -16,7 +16,7 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
@@ -142,9 +142,7 @@ def photo_housenumbers(
     picker when this list is not empty and needs no second rule of its own. A rule that lives in
     two places is a rule that will disagree with itself.
     """
-    photo = session.get(Photo, photo_id)
-    if photo is None:
-        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    photo = _get_published_photo(session, photo_id)
     if not _refinable(session, photo):
         return []
     return [
@@ -179,12 +177,45 @@ def _require_empty(photo: Photo, field: str) -> None:
         raise HTTPException(409, texts().contribute.already_stated)
 
 
-def _get_open_photo(session: Session, photo_id: int, field: str) -> Photo:
+def _get_published_photo(session: Session, photo_id: int) -> Photo:
+    """A deleted photo answers 404 here, as in ``api/photos.py``.
+
+    ``next_task`` never offers one, but the write routes take any id. A visitor's statement on a
+    photo the curator took out would sit in the change log and wait for a moderator who never
+    looks under „Gelöscht".
+    """
     photo = session.get(Photo, photo_id)
-    if photo is None:
+    if photo is None or photo.status == PhotoStatus.DELETED:
         raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    return photo
+
+
+def _get_open_photo(session: Session, photo_id: int, field: str) -> Photo:
+    photo = _get_published_photo(session, photo_id)
     _require_empty(photo, field)
     return photo
+
+
+def _write_if(session: Session, photo: Photo, still: list, values: dict, refusal: str) -> None:
+    """Write ``values`` only if the photo still is as the checks above found it.
+
+    **The checks read the photo, and the write came a moment later.** Two visitors could both find
+    the field empty -- at the kiosk and on the web instance, or through the API directly -- and the
+    second one wrote over the first while both got a thank-you and both landed in the change log.
+    That is the one thing ``_require_empty`` exists to prevent.
+
+    So the condition travels into the UPDATE itself. SQLite writes one transaction at a time, and
+    the second UPDATE sees what the first committed: it matches no row, and the route answers with
+    the same 409 as if its check had caught it.
+    """
+    result = session.execute(
+        update(Photo)
+        .where(Photo.id == photo.id, Photo.status == PhotoStatus.PUBLISHED, *still)
+        .values(**values)
+        .execution_options(synchronize_session=False)
+    )
+    if result.rowcount == 0:
+        raise HTTPException(409, refusal)
 
 
 def _log_change(
@@ -227,13 +258,12 @@ def add_location(
     photo = _get_open_photo(session, photo_id, "location")
     _require_in_region(settings, contribution.lat, contribution.lon)
 
-    photo.lat = contribution.lat
-    photo.lon = contribution.lon
-    photo.location_source = Source.VISITOR
+    values = {"lat": contribution.lat, "lon": contribution.lon, "location_source": Source.VISITOR}
     if contribution.place_name:
-        photo.place_name = contribution.place_name
+        values["place_name"] = contribution.place_name
     if contribution.accuracy_m is not None:
-        photo.location_accuracy_m = contribution.accuracy_m
+        values["location_accuracy_m"] = contribution.accuracy_m
+    _write_if(session, photo, [Photo.lat.is_(None)], values, texts().contribute.already_stated)
 
     _log_change(
         session,
@@ -273,9 +303,7 @@ def add_housenumber(
     carries the previous source: taking the contribution back has to give a curator's statement
     back to the curator.
     """
-    photo = session.get(Photo, photo_id)
-    if photo is None:
-        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    photo = _get_published_photo(session, photo_id)
     if not _refinable(session, photo):
         raise HTTPException(409, texts().contribute.already_more_precise)
 
@@ -290,12 +318,29 @@ def add_housenumber(
     street = photo.place_name
     previous_source = photo.location_source
 
-    # Everything from the gazetteer row, nothing from the request.
-    photo.lat = address.lat
-    photo.lon = address.lon
-    photo.place_name = address.name
-    photo.location_accuracy_m = ACCURACY_ADDRESS_M
-    photo.location_source = Source.VISITOR
+    # Everything from the gazetteer row, nothing from the request. The condition is the statement
+    # the checks above found, whole: the street, its accuracy, its coordinate and whose it was.
+    # Anything less, and a second sharpening would log the street as the old value while it
+    # replaced the first one's house.
+    _write_if(
+        session,
+        photo,
+        [
+            Photo.place_name == street,
+            Photo.location_accuracy_m.is_distinct_from(ACCURACY_ADDRESS_M),
+            Photo.location_source.is_not_distinct_from(previous_source),
+            Photo.lat.is_not_distinct_from(photo.lat),
+            Photo.lon.is_not_distinct_from(photo.lon),
+        ],
+        {
+            "lat": address.lat,
+            "lon": address.lon,
+            "place_name": address.name,
+            "location_accuracy_m": ACCURACY_ADDRESS_M,
+            "location_source": Source.VISITOR,
+        },
+        texts().contribute.already_more_precise,
+    )
 
     _log_change(
         session,
@@ -321,14 +366,30 @@ def add_date(
 ) -> PhotoDetail:
     photo = _get_open_photo(session, photo_id, "date")
 
-    start, end, precision = date_range(
-        contribution.year,
-        contribution.month,
-        contribution.day,
-        DatePrecision(contribution.precision),
+    # The schema checks each part on its own -- a day from 1 to 31, a month from 1 to 12 -- and
+    # not whether they make a date. 31 February passed it, and ``date()`` then raised a
+    # ValueError that became a 500. The admin route has always caught it; this one had not.
+    try:
+        start, end, precision = date_range(
+            contribution.year,
+            contribution.month,
+            contribution.day,
+            DatePrecision(contribution.precision),
+        )
+    except ValueError:
+        raise HTTPException(422, texts().contribute.no_such_date) from None
+    _write_if(
+        session,
+        photo,
+        [Photo.date_from.is_(None)],
+        {
+            "date_from": start,
+            "date_to": end,
+            "date_precision": precision,
+            "date_source": Source.VISITOR,
+        },
+        texts().contribute.already_stated,
     )
-    photo.date_from, photo.date_to, photo.date_precision = start, end, precision
-    photo.date_source = Source.VISITOR
 
     _log_change(
         session, photo, "date", None, format_label(start, end, precision), contribution.session_id
