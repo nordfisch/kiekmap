@@ -88,11 +88,13 @@ def login(request: LoginRequest, settings: Config) -> LoginResponse:
     if not settings.admin_pin_hash:
         raise HTTPException(503, texts().admin.no_pin_configured)
 
-    if (locked := auth.attempts.locked_for()) > 0:
+    if locked := auth.attempts.admit():
         raise HTTPException(429, texts().admin.too_many_attempts(locked))
 
     if not auth.verify_pin(request.pin, settings.admin_pin_hash):
-        if locked := auth.attempts.record_failure():
+        # Already counted by ``admit``. If this attempt was the last one, say so now rather than
+        # letting the next one find out.
+        if locked := auth.attempts.locked_for():
             raise HTTPException(429, texts().admin.too_many_attempts(locked))
         raise HTTPException(401, texts().admin.wrong_pin)
 

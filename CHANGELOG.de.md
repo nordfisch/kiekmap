@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 105fab30a1ff9b83c6f8e5b97ed05fa7d299679e2667c0b0893889ea57a2c0ab -->
+<!-- source-sha: d8f4d917f5778151a70468e5da3375db6866e81b9f517bab46788a6dd10cc2f8 -->
 
 # Änderungen
 
@@ -76,6 +76,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   wartet, bis keine Anfrage sie mehr benutzt, und Anfragen erhalten währenddessen für einige Sekunden
   eine 503. Ein noch laufendes Herunterladen lässt die Wiederherstellung abbrechen, bevor sie etwas
   ändert. Siehe [Punkt 84](docs/developer/decisions.md)
+- **Gleichzeitige Anmeldeversuche kamen an der Sperre vorbei.** Die Anmeldung zur Verwaltung prüfte
+  die Sperre vor dem Hashen der PIN und zählte eine falsche PIN erst danach. Anfragen, die im selben
+  Moment kamen, fanden das Tastenfeld alle offen: Von zwanzig wurden alle zwanzig PINs geprüft, wo
+  fünf erlaubt sind. Ein Versuch zählt jetzt, bevor seine PIN geprüft wird
 
 ## [0.9.0] — 2. September 2026
 

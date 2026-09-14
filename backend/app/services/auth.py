@@ -198,15 +198,27 @@ class AttemptGuard:
         with self._lock:
             return max(0, round(self._locked_until - time.monotonic()))
 
-    def record_failure(self) -> int:
-        """Count one wrong PIN. Returns the seconds now locked, 0 while attempts remain."""
+    def admit(self) -> int:
+        """Count one attempt **before** its PIN is checked. Returns the seconds locked, 0 to go on.
+
+        Checking the lock and counting the attempt happen under one lock, and before the PIN hash,
+        which takes a tenth of a second on purpose. Counted afterwards, as it was, every request
+        that arrived within that tenth of a second found the pad open: parallel requests all got
+        past the check before the first failure was counted, and a burst of twenty had its PINs
+        checked well beyond the limit.
+
+        A PIN that turns out right calls ``reset``, so it takes back its own count. The attempt that
+        reaches the limit is still checked -- it was admitted -- and locks the pad for the next one.
+        """
         with self._lock:
+            now = time.monotonic()
+            if self._locked_until > now:
+                return max(1, round(self._locked_until - now))
             self._failures += 1
             if self._failures >= self._max_attempts:
                 self._failures = 0
-                self._locked_until = time.monotonic() + self._lockout_s
+                self._locked_until = now + self._lockout_s
                 log.warning("Admin login locked for %ss after too many attempts", self._lockout_s)
-                return self._lockout_s
             return 0
 
     def reset(self) -> None:

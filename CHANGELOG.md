@@ -66,6 +66,10 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   the swap: it waits until no request is using it, and requests meanwhile get a 503 for a few
   seconds. A download that is still running makes the restore stop before it changes anything. See
   [point 84](docs/developer/decisions.md)
+- **Parallel sign-in attempts got past the lockout.** The admin login checked the lock before
+  hashing the PIN and counted a wrong PIN only after it. Requests sent at the same moment all found
+  the keypad open: of twenty, all twenty PINs were checked where five are allowed. An attempt now
+  counts before its PIN is checked
 
 ## [0.9.0] — 2026-09-02
 

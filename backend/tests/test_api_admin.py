@@ -68,6 +68,53 @@ class TestSigningIn:
         assert response.status_code == 429
         assert "Sekunden" in response.json()["detail"]
 
+    def test_parallel_attempts_do_not_get_past_the_limit(
+        self, client: TestClient, admin_pin, monkeypatch
+    ):
+        """Twenty requests at once, each held in the PIN check for as long as the hash takes.
+
+        The lock used to be checked before the hash and the failure counted after it. All twenty
+        found the pad open, and twenty PINs were checked where five are allowed.
+        """
+        import threading
+        import time
+
+        from app.services import auth
+
+        checked = []
+
+        def slow_and_wrong(pin, stored):
+            checked.append(pin)
+            time.sleep(0.2)
+            return False
+
+        monkeypatch.setattr(auth, "verify_pin", slow_and_wrong)
+        answers = []
+
+        def attempt():
+            answers.append(client.post("/api/admin/login", json={"pin": "0000"}).status_code)
+
+        threads = [threading.Thread(target=attempt) for _ in range(20)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        assert len(checked) == auth.MAX_ATTEMPTS
+        # Which of the checked ones answer 401 and which 429 depends on whether the pad locked
+        # while they were being checked. That none got in does not.
+        assert sorted(set(answers)) in ([401, 429], [429])
+
+    def test_the_right_pin_on_the_last_attempt_still_signs_in(self, client: TestClient, admin_pin):
+        """The attempt that reaches the limit is admitted and checked, so a right PIN still wins."""
+        from app.services import auth
+
+        for _ in range(auth.MAX_ATTEMPTS - 1):
+            client.post("/api/admin/login", json={"pin": "0000"})
+
+        assert client.post("/api/admin/login", json={"pin": admin_pin}).status_code == 200
+        assert client.post("/api/admin/login", json={"pin": admin_pin}).status_code == 200
+
     def test_richtige_pin_gibt_ein_token(self, client: TestClient, admin_pin):
         response = client.post("/api/admin/login", json={"pin": admin_pin})
 
