@@ -5,6 +5,8 @@ the selection 1925-1930. With a query for containment instead of overlap it drop
 and with it most of a local history museum's collection.
 """
 
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -475,6 +477,53 @@ class TestServingFiles:
 
         assert response["total"] == 1
         assert response["photos"][0]["date_label"] == "21. Juni 1975"
+
+
+class TestAHashThatIsNoHash:
+    """The hash becomes a path, and after a restore the hash comes from somebody else's database.
+
+    A value starting with ``../.`` put ``/.`` into the second segment and made the path absolute.
+    The routes served any file on the device whose name ends like a photo, without a PIN.
+    """
+
+    def _pointing_at(self, session, make_photo, target: Path):
+        photo = make_photo()
+        photo.sha256 = "../../" + str(target.with_suffix("")).lstrip("/")
+        session.commit()
+        return photo
+
+    def test_the_original_route_does_not_leave_the_photo_folder(
+        self, client: TestClient, session, settings, make_photo
+    ):
+        outside = settings.data_dir / "not_a_photo.jpg"
+        outside.write_bytes(b"\xff\xd8 private")
+        photo = self._pointing_at(session, make_photo, outside)
+
+        response = client.get(f"/api/photos/{photo.id}/image")
+
+        assert response.status_code == 404
+        assert b"private" not in response.content
+
+    def test_the_thumbnail_route_does_not_leave_the_thumbnail_folder(
+        self, client: TestClient, session, settings, make_photo
+    ):
+        outside = settings.data_dir / "not_a_thumbnail.webp"
+        outside.write_bytes(b"RIFF private")
+        photo = self._pointing_at(session, make_photo, outside)
+
+        response = client.get(f"/api/photos/{photo.id}/thumb")
+
+        assert response.status_code == 404
+        assert b"private" not in response.content
+
+    def test_the_path_builders_refuse_it(self, settings):
+        from app.services.storage import original_path, thumbnail_path
+
+        for value in ("../." + "a" * 60, "A" * 64, "a" * 63, "a" * 64 + "/"):
+            with pytest.raises(ValueError):
+                original_path(settings.photos_dir, value, ".jpg")
+            with pytest.raises(ValueError):
+                thumbnail_path(settings.thumbs_dir, value, 240)
 
 
 class TestFileSuffix:

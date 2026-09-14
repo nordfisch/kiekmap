@@ -82,6 +82,11 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   free space against the size its manifest states, and a manifest with too small a number let the
   copy run until the card was full. It now measures the files on the stick, or adds up the entries
   of the archive
+- **A restored backup could reach files outside the collection.** The hash of a photo becomes its
+  file path, and after a restore the hash comes from the database on the stick. A crafted value
+  made the photo routes serve any file on the device whose name ends like a photo, without a PIN.
+  Such a row now answers 404. A restore from a stick also followed symbolic links and copied
+  whatever they pointed at into the collection; it ignores them now
 
 ## [0.9.0] — 2026-09-02
 

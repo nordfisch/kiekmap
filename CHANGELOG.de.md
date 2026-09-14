@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 1b70ca762b23b07fdd2da281902ddf2fcba38b324dcedbea2bd6625a3162c6fe -->
+<!-- source-sha: b1c6fb4dd72d76c1ee5349df34f60bffad19f5516c3cc7d647cf4c712f18be2b -->
 
 # Änderungen
 
@@ -94,6 +94,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Größe, die ihr Manifest nennt, und ein Manifest mit zu kleiner Zahl ließ das Kopieren laufen, bis
   die Karte voll war. Sie misst jetzt die Dateien auf dem Stick oder zählt die Einträge des Archivs
   zusammen
+- **Eine eingespielte Sicherung konnte Dateien außerhalb der Sammlung erreichen.** Der Hash eines
+  Fotos wird zu seinem Dateipfad, und nach einer Wiederherstellung stammt der Hash aus der Datenbank
+  auf dem Stick. Ein präparierter Wert ließ die Foto-Routen jede Datei des Geräts ausliefern, deren
+  Name wie ein Foto endet, ohne PIN. Eine solche Zeile antwortet jetzt mit 404. Eine
+  Wiederherstellung vom Stick folgte außerdem symbolischen Links und kopierte, worauf sie zeigten,
+  in die Sammlung; sie übergeht sie jetzt
 
 ## [0.9.0] — 2. September 2026
 

@@ -47,32 +47,44 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
     the end.
     """
     source = drive.path / BACKUP_DIR_NAME
-    if not is_restorable(source):
+    if any(_linked(path) for path in (source, source / "kiekmap.db")) or not is_restorable(source):
         raise BackupError(texts().backup.no_backup_on_the_stick)
 
     work = _prepare_work_dir(settings, _size_on_stick(source))
 
-    total = sum(1 for path in (source / "photos").rglob("*") if path.is_file())
+    photos = _files_on_stick(source / "photos")
+    total = len(photos)
     report(0, total, texts().backup.first_the_records)
     shutil.copy2(source / "kiekmap.db", work / "kiekmap.db")
 
-    done = 0
-    for path in sorted((source / "photos").rglob("*")):
-        if not path.is_file():
-            continue
+    for done, path in enumerate(photos, start=1):
         copy_if_new(path, work / "photos" / path.relative_to(source / "photos"))
-        done += 1
         report(done, total, texts().backup.fetching_photo(done, total))
 
-    if (source / "thumbs").is_dir():
-        for path in sorted((source / "thumbs").rglob("*")):
-            if path.is_file():
-                copy_if_new(path, work / "thumbs" / path.relative_to(source / "thumbs"))
+    for path in _files_on_stick(source / "thumbs"):
+        copy_if_new(path, work / "thumbs" / path.relative_to(source / "thumbs"))
     for name in LOOSE_FILES:
-        if (source / name).is_file():
+        if (source / name).is_file() and not _linked(source / name):
             copy_if_new(source / name, work / name)
 
     return _swap_in(settings, work, total, report)
+
+
+def _linked(path: Path) -> bool:
+    return path.is_symlink()
+
+
+def _files_on_stick(folder: Path) -> list[Path]:
+    """The files below a folder on the stick, in stable order -- **none of them a symbolic link**.
+
+    The stick belongs to anybody. A link in ``photos/`` pointing at a file of the device was copied
+    as if it were a photo, and ``is_file()`` does not tell the two apart, because it follows the
+    link. ``rglob`` does not descend into a linked folder, but it starts in one: a linked
+    ``photos/`` itself counts as missing.
+    """
+    if _linked(folder) or not folder.is_dir():
+        return []
+    return sorted(path for path in folder.rglob("*") if path.is_file() and not _linked(path))
 
 
 def _size_on_stick(source: Path) -> int:
@@ -83,10 +95,9 @@ def _size_on_stick(source: Path) -> int:
     also holds the running collection.
     """
     files = [source / "kiekmap.db", *(source / name for name in LOOSE_FILES)]
-    for folder in ("photos", "thumbs"):
-        if (source / folder).is_dir():
-            files.extend((source / folder).rglob("*"))
-    return sum(path.stat().st_size for path in files if path.is_file())
+    files = [path for path in files if path.is_file() and not _linked(path)]
+    files += _files_on_stick(source / "photos") + _files_on_stick(source / "thumbs")
+    return sum(path.stat().st_size for path in files)
 
 
 def _prepare_work_dir(settings: Settings, needed: int) -> Path:

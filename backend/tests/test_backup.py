@@ -13,6 +13,7 @@ Four promises carry this stage, and all four break silently:
 """
 
 import io
+import shutil
 import sqlite3
 import zipfile
 from datetime import UTC, datetime, timedelta
@@ -397,6 +398,54 @@ class TestTheSwap:
         assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
         assert client.get("/api/photos/tags").status_code == 200, "the gate is open again"
+
+
+class TestLinksOnTheStick:
+    """A stick belongs to anybody, and ``is_file()`` follows a symbolic link.
+
+    A link in the backup's ``photos/`` pointing at a file of the device was copied into the
+    collection as if it were a photo. A linked ``kiekmap.db`` was read in as the database.
+    """
+
+    def test_a_linked_file_is_not_copied(self, session, settings, stick, collection, tmp_path):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        device_file = tmp_path / "device_secret.jpg"
+        device_file.write_bytes(b"private")
+        link = stick / backup.BACKUP_DIR_NAME / "photos" / "ee" / "ee" / f"{'e' * 64}.jpg"
+        link.parent.mkdir(parents=True)
+        link.symlink_to(device_file)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert not original_path(settings.photos_dir, "e" * 64, ".jpg").exists()
+
+    def test_a_linked_photo_folder_counts_as_empty(
+        self, session, settings, stick, collection, tmp_path
+    ):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        elsewhere = tmp_path / "elsewhere"
+        (elsewhere / "ee" / "ee").mkdir(parents=True)
+        (elsewhere / "ee" / "ee" / f"{'e' * 64}.jpg").write_bytes(b"private")
+        photos = stick / backup.BACKUP_DIR_NAME / "photos"
+        shutil.rmtree(photos)
+        photos.symlink_to(elsewhere)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert not original_path(settings.photos_dir, "e" * 64, ".jpg").exists()
+
+    def test_a_linked_database_is_no_backup(self, session, settings, stick, collection, tmp_path):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        database = stick / backup.BACKUP_DIR_NAME / "kiekmap.db"
+        real = tmp_path / "somewhere.db"
+        database.replace(real)
+        database.symlink_to(real)
+
+        with pytest.raises(backup.BackupError):
+            backup.run_restore(settings, _drive(settings), _report_nothing)
 
 
 class TestRoomForARestore:
