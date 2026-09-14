@@ -130,6 +130,55 @@ class TestRoundTrip:
         assert after.needs_location, "the missing place was filled in while reading back"
 
 
+class TestTagsSharedAcrossPhotos:
+    """A keyword the index gives one photo, and the next photo's file carries as well.
+
+    The loader attaches the index's tags as new ``Tag`` objects without writing them out. The next
+    photo's import wrote the same name straight to the database, and the loader's pending object
+    then failed the unique constraint when the session flushed. ``make seed`` stopped with an
+    IntegrityError on the shipped sample collection, which no other test loads.
+    """
+
+    def test_the_second_photo_reuses_the_tag_the_first_one_introduced(
+        self, session, settings, tmp_path
+    ):
+        import io
+        import json
+
+        import piexif
+        from PIL import Image
+
+        source = tmp_path / "seed"
+        images = source / seed.IMAGE_DIR_NAME
+        images.mkdir(parents=True)
+        Image.new("RGB", (40, 30), "white").save(images / "a.jpg", "JPEG")
+        second = io.BytesIO()
+        Image.new("RGB", (40, 30), "grey").save(second, "JPEG")
+        keywords = {"0th": {piexif.ImageIFD.XPKeywords: tuple("Winter".encode("utf-16-le"))}}
+        piexif.insert(piexif.dump(keywords), second.getvalue(), str(images / "b.jpg"))
+        (source / seed.INDEX_NAME).write_text(
+            json.dumps(
+                {
+                    "photos": [
+                        {"file": "a.jpg", "tags": ["Winter"]},
+                        {"file": "b.jpg", "tags": ["Winter"]},
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        photos, _ = seed.load(session, settings, source)
+        session.commit()
+
+        assert photos == 2
+        assert session.scalars(select(Tag.name)).all() == ["Winter"]
+        assert all(
+            [tag.name for tag in photo.tags] == ["Winter"]
+            for photo in session.scalars(select(Photo))
+        )
+
+
 class TestAMissingCollection:
     def test_without_a_seed_directory_there_is_a_clear_message(self, session, settings, tmp_path):
         """Not a stack trace but something readable -- the CLI turns it into a sentence."""
