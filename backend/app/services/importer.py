@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import BinaryIO
 
 from sqlalchemy import select
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
 
 from app.config import Settings
@@ -87,6 +88,46 @@ def _free_name(target: Path) -> Path:
         if not candidate.exists():
             return candidate
     raise RuntimeError(f"no free name for {target.name} in {target.parent}")
+
+
+def _duplicate(
+    session: Session, path: Path, existing: Photo, sha256: str, move_aside: bool, inbox: Path
+) -> ImportOutcome:
+    outcome = ImportOutcome(
+        ImportResult.DUPLICATE,
+        texts().imports.same_content_as(existing.id, existing.original_filename),
+        photo=existing,
+    )
+    _log_outcome(session, path, outcome, sha256)
+    if move_aside:
+        _move_aside(path, inbox, DONE_DIR)
+    return outcome
+
+
+def _copy_into_place(source: Path, target: Path, scratch: Path) -> None:
+    """Copy under a temporary name, then rename it into place.
+
+    A rename on one filesystem is atomic. A reader -- the thumbnail step of a parallel import of
+    the same file -- therefore sees the whole file or none, never its first megabytes. ``scratch``
+    is the data directory: on the same filesystem as ``photos/``, and outside what a backup copies.
+    """
+    with tempfile.NamedTemporaryFile(dir=scratch, prefix="partial-", delete=False) as handle:
+        partial = Path(handle.name)
+    try:
+        shutil.copy2(source, partial)
+        partial.replace(target)
+    except BaseException:
+        partial.unlink(missing_ok=True)
+        raise
+
+
+def _column_values(photo: Photo) -> dict:
+    """A transient ``Photo`` as values for an INSERT. Unset columns take their defaults."""
+    return {
+        column.key: value
+        for column in Photo.__table__.columns
+        if (value := getattr(photo, column.key)) is not None
+    }
 
 
 def _reason(error: Exception) -> str:
@@ -217,17 +258,9 @@ def import_file(
         _log_outcome(session, path, outcome)
         return outcome
 
-    existing = session.scalar(select(Photo).where(Photo.sha256 == sha256))
-    if existing:
-        outcome = ImportOutcome(
-            ImportResult.DUPLICATE,
-            texts().imports.same_content_as(existing.id, existing.original_filename),
-            photo=existing,
-        )
-        _log_outcome(session, path, outcome, sha256)
-        if move_aside:
-            _move_aside(path, inbox, DONE_DIR)
-        return outcome
+    # The cheap answer for the common case. It is not the guard: see step 4.
+    if existing := session.scalar(select(Photo).where(Photo.sha256 == sha256)):
+        return _duplicate(session, path, existing, sha256, move_aside, inbox)
 
     # 2. Read the image.
     #
@@ -266,16 +299,21 @@ def import_file(
     #    can exist whose files are missing.
     target = original_path(settings.photos_dir, sha256, suffix)
     target.parent.mkdir(parents=True, exist_ok=True)
-    if not target.exists():
-        shutil.copy2(path, target)
+    # Whether this call wrote the file decides whether it may remove it again. The upload, the
+    # inbox and a stick import run side by side, and the file under this name may belong to a
+    # photo another of them has just recorded.
+    wrote_it = not target.exists()
+    if wrote_it:
+        _copy_into_place(path, target, settings.data_dir)
 
     # The same reasoning as for reading: decoding the pixels is where the rest of Pillow's
     # exceptions surface.
     try:
         thumbnails.create_thumbnails(target, settings.thumbs_dir, sha256)
     except Exception as error:  # noqa: BLE001 -- whatever the file does, it is rejected
-        target.unlink(missing_ok=True)
-        thumbnails.remove_thumbnails(settings.thumbs_dir, sha256)
+        if wrote_it:
+            target.unlink(missing_ok=True)
+            thumbnails.remove_thumbnails(settings.thumbs_dir, sha256)
         outcome = ImportOutcome(
             ImportResult.REJECTED, texts().imports.thumbnail_failed(_reason(error))
         )
@@ -315,10 +353,24 @@ def import_file(
         photo.lat, photo.lon = info.lat, info.lon
         photo.location_source = Source.EXIF
 
-    session.add(photo)
-    session.flush()  # assigns the id for the log entry
+    # **The unique index is the guard, not the query in step 1.** The upload, the inbox and a
+    # stick import run side by side, and another import of the same content can commit between
+    # that query and this line. A plain INSERT then raised an IntegrityError: a 500 for the
+    # upload, an aborted stick import, and a session that needed a rollback before anything else.
+    # ``ON CONFLICT DO NOTHING`` turns the race into what it is -- a duplicate -- and leaves the
+    # session as it was.
+    photo_id = session.scalar(
+        sqlite_insert(Photo)
+        .values(_column_values(photo))
+        .on_conflict_do_nothing(index_elements=[Photo.sha256])
+        .returning(Photo.id)
+    )
+    if photo_id is None:
+        existing = session.scalar(select(Photo).where(Photo.sha256 == sha256))
+        return _duplicate(session, path, existing, sha256, move_aside, inbox)
+    photo = session.get(Photo, photo_id)
 
-    # After the flush, not before: add_tags writes a new tag out at once, and doing that while
+    # After the insert, not before: add_tags writes a new tag out at once, and doing that while
     # the photo is still transient would drop the link between the two.
     add_tags(session, photo, [*info.keywords, *settings.import_tags])
 

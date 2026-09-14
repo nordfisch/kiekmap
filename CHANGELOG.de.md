@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: d8f4d917f5778151a70468e5da3375db6866e81b9f517bab46788a6dd10cc2f8 -->
+<!-- source-sha: f54d8ea631fe4bc31495714a984c4efdc1f471ef9d73989438e37744aa7fc310 -->
 
 # Änderungen
 
@@ -80,6 +80,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   die Sperre vor dem Hashen der PIN und zählte eine falsche PIN erst danach. Anfragen, die im selben
   Moment kamen, fanden das Tastenfeld alle offen: Von zwanzig wurden alle zwanzig PINs geprüft, wo
   fünf erlaubt sind. Ein Versuch zählt jetzt, bevor seine PIN geprüft wird
+- **Zwei gleichzeitige Importe derselben Datei endeten mit einem Fehler.** Hochladen, Eingangsordner
+  und Stick-Import laufen nebeneinander. Beide konnten die Dublettenprüfung passieren, bevor einer
+  das Foto gespeichert hatte, und der zweite scheiterte dann an der Eindeutigkeitsregel der
+  Datenbank: eine 500 beim Hochladen, ein abgebrochener Stick-Import. Er wird jetzt als Dublette
+  verzeichnet. Ein neues Schlagwort, das zwei Importe gleichzeitig anlegten, scheiterte ebenso,
+  und eine Bearbeitung in der Verwaltung, die auf einen Import traf, auch. Ein fehlgeschlagenes
+  Vorschaubild löscht kein Original mehr, das ein anderer Import abgelegt hat
 
 ## [0.9.0] — 2. September 2026
 

@@ -29,7 +29,6 @@ from app.models import (
     Photo,
     PhotoStatus,
     Source,
-    Tag,
 )
 from app.schemas import (
     BackupReminder,
@@ -53,6 +52,7 @@ from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
 from app.services.importer import apply_batch_defaults, import_upload, upload_name
 from app.services.places import ACCURACY_STREET_M
+from app.services.tags import tag_named
 from app.text import texts
 
 log = logging.getLogger(__name__)
@@ -345,9 +345,7 @@ def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) 
             ", ".join(sorted(tag.name for tag in photo.tags)) or None,
             ", ".join(sorted(names)) or None,
         )
-        photo.tags = [
-            session.scalar(select(Tag).where(Tag.name == name)) or Tag(name=name) for name in names
-        ]
+        photo.tags = [tag_named(session, name) for name in names]
 
     if "status" in supplied and update.status is not None:
         _record(session, photo, "status", photo.status, update.status)

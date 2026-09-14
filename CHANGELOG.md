@@ -70,6 +70,12 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   hashing the PIN and counted a wrong PIN only after it. Requests sent at the same moment all found
   the keypad open: of twenty, all twenty PINs were checked where five are allowed. An attempt now
   counts before its PIN is checked
+- **Two imports of the same file at the same moment ended in an error.** The upload, the inbox and a
+  stick import run side by side. Both could pass the duplicate check before either had saved the
+  photo, and the second then failed on the database's uniqueness rule: a 500 for the upload, an
+  aborted stick import. It is recorded as a duplicate now. A new keyword created by two imports at
+  once failed the same way, and so did a curator's edit meeting an import. A failed thumbnail no
+  longer deletes an original that another import stored
 
 ## [0.9.0] — 2026-09-02
 

@@ -386,6 +386,93 @@ class TestAwkwardFiles:
         assert session.scalars(select(Photo)).all() == []
 
 
+class TestParallelImports:
+    """The upload, the inbox and a stick import run side by side, and may meet on one file.
+
+    The duplicate check in step 1 is a query, and a query answers for the moment it ran. Another
+    import of the same content could commit after it. The INSERT then raised an IntegrityError, and
+    a thumbnail that failed afterwards deleted an original that the other import had just
+    recorded.
+    """
+
+    def test_a_photo_recorded_meanwhile_makes_a_duplicate_not_an_error(
+        self, session, settings, sample_image, monkeypatch
+    ):
+        import app.db
+        from app.services import exif
+        from app.services.storage import sha256_of_file
+
+        path = sample_image("scan_ohne_exif.jpg")
+        sha = sha256_of_file(path)
+        read = exif.read_image_info
+
+        def another_import_commits_first(file):
+            # Past the duplicate check of this import, before its INSERT.
+            with app.db.SessionLocal() as other:
+                other.add(
+                    Photo(
+                        sha256=sha,
+                        original_filename="from_the_upload.jpg",
+                        mime="image/jpeg",
+                        bytes=1,
+                        width=1,
+                        height=1,
+                    )
+                )
+                other.commit()
+            return read(file)
+
+        monkeypatch.setattr(exif, "read_image_info", another_import_commits_first)
+
+        outcome = import_file(session, path, settings)
+
+        assert outcome.result == ImportResult.DUPLICATE
+        assert outcome.photo.original_filename == "from_the_upload.jpg"
+        session.commit()  # the session is still usable
+        assert len(session.scalars(select(Photo)).all()) == 1
+        assert session.scalar(select(ImportLog.result)) == ImportResult.DUPLICATE
+
+    def test_a_failed_thumbnail_leaves_an_original_it_did_not_write(
+        self, session, settings, sample_image, monkeypatch
+    ):
+        """The original under this name was stored by another import, which may have recorded it."""
+        from app.services import thumbnails
+        from app.services.storage import sha256_of_file
+
+        path = sample_image("scan_ohne_exif.jpg")
+        stored = original_path(settings.photos_dir, sha256_of_file(path), ".jpg")
+        stored.parent.mkdir(parents=True)
+        stored.write_bytes(path.read_bytes())
+
+        def stumbles(*args):
+            raise OSError("No space left on device")
+
+        monkeypatch.setattr(thumbnails, "create_thumbnails", stumbles)
+
+        outcome = import_file(session, path, settings)
+
+        assert outcome.result == ImportResult.REJECTED
+        assert stored.is_file(), "deleted a file this import had not written"
+
+    def test_no_partial_copy_is_left_behind(self, session, settings, sample_image):
+        """The original is copied under a temporary name first, so a reader never sees half."""
+        import_file(session, sample_image("scan_ohne_exif.jpg"), settings)
+
+        assert list(settings.data_dir.glob("partial-*")) == []
+
+
+class TestTagNamed:
+    def test_an_existing_tag_is_reused_not_created_again(self, session):
+        from app.models import Tag
+        from app.services.tags import tag_named
+
+        first = tag_named(session, "Gasthof")
+        second = tag_named(session, "Gasthof")
+
+        assert first.id == second.id
+        assert len(session.scalars(select(Tag)).all()) == 1
+
+
 class TestTheInbox:
     def test_what_is_taken_in_is_filed_aside_not_deleted(self, session, settings, sample_image):
         source = settings.incoming_dir / "scan_ohne_exif.jpg"
