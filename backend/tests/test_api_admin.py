@@ -633,6 +633,36 @@ class TestBatchUpload:
         assert data["imported"] == 2
         assert [entry["photo"]["date_label"] for entry in data["items"]] == ["1932", "1932"]
 
+    @pytest.mark.parametrize("precision", ["month", "day", "unknown"])
+    def test_a_precision_finer_than_a_year_is_refused_before_anything_is_stored(
+        self, admin_client: TestClient, session, settings, fixtures_dir, precision
+    ):
+        """The batch form holds a year and nothing finer.
+
+        "month" and "day" need parts it does not have. The file was stored and its thumbnails made
+        before ``date_range`` raised, and the upload answered 500 with the files left behind.
+        """
+        response = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
+            data={"year": "1932", "precision": precision},
+        )
+
+        assert response.status_code == 422
+        assert session.scalars(select(Photo)).all() == []
+        assert list(settings.photos_dir.rglob("*.*")) == []
+
+    def test_a_decade_applies_to_the_whole_batch(
+        self, admin_client: TestClient, session, fixtures_dir
+    ):
+        response = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
+            data={"year": "1934", "precision": "decade"},
+        )
+
+        assert response.json()["items"][0]["photo"]["date_label"] == "1930er"
+
     def test_the_place_applies_to_the_whole_batch(
         self, admin_client: TestClient, session, fixtures_dir
     ):

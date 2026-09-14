@@ -512,7 +512,7 @@ def apply_batch_defaults(
     session: Session,
     photo: Photo,
     year: int | None,
-    precision: DatePrecision,
+    precision: DatePrecision | str,
     lat: float | None,
     lon: float | None,
     place_name: str | None,

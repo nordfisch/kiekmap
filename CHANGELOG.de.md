@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 6d442f62c1783849f327d9de9d1bf43c971532a88f2fa1e11c1f547635f1939c -->
+<!-- source-sha: a6bc07f86daaa77dc85279f5baa91612bc2a7dcda0bab0019957669e49b953f7 -->
 
 # Änderungen
 
@@ -114,6 +114,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   eines Besuchers oder ein zweites Zurücknehmen desselben Eintrags dazwischen wurde überschrieben.
   Das Zurücknehmen schreibt jetzt nur, wenn das Foto noch so ist, wie es geprüft wurde, und sagt
   sonst, was sich geändert hat
+- **Ein Stapel mit Monats- oder Tagesgenauigkeit scheiterte auf halbem Weg.** Hochladen und
+  Stick-Import nehmen für den ganzen Stapel ein Jahr entgegen, nichts Feineres. Eine Anfrage mit
+  Monats- oder Tagesgenauigkeit legte die Datei und ihre Vorschaubilder ab, scheiterte dann mit
+  einem Serverfehler und ließ sie ohne Eintrag zurück; ein Stick-Import brach ab. Angenommen werden
+  jetzt nur Jahr und Jahrzehnt, alles andere wird abgelehnt, bevor eine Datei gelesen wird. Die
+  Verwaltung schickte ohnehin nur diese beiden
 
 ## [0.9.0] — 2. September 2026
 

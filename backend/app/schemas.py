@@ -1,7 +1,7 @@
 """API payload shapes."""
 
 from datetime import UTC, date, datetime
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
@@ -246,6 +246,15 @@ class PlaceOut(BaseModel):
             housenumber=place.housenumber,
             accuracy_m=accuracy,
         )
+
+
+#: How precise a date for a whole batch can be -- the upload form and the stick import.
+#:
+#: The batch form holds a year and nothing finer. "month" and "day" need parts it does not have, and
+#: ``dates.date_range`` raised a ValueError for them: a 500 for the upload, after the file was
+#: already stored, and an aborted stick import. "unknown" beside a year raised nothing and marked
+#: the photo as dated by a curator while leaving it undated. The admin area only ever sends the two.
+BatchPrecision = Literal["year", "decade"]
 
 
 class DateInput(BaseModel):
@@ -527,7 +536,7 @@ class ImportRequest(DriveChoice):
     """Which folder to take in, and what applies to all of it."""
 
     year: int | None = Field(default=None, ge=1800, le=2100)
-    precision: DatePrecision = DatePrecision.YEAR
+    precision: BatchPrecision = "year"
     lat: float | None = Field(default=None, ge=-90, le=90)
     lon: float | None = Field(default=None, ge=-180, le=180)
     place_name: str | None = Field(default=None, max_length=300)

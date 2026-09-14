@@ -32,6 +32,7 @@ from app.models import (
 )
 from app.schemas import (
     BackupReminder,
+    BatchPrecision,
     ChangeItem,
     ChangeList,
     ImportLogItem,
@@ -611,7 +612,7 @@ def upload(
     settings: Config,
     files: Annotated[list[UploadFile], File(description="One or more image files")],
     year: Annotated[int | None, Form(ge=1800, le=2100)] = None,
-    precision: Annotated[DatePrecision, Form()] = DatePrecision.YEAR,
+    precision: Annotated[BatchPrecision, Form()] = "year",
     lat: Annotated[float | None, Form(ge=-90, le=90)] = None,
     lon: Annotated[float | None, Form(ge=-180, le=180)] = None,
     place_name: Annotated[str | None, Form(max_length=300)] = None,

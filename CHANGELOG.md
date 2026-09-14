@@ -99,6 +99,11 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   photo and then wrote a moment later. A correction by hand, a visitor's newer house number, or a
   second curator taking back the same entry in between was overwritten. The revert now only writes
   if the photo is still as it was checked, and says what changed otherwise
+- **A batch dated to a month or a day failed halfway.** The upload form and the stick import take a
+  year for the whole batch, and nothing finer. A request asking for month or day precision stored
+  the file and its thumbnails, then failed with a server error and left them without a record; a
+  stick import aborted. Only year and decade are accepted now, and anything else is refused before a
+  file is read. The admin area only ever sent those two
 
 ## [0.9.0] — 2026-09-02
 
