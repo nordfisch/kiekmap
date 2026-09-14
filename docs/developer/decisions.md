@@ -157,9 +157,13 @@ out of curiosity sees a keypad and goes back.
 **Why a PIN and not a password.** Input happens with a finger on a touchscreen, often by older
 people. A keypad with large keys beats an on-screen keyboard for that.
 
-**What carries a four-digit PIN is the lockout, not the length.** A script tries ten thousand
-possibilities in seconds. After five failed attempts the device locks for a minute, which stretches
-the same attack to a good two years. The hash is PBKDF2 with 200,000 rounds.
+**The lockout stretches guessing to hours, not years.** A script tries ten thousand four-digit
+PINs in seconds. After five failed attempts the device locks for a minute, so the same attack takes
+about 33 hours, 17 on average. The hash is PBKDF2 with 200,000 rounds; its tenth of a second per
+attempt does not change that figure. What protects the PIN is where the device stands: the museum
+device runs offline, and its only input is a touchscreen without a keyboard. The online instance
+puts a password in front of everything, and its PIN gets more than four digits
+([point 76](#76-the-online-instance-is-a-doorman-in-front-not-a-login-inside)).
 
 **Sessions live in memory, not in the database.** A restart therefore ends every session — on a
 device that boots every morning, the cheapest guarantee that no login survives the night. Time is
