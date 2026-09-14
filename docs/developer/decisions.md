@@ -2317,14 +2317,22 @@ it does not say the file stays reachable.
 exist, so the answer does not reveal that the photo exists. That covers `/api/photos/{id}`,
 `/api/photos/{id}/image` and all four routes under `/api/contribute/{id}/`.
 
-**`/api/photos/{id}/thumb` stays open, and that is a known gap.** The admin area shows deleted
-photos in „Gelöscht", in the editor and in the change log. It loads them through this route with
-plain `<img>` tags, and an `<img>` sends no `X-Admin-Token`. Closing the route needs a second way
-to authenticate an image. Two were weighed: a cookie limited to admin image routes, or `fetch()`
-with the header and a blob URL in the frontend. Both change more than this fix should. The
-thumbnail is at most 1200 px wide, which is enough to recognise the picture. A test in
-`tests/test_api_photos.py` keeps the route open on purpose, so that nobody closes it before the
-admin area has another way to its images.
+**`/api/photos/{id}/thumb` stays open, on purpose.** The admin area shows deleted photos in
+„Gelöscht", in the editor and in the change log. It loads them through this route with plain
+`<img>` tags, and an `<img>` sends no `X-Admin-Token`. Closing the route needs a second way to
+authenticate an image: a cookie limited to admin image routes, or `fetch()` with the header and a
+blob URL in the frontend. Neither is worth its code for the risk that remains.
+
+**The risk is small because of who reaches the API, not because the route is hard to use.** Ids
+count up, so whoever reaches it can list every thumbnail, up to 1200 px wide. The museum device runs
+offline and has no keyboard. The online instance lets only the team past its password
+([point 76](#76-the-online-instance-is-a-doorman-in-front-not-a-login-inside)). Checking the status
+would cost nothing: the route loads the row anyway.
+
+**Revisit it when the collection becomes reachable without that password**, such as a public web
+version. From then on the thumbnail of a photo deleted for its rights is visible to anybody. A test
+in `tests/test_api_photos.py` keeps the route open, so that nobody closes it before the admin area
+has another way to its images.
 
 ---
 
@@ -2367,3 +2375,28 @@ own, which no lock in this one reaches; running `app.cli` during a restore stays
 **The price:** a session that stays in use for 60 seconds (`CLOSE_TIMEOUT_S`) makes the restore
 give up, before anything was moved. In practice that is a running download. The admin area then
 says so, and the restore can be started again.
+
+---
+
+## 85. The lockout stays a flat minute
+
+A backend review in September 2026 proposed a lockout that grows with every lock. **It stays as it
+is:** five wrong PINs lock the keypad for 60 seconds, every time.
+
+**The real figure is hours, not years.** Five attempts a minute try all ten thousand four-digit
+PINs in about 33 hours, 17 on average. [Point 7](#7-the-way-into-the-admin-view-is-visible-the-pin-protects-it)
+and the docstring of `backend/app/services/auth.py` say "a good two years" and "years"; both are
+wrong and are corrected under issue #70.
+
+**What protects the PIN is where the device stands.** The museum device runs offline, and its only
+input is a touchscreen without a keyboard. The online instance puts one password in front of
+everything, and its PIN gets more than four digits
+([point 76](#76-the-online-instance-is-a-doorman-in-front-not-a-login-inside)). Neither leaves an
+outside attacker with thirty hours of unhindered attempts.
+
+**A growing lockout would have its own price.** `AttemptGuard` counts for the whole device, not per
+caller, because every request comes through nginx from the same address. A lockout that doubles
+would let anybody who reaches the keypad lock the volunteers out for hours.
+
+What the review did change stays: an attempt counts before its PIN is checked (#62), so parallel
+requests do not multiply the five attempts.
