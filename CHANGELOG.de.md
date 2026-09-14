@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 70482461dcefe5f004fc573e392959c322969d9d186acd5aa3509a95dc526cad -->
+<!-- source-sha: 6d442f62c1783849f327d9de9d1bf43c971532a88f2fa1e11c1f547635f1939c -->
 
 # Änderungen
 
@@ -109,6 +109,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Tag ohne seinen Monat kamen durch die Prüfungen des Mitmachens und scheiterten erst, als das Datum
   gebildet wurde. Sie werden jetzt mit „Dieses Datum gibt es nicht." abgelehnt, wie es die
   Verwaltung schon tat
+- **Das Zurücknehmen einer Besucherangabe konnte eine neuere Angabe verwerfen.** Die Verwaltung
+  prüfte das Foto und schrieb einen Moment später. Eine Korrektur von Hand, eine neuere Hausnummer
+  eines Besuchers oder ein zweites Zurücknehmen desselben Eintrags dazwischen wurde überschrieben.
+  Das Zurücknehmen schreibt jetzt nur, wenn das Foto noch so ist, wie es geprüft wurde, und sagt
+  sonst, was sich geändert hat
 
 ## [0.9.0] — 2. September 2026
 

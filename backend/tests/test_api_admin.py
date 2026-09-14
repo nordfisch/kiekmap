@@ -7,7 +7,7 @@ Two promises carry this area, and both break silently when they break:
   2. Uploaded photos are in the database at once, not only after "Uebernehmen". A closed browser
      must not cost uploads."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 import pytest
 from fastapi.testclient import TestClient
@@ -818,6 +818,118 @@ class TestTheUploadLimit:
         )
 
         assert response.status_code == 200
+
+
+class TestRevertingWhileSomethingElseHappens:
+    """The revert checked the photo and the log, and wrote a moment later.
+
+    Whatever was committed in between was overwritten: a curator's correction, a visitor's newer
+    house number, or the same revert by a second curator. Each test commits that at exactly this
+    moment, after the checks and before the write.
+    """
+
+    @staticmethod
+    def _meanwhile(monkeypatch, commit):
+        from app.api import admin
+
+        is_newest = admin._is_newest
+
+        def after_the_checks(session, change):
+            answer = is_newest(session, change)
+            commit()
+            return answer
+
+        monkeypatch.setattr(admin, "_is_newest", after_the_checks)
+
+    @staticmethod
+    def _other_session():
+        import app.db
+
+        return app.db.SessionLocal()
+
+    def test_a_correction_by_hand_meanwhile_is_not_thrown_away(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        admin_client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930})
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def a_curator_corrects_it():
+            with self._other_session() as other:
+                edited = other.get(Photo, photo.id)
+                edited.date_from, edited.date_to = date(1950, 1, 1), date(1950, 12, 31)
+                edited.date_source = Source.CURATOR
+                other.commit()
+
+        self._meanwhile(monkeypatch, a_curator_corrects_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "von Hand" in response.json()["detail"]
+        session.expire_all()
+        assert session.get(Photo, photo.id).date_from == date(1950, 1, 1)
+        assert session.get(Change, entry).reverted_at is None, "the entry was marked taken back"
+
+    def test_a_newer_house_number_meanwhile_is_not_thrown_away(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        """Taken back in the wrong order, the location revert cleared the house as well."""
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        admin_client.post(
+            f"/api/contribute/{photo.id}/location",
+            json={**HOLM, "place_name": "Am Kamp", "accuracy_m": 150},
+        )
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def a_visitor_sharpens_it():
+            with self._other_session() as other:
+                sharpened = other.get(Photo, photo.id)
+                sharpened.place_name, sharpened.location_accuracy_m = "Am Kamp 2", 15
+                other.add(
+                    Change(
+                        photo_id=photo.id,
+                        field="housenumber",
+                        old_value="Am Kamp",
+                        old_source=Source.VISITOR,
+                        new_value="Am Kamp 2",
+                        source=Source.VISITOR,
+                    )
+                )
+                other.commit()
+
+        self._meanwhile(monkeypatch, a_visitor_sharpens_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "neuere Angabe" in response.json()["detail"]
+        session.expire_all()
+        assert session.get(Photo, photo.id).place_name == "Am Kamp 2"
+
+    def test_a_second_curator_taking_it_back_meanwhile_does_not_take_it_back_twice(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        admin_client.post(f"/api/contribute/{photo.id}/location", json=HOLM)
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def another_curator_reverts_it():
+            with self._other_session() as other:
+                reverted = other.get(Photo, photo.id)
+                reverted.lat = reverted.lon = reverted.location_source = None
+                other.get(Change, entry).reverted_at = datetime(2026, 9, 14, tzinfo=UTC)
+                other.commit()
+
+        self._meanwhile(monkeypatch, another_curator_reverts_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "bereits" in response.json()["detail"]
 
 
 class TestTheImportLog:

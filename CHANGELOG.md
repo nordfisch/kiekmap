@@ -95,6 +95,10 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **A visitor's impossible date answered with a server error.** 31 February, or a day without its
   month, passed the checks of the contribution panel and failed only when the date was built. It is
   refused now with "There is no such date", as the admin area already did
+- **Taking a visitor's statement back could throw away a newer one.** The admin area checked the
+  photo and then wrote a moment later. A correction by hand, a visitor's newer house number, or a
+  second curator taking back the same entry in between was overwritten. The revert now only writes
+  if the photo is still as it was checked, and says what changed otherwise
 
 ## [0.9.0] — 2026-09-02
 
