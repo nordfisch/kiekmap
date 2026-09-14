@@ -459,10 +459,11 @@ class TestServingFiles:
     def test_a_deleted_photo_still_has_a_thumbnail(
         self, client: TestClient, session, imported_photo
     ):
-        """The known gap, held on purpose: „Gelöscht" in the admin area shows it through this route.
+        """Open on purpose: „Gelöscht" in the admin area shows it through this route.
 
         An <img> sends no X-Admin-Token. Whoever closes this route has to give the admin area
-        another way to its images first -- this test says so before the list goes blank.
+        another way to its images first -- this test says so before the list goes blank. See
+        decisions.md, point 83.
         """
         imported_photo.status = PhotoStatus.DELETED
         session.commit()

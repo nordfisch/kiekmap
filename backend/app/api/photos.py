@@ -363,10 +363,9 @@ def thumbnail(
             422, f"No thumbnail size {size}; available sizes are {list(THUMBNAIL_SIZES)}"
         )
 
-    # The one exception, and a known gap. The admin area shows deleted photos in „Gelöscht", in the
+    # The one exception, kept on purpose. The admin area shows deleted photos in „Gelöscht", in the
     # editor and in the change log, through this route and plain <img> tags -- and an <img> sends
-    # no X-Admin-Token. Closing it needs a second way to authenticate an image; until then the
-    # thumbnail of a deleted photo stays readable, the original and its details do not.
+    # no X-Admin-Token. See decisions.md, point 83, for why it stays open and when to revisit it.
     photo = _get_photo(session, photo_id, deleted_too=True)
     path = _file_of(photo, lambda: thumbnail_path(settings.thumbs_dir, photo.sha256, size))
     if path is None or not path.is_file():

@@ -2317,14 +2317,22 @@ it does not say the file stays reachable.
 exist, so the answer does not reveal that the photo exists. That covers `/api/photos/{id}`,
 `/api/photos/{id}/image` and all four routes under `/api/contribute/{id}/`.
 
-**`/api/photos/{id}/thumb` stays open, and that is a known gap.** The admin area shows deleted
-photos in „Gelöscht", in the editor and in the change log. It loads them through this route with
-plain `<img>` tags, and an `<img>` sends no `X-Admin-Token`. Closing the route needs a second way
-to authenticate an image. Two were weighed: a cookie limited to admin image routes, or `fetch()`
-with the header and a blob URL in the frontend. Both change more than this fix should. The
-thumbnail is at most 1200 px wide, which is enough to recognise the picture. A test in
-`tests/test_api_photos.py` keeps the route open on purpose, so that nobody closes it before the
-admin area has another way to its images.
+**`/api/photos/{id}/thumb` stays open, on purpose.** The admin area shows deleted photos in
+„Gelöscht", in the editor and in the change log. It loads them through this route with plain
+`<img>` tags, and an `<img>` sends no `X-Admin-Token`. Closing the route needs a second way to
+authenticate an image: a cookie limited to admin image routes, or `fetch()` with the header and a
+blob URL in the frontend. Neither is worth its code for the risk that remains.
+
+**The risk is small because of who reaches the API, not because the route is hard to use.** Ids
+count up, so whoever reaches it can list every thumbnail, up to 1200 px wide. The museum device runs
+offline and has no keyboard. The online instance lets only the team past its password
+([point 76](#76-the-online-instance-is-a-doorman-in-front-not-a-login-inside)). Checking the status
+would cost nothing: the route loads the row anyway.
+
+**Revisit it when the collection becomes reachable without that password**, such as a public web
+version. From then on the thumbnail of a photo deleted for its rights is visible to anybody. A test
+in `tests/test_api_photos.py` keeps the route open, so that nobody closes it before the admin area
+has another way to its images.
 
 ---
 
