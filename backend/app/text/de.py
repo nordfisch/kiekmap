@@ -107,6 +107,7 @@ de = Texts(
         ),
         housenumber_unknown="Diese Hausnummer steht nicht im Ortsverzeichnis.",
         housenumber_wrong_street="Diese Hausnummer gehoert nicht zu dieser Strasse.",
+        no_such_date="Dieses Datum gibt es nicht.",
     ),
     backup=BackupTexts(
         stick_gone="Dieser Stick ist nicht mehr da. Bitte neu einstecken.",

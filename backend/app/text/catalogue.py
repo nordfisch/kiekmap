@@ -51,6 +51,7 @@ class ContributeTexts:
     already_more_precise: str
     housenumber_unknown: str
     housenumber_wrong_street: str
+    no_such_date: str
 
 
 @dataclass(frozen=True)

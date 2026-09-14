@@ -366,12 +366,18 @@ def add_date(
 ) -> PhotoDetail:
     photo = _get_open_photo(session, photo_id, "date")
 
-    start, end, precision = date_range(
-        contribution.year,
-        contribution.month,
-        contribution.day,
-        DatePrecision(contribution.precision),
-    )
+    # The schema checks each part on its own -- a day from 1 to 31, a month from 1 to 12 -- and
+    # not whether they make a date. 31 February passed it, and ``date()`` then raised a
+    # ValueError that became a 500. The admin route has always caught it; this one had not.
+    try:
+        start, end, precision = date_range(
+            contribution.year,
+            contribution.month,
+            contribution.day,
+            DatePrecision(contribution.precision),
+        )
+    except ValueError:
+        raise HTTPException(422, texts().contribute.no_such_date) from None
     _write_if(
         session,
         photo,

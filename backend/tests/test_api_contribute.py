@@ -764,6 +764,46 @@ class TestAddingAYear:
         assert entry.source == Source.VISITOR
 
 
+class TestAnImpossibleDate:
+    """The schema checks day and month each on its own, not whether they make a date together.
+
+    31 February passed it, and the route answered with a 500 where the admin route, which catches
+    the same error, answered 422.
+    """
+
+    @pytest.mark.parametrize(
+        "statement",
+        [
+            {"year": 1930, "month": 2, "day": 31, "precision": "day"},
+            {"year": 1931, "month": 2, "day": 29, "precision": "day"},
+            {"year": 1930, "precision": "day"},
+            {"year": 1930, "precision": "month"},
+        ],
+    )
+    def test_is_refused_with_a_reason(self, client: TestClient, session, make_photo, statement):
+        photo = make_photo(year=None)
+        session.commit()
+
+        response = client.post(f"/api/contribute/{photo.id}/date", json=statement)
+
+        assert response.status_code == 422
+        assert response.json()["detail"] == "Dieses Datum gibt es nicht."
+        session.expire_all()
+        assert session.get(Photo, photo.id).date_from is None
+        assert session.scalars(select(Change)).all() == []
+
+    def test_a_leap_day_is_a_date(self, client: TestClient, session, make_photo):
+        photo = make_photo(year=None)
+        session.commit()
+
+        response = client.post(
+            f"/api/contribute/{photo.id}/date",
+            json={"year": 1932, "month": 2, "day": 29, "precision": "day"},
+        )
+
+        assert response.status_code == 200
+
+
 class TestTheTwoTogether:
     def test_filling_both_gaps_one_after_the_other(self, client: TestClient, session, make_photo):
         photo = make_photo(lat=None, lon=None, year=None, sha="a" * 64)

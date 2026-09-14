@@ -96,6 +96,7 @@ en = Texts(
         ),
         housenumber_unknown="This house number is not in the gazetteer.",
         housenumber_wrong_street="This house number does not belong to this street.",
+        no_such_date="There is no such date.",
     ),
     backup=BackupTexts(
         stick_gone="This stick is gone. Please plug it in again.",

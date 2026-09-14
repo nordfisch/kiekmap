@@ -92,6 +92,9 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   between replaced the first, and both were thanked and logged. The write now only happens if the
   field is still as the check found it; the second visitor hears that the photo already has an
   answer. The same holds for the place, the year and the house number
+- **A visitor's impossible date answered with a server error.** 31 February, or a day without its
+  month, passed the checks of the contribution panel and failed only when the date was built. It is
+  refused now with "There is no such date", as the admin area already did
 
 ## [0.9.0] — 2026-09-02
 

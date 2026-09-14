@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 8979778eaeac3836c3de62d679c7a6efd8dbb2957ef69143db84be1214c06001 -->
+<!-- source-sha: 70482461dcefe5f004fc573e392959c322969d9d186acd5aa3509a95dc526cad -->
 
 # Änderungen
 
@@ -105,6 +105,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   dazwischen ersetzte die erste, und beiden wurde gedankt, beide wurden verzeichnet. Geschrieben
   wird jetzt nur, wenn das Feld noch so ist, wie die Prüfung es vorfand; der zweite Besucher erfährt,
   dass das Foto schon eine Angabe hat. Das gilt für Ort, Jahr und Hausnummer
+- **Ein unmögliches Datum eines Besuchers endete in einem Serverfehler.** Der 31. Februar oder ein
+  Tag ohne seinen Monat kamen durch die Prüfungen des Mitmachens und scheiterten erst, als das Datum
+  gebildet wurde. Sie werden jetzt mit „Dieses Datum gibt es nicht." abgelehnt, wie es die
+  Verwaltung schon tat
 
 ## [0.9.0] — 2. September 2026
 
