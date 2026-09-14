@@ -50,6 +50,12 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **A German segment in an API path.** `/api/photos/tags/alle` is `/api/photos/tags`. The second
   segment was there because the route stood after `/photos/{photo_id}`, which takes an `int` and
   swallows `/photos/tags` with a 422 — the route moved above it, and a test holds it there
+- **One unreadable file stopped the inbox.** The import rejected only files that Pillow reported
+  with `OSError` or `ValueError`. A file whose header claims too many pixels raises
+  `DecompressionBombError` instead. It stayed in the inbox, failed on every sweep, and no file
+  sorted after it came in. The upload answered 500, and a stick import aborted. Any error while
+  reading a file now rejects that file into `_problem/`. A file that fails for another reason,
+  such as a full disk, stays for the next sweep without holding up the others
 
 ## [0.9.0] — 2026-09-02
 

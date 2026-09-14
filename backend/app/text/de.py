@@ -155,6 +155,7 @@ de = Texts(
             f"Inhaltsgleich mit Foto {photo_id} ({filename})"
         ),
         no_readable_image=lambda reason: f"Kein lesbares Bild: {reason}",
+        thumbnail_failed=lambda reason: f"Vorschaubild fehlgeschlagen: {reason}",
         unknown_format="unbekannt",
         format_not_allowed=lambda found, allowed: (
             f"Format {found} passt nicht (erlaubt sind: {allowed})"

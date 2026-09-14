@@ -21,7 +21,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO
 
-from PIL import Image, UnidentifiedImageError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -88,6 +87,11 @@ def _free_name(target: Path) -> Path:
         if not candidate.exists():
             return candidate
     raise RuntimeError(f"no free name for {target.name} in {target.parent}")
+
+
+def _reason(error: Exception) -> str:
+    """The exception as the import log shows it. Without a message, its type says what it was."""
+    return str(error) or type(error).__name__
 
 
 def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
@@ -226,10 +230,17 @@ def import_file(
         return outcome
 
     # 2. Read the image.
+    #
+    # Every exception, not a list of the expected ones. The file is input from outside, and Pillow
+    # raises more than ``OSError`` and ``ValueError`` for input it cannot read:
+    # ``DecompressionBombError`` derives from ``Exception`` directly, and its parsers also raise
+    # ``SyntaxError``, ``TypeError`` and ``struct.error``. One that got past a narrower list was not
+    # rejected but raised out of the watcher, left the file in the inbox, and was tried again on
+    # every sweep -- and every file sorted after it never came in.
     try:
         info = exif_service.read_image_info(path)
-    except (UnidentifiedImageError, OSError, ValueError) as error:
-        message = texts().imports.no_readable_image(str(error))
+    except Exception as error:  # noqa: BLE001 -- whatever the file does, it is rejected
+        message = texts().imports.no_readable_image(_reason(error))
         outcome = ImportOutcome(ImportResult.REJECTED, message)
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
@@ -258,12 +269,16 @@ def import_file(
     if not target.exists():
         shutil.copy2(path, target)
 
+    # The same reasoning as for reading: decoding the pixels is where the rest of Pillow's
+    # exceptions surface.
     try:
         thumbnails.create_thumbnails(target, settings.thumbs_dir, sha256)
-    except (OSError, ValueError, Image.DecompressionBombError) as error:
+    except Exception as error:  # noqa: BLE001 -- whatever the file does, it is rejected
         target.unlink(missing_ok=True)
         thumbnails.remove_thumbnails(settings.thumbs_dir, sha256)
-        outcome = ImportOutcome(ImportResult.REJECTED, f"Vorschaubild fehlgeschlagen: {error}")
+        outcome = ImportOutcome(
+            ImportResult.REJECTED, texts().imports.thumbnail_failed(_reason(error))
+        )
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
             _move_aside(path, inbox, PROBLEM_DIR)

@@ -513,3 +513,44 @@ class TestUnwieldyFiles:
 
         assert outcome.result == ImportResult.IMPORTED
         assert (outcome.photo.width, outcome.photo.height) == (40, 30)
+
+    def test_an_exception_outside_oserror_and_valueerror_rejects_the_file(
+        self, session, settings, tmp_path, monkeypatch
+    ):
+        """Pillow raises more than the two, and the file is input from outside.
+
+        ``DecompressionBombError`` derives from ``Exception`` directly. Before, it left
+        ``import_file`` instead of rejecting the file -- a 500 for the upload, an aborted job for
+        the stick, and for the inbox a file tried again on every sweep. ``test_watcher.py`` holds
+        the real bomb; this one stands for the rest of them.
+        """
+        from app.services import exif
+
+        def stumbles(path):
+            raise SyntaxError("not a PNG file")
+
+        monkeypatch.setattr(exif, "read_image_info", stumbles)
+        path = tmp_path / "odd.png"
+        path.write_bytes(b"\x89PNG not really")
+
+        outcome = import_file(session, path, settings)
+
+        assert outcome.result == ImportResult.REJECTED
+        assert "not a PNG file" in outcome.message
+
+    def test_a_thumbnail_that_fails_oddly_rejects_the_file_and_leaves_nothing(
+        self, session, settings, sample_image, monkeypatch
+    ):
+        from app.services import thumbnails
+
+        def stumbles(*args):
+            raise TypeError
+
+        monkeypatch.setattr(thumbnails, "create_thumbnails", stumbles)
+
+        outcome = import_file(session, sample_image("scan_ohne_exif.jpg"), settings)
+
+        assert outcome.result == ImportResult.REJECTED
+        assert "TypeError" in outcome.message, "an exception without a message still says what"
+        assert list(settings.photos_dir.rglob("*.*")) == []
+        assert session.scalars(select(Photo)).all() == []

@@ -139,6 +139,7 @@ en = Texts(
         unreadable_file=lambda reason: f"File not readable: {reason}",
         same_content_as=lambda photo_id, filename: f"Same content as photo {photo_id} ({filename})",
         no_readable_image=lambda reason: f"No readable image: {reason}",
+        thumbnail_failed=lambda reason: f"No preview could be made: {reason}",
         unknown_format="unknown",
         format_not_allowed=lambda found, allowed: (
             f"Format {found} does not fit (allowed are: {allowed})"

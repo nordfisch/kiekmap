@@ -104,9 +104,22 @@ class IncomingWatcher:
             for path in ready:
                 # ``root`` is the inbox itself: whoever copies in a stack filed by street has
                 # said something about every photo in it -- see services/foldermeta.py.
-                outcome = import_file(
-                    session, path, self.settings, move_aside=True, root=self.settings.incoming_dir
-                )
+                try:
+                    outcome = import_file(
+                        session,
+                        path,
+                        self.settings,
+                        move_aside=True,
+                        root=self.settings.incoming_dir,
+                    )
+                except Exception:  # noqa: BLE001 -- one file must not hold up the ones after it
+                    # A file ``import_file`` cannot even reject -- a full disk, a locked
+                    # database. It stays in the inbox and in ``_sizes``, so the next sweep tries
+                    # it again. Raising instead ended the sweep here, and when the cause lay in the
+                    # file itself, every sweep ended on it and nothing sorted after it came in.
+                    session.rollback()
+                    log.exception("Could not import %s, trying again at the next look", path)
+                    continue
                 self._sizes.pop(path, None)
                 # Per file, not once for the whole sweep -- and that is not a matter of taste.
                 # ``import_file`` moves the file to ``_done/`` inside itself, before anything

@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 3495aa5a7a5a85a8bfebd7e6704b3b154a8020c61c7f6466430aabf6fae8d254 -->
+<!-- source-sha: 0faf0621cbe12c738d2cf67cfc4fd57e98c5f0c093457bccefc1c450cd060c25 -->
 
 # Änderungen
 
@@ -58,6 +58,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   `/api/photos/tags`. Das zweite Segment gab es, weil die Route hinter `/photos/{photo_id}` stand,
   die einen `int` nimmt und `/photos/tags` mit einer 422 verschluckt — die Route ist nach oben
   gewandert, und ein Test hält sie dort
+- **Eine unlesbare Datei hielt den Eingangsordner an.** Der Import wies nur Dateien ab, die Pillow
+  mit `OSError` oder `ValueError` meldete. Eine Datei, deren Kopf zu viele Pixel angibt, löst
+  stattdessen `DecompressionBombError` aus. Sie blieb im Eingang, scheiterte bei jedem Durchgang,
+  und keine Datei, die danach einsortiert war, kam herein. Der Upload antwortete mit 500, ein
+  Stick-Import brach ab. Jeder Fehler beim Lesen einer Datei weist diese Datei jetzt nach
+  `_problem/` ab. Eine Datei, die aus einem anderen Grund scheitert, etwa bei voller Festplatte,
+  bleibt für den nächsten Durchgang liegen und hält die anderen nicht auf
 
 ## [0.9.0] — 2. September 2026
 
