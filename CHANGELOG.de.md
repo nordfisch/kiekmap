@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: b1c6fb4dd72d76c1ee5349df34f60bffad19f5516c3cc7d647cf4c712f18be2b -->
+<!-- source-sha: 8979778eaeac3836c3de62d679c7a6efd8dbb2957ef69143db84be1214c06001 -->
 
 # Änderungen
 
@@ -100,6 +100,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Name wie ein Foto endet, ohne PIN. Eine solche Zeile antwortet jetzt mit 404. Eine
   Wiederherstellung vom Stick folgte außerdem symbolischen Links und kopierte, worauf sie zeigten,
   in die Sammlung; sie übergeht sie jetzt
+- **Zwei Besucher, die gleichzeitig dieselbe Frage beantworteten, konnten sich überschreiben.** Das
+  Mitmachen prüfte, ob ein Feld leer war, und schrieb einen Moment später. Eine zweite Antwort
+  dazwischen ersetzte die erste, und beiden wurde gedankt, beide wurden verzeichnet. Geschrieben
+  wird jetzt nur, wenn das Feld noch so ist, wie die Prüfung es vorfand; der zweite Besucher erfährt,
+  dass das Foto schon eine Angabe hat. Das gilt für Ort, Jahr und Hausnummer
 
 ## [0.9.0] — 2. September 2026
 

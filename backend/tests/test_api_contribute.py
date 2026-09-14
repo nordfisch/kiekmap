@@ -947,3 +947,110 @@ class TestADeletedPhoto:
         streets.commit()
 
         assert client.get(f"/api/contribute/{photo.id}/housenumbers").status_code == 404
+
+
+class TestTwoVisitorsAtOnce:
+    """Both find the field empty, and both write.
+
+    The route read the photo, checked it, and wrote a moment later. A second visitor whose request
+    arrived in that moment -- at the kiosk and on the web instance at once -- overwrote the first
+    one's statement. Both got a thank-you, and both landed in the change log.
+
+    Each test commits the first visitor's statement from another session at exactly that moment:
+    after the route's check, before its write.
+    """
+
+    @staticmethod
+    def _meanwhile(**fields):
+        """Commit ``fields`` onto the photo from a session of its own, like a parallel request."""
+        import app.db
+
+        def commit(photo_id):
+            with app.db.SessionLocal() as other:
+                photo = other.get(Photo, photo_id)
+                for name, value in fields.items():
+                    setattr(photo, name, value)
+                other.commit()
+
+        return commit
+
+    def test_a_place_stated_meanwhile_is_not_overwritten(
+        self, client: TestClient, session, make_photo, monkeypatch
+    ):
+        from app.api import contribute
+
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        first_visitor = self._meanwhile(lat=53.63, lon=9.68, location_source=Source.VISITOR)
+        check = contribute._require_in_region
+
+        def between_check_and_write(settings, lat, lon):
+            check(settings, lat, lon)
+            first_visitor(photo.id)
+
+        monkeypatch.setattr(contribute, "_require_in_region", between_check_and_write)
+
+        response = client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
+
+        assert response.status_code == 409
+        session.expire_all()
+        assert (session.get(Photo, photo.id).lat, session.get(Photo, photo.id).lon) == (53.63, 9.68)
+        assert session.scalars(select(Change)).all() == [], "the refused statement was logged"
+
+    def test_a_year_stated_meanwhile_is_not_overwritten(
+        self, client: TestClient, session, make_photo, monkeypatch
+    ):
+        from app.api import contribute
+
+        photo = make_photo(year=None)
+        session.commit()
+        first_visitor = self._meanwhile(
+            date_from=date(1950, 1, 1), date_to=date(1950, 12, 31), date_precision="year"
+        )
+        date_range = contribute.date_range
+
+        def between_check_and_write(*args):
+            first_visitor(photo.id)
+            return date_range(*args)
+
+        monkeypatch.setattr(contribute, "date_range", between_check_and_write)
+
+        response = client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930})
+
+        assert response.status_code == 409
+        session.expire_all()
+        assert session.get(Photo, photo.id).date_from == date(1950, 1, 1)
+
+    def test_a_house_number_stated_meanwhile_is_not_overwritten(
+        self, client: TestClient, streets, make_photo, monkeypatch
+    ):
+        from app.api import contribute
+
+        photo = make_photo(place_name="Am Kamp", accuracy=150, sha="a" * 64)
+        streets.commit()
+        numbers = {
+            place.housenumber: place
+            for place in streets.scalars(select(Place).where(Place.kind == "adresse"))
+        }
+        first_visitor = self._meanwhile(
+            lat=numbers["1"].lat,
+            lon=numbers["1"].lon,
+            place_name="Am Kamp 1",
+            location_accuracy_m=15,
+            location_source=Source.VISITOR,
+        )
+        check = contribute._require_in_region
+
+        def between_check_and_write(settings, lat, lon):
+            check(settings, lat, lon)
+            first_visitor(photo.id)
+
+        monkeypatch.setattr(contribute, "_require_in_region", between_check_and_write)
+
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": numbers["2"].id}
+        )
+
+        assert response.status_code == 409
+        streets.expire_all()
+        assert streets.get(Photo, photo.id).place_name == "Am Kamp 1"

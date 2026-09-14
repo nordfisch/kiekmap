@@ -87,6 +87,11 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   made the photo routes serve any file on the device whose name ends like a photo, without a PIN.
   Such a row now answers 404. A restore from a stick also followed symbolic links and copied
   whatever they pointed at into the collection; it ignores them now
+- **Two visitors answering the same question at once could overwrite each other.** The
+  contribution panel checked that a field was empty and wrote a moment later. A second answer in
+  between replaced the first, and both were thanked and logged. The write now only happens if the
+  field is still as the check found it; the second visitor hears that the photo already has an
+  answer. The same holds for the place, the year and the house number
 
 ## [0.9.0] — 2026-09-02
 
