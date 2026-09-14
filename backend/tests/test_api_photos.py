@@ -440,6 +440,33 @@ class TestServingFiles:
         assert response.headers["content-type"] == "image/jpeg"
         assert response.content[:2] == b"\xff\xd8", "JPEG marker"
 
+    def test_a_deleted_photo_hands_out_neither_details_nor_original(
+        self, client: TestClient, session, imported_photo
+    ):
+        """Every route here answers without a PIN, and the ids count up.
+
+        The lists filtered deleted photos out, the routes by id did not. A photo taken out for its
+        rights stayed downloadable at full size under a number anybody could guess.
+        """
+        imported_photo.status = PhotoStatus.DELETED
+        session.commit()
+
+        assert client.get(f"/api/photos/{imported_photo.id}").status_code == 404
+        assert client.get(f"/api/photos/{imported_photo.id}/image").status_code == 404
+
+    def test_a_deleted_photo_still_has_a_thumbnail(
+        self, client: TestClient, session, imported_photo
+    ):
+        """The known gap, held on purpose: „Gelöscht" in the admin area shows it through this route.
+
+        An <img> sends no X-Admin-Token. Whoever closes this route has to give the admin area
+        another way to its images first -- this test says so before the list goes blank.
+        """
+        imported_photo.status = PhotoStatus.DELETED
+        session.commit()
+
+        assert client.get(f"/api/photos/{imported_photo.id}/thumb").status_code == 200
+
     def test_an_imported_photo_appears_on_the_map(self, client: TestClient, imported_photo):
         """The GPS test image lies in Holm and carries a capture date of 1975."""
         response = client.get(

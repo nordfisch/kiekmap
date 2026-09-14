@@ -893,3 +893,57 @@ class TestTheLastTask:
 
         assert daten["open_count"] == 1
         assert daten["open_other"] == 0
+
+
+class TestADeletedPhoto:
+    """The write routes take any id, and ``next_task`` is not the only way to one.
+
+    Only the offer filtered deleted photos out. A call straight to the API located and dated a photo
+    the curator had taken out of the exhibition, and the statement waited in the change log for a
+    moderator who never looks under „Gelöscht".
+    """
+
+    def _no_change_logged(self, session):
+        assert session.scalars(select(Change)).all() == []
+
+    def test_cannot_be_located(self, client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None, status=PhotoStatus.DELETED)
+        session.commit()
+
+        response = client.post(f"/api/contribute/{photo.id}/location", json=IN_HOLM)
+
+        assert response.status_code == 404
+        self._no_change_logged(session)
+
+    def test_cannot_be_dated(self, client: TestClient, session, make_photo):
+        photo = make_photo(year=None, status=PhotoStatus.DELETED)
+        session.commit()
+
+        response = client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930})
+
+        assert response.status_code == 404
+        self._no_change_logged(session)
+
+    def test_cannot_be_refined(self, client: TestClient, streets, make_photo):
+        photo = make_photo(
+            place_name="Am Kamp", accuracy=150, sha="a" * 64, status=PhotoStatus.DELETED
+        )
+        streets.commit()
+        number = streets.scalar(
+            select(Place).where(Place.kind == "adresse", Place.housenumber == "2")
+        )
+
+        response = client.post(
+            f"/api/contribute/{photo.id}/housenumber", json={"place_id": number.id}
+        )
+
+        assert response.status_code == 404
+        self._no_change_logged(streets)
+
+    def test_offers_no_house_numbers(self, client: TestClient, streets, make_photo):
+        photo = make_photo(
+            place_name="Am Kamp", accuracy=150, sha="a" * 64, status=PhotoStatus.DELETED
+        )
+        streets.commit()
+
+        assert client.get(f"/api/contribute/{photo.id}/housenumbers").status_code == 404

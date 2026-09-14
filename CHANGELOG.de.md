@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 0faf0621cbe12c738d2cf67cfc4fd57e98c5f0c093457bccefc1c450cd060c25 -->
+<!-- source-sha: 3a459aa8de7e27e409f19ae443bc2a2ebb1a06508bd6afeee49977fae4ad8e26 -->
 
 # Änderungen
 
@@ -65,6 +65,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Stick-Import brach ab. Jeder Fehler beim Lesen einer Datei weist diese Datei jetzt nach
   `_problem/` ab. Eine Datei, die aus einem anderen Grund scheitert, etwa bei voller Festplatte,
   bleibt für den nächsten Durchgang liegen und hält die anderen nicht auf
+- **Ein gelöschtes Foto war unter seiner Nummer weiter öffentlich.** Seine Angaben und das Original
+  in voller Größe ließen sich ohne PIN abrufen, und Besucher konnten es über die API weiter verorten
+  und datieren. Diese Routen antworten jetzt mit 404. Das Vorschaubild bleibt erreichbar, weil die
+  Verwaltung gelöschte Fotos darüber zeigt. Siehe [Punkt 83](docs/developer/decisions.md)
 
 ## [0.9.0] — 2. September 2026
 

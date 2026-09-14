@@ -56,6 +56,10 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   sorted after it came in. The upload answered 500, and a stick import aborted. Any error while
   reading a file now rejects that file into `_problem/`. A file that fails for another reason,
   such as a full disk, stays for the next sweep without holding up the others
+- **A deleted photo was still public under its id.** Its details and full-size original stayed
+  downloadable without a PIN, and visitors could still locate and date it through the API. These
+  routes answer 404 now. The thumbnail stays reachable, because the admin area shows deleted
+  photos through it. See [point 83](docs/developer/decisions.md)
 
 ## [0.9.0] — 2026-09-02
 

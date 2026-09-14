@@ -142,9 +142,7 @@ def photo_housenumbers(
     picker when this list is not empty and needs no second rule of its own. A rule that lives in
     two places is a rule that will disagree with itself.
     """
-    photo = session.get(Photo, photo_id)
-    if photo is None:
-        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    photo = _get_published_photo(session, photo_id)
     if not _refinable(session, photo):
         return []
     return [
@@ -179,10 +177,21 @@ def _require_empty(photo: Photo, field: str) -> None:
         raise HTTPException(409, texts().contribute.already_stated)
 
 
-def _get_open_photo(session: Session, photo_id: int, field: str) -> Photo:
+def _get_published_photo(session: Session, photo_id: int) -> Photo:
+    """A deleted photo answers 404 here, as in ``api/photos.py``.
+
+    ``next_task`` never offers one, but the write routes take any id. A visitor's statement on a
+    photo the curator took out would sit in the change log and wait for a moderator who never
+    looks under „Gelöscht".
+    """
     photo = session.get(Photo, photo_id)
-    if photo is None:
+    if photo is None or photo.status == PhotoStatus.DELETED:
         raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    return photo
+
+
+def _get_open_photo(session: Session, photo_id: int, field: str) -> Photo:
+    photo = _get_published_photo(session, photo_id)
     _require_empty(photo, field)
     return photo
 
@@ -273,9 +282,7 @@ def add_housenumber(
     carries the previous source: taking the contribution back has to give a curator's statement
     back to the curator.
     """
-    photo = session.get(Photo, photo_id)
-    if photo is None:
-        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    photo = _get_published_photo(session, photo_id)
     if not _refinable(session, photo):
         raise HTTPException(409, texts().contribute.already_more_precise)
 

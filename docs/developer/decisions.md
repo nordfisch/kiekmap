@@ -2301,3 +2301,27 @@ since this update it is a requirement, and `operations.md` says so.
 (`zoomLevelsToOverscale`), how overlapping transparent lines render, and how icons with an offset
 scale. The map was looked at in the browser and showed no difference that stood out; the first Pi
 is the real test.
+
+---
+
+## 83. A deleted photo is gone from the public API, except for its thumbnail
+
+Every route under `/api/photos/` and `/api/contribute/` answers without a PIN, and photo ids count
+up. Until this point only the lists filtered deleted photos out. The routes by id served the
+details and the original of a deleted photo, and the contribution routes wrote to it. A curator
+deletes a photo for a reason that has to hold, such as its rights or a person who asked to be taken
+out. [Point 16](#16-deleting-means-taken-out-of-the-exhibition-not-removed-from-disk) keeps the file;
+it does not say the file stays reachable.
+
+**The routes by id now answer 404 for a deleted photo**, the same answer as for an id that does not
+exist, so the answer does not reveal that the photo exists. That covers `/api/photos/{id}`,
+`/api/photos/{id}/image` and all four routes under `/api/contribute/{id}/`.
+
+**`/api/photos/{id}/thumb` stays open, and that is a known gap.** The admin area shows deleted
+photos in „Gelöscht", in the editor and in the change log. It loads them through this route with
+plain `<img>` tags, and an `<img>` sends no `X-Admin-Token`. Closing the route needs a second way
+to authenticate an image. Two were weighed: a cookie limited to admin image routes, or `fetch()`
+with the header and a blob URL in the frontend. Both change more than this fix should. The
+thumbnail is at most 1200 px wide, which is enough to recognise the picture. A test in
+`tests/test_api_photos.py` keeps the route open on purpose, so that nobody closes it before the
+admin area has another way to its images.

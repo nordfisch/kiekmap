@@ -249,11 +249,17 @@ def histogram(
     )
 
 
-def _get_photo(session: Session, photo_id: int) -> Photo:
+def _get_photo(session: Session, photo_id: int, *, deleted_too: bool = False) -> Photo:
+    """One photo -- **a deleted one answers 404 like one that never existed**.
+
+    Every route here answers without a PIN, and ids count up. Deleting takes a photo out of the
+    exhibition, and a curator may do it for a reason that must hold: the rights, or a person who
+    asked to be taken out. Without this check the original stayed one guessed number away.
+    """
     photo = session.scalar(
         select(Photo).where(Photo.id == photo_id).options(selectinload(Photo.tags))
     )
-    if photo is None:
+    if photo is None or (photo.status == PhotoStatus.DELETED and not deleted_too):
         raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     return photo
 
@@ -342,7 +348,11 @@ def thumbnail(
             422, f"No thumbnail size {size}; available sizes are {list(THUMBNAIL_SIZES)}"
         )
 
-    photo = _get_photo(session, photo_id)
+    # The one exception, and a known gap. The admin area shows deleted photos in „Gelöscht", in the
+    # editor and in the change log, through this route and plain <img> tags -- and an <img> sends
+    # no X-Admin-Token. Closing it needs a second way to authenticate an image; until then the
+    # thumbnail of a deleted photo stays readable, the original and its details do not.
+    photo = _get_photo(session, photo_id, deleted_too=True)
     path = thumbnail_path(settings.thumbs_dir, photo.sha256, size)
     if not path.is_file():
         # A database row without files points to an incompletely restored backup.
