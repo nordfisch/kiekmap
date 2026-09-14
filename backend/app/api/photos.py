@@ -251,16 +251,22 @@ def histogram(
     )
 
 
-def _get_photo(session: Session, photo_id: int, *, deleted_too: bool = False) -> Photo:
+def _get_photo(
+    session: Session, photo_id: int, *, deleted_too: bool = False, with_tags: bool = False
+) -> Photo:
     """One photo -- **a deleted one answers 404 like one that never existed**.
 
     Every route here answers without a PIN, and ids count up. Deleting takes a photo out of the
     exhibition, and a curator may do it for a reason that must hold: the rights, or a person who
     asked to be taken out. Without this check the original stayed one guessed number away.
+
+    Only the detail asks for the tags. The file routes read four columns, and the tag query was a
+    second statement for every thumbnail the browser has not cached yet.
     """
-    photo = session.scalar(
-        select(Photo).where(Photo.id == photo_id).options(selectinload(Photo.tags))
-    )
+    query = select(Photo).where(Photo.id == photo_id)
+    if with_tags:
+        query = query.options(selectinload(Photo.tags))
+    photo = session.scalar(query)
     if photo is None or (photo.status == PhotoStatus.DELETED and not deleted_too):
         raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     return photo
@@ -348,7 +354,7 @@ def offered_tags(
 # read "tags" as a number and answers 422. The list is then unreachable and nothing says why.
 @router.get("/{photo_id}", response_model=PhotoDetail, summary="Everything known about one photo")
 def detail(photo_id: int, session: Annotated[Session, Depends(get_session)]) -> PhotoDetail:
-    return PhotoDetail.from_photo(_get_photo(session, photo_id))
+    return PhotoDetail.from_photo(_get_photo(session, photo_id, with_tags=True))
 
 
 @router.get("/{photo_id}/thumb", summary="Thumbnail")
