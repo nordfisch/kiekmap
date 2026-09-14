@@ -180,6 +180,11 @@ What was on the device before is **not deleted** but set aside into a folder wit
 So whoever reads the wrong backup in by mistake has lost nothing — tell somebody in that case who
 can get at the device.
 
+At the very end the device swaps the records. For a few seconds the map loads no photos then, and
+the contribution panel saves nothing; after that everything works again. If a download of the
+backup is running at the same time, the restore stops with a message and changes nothing. Start it
+again once the download has finished.
+
 ### When the backup is older than the program
 
 That is the normal case, and **you need do nothing for it**. A backup holds the records in the

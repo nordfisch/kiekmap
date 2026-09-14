@@ -2325,3 +2325,40 @@ with the header and a blob URL in the frontend. Both change more than this fix s
 thumbnail is at most 1200 px wide, which is enough to recognise the picture. A test in
 `tests/test_api_photos.py` keeps the route open on purpose, so that nobody closes it before the
 admin area has another way to its images.
+
+---
+
+## 84. A restore closes the database for the swap
+
+A restore renames `kiekmap.db` and moves the restored file into its place. Until this point it did
+that while the connection pool held connections open on the old file, and it rebuilt the engine
+only afterwards. Two things followed:
+
+- **A write in between was lost.** A request that arrived during the swap used a pooled connection
+  and wrote into the file that had just been set aside. The device answered 200. A test reproduced
+  it with a visitor's dating.
+- **The journal of the new file was at risk.** When SQLite closes the last connection to a file, it
+  checkpoints and deletes the `-wal` by its name. That name belonged to the restored database by
+  then. SQLite's own list of ways to corrupt a database names renaming a file in use.
+
+**The swap now runs with the database closed.** `DatabaseGate` in `app/db.py` counts the sessions in
+use. `closed_for_swap` refuses new sessions, waits until none is in use, disposes the engine, lets
+the restore move the files and migrate, and reopens. Only after the wait is every connection back
+in the pool, so only then does `dispose()` close all of them.
+
+**The gate closes for seconds, not for the whole restore.** Copying from the stick takes minutes and
+runs with the database open. Requests during the swap get a 503 with `Retry-After`. The progress
+bar keeps working, because the job status needs no database.
+
+**What goes through the gate:** every request session, the readiness probe, the inbox watcher and
+the ZIP download. The watcher now opens one session per file, so that a restore waits for one
+import at most. The ZIP download holds its session for the whole transfer, which also stops a
+restore from swapping the photos out halfway through a download.
+
+**What does not, and why.** Backup and stick import open their sessions without the gate, because
+they share the one job with the restore and cannot run beside it. The CLI runs in a process of its
+own, which no lock in this one reaches; running `app.cli` during a restore stays unguarded.
+
+**The price:** a session that stays in use for 60 seconds (`CLOSE_TIMEOUT_S`) makes the restore
+give up, before anything was moved. In practice that is a running download. The admin area then
+says so, and the restore can be started again.

@@ -60,6 +60,12 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   downloadable without a PIN, and visitors could still locate and date it through the API. These
   routes answer 404 now. The thumbnail stays reachable, because the admin area shows deleted
   photos through it. See [point 83](docs/developer/decisions.md)
+- **A restore could lose what was saved while it swapped the database.** The file was renamed while
+  connections were still open on it. A visitor's statement in those seconds went into the set-aside
+  file, and the device answered as if it had been saved. The restore now closes the database for
+  the swap: it waits until no request is using it, and requests meanwhile get a 503 for a few
+  seconds. A download that is still running makes the restore stop before it changes anything. See
+  [point 84](docs/developer/decisions.md)
 
 ## [0.9.0] — 2026-09-02
 

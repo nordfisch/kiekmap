@@ -17,7 +17,7 @@ from fastapi.responses import StreamingResponse
 
 from app.api.admin import Admin, Config
 from app.config import Settings
-from app.db import SessionLocal
+from app.db import SessionLocal, gate
 from app.schemas import (
     BackupOnDrive,
     BackupReminder,
@@ -142,9 +142,7 @@ def restore(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
     drive = _pick(settings, choice.path)
 
     def work(report: service.Report) -> str:
-        message = service.run_restore(settings, drive, report)
-        _reopen_database()
-        return message
+        return service.run_restore(settings, drive, report)
 
     if not service.job.start("restore", work):
         raise HTTPException(409, texts().backup.busy)
@@ -163,9 +161,7 @@ def restore_from_incoming(choice: IncomingChoice, admin: Admin, settings: Config
     archive = _pick_archive(settings, choice.file)
 
     def work(report: service.Report) -> str:
-        message = service.run_restore_from_archive(settings, archive, report)
-        _reopen_database()
-        return message
+        return service.run_restore_from_archive(settings, archive, report)
 
     if not service.job.start("restore", work):
         raise HTTPException(409, texts().backup.busy)
@@ -188,21 +184,6 @@ def _pick_archive(settings: Settings, name: str) -> Path:
     if service.read_archive_manifest(wanted) is None:
         raise HTTPException(422, texts().backup.not_a_complete_backup)
     return wanted
-
-
-def _reopen_database() -> None:
-    """Point the engine at the file that is now there.
-
-    The database was swapped underneath the running service. Every pooled connection still holds
-    the old, already moved file open -- reads would keep working and writes would land in a file
-    nobody can see any more. Disposing and rebuilding is the same dance the test fixtures do.
-    """
-    import app.db
-
-    app.db.engine.dispose()
-    app.db.engine = app.db.create_db_engine()
-    app.db.SessionLocal.configure(bind=app.db.engine)
-    log.info("Database reopened after restore")
 
 
 @import_router.get("/folders", response_model=ImportFolders, summary="Image folders on a stick")
@@ -347,15 +328,17 @@ def zip_download(settings: Config, ticket: str = Query(description="From /zip/ti
     if service.job.running:
         raise HTTPException(409, texts().backup.busy)
 
-    def strom():
-        # Its own session: the generator runs on after the request has been answered.
-        with SessionLocal() as session:
+    def stream():
+        # Its own session: the generator runs on after the request has been answered. Through the
+        # gate, and for the whole transfer: that is what keeps a restore started *after* the check
+        # above from swapping the files out halfway -- it waits, and then refuses.
+        with gate.use(), SessionLocal() as session:
             yield from service.stream_archive(session, settings)
 
     name = service.archive_name(settings)
     log.info("Archive download started: %s", name)
     return StreamingResponse(
-        strom(),
+        stream(),
         media_type="application/zip",
         # No content length: with ZIP_STORED it could be worked out, but the arithmetic
         # over entry headers, the central directory and ZIP64 extra fields is brittle

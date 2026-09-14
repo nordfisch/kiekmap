@@ -14,7 +14,7 @@ from fastapi import APIRouter, Response, status
 from sqlalchemy import text
 
 from app import __version__
-from app.db import SessionLocal
+from app.db import DatabaseClosed, SessionLocal, gate
 
 router = APIRouter(tags=["system"])
 
@@ -33,8 +33,12 @@ def health(response: Response) -> dict[str, str]:
     a curl response does not. Found by CodeQL, ``py/stack-trace-exposure``.
     """
     try:
-        with SessionLocal() as session:
+        with gate.use(), SessionLocal() as session:
             session.execute(text("SELECT 1"))
+    except DatabaseClosed:
+        # A restore is swapping the file. Not ready for these seconds, and nothing to log.
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        return {"status": "not ready", "version": __version__}
     except Exception:  # noqa: BLE001 -- any failure means not ready, and the log gets the cause
         log.exception("The readiness probe could not reach the database")
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE

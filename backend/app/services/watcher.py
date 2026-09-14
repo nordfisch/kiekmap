@@ -15,9 +15,9 @@ import threading
 from pathlib import Path
 
 from app.config import Settings, get_settings
-from app.db import SessionLocal
+from app.db import DatabaseClosed, SessionLocal, gate
 from app.services import backup
-from app.services.importer import SPECIAL_DIRS, import_file
+from app.services.importer import SPECIAL_DIRS, ImportOutcome, import_file
 
 log = logging.getLogger(__name__)
 
@@ -100,37 +100,47 @@ class IncomingWatcher:
             return 0
 
         count = 0
-        with SessionLocal() as session:
-            for path in ready:
-                # ``root`` is the inbox itself: whoever copies in a stack filed by street has
-                # said something about every photo in it -- see services/foldermeta.py.
-                try:
-                    outcome = import_file(
-                        session,
-                        path,
-                        self.settings,
-                        move_aside=True,
-                        root=self.settings.incoming_dir,
-                    )
-                except Exception:  # noqa: BLE001 -- one file must not hold up the ones after it
-                    # A file ``import_file`` cannot even reject -- a full disk, a locked
-                    # database. It stays in the inbox and in ``_sizes``, so the next sweep tries
-                    # it again. Raising instead ended the sweep here, and when the cause lay in the
-                    # file itself, every sweep ended on it and nothing sorted after it came in.
-                    session.rollback()
-                    log.exception("Could not import %s, trying again at the next look", path)
-                    continue
-                self._sizes.pop(path, None)
-                # Per file, not once for the whole sweep -- and that is not a matter of taste.
-                # ``import_file`` moves the file to ``_done/`` inside itself, before anything
-                # is written down. Committed at the end, an exception on the fifth file would take
-                # the rows of the first four with it while their sources lie in ``_done/`` --
-                # and the import log along with them, because its entries hang in the same
-                # transaction. The one record that would have shown it is the one that is lost.
-                # ``importer.import_from_folder`` has always done it this way.
-                session.commit()
-                log.info("%s: %s -- %s", outcome.result, path.name, outcome.message)
-                if outcome.succeeded:
-                    count += 1
+        for path in ready:
+            try:
+                outcome = self._import_one(path)
+            except DatabaseClosed:
+                # A restore is swapping the database. Everything left stays in ``_sizes`` and comes
+                # in at the next look.
+                log.info("Database closed for a restore, the inbox waits")
+                break
+            except Exception:  # noqa: BLE001 -- one file must not hold up the ones after it
+                # A file ``import_file`` cannot even reject -- a full disk, a locked database. It
+                # stays in the inbox and in ``_sizes``, so the next sweep tries it again. Raising
+                # instead ended the sweep here, and when the cause lay in the file itself, every
+                # sweep ended on it and nothing sorted after it came in.
+                log.exception("Could not import %s, trying again at the next look", path)
+                continue
+            self._sizes.pop(path, None)
+            log.info("%s: %s -- %s", outcome.result, path.name, outcome.message)
+            if outcome.succeeded:
+                count += 1
 
         return count
+
+    def _import_one(self, path: Path) -> ImportOutcome:
+        """One file, in a session of its own that is committed before the next file starts.
+
+        **Committed per file, not once for the whole sweep** -- and that is not a matter of taste.
+        ``import_file`` moves the file to ``_done/`` inside itself, before anything is written
+        down. Committed at the end, an exception on the fifth file would take the rows of the first
+        four with it while their sources lie in ``_done/`` -- and the import log along with them,
+        because its entries hang in the same transaction. The one record that would have shown it
+        is the one that is lost. ``importer.import_from_folder`` has always done it this way.
+
+        **A session per file**, so that a restore waits for one file at most, not for a whole
+        sweep; see ``app.db.DatabaseGate``. Leaving the ``with`` block rolls back whatever an
+        exception left unfinished.
+        """
+        with gate.use(), SessionLocal() as session:
+            # ``root`` is the inbox itself: whoever copies in a stack filed by street has said
+            # something about every photo in it -- see services/foldermeta.py.
+            outcome = import_file(
+                session, path, self.settings, move_aside=True, root=self.settings.incoming_dir
+            )
+            session.commit()
+            return outcome

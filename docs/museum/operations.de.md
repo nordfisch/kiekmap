@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 79c94120e08c922a1e345755316c3f37a576b0475342b5198f5152d5a40cf9ae -->
+<!-- source-sha: c2685461d43ddaf20e32b4596941beb40fb35e136e15d6292faaa0a5ebffdede -->
 
 # Betriebshandbuch
 
@@ -295,8 +295,9 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 
 **Warum es überhaupt eine Frage ist.** Eine Sicherung enthält `kiekmap.db` genau so, wie die Datei
 damals aussah — mitsamt ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird
-die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`); danach hängt
-sich das laufende Programm nur neu an sie (`_reopen_database`). Migrationen laufen dabei nicht von
+die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`). Für diese
+Sekunden schließt das Programm die Datenbank und hängt sich danach an die neue Datei
+(`closed_for_swap` in `app/db.py`). Migrationen laufen dabei nicht von
 selbst: Sie laufen beim *Start* (`backend/docker-entrypoint.sh`), und eine Wiederherstellung ist
 kein Start.
 

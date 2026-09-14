@@ -58,6 +58,7 @@ class BackupTexts:
     #: The API refuses.
     stick_gone: str
     busy: str
+    restore_swapping: str
     file_gone_from_inbox: str
     not_a_complete_backup: str
     folder_gone_from_stick: str
@@ -86,6 +87,7 @@ class BackupTexts:
     no_room_on_the_stick: Callable[[str, str], str]
     no_room_here: Callable[[str, str], str]
     backup_is_newer: Callable[[str], str]
+    database_in_use: str
     unexpected_entry: str
     something_went_wrong: Callable[[str], str]
 

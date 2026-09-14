@@ -307,6 +307,98 @@ class TestRestoring:
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
 
 
+class TestTheSwap:
+    """The seconds in which the database file changes under the running service.
+
+    Before, the restore renamed the file while the pool held connections open on it, and only
+    reopened the engine afterwards. A request in between wrote into the file that had just been set
+    aside: the device answered 200, and the statement was gone. The database is closed for the swap
+    now; see ``app.db.DatabaseGate``.
+    """
+
+    def _make_backup(self, session, settings, collection):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+
+    def test_a_contribution_during_the_swap_is_refused_not_lost(
+        self, client, session, settings, stick, collection, make_photo, monkeypatch
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        self._make_backup(session, settings, collection)
+
+        answers = []
+        migrate = schema.bring_up_to_date
+
+        def a_visitor_taps_meanwhile(database):
+            # Inside the swap: the old file is set aside, the restored one is in place.
+            answers.append(client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930}))
+            return migrate(database)
+
+        monkeypatch.setattr(schema, "bring_up_to_date", a_visitor_taps_meanwhile)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert answers[0].status_code == 503, "the statement went into the set-aside file"
+        assert answers[0].headers["retry-after"]
+        assert "Sicherung" in answers[0].json()["detail"]
+
+    def test_the_service_answers_again_after_the_swap(
+        self, client, session, settings, stick, collection, make_photo
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        self._make_backup(session, settings, collection)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        response = client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930})
+        assert response.status_code == 200
+
+    def test_the_connections_are_closed_before_the_file_is_moved(
+        self, session, settings, stick, collection, monkeypatch
+    ):
+        """Closed afterwards, SQLite removes the journal of the old file by its name.
+
+        By then that name belongs to the restored database.
+        """
+        import app.db
+        from app.services.backup import restore
+
+        self._make_backup(session, settings, collection)
+        order = []
+        dispose, set_aside = app.db.engine.dispose, restore._set_aside
+        monkeypatch.setattr(app.db.engine, "dispose", lambda: (order.append("dispose"), dispose()))
+        monkeypatch.setattr(
+            restore, "_set_aside", lambda s: (order.append("set aside"), set_aside(s))[1]
+        )
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert order == ["dispose", "set aside"]
+
+    def test_a_session_that_stays_in_use_refuses_the_restore_and_changes_nothing(
+        self, client, session, settings, stick, collection, monkeypatch
+    ):
+        """A ZIP download holds its session for minutes. The restore must not swap under it."""
+        import app.db
+
+        self._make_backup(session, settings, collection)
+        monkeypatch.setattr(app.db, "CLOSE_TIMEOUT_S", 0.1)
+        database_before = settings.db_path.read_bytes()
+
+        with app.db.gate.use():
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert "in Gebrauch" in str(refusal.value)
+        assert settings.db_path.read_bytes() == database_before
+        assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+        assert client.get("/api/photos/tags").status_code == 200, "the gate is open again"
+
+
 class TestSchemaRevisionOnRestore:
     """The error that ran unnoticed for two days on 12 August 2026.
 

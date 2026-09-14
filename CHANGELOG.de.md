@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 3a459aa8de7e27e409f19ae443bc2a2ebb1a06508bd6afeee49977fae4ad8e26 -->
+<!-- source-sha: 105fab30a1ff9b83c6f8e5b97ed05fa7d299679e2667c0b0893889ea57a2c0ab -->
 
 # Änderungen
 
@@ -69,6 +69,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   in voller Größe ließen sich ohne PIN abrufen, und Besucher konnten es über die API weiter verorten
   und datieren. Diese Routen antworten jetzt mit 404. Das Vorschaubild bleibt erreichbar, weil die
   Verwaltung gelöschte Fotos darüber zeigt. Siehe [Punkt 83](docs/developer/decisions.md)
+- **Eine Wiederherstellung konnte verlieren, was während des Austauschs der Datenbank gespeichert
+  wurde.** Die Datei wurde umbenannt, während noch Verbindungen auf ihr offen waren. Die Angabe
+  eines Besuchers in diesen Sekunden landete in der beiseitegelegten Datei, und das Gerät antwortete,
+  als sei sie gespeichert. Die Wiederherstellung schließt die Datenbank jetzt für den Austausch: Sie
+  wartet, bis keine Anfrage sie mehr benutzt, und Anfragen erhalten währenddessen für einige Sekunden
+  eine 503. Ein noch laufendes Herunterladen lässt die Wiederherstellung abbrechen, bevor sie etwas
+  ändert. Siehe [Punkt 84](docs/developer/decisions.md)
 
 ## [0.9.0] — 2. September 2026
 

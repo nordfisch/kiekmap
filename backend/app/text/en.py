@@ -100,6 +100,7 @@ en = Texts(
     backup=BackupTexts(
         stick_gone="This stick is gone. Please plug it in again.",
         busy="Something is already under way. Please wait until it is finished.",
+        restore_swapping="A backup is being read in. Please wait a moment and try again.",
         file_gone_from_inbox="This file is no longer in the inbox folder.",
         not_a_complete_backup="This file is not a complete backup.",
         folder_gone_from_stick="This folder is no longer on the stick.",
@@ -131,6 +132,10 @@ en = Texts(
             f"This backup belongs to a newer version of the program (schema {revision}). "
             "Please update the program first, then read the backup in. "
             "Nothing on the device was changed."
+        ),
+        database_in_use=(
+            "The records are still in use, perhaps by a download that is running. "
+            "Nothing on the device was changed. Please try again once it has finished."
         ),
         unexpected_entry="The file holds an unexpected entry.",
         something_went_wrong=lambda reason: f"Something went wrong: {reason}",

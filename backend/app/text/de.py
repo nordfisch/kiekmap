@@ -111,6 +111,10 @@ de = Texts(
     backup=BackupTexts(
         stick_gone="Dieser Stick ist nicht mehr da. Bitte neu einstecken.",
         busy="Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.",
+        restore_swapping=(
+            "Gerade wird eine Sicherung eingespielt. Bitte einen Moment warten und es dann "
+            "noch einmal versuchen."
+        ),
         file_gone_from_inbox="Diese Datei liegt nicht mehr im Eingangsordner.",
         not_a_complete_backup="Diese Datei ist keine vollstaendige Sicherung.",
         folder_gone_from_stick="Diesen Ordner gibt es auf dem Stick nicht mehr.",
@@ -145,6 +149,10 @@ de = Texts(
             f"Diese Sicherung gehoert zu einer neueren Programmversion (Schemastand {revision}). "
             "Bitte erst das Programm aktualisieren, dann die Sicherung einspielen. "
             "Auf dem Geraet wurde nichts veraendert."
+        ),
+        database_in_use=(
+            "Die Angaben sind noch in Gebrauch, vielleicht durch ein laufendes Herunterladen. "
+            "Auf dem Geraet wurde nichts veraendert. Bitte erneut versuchen, sobald es fertig ist."
         ),
         unexpected_entry="Die Datei enthaelt einen unerwarteten Eintrag.",
         something_went_wrong=lambda reason: f"Es ist etwas schiefgegangen: {reason}",

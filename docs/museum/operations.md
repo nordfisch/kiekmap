@@ -292,8 +292,8 @@ what to do if something sticks after all. The short way for the team is in the
 
 **Why it is a question at all.** A backup holds `kiekmap.db` exactly as the file looked at the
 time — schema version in the table `alembic_version` included. On restoring, the file is swapped
-**as a whole** (`_swap_in` in `services/backup/restore.py`); the running program then only attaches
-itself to it again (`_reopen_database`). Migrations do not run by themselves in the process: they
+**as a whole** (`_swap_in` in `services/backup/restore.py`). For those seconds the program closes
+the database, and then attaches itself to the new file (`closed_for_swap` in `app/db.py`). Migrations do not run by themselves in the process: they
 run at *startup* (`backend/docker-entrypoint.sh`), and a restore is not a startup.
 
 **What happens now**, and the order is the whole point (`services/schema.py`):

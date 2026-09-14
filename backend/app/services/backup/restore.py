@@ -12,6 +12,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
+from app import db as database
 from app.config import Settings
 from app.services import schema
 from app.services.backup.collection import copy_if_new, forget_size
@@ -111,17 +112,28 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
         raise BackupError(texts().backup.backup_is_newer(str(ahead)))
 
     report(total, total, texts().backup.setting_the_old_state_aside)
-    set_aside = _set_aside(settings)
 
-    for name in ("photos", "thumbs", "kiekmap.db", *LOOSE_FILES):
-        moved = work / name
-        if moved.exists():
-            moved.replace(settings.data_dir / name)
+    # **Closed for the swap, and only for the swap.** The service answers 503 for these seconds
+    # instead of writing into the file that is about to be set aside; see ``app.db.DatabaseGate``.
+    # The migration runs inside as well: until it has run, the restored database is not one the
+    # program can use.
+    try:
+        with database.closed_for_swap():
+            set_aside = _set_aside(settings)
+
+            for name in ("photos", "thumbs", "kiekmap.db", *LOOSE_FILES):
+                moved = work / name
+                if moved.exists():
+                    moved.replace(settings.data_dir / name)
+
+            # Now, and not a step earlier: the file at the configured path is the restored one.
+            report(total, total, texts().backup.bringing_the_schema_forward)
+            schema.bring_up_to_date(settings.db_path)
+    except database.DatabaseInUse:
+        # Raised before anything was closed or moved, so the collection is as it was.
+        shutil.rmtree(work, ignore_errors=True)
+        raise BackupError(texts().backup.database_in_use) from None
     shutil.rmtree(work, ignore_errors=True)
-
-    # Now, and not a step earlier: the file at the configured path is the restored one.
-    report(total, total, texts().backup.bringing_the_schema_forward)
-    schema.bring_up_to_date(settings.db_path)
 
     # The collection is a different one now -- what was measured before says nothing any more.
     forget_size()
