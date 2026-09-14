@@ -50,60 +50,29 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **A German segment in an API path.** `/api/photos/tags/alle` is `/api/photos/tags`. The second
   segment was there because the route stood after `/photos/{photo_id}`, which takes an `int` and
   swallows `/photos/tags` with a 422 — the route moved above it, and a test holds it there
-- **One unreadable file stopped the inbox.** The import rejected only files that Pillow reported
-  with `OSError` or `ValueError`. A file whose header claims too many pixels raises
-  `DecompressionBombError` instead. It stayed in the inbox, failed on every sweep, and no file
-  sorted after it came in. The upload answered 500, and a stick import aborted. Any error while
-  reading a file now rejects that file into `_problem/`. A file that fails for another reason,
-  such as a full disk, stays for the next sweep without holding up the others
-- **A deleted photo was still public under its id.** Its details and full-size original stayed
-  downloadable without a PIN, and visitors could still locate and date it through the API. These
-  routes answer 404 now. The thumbnail stays reachable, because the admin area shows deleted
-  photos through it. See [point 83](docs/developer/decisions.md)
-- **A restore could lose what was saved while it swapped the database.** The file was renamed while
-  connections were still open on it. A visitor's statement in those seconds went into the set-aside
-  file, and the device answered as if it had been saved. The restore now closes the database for
-  the swap: it waits until no request is using it, and requests meanwhile get a 503 for a few
-  seconds. A download that is still running makes the restore stop before it changes anything. See
-  [point 84](docs/developer/decisions.md)
-- **Parallel sign-in attempts got past the lockout.** The admin login checked the lock before
-  hashing the PIN and counted a wrong PIN only after it. Requests sent at the same moment all found
-  the keypad open: of twenty, all twenty PINs were checked where five are allowed. An attempt now
-  counts before its PIN is checked
-- **Two imports of the same file at the same moment ended in an error.** The upload, the inbox and a
-  stick import run side by side. Both could pass the duplicate check before either had saved the
-  photo, and the second then failed on the database's uniqueness rule: a 500 for the upload, an
-  aborted stick import. It is recorded as a duplicate now. A new keyword created by two imports at
-  once failed the same way, and so did a curator's edit meeting an import. A failed thumbnail no
-  longer deletes an original that another import stored
-- **An upload or a restore could fill the SD card.** An upload had no size limit in the program:
-  the server wrote the whole body to disk before the endpoint ran, and before it checked the PIN.
-  An upload over 128 MB is now refused with a message the admin area shows. A restore checked the
-  free space against the size its manifest states, and a manifest with too small a number let the
-  copy run until the card was full. It now measures the files on the stick, or adds up the entries
-  of the archive
-- **A restored backup could reach files outside the collection.** The hash of a photo becomes its
-  file path, and after a restore the hash comes from the database on the stick. A crafted value
-  made the photo routes serve any file on the device whose name ends like a photo, without a PIN.
-  Such a row now answers 404. A restore from a stick also followed symbolic links and copied
-  whatever they pointed at into the collection; it ignores them now
-- **Two visitors answering the same question at once could overwrite each other.** The
-  contribution panel checked that a field was empty and wrote a moment later. A second answer in
-  between replaced the first, and both were thanked and logged. The write now only happens if the
-  field is still as the check found it; the second visitor hears that the photo already has an
-  answer. The same holds for the place, the year and the house number
-- **A visitor's impossible date answered with a server error.** 31 February, or a day without its
-  month, passed the checks of the contribution panel and failed only when the date was built. It is
-  refused now with "There is no such date", as the admin area already did
-- **Taking a visitor's statement back could throw away a newer one.** The admin area checked the
-  photo and then wrote a moment later. A correction by hand, a visitor's newer house number, or a
-  second curator taking back the same entry in between was overwritten. The revert now only writes
-  if the photo is still as it was checked, and says what changed otherwise
-- **A batch dated to a month or a day failed halfway.** The upload form and the stick import take a
-  year for the whole batch, and nothing finer. A request asking for month or day precision stored
-  the file and its thumbnails, then failed with a server error and left them without a record; a
-  stick import aborted. Only year and decade are accepted now, and anything else is refused before a
-  file is read. The admin area only ever sent those two
+- **One unreadable file no longer stops the inbox** ([#59])
+- **A deleted photo is no longer public under its id** ([#60])
+- **A write during a restore is no longer lost** ([#61])
+- **Parallel sign-in attempts no longer get past the lockout** ([#62])
+- **Two imports of the same file at once no longer end in an error** ([#63])
+- **An upload or a restore can no longer fill the SD card** ([#64])
+- **A restored backup can no longer reach files outside the collection** ([#65])
+- **Two visitors answering at once no longer overwrite each other** ([#66])
+- **An impossible visitor date no longer causes a server error** ([#67])
+- **Taking back a visitor's statement no longer overwrites a newer one** ([#68])
+- **A batch accepts only a year or a decade as its precision** ([#69])
+
+[#59]: https://github.com/nordfisch/kiekmap/issues/59
+[#60]: https://github.com/nordfisch/kiekmap/issues/60
+[#61]: https://github.com/nordfisch/kiekmap/issues/61
+[#62]: https://github.com/nordfisch/kiekmap/issues/62
+[#63]: https://github.com/nordfisch/kiekmap/issues/63
+[#64]: https://github.com/nordfisch/kiekmap/issues/64
+[#65]: https://github.com/nordfisch/kiekmap/issues/65
+[#66]: https://github.com/nordfisch/kiekmap/issues/66
+[#67]: https://github.com/nordfisch/kiekmap/issues/67
+[#68]: https://github.com/nordfisch/kiekmap/issues/68
+[#69]: https://github.com/nordfisch/kiekmap/issues/69
 
 ## [0.9.0] — 2026-09-02
 

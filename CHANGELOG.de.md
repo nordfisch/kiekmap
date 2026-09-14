@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: a6bc07f86daaa77dc85279f5baa91612bc2a7dcda0bab0019957669e49b953f7 -->
+<!-- source-sha: cfbd5b13683a7e607d642d9c4a474e159a3af4cdb824eafe9e329e9ccce01304 -->
 
 # Änderungen
 
@@ -58,68 +58,29 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   `/api/photos/tags`. Das zweite Segment gab es, weil die Route hinter `/photos/{photo_id}` stand,
   die einen `int` nimmt und `/photos/tags` mit einer 422 verschluckt — die Route ist nach oben
   gewandert, und ein Test hält sie dort
-- **Eine unlesbare Datei hielt den Eingangsordner an.** Der Import wies nur Dateien ab, die Pillow
-  mit `OSError` oder `ValueError` meldete. Eine Datei, deren Kopf zu viele Pixel angibt, löst
-  stattdessen `DecompressionBombError` aus. Sie blieb im Eingang, scheiterte bei jedem Durchgang,
-  und keine Datei, die danach einsortiert war, kam herein. Der Upload antwortete mit 500, ein
-  Stick-Import brach ab. Jeder Fehler beim Lesen einer Datei weist diese Datei jetzt nach
-  `_problem/` ab. Eine Datei, die aus einem anderen Grund scheitert, etwa bei voller Festplatte,
-  bleibt für den nächsten Durchgang liegen und hält die anderen nicht auf
-- **Ein gelöschtes Foto war unter seiner Nummer weiter öffentlich.** Seine Angaben und das Original
-  in voller Größe ließen sich ohne PIN abrufen, und Besucher konnten es über die API weiter verorten
-  und datieren. Diese Routen antworten jetzt mit 404. Das Vorschaubild bleibt erreichbar, weil die
-  Verwaltung gelöschte Fotos darüber zeigt. Siehe [Punkt 83](docs/developer/decisions.md)
-- **Eine Wiederherstellung konnte verlieren, was während des Austauschs der Datenbank gespeichert
-  wurde.** Die Datei wurde umbenannt, während noch Verbindungen auf ihr offen waren. Die Angabe
-  eines Besuchers in diesen Sekunden landete in der beiseitegelegten Datei, und das Gerät antwortete,
-  als sei sie gespeichert. Die Wiederherstellung schließt die Datenbank jetzt für den Austausch: Sie
-  wartet, bis keine Anfrage sie mehr benutzt, und Anfragen erhalten währenddessen für einige Sekunden
-  eine 503. Ein noch laufendes Herunterladen lässt die Wiederherstellung abbrechen, bevor sie etwas
-  ändert. Siehe [Punkt 84](docs/developer/decisions.md)
-- **Gleichzeitige Anmeldeversuche kamen an der Sperre vorbei.** Die Anmeldung zur Verwaltung prüfte
-  die Sperre vor dem Hashen der PIN und zählte eine falsche PIN erst danach. Anfragen, die im selben
-  Moment kamen, fanden das Tastenfeld alle offen: Von zwanzig wurden alle zwanzig PINs geprüft, wo
-  fünf erlaubt sind. Ein Versuch zählt jetzt, bevor seine PIN geprüft wird
-- **Zwei gleichzeitige Importe derselben Datei endeten mit einem Fehler.** Hochladen, Eingangsordner
-  und Stick-Import laufen nebeneinander. Beide konnten die Dublettenprüfung passieren, bevor einer
-  das Foto gespeichert hatte, und der zweite scheiterte dann an der Eindeutigkeitsregel der
-  Datenbank: eine 500 beim Hochladen, ein abgebrochener Stick-Import. Er wird jetzt als Dublette
-  verzeichnet. Ein neues Schlagwort, das zwei Importe gleichzeitig anlegten, scheiterte ebenso,
-  und eine Bearbeitung in der Verwaltung, die auf einen Import traf, auch. Ein fehlgeschlagenes
-  Vorschaubild löscht kein Original mehr, das ein anderer Import abgelegt hat
-- **Ein Hochladen oder eine Wiederherstellung konnte die SD-Karte füllen.** Das Hochladen hatte im
-  Programm keine Obergrenze: Der Server schrieb die ganze Anfrage auf die Karte, bevor der Endpunkt
-  lief und bevor er die PIN prüfte. Ein Hochladen über 128 MB wird jetzt mit einer Meldung
-  abgelehnt, die die Verwaltung anzeigt. Eine Wiederherstellung verglich den freien Platz mit der
-  Größe, die ihr Manifest nennt, und ein Manifest mit zu kleiner Zahl ließ das Kopieren laufen, bis
-  die Karte voll war. Sie misst jetzt die Dateien auf dem Stick oder zählt die Einträge des Archivs
-  zusammen
-- **Eine eingespielte Sicherung konnte Dateien außerhalb der Sammlung erreichen.** Der Hash eines
-  Fotos wird zu seinem Dateipfad, und nach einer Wiederherstellung stammt der Hash aus der Datenbank
-  auf dem Stick. Ein präparierter Wert ließ die Foto-Routen jede Datei des Geräts ausliefern, deren
-  Name wie ein Foto endet, ohne PIN. Eine solche Zeile antwortet jetzt mit 404. Eine
-  Wiederherstellung vom Stick folgte außerdem symbolischen Links und kopierte, worauf sie zeigten,
-  in die Sammlung; sie übergeht sie jetzt
-- **Zwei Besucher, die gleichzeitig dieselbe Frage beantworteten, konnten sich überschreiben.** Das
-  Mitmachen prüfte, ob ein Feld leer war, und schrieb einen Moment später. Eine zweite Antwort
-  dazwischen ersetzte die erste, und beiden wurde gedankt, beide wurden verzeichnet. Geschrieben
-  wird jetzt nur, wenn das Feld noch so ist, wie die Prüfung es vorfand; der zweite Besucher erfährt,
-  dass das Foto schon eine Angabe hat. Das gilt für Ort, Jahr und Hausnummer
-- **Ein unmögliches Datum eines Besuchers endete in einem Serverfehler.** Der 31. Februar oder ein
-  Tag ohne seinen Monat kamen durch die Prüfungen des Mitmachens und scheiterten erst, als das Datum
-  gebildet wurde. Sie werden jetzt mit „Dieses Datum gibt es nicht." abgelehnt, wie es die
-  Verwaltung schon tat
-- **Das Zurücknehmen einer Besucherangabe konnte eine neuere Angabe verwerfen.** Die Verwaltung
-  prüfte das Foto und schrieb einen Moment später. Eine Korrektur von Hand, eine neuere Hausnummer
-  eines Besuchers oder ein zweites Zurücknehmen desselben Eintrags dazwischen wurde überschrieben.
-  Das Zurücknehmen schreibt jetzt nur, wenn das Foto noch so ist, wie es geprüft wurde, und sagt
-  sonst, was sich geändert hat
-- **Ein Stapel mit Monats- oder Tagesgenauigkeit scheiterte auf halbem Weg.** Hochladen und
-  Stick-Import nehmen für den ganzen Stapel ein Jahr entgegen, nichts Feineres. Eine Anfrage mit
-  Monats- oder Tagesgenauigkeit legte die Datei und ihre Vorschaubilder ab, scheiterte dann mit
-  einem Serverfehler und ließ sie ohne Eintrag zurück; ein Stick-Import brach ab. Angenommen werden
-  jetzt nur Jahr und Jahrzehnt, alles andere wird abgelehnt, bevor eine Datei gelesen wird. Die
-  Verwaltung schickte ohnehin nur diese beiden
+- **Eine unlesbare Datei hält den Eingangsordner nicht mehr an** ([#59])
+- **Ein gelöschtes Foto ist unter seiner Nummer nicht mehr öffentlich** ([#60])
+- **Eine Angabe während einer Wiederherstellung geht nicht mehr verloren** ([#61])
+- **Gleichzeitige Anmeldeversuche kommen nicht mehr an der Sperre vorbei** ([#62])
+- **Zwei gleichzeitige Importe derselben Datei enden nicht mehr mit einem Fehler** ([#63])
+- **Hochladen oder Wiederherstellen kann die SD-Karte nicht mehr füllen** ([#64])
+- **Eine eingespielte Sicherung erreicht keine Dateien außerhalb der Sammlung mehr** ([#65])
+- **Zwei gleichzeitig antwortende Besucher überschreiben sich nicht mehr** ([#66])
+- **Ein unmögliches Datum eines Besuchers führt nicht mehr zu einem Serverfehler** ([#67])
+- **Das Zurücknehmen einer Besucherangabe überschreibt keine neuere mehr** ([#68])
+- **Ein Stapel nimmt als Genauigkeit nur Jahr oder Jahrzehnt an** ([#69])
+
+[#59]: https://github.com/nordfisch/kiekmap/issues/59
+[#60]: https://github.com/nordfisch/kiekmap/issues/60
+[#61]: https://github.com/nordfisch/kiekmap/issues/61
+[#62]: https://github.com/nordfisch/kiekmap/issues/62
+[#63]: https://github.com/nordfisch/kiekmap/issues/63
+[#64]: https://github.com/nordfisch/kiekmap/issues/64
+[#65]: https://github.com/nordfisch/kiekmap/issues/65
+[#66]: https://github.com/nordfisch/kiekmap/issues/66
+[#67]: https://github.com/nordfisch/kiekmap/issues/67
+[#68]: https://github.com/nordfisch/kiekmap/issues/68
+[#69]: https://github.com/nordfisch/kiekmap/issues/69
 
 ## [0.9.0] — 2. September 2026
 
