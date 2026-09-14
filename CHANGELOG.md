@@ -76,6 +76,12 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   aborted stick import. It is recorded as a duplicate now. A new keyword created by two imports at
   once failed the same way, and so did a curator's edit meeting an import. A failed thumbnail no
   longer deletes an original that another import stored
+- **An upload or a restore could fill the SD card.** An upload had no size limit in the program:
+  the server wrote the whole body to disk before the endpoint ran, and before it checked the PIN.
+  An upload over 128 MB is now refused with a message the admin area shows. A restore checked the
+  free space against the size its manifest states, and a manifest with too small a number let the
+  copy run until the card was full. It now measures the files on the stick, or adds up the entries
+  of the archive
 
 ## [0.9.0] — 2026-09-02
 

@@ -738,6 +738,88 @@ class TestBatchUpload:
         assert log["entries"][0]["result"] == "imported"
 
 
+class TestTheUploadLimit:
+    """Starlette writes every uploaded file to a temporary file before any endpoint runs.
+
+    Without a limit in front of that, one request filled the SD card, and it did not even need a
+    PIN: the body was spooled in full before the 401. nginx has a limit, the development server
+    does not, and nginx answers with a page the admin area cannot show.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _small_limit(self, monkeypatch):
+        from app.api import body_limit
+
+        monkeypatch.setattr(body_limit, "MAX_UPLOAD_BYTES", 1_000)
+
+    def test_a_declared_size_over_the_limit_is_refused_before_reading(
+        self, admin_client: TestClient, session
+    ):
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("big.tif", b"x" * 5_000, "image/tiff"))]
+        )
+
+        assert response.status_code == 413
+        assert "zu gross" in response.json()["detail"]
+        assert session.scalars(select(Photo)).all() == []
+
+    def test_a_body_without_a_declared_size_is_counted_and_broken_off(
+        self, admin_client: TestClient, session
+    ):
+        """Chunked transfer sends no Content-Length, so the header alone cannot be the limit."""
+        boundary = "kiekmap"
+        head = (
+            f'--{boundary}\r\nContent-Disposition: form-data; name="files"; filename="big.tif"\r\n'
+            "Content-Type: image/tiff\r\n\r\n"
+        ).encode()
+
+        def chunks():
+            yield head
+            for _ in range(10):
+                yield b"x" * 500
+            yield f"\r\n--{boundary}--\r\n".encode()
+
+        response = admin_client.post(
+            "/api/admin/upload",
+            content=chunks(),
+            headers={"content-type": f"multipart/form-data; boundary={boundary}"},
+        )
+
+        assert response.status_code == 413
+        assert session.scalars(select(Photo)).all() == []
+
+    def test_the_limit_holds_before_the_pin(self, client: TestClient):
+        """A body over the limit is refused without being spooled, whoever sends it."""
+        response = client.post(
+            "/api/admin/upload", files=[("files", ("big.tif", b"x" * 5_000, "image/tiff"))]
+        )
+
+        assert response.status_code == 413
+
+    def test_an_upload_under_the_limit_is_not_touched(
+        self, admin_client: TestClient, monkeypatch, fixtures_dir
+    ):
+        from app.api import body_limit
+
+        monkeypatch.setattr(body_limit, "MAX_UPLOAD_BYTES", 10_000_000)
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("scan.jpg", _image(fixtures_dir), "image/jpeg"))]
+        )
+
+        assert response.status_code == 200
+        assert response.json()["imported"] == 1
+
+    def test_other_routes_are_not_limited(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}", json={"description": "x" * 5_000}
+        )
+
+        assert response.status_code == 200
+
+
 class TestTheImportLog:
     def test_only_the_rejected_ones_on_request(
         self, admin_client: TestClient, session, fixtures_dir

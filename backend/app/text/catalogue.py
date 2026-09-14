@@ -98,6 +98,7 @@ class ImportTexts:
     same_content_as: Callable[[int, str], str]
     no_readable_image: Callable[[str], str]
     thumbnail_failed: Callable[[str], str]
+    upload_too_large: Callable[[str], str]
     unknown_format: str
     format_not_allowed: Callable[[str, str], str]
     imported: Callable[[bool, bool], str]

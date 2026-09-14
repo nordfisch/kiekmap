@@ -27,7 +27,7 @@ from app.services.backup.common import (
     human_size,
 )
 from app.services.backup.drives import Drive
-from app.services.backup.manifest import is_restorable, read_archive_manifest, read_manifest
+from app.services.backup.manifest import is_restorable, read_archive_manifest
 from app.text import texts
 
 log = logging.getLogger(__name__)
@@ -50,10 +50,7 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
     if not is_restorable(source):
         raise BackupError(texts().backup.no_backup_on_the_stick)
 
-    manifest = read_manifest(source)
-    assert manifest is not None  # is_restorable checked it
-
-    work = _prepare_work_dir(settings, manifest.bytes)
+    work = _prepare_work_dir(settings, _size_on_stick(source))
 
     total = sum(1 for path in (source / "photos").rglob("*") if path.is_file())
     report(0, total, texts().backup.first_the_records)
@@ -76,6 +73,20 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
             copy_if_new(source / name, work / name)
 
     return _swap_in(settings, work, total, report)
+
+
+def _size_on_stick(source: Path) -> int:
+    """What the copy onto the device will take: the files on the stick, measured.
+
+    Not the size the manifest states. The manifest is a file on a stick like any other, and a
+    number in it that is too small let the copy run until the SD card was full -- the card that
+    also holds the running collection.
+    """
+    files = [source / "kiekmap.db", *(source / name for name in LOOSE_FILES)]
+    for folder in ("photos", "thumbs"):
+        if (source / folder).is_dir():
+            files.extend((source / folder).rglob("*"))
+    return sum(path.stat().st_size for path in files if path.is_file())
 
 
 def _prepare_work_dir(settings: Settings, needed: int) -> Path:
@@ -157,12 +168,17 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
     if info is None:
         raise BackupError(texts().backup.not_a_complete_backup)
 
-    work = _prepare_work_dir(settings, info.bytes)
     prefix = f"{BACKUP_DIR_NAME}/"
 
     with zipfile.ZipFile(archive) as opened:
         entries = [e for e in opened.infolist() if not e.is_dir() and e.filename.startswith(prefix)]
         total = sum(1 for e in entries if e.filename.startswith(f"{prefix}photos/"))
+
+        # **The room needed is the sum of the entries, not the size in the manifest.** The manifest
+        # is one entry of the archive, and a number in it that is too small let the unpacking run
+        # until the SD card was full. The sizes in the ZIP directory do hold: ``zipfile`` stops
+        # reading an entry at its declared size, so no entry unpacks to more than it claims.
+        work = _prepare_work_dir(settings, sum(entry.file_size for entry in entries))
 
         report(0, total, texts().backup.first_the_records)
         done = 0

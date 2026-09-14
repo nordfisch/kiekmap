@@ -399,6 +399,66 @@ class TestTheSwap:
         assert client.get("/api/photos/tags").status_code == 200, "the gate is open again"
 
 
+class TestRoomForARestore:
+    """A restore needs room for a second collection beside the first, on the same SD card.
+
+    The check compared free space with the size the manifest states. The manifest is one file
+    among those it describes, and a number in it that was too small let the copy run until the card
+    was full.
+    """
+
+    @staticmethod
+    def _little_room(monkeypatch, free: int):
+        from collections import namedtuple
+
+        from app.services.backup import restore
+
+        usage = namedtuple("usage", "total used free")
+        monkeypatch.setattr(restore.shutil, "disk_usage", lambda path: usage(free, 0, free))
+
+    def test_a_stick_whose_manifest_understates_its_size_is_refused(
+        self, session, settings, stick, collection, monkeypatch
+    ):
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        drive = _drive(settings)
+        manifest = stick / backup.BACKUP_DIR_NAME / backup.MANIFEST_NAME
+        manifest.write_text(manifest.read_text().replace('"bytes": ', '"bytes": 1, "was": '))
+        self._little_room(monkeypatch, free=1_000)
+
+        with pytest.raises(backup.BackupError) as refusal:
+            backup.run_restore(settings, drive, _report_nothing)
+
+        assert "zu wenig Platz" in str(refusal.value)
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+    def test_an_archive_whose_manifest_understates_its_size_is_refused(
+        self, session, settings, collection, monkeypatch
+    ):
+        collection(2)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        honest = settings.data_dir / "honest.zip"
+        with honest.open("wb") as target:
+            for part in backup.stream_archive(session, settings):
+                target.write(part)
+
+        archive = settings.incoming_dir / "kiekmap-backup-holm-2026-08-03.zip"
+        manifest_name = f"{backup.BACKUP_DIR_NAME}/{backup.MANIFEST_NAME}"
+        with zipfile.ZipFile(honest) as source, zipfile.ZipFile(archive, "w") as lying:
+            for entry in source.infolist():
+                data = source.read(entry)
+                if entry.filename == manifest_name:
+                    data = data.replace(b'"bytes": ', b'"bytes": 1, "was": ')
+                lying.writestr(entry, data)
+        self._little_room(monkeypatch, free=1_000)
+
+        with pytest.raises(backup.BackupError) as refusal:
+            backup.run_restore_from_archive(settings, archive, _report_nothing)
+
+        assert "zu wenig Platz" in str(refusal.value)
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+
 class TestSchemaRevisionOnRestore:
     """The error that ran unnoticed for two days on 12 August 2026.
 

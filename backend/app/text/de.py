@@ -164,6 +164,7 @@ de = Texts(
         ),
         no_readable_image=lambda reason: f"Kein lesbares Bild: {reason}",
         thumbnail_failed=lambda reason: f"Vorschaubild fehlgeschlagen: {reason}",
+        upload_too_large=lambda limit: f"Die Datei ist zu gross. Die Obergrenze liegt bei {limit}.",
         unknown_format="unbekannt",
         format_not_allowed=lambda found, allowed: (
             f"Format {found} passt nicht (erlaubt sind: {allowed})"

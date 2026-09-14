@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: f54d8ea631fe4bc31495714a984c4efdc1f471ef9d73989438e37744aa7fc310 -->
+<!-- source-sha: 1b70ca762b23b07fdd2da281902ddf2fcba38b324dcedbea2bd6625a3162c6fe -->
 
 # Änderungen
 
@@ -87,6 +87,13 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   verzeichnet. Ein neues Schlagwort, das zwei Importe gleichzeitig anlegten, scheiterte ebenso,
   und eine Bearbeitung in der Verwaltung, die auf einen Import traf, auch. Ein fehlgeschlagenes
   Vorschaubild löscht kein Original mehr, das ein anderer Import abgelegt hat
+- **Ein Hochladen oder eine Wiederherstellung konnte die SD-Karte füllen.** Das Hochladen hatte im
+  Programm keine Obergrenze: Der Server schrieb die ganze Anfrage auf die Karte, bevor der Endpunkt
+  lief und bevor er die PIN prüfte. Ein Hochladen über 128 MB wird jetzt mit einer Meldung
+  abgelehnt, die die Verwaltung anzeigt. Eine Wiederherstellung verglich den freien Platz mit der
+  Größe, die ihr Manifest nennt, und ein Manifest mit zu kleiner Zahl ließ das Kopieren laufen, bis
+  die Karte voll war. Sie misst jetzt die Dateien auf dem Stick oder zählt die Einträge des Archivs
+  zusammen
 
 ## [0.9.0] — 2. September 2026
 

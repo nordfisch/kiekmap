@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 
 from app import __version__
 from app.api import admin, backup, config, contribute, health, photos, places
+from app.api.body_limit import BodyLimit
 from app.config import get_settings
 from app.db import DatabaseClosed, SessionLocal
 from app.services.places import load_if_empty as load_places_if_empty
@@ -58,6 +59,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(BodyLimit)
 
 
 @app.exception_handler(DatabaseClosed)
