@@ -2332,14 +2332,19 @@ admin area has another way to its images.
 
 A restore renames `kiekmap.db` and moves the restored file into its place. Until this point it did
 that while the connection pool held connections open on the old file, and it rebuilt the engine
-only afterwards. Two things followed:
+only afterwards.
 
-- **A write in between was lost.** A request that arrived during the swap used a pooled connection
-  and wrote into the file that had just been set aside. The device answered 200. A test reproduced
-  it with a visitor's dating.
-- **The journal of the new file was at risk.** When SQLite closes the last connection to a file, it
-  checkpoints and deletes the `-wal` by its name. That name belonged to the restored database by
-  then. SQLite's own list of ways to corrupt a database names renaming a file in use.
+**A write in between was lost.** A request that arrived during the swap used a pooled connection
+and wrote into the file that had just been set aside. The device answered 200. A test reproduced
+it with a visitor's dating.
+
+**Renaming a database file while a connection holds it is also on SQLite's list of ways to corrupt
+a database.** This point first said that closing the old connections afterwards would delete the
+restored file's `-wal` by its name. A test against SQLite 3.53.4 refuted that: the old connection
+was closed after the swap, and the `-wal` of the restored file and a write made after the swap both
+survived. No damage beyond the lost write is known. The connections are still closed before the
+rename, so that the restore does not depend on how SQLite handles the case its documentation warns
+about.
 
 **The swap now runs with the database closed.** `DatabaseGate` in `app/db.py` counts the sessions in
 use. `closed_for_swap` refuses new sessions, waits until none is in use, disposes the engine, lets

@@ -360,9 +360,10 @@ class TestTheSwap:
     def test_the_connections_are_closed_before_the_file_is_moved(
         self, session, settings, stick, collection, monkeypatch
     ):
-        """Closed afterwards, SQLite removes the journal of the old file by its name.
+        """SQLite's documentation counts renaming a database file in use as a way to corrupt it.
 
-        By then that name belongs to the restored database.
+        A test against SQLite 3.53.4 found no damage from it beyond the lost write. The order still
+        holds, so that the restore does not depend on that. See decisions.md, point 84.
         """
         import app.db
         from app.services.backup import restore

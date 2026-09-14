@@ -62,11 +62,10 @@ class DatabaseInUse(Exception):
 class DatabaseGate:
     """Counts the sessions in use, so that a restore can swap the file under none of them.
 
-    **A restore renames the database file**, and SQLite does not survive that under an open
-    connection. A pooled connection keeps writing into the renamed file, so a visitor's
-    contribution during the swap lands in the set-aside state and is gone. When that connection is
-    finally closed, SQLite deletes its journal by name -- and by then that name belongs to the
-    restored database. SQLite's own list of ways to corrupt a database names this case.
+    **A restore renames the database file.** A pooled connection keeps writing into the renamed
+    file, so a visitor's contribution during the swap lands in the set-aside state and is gone.
+    SQLite's documentation also lists renaming a database file while it is in use among the ways to
+    corrupt it. See ``docs/developer/decisions.md``, point 84, for what a test found about that.
 
     The gate closes only for the swap itself, which takes seconds; the copying before it runs with
     the database open. Whoever asks for a session meanwhile gets ``DatabaseClosed``.
@@ -119,7 +118,7 @@ def closed_for_swap(timeout_s: float | None = None) -> Iterator[None]:
 
     ``dispose()`` closes only the connections that are back in the pool. That is why the gate
     comes first: once no session is in use, every connection is back, and none stays open on the
-    old file. SQLite checkpoints and removes its journal while the file still has its own name.
+    old file when it is renamed.
 
     Raises ``DatabaseInUse`` before anything is closed, so a refusal leaves the service as it was.
     """
