@@ -40,9 +40,6 @@ class Settings(BaseSettings):
     #: Where mounted USB sticks are looked for (stage 9).
     media_dir: Path = Path("/media")
 
-    #: Allowed origins for the Vite dev server. Empty in production -- same origin there.
-    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
-
     #: For the admin area from stage 8 on. Empty means the admin API does not answer.
     admin_pin_hash: str = ""
 

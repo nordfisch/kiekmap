@@ -5,7 +5,6 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app import __version__
@@ -50,15 +49,6 @@ app = FastAPI(
     redoc_url=None,
 )
 
-# Only needed for the Vite dev server. On the Pi, nginx serves frontend and API from the same
-# origin, so this middleware never applies there.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=get_settings().cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 app.add_middleware(BodyLimit)
 
 

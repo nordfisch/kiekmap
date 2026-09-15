@@ -14,7 +14,7 @@ Four questions, and only the first is about the compose file:
   1. Does every ``KIEKMAP_*`` setting reach the backend container -- through ``env_file`` or
      because ``environment:`` sets it by name?
   2. Does ``environment:`` name only settings that actually exist? A typo there does nothing at
-     all, quietly: ``KIEKMAP_CORS_ORIGIN`` is not ``KIEKMAP_CORS_ORIGINS``.
+     all, quietly: ``KIEKMAP_MEDIA_DIRS`` is not ``KIEKMAP_MEDIA_DIR``.
   3. Same for ``deploy/.env.example``, including the commented-out lines -- it is the template
      every new installation starts from, so a typo in it travels.
   4. **And the same for the real ``.env``**, when there is one. It is not versioned, so it is the
