@@ -32,5 +32,7 @@ RUN ls dist/assets/maplibre-gl-worker-*.js >/dev/null 2>&1 || { \
 FROM nginx:1.27-alpine AS runtime
 COPY --from=build /src/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Not under conf.d/: nginx includes every *.conf there at http level on its own.
+COPY nginx/nosniff.conf /etc/nginx/snippets/nosniff.conf
 
 EXPOSE 80
