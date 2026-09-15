@@ -34,10 +34,9 @@ UtcDatetime = Annotated[datetime, AfterValidator(_as_utc)]
 
 #: The longest ``description`` or ``provenance`` the API takes, in characters.
 #:
-#: **Measured, not chosen.** Before this limit a PATCH with 2 MB in each field was accepted. In the
-#: initial collection of 1,324 photos the longest description has 855 characters and the longest
-#: provenance 580; the 99th percentiles are 467 and 217. The change log holds one longer value, a
-#: description of 942 characters that was shortened since.
+#: **Measured, not chosen.** In the initial collection of 1,324 photos the longest description has
+#: 855 characters and the longest provenance 580; the 99th percentiles are 467 and 217. The change
+#: log holds one longer value, a description of 942 characters that was shortened since.
 #:
 #: Four thousand is more than four times that. It also covers what the importer can bring along: an
 #: IPTC caption holds at most 2,000 bytes, and a title too long to be one is put in front of it (see
