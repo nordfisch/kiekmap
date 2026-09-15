@@ -149,6 +149,10 @@ en = Texts(
         unreadable_file=lambda reason: f"File not readable: {reason}",
         same_content_as=lambda photo_id, filename: f"Same content as photo {photo_id} ({filename})",
         no_readable_image=lambda reason: f"No readable image: {reason}",
+        too_many_pixels=lambda megapixels: (
+            f"The image has too many pixels. The limit is {megapixels} megapixels. "
+            "Please save the scan at a lower dpi."
+        ),
         thumbnail_failed=lambda reason: f"No preview could be made: {reason}",
         upload_too_large=lambda limit: f"The file is too large. The limit is {limit}.",
         unknown_format="unknown",

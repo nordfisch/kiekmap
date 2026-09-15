@@ -1,12 +1,16 @@
+import struct
+import zlib
 from datetime import date
 from pathlib import Path
 
-from PIL import Image
+import pytest
+from PIL import Image, ImageFile
 from sqlalchemy import select
 
 from app.models import DatePrecision, ImportLog, ImportResult, Photo, Source
 from app.services.importer import DONE_DIR, PROBLEM_DIR, import_directory, import_file
-from app.services.storage import THUMBNAIL_SIZES, original_path, thumbnail_path
+from app.services.storage import THUMBNAIL_SIZES, original_path, sha256_of_file, thumbnail_path
+from app.text import texts
 
 
 class TestTheBasicCase:
@@ -659,3 +663,139 @@ class TestUnwieldyFiles:
         assert "TypeError" in outcome.message, "an exception without a message still says what"
         assert list(settings.photos_dir.rglob("*.*")) == []
         assert session.scalars(select(Photo)).all() == []
+
+
+def _png_header_claiming(width: int, height: int) -> bytes:
+    """A PNG header claiming a size. Opening reads only the header, so no pixels are needed."""
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        checksum = struct.pack(">I", zlib.crc32(kind + data))
+        return struct.pack(">I", len(data)) + kind + data + checksum
+
+    header = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) + chunk(b"IEND", b"")
+
+
+class TestLargeScans:
+    """A thumbnail needs a fraction of a scan's pixels, and the Pi has 4 GB beside Chromium.
+
+    The thumbnails used to decode every scan in full and then copy it three times: rotated,
+    converted, once per size. A 35 MP scan cost about half a gigabyte. Above Pillow's limit it only
+    warned, so an image of up to 179 MP was decoded the same way.
+    """
+
+    #: Four times the long side of the 1200 px thumbnail: the smallest image that is reduced at all,
+    #: and generated in a fraction of a second.
+    SIZE = (4800, 3200)
+
+    @pytest.fixture
+    def decoded(self, monkeypatch) -> list[tuple[int, int]]:
+        """The size of every image Pillow decodes from a file."""
+        sizes: list[tuple[int, int]] = []
+        real_load = ImageFile.ImageFile.load
+
+        def load(image):
+            if image.tile:
+                sizes.append(image.size)
+            return real_load(image)
+
+        monkeypatch.setattr(ImageFile.ImageFile, "load", load)
+        return sizes
+
+    def _scan(self, tmp_path: Path, format: str) -> Path:
+        path = tmp_path / f"large.{format.lower()}"
+        gradient = Image.linear_gradient("L").resize(self.SIZE)
+        if format == "MPO":
+            gradient.save(path, "MPO", save_all=True, append_images=[gradient.rotate(180)])
+        elif format == "PNG":
+            gradient.save(path, "PNG", compress_level=1)
+        else:
+            gradient.save(path, format)
+        return path
+
+    @pytest.mark.parametrize("format", ["JPEG", "MPO"])
+    def test_a_large_jpeg_is_not_decoded_in_full_for_its_thumbnails(
+        self, session, settings, tmp_path, decoded, format
+    ):
+        path = self._scan(tmp_path, format)
+
+        outcome = import_file(session, path, settings)
+
+        assert outcome.result == ImportResult.IMPORTED
+        assert decoded, "the thumbnails were made from decoded pixels"
+        assert max(width * height for width, height in decoded) <= 2400 * 1600
+        # What is stored describes the original, not the decode.
+        assert (outcome.photo.width, outcome.photo.height) == self.SIZE
+        assert outcome.photo.sha256 == sha256_of_file(path)
+        with Image.open(thumbnail_path(settings.thumbs_dir, outcome.photo.sha256, 1200)) as v:
+            assert v.size == (1200, 800)
+
+    def test_a_jpeg_is_not_decoded_below_twice_its_largest_thumbnail(
+        self, session, settings, tmp_path, decoded
+    ):
+        """JPEG reduces by whole powers of two, which blurs. Lanczos does the last factor of two.
+
+        Decoded straight to 1200 x 800 the draft would save more memory and cost sharpness.
+        """
+        outcome = import_file(session, self._scan(tmp_path, "JPEG"), settings)
+
+        assert outcome.result == ImportResult.IMPORTED
+        assert min(max(size) for size in decoded) >= 2 * max(THUMBNAIL_SIZES)
+
+    def test_a_large_png_is_reduced_before_it_is_rotated_and_converted(
+        self, session, settings, tmp_path, monkeypatch
+    ):
+        """PNG and TIFF decode only in full. Each copy after that is what ``reduce`` saves."""
+        from app.services import thumbnails
+
+        received: list[tuple[int, int]] = []
+        real = thumbnails._for_display
+
+        def for_display(image):
+            received.append(image.size)
+            return real(image)
+
+        monkeypatch.setattr(thumbnails, "_for_display", for_display)
+
+        outcome = import_file(session, self._scan(tmp_path, "PNG"), settings)
+
+        assert outcome.result == ImportResult.IMPORTED
+        assert received == [(2400, 1600)]
+
+    @pytest.mark.filterwarnings("ignore::PIL.Image.DecompressionBombWarning")
+    @pytest.mark.parametrize(
+        "size",
+        [(1200, 1000), (1500, 1500)],
+        ids=["up to twice the limit, where Pillow only warns", "above twice the limit"],
+    )
+    def test_an_image_above_the_limit_is_rejected_and_leaves_nothing(
+        self, session, settings, tmp_path, monkeypatch, size
+    ):
+        monkeypatch.setattr(Image, "MAX_IMAGE_PIXELS", 1_000_000)
+        path = tmp_path / "large.jpg"
+        Image.new("L", size).save(path)
+
+        outcome = import_file(session, path, settings)
+
+        assert outcome.result == ImportResult.REJECTED
+        assert outcome.message == texts().imports.too_many_pixels(1)
+        assert list(settings.photos_dir.rglob("*.*")) == []
+        assert list(settings.thumbs_dir.rglob("*.*")) == []
+        session.flush()
+        assert session.scalars(select(Photo)).all() == []
+        assert session.scalar(select(ImportLog.result)) == ImportResult.REJECTED
+
+    @pytest.mark.filterwarnings("ignore::PIL.Image.DecompressionBombWarning")
+    def test_the_limit_is_set_rather_than_left_to_pillow(self, tmp_path):
+        """An A3 scan at 600 dpi comes in. 81 MP does not, though Pillow's default lets it pass."""
+        from app.services.exif import TooManyPixels, open_image
+
+        a3 = tmp_path / "a3.png"
+        a3.write_bytes(_png_header_claiming(9921, 7016))
+        with open_image(a3) as image:
+            assert image.size == (9921, 7016)
+
+        larger = tmp_path / "larger.png"
+        larger.write_bytes(_png_header_claiming(9000, 9000))
+        with pytest.raises(TooManyPixels):
+            open_image(larger)
