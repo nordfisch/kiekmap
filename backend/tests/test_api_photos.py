@@ -470,6 +470,48 @@ class TestServingFiles:
 
         assert client.get(f"/api/photos/{imported_photo.id}/thumb").status_code == 200
 
+    @pytest.fixture
+    def statements(self, session):
+        """The SQL statements the engine sends, collected while a test runs."""
+        from sqlalchemy import event
+
+        import app.db
+
+        sent: list[str] = []
+
+        def record(conn, cursor, statement, parameters, context, executemany):
+            sent.append(statement)
+
+        event.listen(app.db.engine, "before_cursor_execute", record)
+        yield sent
+        event.remove(app.db.engine, "before_cursor_execute", record)
+
+    @pytest.mark.parametrize("route", ["thumb", "image"])
+    def test_a_file_request_does_not_load_the_tags(
+        self, client: TestClient, session, imported_photo, statements, route
+    ):
+        """A tag query here was a second statement for every thumbnail the map loads first."""
+        from app.services.tags import add_tags
+
+        add_tags(session, imported_photo, ["Gebäude", "Schule"])
+        session.commit()
+        statements.clear()
+
+        response = client.get(f"/api/photos/{imported_photo.id}/{route}")
+
+        assert response.status_code == 200
+        assert len(statements) == 1, statements
+
+    def test_the_detail_still_carries_the_tags(self, client: TestClient, session, imported_photo):
+        from app.services.tags import add_tags
+
+        add_tags(session, imported_photo, ["Gebäude", "Schule"])
+        session.commit()
+
+        data = client.get(f"/api/photos/{imported_photo.id}").json()
+
+        assert sorted(data["tags"]) == ["Gebäude", "Schule"]
+
     def test_an_imported_photo_appears_on_the_map(self, client: TestClient, imported_photo):
         """The GPS test image lies in Holm and carries a capture date of 1975."""
         response = client.get(
