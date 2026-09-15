@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 61362f65696ff9ec7cdb99bf4c71df26da768d351801b92ebde437e41bab3992 -->
+<!-- source-sha: 90772ac8805fbb3476ebaba54a621e5ab9ffe3801f59dba7297a5fe35e0735a4 -->
 
 # Änderungen
 
@@ -73,6 +73,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Ein Befehl auf der Kommandozeile schreibt nicht mehr in eine Wiederherstellung** ([#71])
 - **Vorschaubilder und Originale laden mit einer Datenbankabfrage statt zwei** ([#73])
 - **`make seed` lädt die Beispielsammlung wieder** ([#75])
+- **nginx sendet Sicherheits-Header** ([#76])
+- **Das Backend hat keine CORS-Middleware mehr, die niemand brauchte** ([#78])
+- **Ein zweiter Backend-Prozess auf demselben Datenverzeichnis bricht beim Start ab** ([#79])
+- **Überlange Eingaben werden abgewiesen statt einen Serverfehler auszulösen** ([#80])
+- **Große Scans werden für Vorschaubilder nicht mehr vollständig dekodiert** ([#81])
+- **Ein laufender Download lehnt eine Wiederherstellung sofort ab, ohne 503 am Kiosk** ([#82])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -89,6 +95,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#71]: https://github.com/nordfisch/kiekmap/issues/71
 [#73]: https://github.com/nordfisch/kiekmap/issues/73
 [#75]: https://github.com/nordfisch/kiekmap/issues/75
+[#76]: https://github.com/nordfisch/kiekmap/issues/76
+[#78]: https://github.com/nordfisch/kiekmap/issues/78
+[#79]: https://github.com/nordfisch/kiekmap/issues/79
+[#80]: https://github.com/nordfisch/kiekmap/issues/80
+[#81]: https://github.com/nordfisch/kiekmap/issues/81
+[#82]: https://github.com/nordfisch/kiekmap/issues/82
 
 ## [0.9.0] — 2. September 2026
 

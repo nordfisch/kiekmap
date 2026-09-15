@@ -65,6 +65,12 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **A writing command at the command line can no longer run through a restore** ([#71])
 - **Thumbnails and originals load with one database query instead of two** ([#73])
 - **`make seed` loads the sample collection again** ([#75])
+- **nginx sends security headers** ([#76])
+- **The backend no longer carries a CORS middleware nobody needed** ([#78])
+- **A second backend process on the same data directory stops at startup** ([#79])
+- **Over-long input is refused instead of causing a server error** ([#80])
+- **Large scans are no longer decoded in full for their thumbnails** ([#81])
+- **A running download refuses a restore at once, without 503 on the kiosk** ([#82])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -81,6 +87,12 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 [#71]: https://github.com/nordfisch/kiekmap/issues/71
 [#73]: https://github.com/nordfisch/kiekmap/issues/73
 [#75]: https://github.com/nordfisch/kiekmap/issues/75
+[#76]: https://github.com/nordfisch/kiekmap/issues/76
+[#78]: https://github.com/nordfisch/kiekmap/issues/78
+[#79]: https://github.com/nordfisch/kiekmap/issues/79
+[#80]: https://github.com/nordfisch/kiekmap/issues/80
+[#81]: https://github.com/nordfisch/kiekmap/issues/81
+[#82]: https://github.com/nordfisch/kiekmap/issues/82
 
 ## [0.9.0] — 2026-09-02
 

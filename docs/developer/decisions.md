@@ -2423,3 +2423,85 @@ would let anybody who reaches the keypad lock the volunteers out for hours.
 
 What the review did change stays: an attempt counts before its PIN is checked (#62), so parallel
 requests do not multiply the five attempts.
+
+---
+
+## 86. Security headers go into each nginx location
+
+nginx passes a server-level `add_header` only to locations that define no `add_header` of their
+own. `/assets/`, `/basemaps/` and `/tiles/` set `Cache-Control`, so a server-level header would be
+missing exactly there. **`X-Content-Type-Options: nosniff` therefore comes from an included
+snippet, `frontend/nginx/nosniff.conf`, in every location.** It carries `always`; without it the
+header is missing on error responses such as the 502 of `/api/` (#76).
+
+The Content-Security-Policy applies to the page only. It allows `data:` images, because MapLibre
+draws its controls with them and `admin.css` its select arrow. It stays off `/api/`: `/api/docs`
+loads Swagger UI from a CDN, and the policy would block it.
+
+Whoever adds a location includes the snippet in it.
+
+---
+
+## 87. The backend runs as exactly one process
+
+Admin sessions, download tickets, the PIN lockout, the backup job and `DatabaseGate` live in the
+memory of one process. A second worker would drop sign-ins at random, allow the lockout's attempts
+once per process, run two jobs at once and leave the gate without effect.
+
+**At startup `lifespan` takes an exclusive, non-blocking `flock` on `data/kiekmap-backend.lock`**
+(`process_lock` in `app/db.py`) and holds it while the process runs. A second process on the same
+data directory logs the reason and stops. Under `uvicorn --workers 2` the parent stops with it
+(#79).
+
+**The file is not `kiekmap.lock`.** The writing CLI commands take that one shared while the backend
+runs ([point 84](#84-a-restore-closes-the-database-for-the-swap)). An exclusive lock there would
+refuse all of them.
+
+`uvicorn --reload` is unaffected, because the reloader ends the old process before it starts the
+new one. The Dockerfile names `--workers 1`, which takes precedence over `WEB_CONCURRENCY`. Docker
+Desktop's file sharing on the Mac ignores `flock`; there the lock does nothing.
+
+---
+
+## 88. Input from the API has an upper bound, measured against the collection
+
+**`exclude` reads ids from 1 to 2⁶³−1, and the last 200 of them** (`EXCLUDE_MAX`). A longer run of
+digits reached SQLite and gave a 500. The panel remembers 20 skipped photos, so a visitor never
+reaches the limit. The panel appends at the end, so the newest skips are the ones kept. 200 bound
+parameters also stay below the 999 that older SQLite versions allow.
+
+**`description` and `provenance` take at most 4,000 characters** (`LONG_TEXT_MAX` in
+`schemas.py`). In the initial collection of 1,324 photos the longest description has 855
+characters and the longest provenance 580; the 99th percentiles are 467 and 217. The longest value
+the change log holds is 942 characters. An IPTC caption holds at most 2,000 bytes, so a photo
+straight from an import stays editable. The admin fields carry the same `maxLength`, and a refusal
+from the schema reaches the screen as a sentence from the text catalogue (#80).
+
+**Every `/api/` route other than the upload takes a body of at most 1 MB.** A JSON body is read
+into memory whole before validation. The largest legitimate one is a photo edit: 8,800 characters
+of text, at most 105.6 kB even escaped as surrogate pairs. `BodyLimit` checks `Content-Length` or
+counts a chunked body, as it does for the upload, which keeps its 128 MB.
+
+---
+
+## 89. A thumbnail decodes only what it needs, and the pixel limit is a decision
+
+Pillow warns above 89.5 MP, refuses only above 179 MP, and decodes everything below in full. An RGB
+image of 34.8 MP, the size of the largest scan in the collection (A4 at 600 dpi), peaked at 475 to
+546 MB while its thumbnails were made (#81).
+
+**A JPEG decodes at reduced size.** `draft()` decodes at 1/2, 1/4 or 1/8. Other formats decode in
+full and are shrunk with `reduce()` before any copy. Both stop at twice the long side of the
+largest thumbnail. That is the gap Pillow's own `thumbnail()` keeps: reduction by whole factors
+blurs, and Lanczos over the last factor of two does not. Compared on the 73 scans large enough to
+be reduced, old and new thumbnails differ less than the WebP encoding changes them (median 51 dB
+against 35 dB PSNR).
+
+**The limit is 70 MP**, set in `services/exif.py`. It admits A3 at 600 dpi (69.6 MP). At that size
+an RGB image peaks at about 340 MB as JPEG, PNG or TIFF, less than the A4 scan cost before. An
+image above the limit is rejected before a pixel is read, also where Pillow only warns, and the
+import log names the limit.
+
+**WebP is the exception.** Pillow decodes it only in full, 1.2 GB at the limit. No scan of the
+collection is WebP. The Pi's free memory is not measured yet; the first device (#18) can correct
+the number.
