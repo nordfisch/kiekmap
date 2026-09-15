@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import ExitStack, asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +12,7 @@ from app import __version__
 from app.api import admin, backup, config, contribute, health, photos, places
 from app.api.body_limit import BodyLimit
 from app.config import get_settings
-from app.db import DatabaseClosed, SessionLocal
+from app.db import BackendAlreadyRunning, DatabaseClosed, SessionLocal, process_lock
 from app.services.places import load_if_empty as load_places_if_empty
 from app.services.watcher import IncomingWatcher
 from app.text import texts
@@ -27,15 +27,25 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings.ensure_dirs()
     log.info("Data directory: %s", settings.data_dir)
 
-    with SessionLocal() as session:
-        load_places_if_empty(session, settings.places_file)
+    with ExitStack() as held:
+        # Before anything writes: a second process must stop before it reads in places or starts
+        # a watcher of its own. See ``app.db.process_lock``.
+        try:
+            held.enter_context(process_lock(settings))
+        except BackendAlreadyRunning as refusal:
+            # Logged on its own line, so that the reason stands above the traceback.
+            log.error("%s", refusal)
+            raise
 
-    watcher = IncomingWatcher(settings)
-    watcher.start()
-    try:
-        yield
-    finally:
-        watcher.stop()
+        with SessionLocal() as session:
+            load_places_if_empty(session, settings.places_file)
+
+        watcher = IncomingWatcher(settings)
+        watcher.start()
+        try:
+            yield
+        finally:
+            watcher.stop()
 
 
 app = FastAPI(

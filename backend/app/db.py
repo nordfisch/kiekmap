@@ -10,6 +10,7 @@ import os
 import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
+from pathlib import Path
 
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -162,18 +163,70 @@ def collection_lock(settings: Settings, *, exclusive: bool) -> Iterator[None]:
     sharing ignores ``flock``, even inside one container. See ``docs/developer/decisions.md``,
     point 84.
     """
-    settings.data_dir.mkdir(parents=True, exist_ok=True)
-    # Read-only is enough for flock, and it opens a lock file another user created.
-    fd = os.open(settings.lock_path, os.O_RDONLY | os.O_CREAT, 0o644)
     try:
-        try:
-            fcntl.flock(fd, (fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH) | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise CollectionLocked from None
+        fd = _flock(settings.lock_path, exclusive=exclusive)
+    except BlockingIOError:
+        raise CollectionLocked from None
+    try:
         yield
     finally:
         # Closing the descriptor releases the lock.
         os.close(fd)
+
+
+class BackendAlreadyRunning(Exception):
+    """Another backend process holds the process lock on the same data directory."""
+
+
+@contextmanager
+def process_lock(settings: Settings) -> Iterator[None]:
+    """Let exactly one backend process run on a data directory.
+
+    Admin sessions, download tickets, the PIN lockout, the one backup job and ``DatabaseGate`` live
+    in the memory of one process. A second worker -- ``--workers 2`` or ``WEB_CONCURRENCY`` --
+    would drop sign-ins depending on which process answers, allow the lockout's attempts once per
+    process, run two jobs at once, and leave the gate protecting nothing.
+
+    Exclusive and non-blocking: the second process ends at startup instead of waiting. Under
+    ``uvicorn --workers 2`` that stops the parent too, because the worker fails before it serves.
+
+    **A file of its own, not ``kiekmap.lock``.** The writing CLI commands take that one shared while
+    the backend runs; an exclusive lock there for the life of the backend would refuse every one of
+    them. See ``collection_lock``.
+
+    ``uvicorn --reload`` still works: the reloader ends the old process before it starts the new
+    one. **Not under Docker Desktop on a Mac:** its file sharing ignores ``flock``, so there the
+    lock lets a second process through.
+    """
+    try:
+        fd = _flock(settings.process_lock_path, exclusive=True)
+    except BlockingIOError:
+        raise BackendAlreadyRunning(
+            f"Another Kiekmap backend is already running: it holds {settings.process_lock_path}. "
+            "This process stops, because a second one would split sign-ins, the PIN lockout and "
+            "the backup job between them."
+        ) from None
+    try:
+        yield
+    finally:
+        os.close(fd)
+
+
+def _flock(path: Path, *, exclusive: bool) -> int:
+    """Take ``flock`` on ``path`` and return the descriptor that holds it.
+
+    Raises ``BlockingIOError`` at once if another descriptor holds a conflicting lock -- one in the
+    same process included. Closing the returned descriptor releases the lock.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # Read-only is enough for flock, and it opens a lock file another user created.
+    fd = os.open(path, os.O_RDONLY | os.O_CREAT, 0o644)
+    try:
+        fcntl.flock(fd, (fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH) | fcntl.LOCK_NB)
+    except BaseException:
+        os.close(fd)
+        raise
+    return fd
 
 
 def get_session() -> Iterator[Session]:
