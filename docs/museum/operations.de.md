@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: ba58c7f4112160aa83a4fe88632a54323e88f5d0d4ebbe32193327cc0ba494b9 -->
+<!-- source-sha: 086df676476f7a4a81a36a366c2d3e5fd2f23944102fc11c46044d24bb2b3cea -->
 
 # Betriebshandbuch
 
@@ -226,8 +226,8 @@ nicht nötig** — nach dem Neustart der Container gilt der neue Wert. Ein ander
 `en` bricht den Start ab, statt still auf Deutsch zurückzufallen; im Protokoll steht dann eine
 Zeile von Pydantic. Mehr in [adaption.de.md](adaption.de.md#andere-sprache).
 
-**Vier Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
-`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
+**Drei Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
+`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR` und der Ort des PIN-Hashes. Sie
 beschreiben den Container, nicht den Ort — innen heißen die Verzeichnisse immer `/data` und
 `/media`, gleichgültig wo sie außen liegen. Ein `KIEKMAP_MEDIA_DIR=/Volumes` in der `.env` des
 Entwicklungsmacs stört den Betrieb deshalb nicht.

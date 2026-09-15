@@ -22,12 +22,10 @@ services:
     # own .env and no fork. See docs/adaption.md.
     env_file: ../.env
     environment:
-      # These four win over the .env: they describe the container, not the place.
+      # These three win over the .env: they describe the container, not the place.
       KIEKMAP_DATA_DIR: /data
       KIEKMAP_MEDIA_DIR: /media
       KIEKMAP_ADMIN_PIN_HASH: ${KIEKMAP_ADMIN_PIN_HASH:-}
-      # Same origin in operation, so no CORS exceptions are needed.
-      KIEKMAP_CORS_ORIGINS: "[]"
     volumes:
       - ../data:/data
       # USB sticks for the backup (stage 9). rshared is needed for a stick plugged in later to

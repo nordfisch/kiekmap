@@ -224,8 +224,8 @@ needed** — the new value applies once the containers have restarted. A value o
 `en` aborts the start instead of falling back to German in silence; a line from Pydantic then
 stands in the log. More in [adaption.md](adaption.md#another-language).
 
-**Four values the compose file sets itself**, and those win over the `.env`:
-`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` and the location of the PIN hash.
+**Three values the compose file sets itself**, and those win over the `.env`:
+`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR` and the location of the PIN hash.
 They describe the container, not the place — inside, the directories are always called `/data` and
 `/media`, wherever they lie outside. A `KIEKMAP_MEDIA_DIR=/Volumes` in the `.env` of the
 development Mac therefore does not disturb operation.

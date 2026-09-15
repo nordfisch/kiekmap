@@ -79,8 +79,8 @@ admin view (`src/admin/`). On a device without an address bar a router would be 
 somebody leaves behind by accident would be a risk.
 
 In production **nginx** serves the built page and proxies `/api` to the backend. Both therefore
-come from the same origin; the CORS setting in the backend exists for the Vite development server
-and never applies on the Pi.
+come from the same origin. In development the Vite server proxies `/api` the same way, so the
+backend needs no CORS configuration.
 
 nginx does more here than serve files: it answers **HTTP range requests** on the map file. That is
 exactly why the project needs no tile server — MapLibre reads single tile ranges out of a static
