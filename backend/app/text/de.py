@@ -155,6 +155,10 @@ de = Texts(
             "Die Angaben sind noch in Gebrauch, vielleicht durch ein laufendes Herunterladen. "
             "Auf dem Geraet wurde nichts veraendert. Bitte erneut versuchen, sobald es fertig ist."
         ),
+        command_line_writing=(
+            "Ein Befehl auf der Kommandozeile veraendert gerade die Sammlung. "
+            "Auf dem Geraet wurde nichts veraendert. Bitte erneut versuchen, sobald er fertig ist."
+        ),
         unexpected_entry="Die Datei enthaelt einen unerwarteten Eintrag.",
         something_went_wrong=lambda reason: f"Es ist etwas schiefgegangen: {reason}",
     ),

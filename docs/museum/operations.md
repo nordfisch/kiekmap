@@ -424,4 +424,14 @@ rm -rf data/before-2026-07-29-1115
 
 That is the only place where the SD card can fill up unnoticed.
 
+**A restore and a command that writes exclude each other.** `import`, `scan`, `places`,
+`seed-load` and `empty` hold a lock on `data/kiekmap.lock` while they run. A restore started
+meanwhile stops at once, changes nothing and says so in the admin area. A command started during a
+restore writes nothing and ends with `A restore is running`. `stats`, `duplicates`, `pin` and
+`seed-export` only read and run at any time. The lock reaches commands run with
+`docker compose exec` or `run --rm`, because every container sees the same `data/`. The kernel
+releases it when a process ends, a crash or a power cut included; the file itself stays and must
+not be deleted. **Not on the Mac with `make prod-mac`:** Docker Desktop's file sharing ignores the
+lock, even inside one container.
+
 Setting the device up for another place: [adaption.md](adaption.md).

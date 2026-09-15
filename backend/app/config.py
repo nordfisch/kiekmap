@@ -91,6 +91,15 @@ class Settings(BaseSettings):
         return self.data_dir / "kiekmap.db"
 
     @property
+    def lock_path(self) -> Path:
+        """Where a restore and the writing CLI commands see each other.
+
+        Never moved and never deleted: a lock sits on the file, and a new file by the same name is
+        a different lock. See ``app.db.collection_lock``.
+        """
+        return self.data_dir / "kiekmap.lock"
+
+    @property
     def db_url(self) -> str:
         return f"sqlite:///{self.db_path}"
 

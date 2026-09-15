@@ -23,7 +23,7 @@ from pathlib import Path
 from sqlalchemy import func, select
 
 from app.config import get_settings
-from app.db import SessionLocal
+from app.db import CollectionLocked, SessionLocal, collection_lock
 from app.models import ImportResult, Photo, PhotoStatus
 from app.services.importer import import_directory
 
@@ -257,10 +257,10 @@ def main(argv: list[str] | None = None) -> int:
 
     p_import = commands.add_parser("import", help="take in a directory")
     p_import.add_argument("path")
-    p_import.set_defaults(handler=_cmd_import)
+    p_import.set_defaults(handler=_cmd_import, writes=True)
 
     p_scan = commands.add_parser("scan", help="sweep the inbox folder once")
-    p_scan.set_defaults(handler=_cmd_scan)
+    p_scan.set_defaults(handler=_cmd_scan, writes=True)
 
     p_stats = commands.add_parser("stats", help="the collection and its gaps")
     p_stats.set_defaults(handler=_cmd_stats)
@@ -275,7 +275,7 @@ def main(argv: list[str] | None = None) -> int:
     p_duplicates.set_defaults(handler=_cmd_duplicates)
 
     p_places = commands.add_parser("places", help="reload the gazetteer")
-    p_places.set_defaults(handler=_cmd_places)
+    p_places.set_defaults(handler=_cmd_places, writes=True)
 
     p_pin = commands.add_parser("pin", help="set the PIN for the admin area")
     p_pin.set_defaults(handler=_cmd_pin)
@@ -284,7 +284,7 @@ def main(argv: list[str] | None = None) -> int:
     p_seed_export.set_defaults(handler=_cmd_seed_export)
 
     p_seed_load = commands.add_parser("seed-load", help="restore the collection from seed/")
-    p_seed_load.set_defaults(handler=_cmd_seed_load)
+    p_seed_load.set_defaults(handler=_cmd_seed_load, writes=True)
 
     p_empty = commands.add_parser("empty", help="delete the whole collection")
     p_empty.add_argument(
@@ -292,10 +292,22 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="delete without asking -- for scripts only",
     )
-    p_empty.set_defaults(handler=_cmd_empty)
+    p_empty.set_defaults(handler=_cmd_empty, writes=True)
 
     args = parser.parse_args(argv)
-    return args.handler(args)
+    if not getattr(args, "writes", False):
+        return args.handler(args)
+
+    # A writing command holds the lock for its whole run, the question of ``empty`` included: the
+    # number it asks for belongs to the collection a restore would replace. See
+    # ``app.db.collection_lock``.
+    try:
+        with collection_lock(get_settings(), exclusive=False):
+            return args.handler(args)
+    except CollectionLocked:
+        print("A restore is running. Nothing was changed.", file=sys.stderr)
+        print("Run the command again once the restore has finished.", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

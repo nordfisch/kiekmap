@@ -89,6 +89,7 @@ class BackupTexts:
     no_room_here: Callable[[str, str], str]
     backup_is_newer: Callable[[str], str]
     database_in_use: str
+    command_line_writing: str
     unexpected_entry: str
     something_went_wrong: Callable[[str], str]
 

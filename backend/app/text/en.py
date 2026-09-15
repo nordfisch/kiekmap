@@ -138,6 +138,10 @@ en = Texts(
             "The records are still in use, perhaps by a download that is running. "
             "Nothing on the device was changed. Please try again once it has finished."
         ),
+        command_line_writing=(
+            "A command at the command line is changing the collection. "
+            "Nothing on the device was changed. Please try again once it has finished."
+        ),
         unexpected_entry="The file holds an unexpected entry.",
         something_went_wrong=lambda reason: f"Something went wrong: {reason}",
     ),
