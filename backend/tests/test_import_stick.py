@@ -324,6 +324,22 @@ class TestThroughTheApi:
         assert response.status_code == 422
         assert admin_client.get("/api/admin/backup/status").json()["phase"] == "idle"
 
+    def test_an_over_long_provenance_is_refused_before_the_job(
+        self, admin_client: TestClient, stick, images_on_the_stick
+    ):
+        """The provenance applies to every photo of the folder, so it must not be unbounded."""
+        from app.schemas import LONG_TEXT_MAX
+
+        folder = images_on_the_stick()
+
+        response = admin_client.post(
+            "/api/admin/import/start",
+            json={"path": str(folder), "provenance": "x" * (LONG_TEXT_MAX + 1)},
+        )
+
+        assert response.status_code == 422
+        assert admin_client.get("/api/admin/backup/status").json()["phase"] == "idle"
+
     def test_no_import_runs_beside_a_backup(
         self, admin_client: TestClient, stick, images_on_the_stick
     ):

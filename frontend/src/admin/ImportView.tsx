@@ -22,6 +22,7 @@ import {
   type ImportFolder,
   type JobState,
   type UploadItem,
+  LONG_TEXT_MAX,
   acknowledgeJob,
   patchPhoto,
   startStickImport,
@@ -378,6 +379,7 @@ export function ImportView({ onReview }: { onReview: () => void }) {
           <input
             id="upload-provenance"
             className="field__input"
+            maxLength={LONG_TEXT_MAX}
             value={provenance}
             onChange={(event) => setProvenance(event.target.value)}
           />

@@ -1,5 +1,7 @@
 /** Backend access. The types mirror backend/app/schemas.py. */
 
+import { t } from "../text";
+
 export type PhotoMarker = {
   id: number;
   lat: number;
@@ -121,15 +123,26 @@ export type Place = {
 
 export type Precision = "day" | "month" | "year" | "decade";
 
+/** One entry of the list FastAPI sends with a 422 when a field fails the schema. */
+type ValidationIssue = { type?: string; ctx?: { max_length?: number } };
+
 /** The backend's `detail` if there is one -- it is written for the reader, the status code is not. */
 export async function readError(response: Response): Promise<string> {
   try {
-    const body = (await response.json()) as { detail?: string };
+    const body = (await response.json()) as { detail?: string | ValidationIssue[] };
+    // A refusal from the schema is a list of English records, not a sentence. Handed to
+    // `new Error()` as it is, the screen read "[object Object]".
+    if (Array.isArray(body.detail)) return validationMessage(body.detail);
     if (body.detail) return body.detail;
   } catch {
     /* response without JSON -- the status code has to do */
   }
   return `HTTP ${response.status}`;
+}
+
+function validationMessage(issues: ValidationIssue[]): string {
+  const limit = issues.find((issue) => issue.type === "string_too_long")?.ctx?.max_length;
+  return limit === undefined ? t.errors.notAccepted : t.errors.tooLong(limit);
 }
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {

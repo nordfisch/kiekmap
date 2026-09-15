@@ -79,6 +79,7 @@ en = Texts(
             "The street from this statement is no longer in the gazetteer. "
             "The place therefore stays."
         ),
+        body_too_large=lambda limit: f"The request is too large. The limit is {limit}.",
     ),
     photos=PhotoTexts(
         no_such_photo=lambda photo_id: f"No photo with the number {photo_id}",

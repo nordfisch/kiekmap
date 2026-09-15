@@ -7,6 +7,7 @@ Two promises carry this area, and both break silently when they break:
   2. Uploaded photos are in the database at once, not only after "Uebernehmen". A closed browser
      must not cost uploads."""
 
+import json
 from datetime import UTC, date, datetime
 
 import pytest
@@ -839,15 +840,125 @@ class TestTheUploadLimit:
         assert response.status_code == 200
         assert response.json()["imported"] == 1
 
-    def test_other_routes_are_not_limited(self, admin_client: TestClient, session, make_photo):
+    def test_the_upload_limit_does_not_apply_to_other_routes(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        from app.schemas import LONG_TEXT_MAX
+
         photo = make_photo()
         session.commit()
 
         response = admin_client.patch(
-            f"/api/admin/photos/{photo.id}", json={"description": "x" * 5_000}
+            f"/api/admin/photos/{photo.id}", json={"description": "x" * LONG_TEXT_MAX}
         )
 
         assert response.status_code == 200
+
+
+class TestTheBodyLimitOfOtherRoutes:
+    """Every other route read its JSON body into memory whole, however large.
+
+    Only nginx's 128 MB limit stood in front of that, and the development server had none. A body
+    of that size can take the Pi's memory before a single field is validated.
+    """
+
+    @staticmethod
+    def _two_megabytes() -> bytes:
+        return json.dumps({"description": "x" * 2_000_000}).encode()
+
+    def test_a_large_json_body_is_refused_before_the_route_reads_it(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
+            content=self._two_megabytes(),
+            headers={"content-type": "application/json"},
+        )
+
+        assert response.status_code == 413
+        assert "Anfrage ist zu gross" in response.json()["detail"]
+        session.expire_all()
+        assert session.get(Photo, photo.id).description is None
+        assert session.scalars(select(Change)).all() == []
+
+    def test_the_limit_holds_before_the_pin(self, client: TestClient, session, make_photo):
+        """A 401 would mean the body had been accepted first."""
+        photo = make_photo()
+        session.commit()
+
+        response = client.patch(
+            f"/api/admin/photos/{photo.id}",
+            content=self._two_megabytes(),
+            headers={"content-type": "application/json"},
+        )
+
+        assert response.status_code == 413
+
+    def test_the_visitor_routes_are_limited_too(self, client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        body = {**HOLM, "session_id": "x", "padding": "x" * 2_000_000}
+
+        response = client.post(f"/api/contribute/{photo.id}/location", json=body)
+
+        assert response.status_code == 413
+        session.expire_all()
+        assert session.get(Photo, photo.id).lat is None
+
+    def test_a_body_without_a_declared_size_is_counted_and_broken_off(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        """Chunked transfer sends no Content-Length, so the header alone cannot be the limit."""
+        from app.api import body_limit
+
+        monkeypatch.setattr(body_limit, "MAX_BODY_BYTES", 1_000)
+        photo = make_photo()
+        session.commit()
+
+        def chunks():
+            yield b'{"description": "'
+            for _ in range(10):
+                yield b"x" * 500
+            yield b'"}'
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
+            content=chunks(),
+            headers={"content-type": "application/json"},
+        )
+
+        assert response.status_code == 413
+        session.expire_all()
+        assert session.get(Photo, photo.id).description is None
+
+    def test_the_upload_keeps_its_own_limit(self, admin_client: TestClient, fixtures_dir):
+        """The file is larger than the limit for JSON, and it is taken in."""
+        from app.api import body_limit
+
+        image = _image(fixtures_dir, "cmyk.tif")
+        assert len(image) > body_limit.MAX_BODY_BYTES
+
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("scan.tif", image, "image/tiff"))]
+        )
+
+        assert response.status_code == 200
+        assert response.json()["imported"] == 1
+
+    def test_an_ordinary_edit_passes(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
+            json={"title": "Gasthof Petersen", "description": "Saal im Winter", "tags": ["Saal"]},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["description"] == "Saal im Winter"
 
 
 class TestRevertingWhileSomethingElseHappens:
@@ -1067,6 +1178,63 @@ class TestCreditAndProvenance:
         photo = session.scalars(select(Photo)).one()
         assert photo.credit == "Sammlung Heimatmuseum Holm"
         assert photo.provenance == "Kiste Dachboden Petersen"
+
+
+class TestLongTexts:
+    """``description`` and ``provenance`` had no upper bound: a PATCH with 2 MB in each was stored.
+
+    The limit is ``LONG_TEXT_MAX``; schemas.py says how it was measured.
+    """
+
+    @pytest.mark.parametrize("field", ["description", "provenance"])
+    def test_an_over_long_text_is_refused_and_nothing_is_stored(
+        self, admin_client: TestClient, session, make_photo, field
+    ):
+        from app.schemas import LONG_TEXT_MAX
+
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
+            json={"title": "Neu", field: "x" * (LONG_TEXT_MAX + 1)},
+        )
+
+        assert response.status_code == 422
+        session.expire_all()
+        stored = session.get(Photo, photo.id)
+        assert getattr(stored, field) is None
+        assert stored.title == "Test photo", "the valid field beside it is not stored either"
+        assert session.scalars(select(Change)).all() == []
+
+    @pytest.mark.parametrize("field", ["description", "provenance"])
+    def test_a_text_of_exactly_the_limit_is_stored(
+        self, admin_client: TestClient, session, make_photo, field
+    ):
+        from app.schemas import LONG_TEXT_MAX
+
+        photo = make_photo()
+        session.commit()
+        text = "ä" * LONG_TEXT_MAX  # characters, not bytes
+
+        response = admin_client.patch(f"/api/admin/photos/{photo.id}", json={field: text})
+
+        assert response.status_code == 200
+        assert response.json()[field] == text
+
+    def test_an_upload_with_an_over_long_provenance_stores_no_photo(
+        self, admin_client: TestClient, session, fixtures_dir
+    ):
+        from app.schemas import LONG_TEXT_MAX
+
+        response = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
+            data={"provenance": "x" * (LONG_TEXT_MAX + 1)},
+        )
+
+        assert response.status_code == 422
+        assert session.scalars(select(Photo)).all() == []
 
 
 class TestSearchingByHash:

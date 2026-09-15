@@ -69,6 +69,64 @@ class TestTheNextTask:
 
         assert daten["photo"]["id"] == photo.id
 
+    @pytest.mark.parametrize(
+        "junk",
+        [
+            "12345678901234567890",  # one past SQLite's integer range: OverflowError, a 500
+            "9223372036854775808",  # 2**63, nineteen digits and still too large
+            "9" * 5_000,  # more digits than int() converts
+            "²",  # isdigit() says yes, int() says no
+            "0",
+            "-3",
+        ],
+        ids=["20 digits", "2**63", "5000 digits", "superscript two", "zero", "negative"],
+    )
+    def test_an_id_no_photo_can_have_is_ignored(
+        self, client: TestClient, session, make_photo, junk
+    ):
+        skipped = make_photo(lat=None, lon=None, title="A", sha="a" * 64)
+        make_photo(lat=None, lon=None, title="B", sha="b" * 64)
+        session.commit()
+
+        response = client.get(
+            "/api/contribute/next",
+            params={"need": "location", "exclude": f"{junk},{skipped.id}"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["photo"]["title"] == "B", "the valid id beside it still counts"
+
+    def test_a_thousand_ids_do_not_break_the_panel(self, client: TestClient, session, make_photo):
+        """One bound parameter per id. SQLite before 3.32 refused a query with more than 999."""
+        make_photo(lat=None, lon=None, sha="a" * 64)
+        session.commit()
+        exclude = ",".join(str(i) for i in range(10_000, 11_000))
+
+        response = client.get(
+            "/api/contribute/next", params={"need": "location", "exclude": exclude}
+        )
+
+        assert response.status_code == 200
+        assert response.json()["photo"] is not None
+
+    def test_a_long_list_keeps_the_photo_skipped_last(
+        self, client: TestClient, session, make_photo
+    ):
+        """The panel appends at the end. Cutting the end off would bring back what was just seen."""
+        from app.api.contribute import EXCLUDE_MAX
+
+        just_skipped = make_photo(lat=None, lon=None, title="A", sha="a" * 64)
+        make_photo(lat=None, lon=None, title="B", sha="b" * 64)
+        session.commit()
+        earlier = [str(i) for i in range(10_000, 10_000 + EXCLUDE_MAX)]
+
+        data = client.get(
+            "/api/contribute/next",
+            params={"need": "location", "exclude": ",".join([*earlier, str(just_skipped.id)])},
+        ).json()
+
+        assert data["photo"]["title"] == "B"
+
     def test_nothing_open(self, client: TestClient, session, make_photo):
         make_photo(sha="a" * 64)
         session.commit()

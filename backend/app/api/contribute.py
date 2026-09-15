@@ -13,6 +13,7 @@ Three things catch the abuse case without slowing down the normal one:
 """
 
 import logging
+import re
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -38,6 +39,34 @@ from app.text import texts
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/contribute", tags=["contribute"])
+
+#: How many ids of ``exclude`` are read. The rest is ignored.
+#:
+#: The panel remembers the last 20 skipped photos (``SKIP_MEMORY`` in
+#: ``frontend/src/store/contribute.ts``), so a real visitor never comes near this. Ten times that
+#: leaves room for another client. Each id becomes one bound parameter of the query, and 200 stays
+#: well below the 999 that older SQLite versions allow.
+EXCLUDE_MAX = 200
+
+#: The largest id SQLite can hold. A longer run of digits raised ``OverflowError`` in the driver.
+_SQLITE_INTEGER_MAX = 2**63 - 1
+_ID = re.compile(r"[0-9]{1,19}")
+
+
+def _skipped(exclude: str) -> set[int]:
+    """The ids in ``exclude`` that can name a photo, the most recent ``EXCLUDE_MAX`` of them.
+
+    The panel appends each skipped photo at the end, so the ids at the end are the ones a visitor
+    has just seen. Those are kept when the list is too long.
+
+    A pattern rather than ``isdigit``: ``"²".isdigit()`` is true and ``int("²")`` raises, and so
+    does ``int()`` on more than 4,300 digits. The largest id has nineteen digits; the range check
+    catches the nineteen-digit numbers above it.
+    """
+    parts = (part.strip() for part in exclude.split(","))
+    ids = [int(part) for part in parts if _ID.fullmatch(part)]
+    valid = [i for i in ids if 1 <= i <= _SQLITE_INTEGER_MAX]
+    return set(valid[-EXCLUDE_MAX:])
 
 
 @router.get("/next", response_model=TaskResponse, summary="A photo that is missing something")
@@ -67,7 +96,7 @@ def next_task(
     ``exclude`` does *not* apply to it. Whoever asks for a photo by name may well have waved it
     away earlier and has now thought better of it.
     """
-    skipped = {int(part) for part in exclude.split(",") if part.strip().isdigit()}
+    skipped = _skipped(exclude)
 
     filters = [Photo.status == PhotoStatus.PUBLISHED, open_filter(need)]
     open_count = session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0

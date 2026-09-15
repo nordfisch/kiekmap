@@ -153,6 +153,8 @@ export const en: Texts = {
   errors: {
     regionMissing: (status: number) =>
       `The region could not be loaded (HTTP ${status}). Was "make tiles" run?`,
+    notAccepted: "The input was not accepted. Please check the fields.",
+    tooLong: (limit: number) => `A text is too long. At most ${limit} characters are allowed.`,
   },
 
   admin: {

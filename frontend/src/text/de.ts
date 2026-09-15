@@ -285,6 +285,9 @@ export const de = {
   errors: {
     regionMissing: (status: number) =>
       `Die Region konnte nicht geladen werden (HTTP ${status}). Wurde "make tiles" ausgeführt?`,
+    /** The backend's schema refused a field. Its own message is English and not for this screen. */
+    notAccepted: "Die Eingabe wurde nicht angenommen. Bitte die Felder prüfen.",
+    tooLong: (limit: number) => `Ein Text ist zu lang. Erlaubt sind höchstens ${limit} Zeichen.`,
   },
 
   /**
