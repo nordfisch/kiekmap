@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: cfbd5b13683a7e607d642d9c4a474e159a3af4cdb824eafe9e329e9ccce01304 -->
+<!-- source-sha: 0cf6a9676952fb4b621a625b12e66a144ac0f1cfc736ddf7c6bc2bffb6cea6b6 -->
 
 # Änderungen
 
@@ -69,6 +69,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Ein unmögliches Datum eines Besuchers führt nicht mehr zu einem Serverfehler** ([#67])
 - **Das Zurücknehmen einer Besucherangabe überschreibt keine neuere mehr** ([#68])
 - **Ein Stapel nimmt als Genauigkeit nur Jahr oder Jahrzehnt an** ([#69])
+- **`make seed` lädt die Beispielsammlung wieder** ([#75])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -81,6 +82,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#67]: https://github.com/nordfisch/kiekmap/issues/67
 [#68]: https://github.com/nordfisch/kiekmap/issues/68
 [#69]: https://github.com/nordfisch/kiekmap/issues/69
+[#75]: https://github.com/nordfisch/kiekmap/issues/75
 
 ## [0.9.0] — 2. September 2026
 

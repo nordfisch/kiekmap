@@ -31,6 +31,7 @@ from app.config import Settings
 from app.models import Change, ImportLog, Photo, PhotoTag, Tag
 from app.services.importer import import_file
 from app.services.storage import original_path, suffix_for_mime
+from app.services.tags import tag_named
 
 log = logging.getLogger(__name__)
 
@@ -227,9 +228,7 @@ def load(session: Session, settings: Settings, source: Path) -> tuple[int, int]:
             if field in entry:
                 setattr(photo, field, _from_json(field, entry[field]))
 
-        photo.tags.clear()
-        for name in dict.fromkeys(entry.get("tags", [])):
-            photo.tags.append(session.scalar(select(Tag).where(Tag.name == name)) or Tag(name=name))
+        photo.tags = [tag_named(session, name) for name in dict.fromkeys(entry.get("tags", []))]
 
         for change in entry.get("changes", []):
             session.add(

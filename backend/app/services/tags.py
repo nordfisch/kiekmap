@@ -25,7 +25,13 @@ def tag_named(session: Session, name: str) -> Tag:
     Written out at once also matters on its own. The session runs with ``autoflush=False``, so a
     tag only added would still be invisible to the query for the next photo -- and two photos at
     the same address ("Hauptstraße 26, Hof Sieveking") would each create their own.
+
+    **The session is flushed first.** A caller may hold a ``Tag`` of the same name that it added
+    but has not written out. The INSERT below cannot see it, writes the name itself, and the
+    caller's object then fails the unique constraint at the next flush. ``import_file`` used to
+    flush before it attached tags, and the seed loader relied on that without saying so.
     """
+    session.flush()
     session.execute(
         sqlite_insert(Tag).values(name=name).on_conflict_do_nothing(index_elements=[Tag.name])
     )
