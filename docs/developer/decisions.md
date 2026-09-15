@@ -2372,6 +2372,14 @@ the ZIP download. The watcher now opens one session per file, so that a restore 
 import at most. The ZIP download holds its session for the whole transfer, which also stops a
 restore from swapping the photos out halfway through a download.
 
+**A running download refuses the restore at once** (#82). Without that, the gate closes for the
+swap, waits the full 60 seconds for the download with the kiosk at 503, and then gives up. The
+download marks its session as lasting (`gate.use(lasting=True)`). Both restore routes read that
+count before they copy anything. The gate itself refuses a swap without closing while a lasting
+session is in use, which covers a download that starts after that first check. The download
+response closes its generator when the browser leaves early. Starlette leaves the generator
+suspended on a disconnect, and only the garbage collector would close it.
+
 **What does not, and why.** Backup and stick import open their sessions without the gate, because
 they share the one job with the restore and cannot run beside it. The CLI runs in a process of its
 own, which the gate does not reach.
@@ -2388,8 +2396,8 @@ file sharing on the Mac ignores `flock`, even inside one container; there the lo
 The reading commands take no lock.
 
 **The price:** a session that stays in use for 60 seconds (`CLOSE_TIMEOUT_S`) makes the restore
-give up, before anything was moved. In practice that is a running download. The admin area then
-says so, and the restore can be started again.
+give up, before anything was moved. A running download makes it give up at once. The admin area
+then says so, and the restore can be started again.
 
 ---
 

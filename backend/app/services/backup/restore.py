@@ -58,6 +58,23 @@ def _apart_from_the_command_line[**P](restore: Callable[P, str]) -> Callable[P, 
     return guarded
 
 
+def _not_during_a_download[**P](restore: Callable[P, str]) -> Callable[P, str]:
+    """Refuse the restore before it begins while a ZIP download is running.
+
+    The gate refuses the swap as well, but only after minutes of copying. See
+    ``app.db.DatabaseGate.use``.
+    """
+
+    @functools.wraps(restore)
+    def guarded(*args: P.args, **kwargs: P.kwargs) -> str:
+        if database.gate.lasting_in_use:
+            raise BackupError(texts().backup.database_in_use)
+        return restore(*args, **kwargs)
+
+    return guarded
+
+
+@_not_during_a_download
 @_apart_from_the_command_line
 def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
     """Bring a backup from the stick back onto the device.
@@ -190,6 +207,7 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
     return texts().backup.restore_done(total, set_aside.name)
 
 
+@_not_during_a_download
 @_apart_from_the_command_line
 def run_restore_from_archive(settings: Settings, archive: Path, report: Report) -> str:
     """The same restore, out of a ZIP file lying in the inbox.

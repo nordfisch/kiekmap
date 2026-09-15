@@ -383,7 +383,7 @@ class TestTheSwap:
     def test_a_session_that_stays_in_use_refuses_the_restore_and_changes_nothing(
         self, client, session, settings, stick, collection, monkeypatch
     ):
-        """A ZIP download holds its session for minutes. The restore must not swap under it."""
+        """An import that outlasts the wait. The restore must not swap under it."""
         import app.db
 
         self._make_backup(session, settings, collection)
@@ -399,6 +399,206 @@ class TestTheSwap:
         assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
         assert client.get("/api/photos/tags").status_code == 200, "the gate is open again"
+
+
+class TestARestoreDuringADownload:
+    """A ZIP download holds its session for its whole transfer, which takes minutes.
+
+    Without a check of its own, the gate closes for the swap and waits 60 seconds for that session.
+    Every visitor request gets 503 during the wait, and the restore gives up at its end. See
+    ``app.db.DatabaseGate.use``.
+    """
+
+    @pytest.fixture
+    def watched(self, monkeypatch):
+        """Records whether the gate closed and whether copying began.
+
+        The wait is cut short, so that a broken refusal fails the test instead of stalling it.
+        """
+        import app.db
+        from app.services.backup import restore
+
+        seen: list[str] = []
+        closed, prepare = app.db.gate.closed, restore._prepare_work_dir
+        monkeypatch.setattr(app.db, "CLOSE_TIMEOUT_S", 0.1)
+        monkeypatch.setattr(
+            app.db.gate, "closed", lambda timeout_s: (seen.append("closed"), closed(timeout_s))[1]
+        )
+        monkeypatch.setattr(
+            restore,
+            "_prepare_work_dir",
+            lambda s, needed: (seen.append("copying"), prepare(s, needed))[1],
+        )
+        return seen
+
+    def _started_download(self, settings):
+        from app.api.backup import archive_download
+
+        download = archive_download(settings)
+        next(download)
+        return download
+
+    def _assert_refused_untouched(self, client, settings, refusal, seen, database_before) -> None:
+        assert "in Gebrauch" in str(refusal.value)
+        assert seen == [], "the restore copied or closed the gate before it refused"
+        assert settings.db_path.read_bytes() == database_before
+        assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+        assert client.get("/api/photos/tags").status_code == 200
+
+    def test_a_restore_from_the_stick_is_refused_at_once_while_a_download_runs(
+        self, client, session, settings, stick, collection, watched
+    ):
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+        database_before = settings.db_path.read_bytes()
+
+        download = self._started_download(settings)
+        try:
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore(settings, _drive(settings), _report_nothing)
+            self._assert_refused_untouched(client, settings, refusal, watched, database_before)
+        finally:
+            download.close()
+
+    def test_a_restore_from_the_inbox_is_refused_at_once_while_a_download_runs(
+        self, client, session, settings, collection, watched
+    ):
+        collection(2)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        archive = settings.incoming_dir / "kiekmap-backup-holm-2026-08-03.zip"
+        with archive.open("wb") as sink:
+            for chunk in backup.stream_archive(session, settings):
+                sink.write(chunk)
+        database_before = settings.db_path.read_bytes()
+
+        download = self._started_download(settings)
+        try:
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore_from_archive(settings, archive, _report_nothing)
+            self._assert_refused_untouched(client, settings, refusal, watched, database_before)
+        finally:
+            download.close()
+        assert archive.is_file(), "the archive stays in the inbox for the next attempt"
+
+    def test_a_download_closed_before_its_end_lets_the_restore_run(
+        self, session, settings, stick, collection
+    ):
+        """A browser that breaks the download off must not block every later restore."""
+        import app.db
+
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+
+        self._started_download(settings).close()
+
+        assert app.db.gate.lasting_in_use == 0
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+        assert len(list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))) == 1
+
+    def test_a_finished_download_lets_the_restore_run(
+        self, admin_client, session, settings, stick, collection
+    ):
+        import app.db
+
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+        ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
+
+        response = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+
+        assert response.status_code == 200
+        assert app.db.gate.lasting_in_use == 0
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+        assert len(list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))) == 1
+
+    def test_a_download_that_fails_midway_does_not_stay_counted(
+        self, session, settings, collection, monkeypatch
+    ):
+        import app.db
+        from app.api.backup import archive_download
+
+        collection(1)
+
+        def breaks_off(session, settings):
+            yield b"PK"
+            raise OSError("a photo could not be read")
+
+        monkeypatch.setattr(backup, "stream_archive", breaks_off)
+        download = archive_download(settings)
+        next(download)
+        with pytest.raises(OSError):
+            next(download)
+
+        assert app.db.gate.lasting_in_use == 0
+
+    def test_a_browser_that_leaves_midway_does_not_stay_counted(
+        self, session, settings, monkeypatch
+    ):
+        """Starlette leaves the generator suspended on a disconnect.
+
+        See ``_ClosingStreamingResponse``. The garbage collector is off here, so that only the
+        response can close the generator.
+        """
+        import gc
+
+        import anyio
+
+        import app.db
+        from app.api.backup import zip_download
+        from app.services import auth
+
+        def endless(session, settings):
+            for _ in range(100_000):
+                yield b"x" * 1024
+
+        monkeypatch.setattr(backup, "stream_archive", endless)
+        ticket, _ = auth.tickets.issue()
+        response = zip_download(settings, ticket=ticket)
+
+        async def browser_leaves_after_the_first_chunk() -> None:
+            first_chunk = anyio.Event()
+
+            async def send(message) -> None:
+                if message["type"] == "http.response.body" and message["body"]:
+                    first_chunk.set()
+
+            async def receive() -> dict:
+                await first_chunk.wait()
+                return {"type": "http.disconnect"}
+
+            await response({"type": "http", "asgi": {"spec_version": "2.3"}}, receive, send)
+
+        gc.disable()
+        try:
+            anyio.run(browser_leaves_after_the_first_chunk)
+            assert app.db.gate.lasting_in_use == 0
+        finally:
+            gc.enable()
+            gc.collect()  # a failure must not leave the count up for the tests after this one
+
+    def test_a_download_that_starts_after_the_check_still_spares_the_kiosk_the_wait(self):
+        """The restore reads the count before copying, and a download can begin after that.
+
+        The gate then refuses the swap without closing, rather than waiting for the download.
+        """
+        import time
+
+        import app.db
+
+        gate = app.db.DatabaseGate()
+        with gate.use(lasting=True):
+            started = time.monotonic()
+            with pytest.raises(app.db.DatabaseInUse):
+                with gate.closed(timeout_s=5):
+                    pass
+            assert time.monotonic() - started < 1, "the gate waited for the download"
+
+            with gate.use():
+                pass  # a visitor request still gets its session
 
 
 class TestACommandLineWriteDuringARestore:

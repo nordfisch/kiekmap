@@ -19,7 +19,8 @@ from app.config import Settings, get_settings
 #: How long a restore waits for the sessions in use to finish before it gives up.
 #:
 #: Long enough for the watcher to finish the file it is importing, a large TIFF on a Pi included.
-#: A ZIP download holds its session for minutes; the restore should fail and say so, not wait.
+#: A ZIP download holds its session for minutes, so the gate does not wait for one at all; see
+#: ``DatabaseGate.use``.
 CLOSE_TIMEOUT_S = 60.0
 
 
@@ -82,25 +83,46 @@ class DatabaseGate:
     def __init__(self) -> None:
         self._condition = threading.Condition()
         self._in_use = 0
+        self._lasting = 0
         self._closed = False
 
     @contextmanager
-    def use(self) -> Iterator[None]:
+    def use(self, *, lasting: bool = False) -> Iterator[None]:
+        """Hold a session through the gate.
+
+        ``lasting`` marks a session held for minutes: the ZIP download. A swap does not wait for
+        one. The gate closes the moment it starts waiting, and every visitor request gets 503 until
+        the wait ends. Waiting out a download would keep the kiosk at 503 for the whole timeout,
+        only to refuse at its end.
+        """
         with self._condition:
             if self._closed:
                 raise DatabaseClosed
             self._in_use += 1
+            self._lasting += lasting
         try:
             yield
         finally:
             with self._condition:
                 self._in_use -= 1
+                self._lasting -= lasting
                 self._condition.notify_all()
+
+    @property
+    def lasting_in_use(self) -> int:
+        """How many lasting sessions are in use. A restore reads it before it starts copying."""
+        with self._condition:
+            return self._lasting
 
     @contextmanager
     def closed(self, timeout_s: float) -> Iterator[None]:
-        """Refuse new sessions, wait until none is in use, and open again afterwards."""
+        """Refuse new sessions, wait until none is in use, and open again afterwards.
+
+        Refuses at once, without closing, while a lasting session is in use.
+        """
         with self._condition:
+            if self._lasting:
+                raise DatabaseInUse
             self._closed = True
             if not self._condition.wait_for(lambda: self._in_use == 0, timeout_s):
                 self._closed = False
