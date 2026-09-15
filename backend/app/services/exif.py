@@ -214,8 +214,30 @@ def _read_iptc(image: Image.Image) -> dict:
         return {}
 
 
+#: The most pixels an image may have to be taken in: A3 at 600 dpi (9921 x 7016 = 69.6 MP) fits.
+#:
+#: **A decision about the device, not a library default.** Pillow's default warns above 89.5 MP,
+#: refuses only above 179 MP, and decodes everything below in full. The device is a Pi 4 or 5 with
+#: 4 GB, beside a running Chromium (#18). Its free memory is not measured yet.
+#:
+#: The largest scan of the initial collection is A4 at 600 dpi, 4962 x 7014 = 34.8 MP. Thumbnails
+#: decode at reduced size (see ``thumbnails``), and an RGB image at this limit peaks at 340 MB as
+#: JPEG, PNG or TIFF. An RGB image of the A4 size peaked at 475 to 546 MB when thumbnails still
+#: decoded in full. WebP always decodes in full and reaches 1.2 GB at this limit; no scan of the
+#: collection is WebP. All peaks are resident memory, measured on a Mac.
+Image.MAX_IMAGE_PIXELS = 70_000_000
+
+
+class TooManyPixels(Exception):
+    """The image exceeds ``Image.MAX_IMAGE_PIXELS``."""
+
+
 def open_image(path: Path) -> Image.Image:
-    """Open an image file for reading, with one Pillow trap defused.
+    """Open an image file for reading, with two Pillow traps defused.
+
+    **Pillow only warns about an image above its limit.** It refuses one only above twice the
+    limit, and every size in between would be decoded. Both are refused here, before a pixel is
+    read.
 
     **A TIFF may keep its XMP packet in a numeric tag, and Pillow then hands it back as a tuple of
     integers.** Any later ``getexif()`` runs a regular expression over that value and raises
@@ -226,7 +248,14 @@ def open_image(path: Path) -> Image.Image:
     Every reader has to pass through here, not just this module: ``ImageOps.exif_transpose`` in
     ``thumbnails`` walks into the same trap, one step further along.
     """
-    image = Image.open(path)
+    try:
+        image = Image.open(path)
+    except Image.DecompressionBombError as error:
+        raise TooManyPixels(str(error)) from error
+    limit = Image.MAX_IMAGE_PIXELS
+    if limit is not None and image.width * image.height > limit:
+        image.close()
+        raise TooManyPixels(f"{image.width} x {image.height} pixels")
     if not isinstance(image.info.get("xmp"), str | bytes):
         image.info.pop("xmp", None)
     return image

@@ -168,6 +168,10 @@ de = Texts(
             f"Inhaltsgleich mit Foto {photo_id} ({filename})"
         ),
         no_readable_image=lambda reason: f"Kein lesbares Bild: {reason}",
+        too_many_pixels=lambda megapixels: (
+            f"Das Bild hat zu viele Pixel. Die Obergrenze liegt bei {megapixels} Megapixeln. "
+            "Den Scan bitte mit weniger dpi speichern."
+        ),
         thumbnail_failed=lambda reason: f"Vorschaubild fehlgeschlagen: {reason}",
         upload_too_large=lambda limit: f"Die Datei ist zu gross. Die Obergrenze liegt bei {limit}.",
         unknown_format="unbekannt",

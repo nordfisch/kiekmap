@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO
 
+from PIL import Image
 from sqlalchemy import select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
@@ -273,7 +274,11 @@ def import_file(
     try:
         info = exif_service.read_image_info(path)
     except Exception as error:  # noqa: BLE001 -- whatever the file does, it is rejected
-        message = texts().imports.no_readable_image(_reason(error))
+        if isinstance(error, exif_service.TooManyPixels):
+            # The scan is readable, only too large. The volunteer can fix that, if told how.
+            message = texts().imports.too_many_pixels(Image.MAX_IMAGE_PIXELS // 1_000_000)
+        else:
+            message = texts().imports.no_readable_image(_reason(error))
         outcome = ImportOutcome(ImportResult.REJECTED, message)
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
