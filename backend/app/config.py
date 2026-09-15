@@ -97,6 +97,16 @@ class Settings(BaseSettings):
         return self.data_dir / "kiekmap.lock"
 
     @property
+    def process_lock_path(self) -> Path:
+        """Held exclusively by the one backend process for as long as it runs.
+
+        A file of its own rather than ``lock_path``: the writing CLI commands take that one shared
+        while the backend runs, and an exclusive lock on it would refuse all of them. Never moved
+        and never deleted, for the same reason as ``lock_path``. See ``app.db.process_lock``.
+        """
+        return self.data_dir / "kiekmap-backend.lock"
+
+    @property
     def db_url(self) -> str:
         return f"sqlite:///{self.db_path}"
 
