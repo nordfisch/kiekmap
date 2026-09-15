@@ -64,6 +64,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **The PIN lockout is no longer described as years of guessing; it is about 33 hours** ([#70])
 - **A writing command at the command line can no longer run through a restore** ([#71])
 - **Thumbnails and originals load with one database query instead of two** ([#73])
+- **`make seed` loads the sample collection again** ([#75])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -79,6 +80,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 [#70]: https://github.com/nordfisch/kiekmap/issues/70
 [#71]: https://github.com/nordfisch/kiekmap/issues/71
 [#73]: https://github.com/nordfisch/kiekmap/issues/73
+[#75]: https://github.com/nordfisch/kiekmap/issues/75
 
 ## [0.9.0] — 2026-09-02
 

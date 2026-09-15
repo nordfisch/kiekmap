@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 964cc50dc7ebe9332b3319dd4f08f437b2e7484127a758c8f094ff24c519eb3e -->
+<!-- source-sha: 61362f65696ff9ec7cdb99bf4c71df26da768d351801b92ebde437e41bab3992 -->
 
 # Änderungen
 
@@ -72,6 +72,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Die PIN-Sperre gilt nicht mehr als jahrelanger Schutz; es sind etwa 33 Stunden** ([#70])
 - **Ein Befehl auf der Kommandozeile schreibt nicht mehr in eine Wiederherstellung** ([#71])
 - **Vorschaubilder und Originale laden mit einer Datenbankabfrage statt zwei** ([#73])
+- **`make seed` lädt die Beispielsammlung wieder** ([#75])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -87,6 +88,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#70]: https://github.com/nordfisch/kiekmap/issues/70
 [#71]: https://github.com/nordfisch/kiekmap/issues/71
 [#73]: https://github.com/nordfisch/kiekmap/issues/73
+[#75]: https://github.com/nordfisch/kiekmap/issues/75
 
 ## [0.9.0] — 2. September 2026
 

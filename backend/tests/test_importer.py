@@ -472,6 +472,24 @@ class TestTagNamed:
         assert first.id == second.id
         assert len(session.scalars(select(Tag)).all()) == 1
 
+    def test_a_tag_the_caller_added_but_did_not_write_out_is_not_created_twice(self, session):
+        """The INSERT cannot see an object that is only pending in the session.
+
+        Without the flush first, the name was written twice and the next flush failed the unique
+        constraint -- which is how ``make seed`` broke.
+        """
+        from app.models import Tag
+        from app.services.tags import tag_named
+
+        pending = Tag(name="Winter")
+        session.add(pending)
+
+        tag = tag_named(session, "Winter")
+        session.flush()
+
+        assert tag is pending
+        assert len(session.scalars(select(Tag)).all()) == 1
+
 
 class TestTheInbox:
     def test_what_is_taken_in_is_filed_aside_not_deleted(self, session, settings, sample_image):
