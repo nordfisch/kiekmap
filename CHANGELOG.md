@@ -61,6 +61,9 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **An impossible visitor date no longer causes a server error** ([#67])
 - **Taking back a visitor's statement no longer overwrites a newer one** ([#68])
 - **A batch accepts only a year or a decade as its precision** ([#69])
+- **The PIN lockout is no longer described as years of guessing; it is about 33 hours** ([#70])
+- **A writing command at the command line can no longer run through a restore** ([#71])
+- **Thumbnails and originals load with one database query instead of two** ([#73])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -73,6 +76,9 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 [#67]: https://github.com/nordfisch/kiekmap/issues/67
 [#68]: https://github.com/nordfisch/kiekmap/issues/68
 [#69]: https://github.com/nordfisch/kiekmap/issues/69
+[#70]: https://github.com/nordfisch/kiekmap/issues/70
+[#71]: https://github.com/nordfisch/kiekmap/issues/71
+[#73]: https://github.com/nordfisch/kiekmap/issues/73
 
 ## [0.9.0] — 2026-09-02
 

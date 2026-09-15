@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: cfbd5b13683a7e607d642d9c4a474e159a3af4cdb824eafe9e329e9ccce01304 -->
+<!-- source-sha: 964cc50dc7ebe9332b3319dd4f08f437b2e7484127a758c8f094ff24c519eb3e -->
 
 # Änderungen
 
@@ -69,6 +69,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Ein unmögliches Datum eines Besuchers führt nicht mehr zu einem Serverfehler** ([#67])
 - **Das Zurücknehmen einer Besucherangabe überschreibt keine neuere mehr** ([#68])
 - **Ein Stapel nimmt als Genauigkeit nur Jahr oder Jahrzehnt an** ([#69])
+- **Die PIN-Sperre gilt nicht mehr als jahrelanger Schutz; es sind etwa 33 Stunden** ([#70])
+- **Ein Befehl auf der Kommandozeile schreibt nicht mehr in eine Wiederherstellung** ([#71])
+- **Vorschaubilder und Originale laden mit einer Datenbankabfrage statt zwei** ([#73])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -81,6 +84,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#67]: https://github.com/nordfisch/kiekmap/issues/67
 [#68]: https://github.com/nordfisch/kiekmap/issues/68
 [#69]: https://github.com/nordfisch/kiekmap/issues/69
+[#70]: https://github.com/nordfisch/kiekmap/issues/70
+[#71]: https://github.com/nordfisch/kiekmap/issues/71
+[#73]: https://github.com/nordfisch/kiekmap/issues/73
 
 ## [0.9.0] — 2. September 2026
 
