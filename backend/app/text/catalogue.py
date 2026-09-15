@@ -30,6 +30,7 @@ class AdminTexts:
     edited_by_hand: str
     a_newer_statement_exists: str
     street_gone_from_the_index: str
+    body_too_large: Callable[[str], str]
 
 
 @dataclass(frozen=True)

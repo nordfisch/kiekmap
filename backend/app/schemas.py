@@ -32,6 +32,20 @@ def _as_utc(value: datetime) -> datetime:
 #: to 16:00 and invent a fact.
 UtcDatetime = Annotated[datetime, AfterValidator(_as_utc)]
 
+#: The longest ``description`` or ``provenance`` the API takes, in characters.
+#:
+#: **Measured, not chosen.** Before this limit a PATCH with 2 MB in each field was accepted. In the
+#: initial collection of 1,324 photos the longest description has 855 characters and the longest
+#: provenance 580; the 99th percentiles are 467 and 217. The change log holds one longer value, a
+#: description of 942 characters that was shortened since.
+#:
+#: Four thousand is more than four times that. It also covers what the importer can bring along: an
+#: IPTC caption holds at most 2,000 bytes, and a title too long to be one is put in front of it (see
+#: ``importer.TITLE_MAX``). A photo straight from an import therefore stays editable.
+#:
+#: ``frontend/src/api/admin.ts`` repeats the number for the ``maxLength`` of its fields.
+LONG_TEXT_MAX = 4_000
+
 
 class PhotoMarker(BaseModel):
     """What the map needs per photo -- and no more.
@@ -347,9 +361,9 @@ class PhotoUpdate(BaseModel):
     """
 
     title: str | None = Field(default=None, max_length=300)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=LONG_TEXT_MAX)
     credit: str | None = Field(default=None, max_length=200)
-    provenance: str | None = None
+    provenance: str | None = Field(default=None, max_length=LONG_TEXT_MAX)
     date: DateInput | None = None
     location: LocationUpdate | None = None
     tags: list[str] | None = None
@@ -542,7 +556,7 @@ class ImportRequest(DriveChoice):
     place_name: str | None = Field(default=None, max_length=300)
     #: A box of scans usually comes from one person -- so both of these belong to the whole batch.
     credit: str | None = Field(default=None, max_length=200)
-    provenance: str | None = None
+    provenance: str | None = Field(default=None, max_length=LONG_TEXT_MAX)
     #: Keywords for the whole batch, separated by commas. Unlike the fields above they are *added*
     #: to what the file itself brought, because a keyword list is a set -- see
     #: ``importer.apply_batch_defaults``.

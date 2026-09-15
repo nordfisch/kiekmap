@@ -12,6 +12,16 @@ import { type PhotoDetail, readError } from "./client";
 
 export type AdminSession = { token: string; expires_in_s: number };
 
+/**
+ * The longest description or provenance the backend takes, in characters: `LONG_TEXT_MAX` in
+ * backend/app/schemas.py, where the measurement behind it stands.
+ *
+ * It is the `maxLength` of those fields, so a volunteer cannot type past it and only then be
+ * refused. `maxLength` counts UTF-16 units and the backend counts characters, so the field is the
+ * stricter of the two.
+ */
+export const LONG_TEXT_MAX = 4000;
+
 export type BackupReminder = {
   last_backup_at: string | null;
   last_drive: string;

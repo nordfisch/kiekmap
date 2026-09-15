@@ -31,6 +31,7 @@ from app.models import (
     Source,
 )
 from app.schemas import (
+    LONG_TEXT_MAX,
     BackupReminder,
     BatchPrecision,
     ChangeItem,
@@ -617,7 +618,7 @@ def upload(
     lon: Annotated[float | None, Form(ge=-180, le=180)] = None,
     place_name: Annotated[str | None, Form(max_length=300)] = None,
     credit: Annotated[str | None, Form(max_length=200)] = None,
-    provenance: Annotated[str | None, Form()] = None,
+    provenance: Annotated[str | None, Form(max_length=LONG_TEXT_MAX)] = None,
     tags: Annotated[str | None, Form(max_length=200)] = None,
 ) -> UploadResult:
     """Take in a batch, optionally dating and locating all of it at once.

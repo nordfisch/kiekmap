@@ -11,7 +11,7 @@
 
 import { useEffect, useState } from "react";
 
-import { type PhotoAdminDetail, type PhotoPatch, patchPhoto } from "../api/admin";
+import { type PhotoAdminDetail, type PhotoPatch, LONG_TEXT_MAX, patchPhoto } from "../api/admin";
 import { t } from "../text";
 import { type YearInput, toDate } from "./yearInput";
 import { PlaceField, type PickedPlace } from "./PlaceField";
@@ -135,6 +135,7 @@ export function PhotoEditor({
         id="editor-description"
         className="field__input field__input--area"
         rows={3}
+        maxLength={LONG_TEXT_MAX}
         value={draft.description}
         onChange={(event) => change("description", event.target.value)}
       />
@@ -214,6 +215,7 @@ export function PhotoEditor({
         id="editor-provenance"
         className="field__input field__input--area"
         rows={2}
+        maxLength={LONG_TEXT_MAX}
         value={draft.provenance}
         onChange={(event) => change("provenance", event.target.value)}
       />

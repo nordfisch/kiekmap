@@ -88,6 +88,7 @@ de = Texts(
             "Die Strasse aus dieser Angabe steht nicht mehr im Ortsverzeichnis. "
             "Der Ort bleibt daher stehen."
         ),
+        body_too_large=lambda limit: f"Die Anfrage ist zu gross. Die Obergrenze liegt bei {limit}.",
     ),
     photos=PhotoTexts(
         no_such_photo=lambda photo_id: f"Kein Foto mit der Nummer {photo_id}",
