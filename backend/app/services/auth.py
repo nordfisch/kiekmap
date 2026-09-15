@@ -1,9 +1,10 @@
 """Access to the admin area: PIN, sessions, and a lock against guessing.
 
 A PIN rather than a password, because the only input device in the museum is a touchscreen with
-no keyboard. That makes the secret short, so it needs a counterweight: four digits are ten
-thousand combinations, which a script would be through in seconds. ``AttemptGuard`` turns that
-into years.
+no keyboard. That makes the secret short: four digits are ten thousand combinations, which a
+script would be through in seconds. ``AttemptGuard`` stretches that to about 33 hours, 17 on
+average. What protects the PIN is where the device stands: offline without a keyboard, or online
+behind a password (docs/developer/decisions.md, points 76 and 85).
 
 The PIN itself is never stored -- ``admin_pin_hash`` in the settings holds a PBKDF2 digest, which
 ``python -m app.cli pin`` produces.
