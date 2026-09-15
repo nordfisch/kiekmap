@@ -2389,8 +2389,8 @@ is:** five wrong PINs lock the keypad for 60 seconds, every time.
 
 **The real figure is hours, not years.** Five attempts a minute try all ten thousand four-digit
 PINs in about 33 hours, 17 on average. [Point 7](#7-the-way-into-the-admin-view-is-visible-the-pin-protects-it)
-and the docstring of `backend/app/services/auth.py` say "a good two years" and "years"; both are
-wrong and are corrected under issue #70.
+and the docstring of `backend/app/services/auth.py` said "a good two years" and "years" until #70
+corrected both.
 
 **What protects the PIN is where the device stands.** The museum device runs offline, and its only
 input is a touchscreen without a keyboard. The online instance puts one password in front of
