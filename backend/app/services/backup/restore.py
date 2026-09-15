@@ -6,9 +6,11 @@ into place. An interruption before the last step leaves the running collection u
 it, the old state is still there under ``before-<date>``.
 """
 
+import functools
 import logging
 import shutil
 import zipfile
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
@@ -33,6 +35,30 @@ from app.text import texts
 log = logging.getLogger(__name__)
 
 
+def _apart_from_the_command_line[**P](restore: Callable[P, str]) -> Callable[P, str]:
+    """Hold the collection lock exclusively for the whole restore, or refuse before it begins.
+
+    **The whole restore, not only the swap the database gate closes for.** The gate keeps the
+    kiosk's seconds of downtime short; this lock keeps out nothing but the command line. Taken
+    at the start, a running command stops the restore before minutes of copying rather than after
+    them. See ``app.db.collection_lock``.
+
+    Both routes, the stick and the archive, go through here, and ``settings`` is the first
+    argument of both.
+    """
+
+    @functools.wraps(restore)
+    def guarded(*args: P.args, **kwargs: P.kwargs) -> str:
+        try:
+            with database.collection_lock(args[0], exclusive=True):
+                return restore(*args, **kwargs)
+        except database.CollectionLocked:
+            raise BackupError(texts().backup.command_line_writing) from None
+
+    return guarded
+
+
+@_apart_from_the_command_line
 def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
     """Bring a backup from the stick back onto the device.
 
@@ -164,6 +190,7 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
     return texts().backup.restore_done(total, set_aside.name)
 
 
+@_apart_from_the_command_line
 def run_restore_from_archive(settings: Settings, archive: Path, report: Report) -> str:
     """The same restore, out of a ZIP file lying in the inbox.
 

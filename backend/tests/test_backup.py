@@ -401,6 +401,88 @@ class TestTheSwap:
         assert client.get("/api/photos/tags").status_code == 200, "the gate is open again"
 
 
+class TestACommandLineWriteDuringARestore:
+    """``python -m app.cli`` runs in a process of its own, which the database gate cannot reach.
+
+    A command that wrote through a restore put its rows into the database that was set aside, and
+    reported success. The lock file keeps the two apart; see ``app.db.collection_lock``.
+    """
+
+    def _assert_nothing_changed(self, settings, database_before: bytes) -> None:
+        assert settings.db_path.read_bytes() == database_before
+        assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+    def test_a_restore_from_the_stick_refuses_while_a_command_writes(
+        self, session, settings, stick, collection
+    ):
+        from app.db import collection_lock
+
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        database_before = settings.db_path.read_bytes()
+
+        with collection_lock(settings, exclusive=False):
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert "Kommandozeile" in str(refusal.value)
+        self._assert_nothing_changed(settings, database_before)
+
+    def test_a_restore_from_the_inbox_refuses_while_a_command_writes(
+        self, session, settings, collection
+    ):
+        from app.db import collection_lock
+
+        collection(1)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        archive = settings.incoming_dir / "kiekmap-backup-holm-2026-08-03.zip"
+        with archive.open("wb") as sink:
+            for chunk in backup.stream_archive(session, settings):
+                sink.write(chunk)
+        database_before = settings.db_path.read_bytes()
+
+        with collection_lock(settings, exclusive=False):
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore_from_archive(settings, archive, _report_nothing)
+
+        assert "Kommandozeile" in str(refusal.value)
+        self._assert_nothing_changed(settings, database_before)
+        assert archive.is_file(), "the archive stays in the inbox for the next attempt"
+
+    def test_the_restore_releases_the_lock_for_the_next_command(
+        self, session, settings, stick, collection
+    ):
+        from app.db import collection_lock
+
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        with collection_lock(settings, exclusive=False):
+            pass
+
+    def test_a_restore_holds_the_lock_while_it_copies(self, session, settings, stick, collection):
+        """A command started during the minutes of copying would still be writing at the swap."""
+        from app.db import CollectionLocked, collection_lock
+
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        refused: list[str] = []
+
+        def try_a_command(done: int, total: int, message: str) -> None:
+            try:
+                with collection_lock(settings, exclusive=False):
+                    refused.append("no")
+            except CollectionLocked:
+                refused.append("yes")
+
+        backup.run_restore(settings, _drive(settings), try_a_command)
+
+        assert refused and set(refused) == {"yes"}
+
+
 class TestLinksOnTheStick:
     """A stick belongs to anybody, and ``is_file()`` follows a symbolic link.
 

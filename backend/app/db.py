@@ -5,6 +5,8 @@ other -- important because the import thread writes while the kiosk reads -- and
 ``VACUUM INTO`` produces a consistent backup copy while the service is running.
 """
 
+import fcntl
+import os
 import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -12,7 +14,7 @@ from contextlib import contextmanager
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.config import get_settings
+from app.config import Settings, get_settings
 
 #: How long a restore waits for the sessions in use to finish before it gives up.
 #:
@@ -73,7 +75,8 @@ class DatabaseGate:
     Every session the running service opens goes through here: requests, the readiness probe, the
     inbox watcher and the ZIP download. **Two exceptions, both deliberate.** The job's own sessions
     -- backup and stick import -- need no gate, because only one job runs at a time and a restore
-    is that job. And the CLI runs in a process of its own, which no lock in this one can reach.
+    is that job. And the CLI runs in a process of its own, which no lock in this one can reach;
+    ``collection_lock`` below keeps it apart from a restore instead.
     """
 
     def __init__(self) -> None:
@@ -131,6 +134,46 @@ def closed_for_swap(timeout_s: float | None = None) -> Iterator[None]:
         finally:
             engine = create_db_engine()
             SessionLocal.configure(bind=engine)
+
+
+class CollectionLocked(Exception):
+    """The other side holds the lock file: a restore, or a CLI command that writes."""
+
+
+@contextmanager
+def collection_lock(settings: Settings, *, exclusive: bool) -> Iterator[None]:
+    """Keep a restore and the writing CLI commands apart, across processes.
+
+    ``DatabaseGate`` counts sessions in this process only; ``python -m app.cli`` runs in its own.
+    A command that kept writing through a restore wrote its rows into the database that was set
+    aside, and its files into ``photos/`` on either side of the move -- and reported success.
+
+    **Shared** for the CLI, so that two commands do not exclude each other. **Exclusive** for the
+    restore, so that it excludes every command, and every command excludes it.
+
+    **Both sides refuse rather than wait.** A command waiting for a restore of twenty minutes looks
+    like a command that hangs; a restore waiting for an import of a few thousand scans looks like a
+    progress bar that hangs.
+
+    ``flock`` rather than a marker file, because the kernel releases the lock when the process
+    ends -- after a crash and a power cut too. A marker file outlives both and blocks the next
+    restore for no reason. The lock also reaches a command run in a second container, because on
+    Linux every container sees the same inode. **Not under Docker Desktop on a Mac:** its file
+    sharing ignores ``flock``, even inside one container. See ``docs/developer/decisions.md``,
+    point 84.
+    """
+    settings.data_dir.mkdir(parents=True, exist_ok=True)
+    # Read-only is enough for flock, and it opens a lock file another user created.
+    fd = os.open(settings.lock_path, os.O_RDONLY | os.O_CREAT, 0o644)
+    try:
+        try:
+            fcntl.flock(fd, (fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH) | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise CollectionLocked from None
+        yield
+    finally:
+        # Closing the descriptor releases the lock.
+        os.close(fd)
 
 
 def get_session() -> Iterator[Session]:

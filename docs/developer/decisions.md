@@ -2370,7 +2370,18 @@ restore from swapping the photos out halfway through a download.
 
 **What does not, and why.** Backup and stick import open their sessions without the gate, because
 they share the one job with the restore and cannot run beside it. The CLI runs in a process of its
-own, which no lock in this one reaches; running `app.cli` during a restore stays unguarded.
+own, which the gate does not reach.
+
+**The CLI is kept apart by a lock file instead** (#71). `collection_lock` in `app/db.py` takes
+`flock` on `data/kiekmap.lock`: shared for `import`, `scan`, `places`, `seed-load` and `empty` for
+their whole run, exclusive for the whole restore, on both routes. Neither side waits; a command
+ends with a message, a restore fails the job with one. The restore holds the lock from its start,
+not only for the swap, so that a running command stops it before minutes of copying rather than
+after them. `flock` rather than a marker file, because the kernel releases it when the process
+ends, after a crash or a power cut too; a marker file outlives both. A test with two containers on
+one volume showed the lock between them, and its release after `docker kill`. Docker Desktop's
+file sharing on the Mac ignores `flock`, even inside one container; there the lock does nothing.
+The reading commands take no lock.
 
 **The price:** a session that stays in use for 60 seconds (`CLOSE_TIMEOUT_S`) makes the restore
 give up, before anything was moved. In practice that is a running download. The admin area then

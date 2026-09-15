@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: c2685461d43ddaf20e32b4596941beb40fb35e136e15d6292faaa0a5ebffdede -->
+<!-- source-sha: ba58c7f4112160aa83a4fe88632a54323e88f5d0d4ebbe32193327cc0ba494b9 -->
 
 # Betriebshandbuch
 
@@ -426,5 +426,16 @@ rm -rf data/before-2026-07-29-1115
 ```
 
 Das ist der einzige Ort, an dem die SD-Karte unbemerkt volllaufen kann.
+
+**Eine Wiederherstellung und ein schreibender Befehl schließen einander aus.** `import`, `scan`,
+`places`, `seed-load` und `empty` halten während ihres Laufs eine Sperre auf `data/kiekmap.lock`.
+Eine Wiederherstellung, die in dieser Zeit beginnt, bricht sofort ab, verändert nichts und meldet
+das im Admin-Bereich. Ein Befehl, der während einer Wiederherstellung beginnt, schreibt nichts und
+endet mit `A restore is running`. `stats`, `duplicates`, `pin` und `seed-export` lesen nur und
+laufen jederzeit. Die Sperre erreicht auch Befehle über `docker compose exec` oder `run --rm`, weil
+jeder Container dasselbe `data/` sieht. Der Kernel gibt sie frei, wenn ein Prozess endet, auch nach
+einem Absturz oder Stromausfall; die Datei selbst bleibt liegen und darf nicht gelöscht werden.
+**Nicht auf dem Mac mit `make prod-mac`:** Die Dateifreigabe von Docker Desktop übergeht die
+Sperre, sogar innerhalb eines Containers.
 
 Das Gerät für einen anderen Ort einrichten: [adaption.de.md](adaption.de.md).
