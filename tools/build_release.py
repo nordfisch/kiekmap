@@ -37,7 +37,8 @@ IMAGES = (("kiekmap-backend", ROOT / "backend"), ("kiekmap-frontend", ROOT / "fr
 
 
 def run(*command: str) -> str:
-    result = subprocess.run(command, capture_output=True, text=True, cwd=ROOT)
+    # S603: every caller passes a literal git command; nothing here comes from outside.
+    result = subprocess.run(command, capture_output=True, text=True, cwd=ROOT)  # noqa: S603
     if result.returncode != 0:
         raise SystemExit(f"Failed: {' '.join(command)}\n{result.stderr.strip()}")
     return result.stdout.strip()
@@ -138,12 +139,18 @@ def main() -> int:
 
     for name, context in IMAGES:
         print(f"== building {name}:{tag}")
-        subprocess.run(["docker", "build", "-t", f"{name}:{tag}", str(context)], check=True)
+        # S603, S607: a literal list without a shell, and docker comes from PATH -- Docker
+        # Desktop and a package manager put it in different places.
+        subprocess.run(  # noqa: S603
+            ["docker", "build", "-t", f"{name}:{tag}", str(context)],  # noqa: S607
+            check=True,
+        )
 
     print("== saving the images")
     archive = target / "images.tar"
-    subprocess.run(
-        ["docker", "save", *(f"{name}:{tag}" for name, _ in IMAGES), "-o", str(archive)],
+    saved = [f"{name}:{tag}" for name, _ in IMAGES]
+    subprocess.run(  # noqa: S603
+        ["docker", "save", *saved, "-o", str(archive)],  # noqa: S607
         check=True,
     )
 

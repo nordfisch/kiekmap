@@ -39,7 +39,7 @@ class TestTheLock:
                 pass
 
     def test_a_lock_held_by_another_process_refuses_this_one(self, settings):
-        holder = subprocess.Popen(
+        holder = subprocess.Popen(  # noqa: S603 -- this interpreter, a literal list, no shell
             [
                 sys.executable,
                 "-c",

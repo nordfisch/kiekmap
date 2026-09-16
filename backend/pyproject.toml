@@ -38,9 +38,14 @@ testpaths = ["tests"]
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+# S is bandit, BLE the rule against a bare `except Exception`. Neither finds anything real today;
+# they guard the code that comes later -- a subprocess with a shell, pickle, tempfile.mktemp, a
+# secret in the source. The same selection stands in ruff.toml for everything outside backend/.
+select = ["E", "F", "I", "UP", "B", "S", "BLE"]
 
 [tool.ruff.lint.per-file-ignores]
 # Migrations are generated and import op/sa whether they need them or not. When one is adjusted
 # by hand that is exactly what helps -- so do not complain about it.
 "alembic/versions/*.py" = ["F401"]
+# An assert is what a test is made of. S101 hits every one of them, a thousand times over.
+"tests/*.py" = ["S101"]
