@@ -15,7 +15,7 @@ import threading
 from pathlib import Path
 
 from app.config import Settings, get_settings
-from app.db import DatabaseClosed, SessionLocal, gate
+from app.db import DatabaseClosed, current_database
 from app.services import backup
 from app.services.importer import SPECIAL_DIRS, ImportOutcome, import_file
 
@@ -136,7 +136,8 @@ class IncomingWatcher:
         sweep; see ``app.db.DatabaseGate``. Leaving the ``with`` block rolls back whatever an
         exception left unfinished.
         """
-        with gate.use(), SessionLocal() as session:
+        database = current_database()
+        with database.gate.use(), database.session() as session:
             # ``root`` is the inbox itself: whoever copies in a stack filed by street has said
             # something about every photo in it -- see services/foldermeta.py.
             outcome = import_file(

@@ -250,7 +250,7 @@ class TestRestoring:
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
         return shas
 
-    def test_an_incomplete_backup_is_refused(self, settings, stick):
+    def test_an_incomplete_backup_is_refused(self, database, settings, stick):
         (stick / backup.BACKUP_DIR_NAME).mkdir()
 
         with pytest.raises(backup.BackupError) as fehler:
@@ -358,20 +358,21 @@ class TestTheSwap:
         assert response.status_code == 200
 
     def test_the_connections_are_closed_before_the_file_is_moved(
-        self, session, settings, stick, collection, monkeypatch
+        self, session, database, settings, stick, collection, monkeypatch
     ):
         """SQLite's documentation counts renaming a database file in use as a way to corrupt it.
 
         A test against SQLite 3.53.4 found no damage from it beyond the lost write. The order still
         holds, so that the restore does not depend on that. See decisions.md, point 84.
         """
-        import app.db
         from app.services.backup import restore
 
         self._make_backup(session, settings, collection)
         order = []
-        dispose, set_aside = app.db.engine.dispose, restore._set_aside
-        monkeypatch.setattr(app.db.engine, "dispose", lambda: (order.append("dispose"), dispose()))
+        dispose, set_aside = database.engine.dispose, restore._set_aside
+        monkeypatch.setattr(
+            database.engine, "dispose", lambda: (order.append("dispose"), dispose())
+        )
         monkeypatch.setattr(
             restore, "_set_aside", lambda s: (order.append("set aside"), set_aside(s))[1]
         )
@@ -381,7 +382,7 @@ class TestTheSwap:
         assert order == ["dispose", "set aside"]
 
     def test_a_session_that_stays_in_use_refuses_the_restore_and_changes_nothing(
-        self, client, session, settings, stick, collection, monkeypatch
+        self, client, session, database, settings, stick, collection, monkeypatch
     ):
         """An import that outlasts the wait. The restore must not swap under it."""
         import app.db
@@ -390,7 +391,7 @@ class TestTheSwap:
         monkeypatch.setattr(app.db, "CLOSE_TIMEOUT_S", 0.1)
         database_before = settings.db_path.read_bytes()
 
-        with app.db.gate.use():
+        with database.gate.use():
             with pytest.raises(backup.BackupError) as refusal:
                 backup.run_restore(settings, _drive(settings), _report_nothing)
 
@@ -410,7 +411,7 @@ class TestARestoreDuringADownload:
     """
 
     @pytest.fixture
-    def watched(self, monkeypatch):
+    def watched(self, database, monkeypatch):
         """Records whether the gate closed and whether copying began.
 
         The wait is cut short, so that a broken refusal fails the test instead of stalling it.
@@ -419,10 +420,10 @@ class TestARestoreDuringADownload:
         from app.services.backup import restore
 
         seen: list[str] = []
-        closed, prepare = app.db.gate.closed, restore._prepare_work_dir
+        closed, prepare = database.gate.closed, restore._prepare_work_dir
         monkeypatch.setattr(app.db, "CLOSE_TIMEOUT_S", 0.1)
         monkeypatch.setattr(
-            app.db.gate, "closed", lambda timeout_s: (seen.append("closed"), closed(timeout_s))[1]
+            database.gate, "closed", lambda timeout_s: (seen.append("closed"), closed(timeout_s))[1]
         )
         monkeypatch.setattr(
             restore,
@@ -483,26 +484,22 @@ class TestARestoreDuringADownload:
         assert archive.is_file(), "the archive stays in the inbox for the next attempt"
 
     def test_a_download_closed_before_its_end_lets_the_restore_run(
-        self, session, settings, stick, collection
+        self, session, database, settings, stick, collection
     ):
         """A browser that breaks the download off must not block every later restore."""
-        import app.db
-
         collection(2)
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
         session.commit()
 
         self._started_download(settings).close()
 
-        assert app.db.gate.lasting_in_use == 0
+        assert database.gate.lasting_in_use == 0
         backup.run_restore(settings, _drive(settings), _report_nothing)
         assert len(list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))) == 1
 
     def test_a_finished_download_lets_the_restore_run(
-        self, admin_client, session, settings, stick, collection
+        self, admin_client, session, database, settings, stick, collection
     ):
-        import app.db
-
         collection(2)
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
         session.commit()
@@ -511,14 +508,13 @@ class TestARestoreDuringADownload:
         response = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
 
         assert response.status_code == 200
-        assert app.db.gate.lasting_in_use == 0
+        assert database.gate.lasting_in_use == 0
         backup.run_restore(settings, _drive(settings), _report_nothing)
         assert len(list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))) == 1
 
     def test_a_download_that_fails_midway_does_not_stay_counted(
-        self, session, settings, collection, monkeypatch
+        self, session, database, settings, collection, monkeypatch
     ):
-        import app.db
         from app.api.backup import archive_download
 
         collection(1)
@@ -533,10 +529,10 @@ class TestARestoreDuringADownload:
         with pytest.raises(OSError):
             next(download)
 
-        assert app.db.gate.lasting_in_use == 0
+        assert database.gate.lasting_in_use == 0
 
     def test_a_browser_that_leaves_midway_does_not_stay_counted(
-        self, session, settings, monkeypatch
+        self, session, database, settings, monkeypatch
     ):
         """Starlette leaves the generator suspended on a disconnect.
 
@@ -547,7 +543,6 @@ class TestARestoreDuringADownload:
 
         import anyio
 
-        import app.db
         from app.api.backup import zip_download
         from app.services import auth
 
@@ -575,7 +570,7 @@ class TestARestoreDuringADownload:
         gc.disable()
         try:
             anyio.run(browser_leaves_after_the_first_chunk)
-            assert app.db.gate.lasting_in_use == 0
+            assert database.gate.lasting_in_use == 0
         finally:
             gc.enable()
             gc.collect()  # a failure must not leave the count up for the tests after this one
@@ -1307,7 +1302,7 @@ class TestABackupFromTheInbox:
         assert (settings.incoming_dir / "_done" / path.name).is_file()
         assert backup.waiting_archive(settings) is None
 
-    def test_an_incomplete_file_is_refused(self, settings):
+    def test_an_incomplete_file_is_refused(self, database, settings):
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         broken = settings.incoming_dir / "kiekmap-backup-kaputt.zip"
         broken.write_bytes(b"kein zip")

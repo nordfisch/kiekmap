@@ -51,10 +51,8 @@ def test_a_session_that_stays_in_use_opens_the_gate_again():
         pass
 
 
-def test_the_api_answers_503_while_the_gate_is_closed(client):
-    import app.db
-
-    with app.db.gate.closed(timeout_s=1):
+def test_the_api_answers_503_while_the_gate_is_closed(client, database):
+    with database.gate.closed(timeout_s=1):
         response = client.get("/api/photos/tags")
 
     assert response.status_code == 503
@@ -62,15 +60,12 @@ def test_the_api_answers_503_while_the_gate_is_closed(client):
     assert client.get("/api/photos/tags").status_code == 200
 
 
-def test_the_readiness_probe_is_not_ready_while_the_gate_is_closed(client):
-    import app.db
-
-    with app.db.gate.closed(timeout_s=1):
+def test_the_readiness_probe_is_not_ready_while_the_gate_is_closed(client, database):
+    with database.gate.closed(timeout_s=1):
         assert client.get("/api/health").status_code == 503
 
 
-def test_the_inbox_waits_while_the_gate_is_closed(session, settings, fixtures_dir):
-    import app.db
+def test_the_inbox_waits_while_the_gate_is_closed(session, database, settings, fixtures_dir):
     from app.services.watcher import IncomingWatcher
 
     (settings.incoming_dir / "scan.jpg").write_bytes(
@@ -79,7 +74,7 @@ def test_the_inbox_waits_while_the_gate_is_closed(session, settings, fixtures_di
     watcher = IncomingWatcher(settings, interval=0)
     watcher.scan_once()
 
-    with app.db.gate.closed(timeout_s=1):
+    with database.gate.closed(timeout_s=1):
         assert watcher.scan_once() == 0
 
     assert (settings.incoming_dir / "scan.jpg").is_file(), "the file waits in the inbox"

@@ -14,7 +14,7 @@ from fastapi import APIRouter, Response, status
 from sqlalchemy import text
 
 from app import __version__
-from app.db import DatabaseClosed, SessionLocal, gate
+from app.db import DatabaseClosed, current_database
 
 router = APIRouter(tags=["system"])
 
@@ -33,7 +33,8 @@ def health(response: Response) -> dict[str, str]:
     a curl response does not. Found by CodeQL, ``py/stack-trace-exposure``.
     """
     try:
-        with gate.use(), SessionLocal() as session:
+        database = current_database()
+        with database.gate.use(), database.session() as session:
             session.execute(text("SELECT 1"))
     except DatabaseClosed:
         # A restore is swapping the file. Not ready for these seconds, and nothing to log.

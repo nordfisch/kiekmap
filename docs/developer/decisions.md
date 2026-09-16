@@ -2359,9 +2359,14 @@ rename, so that the restore does not depend on how SQLite handles the case its d
 about.
 
 **The swap now runs with the database closed.** `DatabaseGate` in `app/db.py` counts the sessions in
-use. `closed_for_swap` refuses new sessions, waits until none is in use, disposes the engine, lets
-the restore move the files and migrate, and reopens. Only after the wait is every connection back
-in the pool, so only then does `dispose()` close all of them.
+use. `Database.closed_for_swap` refuses new sessions, waits until none is in use, disposes the
+engine, lets the restore move the files and migrate, and calls `reopen()`. Only after the wait is
+every connection back in the pool, so only then does `dispose()` close all of them.
+
+`reopen()` builds a new engine on the configured path and binds the sessions of the `Database` to
+it. Until #88 the engine was a module-level name that `closed_for_swap` rebound with `global`, and
+the sessionmaker beside it was reconfigured to match. Engine, sessions and gate belong to one
+object now, which startup creates and `current_database()` hands out.
 
 **The gate closes for seconds, not for the whole restore.** Copying from the stick takes minutes and
 runs with the database open. Requests during the swap get a 503 with `Retry-After`. The progress

@@ -3,6 +3,12 @@
 SQLite runs with a WAL journal here. That is the mode in which reads and writes do not block each
 other -- important because the import thread writes while the kiosk reads -- and in which
 ``VACUUM INTO`` produces a consistent backup copy while the service is running.
+
+**Importing this module creates nothing.** ``Database`` is built at startup -- by the ``lifespan``
+of ``app.main``, by ``app.cli``, or by a test fixture -- and ``current_database`` hands it out. An
+engine at module level would read the settings and create the data directories on every import of
+``app.db``, models and services included, and a test could only get one of its own by rebinding a
+module attribute after the fact.
 """
 
 import fcntl
@@ -15,7 +21,7 @@ from pathlib import Path
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.config import Settings, get_settings
+from app.config import Settings
 
 #: How long a restore waits for the sessions in use to finish before it gives up.
 #:
@@ -40,8 +46,7 @@ def _configure_sqlite(dbapi_connection, connection_record) -> None:
     cursor.close()
 
 
-def create_db_engine() -> Engine:
-    settings = get_settings()
+def _create_engine(settings: Settings) -> Engine:
     settings.ensure_dirs()
     return create_engine(
         settings.db_url,
@@ -49,10 +54,6 @@ def create_db_engine() -> Engine:
         connect_args={"check_same_thread": False},
         pool_pre_ping=True,
     )
-
-
-engine = create_db_engine()
-SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 
 class DatabaseClosed(Exception):
@@ -135,28 +136,95 @@ class DatabaseGate:
                 self._closed = False
 
 
-gate = DatabaseGate()
+class Database:
+    """The engine of one process, the sessions on it, and the gate in front of them.
 
-
-@contextmanager
-def closed_for_swap(timeout_s: float | None = None) -> Iterator[None]:
-    """Close every connection, let the caller swap the file, and connect to what is there then.
-
-    ``dispose()`` closes only the connections that are back in the pool. That is why the gate
-    comes first: once no session is in use, every connection is back, and none stays open on the
-    old file when it is renamed.
-
-    Raises ``DatabaseInUse`` before anything is closed, so a refusal leaves the service as it was.
+    Built at startup from the settings it is handed, so that nothing about it depends on the
+    moment a module was imported. Whoever needs it during a request, a job or a CLI command asks
+    ``current_database``.
     """
-    global engine
 
-    with gate.closed(CLOSE_TIMEOUT_S if timeout_s is None else timeout_s):
-        engine.dispose()
-        try:
-            yield
-        finally:
-            engine = create_db_engine()
-            SessionLocal.configure(bind=engine)
+    def __init__(self, settings: Settings) -> None:
+        self.settings = settings
+        self.gate = DatabaseGate()
+        self.engine = _create_engine(settings)
+        self._sessions = sessionmaker(autoflush=False, expire_on_commit=False, bind=self.engine)
+
+    def session(self) -> Session:
+        """A session on the current engine, without the gate.
+
+        Whoever opens one while the service runs takes ``gate.use()`` around it, as ``get_session``
+        does for a request. The two exceptions are named in ``DatabaseGate``.
+        """
+        return self._sessions()
+
+    def reopen(self) -> None:
+        """Connect to whatever lies at the configured path now.
+
+        The restore moves a different file there, and ``closed_for_swap`` has disposed the old
+        engine by then. The sessionmaker keeps its settings and only changes what it binds to.
+        """
+        self.engine = _create_engine(self.settings)
+        self._sessions.configure(bind=self.engine)
+
+    @contextmanager
+    def closed_for_swap(self, timeout_s: float | None = None) -> Iterator[None]:
+        """Close every connection, let the caller swap the file, and reopen on what is there then.
+
+        ``dispose()`` closes only the connections that are back in the pool. That is why the gate
+        comes first: once no session is in use, every connection is back, and none stays open on
+        the old file when it is renamed.
+
+        Raises ``DatabaseInUse`` before anything is closed, so a refusal leaves the service as it
+        was.
+        """
+        with self.gate.closed(CLOSE_TIMEOUT_S if timeout_s is None else timeout_s):
+            self.engine.dispose()
+            try:
+                yield
+            finally:
+                self.reopen()
+
+
+#: The database of this process. ``open_database`` fills it, ``current_database`` reads it.
+_database: Database | None = None
+
+
+def open_database(settings: Settings) -> Database:
+    """The database of this process, created on the first call and handed out on every later one.
+
+    **One per process, and the second caller gets the first one.** ``DatabaseGate`` counts the
+    sessions of the engine it belongs to; a second engine on the same file would open connections
+    outside that count, and a restore would swap the file under them. The backend is a single
+    process for the same kind of reason; see ``process_lock``.
+
+    A test fixture opens the database before it starts the app, so that the test and the service
+    share one engine and one gate. ``close_database`` gives the next test a clean process.
+    """
+    global _database
+
+    if _database is None:
+        _database = Database(settings)
+    return _database
+
+
+def close_database() -> None:
+    """Close the database of this process, so that the next ``open_database`` builds a new one."""
+    global _database
+
+    if _database is not None:
+        _database.engine.dispose()
+        _database = None
+
+
+def current_database() -> Database:
+    """The database of this process. Raises if startup has not opened one."""
+    if _database is None:
+        raise RuntimeError(
+            "No database is open in this process. app.main opens it in its lifespan, app.cli at "
+            "the start of a command, and the tests in the database fixture."
+        )
+    return _database
 
 
 class CollectionLocked(Exception):
@@ -253,5 +321,6 @@ def _flock(path: Path, *, exclusive: bool) -> int:
 
 def get_session() -> Iterator[Session]:
     """FastAPI dependency."""
-    with gate.use(), SessionLocal() as session:
+    database = current_database()
+    with database.gate.use(), database.session() as session:
         yield session
