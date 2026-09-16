@@ -412,7 +412,7 @@ class TestParallelImports:
 
         def another_import_commits_first(file):
             # Past the duplicate check of this import, before its INSERT.
-            with app.db.SessionLocal() as other:
+            with app.db.current_database().session() as other:
                 other.add(
                     Photo(
                         sha256=sha,

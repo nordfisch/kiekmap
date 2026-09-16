@@ -22,7 +22,7 @@ def test_a_broken_database_does_not_report_why(client: TestClient) -> None:
     """
     broken = OperationalError("SELECT 1", {}, Exception("unable to open /data/kiekmap.db"))
 
-    with patch("app.api.health.SessionLocal", side_effect=broken):
+    with patch("app.db.Database.session", side_effect=broken):
         response = client.get("/api/health")
 
     assert response.status_code == 503

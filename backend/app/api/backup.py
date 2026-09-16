@@ -20,7 +20,7 @@ from starlette.types import Receive, Scope, Send
 
 from app.api.admin import Admin, Config
 from app.config import Settings
-from app.db import SessionLocal, gate
+from app.db import current_database
 from app.schemas import (
     BackupOnDrive,
     BackupReminder,
@@ -126,7 +126,7 @@ def start(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
 
     def work(report: service.Report) -> str:
         # Its own session: this runs in a thread, and the request's session belongs to the request.
-        with SessionLocal() as session:
+        with current_database().session() as session:
             return service.run_backup(session, settings, drive, report)
 
     if not service.job.start("backup", work):
@@ -221,7 +221,7 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
     folder = _pick_folder(settings, request.path)
 
     def work(report: service.Report) -> service.JobResult:
-        with SessionLocal() as session:
+        with current_database().session() as session:
             message, outcomes = importer.import_from_folder(
                 session,
                 folder,
@@ -378,7 +378,8 @@ def archive_download(settings: Settings) -> Generator[bytes, None, None]:
     closed before its end. A browser that leaves early ends it through
     ``_ClosingStreamingResponse``.
     """
-    with gate.use(lasting=True), SessionLocal() as session:
+    database = current_database()
+    with database.gate.use(lasting=True), database.session() as session:
         yield from service.stream_archive(session, settings)
 
 

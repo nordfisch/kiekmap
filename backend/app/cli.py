@@ -21,13 +21,24 @@ from collections import Counter
 from pathlib import Path
 
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.db import CollectionLocked, SessionLocal, collection_lock
+from app.db import CollectionLocked, collection_lock, open_database
 from app.models import ImportResult, Photo, PhotoStatus
 from app.services.importer import import_directory
 
 log = logging.getLogger("kiekmap.cli")
+
+
+def _session() -> Session:
+    """A session on the database of this command.
+
+    Opened here rather than at import, and only by the commands that read or write the collection:
+    ``pin`` needs no database and creates none. ``DatabaseGate`` does not reach this process at
+    all; ``collection_lock`` keeps a writing command and a restore apart instead.
+    """
+    return open_database(get_settings()).session()
 
 
 def _cmd_import(args: argparse.Namespace) -> int:
@@ -39,7 +50,7 @@ def _cmd_import(args: argparse.Namespace) -> int:
     settings = get_settings()
     settings.ensure_dirs()
 
-    with SessionLocal() as session:
+    with _session() as session:
         outcomes = import_directory(session, directory, settings)
         session.commit()
 
@@ -76,7 +87,7 @@ def _cmd_stats(_: argparse.Namespace) -> int:
     # the admin overview, so that the two never disagree in front of the same person.
     alive = Photo.status != PhotoStatus.DELETED
 
-    with SessionLocal() as session:
+    with _session() as session:
         total = count(alive)
         without_location = count(alive, Photo.lat.is_(None))
         without_date = count(alive, Photo.date_from.is_(None))
@@ -100,7 +111,7 @@ def _cmd_duplicates(args: argparse.Namespace) -> int:
     from app.services.similar import candidate_groups
 
     settings = get_settings()
-    with SessionLocal() as session:
+    with _session() as session:
         groups = candidate_groups(session, settings, limit=args.distance)
 
     total = sum(len(group) for group in groups)
@@ -125,7 +136,7 @@ def _cmd_places(_: argparse.Namespace) -> int:
     from app.services.places import load_from_file
 
     settings = get_settings()
-    with SessionLocal() as session:
+    with _session() as session:
         count = load_from_file(session, settings.places_file)
 
     if count:
@@ -142,7 +153,7 @@ def _cmd_seed_export(_: argparse.Namespace) -> int:
     settings = get_settings()
     target = seed.seed_dir(settings)
 
-    with SessionLocal() as session:
+    with _session() as session:
         photos, contributions = seed.export(session, settings, target)
 
     print(f"{photos} photos and {contributions} visitor contributions written to {target}.")
@@ -161,7 +172,7 @@ def _cmd_seed_load(_: argparse.Namespace) -> int:
     settings.ensure_dirs()
     source = seed.seed_dir(settings)
 
-    with SessionLocal() as session:
+    with _session() as session:
         try:
             photos, contributions = seed.load(session, settings, source)
         except FileNotFoundError:
@@ -190,7 +201,7 @@ def _cmd_empty(args: argparse.Namespace) -> int:
     settings = get_settings()
     settings.ensure_dirs()
 
-    with SessionLocal() as session:
+    with _session() as session:
         photos = session.scalar(select(func.count()).select_from(Photo)) or 0
         contributions = session.scalar(select(func.count()).select_from(Change)) or 0
 

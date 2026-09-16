@@ -1,18 +1,24 @@
 """Shared test setup.
 
-Every test gets a fresh, temporary data directory. That has to happen *before* ``app.db`` is
-used, because the engine is created on import -- hence the detour through
-``get_settings.cache_clear()`` and rebinding the session.
+Every test gets a fresh, temporary data directory and its own ``Database`` on it. The ``database``
+fixture opens it before the service under test starts, so that the test and the service share one
+engine and one gate; ``reset_process_state`` closes it again afterwards.
 """
 
 import os
 import shutil
 from collections.abc import Iterator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+
+if TYPE_CHECKING:
+    # Imported for the annotations only. At runtime every app module is imported inside a fixture,
+    # after the environment of the test stands.
+    from app.db import Database
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -71,21 +77,27 @@ def settings(data_dir: Path):
 
 
 @pytest.fixture
-def session(settings) -> Iterator[Session]:
-    """A fresh database with every table.
+def database(settings) -> "Database":
+    """The database of the test process, with every table, on the temporary data directory.
 
     The tables are created straight from the models rather than through Alembic -- faster, and the
     migrations themselves run at container start anyway.
+
+    Opened here rather than by the service, because ``open_database`` hands out what the process
+    already has: the app started by the ``client`` fixture, a command run through ``app.cli`` and
+    this fixture all work on the same engine and the same gate.
     """
-    import app.db
-    from app.db import Base
+    from app.db import Base, open_database
     from app.models import Photo  # noqa: F401 -- registers every table with Base
 
-    app.db.engine = app.db.create_db_engine()
-    app.db.SessionLocal.configure(bind=app.db.engine)
-    Base.metadata.create_all(app.db.engine)
+    opened = open_database(settings)
+    Base.metadata.create_all(opened.engine)
+    return opened
 
-    with app.db.SessionLocal() as db_session:
+
+@pytest.fixture
+def session(database: "Database") -> Iterator[Session]:
+    with database.session() as db_session:
         yield db_session
 
 
@@ -103,12 +115,17 @@ TEST_PIN = "4711"
 
 @pytest.fixture(autouse=True)
 def reset_process_state() -> Iterator[None]:
-    """Everything the service keeps in memory rather than in the database.
+    """Everything the process keeps outside the database, and the database itself.
 
     Sessions, the failed-attempt counter and the single backup job would otherwise outlive a test
     -- one that enters the PIN wrongly five times would take the whole run down with it, and a
     finished backup job would still be reported to the next test.
+
+    The open database goes with them: it points at a data directory that is about to be deleted,
+    and the next test has to get one of its own. Autouse, so that it also catches the tests that
+    open it through ``app.cli`` rather than through the ``database`` fixture.
     """
+    from app.db import close_database
     from app.services import auth, backup
 
     def clear() -> None:
@@ -116,6 +133,7 @@ def reset_process_state() -> Iterator[None]:
         auth.attempts.reset()
         auth.tickets.clear()
         backup.job.reset()
+        close_database()
 
     clear()
     yield

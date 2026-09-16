@@ -482,9 +482,10 @@ class TestServingFiles:
         def record(conn, cursor, statement, parameters, context, executemany):
             sent.append(statement)
 
-        event.listen(app.db.engine, "before_cursor_execute", record)
+        engine = app.db.current_database().engine
+        event.listen(engine, "before_cursor_execute", record)
         yield sent
-        event.remove(app.db.engine, "before_cursor_execute", record)
+        event.remove(engine, "before_cursor_execute", record)
 
     @pytest.mark.parametrize("route", ["thumb", "image"])
     def test_a_file_request_does_not_load_the_tags(

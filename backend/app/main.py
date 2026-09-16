@@ -11,7 +11,7 @@ from app import __version__
 from app.api import admin, backup, config, contribute, health, photos, places
 from app.api.body_limit import BodyLimit
 from app.config import get_settings
-from app.db import BackendAlreadyRunning, DatabaseClosed, SessionLocal, process_lock
+from app.db import BackendAlreadyRunning, DatabaseClosed, open_database, process_lock
 from app.services.places import load_if_empty as load_places_if_empty
 from app.services.watcher import IncomingWatcher
 from app.text import texts
@@ -36,7 +36,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             log.error("%s", refusal)
             raise
 
-        with SessionLocal() as session:
+        # Opened here and not at import: only now do the settings stand, and only now is this
+        # process the one that may use the data directory.
+        database = open_database(settings)
+
+        with database.session() as session:
             load_places_if_empty(session, settings.places_file)
 
         watcher = IncomingWatcher(settings)

@@ -98,7 +98,7 @@ class TestAnAbortInTheMiddle:
         # in the memory of the one that was aborted?
         import app.db
 
-        with app.db.SessionLocal() as fresh:
+        with app.db.current_database().session() as fresh:
             photo = fresh.scalar(select(Photo).where(Photo.original_filename == "1_erstes.jpg"))
             assert photo is not None, "the abort must not take the first photo with it"
             entries = fresh.scalars(select(ImportLog)).all()

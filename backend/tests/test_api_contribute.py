@@ -1064,7 +1064,7 @@ class TestTwoVisitorsAtOnce:
         import app.db
 
         def commit(photo_id):
-            with app.db.SessionLocal() as other:
+            with app.db.current_database().session() as other:
                 photo = other.get(Photo, photo_id)
                 for name, value in fields.items():
                     setattr(photo, name, value)

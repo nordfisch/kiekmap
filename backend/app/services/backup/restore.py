@@ -14,7 +14,7 @@ from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
-from app import db as database
+from app import db
 from app.config import Settings
 from app.services import schema
 from app.services.backup.collection import copy_if_new, forget_size
@@ -50,9 +50,9 @@ def _apart_from_the_command_line[**P](restore: Callable[P, str]) -> Callable[P, 
     @functools.wraps(restore)
     def guarded(*args: P.args, **kwargs: P.kwargs) -> str:
         try:
-            with database.collection_lock(args[0], exclusive=True):
+            with db.collection_lock(args[0], exclusive=True):
                 return restore(*args, **kwargs)
-        except database.CollectionLocked:
+        except db.CollectionLocked:
             raise BackupError(texts().backup.command_line_writing) from None
 
     return guarded
@@ -67,7 +67,7 @@ def _not_during_a_download[**P](restore: Callable[P, str]) -> Callable[P, str]:
 
     @functools.wraps(restore)
     def guarded(*args: P.args, **kwargs: P.kwargs) -> str:
-        if database.gate.lasting_in_use:
+        if db.current_database().gate.lasting_in_use:
             raise BackupError(texts().backup.database_in_use)
         return restore(*args, **kwargs)
 
@@ -183,7 +183,7 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
     # The migration runs inside as well: until it has run, the restored database is not one the
     # program can use.
     try:
-        with database.closed_for_swap():
+        with db.current_database().closed_for_swap():
             set_aside = _set_aside(settings)
 
             for name in ("photos", "thumbs", "kiekmap.db", *LOOSE_FILES):
@@ -194,7 +194,7 @@ def _swap_in(settings: Settings, work: Path, total: int, report: Report) -> str:
             # Now, and not a step earlier: the file at the configured path is the restored one.
             report(total, total, texts().backup.bringing_the_schema_forward)
             schema.bring_up_to_date(settings.db_path)
-    except database.DatabaseInUse:
+    except db.DatabaseInUse:
         # Raised before anything was closed or moved, so the collection is as it was.
         shutil.rmtree(work, ignore_errors=True)
         raise BackupError(texts().backup.database_in_use) from None

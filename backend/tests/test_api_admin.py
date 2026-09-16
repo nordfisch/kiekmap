@@ -986,7 +986,7 @@ class TestRevertingWhileSomethingElseHappens:
     def _other_session():
         import app.db
 
-        return app.db.SessionLocal()
+        return app.db.current_database().session()
 
     def test_a_correction_by_hand_meanwhile_is_not_thrown_away(
         self, admin_client: TestClient, session, make_photo, monkeypatch
