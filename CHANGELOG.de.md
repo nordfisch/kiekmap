@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 1a6e3bab8d562ca2a309d8c58af0eff49d5966e0c5f27eecc4c039f61020523c -->
+<!-- source-sha: 7a787e42ff1babffbd3458cea0ca026010d8a23bee6eea606393f2da207edd1b -->
 
 # Änderungen
 
@@ -82,6 +82,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Ruff prüft das Python des Projekts gegen Sicherheitsregeln** ([#85])
 - **Kaputte Dateien jedes erlaubten Formats werden beantwortet statt zu scheitern** ([#87])
 - **Die Datenbank entsteht beim Start statt beim Import eines Moduls** ([#88])
+- **Die Sprachregel gilt wieder: Bezeichner, Protokollzeilen und Meldungen** ([#83])
+- **Kommentare tragen Grund und Stolperfalle, nicht die datierte Vorgeschichte** ([#84])
+- **mypy prüft das Backend, bevor die Tests laufen** ([#86])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -107,6 +110,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#85]: https://github.com/nordfisch/kiekmap/issues/85
 [#87]: https://github.com/nordfisch/kiekmap/issues/87
 [#88]: https://github.com/nordfisch/kiekmap/issues/88
+[#83]: https://github.com/nordfisch/kiekmap/issues/83
+[#84]: https://github.com/nordfisch/kiekmap/issues/84
+[#86]: https://github.com/nordfisch/kiekmap/issues/86
 
 ## [0.9.0] — 2. September 2026
 

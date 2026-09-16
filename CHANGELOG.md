@@ -74,6 +74,9 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **Ruff checks the Python of the repository against security rules** ([#85])
 - **Broken files of every allowed format are answered instead of raising** ([#87])
 - **The database is created at startup instead of when a module is imported** ([#88])
+- **The language rule holds again: identifiers, log lines and messages** ([#83])
+- **Comments carry the reason and the pitfall, not the dated history** ([#84])
+- **mypy checks the backend before the tests run** ([#86])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -99,6 +102,9 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 [#85]: https://github.com/nordfisch/kiekmap/issues/85
 [#87]: https://github.com/nordfisch/kiekmap/issues/87
 [#88]: https://github.com/nordfisch/kiekmap/issues/88
+[#83]: https://github.com/nordfisch/kiekmap/issues/83
+[#84]: https://github.com/nordfisch/kiekmap/issues/84
+[#86]: https://github.com/nordfisch/kiekmap/issues/86
 
 ## [0.9.0] — 2026-09-02
 
