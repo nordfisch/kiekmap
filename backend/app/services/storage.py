@@ -41,11 +41,11 @@ _SUFFIX_BY_MIME = {mime: suffix for mime, suffix in ALLOWED_FORMATS.values()}
 def suffix_for_mime(mime: str) -> str | None:
     """The file ending belonging to a stored MIME type, or None for one we never wrote.
 
-    Its own function because three callers need it and each of them used to answer it for itself.
-    One of the three answered it by arithmetic on the string -- ``mime.split("/")[-1]`` with
-    ``jpeg`` and ``tiff`` patched back by hand -- which happened to agree with the table and would
-    have stopped agreeing the moment a format arrived whose ending is not the tail of its MIME
-    type. A rule that lives in two places is a rule that will disagree with itself.
+    Its own function because three callers need it. Working the ending out by arithmetic on the
+    string -- ``mime.split("/")[-1]`` with ``jpeg`` and ``tiff`` patched back by hand -- agrees
+    with the table today and stops agreeing the moment a format arrives whose ending is not the
+    tail of its MIME type. A rule that lives in two places is a rule that will disagree with
+    itself.
     """
     return _SUFFIX_BY_MIME.get(mime)
 
