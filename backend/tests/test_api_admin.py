@@ -1151,8 +1151,8 @@ class TestCreditAndProvenance:
 
         data = admin_client.get(f"/api/photos/{photo.id}").json()
 
-        assert data["credit"] == "Sammlung Heimatmuseum Holm", "der Nachweis gehoert ans Bild"
-        assert "provenance" not in data, "die Herkunft darf den Kiosk nie erreichen"
+        assert data["credit"] == "Sammlung Heimatmuseum Holm", "the credit belongs on the picture"
+        assert "provenance" not in data, "the provenance must never reach the kiosk"
         assert "Meyer" not in str(data)
 
     def test_an_empty_field_clears_the_credit(self, admin_client: TestClient, session, make_photo):
@@ -1314,7 +1314,7 @@ class TestRevertingARefinement:
 
         data = admin_client.post(f"/api/admin/changes/{contribution}/revert").json()
 
-        assert data["lat"] is not None, "das Foto behaelt seinen Ort"
+        assert data["lat"] is not None, "the photo keeps its place"
         assert data["place_name"] == "Am Kamp"
         assert data["location_accuracy_m"] == 150
 
@@ -1368,7 +1368,7 @@ class TestRevertingARefinement:
         assert response.status_code == 409
         entries = admin_client.get("/api/admin/changes").json()["changes"]
         older_entry = next(e for e in entries if e["id"] == older_one)
-        assert older_entry["revertable"] is False, "kein Knopf, der nur 409 liefert"
+        assert older_entry["revertable"] is False, "no button that only ever yields a 409"
 
     def test_without_the_street_in_the_place_index_nothing_is_reverted(
         self, admin_client: TestClient, place_index, make_photo
@@ -1388,7 +1388,7 @@ class TestRevertingARefinement:
 
         assert response.status_code == 409
         place_index.refresh(photo)
-        assert photo.place_name == "Am Kamp 2", "die Angabe bleibt stehen"
+        assert photo.place_name == "Am Kamp 2", "the entry stays as it is"
 
     def test_a_house_number_edited_by_hand_stays(
         self, admin_client: TestClient, place_index, make_photo

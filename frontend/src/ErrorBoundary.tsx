@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // Nobody reads a console on the Pi. It is written for the one case that counts: somebody
     // reproducing the crash on a development machine.
-    console.error("Kiekmap ist abgestuerzt:", error, info.componentStack);
+    console.error("Kiekmap crashed:", error, info.componentStack);
 
     const now = Date.now();
     if (!mayReload(lastRecovery(sessionStorage), now)) return;

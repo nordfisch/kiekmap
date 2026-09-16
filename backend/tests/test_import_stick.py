@@ -271,7 +271,7 @@ class TestThroughTheApi:
         self, admin_client: TestClient, stick, tmp_path: Path
     ):
         """Otherwise the admin view would be a way to read in every folder of the device."""
-        elsewhere = tmp_path / "woanders"
+        elsewhere = tmp_path / "elsewhere"
         elsewhere.mkdir()
 
         response = admin_client.post("/api/admin/import/start", json={"path": str(elsewhere)})

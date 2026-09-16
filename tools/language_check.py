@@ -15,6 +15,10 @@ Two more questions concern the prose, and both went unwatched far longer. German
 writes its umlauts out; nothing read the documentation, so nothing noticed when two files drifted
 to 900 transcribed words. English documentation must be free of German left over from the switch
 of August 2026. See ``transcribed_in_prose`` and ``german_in_english_prose``.
+
+A fourth question concerns what the program says: a log line, a line of CLI output and a line in
+the browser console are English. Reading comments alone left those unwatched, and German ones
+survived in two files. See ``german_output``.
 """
 
 import argparse
@@ -170,6 +174,79 @@ def texts_of(name: str, path: Path) -> list[str] | None:
     if name.endswith(HASH_COMMENT):
         return hash_comment_texts(path)
     return None
+
+
+#: Calls whose string arguments are program output: a log line, a line of CLI output, a line in
+#: the browser console. The rule (CLAUDE.md) puts all three in English -- only what reaches a
+#: screen in the visitor or admin view comes from the text catalogue, and that is not a log.
+OUTPUT_LEVELS = ("debug", "info", "warning", "warn", "error", "exception", "critical")
+OUTPUT_OBJECTS = ("log", "logger", "logging", "console")
+
+
+def python_output(path: Path) -> list[str]:
+    """Strings a Python file logs or prints.
+
+    Read from the syntax tree rather than by a regular expression: a log call is a call, and only
+    the literal strings among its arguments are output. A formatted string contributes its literal
+    parts; what an interpolation yields is a value, not prose.
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return []
+    found: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        is_log = (
+            isinstance(func, ast.Attribute)
+            and func.attr in OUTPUT_LEVELS
+            and isinstance(func.value, ast.Name)
+            and func.value.id in OUTPUT_OBJECTS
+        )
+        if not is_log and not (isinstance(func, ast.Name) and func.id == "print"):
+            continue
+        for arg in node.args:
+            if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                found.append(arg.value)
+            elif isinstance(arg, ast.JoinedStr):
+                found.append("".join(v.value for v in arg.values if isinstance(v, ast.Constant)))
+    return found
+
+
+#: The opening of a ``console.*`` call up to the end of its first string. Deliberately no parser:
+#: the repository holds a single console call, and a TypeScript parser for it would cost more than
+#: it can ever find.
+CONSOLE_CALL = re.compile(r"console\.\w+\(\s*[\"'`]([^\"'`]*)")
+
+
+def typescript_output(path: Path) -> list[str]:
+    """Strings a TypeScript file writes to the browser console."""
+    return CONSOLE_CALL.findall(path.read_text(encoding="utf-8"))
+
+
+def output_of(name: str, path: Path) -> list[str]:
+    """Every line of program output of a file we can read -- empty for every other format."""
+    if name.endswith(".py"):
+        return python_output(path)
+    if name.endswith((".ts", ".tsx")):
+        return typescript_output(path)
+    return []
+
+
+def german_output(texts: list[str]) -> list[str]:
+    """Which of these output lines are German.
+
+    Asked twice, because a log line is short. ``language`` needs function words and returns None on
+    a tie: ``"Foto %s: unbekanntes Format %s -- uebersprungen"`` carries none of either language
+    and would pass unseen. A transcribed umlaut settles the same case without them -- no English
+    line contains ``uebersprungen``, and the same short list already serves the prose check.
+
+    Quoted material is stripped first, for the reason it is stripped everywhere else: a log line
+    naming the OSM value ``"strasse"`` reports a value, not a German sentence.
+    """
+    return [t for t in texts if language(t) == "de" or TRANSCRIBED.search(strip_quoted(t))]
 
 
 def is_test(path: str) -> bool:
@@ -333,12 +410,15 @@ def main() -> int:
     ]
 
     breaks: list[tuple[str, int, int]] = []
+    spoken: list[tuple[str, list[str]]] = []
     total = {"de": 0, "en": 0}
 
     for name in sorted(files):
         path = ROOT / name
         if not path.is_file():
             continue
+        if said := german_output(output_of(name, path)):
+            spoken.append((name, said))
         texts = texts_of(name, path)
         if texts is None:
             continue
@@ -372,9 +452,20 @@ def main() -> int:
         if prose_language(name) == "en" and (hits := german_in_english_prose(ROOT / name))
     ]
 
-    if not breaks and not transcribed and not still_german:
+    if not breaks and not spoken and not transcribed and not still_german:
         print("No file breaks the language rule.")
         return 0
+
+    if spoken:
+        lines = sum(len(s) for _, s in spoken)
+        print(f"\n{lines} lines of program output stand in German, in {len(spoken)} files:")
+        for name, said in spoken:
+            for text in said[:5]:
+                print(f"  {name}  {text[:70]}")
+            if len(said) > 5:
+                print(f"  {name}  … and {len(said) - 5} more lines")
+        print("\n  A log line, a line of CLI output and a line in the browser console are English.")
+        print("  What reaches the visitor or admin view comes from the text catalogue instead.")
 
     if breaks:
         comments = sum(b[1] for b in breaks)
