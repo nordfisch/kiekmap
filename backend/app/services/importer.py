@@ -178,10 +178,9 @@ TITLE_MAX = 60
 
 #: What the scanning software says about itself, standing in the title field.
 #:
-#: "Intel(R) JPEG Library, version [1.51.12.44]" arrived as the title of 35 photographs of the
-#: newer archive stand, "OLYMPUS DIGITAL CAMERA" as the description of others. It is not a
-#: shortened caption and does not belong in the description either -- it says nothing about the
-#: picture. Punkt 41 removed eighteen of these by hand; they came back with the next import.
+#: "Intel(R) JPEG Library, version [1.51.12.44]" arrives as the title of a scan, "OLYMPUS DIGITAL
+#: CAMERA" as the description. It is not a shortened caption and does not belong in the
+#: description either -- it says nothing about the picture.
 _SOFTWARE = re.compile(
     r"^\s*(intel\(r\)|olympus digital camera|lead technologies|picasa|hp scanjet|epson scan)",
     re.I,
@@ -242,12 +241,11 @@ def import_file(
     below it as statements about the photo -- street, house number, name; see
     app/services/foldermeta.py. Without one it reads only the file itself.
 
-    **That this decision sits here and not at the call site is the point.** It used to be a line
-    each caller had to remember, and the busiest of them -- the watched inbox, which CLAUDE.md
-    calls the museum team's usual route -- did not have it. 929 photographs came in with their
-    street standing in the path and nowhere in the database. A fifth import route now has to
-    *answer* the question "what is this file's root?" rather than silently skip it; the browser
-    upload answers it with ``None``, because a browser sends no path.
+    **That this decision sits here and not at the call site is the point.** A caller that forgets
+    the root takes photographs in with their street standing in the path and nowhere in the
+    database, and nothing says so. As a parameter here every import route has to *answer* the
+    question "what is this file's root?"; the browser upload answers it with ``None``, because a
+    browser sends no path.
     """
     inbox = settings.incoming_dir
 
@@ -506,9 +504,8 @@ def batch_tags(text: str | None) -> list[str]:
     """The batch keyword field, split into keywords.
 
     Commas separate, because somebody who knows the box holds "Feuerwehr, Neubau" should not need
-    a second field for it. That this is the same split that once turned whole sentences into
-    keywords (see backlog, point 1) is not the same case: there a machine cut up a caption, here
-    a person types into a field labelled "Schlagwörter".
+    a second field for it. Splitting a caption the same way would turn whole sentences into
+    keywords; here a person types into a field labelled "Schlagwörter", and the commas are theirs.
     """
     return [word.strip() for word in (text or "").split(",") if word.strip()]
 

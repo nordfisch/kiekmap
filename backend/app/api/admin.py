@@ -395,9 +395,9 @@ def _is_newest(session: Session, change: Change) -> bool:
     **Newer means a higher id, not a later timestamp**, and that is not laziness. ``created_at``
     carries a SQLite server default, which writes whole seconds ("14:24:37"); a bound Python
     datetime renders with microseconds ("14:24:37.000000"). SQLite compares those as text and the
-    shorter string loses -- so ``created_at >= created_at`` matched **nothing at all**, not even
-    its own row. The guard was silently doing nothing. A log is only ever appended to, so the id
-    says "newer" with no format to get wrong.
+    shorter string loses, so ``created_at >= created_at`` matches **nothing at all**, not even its
+    own row -- a guard that silently does nothing. A log is only ever appended to, so the id says
+    "newer" with no format to get wrong.
     """
     fields = LOCATION_FIELDS if change.field in LOCATION_FIELDS else {change.field}
     newer = (
@@ -491,8 +491,7 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail
     """Undo what the visitor wrote -- which usually means clearing, but not always.
 
     For ``location`` and ``date`` the previous value really is "nothing": those routes may only
-    fill what was empty (see api/contribute.py), so clearing is restoring. This docstring used to
-    say exactly that, and it stopped being the whole truth when sharpening arrived.
+    fill what was empty (see api/contribute.py), so clearing is restoring.
 
     ``housenumber`` **replaces**. Its log entry therefore carries the street it displaced and where
     that came from, and taking it back puts the photo back on the middle of that street. Clearing

@@ -324,9 +324,9 @@ def add_housenumber(
     """Move a photo from the middle of its street to one of its houses.
 
     **The exception to "visitors only fill what is empty"** (decisions.md, point 5) -- and it goes
-    through its own door rather than loosening that check. ``_require_empty`` still reads exactly
-    as it did; what stands beside it is a narrower rule: only street-precise, only to an address
-    of that same street, and never the other way round.
+    through its own door rather than loosening that check. ``_require_empty`` stays as it is; what
+    stands beside it is a narrower rule: only street-precise, only to an address of that same
+    street, and never the other way round.
 
     Curator statements may be sharpened too. That is a real widening, and it is why the change log
     carries the previous source: taking the contribution back has to give a curator's statement
@@ -396,8 +396,8 @@ def add_date(
     photo = _get_open_photo(session, photo_id, "date")
 
     # The schema checks each part on its own -- a day from 1 to 31, a month from 1 to 12 -- and
-    # not whether they make a date. 31 February passed it, and ``date()`` then raised a
-    # ValueError that became a 500. The admin route has always caught it; this one had not.
+    # not whether they make a date. 31 February passes it, and ``date()`` then raises a
+    # ValueError, which without this would reach the client as a 500.
     try:
         start, end, precision = date_range(
             contribution.year,
