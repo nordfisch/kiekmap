@@ -81,11 +81,11 @@ class TestRecognisingDrives:
         assert backup.find_drives(settings.media_dir) == []
 
     def test_a_stick_is_found(self, settings, stick: Path):
-        gefunden = backup.find_drives(settings.media_dir)
+        found = backup.find_drives(settings.media_dir)
 
-        assert len(gefunden) == 1
-        assert gefunden[0].name == "SANDISK"
-        assert gefunden[0].free_bytes > 0
+        assert len(found) == 1
+        assert found[0].name == "SANDISK"
+        assert found[0].free_bytes > 0
 
     def test_an_ordinary_folder_is_no_stick(self, settings, stick: Path):
         """The most important case here.
@@ -104,14 +104,14 @@ class TestRecognisingDrives:
     ):
         """Raspberry Pi OS mounts under /media/<user>/<label>."""
         media = tmp_path / "media"
-        tief = media / "pi" / "USB-STICK"
-        tief.mkdir(parents=True)
+        nested = media / "pi" / "USB-STICK"
+        nested.mkdir(parents=True)
         settings.media_dir = media
-        monkeypatch.setattr(backup.drives, "_is_mounted", lambda path: path == tief)
+        monkeypatch.setattr(backup.drives, "_is_mounted", lambda path: path == nested)
 
-        gefunden = backup.find_drives(media)
+        found = backup.find_drives(media)
 
-        assert [drive.name for drive in gefunden] == ["USB-STICK"]
+        assert [drive.name for drive in found] == ["USB-STICK"]
 
     def test_a_symlink_is_no_drive(self, settings, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         """The case that really happened on 14 August 2026.
@@ -125,10 +125,10 @@ class TestRecognisingDrives:
         """
         media = tmp_path / "media"
         media.mkdir()
-        anderswo = tmp_path / "anderswo"
-        mounted = anderswo / "data"
+        elsewhere = tmp_path / "elsewhere"
+        mounted = elsewhere / "data"
         mounted.mkdir(parents=True)
-        (media / "Danger").symlink_to(anderswo)
+        (media / "Danger").symlink_to(elsewhere)
         settings.media_dir = media
         # Compared resolved, not literally: otherwise the check in place does not model the
         # symlink at all, and the test would be green even without the safeguard.
@@ -205,13 +205,13 @@ class TestBackingUp:
     def test_too_little_space_is_said_beforehand(self, session, settings, stick, collection):
         """Better not to start at all than to stop half way."""
         collection(2)
-        laufwerk = _drive(settings)
-        laufwerk.free_bytes = 1
+        drive = _drive(settings)
+        drive.free_bytes = 1
 
-        with pytest.raises(backup.BackupError) as fehler:
-            backup.run_backup(session, settings, laufwerk, _report_nothing)
+        with pytest.raises(backup.BackupError) as error:
+            backup.run_backup(session, settings, drive, _report_nothing)
 
-        assert "zu wenig Platz" in str(fehler.value)
+        assert "zu wenig Platz" in str(error.value)
 
     def test_progress_counts_photos(self, session, settings, stick, collection):
         collection(3)
@@ -253,10 +253,10 @@ class TestRestoring:
     def test_an_incomplete_backup_is_refused(self, database, settings, stick):
         (stick / backup.BACKUP_DIR_NAME).mkdir()
 
-        with pytest.raises(backup.BackupError) as fehler:
+        with pytest.raises(backup.BackupError) as error:
             backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert "nicht komplett" in str(fehler.value)
+        assert "nicht komplett" in str(error.value)
 
     def test_the_collection_is_replaced(self, session, settings, stick, collection):
         shas = self._make_backup(session, settings, stick, collection)
@@ -281,7 +281,7 @@ class TestRestoring:
 
         backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert not path.exists(), "in der Sicherung war es nicht"
+        assert not path.exists(), "it was not in the backup"
         set_aside = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
         assert len(set_aside) == 1
         assert (set_aside[0] / "photos" / later[0:2] / later[2:4] / f"{later}.jpg").is_file()
@@ -841,10 +841,10 @@ class TestSchemaRevisionOnRestore:
         """
         self._backup_at_schema_revision(session, settings, stick, collection, "aus der zukunft")
 
-        with pytest.raises(backup.BackupError) as fehler:
+        with pytest.raises(backup.BackupError) as error:
             backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert "neueren Programmversion" in str(fehler.value)
+        assert "neueren Programmversion" in str(error.value)
 
     def test_on_refusal_the_device_stays_untouched(self, session, settings, stick, collection):
         """The promise the order in the code hangs on.
@@ -862,7 +862,7 @@ class TestSchemaRevisionOnRestore:
         with pytest.raises(backup.BackupError):
             backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert path.is_file(), "der Bestand haette nicht angefasst werden duerfen"
+        assert path.is_file(), "the collection must not have been touched"
         assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
 
@@ -906,72 +906,72 @@ class TestTheReminder:
 
 class TestTheJob:
     def test_a_second_job_is_rejected(self):
-        auftrag = backup.Job()
+        job = backup.Job()
         running = __import__("threading").Event()
 
-        auftrag.start("backup", lambda report: (running.wait(2), "fertig")[1])
+        job.start("backup", lambda report: (running.wait(2), "fertig")[1])
         try:
-            assert auftrag.start("restore", lambda report: "geht nicht") is False
+            assert job.start("restore", lambda report: "geht nicht") is False
         finally:
             running.set()
 
     def test_an_error_ends_up_in_the_status(self):
-        auftrag = backup.Job()
+        job = backup.Job()
 
         def fails(report):
             raise backup.BackupError("Der Stick ist weg.")
 
-        auftrag.start("backup", fails)
-        _warten(auftrag)
+        job.start("backup", fails)
+        _wait(job)
 
-        assert auftrag.status().phase == "error"
-        assert auftrag.status().error == "Der Stick ist weg."
+        assert job.status().phase == "error"
+        assert job.status().error == "Der Stick ist weg."
 
     def test_an_unexpected_error_does_not_stay_silent(self):
         """Otherwise the progress bar would stand still and nobody would know why."""
-        auftrag = backup.Job()
+        job = backup.Job()
 
         def bursts(report):
             raise RuntimeError("kaputt")
 
-        auftrag.start("backup", bursts)
-        _warten(auftrag)
+        job.start("backup", bursts)
+        _wait(job)
 
-        assert auftrag.status().phase == "error"
-        assert "schiefgegangen" in auftrag.status().error
+        assert job.status().phase == "error"
+        assert "schiefgegangen" in job.status().error
 
     def test_acknowledging_resets(self):
-        auftrag = backup.Job()
-        auftrag.start("backup", lambda report: "fertig")
-        _warten(auftrag)
+        job = backup.Job()
+        job.start("backup", lambda report: "fertig")
+        _wait(job)
 
-        auftrag.reset()
+        job.reset()
 
-        assert auftrag.status().phase == "idle"
+        assert job.status().phase == "idle"
 
 
-def _warten(auftrag: backup.Job, sekunden: float = 3.0) -> None:
+def _wait(job: backup.Job, seconds: float = 3.0) -> None:
     """The job runs in a thread -- wait briefly until it is through."""
     import time
 
-    ende = time.monotonic() + sekunden
-    while auftrag.running and time.monotonic() < ende:
+    deadline = time.monotonic() + seconds
+    while job.running and time.monotonic() < deadline:
         time.sleep(0.01)
 
 
 class TestThroughTheApi:
     """The path the interface takes: query the drives, start, poll the status."""
 
-    def _bis_fertig(self, client, sekunden: float = 5.0) -> dict:
+    def _until_done(self, client, seconds: float = 5.0) -> dict:
         import time
 
-        ende = time.monotonic() + sekunden
-        while time.monotonic() < ende:
+        deadline = time.monotonic() + seconds
+        while time.monotonic() < deadline:
             state = client.get("/api/admin/backup/status").json()
             if state["phase"] != "running":
                 return state
             time.sleep(0.02)
-        raise AssertionError("Der Auftrag wurde nicht fertig")
+        raise AssertionError("the job did not finish")
 
     def test_no_drives_without_signing_in(self, client):
         assert client.get("/api/admin/backup/drives").status_code == 401
@@ -979,31 +979,31 @@ class TestThroughTheApi:
     def test_without_a_stick_the_list_stays_empty(self, admin_client, settings, tmp_path: Path):
         settings.media_dir = tmp_path / "media"
 
-        daten = admin_client.get("/api/admin/backup/drives").json()
+        data = admin_client.get("/api/admin/backup/drives").json()
 
-        assert daten["drives"] == []
+        assert data["drives"] == []
         # Answerable all the same: how much would have to be backed up, and when it last was.
-        assert daten["reminder"]["overdue"] is True
+        assert data["reminder"]["overdue"] is True
 
     def test_the_list_names_the_space_and_what_is_needed(
         self, admin_client, settings, stick, collection
     ):
         collection(2)
 
-        daten = admin_client.get("/api/admin/backup/drives").json()
+        data = admin_client.get("/api/admin/backup/drives").json()
 
-        assert daten["photos"] == 2
-        assert daten["needed_bytes"] > 0
-        assert daten["drives"][0]["name"] == "SANDISK"
-        assert daten["drives"][0]["enough_space"] is True
+        assert data["photos"] == 2
+        assert data["needed_bytes"] > 0
+        assert data["drives"][0]["name"] == "SANDISK"
+        assert data["drives"][0]["enough_space"] is True
 
     def test_the_backup_runs_through(self, admin_client, settings, stick, collection):
         collection(2)
 
-        gestartet = admin_client.post("/api/admin/backup/start", json={"path": str(stick)}).json()
-        assert gestartet["kind"] == "backup"
+        started = admin_client.post("/api/admin/backup/start", json={"path": str(stick)}).json()
+        assert started["kind"] == "backup"
 
-        state = self._bis_fertig(admin_client)
+        state = self._until_done(admin_client)
         assert state["phase"] == "done"
         assert "2 Fotos" in state["message"]
         assert (stick / backup.BACKUP_DIR_NAME / "kiekmap.db").is_file()
@@ -1013,7 +1013,7 @@ class TestThroughTheApi:
     ):
         collection(1)
         admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
-        self._bis_fertig(admin_client)
+        self._until_done(admin_client)
 
         overview = admin_client.get("/api/admin/overview").json()
 
@@ -1029,7 +1029,7 @@ class TestThroughTheApi:
     def test_acknowledging_clears_the_status(self, admin_client, settings, stick, collection):
         collection(1)
         admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
-        self._bis_fertig(admin_client)
+        self._until_done(admin_client)
 
         state = admin_client.post("/api/admin/backup/acknowledge").json()
 
@@ -1039,7 +1039,7 @@ class TestThroughTheApi:
         (stick / backup.BACKUP_DIR_NAME).mkdir()
 
         admin_client.post("/api/admin/backup/restore", json={"path": str(stick)})
-        state = self._bis_fertig(admin_client)
+        state = self._until_done(admin_client)
 
         assert state["phase"] == "error"
         assert "nicht komplett" in state["error"]
@@ -1054,17 +1054,17 @@ class TestTheArchive:
     without anyone noticing.
     """
 
-    def _archiv(self, session, settings) -> bytes:
+    def _archive(self, session, settings) -> bytes:
         return b"".join(backup.stream_archive(session, settings))
 
     def test_an_unpacked_archive_can_be_restored(self, session, settings, stick, collection):
         """The most important test of the archive: it ties the two paths together."""
         shas = collection(3)
-        daten = self._archiv(session, settings)
+        data = self._archive(session, settings)
 
         # Unpack onto the stick -- exactly what somebody would do by hand.
-        with zipfile.ZipFile(io.BytesIO(daten)) as archiv:
-            archiv.extractall(stick)
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            archive.extractall(stick)
 
         # And after that the entirely ordinary way back.
         for sha in shas:
@@ -1073,14 +1073,14 @@ class TestTheArchive:
 
         for sha in shas:
             assert original_path(settings.photos_dir, sha, ".jpg").is_file(), (
-                "das entpackte Archiv war fuer die Wiederherstellung nicht brauchbar"
+                "the unpacked archive was not usable for the restore"
             )
 
     def test_the_archive_holds_the_same_folder_as_the_stick(self, session, settings, collection):
         collection(2)
 
-        with zipfile.ZipFile(io.BytesIO(self._archiv(session, settings))) as archiv:
-            names = archiv.namelist()
+        with zipfile.ZipFile(io.BytesIO(self._archive(session, settings))) as archive:
+            names = archive.namelist()
 
         assert {name.split("/")[0] for name in names} == {backup.BACKUP_DIR_NAME}
         assert f"{backup.BACKUP_DIR_NAME}/kiekmap.db" in names
@@ -1092,10 +1092,10 @@ class TestTheArchive:
         """JPEG and WebP are already compressed -- a second pass only costs the Pi time."""
         collection(2)
 
-        with zipfile.ZipFile(io.BytesIO(self._archiv(session, settings))) as archiv:
-            verfahren = {entry.compress_type for entry in archiv.infolist()}
+        with zipfile.ZipFile(io.BytesIO(self._archive(session, settings))) as archive:
+            methods = {entry.compress_type for entry in archive.infolist()}
 
-        assert verfahren == {zipfile.ZIP_STORED}
+        assert methods == {zipfile.ZIP_STORED}
 
     def test_the_archive_is_built_as_a_stream(self, session, settings, collection):
         """Otherwise it would sit entirely in memory -- on a Pi with 2 GB not a good idea."""
@@ -1103,21 +1103,21 @@ class TestTheArchive:
 
         pieces = list(backup.stream_archive(session, settings))
 
-        assert len(pieces) > 1, "der Erzeuger hat alles auf einmal geliefert"
+        assert len(pieces) > 1, "the generator delivered everything at once"
 
     def test_an_aborted_download_does_not_count_as_a_backup(self, session, settings, collection):
         """What the browser did not receive protects nobody -- so it does not count either."""
         collection(3)
-        strom = backup.stream_archive(session, settings)
-        next(strom)  # started, but not read to the end
-        strom.close()
+        stream = backup.stream_archive(session, settings)
+        next(stream)  # started, but not read to the end
+        stream.close()
 
         assert backup.read_state(settings).last_backup_at is None
 
     def test_a_complete_download_resets_the_reminder(self, session, settings, collection):
         collection(2)
 
-        self._archiv(session, settings)
+        self._archive(session, settings)
 
         state = backup.read_state(settings)
         assert state.last_backup_at is not None
@@ -1131,7 +1131,7 @@ class TestTheArchive:
 
         assert name.startswith("kiekmap-backup-holm-")
         assert name.endswith(".zip")
-        assert name.isascii(), "der Name steht in einem HTTP-Kopf"
+        assert name.isascii(), "the name stands in an HTTP header"
 
 
 class TestTheArchiveThroughTheApi:
@@ -1147,11 +1147,11 @@ class TestTheArchiveThroughTheApi:
         collection(1)
         ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
 
-        erste = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
-        zweite = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+        first = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+        second = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
 
-        assert erste.status_code == 200
-        assert zweite.status_code == 401, "ein Ticket darf sich nicht wiederverwenden lassen"
+        assert first.status_code == 200
+        assert second.status_code == 401, "a ticket must not be reusable"
 
     def test_a_ticket_only_for_signed_in_users(self, client):
         assert client.post("/api/admin/backup/zip/ticket").status_code == 401
@@ -1164,8 +1164,8 @@ class TestTheArchiveThroughTheApi:
 
         assert response.headers["content-type"] == "application/zip"
         assert "attachment" in response.headers["content-disposition"]
-        with zipfile.ZipFile(io.BytesIO(response.content)) as archiv:
-            assert archiv.testzip() is None
+        with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
+            assert archive.testzip() is None
 
     def test_a_running_job_blocks_the_download(self, admin_client, settings):
         """A restore would swap the files out from under the running stream."""
@@ -1194,8 +1194,8 @@ class TestABackupFromTheInbox:
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         target = settings.incoming_dir / name
         with target.open("wb") as file_name:
-            for teil in backup.stream_archive(session, settings):
-                file_name.write(teil)
+            for part in backup.stream_archive(session, settings):
+                file_name.write(part)
         return target
 
     def test_a_downloaded_archive_comes_back_through_the_inbox(self, session, settings, collection):
@@ -1208,9 +1208,9 @@ class TestABackupFromTheInbox:
         for sha in shas:
             original_path(settings.photos_dir, sha, ".jpg").unlink()
 
-        gefunden = backup.waiting_archive(settings)
-        assert gefunden is not None, "die abgelegte Sicherung wurde nicht erkannt"
-        backup.run_restore_from_archive(settings, gefunden[0], _report_nothing)
+        found = backup.waiting_archive(settings)
+        assert found is not None, "the backup put down there was not recognised"
+        backup.run_restore_from_archive(settings, found[0], _report_nothing)
 
         for sha in shas:
             assert original_path(settings.photos_dir, sha, ".jpg").is_file()
@@ -1224,10 +1224,10 @@ class TestABackupFromTheInbox:
         collection(2)
         self._put_down(session, settings)
 
-        gefunden = backup.waiting_archive(settings)
+        found = backup.waiting_archive(settings)
 
-        assert gefunden is not None
-        _, info = gefunden
+        assert found is not None
+        _, info = found
         assert info.photos == 2
         assert info.created_at is not None
 
@@ -1235,8 +1235,8 @@ class TestABackupFromTheInbox:
         """A truncated ZIP has no central directory -- it fails of its own accord."""
         collection(2)
         path = self._put_down(session, settings)
-        daten = path.read_bytes()
-        path.write_bytes(daten[: len(daten) // 2])
+        data = path.read_bytes()
+        path.write_bytes(data[: len(data) // 2])
 
         assert backup.waiting_archive(settings) is None
 
@@ -1244,8 +1244,8 @@ class TestABackupFromTheInbox:
         """A matching name, no manifest -- the name only decides whether to look inside."""
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         foreign = settings.incoming_dir / "kiekmap-backup-fremd.zip"
-        with zipfile.ZipFile(foreign, "w") as archiv:
-            archiv.writestr("irgendwas.txt", "kein Bestand")
+        with zipfile.ZipFile(foreign, "w") as archive:
+            archive.writestr("irgendwas.txt", "kein Bestand")
 
         assert backup.waiting_archive(settings) is None
 
@@ -1262,7 +1262,7 @@ class TestABackupFromTheInbox:
         watcher.scan_once()
         watcher.scan_once()
 
-        assert path.is_file(), "der Watcher hat die Sicherung angefasst"
+        assert path.is_file(), "the watcher touched the backup"
         assert not (settings.incoming_dir / "_problem").exists()
 
     def test_a_photo_beside_it_is_still_taken_in(self, session, settings, collection, sample_image):
@@ -1277,9 +1277,9 @@ class TestABackupFromTheInbox:
 
         watcher = IncomingWatcher(settings)
         watcher.scan_once()
-        aufgenommen = watcher.scan_once()
+        taken_in = watcher.scan_once()
 
-        assert aufgenommen == 1
+        assert taken_in == 1
 
     def test_the_previous_state_is_set_aside(self, session, settings, collection):
         collection(2)
@@ -1289,7 +1289,7 @@ class TestABackupFromTheInbox:
         backup.run_restore_from_archive(settings, path, _report_nothing)
 
         set_aside = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
-        assert len(set_aside) == 1, "der bisherige Stand wurde nicht beiseitegelegt"
+        assert len(set_aside) == 1, "the previous state was not set aside"
         assert before <= {p.name for p in set_aside[0].rglob("*") if p.is_file()}
 
     def test_the_archive_moves_to_the_done_folder(self, session, settings, collection):
@@ -1298,7 +1298,7 @@ class TestABackupFromTheInbox:
 
         backup.run_restore_from_archive(settings, path, _report_nothing)
 
-        assert not path.exists(), "die Datei liegt noch im Eingang"
+        assert not path.exists(), "the file is still in the inbox"
         assert (settings.incoming_dir / "_done" / path.name).is_file()
         assert backup.waiting_archive(settings) is None
 
@@ -1307,30 +1307,30 @@ class TestABackupFromTheInbox:
         broken = settings.incoming_dir / "kiekmap-backup-kaputt.zip"
         broken.write_bytes(b"kein zip")
 
-        with pytest.raises(backup.BackupError) as fehler:
+        with pytest.raises(backup.BackupError) as error:
             backup.run_restore_from_archive(settings, broken, _report_nothing)
 
-        assert "keine vollstaendige Sicherung" in str(fehler.value)
+        assert "keine vollstaendige Sicherung" in str(error.value)
 
 
-class TestEingangUeberDieApi:
-    def _bis_fertig(self, client, sekunden: float = 5.0) -> dict:
+class TestTheInboxThroughTheApi:
+    def _until_done(self, client, seconds: float = 5.0) -> dict:
         import time
 
-        ende = time.monotonic() + sekunden
-        while time.monotonic() < ende:
+        deadline = time.monotonic() + seconds
+        while time.monotonic() < deadline:
             state = client.get("/api/admin/backup/status").json()
             if state["phase"] != "running":
                 return state
             time.sleep(0.02)
-        raise AssertionError("Der Auftrag wurde nicht fertig")
+        raise AssertionError("the job did not finish")
 
     def _put_down(self, session, settings) -> str:
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         name = "kiekmap-backup-holm-2026-08-03.zip"
         with (settings.incoming_dir / name).open("wb") as file_name:
-            for teil in backup.stream_archive(session, settings):
-                file_name.write(teil)
+            for part in backup.stream_archive(session, settings):
+                file_name.write(part)
         return name
 
     def test_the_drive_list_reports_the_waiting_backup(
@@ -1339,11 +1339,11 @@ class TestEingangUeberDieApi:
         collection(2)
         name = self._put_down(session, settings)
 
-        daten = admin_client.get("/api/admin/backup/drives").json()
+        data = admin_client.get("/api/admin/backup/drives").json()
 
-        assert daten["incoming"] is not None
-        assert daten["incoming"]["file"] == name
-        assert daten["incoming"]["photos"] == 2
+        assert data["incoming"] is not None
+        assert data["incoming"]["file"] == name
+        assert data["incoming"]["photos"] == 2
 
     def test_without_a_file_the_list_reports_nothing(self, admin_client, settings):
         assert admin_client.get("/api/admin/backup/drives").json()["incoming"] is None
@@ -1356,7 +1356,7 @@ class TestEingangUeberDieApi:
 
         response = admin_client.post("/api/admin/backup/incoming/restore", json={"file": name})
         assert response.status_code == 200
-        state = self._bis_fertig(admin_client)
+        state = self._until_done(admin_client)
 
         assert state["phase"] == "done", state
         assert "_done" in state["message"]

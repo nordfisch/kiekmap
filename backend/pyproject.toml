@@ -1,7 +1,7 @@
 [project]
 name = "kiekmap-backend"
 version = "0.9.0"
-description = "Bilddatenbank fuer historische Ortsfotos im Heimatmuseum"
+description = "Image database for historic photos of a place, for a local history museum"
 requires-python = ">=3.12"
 authors = [{ name = "Kalle Erlhoff" }]
 license = "Apache-2.0"
@@ -19,8 +19,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3",
-    "httpx2",  # von starlette.testclient bevorzugt; httpx loest eine Deprecation-Warnung aus
-    "piexif>=1.1",  # nur zum Erzeugen der Testbilder mit EXIF
+    "httpx2",  # preferred by starlette.testclient; httpx raises a deprecation warning
+    "piexif>=1.1",  # only for building the test images with EXIF
     "ruff>=0.8",
 ]
 

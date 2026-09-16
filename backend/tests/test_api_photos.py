@@ -65,7 +65,7 @@ class TestTimeFilter:
             "/api/photos", params={"bbox": BBOX, "from_year": 1925, "to_year": 1930}
         )
 
-        assert response.json()["total"] == 1, "1920er-Foto muss in 1925-1930 erscheinen"
+        assert response.json()["total"] == 1, "a photo of the 1920s has to appear in 1925-1930"
 
     def test_a_decade_outside_does_not_appear(self, client: TestClient, session, make_photo):
         make_photo(year=1920, precision=DatePrecision.DECADE)
@@ -86,7 +86,7 @@ class TestTimeFilter:
             response = client.get(
                 "/api/photos", params={"bbox": BBOX, "from_year": start, "to_year": end}
             )
-            assert response.json()["total"] == 1, f"{start}-{end} muss 1932 enthalten"
+            assert response.json()["total"] == 1, f"{start}-{end} has to contain 1932"
 
     def test_swapped_years_are_turned_around(self, client: TestClient, session, make_photo):
         make_photo(year=1932)
@@ -225,7 +225,7 @@ class TestTheLimit:
 
         assert len(response["photos"]) == 2
         assert response["total"] == 5
-        assert response["truncated"] is True, "die Karte soll zum Hineinzoomen auffordern koennen"
+        assert response["truncated"] is True, "the map has to be able to ask for a closer zoom"
 
     def test_no_notice_without_a_limit(self, client: TestClient, session, make_photo):
         make_photo()
@@ -328,8 +328,8 @@ class TestHistogram:
 
         data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert data["bars"] == [{"year": 1930, "count": 1}], "Balken zeigen den Ausschnitt"
-        assert data["collection_from"] == 1890, "die Achse zeigt den ganzen Bestand"
+        assert data["bars"] == [{"year": 1930, "count": 1}], "the bars show the current section"
+        assert data["collection_from"] == 1890, "the axis shows the whole collection"
 
     def test_the_width_belongs_to_the_collection_too(self, client: TestClient, session, make_photo):
         """Otherwise the meaning of the bars would change while panning the map.
@@ -588,7 +588,7 @@ class TestFileSuffix:
         from app.services.storage import ALLOWED_FORMATS, suffix_for_mime
 
         for mime, suffix in ALLOWED_FORMATS.values():
-            assert suffix_for_mime(mime) == suffix, f"{mime} findet seine Endung nicht"
+            assert suffix_for_mime(mime) == suffix, f"{mime} does not find its suffix"
 
     def test_an_unknown_type_yields_no_suffix(self):
         from app.services.storage import suffix_for_mime
