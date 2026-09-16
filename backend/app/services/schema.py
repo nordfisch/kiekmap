@@ -2,19 +2,17 @@
 
 Alembic normally runs from the command line, once, at startup
 (``backend/docker-entrypoint.sh``). This module is what lets the application ask the same
-questions while it is running -- and it exists because of a failure that went unnoticed for two
-days.
+questions while it is running.
 
 **A backup brings its own schema.** Restoring swaps the database file as a whole
 (``backup.restore._swap_in``); the running service is then merely re-attached to it
 (``api/backup._reopen_database``). No migration happens in between, because migrations happen at
-*start*, and a restore is not a start. On 12 August 2026 that meant a device that looked entirely
-normal -- photos, map, timeline -- while **every write ended in a 500**:
+*start*, and a restore is not a start. Without one the device looks entirely normal -- photos,
+map, timeline -- while **every write ends in a 500**:
 
     sqlite3.OperationalError: table changes has no column named old_source
 
-The remedy was a restart, and it stood in the manuals as a caveat the museum team had to know.
-Since 15 August 2026 the restore does it itself, and the caveat is gone.
+Nothing short of a restart clears that, which is why the restore migrates itself.
 
 **Both directions matter, and they need opposite answers.** A backup older than the program is
 brought up (``upgrade``). A backup *newer* than the program cannot be: this program does not know

@@ -14,14 +14,13 @@ as a street when ``places`` knows one by that name. So this works on a USB stick
 on a folder in a different language, and in a village that never had a "Straßen" folder -- and no
 place name ends up in the code (see CLAUDE.md, "Nichts Ortsspezifisches gehört in den Code").
 
-Everything here only fills fields the file itself left empty -- with one exception, and it used to
-read the other way round. **A house number from the folder beats a coordinate out of the EXIF.**
-The old rule said the camera stood somewhere while the folder is somebody's filing, and that
-sounded like measurement against opinion. On Holm's stock it is not: 278 of the 413 EXIF-located
-photographs share their coordinate with another, and one point carries 20 photographs taken on
-four different days. No receiver produces the same six decimal places on four days -- those
-coordinates were typed, not measured. So both sides are somebody's filing, and only one of them
-snaps to the gazetteer. A street centre still gives way to the EXIF -- see ``_locate``.
+Everything here only fills fields the file itself left empty -- with one exception. **A house
+number from the folder beats a coordinate out of the EXIF.** An EXIF coordinate looks like a
+measurement and is not one: 278 of the 413 EXIF-located photographs share their coordinate with
+another, and one point carries 20 photographs taken on four different days. No receiver produces
+the same six decimal places on four days -- those coordinates were typed, not measured. So both
+sides are somebody's filing, and only one of them snaps to the gazetteer. A street centre still
+gives way to the EXIF -- see ``_locate``.
 """
 
 import logging
@@ -162,9 +161,8 @@ def _without_street(folder: str, street: str) -> str:
     street "Twiete" would be cut down to "nhof" -- the prefix test alone is too loose, the test
     for a number behind it is not.
 
-    One folder of the Holm archive is filed this way, and it produced exactly what
-    decisions.md, point 48, set out to remove: a photograph titled "Hörnstraße 14" standing above
-    the line "Hörnstraße".
+    Archives do file this way. Without the cut the photograph ends up titled "Hörnstraße 14"
+    above the line "Hörnstraße" -- the repetition decisions.md, point 48, is about.
     """
     if not folder.startswith(street) or folder == street:
         return folder
@@ -254,14 +252,13 @@ def apply_folder_meta(
     """
     # The provenance note goes first, because it is the one field that does *not* depend on a
     # street: it records where the file lay, and that is worth keeping even when the folder said
-    # nothing we could read. Three photos of the first import lost it to the early return below --
-    # two that lay loose in the import root, and one under an ambiguous street name.
+    # nothing we could read. A file loose in the import root, or under an ambiguous street name,
+    # reaches the early return below and would get nothing.
     #
-    # **It is added to whatever the file already said, not skipped.** Until 16 August 2026 this
-    # only filled an empty field, and 265 photographs whose file named a lender ("Familie Boysen")
-    # therefore never got the path -- the one trace back to the file in the museum's archive, and
-    # the one thing nobody can reconstruct from the picture. Both belong here: who lent it and
-    # where it lay are different answers to different questions.
+    # **It is added to whatever the file already said, not skipped.** A file whose own metadata
+    # names a lender ("Familie Boysen") would otherwise never get the path -- the one trace back
+    # to the file in the museum's archive, and the one thing nobody can reconstruct from the
+    # picture. Who lent it and where it lay are different answers to different questions.
     if settings.import_provenance:
         archive = settings.import_provenance + str(relative_to_root(path, root))
         if not photo.provenance:
@@ -282,12 +279,9 @@ def apply_folder_meta(
     if not photo.place_name:
         photo.place_name = meta.address
 
-    # **The title is the name beside the number, and nothing else.** Until 16 August 2026 it was
-    # ``meta.title`` -- address included -- and that reads like a title only until it stands under
-    # the picture, where the address is already there in ``place_name``. Punkt 41 cleaned 815 such
-    # titles by hand in August 2026; the next import wrote 323 of them straight back, which is how
-    # the rule was found. A folder that names no house ("049", "Hauptstraße") leaves the title
-    # empty rather than repeating the line below it.
+    # **The title is the name beside the number, and nothing else.** The address already stands
+    # under the picture in ``place_name``, so a title that includes it says the same line twice.
+    # A folder that names no house ("049", "Hauptstraße") therefore leaves the title empty.
     if not photo.title and meta.name:
         photo.title = meta.name
         photo.title_source = Source.CURATOR
@@ -302,22 +296,15 @@ def apply_folder_meta(
 def _locate(session: Session, photo: Photo, meta: FolderMeta) -> None:
     """Put the photo on the map, as precisely as the folder allows.
 
-    **A folder without a house number puts the photo on the street**, at 150 m. Until August 2026
-    it left the photo unlocated instead, and the reasoning was sound at the time: the street point
-    would look like an answer, and the photo would drop out of "Wo ist das?" -- away from the one
-    person who walks past that house every day.
+    **A folder without a house number puts the photo on the street**, at 150 m. The photo does not
+    drop out of the contribution panel over it: a street-precise photo without a house number is
+    what the sharpening question asks about, so it falls into the more precise question instead,
+    where the same person answers something narrower. See decisions.md, Punkt 32.
 
-    That reasoning rested on there being two questions. **There are three now.** A street-precise
-    photo without a house number is exactly what the sharpening question asks about, so such a
-    photo no longer falls out of the panel -- it falls into the more precise question, where the
-    same person answers something narrower. See decisions.md, Punkt 32.
-
-    **The folder's address also beats a coordinate out of the EXIF**, which is the other way round
-    from what this module did until August 2026. The reversal rests on a measurement, not on a
-    preference: on Holm's stock those coordinates repeat across photographs taken on different
-    days, so they were entered by somebody rather than read off a receiver (see the module
-    docstring). They are a second filing, not evidence -- and 349 photos of the first import sat on
-    one, up to 700 m from the address their own folder named.
+    **The folder's address also beats a coordinate out of the EXIF.** Those coordinates repeat
+    across photographs taken on different days, so they were entered by somebody rather than read
+    off a receiver (see the module docstring). They are a second filing, not evidence, and they sit
+    up to 700 m from the address the folder itself names.
 
     **The street centre does not get that privilege.** At 150 m it is coarser than the point it
     would replace, so a photo whose folder names no house number keeps its EXIF point.
