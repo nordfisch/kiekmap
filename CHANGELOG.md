@@ -71,6 +71,9 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **Over-long input is refused instead of causing a server error** ([#80])
 - **Large scans are no longer decoded in full for their thumbnails** ([#81])
 - **A running download refuses a restore at once, without 503 on the kiosk** ([#82])
+- **Ruff checks the Python of the repository against security rules** ([#85])
+- **Broken files of every allowed format are answered instead of raising** ([#87])
+- **The database is created at startup instead of when a module is imported** ([#88])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -93,6 +96,9 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 [#80]: https://github.com/nordfisch/kiekmap/issues/80
 [#81]: https://github.com/nordfisch/kiekmap/issues/81
 [#82]: https://github.com/nordfisch/kiekmap/issues/82
+[#85]: https://github.com/nordfisch/kiekmap/issues/85
+[#87]: https://github.com/nordfisch/kiekmap/issues/87
+[#88]: https://github.com/nordfisch/kiekmap/issues/88
 
 ## [0.9.0] — 2026-09-02
 

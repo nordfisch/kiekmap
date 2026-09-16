@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 90772ac8805fbb3476ebaba54a621e5ab9ffe3801f59dba7297a5fe35e0735a4 -->
+<!-- source-sha: 1a6e3bab8d562ca2a309d8c58af0eff49d5966e0c5f27eecc4c039f61020523c -->
 
 # Änderungen
 
@@ -79,6 +79,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Überlange Eingaben werden abgewiesen statt einen Serverfehler auszulösen** ([#80])
 - **Große Scans werden für Vorschaubilder nicht mehr vollständig dekodiert** ([#81])
 - **Ein laufender Download lehnt eine Wiederherstellung sofort ab, ohne 503 am Kiosk** ([#82])
+- **Ruff prüft das Python des Projekts gegen Sicherheitsregeln** ([#85])
+- **Kaputte Dateien jedes erlaubten Formats werden beantwortet statt zu scheitern** ([#87])
+- **Die Datenbank entsteht beim Start statt beim Import eines Moduls** ([#88])
 
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
@@ -101,6 +104,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#80]: https://github.com/nordfisch/kiekmap/issues/80
 [#81]: https://github.com/nordfisch/kiekmap/issues/81
 [#82]: https://github.com/nordfisch/kiekmap/issues/82
+[#85]: https://github.com/nordfisch/kiekmap/issues/85
+[#87]: https://github.com/nordfisch/kiekmap/issues/87
+[#88]: https://github.com/nordfisch/kiekmap/issues/88
 
 ## [0.9.0] — 2. September 2026
 
