@@ -54,7 +54,7 @@ class TestTheLock:
 
     def test_a_lock_of_a_killed_process_does_not_block_the_next_restore(self, settings):
         """The reason for flock over a marker file: a crash or a power cut leaves nothing behind."""
-        holder = subprocess.Popen(
+        holder = subprocess.Popen(  # noqa: S603 -- this interpreter, a literal list, no shell
             [
                 sys.executable,
                 "-c",

@@ -107,7 +107,8 @@ def ask_overpass(query: str, attempts: int = 3) -> dict:
             OVERPASS, data=data, headers={"User-Agent": USER_AGENT, "Accept": "application/json"}
         )
         try:
-            with urllib.request.urlopen(request, timeout=180) as response:
+            # S310: the URL is the OVERPASS constant, so the scheme is https and fixed.
+            with urllib.request.urlopen(request, timeout=180) as response:  # noqa: S310
                 return json.load(response)
         except urllib.error.HTTPError as error:
             # 429 and 504 mean "busy right now" and pass by themselves. Anything else in the 4xx

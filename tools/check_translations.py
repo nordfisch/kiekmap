@@ -53,8 +53,12 @@ MARKER_LINE = re.compile(r"^<!--\s*(?:translated-from|source-sha):.*-->\s*$")
 
 def translations() -> list[str]:
     """Every ``*.de.md`` under version control."""
+    # S607: git comes from PATH -- an absolute path would tie the tool to one machine.
     listed = subprocess.run(
-        ["git", "ls-files"], capture_output=True, text=True, cwd=ROOT
+        ["git", "ls-files"],  # noqa: S607
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
     ).stdout.split("\n")
     return sorted(name for name in listed if name.endswith(".de.md"))
 

@@ -83,7 +83,8 @@ def date_below(lines: list[str], index: int) -> str | None:
 def sortable(date: str) -> tuple[int, int, int]:
     """Year, month, day -- the end of a range, which is close enough to order two-day entries."""
     match = DATE.search(date)
-    assert match is not None
+    if match is None:
+        raise ValueError(f"not a date: {date}")
     return int(match.group(3)), MONTHS[match.group(2)], int(match.group(1))
 
 

@@ -43,7 +43,8 @@ def staged() -> list[str] | None:
     """The paths this commit changes. ``None`` when there is no repository to ask."""
     try:
         done = subprocess.run(
-            ["git", "diff", "--cached", "--name-only"],
+            # S607: git comes from PATH -- an absolute path would tie the tool to one machine.
+            ["git", "diff", "--cached", "--name-only"],  # noqa: S607
             capture_output=True,
             text=True,
             check=True,

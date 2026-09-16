@@ -6,4 +6,8 @@
 line-length = 100
 
 [lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E", "F", "I", "UP", "B", "S", "BLE"]
+
+[lint.per-file-ignores]
+# An assert is what a test is made of, here as in backend/tests.
+"test_*.py" = ["S101"]

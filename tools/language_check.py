@@ -316,8 +316,12 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    # S607: git comes from PATH -- an absolute path would tie the tool to one machine.
     listed = subprocess.run(
-        ["git", "ls-files"], capture_output=True, text=True, cwd=ROOT
+        ["git", "ls-files"],  # noqa: S607
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
     ).stdout.split("\n")
     # Prose is judged elsewhere, by its file name, and a file still being converted is judged
     # nowhere. Without this a .yml under docs/ or in the issue templates would be counted twice

@@ -396,7 +396,8 @@ GAPS = {
 
 
 def main() -> int:
-    rng = random.Random(RANDOM_SEED)
+    # S311: sample data, and the fixed seed is the point -- two runs must give the same collection.
+    rng = random.Random(RANDOM_SEED)  # noqa: S311
     IMAGE_DIR.mkdir(parents=True, exist_ok=True)
     for old in IMAGE_DIR.iterdir():
         old.unlink()

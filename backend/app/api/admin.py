@@ -60,7 +60,7 @@ from app.text import texts
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-TOKEN_HEADER = "X-Admin-Token"
+TOKEN_HEADER = "X-Admin-Token"  # noqa: S105 -- the name of the header, not a token
 
 #: Page size of the photo list. Large enough that scrolling beats paging on a touchscreen.
 DEFAULT_PAGE = 60

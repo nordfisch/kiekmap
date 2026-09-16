@@ -374,7 +374,7 @@ class TestPaging:
         for number in range(4):
             session.add(
                 ImportLog(
-                    path=f"/tmp/{number}.jpg",
+                    path=f"/tmp/{number}.jpg",  # noqa: S108 -- a stored path, no file is opened
                     result=ImportResult.IMPORTED,
                     created_at=datetime(2026, 3, number + 1, 12, 0),
                 )
@@ -1095,7 +1095,7 @@ class TestTheImportLog:
         for number, tag in enumerate([1, 2, 3], start=1):
             session.add(
                 ImportLog(
-                    path=f"/tmp/{number}.jpg",
+                    path=f"/tmp/{number}.jpg",  # noqa: S108 -- a stored path, no file is opened
                     result=ImportResult.IMPORTED,
                     created_at=datetime(2026, 3, tag, 12, 0),
                 )
