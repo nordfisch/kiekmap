@@ -2510,3 +2510,42 @@ import log names the limit.
 **WebP is the exception.** Pillow decodes it only in full, 1.2 GB at the limit. No scan of the
 collection is WebP. The Pi's free memory is not measured yet; the first device (#18) can correct
 the number.
+
+---
+
+## 90. Ruff checks for security, and the rules stand in two places
+
+`S` (bandit) and `BLE` are selected. **Both selections have to be written twice**, in
+`backend/pyproject.toml` and in `ruff.toml`: ruff always takes the nearest configuration, the first
+governs `backend/`, the second `tiles/` and `tools/`. A rule selected in only one of them leaves
+half the Python of the repository unchecked (#85).
+
+`S101` is ignored for test files: an assert is what a test is made of, and the rule hits a thousand
+lines. Everything else a rule finds is marked in place, with a `noqa` and its reason beside it.
+None of the findings was real except one, an `assert` used as a runtime check in
+`tools/build_register.py`, which `python -O` strips. The rest are a header name read as a password,
+subprocess calls with a literal argument list and no shell, and a seeded random generator for
+generated data.
+
+**A `noqa` without a reason is not allowed here.** Whoever cannot name why a finding is wrong has
+not understood it and must not silence it.
+
+The rules earn their place against the code that comes later: a subprocess with a shell, `pickle`,
+`tempfile.mktemp`, a secret in the source.
+
+---
+
+## 91. Broken input files are generated, not collected
+
+The import takes its files from the inbox, the browser upload and somebody's stick, so no file can
+be assumed whole. `tests/test_importer.py` generates every allowed format damaged in five named
+ways -- truncated after the header, truncated after half the data, random bytes behind a valid
+signature, a header claiming more pixels than the limit, an EXIF block with values of the wrong
+type -- and requires one of the three outcomes for each: imported, duplicate or rejected, never an
+exception (#87).
+
+**Generated rather than stored.** A fixture file in a folder would not say how it was made, and it
+would cost repository space. A generator says it in its own name.
+
+The single reproduction of #59 thereby became 25 cases, and one more test puts all of them into one
+inbox with a whole image sorted last. That is the failure #59 was.
