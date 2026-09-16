@@ -25,12 +25,11 @@ log = logging.getLogger(__name__)
 def health(response: Response) -> dict[str, str]:
     """Whether the database answers. The only endpoint that needs no PIN.
 
-    **The cause goes to the log, not into the response.** It used to travel back as ``detail``,
-    on the thought that whoever debugs the Pi wants to read it. Two things are wrong with that:
-    this endpoint is the one thing on the device that answers without authentication, and a
-    SQLAlchemy error names the driver, the file and often the statement. The log is also the
-    better place for the operator -- ``docker compose logs backend`` still holds it tomorrow,
-    a curl response does not. Found by CodeQL, ``py/stack-trace-exposure``.
+    **The cause goes to the log, not into the response.** This endpoint is the one thing on the
+    device that answers without authentication, and a SQLAlchemy error names the driver, the file
+    and often the statement. The log is also the better place for the operator --
+    ``docker compose logs backend`` still holds it tomorrow, a curl response does not. CodeQL
+    calls the opposite ``py/stack-trace-exposure``.
     """
     try:
         database = current_database()

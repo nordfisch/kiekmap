@@ -12,7 +12,7 @@ away would mean asking visitors "where is this?" about a photo whose address we 
 **The gazetteer decides what a street is, not a folder called "Straßen".** A path segment counts
 as a street when ``places`` knows one by that name. So this works on a USB stick filed differently,
 on a folder in a different language, and in a village that never had a "Straßen" folder -- and no
-place name ends up in the code (see CLAUDE.md, "Nichts Ortsspezifisches gehört in den Code").
+place name ends up in the code (see CLAUDE.md, "Nothing place-specific belongs in the code").
 
 Everything here only fills fields the file itself left empty -- with one exception. **A house
 number from the folder beats a coordinate out of the EXIF.** An EXIF coordinate looks like a
@@ -299,7 +299,7 @@ def _locate(session: Session, photo: Photo, meta: FolderMeta) -> None:
     **A folder without a house number puts the photo on the street**, at 150 m. The photo does not
     drop out of the contribution panel over it: a street-precise photo without a house number is
     what the sharpening question asks about, so it falls into the more precise question instead,
-    where the same person answers something narrower. See decisions.md, Punkt 32.
+    where the same person answers something narrower. See decisions.md, point 32.
 
     **The folder's address also beats a coordinate out of the EXIF.** Those coordinates repeat
     across photographs taken on different days, so they were entered by somebody rather than read
