@@ -79,7 +79,9 @@ class PhotoMarker(BaseModel):
     def from_photo(cls, photo: Photo) -> "PhotoMarker":
         return cls(
             id=photo.id,
-            lat=photo.lat,  # type: ignore[arg-type] -- the query excludes NULL
+            # The query excludes NULL. Nothing may follow the bracket: the text that stood here
+            # made the whole comment invalid, so it suppressed nothing.
+            lat=photo.lat,  # type: ignore[arg-type]
             lon=photo.lon,  # type: ignore[arg-type]
             title=photo.title,
             place_name=photo.place_name,
