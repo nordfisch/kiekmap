@@ -2549,3 +2549,67 @@ would cost repository space. A generator says it in its own name.
 
 The single reproduction of #59 thereby became 25 cases, and one more test puts all of them into one
 inbox with a whole image sorted last. That is the failure #59 was.
+
+---
+
+## 92. The language checker reads what the program says, not only what it explains
+
+Reading comments alone left the log line, the command line and the browser console unwatched, and
+German survived there through the switch to English (#83). `tools/language_check.py` now reads the
+strings handed to `log.*`, `print` and `console.*`, in Python through the AST and in TypeScript by
+pattern.
+
+**Two questions per string, because a log line is short.** The word list alone lets
+`"Foto %s: unbekanntes Format %s -- uebersprungen"` pass: it carries no function word of either
+language. The transcribed-umlaut list of the prose check settles it.
+
+Over the 170 output strings of the repository the second question costs no false alarm, which is
+the condition for keeping it: a check that cries wolf gets switched off.
+
+**Shell and Dockerfile literals stay unread.** There a literal is more often a path or a flag than
+a sentence. That gap is #41, and `development.md` names it.
+
+---
+
+## 93. History belongs in the commit, the pitfall in the code
+
+A comment says why the code is the way it is. It does not say what the code used to be, on which
+day that changed, or which backlog point paid for it. Those answers stand in the commit and in the
+closed issue, and `git log` on the line finds them (#84).
+
+What a comment keeps is the warning and its reason: the SQLite text comparison that makes a
+`created_at` guard match nothing, the EXIF coordinate that repeats across photographs and is
+therefore no measurement. Both read the same way without a date, and a date makes neither truer.
+
+**Two kinds of number are not the same.** A `decisions.md` point is a reference a reader still
+needs, and it stays. A backlog point resolves to `history.de.md`, which is how the work went, and
+it goes.
+
+**A measurement of the collection stays, its date goes.** "141 of 486 streets hold no addresses at
+all" is the reason for a condition. "Measured on 14 August 2026" only says when somebody looked.
+
+---
+
+## 94. mypy, not pyright, and with a baseline
+
+The first run over `backend/app/` found 19 errors in 11 files; pyright found 24 in the same code.
+The count did not decide it (#86). **mypy honours the `# type: ignore` comments the code already
+carries** -- six of pyright's errors sit on lines in `models.py` that carry one -- and it installs
+from `pyproject.toml` like ruff and pytest, while the `pyright` package fetches a Node runtime of
+its own.
+
+**Two findings were real, and both were suppressions that suppressed nothing:** a
+`# type: ignore[arg-type]` with explanatory text after the bracket, which makes the whole comment
+invalid, and a `# type: ignore[misc]` naming a code the line does not produce. That is the kind of
+defect no test finds.
+
+The other 17 are the types of a library rather than of this code. They stand in a baseline in
+`backend/mypy.ini`, per module and per error code, each with its reason. **The form has a price:**
+`disable_error_code` switches a code off for the whole module, so a second finding of the same kind
+stays silent there. It was chosen because the alternative was 17 ignore comments spread through
+`app/`. The baseline shrinks by deleting a code.
+
+mypy runs in `make test-backend`, in front of pytest, as `tsc` runs in front of vitest in
+`make test-frontend`. The CI workflow needed no change, because it calls `make check`. It costs
+4.6 seconds cold and 0.15 with its cache. Not `strict`: that would demand an annotation on every
+function and bury the findings that matter.
