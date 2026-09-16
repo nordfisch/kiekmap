@@ -25,6 +25,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
 .coverage
 htmlcov/
 # Build artefact of the editable install -- sat in the repository by accident until 15 August 2026.

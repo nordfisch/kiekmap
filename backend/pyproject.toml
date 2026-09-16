@@ -22,6 +22,7 @@ dev = [
     "httpx2",  # von starlette.testclient bevorzugt; httpx loest eine Deprecation-Warnung aus
     "piexif>=1.1",  # nur zum Erzeugen der Testbilder mit EXIF
     "ruff>=0.8",
+    "mypy>=1.13",
 ]
 
 [build-system]

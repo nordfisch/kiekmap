@@ -292,11 +292,21 @@ nobody from the collection; the git history and `history.de.md` still do.
 ```bash
 make check         # everything: style, checks, tests -- the target before a commit
 make test          # tests only
-make test-backend  # pytest
+make test-backend  # mypy and pytest
 make test-frontend # typecheck and vitest
 make lint          # ruff
 make docs-check    # only the checks below
 ```
+
+**Both halves are type-checked**, the frontend by `tsc`, the backend by mypy. Each runs in its
+test target, in front of the tests. The backend is configured in `backend/mypy.ini`, without
+`strict`.
+
+That file carries a baseline: per module the error codes the first run found and that are not
+fixed. Almost all of them are the types of a library rather than of this code — SQLAlchemy knows
+no `rowcount` on a `Result`, Pillow declares `MAX_IMAGE_PIXELS` as `int | None`. The form has a
+price: `disable_error_code` switches a code off for the whole module, so a second finding of the
+same kind stays silent there. The baseline shrinks by deleting a code and is meant to reach zero.
 
 **These checks run beside the tests, because they read files no test ever sees:**
 

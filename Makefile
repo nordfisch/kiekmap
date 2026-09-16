@@ -111,7 +111,11 @@ empty: migrate  ## delete the whole photo collection (no way back!)
 
 test: test-backend test-tiles test-frontend  ## all tests
 
+# mypy before pytest, the way test-frontend runs tsc before vitest. Both answer the same question
+# and neither is a test: does a call still fit the signature it calls? The configuration and what
+# it tolerates today stand in backend/mypy.ini.
 test-backend: $(VENV)
+	cd backend && .venv/bin/mypy app
 	cd backend && .venv/bin/pytest -q
 
 # The map build never runs on the Pi, but its arithmetic goes wrong just as silently as the

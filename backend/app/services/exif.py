@@ -183,7 +183,7 @@ def _xp_text(value: object) -> str | None:
 def _degrees(value: object, reference: object) -> float | None:
     """GPS is stored as (degrees, minutes, seconds) in EXIF."""
     try:
-        degrees, minutes, seconds = (float(part) for part in value)  # type: ignore[misc]
+        degrees, minutes, seconds = (float(part) for part in value)  # type: ignore[attr-defined]
     except (TypeError, ValueError):
         return None
 
