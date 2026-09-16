@@ -1,15 +1,23 @@
+import io
+import random
 import struct
 import zlib
 from datetime import date
 from pathlib import Path
 
 import pytest
-from PIL import Image, ImageFile
+from PIL import Image, ImageFile, TiffImagePlugin
 from sqlalchemy import select
 
 from app.models import DatePrecision, ImportLog, ImportResult, Photo, Source
 from app.services.importer import DONE_DIR, PROBLEM_DIR, import_directory, import_file
-from app.services.storage import THUMBNAIL_SIZES, original_path, sha256_of_file, thumbnail_path
+from app.services.storage import (
+    THUMBNAIL_SIZES,
+    original_path,
+    sha256_of_file,
+    suffix_for_mime,
+    thumbnail_path,
+)
 from app.text import texts
 
 
@@ -799,3 +807,304 @@ class TestLargeScans:
         larger.write_bytes(_png_header_claiming(9000, 9000))
         with pytest.raises(TooManyPixels):
             open_image(larger)
+
+
+# --- broken files ------------------------------------------------------------------------------
+#
+# Generated, not kept as fixtures. A broken file is only worth anything as a test if the way it is
+# broken is written down, and a file in a folder does not say how it was made.
+
+#: The formats the import allows, each damaged in every way below.
+BROKEN_FORMATS = ["JPEG", "MPO", "PNG", "TIFF", "WEBP"]
+
+#: What the generated file is called. Not what the import decides it is -- a truncated MPO is a
+#: JPEG to Pillow, and the name has no say in it either way.
+_SUFFIX = {"JPEG": ".jpg", "MPO": ".mpo", "PNG": ".png", "TIFF": ".tif", "WEBP": ".webp"}
+
+#: Small enough to generate in milliseconds, large enough that half the file is still more than a
+#: header. An uncompressed TIFF of this size is 230 kB, which is the largest of them.
+_SAMPLE_SIZE = (320, 240)
+
+#: Every call that needs noise uses this one seed, so a failing case can be reproduced.
+_SEED = 4711
+
+#: The first bytes a reader uses to recognise the format. Taken from a real file rather than
+#: written out per format: a WebP signature is RIFF, a length and "WEBP", and a PNG signature is
+#: followed by the length of its first chunk.
+_SIGNATURE_BYTES = 12
+
+#: Enough to claim more pixels than the limit allows without holding one. 81 megapixels for the
+#: formats that store the size as a number; WebP stores 14 bits per side, and 16383 is its
+#: largest, which is 268 megapixels.
+_HUGE = 9000
+_HUGE_WEBP = 16383
+
+
+def _valid_image(format: str) -> bytes:
+    """A small, whole image of one format -- the starting point of every damaged one."""
+    image = Image.linear_gradient("L").resize(_SAMPLE_SIZE).convert("RGB")
+    buffer = io.BytesIO()
+    if format == "MPO":
+        image.save(buffer, "MPO", save_all=True, append_images=[image.rotate(180)])
+    else:
+        image.save(buffer, format)
+    return buffer.getvalue()
+
+
+def _truncated_after_the_header(format: str) -> bytes:
+    """Signature and header, no image data -- a copy that stopped after its first block."""
+    return _valid_image(format)[:64]
+
+
+def _truncated_after_half_the_data(format: str) -> bytes:
+    """A whole header and half the pixels. The file opens; loading it is what fails."""
+    data = _valid_image(format)
+    return data[: len(data) // 2]
+
+
+def _random_bytes_behind_the_signature(format: str) -> bytes:
+    """Recognised as its format, nonsense from the header on."""
+    return _valid_image(format)[:_SIGNATURE_BYTES] + random.Random(_SEED).randbytes(512)
+
+
+def _claiming_in_jpeg(data: bytes, width: int, height: int) -> bytes:
+    """Overwrite the size in the SOF0 marker: length, sample precision, height, width."""
+    patched = bytearray(data)
+    struct.pack_into(">HH", patched, data.index(b"\xff\xc0") + 5, height, width)
+    return bytes(patched)
+
+
+def _claiming_in_tiff(data: bytes, width: int, height: int) -> bytes:
+    """Overwrite ImageWidth and ImageLength in the first directory.
+
+    An IFD entry is twelve bytes -- tag, type, count, value -- and Pillow writes both sizes as a
+    LONG, which stands in the entry itself rather than somewhere behind it.
+    """
+    patched = bytearray(data)
+    (directory,) = struct.unpack_from("<I", patched, 4)
+    (entries,) = struct.unpack_from("<H", patched, directory)
+    for index in range(entries):
+        entry = directory + 2 + index * 12
+        (tag,) = struct.unpack_from("<H", patched, entry)
+        if tag in (256, 257):
+            struct.pack_into("<I", patched, entry + 8, width if tag == 256 else height)
+    return bytes(patched)
+
+
+def _claiming_in_webp(data: bytes, width: int, height: int) -> bytes:
+    """Overwrite the size in the VP8 frame header, which follows its three-byte start code."""
+    patched = bytearray(data)
+    struct.pack_into("<HH", patched, data.index(b"\x9d\x01\x2a") + 3, width, height)
+    return bytes(patched)
+
+
+def _a_header_claiming_huge_dimensions(format: str) -> bytes:
+    """A few hundred bytes whose header claims more pixels than the limit allows.
+
+    #59 was reproduced with such a file: a PNG of a few hundred bytes claiming 20000 x 20000. The
+    header is read before a pixel is, so the claim costs nothing to make and has to be answered
+    without allocating anything.
+    """
+    if format == "PNG":
+        return _png_header_claiming(_HUGE, _HUGE)
+    data = _valid_image(format)
+    if format == "WEBP":
+        return _claiming_in_webp(data, _HUGE_WEBP, _HUGE_WEBP)
+    if format == "TIFF":
+        return _claiming_in_tiff(data, _HUGE, _HUGE)
+    return _claiming_in_jpeg(data, _HUGE, _HUGE)
+
+
+def _forced(directory: TiffImagePlugin.ImageFileDirectory_v2, tag: int, value, kind: int) -> None:
+    """Write a tag with a type the specification does not give it."""
+    directory[tag] = value
+    directory.tagtype[tag] = kind
+
+
+_ASCII, _SHORT, _LONG = 2, 3, 4
+
+#: The pointers to the two sub-directories of an EXIF block.
+_EXIF_POINTER, _GPS_POINTER = 0x8769, 0x8825
+
+
+def _crooked_directory() -> TiffImagePlugin.ImageFileDirectory_v2:
+    """The tags the import reads, each holding the wrong kind of value.
+
+    Numbers where text belongs and text where a number belongs. That is not invented: 25 TIFF
+    scans of the initial collection file their XMP packet as LONG numbers, which is the last tag
+    here -- see ``TestUnwieldyFiles``.
+    """
+    directory = TiffImagePlugin.ImageFileDirectory_v2()
+    _forced(directory, 0x010E, (7,), _LONG)  # ImageDescription, ASCII by the specification
+    _forced(directory, 0x010F, (1, 2, 3), _LONG)  # Make
+    _forced(directory, 0x0110, (17,), _LONG)  # Model
+    _forced(directory, 0x0112, "sideways", _ASCII)  # Orientation, a SHORT from 1 to 8
+    _forced(directory, 0x013B, (255, 255), _SHORT)  # Artist
+    _forced(directory, 0x8298, (9,), _LONG)  # Copyright
+    _forced(directory, 0x9C9B, (65, 66), _LONG)  # XPTitle, bytes of UCS2
+    _forced(directory, 0x9C9E, (67,), _LONG)  # XPKeywords
+    _forced(directory, 700, (1010792560, 1633905509), _LONG)  # XMLPacket
+    return directory
+
+
+def _crooked_exif() -> bytes:
+    """A whole EXIF block: the tags above plus a date and a coordinate of the wrong type.
+
+    The block is a small TIFF file, and its two sub-directories are reached through an offset into
+    it. The offsets are therefore only known once the directory before them has been laid out.
+    """
+    exif_ifd = TiffImagePlugin.ImageFileDirectory_v2()
+    _forced(exif_ifd, 0x9003, (2019, 3, 14), _LONG)  # DateTimeOriginal, "2019:03:14 11:02:00"
+    _forced(exif_ifd, 0x9004, (0,), _LONG)  # DateTimeDigitized
+
+    gps_ifd = TiffImagePlugin.ImageFileDirectory_v2()
+    _forced(gps_ifd, 0x0001, (1, 2), _LONG)  # GPSLatitudeRef, "N" or "S"
+    _forced(gps_ifd, 0x0002, "53 degrees", _ASCII)  # GPSLatitude, three rational numbers
+    _forced(gps_ifd, 0x0003, (78,), _LONG)  # GPSLongitudeRef
+    _forced(gps_ifd, 0x0004, (9, 9), _LONG)  # GPSLongitude
+
+    main = _crooked_directory()
+    # Setting a pointer does not change the length of the directory it stands in: both are a LONG
+    # and stand in the entry itself. So the first pass only measures, and the second one writes.
+    _forced(main, _EXIF_POINTER, 0, _LONG)
+    _forced(main, _GPS_POINTER, 0, _LONG)
+    header = b"II*\x00" + struct.pack("<I", 8)
+    measured = len(main.tobytes(len(header)))
+
+    main[_EXIF_POINTER] = len(header) + measured
+    exif_bytes = exif_ifd.tobytes(main[_EXIF_POINTER])
+    main[_GPS_POINTER] = main[_EXIF_POINTER] + len(exif_bytes)
+    gps_bytes = gps_ifd.tobytes(main[_GPS_POINTER])
+
+    block = main.tobytes(len(header))
+    assert len(block) == measured, "the pointers moved what they point at"
+    return header + block + exif_bytes + gps_bytes
+
+
+def _an_exif_block_of_the_wrong_type(format: str) -> bytes:
+    """A whole image whose EXIF holds the wrong type in every field the import reads."""
+    image = Image.linear_gradient("L").resize(_SAMPLE_SIZE).convert("RGB")
+    buffer = io.BytesIO()
+    if format == "TIFF":
+        # A TIFF is its own EXIF: the tags stand in its first directory, and there is no block to
+        # hang beside them.
+        image.save(buffer, "TIFF", tiffinfo=_crooked_directory())
+    elif format == "MPO":
+        image.save(
+            buffer, "MPO", save_all=True, append_images=[image.rotate(180)], exif=_crooked_exif()
+        )
+    else:
+        image.save(buffer, format, exif=_crooked_exif())
+    return buffer.getvalue()
+
+
+#: The ways a file arrives broken. The key is the test id.
+DAMAGE = {
+    "truncated after the header": _truncated_after_the_header,
+    "truncated after half the data": _truncated_after_half_the_data,
+    "random bytes behind a valid signature": _random_bytes_behind_the_signature,
+    "a header claiming huge dimensions": _a_header_claiming_huge_dimensions,
+    "an EXIF block of the wrong type": _an_exif_block_of_the_wrong_type,
+}
+
+
+@pytest.mark.filterwarnings("ignore::PIL.Image.DecompressionBombWarning")
+class TestBrokenFiles:
+    """Every allowed format, damaged in five ways: the import answers, it does not raise.
+
+    The files come from outside -- the inbox, the browser upload, somebody's stick -- and none of
+    them can be assumed whole. #59 was a single file that raised instead of being rejected: it
+    stayed in the inbox, failed again on every sweep, and no file sorted after it was ever taken
+    in. The fix catches every exception, and that promise is what this checks, for each format
+    rather than for the one file that caused it.
+    """
+
+    def _broken(self, tmp_path: Path, format: str, damage: str) -> Path:
+        path = tmp_path / f"broken{_SUFFIX[format]}"
+        path.write_bytes(DAMAGE[damage](format))
+        return path
+
+    @pytest.mark.parametrize("format", BROKEN_FORMATS)
+    @pytest.mark.parametrize("damage", list(DAMAGE), ids=list(DAMAGE))
+    def test_a_broken_file_is_answered_and_leaves_a_consistent_state(
+        self, session, settings, tmp_path, format, damage
+    ):
+        """Three outcomes are allowed, and each of them has to hold together.
+
+        Rejected means nothing is left behind: no original, no thumbnail, no row. Taken in means
+        the opposite -- the row exists and so do its files, because a row without them is a gap in
+        the kiosk that nothing repairs.
+        """
+        path = self._broken(tmp_path, format, damage)
+
+        # The call is the first assertion: an exception here fails the test instead of being
+        # turned into one of the three outcomes.
+        outcome = import_file(session, path, settings)
+        session.flush()
+
+        assert outcome.message, "a volunteer reads this line and needs a reason in it"
+        assert session.scalar(select(ImportLog.result)) == outcome.result
+        assert list(settings.data_dir.glob("partial-*")) == []
+
+        if outcome.result == ImportResult.REJECTED:
+            assert session.scalars(select(Photo)).all() == []
+            assert list(settings.photos_dir.rglob("*.*")) == []
+            assert list(settings.thumbs_dir.rglob("*.*")) == []
+            return
+
+        photo = session.scalars(select(Photo)).one()
+        assert photo.sha256 == sha256_of_file(path)
+        stored = original_path(settings.photos_dir, photo.sha256, suffix_for_mime(photo.mime))
+        assert stored.is_file()
+        for size in THUMBNAIL_SIZES:
+            assert thumbnail_path(settings.thumbs_dir, photo.sha256, size).is_file()
+
+    @pytest.mark.parametrize("format", BROKEN_FORMATS)
+    def test_a_claimed_size_is_answered_before_a_pixel_is_read(
+        self, session, settings, tmp_path, format
+    ):
+        """The reason this case gets its own test: rejected for the right reason.
+
+        A file the reader does not understand at all is rejected too, and would pass the test
+        above without the claim ever being read. The message says which of the two happened, and
+        this one has to name the limit -- the volunteer can then scan the sheet again smaller.
+        """
+        path = self._broken(tmp_path, format, "a header claiming huge dimensions")
+
+        outcome = import_file(session, path, settings)
+
+        assert outcome.result == ImportResult.REJECTED
+        assert outcome.message == texts().imports.too_many_pixels(
+            Image.MAX_IMAGE_PIXELS // 1_000_000
+        )
+
+    def test_an_inbox_of_broken_files_empties_itself_and_takes_in_the_whole_one(
+        self, session, settings, sample_image
+    ):
+        """#59 itself, in the folder it happened in.
+
+        One file that raises must not end the sweep for the files behind it, and it must not stay
+        in the inbox either -- there it would fail again on every sweep. The whole image is named
+        so that it sorts last, because the sweep walks the folder in order.
+        """
+        inbox = settings.incoming_dir
+        for damage, damaged in DAMAGE.items():
+            for format in BROKEN_FORMATS:
+                name = f"{damage}-{format}".replace(" ", "-")
+                (inbox / f"{name}{_SUFFIX[format]}").write_bytes(damaged(format))
+        (inbox / "zzz-whole.jpg").write_bytes(sample_image("scan_ohne_exif.jpg").read_bytes())
+
+        outcomes = import_directory(session, inbox, settings, move_aside=True)
+        session.flush()
+
+        assert len(outcomes) == len(DAMAGE) * len(BROKEN_FORMATS) + 1
+        whole = outcomes[-1]
+        assert whole.succeeded
+        assert whole.photo.original_filename == "zzz-whole.jpg"
+        # Every file got an answer, and the sweep wrote one line per file into the import log.
+        assert len(session.scalars(select(ImportLog)).all()) == len(outcomes)
+
+        assert sorted(entry.name for entry in inbox.iterdir()) == [DONE_DIR, PROBLEM_DIR]
+        rejected = sum(1 for entry in outcomes if entry.result == ImportResult.REJECTED)
+        assert len(list((inbox / PROBLEM_DIR).iterdir())) == rejected
+        assert "zzz-whole.jpg" in {entry.name for entry in (inbox / DONE_DIR).iterdir()}
