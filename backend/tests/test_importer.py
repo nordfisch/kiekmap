@@ -864,7 +864,9 @@ def _truncated_after_half_the_data(format: str) -> bytes:
 
 def _random_bytes_behind_the_signature(format: str) -> bytes:
     """Recognised as its format, nonsense from the header on."""
-    return _valid_image(format)[:_SIGNATURE_BYTES] + random.Random(_SEED).randbytes(512)
+    # S311: test data, and the fixed seed is the point -- every run breaks the file the same way.
+    noise = random.Random(_SEED).randbytes(512)  # noqa: S311
+    return _valid_image(format)[:_SIGNATURE_BYTES] + noise
 
 
 def _claiming_in_jpeg(data: bytes, width: int, height: int) -> bytes:
