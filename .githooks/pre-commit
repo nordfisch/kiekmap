@@ -43,6 +43,7 @@ check check_anchors
 check check_settings
 check check_numbers
 check check_translations
+check check_cli
 check build_register --check
 check set_version --check
 

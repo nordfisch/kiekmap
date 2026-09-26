@@ -132,7 +132,8 @@ lint: $(VENV)  ## check the code style
 
 # The checks that read files no test ever sees: the language rule, the links inside docs/, the
 # way of every setting into the container, the bookkeeping of the decisions over their own
-# numbers, and whether a translation still matches the text it was made from.
+# numbers, whether a translation still matches the text it was made from, and whether the
+# documented command line is still the one that exists.
 #
 # Pure readers, therefore without venv and without node_modules -- python3 from the system is
 # enough. Together they need under a second, and that is exactly why they also hang in the git
@@ -152,12 +153,13 @@ docs-serve: $(DOCS_VENV)  ## the documentation site at http://localhost:8001/kie
 docs-build: $(DOCS_VENV)  ## build the site as the workflow does, strictly
 	$(DOCS_VENV)/bin/mkdocs build --strict
 
-docs-check:  ## language rule, links, settings, numbers, register, version, translations
+docs-check:  ## language rule, links, settings, numbers, register, version, translations, CLI
 	@python3 tools/language_check.py
 	@python3 tools/check_anchors.py
 	@python3 tools/check_settings.py
 	@python3 tools/check_numbers.py
 	@python3 tools/check_translations.py
+	@python3 tools/check_cli.py
 	@python3 tools/build_register.py --check
 	@python3 tools/set_version.py --check
 

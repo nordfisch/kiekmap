@@ -38,6 +38,10 @@ stays black.
 index, the coat of arms and the language are configuration; none of it is in the code, and no fork
 is needed.
 
+**[Building the first collection](collection.md)** — for the one-off job at the start. How an
+archive of a few thousand scans gets into the device on the command line, what the import reads
+from a file, and what the numbers afterwards mean.
+
 **[Passing it on](licensing.md)** — what may be given away and under which conditions. The photo
 collection is not covered by the software licence, and the map data brings an obligation of its
 own.

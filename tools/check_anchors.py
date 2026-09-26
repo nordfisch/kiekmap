@@ -39,6 +39,8 @@ DOCUMENTS = (
     "docs/museum/operations.de.md",
     "docs/museum/adaption.md",
     "docs/museum/adaption.de.md",
+    "docs/museum/collection.md",
+    "docs/museum/collection.de.md",
     "docs/museum/licensing.md",
     "docs/museum/licensing.de.md",
     "docs/developer/index.md",

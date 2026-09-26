@@ -481,29 +481,24 @@ photographs belong to the museum and are not in the repository. The rest is in
 
 ## Taking in an archive delivery
 
-When the museum sends a new delivery, two steps come before the import — and both have been
-skipped once, with consequences.
+The procedure itself — conversion, import, checking — is
+[Building the first collection](../museum/collection.md). It is written for a museum filling an
+empty device, and a delivery to a collection that already exists takes the same steps. What is not
+in it, because it belongs to this side, is here.
 
-**First: everything becomes JPEG.**
-
-```bash
-python3 tools/to_jpeg.py "~/Museum/Neuer Stand" "~/Museum/Neuer Stand zwecks Import/Straßen"
-```
-
-The tree is copied and the source is left untouched. TIFF, PNG and WEBP are converted, JPEG is
-passed through. **The setting inside is measured and is not readjusted** — why, is in
+**The conversion setting is measured and is not readjusted** — why, is in
 [decisions.md](decisions.md), point 46. The target folder is called `Straßen` so that the
 provenance takes the same shape as for the initial collection (`KIEKMAP_IMPORT_PROVENANCE` puts
 the prefix in front of it).
 
-**Second: count what is really new.** Even a delivery described as a delta contains images that
-are long since in the collection — the comparison ran over bytes, and those change as soon as
+**Count what is really new before importing.** Even a delivery described as a delta contains images
+that are long since in the collection — the comparison ran over bytes, and those change as soon as
 somebody rewrites the metadata. On 16 August 2026 that was **223 of 619 files**.
 [decisions.md](decisions.md), point 47, describes the way: exact pixel comparison first where the
 edge lengths match, then a coarse pass over downscaled greyscale images.
 
-Only then `python -m app.cli import <folder>`. Take a copy of `data/` first, **including the
-`-wal` and `-shm` files** — without them the copy is at the state of the last checkpoint.
+And take a copy of `data/` first, **including the `-wal` and `-shm` files** — without them the copy
+is at the state of the last checkpoint.
 
 ## Layout
 
