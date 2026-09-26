@@ -54,7 +54,8 @@ class IncomingWatcher:
         while not self._stop.is_set():
             try:
                 self.scan_once()
-            except Exception:  # noqa: BLE001 -- the watcher must never give up
+            except Exception:
+                # Broad on purpose: the watcher must never give up.
                 log.exception("Error while sweeping the inbox folder")
             self._stop.wait(self.interval)
 
@@ -108,11 +109,12 @@ class IncomingWatcher:
                 # in at the next look.
                 log.info("Database closed for a restore, the inbox waits")
                 break
-            except Exception:  # noqa: BLE001 -- one file must not hold up the ones after it
+            except Exception:
+                # Broad on purpose: one file must not hold up the ones after it.
                 # A file ``import_file`` cannot even reject -- a full disk, a locked database. It
                 # stays in the inbox and in ``_sizes``, so the next sweep tries it again. Raising
-                # instead ended the sweep here, and when the cause lay in the file itself, every
-                # sweep ended on it and nothing sorted after it came in.
+                # instead would end the sweep here, and a cause that lies in the file itself would
+                # end every sweep on it, so nothing sorted after it would ever come in.
                 log.exception("Could not import %s, trying again at the next look", path)
                 continue
             self._sizes.pop(path, None)
