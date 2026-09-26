@@ -16,6 +16,9 @@
  * heavier one: the text column carried up to 37 buttons under the description -- fifteen decades
  * alone, since the timeline reaches from 1880 to 2030 -- and **the place question could not be
  * asked here at all**, because it needs the map and the map lies underneath. See decisions.md.
+ *
+ * **A stack pages through itself** until the visitor touches the view; the timing and its reasons
+ * are in `stackAdvance.ts`.
  */
 
 import { useEffect, useState } from "react";
@@ -31,7 +34,9 @@ import { useAdmin } from "../store/admin";
 import { useContribute } from "../store/contribute";
 import { useKiosk } from "../store/kiosk";
 import { t } from "../text";
+import { thumbUrl } from "./attract";
 import { PencilIcon } from "./icons";
+import { STAND_MS } from "./stackAdvance";
 
 /**
  * How much of the hash is shown.
@@ -47,6 +52,7 @@ export function PhotoOverlay() {
   const openIndex = useKiosk((s) => s.openIndex);
   const openPhoto = useKiosk((s) => s.openPhoto);
   const stepInStack = useKiosk((s) => s.stepInStack);
+  const advanceStack = useKiosk((s) => s.advanceStack);
   const filterByTag = useKiosk((s) => s.filterByTag);
   const [detail, setDetail] = useState<PhotoDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +73,14 @@ export function PhotoOverlay() {
    * "do not offer it", and that rule lives in the backend alone. The picker itself is in the panel.
    */
   const [numbers, setNumbers] = useState<Place[]>([]);
+  /**
+   * Whether the open stack still pages by itself.
+   *
+   * On with every stack that is opened, off with the first touch inside the view -- from then on
+   * the visitor turns the pages, and a photo changing under their finger would take that away.
+   * It stays off until a stack is opened again.
+   */
+  const [autoPaging, setAutoPaging] = useState(true);
 
   const askPin = useAdmin((s) => s.askPin);
   const askAbout = useContribute((s) => s.askAbout);
@@ -118,12 +132,49 @@ export function PhotoOverlay() {
     if (openPhotoId === null) return;
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") openPhoto(null);
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") setAutoPaging(false);
       if (event.key === "ArrowLeft") stepInStack(-1);
       if (event.key === "ArrowRight") stepInStack(1);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [openPhotoId, openPhoto, stepInStack]);
+
+  // A new stack -- a new array from the store -- pages by itself again.
+  useEffect(() => setAutoPaging(true), [openStack]);
+
+  /**
+   * The next photo, once this one has stood for `STAND_MS`.
+   *
+   * The clock starts when the photo is drawn (`loadedId`), not when it was asked for, so a slow
+   * load does not eat into the time to look at it. The next thumbnail is decoded before the step,
+   * as the slide show does before a turn: otherwise the step would show an empty frame first.
+   *
+   * A thumbnail that fails to decode is stepped to anyway. If it never loads, its clock never
+   * starts and the paging rests on it -- the buttons still lead on.
+   */
+  const shown = openPhotoId !== null && loadedId === openPhotoId;
+  useEffect(() => {
+    if (!autoPaging || !shown || openStack.length <= 1) return;
+
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      const image = new Image();
+      image.src = thumbUrl(openStack[(openIndex + 1) % openStack.length]!);
+      image
+        .decode()
+        .catch(() => {
+          /* Stepped to regardless; see above. */
+        })
+        .finally(() => {
+          if (!cancelled) advanceStack();
+        });
+    }, STAND_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [autoPaging, shown, openStack, openIndex, advanceStack]);
 
   if (openPhotoId === null) return null;
 
@@ -161,7 +212,11 @@ export function PhotoOverlay() {
     >
       {/* Clicks inside must not close -- otherwise you cannot look at the photo without losing it.
           Beside it they do: whoever is stuck taps somewhere, and that has to lead back. */}
-      <div className="overlay__content" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="overlay__content"
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={() => setAutoPaging(false)}
+      >
         {/* Its own header across both columns, so the button sits where everybody looks for it:
             top right. It stood in the text column's header for a while -- that lined up, but it
             did not read like a close button. */}
@@ -175,6 +230,9 @@ export function PhotoOverlay() {
         <div className="overlay__figure">
           {detail && (
             <img
+              // A new element for every photo: the fade-in is an animation, and an animation
+              // plays when an element appears -- see `.overlay__image` for why not a transition.
+              key={detail.id}
               className={
                 loadedId === detail.id ? "overlay__image" : "overlay__image overlay__image--loading"
               }

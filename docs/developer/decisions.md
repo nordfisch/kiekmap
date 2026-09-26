@@ -2613,3 +2613,34 @@ mypy runs in `make test-backend`, in front of pytest, as `tsc` runs in front of 
 `make test-frontend`. The CI workflow needed no change, because it calls `make check`. It costs
 4.6 seconds cold and 0.15 with its cache. Not `strict`: that would demand an annotation on every
 function and bury the findings that matter.
+
+## 95. A stack in the detail view pages through itself, every eight seconds, and starts again
+
+Nearly every tap on the map opens a stack. Photos placed through the place search share the
+coordinate of their street, and on 26 September 2026 that put **1184 of the 1275 photos on the map
+into 143 stacks**; half of them hold six photos or more, the largest 73. A visitor who does not find
+the paging buttons sees the first photo of each and nothing else (#52).
+
+**Eight seconds, not the five of the slide show.** Five seconds suit a picture with a one-line
+caption; the detail view has title, year, place and a description beside the picture. The clock
+starts when a photo is drawn, not when it is asked for, so a slow load does not shorten the time
+to look at it.
+
+**It starts again after the last photo** rather than stopping on it. Whoever walks up in the middle
+of a stack still sees its beginning. A short stack flipping back and forth for a few minutes is the
+price, and it ends with the idle slide show.
+
+**A fade, no zoom.** The detail view already shows the 1200 px thumbnail at nearly the height of
+the screen, so a camera path would scale it up and turn it soft. A larger thumbnail size would mean
+recomputing every thumbnail, on the Pi as well; the original would mean several megabytes per step.
+The fade is a CSS animation rather than a transition: the next thumbnail is decoded before the
+step, arrives complete, and a transition would have no painted start to leave from. Paging by hand
+fades the same way. Whoever asks for reduced motion gets the cut.
+
+**The first touch inside the view ends it** until a stack is opened again, and the arrow keys count
+as a touch. From then on the visitor turns the pages.
+
+**Paging by itself is not somebody at the device.** It goes through the store and dispatches no
+event, and the idle timer listens to events only. On a long stack the slide show therefore starts
+after five minutes in the middle of it. Measured in the browser: no `pointerdown`, `keydown`,
+`wheel` or `touchstart` on `window` across three automatic steps.
