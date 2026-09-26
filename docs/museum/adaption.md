@@ -254,6 +254,10 @@ Whether the import reads the **folder names** need not be set anywhere: a path e
 street when the place index knows it. An archive filed by street and house number is placed by
 itself; one filed differently is simply left alone.
 
+These values apply at the moment of the import. **Setting them before the first photo comes in is
+the whole point** — changing them afterwards changes nothing about what is already in. How the
+archive then gets in is [Building the first collection](collection.md).
+
 The PIN hash is produced by:
 
 ```bash

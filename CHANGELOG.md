@@ -23,6 +23,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   in. A tap on a photo opens the map around it with the photo large. The admin
   area closes after two minutes without a touch, unless a backup, restore, import or upload is
   running. See [point 81](docs/developer/decisions.md)
+- **The command line for the first fill of a collection is documented** ([#74])
 
 ### Changed
 
@@ -102,6 +103,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 [#85]: https://github.com/nordfisch/kiekmap/issues/85
 [#87]: https://github.com/nordfisch/kiekmap/issues/87
 [#88]: https://github.com/nordfisch/kiekmap/issues/88
+[#74]: https://github.com/nordfisch/kiekmap/issues/74
 [#83]: https://github.com/nordfisch/kiekmap/issues/83
 [#84]: https://github.com/nordfisch/kiekmap/issues/84
 [#86]: https://github.com/nordfisch/kiekmap/issues/86

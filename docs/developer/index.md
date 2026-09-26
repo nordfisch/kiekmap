@@ -34,6 +34,7 @@ because it is old.
 | [museum/usermanual.md](../museum/usermanual.md) | How do I add photos and back the collection up? |
 | [museum/operations.md](../museum/operations.md) | How do I set the Pi up, and what do I do when it does not start? |
 | [museum/adaption.md](../museum/adaption.md) | How do I set this up for another place? |
+| [museum/collection.md](../museum/collection.md) | How do I get an archive of a few thousand scans in, the first time? |
 | [museum/licensing.md](../museum/licensing.md) | What may be passed on, and under which conditions? |
 
 Each of them has a `.de.md` beside it, and `docs/museum/` is the whole of what the site publishes.

@@ -7,7 +7,8 @@
 > files under `docs/`, in both languages, built from the newest tag.
 >
 > **Deutsch:** [README.de.md](README.de.md) · [Benutzung](docs/museum/usermanual.de.md) ·
-> [Betrieb](docs/museum/operations.de.md) · [Übernahme](docs/museum/adaption.de.md)
+> [Betrieb](docs/museum/operations.de.md) · [Übernahme](docs/museum/adaption.de.md) ·
+> [Erste Sammlung](docs/museum/collection.de.md)
 
 Discover historic pictures of a village on a map, decade by decade. A touchscreen kiosk for a local
 history museum: it runs offline on a Raspberry Pi, adapts to any place, and the visitors fill in
@@ -93,7 +94,8 @@ Setup in detail, the language rule, the testing strategy and the traps that cost
 [docs/developer/development.md](docs/developer/development.md). For coding agents: [CLAUDE.md](CLAUDE.md).
 
 **For a different place:** adjusting `tiles/region.json` and running `make tiles && make places` is
-enough — no fork, no change to the code. Step by step in [docs/museum/adaption.md](docs/museum/adaption.md).
+enough — no fork, no change to the code. Step by step in [docs/museum/adaption.md](docs/museum/adaption.md);
+how an archive of a few thousand scans then gets in, in [docs/museum/collection.md](docs/museum/collection.md).
 
 **For a different language:** one line in the `.env`. `KIEKMAP_LANGUAGE=en` switches the visitor
 view, the admin area, the messages and the date labels, without a new build.

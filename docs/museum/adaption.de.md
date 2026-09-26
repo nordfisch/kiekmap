@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/adaption.md -->
-<!-- source-sha: 2905e2379953d5726574365336e121106f105dcfea32cc592134d807aa99c2ca -->
+<!-- source-sha: 9545e58a5e7393b6a241efc6d9447f2714c4340a5fc20a6a718f0815b8448a11 -->
 
 # Kiekmap für einen anderen Ort oder eine andere Sprache
 
@@ -260,6 +260,10 @@ Fotos.
 Ob der Import die **Ordnernamen** auswertet, muss nirgends eingestellt werden: Ein Pfadteil gilt
 als Straße, wenn der Ortsindex sie kennt. Ein Archiv, das nach Straße und Hausnummer abgelegt
 ist, wird damit von selbst verortet; eines mit anderer Ablage bleibt einfach unberührt.
+
+Diese Werte wirken im Augenblick des Imports. **Sie vor dem ersten Foto zu setzen ist der ganze
+Punkt** — sie danach zu ändern ändert nichts an dem, was schon drin ist. Wie das Archiv dann
+hineinkommt, steht in [Die erste Sammlung aufbauen](collection.de.md).
 
 Den PIN-Hash erzeugt:
 

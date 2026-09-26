@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 7a787e42ff1babffbd3458cea0ca026010d8a23bee6eea606393f2da207edd1b -->
+<!-- source-sha: f721a2a9a135732dd82e8e35a308e24d4882313fc095182d56f214c3fa1cea05 -->
 
 # Änderungen
 
@@ -27,6 +27,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   eines zum nächsten um. Das Band, das zum Tippen einlädt, wandert über den Bildschirm, damit nichts
   einbrennt. Ein Tipp auf ein Foto öffnet die Karte um dieses Foto herum, mit dem Foto groß. Die Verwaltung schließt nach zwei Minuten ohne Berührung, außer während einer Sicherung,
   Rücksicherung, eines Imports oder Hochladens. Siehe [Punkt 81](docs/developer/decisions.md)
+- **Die Kommandozeile für die erste Befüllung einer Sammlung ist dokumentiert** ([#74])
 
 ### Geändert
 
@@ -110,6 +111,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#85]: https://github.com/nordfisch/kiekmap/issues/85
 [#87]: https://github.com/nordfisch/kiekmap/issues/87
 [#88]: https://github.com/nordfisch/kiekmap/issues/88
+[#74]: https://github.com/nordfisch/kiekmap/issues/74
 [#83]: https://github.com/nordfisch/kiekmap/issues/83
 [#84]: https://github.com/nordfisch/kiekmap/issues/84
 [#86]: https://github.com/nordfisch/kiekmap/issues/86
