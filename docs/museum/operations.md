@@ -126,6 +126,7 @@ photos, uploading, backing up. SSH is needed for updates and for troubleshooting
 Build a folder for the stick on the development machine:
 
 ```bash
+git switch --detach v0.9.6                            # the release to be shipped
 make release to=/Volumes/STICK/kiekmap-update
 make release to=/Volumes/STICK/kiekmap-update map=1   # if the region has changed
 ```
@@ -134,7 +135,8 @@ The target builds both images, saves them as `images.tar` and writes the `versio
 them. **It aborts when the working tree is not clean or the matching tag is missing** — a stick
 that belongs to no commit cannot be placed a year later.
 
-So beforehand: `make version v=0.9.0`, commit, `git tag -s v0.9.0 -m v0.9.0`.
+**A stick is built from a release, on its tag.** How a release is made is in
+[development.md](../developer/development.md#making-a-release).
 
 By hand these were four commands. The one that gets forgotten writes the `version` file: the
 images load, `KIEKMAP_VERSION` stays as it was in the `.env`, and the next start pulls the **old**

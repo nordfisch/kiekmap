@@ -90,7 +90,8 @@ def main() -> int:
             return 1
         write(args.version)
         print(f"Version {args.version} written in {len(PLACES)} places.")
-        print("Do not forget: commit, then tag.")
+        # Not "commit, then tag": the tag belongs on the merge into main, two pull requests later.
+        print('Next: step 4 of "Making a release" in docs/developer/development.md.')
         return 0
 
     values = found()

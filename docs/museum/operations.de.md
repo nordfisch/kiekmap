@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 377d8cb9a315e683072fbb15304c58f868ab9ec0e4898f132d075a2562f4af12 -->
+<!-- source-sha: 92641ad18288dc83654e61217d9b090c9b7fe96b2f2041e8418d35c607e5d9a0 -->
 
 # Betriebshandbuch
 
@@ -130,6 +130,7 @@ hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
 Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
 
 ```bash
+git switch --detach v0.9.6                            # die auszuliefernde Fassung
 make release to=/Volumes/STICK/kiekmap-update
 make release to=/Volumes/STICK/kiekmap-update map=1   # falls sich die Region geändert hat
 ```
@@ -138,7 +139,8 @@ Das Ziel baut beide Abbilder, sichert sie als `images.tar` und schreibt die `ver
 daneben. **Es bricht ab, wenn der Arbeitsbaum nicht sauber ist oder der passende Tag fehlt** — ein
 Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen.
 
-Vorher also: `make version v=0.9.0`, committen, `git tag -s v0.9.0 -m v0.9.0`.
+**Ein Stick wird aus einer Fassung gebaut, auf ihrem Tag.** Wie eine Fassung entsteht, steht in
+[development.md](../developer/development.md#making-a-release) (englisch).
 
 Von Hand waren das vier Befehle. Der, den man vergisst, schreibt die `version`-Datei: Die Abbilder
 laden, `KIEKMAP_VERSION` bleibt in der `.env` stehen, und der nächste Start zieht das **alte**
