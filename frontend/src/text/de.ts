@@ -347,6 +347,24 @@ export const de = {
         "Von allein passiert dasselbe, sobald das Gerät fünf Minuten unberührt bleibt.",
     },
 
+    /* Read in two views: the button on the overview, the last message in App.tsx. */
+    shutdown: {
+      button: "Gerät ausschalten",
+      hint:
+        "Fährt das Gerät geordnet herunter. Danach kann der Strom abgeschaltet werden — " +
+        "schonender, als einfach den Stecker zu ziehen.",
+      confirmTitle: "Gerät jetzt ausschalten?",
+      confirm:
+        "Die Besucheransicht bleibt dunkel, bis das Gerät wieder eingeschaltet wird. " +
+        "Am Bestand ändert sich nichts.",
+      yes: "Ja, ausschalten",
+      no: "Abbrechen",
+      offTitle: "Das Gerät fährt herunter.",
+      offHint:
+        "Sobald der Bildschirm dunkel bleibt, kann der Strom abgeschaltet werden. " +
+        "Beim nächsten Einschalten startet die Karte von allein.",
+    },
+
     photos: {
       title: "Liste aller Fotos",
       searchLabel: "Suchen in Titel, Ort und Dateiname",

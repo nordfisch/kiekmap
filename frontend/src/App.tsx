@@ -52,6 +52,24 @@ function MapNotice() {
   return null;
 }
 
+/**
+ * The last screen. The device has taken the request and is powering off; what is left to do
+ * happens at the wall.
+ *
+ * Nothing on it is a button and nothing on it makes a request: the backend is going away, and a
+ * failed poll would replace this message with an error.
+ */
+function SwitchedOff() {
+  return (
+    <div className="splash">
+      <div className="splash__panel">
+        <p className="splash__title">{t.admin.shutdown.offTitle}</p>
+        <p>{t.admin.shutdown.offHint}</p>
+      </div>
+    </div>
+  );
+}
+
 export function App() {
   const [region, setRegion] = useState<Region | null>(null);
   // Everything complete means: a task was fetched and there was none. The thank-you does not
@@ -77,6 +95,10 @@ export function App() {
   useEffect(() => {
     void restore();
   }, [restore]);
+
+  // Before everything else: from here on the device is on its way off, and no later state -- a
+  // region that fails to load, an expiring session -- may replace the message.
+  if (view === "off") return <SwitchedOff />;
 
   if (error) return <div className="splash splash--error">{error}</div>;
   if (!region) {

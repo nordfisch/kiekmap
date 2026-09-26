@@ -84,6 +84,10 @@ de = Texts(
         a_newer_statement_exists=(
             "Zu diesem Foto gibt es eine neuere Angabe. Bitte diese zuerst zuruecknehmen."
         ),
+        cannot_switch_off=(
+            "Dieses System kann sich nicht selbst abschalten. Das ist nur auf dem Rechner "
+            "im Museum eingerichtet."
+        ),
         street_gone_from_the_index=(
             "Die Strasse aus dieser Angabe steht nicht mehr im Ortsverzeichnis. "
             "Der Ort bleibt daher stehen."

@@ -2644,3 +2644,51 @@ as a touch. From then on the visitor turns the pages.
 event, and the idle timer listens to events only. On a long stack the slide show therefore starts
 after five minutes in the middle of it. Measured in the browser: no `pointerdown`, `keydown`,
 `wheel` or `touchstart` on `window` across three automatic steps.
+---
+
+## 96. The device switches itself off through a file, not through a privilege
+
+The admin area has a button that powers the device down, beside „Anzeige neu laden". It is the whole
+answer to [issue #21](https://github.com/nordfisch/kiekmap/issues/21) for now: no read-only overlay
+and no shutdown at closing time. What was asked for is that losing power must not keep the device
+from starting again; an orderly way off addresses that without making the card read-only, and the
+overlay can still follow if the card turns out to suffer.
+
+**The risk was weighed rather than assumed.** The database survives a cut — WAL with
+`synchronous=NORMAL` costs at most the last transaction — and ext4 journals the filesystem
+structure. What remains is the card's own wear-levelling, which no setting reaches, and the metadata
+database of containerd: a cut during a write can leave it corrupt, and then the containers do not
+start. That is exactly the failure #21 fears, and the window is widest during an update.
+
+**Why a file.** The backend runs as uid 1000 in a container, with no docker socket, no sudo line and
+no host mount beyond `../data:/data`. Each of those would buy the poweroff with a privilege that the
+whole admin area then carries — and that area stands behind four digits. So: `data/shutdown-requested`,
+a path unit, and one root script that can do exactly one thing. The USB mounter is the same shape,
+one step further out.
+
+**Two guards, because a request that outlives its moment would switch the device off after the next
+boot.** The script deletes the request before anything else — a `PathExists=` unit triggers again
+the moment the service ends while the file is still there, an endless loop inside a shutdown — and
+it powers off only for a request written during this boot, never one from the future, because a Pi
+has no clock of its own and `fake-hwclock` can set the time back. The backend deletes any request it
+finds while starting: it is the only writer, so one that is already there belongs to nobody. That
+guard also holds on a host where no script is installed.
+
+**`data/shutdown-watcher` decides whether the button is offered at all**, and the refusal is the
+point: a screen saying the power may be switched off while the device runs on is worse than a
+sentence saying this machine cannot do it. `setup-pi.sh` writes the file; a development machine and
+the online instance have none.
+
+**Refused while a job runs**, with the backup's own „busy" text, for the same reason the archive
+download refuses: a poweroff during the swap of a restore leaves the collection half moved.
+
+**The containers are not stopped.** `docker compose stop` marks them as stopped by hand, and
+`restart: unless-stopped` would leave them down at the next boot — a device that comes up with no
+collection, in an exhibition, with nobody to notice. systemd stops `docker.service` in its own
+shutdown.
+
+**The price:** whatever can write the data directory can power the device off — uid 1000 and the
+backend container. That is a denial of service, not an escalation: the script reads no content and
+takes no argument from the file. And the part that cannot be checked without the device is whether
+a container's write into the bind mount reaches the path unit at all; the fallback is a timer that
+polls, with the same script ([issue #18](https://github.com/nordfisch/kiekmap/issues/18)).

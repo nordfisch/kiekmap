@@ -75,6 +75,9 @@ en = Texts(
         a_newer_statement_exists=(
             "There is a newer statement for this photo. Please take that one back first."
         ),
+        cannot_switch_off=(
+            "This system cannot switch itself off. Only the device in the museum is set up for it."
+        ),
         street_gone_from_the_index=(
             "The street from this statement is no longer in the gazetteer. "
             "The place therefore stays."

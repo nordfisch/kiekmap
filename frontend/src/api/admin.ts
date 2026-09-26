@@ -237,6 +237,16 @@ export async function signIn(pin: string): Promise<AdminSession> {
   return (await response.json()) as AdminSession;
 }
 
+/**
+ * Ask the device to power off. 204 means the request is written, not that the device is off.
+ *
+ * Refused with 503 where nothing on the host would act on it -- a development machine, the online
+ * instance -- and with 409 while a backup, a restore or an import is running.
+ */
+export function requestShutdown(): Promise<void> {
+  return adminFetch<void>("/shutdown", { method: "POST" });
+}
+
 export function signOut(): Promise<void> {
   return adminFetch<void>("/logout", { method: "POST" });
 }

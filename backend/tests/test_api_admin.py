@@ -1073,6 +1073,101 @@ class TestRevertingWhileSomethingElseHappens:
         assert "bereits" in response.json()["detail"]
 
 
+class TestSwitchingTheDeviceOff:
+    """The orderly way off, for a device that is otherwise switched off at the wall.
+
+    The backend cannot power the host off -- it runs unprivileged in a container. It writes a
+    request into the data directory, and a root script on the Pi acts on it. See decisions.md,
+    point 96.
+    """
+
+    @pytest.fixture
+    def host_can_switch_off(self, settings):
+        """What ``setup-pi.sh`` leaves behind on a device that can carry out the request."""
+        settings.shutdown_watcher_path.write_text("a test\n", encoding="utf-8")
+
+    def test_no_shutdown_without_signing_in(
+        self, client: TestClient, settings, host_can_switch_off
+    ):
+        """The route must not be a way to switch a museum device off without the PIN."""
+        response = client.post("/api/admin/shutdown")
+
+        assert response.status_code == 401
+        assert not settings.shutdown_request_path.exists()
+
+    def test_a_host_that_cannot_switch_off_says_so_instead_of_pretending(
+        self, admin_client: TestClient, settings
+    ):
+        """A development machine, and the online instance: nothing there acts on a request.
+
+        Announcing that the power may be switched off while the device runs on would be worse than
+        a sentence saying this machine cannot do it.
+        """
+        response = admin_client.post("/api/admin/shutdown")
+
+        assert response.status_code == 503
+        assert "nicht selbst abschalten" in response.json()["detail"]
+        assert not settings.shutdown_request_path.exists()
+
+    def test_a_running_job_refuses_the_shutdown(
+        self, admin_client: TestClient, settings, host_can_switch_off
+    ):
+        """A poweroff during a restore leaves the collection half moved."""
+        import threading
+
+        from app.services import backup
+
+        breakpoint_ = threading.Event()
+        backup.job.start("restore", lambda report: (breakpoint_.wait(2), "fertig")[1])
+        try:
+            response = admin_client.post("/api/admin/shutdown")
+        finally:
+            breakpoint_.set()
+
+        assert response.status_code == 409
+        assert not settings.shutdown_request_path.exists()
+
+    def test_the_request_lands_in_the_data_directory(
+        self, admin_client: TestClient, settings, host_can_switch_off
+    ):
+        response = admin_client.post("/api/admin/shutdown")
+
+        assert response.status_code == 204
+        written = settings.shutdown_request_path.read_text(encoding="utf-8").strip()
+        # UTC without the marker saying so, like everything this program stores -- see
+        # services/dates.utc_now. The host judges by the file's mtime; the line is for whoever
+        # reads it.
+        stated = datetime.fromisoformat(written)
+        assert stated.tzinfo is None
+        assert (datetime.now(UTC).replace(tzinfo=None) - stated).total_seconds() < 60
+
+    def test_asking_twice_only_renews_the_request(
+        self, admin_client: TestClient, settings, host_can_switch_off
+    ):
+        """A second press means "yes, really", not an error."""
+        assert admin_client.post("/api/admin/shutdown").status_code == 204
+        first = settings.shutdown_request_path.read_text(encoding="utf-8")
+
+        assert admin_client.post("/api/admin/shutdown").status_code == 204
+
+        assert settings.shutdown_request_path.read_text(encoding="utf-8") >= first
+
+    def test_a_request_left_over_is_cleared_when_the_backend_starts(self, database, settings):
+        """Otherwise the watcher on the Pi switches the device off seconds after the next boot.
+
+        It stays lying there when the power goes between the request and the poweroff, or on a host
+        where nothing acts on it at all. The client is entered here rather than taken as a fixture,
+        because entering it is what runs the lifespan -- and ``database`` rather than ``client``,
+        because the tables have to stand before the lifespan reads the gazetteer.
+        """
+        from app.main import app
+
+        settings.shutdown_request_path.write_text("from before the power cut\n", encoding="utf-8")
+
+        with TestClient(app):
+            assert not settings.shutdown_request_path.exists()
+
+
 class TestTheImportLog:
     def test_only_the_rejected_ones_on_request(
         self, admin_client: TestClient, session, fixtures_dir

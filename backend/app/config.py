@@ -107,6 +107,27 @@ class Settings(BaseSettings):
         return self.data_dir / "kiekmap-backend.lock"
 
     @property
+    def shutdown_request_path(self) -> Path:
+        """The note the host reads when the admin area asks the device to switch off.
+
+        This process runs unprivileged in a container and cannot power the host off. The data
+        directory is bind-mounted, so on the Pi this file stands at
+        ``/opt/kiekmap/data/shutdown-requested``, where ``deploy/pi/kiekmap-shutdown.path`` watches
+        for it. See ``app.services.power`` and decisions.md, point 96.
+        """
+        return self.data_dir / "shutdown-requested"
+
+    @property
+    def shutdown_watcher_path(self) -> Path:
+        """The host's promise that something acts on such a request. Written by ``setup-pi.sh``.
+
+        Without it the admin area refuses to offer the shutdown. The same program runs on a
+        development machine and online behind Caddy, and there the screen would say the power may
+        be switched off while the device went on running.
+        """
+        return self.data_dir / "shutdown-watcher"
+
+    @property
     def db_url(self) -> str:
         return f"sqlite:///{self.db_path}"
 

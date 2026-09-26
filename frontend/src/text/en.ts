@@ -204,6 +204,23 @@ export const en: Texts = {
         "The same happens by itself once the device is untouched for five minutes.",
     },
 
+    shutdown: {
+      button: "Switch the device off",
+      hint:
+        "Shuts the device down in an orderly way. The power can be switched off afterwards — " +
+        "gentler than simply pulling the plug.",
+      confirmTitle: "Switch the device off now?",
+      confirm:
+        "The visitor view stays dark until the device is switched on again. " +
+        "Nothing in the collection changes.",
+      yes: "Yes, switch off",
+      no: "Cancel",
+      offTitle: "The device is shutting down.",
+      offHint:
+        "Once the screen stays dark, the power can be switched off. " +
+        "The map comes back by itself the next time the device is switched on.",
+    },
+
     photos: {
       title: "List of all photos",
       searchLabel: "Search in title, place and file name",

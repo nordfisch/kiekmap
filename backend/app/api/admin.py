@@ -49,7 +49,8 @@ from app.schemas import (
     UploadItem,
     UploadResult,
 )
-from app.services import auth, dates, places
+from app.services import auth, dates, places, power
+from app.services import backup as backup_service
 from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
 from app.services.importer import apply_batch_defaults, import_upload, upload_name
@@ -678,3 +679,31 @@ def upload(
         duplicates=counts[ImportResult.DUPLICATE],
         rejected=counts[ImportResult.REJECTED],
     )
+
+
+# --- switching the device off -----------------------------------------------
+
+
+@router.post("/shutdown", status_code=204, summary="Switch the device off")
+def shut_down(admin: Admin, settings: Config) -> None:
+    """Ask the host to power the device off.
+
+    The museum switches the device off at the wall, and that is the normal case (issue #21). This
+    is the orderly way: the request goes into the data directory, the host acts on it, and the
+    screen says when the power may go. Why a file and not a privilege is in decisions.md, point 96.
+
+    **204, although 202 would be the more precise word:** there is nothing to hand back, and
+    ``adminFetch`` in the frontend reads a body for every status but 204. Pressing twice renews the
+    request rather than being refused -- that is what a second press means.
+    """
+    if not power.host_can_switch_off(settings):
+        raise HTTPException(503, texts().admin.cannot_switch_off)
+
+    # A poweroff in the middle of a restore leaves the collection half moved (see the swap in
+    # services/backup/restore.py), and a backup half written on the stick. Same refusal as the
+    # archive download.
+    if backup_service.job.running:
+        raise HTTPException(409, texts().backup.busy)
+
+    power.request_shutdown(settings)
+    log.info("Shutdown requested through the admin area")

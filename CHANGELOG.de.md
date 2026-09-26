@@ -1,9 +1,15 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: ba0312a55dbf0b3159a953e2d9c0a35acded9efeb5ba5b2d766e2fffb5537440 -->
+<!-- source-sha: 296a60bdb7811b69bb27cb83b2877f1e1e8a3b8743c389e4c3841eb1dcc41610 -->
 
 # Änderungen
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach SemVer.
+
+## [Unveröffentlicht]
+
+### Hinzugefügt
+
+- **Das Gerät lässt sich aus der Verwaltung ausschalten** ([#21])
 
 ## [0.9.5] — 2026-09-26
 
@@ -88,6 +94,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Kommentare tragen Grund und Stolperfalle, nicht die datierte Vorgeschichte** ([#84])
 - **mypy prüft das Backend, bevor die Tests laufen** ([#86])
 
+[#21]: https://github.com/nordfisch/kiekmap/issues/21
 [#52]: https://github.com/nordfisch/kiekmap/issues/52
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
