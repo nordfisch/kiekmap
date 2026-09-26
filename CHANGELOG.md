@@ -4,11 +4,11 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 
 ## [Unreleased]
 
-### Added
+## [0.9.6] — 2026-09-27
 
-- **The device can be switched off from the admin area** ([#21])
-
-## [0.9.5] — 2026-09-26
+**The collection can be filled from home, and the device carries on by itself while nobody touches
+it.** It runs online behind one password, shows a slide show when idle, pages through a stack on
+its own, and switches off from the admin area. A review before the first Pi found the fixes below.
 
 ### Added
 
@@ -31,6 +31,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   running. See [point 81](docs/developer/decisions.md)
 - **The command line for the first fill of a collection is documented** ([#74])
 - **A stack in the detail view pages through itself** until the visitor touches it ([#52])
+- **The device can be switched off from the admin area** ([#21])
 
 ### Changed
 
@@ -85,7 +86,10 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **The language rule holds again: identifiers, log lines and messages** ([#83])
 - **Comments carry the reason and the pitfall, not the dated history** ([#84])
 - **mypy checks the backend before the tests run** ([#86])
+- **The release steps are one list, and `build_release.py --notes` refuses to print the text of a
+  wrong release** ([#116])
 
+[#116]: https://github.com/nordfisch/kiekmap/issues/116
 [#21]: https://github.com/nordfisch/kiekmap/issues/21
 [#52]: https://github.com/nordfisch/kiekmap/issues/52
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
