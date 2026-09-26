@@ -2,7 +2,7 @@
 #
 # The backend runs unprivileged in a container and cannot power the host off. It writes a file into
 # the data directory, which is bind-mounted; this unit is the other half. See
-# docs/developer/decisions.md, point 95.
+# docs/developer/decisions.md, point 96.
 #
 # Copy to /etc/systemd/system/, then:  sudo systemctl enable --now kiekmap-shutdown.path
 

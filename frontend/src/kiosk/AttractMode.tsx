@@ -26,6 +26,7 @@ import {
   bandTravel,
   kenBurnsPath,
   nextTile,
+  thumbUrl,
   transformOf,
   zoomLimit,
 } from "./attract";
@@ -42,10 +43,6 @@ type Tile = {
   /** Half turns so far. Always counted up, so the card always turns the same way. */
   turns: number;
 };
-
-function thumb(photo: PhotoMarker): string {
-  return `/api/photos/${photo.id}/thumb?size=1200`;
-}
 
 function captionOf(photo: PhotoMarker): string {
   return [photo.date_short, photo.place_name].filter(Boolean).join(" · ");
@@ -114,7 +111,7 @@ function Wall({ regionName }: { regionName: string }) {
         // Turned only once the picture is decoded: otherwise the back of the card arrives empty
         // and fills in mid-turn.
         const image = new Image();
-        image.src = thumb(photo);
+        image.src = thumbUrl(photo.id);
         await image.decode();
         if (abort.signal.aborted) return;
 
@@ -322,7 +319,7 @@ function Face({
     <span className={`attract__face attract__face--${side}`}>
       {photo && (
         <>
-          <img ref={image} className="attract__image" src={thumb(photo)} alt="" />
+          <img ref={image} className="attract__image" src={thumbUrl(photo.id)} alt="" />
           {captionOf(photo) && (
             // The corner changes from photo to photo, for the same reason the caption fades.
             <span

@@ -1146,6 +1146,30 @@ button.timeline__undated:hover {
   visibility: hidden;
 }
 
+/* Every photo fades in -- on opening, on every step by hand, and when a stack pages by itself.
+ *
+ * An animation and not a transition, and the difference decides whether anything is seen. A
+ * stack decodes its next thumbnail before the step, so that image is complete at once: the `ref`
+ * in PhotoOverlay.tsx drops the loading class before the first paint, and a transition from
+ * `--loading` would have no painted start to leave from. An animation starts when its rule first
+ * applies to an element, and the image is a new element per photo (`key`). Bound to the loaded
+ * state, so that it does not play out unseen while the file is still arriving. */
+.overlay__image:not(.overlay__image--loading) {
+  animation: overlay-fade-in 300ms ease-out;
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay__image:not(.overlay__image--loading) {
+    animation: none;
+  }
+}
+
 .overlay__text {
   /* A lot of text scrolls inside its column instead of running under the edge of the screen. The
    * limit is the same as for the picture, only without the footer -- the text reaches below the

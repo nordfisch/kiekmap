@@ -690,7 +690,7 @@ def shut_down(admin: Admin, settings: Config) -> None:
 
     The museum switches the device off at the wall, and that is the normal case (issue #21). This
     is the orderly way: the request goes into the data directory, the host acts on it, and the
-    screen says when the power may go. Why a file and not a privilege is in decisions.md, point 95.
+    screen says when the power may go. Why a file and not a privilege is in decisions.md, point 96.
 
     **204, although 202 would be the more precise word:** there is nothing to hand back, and
     ``adminFetch`` in the frontend reads a body for every status but 204. Pressing twice renews the

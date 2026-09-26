@@ -4,7 +4,7 @@ The backend runs as uid 1000 in a container, with no docker socket, no sudo line
 beyond the data directory. It therefore cannot power the Pi off, and it should not be able to: the
 privilege would belong to the whole admin area, which stands behind four digits. So it leaves a
 note, and one root script on the host does the rest -- the same shape as the USB mounter, which
-udev calls. See ``deploy/pi/kiekmap-shutdown`` and decisions.md, point 95.
+udev calls. See ``deploy/pi/kiekmap-shutdown`` and decisions.md, point 96.
 """
 
 import logging

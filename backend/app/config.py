@@ -113,7 +113,7 @@ class Settings(BaseSettings):
         This process runs unprivileged in a container and cannot power the host off. The data
         directory is bind-mounted, so on the Pi this file stands at
         ``/opt/kiekmap/data/shutdown-requested``, where ``deploy/pi/kiekmap-shutdown.path`` watches
-        for it. See ``app.services.power`` and decisions.md, point 95.
+        for it. See ``app.services.power`` and decisions.md, point 96.
         """
         return self.data_dir / "shutdown-requested"
 

@@ -1,11 +1,17 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 5cdd0f78a10476f898d094d7948e280c7a18135da7ecbfe88cb8fb6dadbc6893 -->
+<!-- source-sha: 296a60bdb7811b69bb27cb83b2877f1e1e8a3b8743c389e4c3841eb1dcc41610 -->
 
 # Änderungen
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach SemVer.
 
 ## [Unveröffentlicht]
+
+### Hinzugefügt
+
+- **Das Gerät lässt sich aus der Verwaltung ausschalten** ([#21])
+
+## [0.9.5] — 2026-09-26
 
 ### Hinzugefügt
 
@@ -28,7 +34,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   einbrennt. Ein Tipp auf ein Foto öffnet die Karte um dieses Foto herum, mit dem Foto groß. Die Verwaltung schließt nach zwei Minuten ohne Berührung, außer während einer Sicherung,
   Rücksicherung, eines Imports oder Hochladens. Siehe [Punkt 81](docs/developer/decisions.md)
 - **Die Kommandozeile für die erste Befüllung einer Sammlung ist dokumentiert** ([#74])
-- **Das Gerät lässt sich aus der Verwaltung ausschalten** ([#21])
+- **Ein Stapel in der Detailansicht blättert von selbst um**, bis der Besucher ihn berührt ([#52])
 
 ### Geändert
 
@@ -89,6 +95,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **mypy prüft das Backend, bevor die Tests laufen** ([#86])
 
 [#21]: https://github.com/nordfisch/kiekmap/issues/21
+[#52]: https://github.com/nordfisch/kiekmap/issues/52
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
 [#61]: https://github.com/nordfisch/kiekmap/issues/61

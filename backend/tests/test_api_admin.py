@@ -1078,7 +1078,7 @@ class TestSwitchingTheDeviceOff:
 
     The backend cannot power the host off -- it runs unprivileged in a container. It writes a
     request into the data directory, and a root script on the Pi acts on it. See decisions.md,
-    point 95.
+    point 96.
     """
 
     @pytest.fixture
