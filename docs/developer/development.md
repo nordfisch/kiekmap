@@ -383,10 +383,6 @@ as well as on the documentation site. What it reports is drift, not wrongness --
 the English source turns it red although the German needs no change. Somebody has to look, decide,
 and then run `--update`.
 
-`tools/build_release.py --notes` assembles the body of a GitHub release out of both changelogs:
-English first, German below a rule. A release has one text field and no language variants, so both
-go into it.
-
 **`build_register.py` joined on 21 August 2026**, together with the register at the top of
 [archive/history.de.md](archive/history.de.md). It is really a generator — `make register` writes the table, `--check`
 only says that it no longer matches. Both need the same promise: **every section of the history
@@ -612,27 +608,6 @@ without fixed versions; `make deps-lock` then pulls the lock file's versions ove
 second step `tools/build_notices.py` aborts — **and that is exactly right**, because the licence
 notices would then not be those of the image.
 
-## Building a release
-
-```bash
-make version v=0.9.0                 # set the number
-git commit -am "chore: version 0.9.0"
-git tag -s v0.9.0 -m v0.9.0          # signed, tag.gpgsign is set
-make release to=/Volumes/STICK/kiekmap-update
-```
-
-`tools/build_release.py` builds both images, saves them as `images.tar`, writes the `version`
-file next to them and on request (`map=1`) takes the map file and place index along — exactly
-the folder `deploy/pi/update.sh` expects.
-
-**It aborts on a dirty working tree or a missing tag**, and there is no `--force` against that: a
-stick that belongs to no commit cannot be identified a year later — and a year is exactly the
-interval at which such a device is touched.
-
-**The `version` file is the line that gets forgotten by hand.** Without it `KIEKMAP_VERSION` stays
-as it is in the Pi's `.env`, the next start pulls the old image back up, and the device runs the
-old software without saying so anywhere.
-
 ## Branches and merges
 
 Two long-lived branches, and `main` means something specific:
@@ -642,6 +617,7 @@ Two long-lived branches, and `main` means something specific:
 | `main` | **What runs in the museum.** Every commit on it carries a tag. | merges from `develop` only |
 | `develop` | Everyday work. The default branch. | merges from `feature/*` and `fix/*` |
 | `feature/<short>`, `fix/<short>` | short-lived, one topic | by pull request into `develop`, deleted afterwards |
+| `release/<version>` | the changelog and version commit of one release | by pull request into `develop`, deleted afterwards |
 
 **This is not GitHub Flow**, even though it looks like it. GitHub Flow has exactly one long-lived
 branch and is built for services that ship several times a day. This device stands offline and is
@@ -649,9 +625,11 @@ updated once or twice a year from a stick; there, a `main` of its own answers a 
 really gets asked in the museum: *what is actually running on the device?* The reasoning is in
 [decisions.md](decisions.md).
 
-**No `release/*`, no `hotfix/*`.** With one maintainer that is ballast. An urgent bug becomes a
-`fix/` branch, goes into `develop` and from there straight into `main` — the same road, driven
-faster.
+**`release/<version>` is not the release branch of git-flow.** It lives for one pull request and
+carries the changelog and the version number; nothing is stabilised on it. There is no
+`hotfix/*`: an urgent bug becomes a `fix/` branch, goes into `develop` and from there into `main`
+with the next patch number — the same road, driven faster. The steps are in
+[Making a release](#making-a-release).
 
 ### Squash merge is disabled here, and there is a reason
 
@@ -675,40 +653,172 @@ the follow-up work was half the job.
 The Conventional Commits prefixes apply unchanged (`feat:`, `fix:`, `docs:` …). Transcribing
 umlauts no longer applies to new messages.
 
-## Releasing
+## Making a release
 
-SemVer tags, Conventional Commits, one repository for frontend and backend. Frontend and backend
-are versioned together — for a single-device system separate versioning is only ballast, and API
-compatibility is guaranteed by it.
+A release is four things under one number: the number in the files, a merge of `develop` into
+`main`, a signed tag on that merge, and a GitHub release whose text comes from the two changelogs.
+Pushing the tag also deploys the documentation site. The update stick for a device is built from
+the tag afterwards.
 
-The road, in order:
+Frontend and backend carry the same number. Do the steps in this order: each one depends on the
+one before it.
+
+**Before you start:**
+
+- Everything that belongs in the release is merged into `develop`, and its check is green.
+- Your clone signs commits and tags: `git config --get tag.gpgsign` answers `true`.
+- The two GitHub settings under [The documentation site](#the-documentation-site) are right.
+  Nothing in the repository can check them.
+
+**Choose the number.** SemVer, while the major version is 0: a new ability raises the middle
+number (0.9.6 → 0.10.0), fixes alone raise the last one (0.9.6 → 0.9.7). **A number that was
+published once is never used again**, even when its release is withdrawn — see
+[When a release went wrong](#when-a-release-went-wrong).
+
+Set it once in the shell. Every command below uses it:
 
 ```bash
-make version v=0.9.0        # the number in all five places
-make check                  # before anything is committed
-                            # commit, then develop into main by pull request
-git tag -s v0.9.0 -m v0.9.0 # on main -- every commit there carries a tag
-git push origin v0.9.0      # this is what deploys the documentation site
-python3 tools/build_release.py --notes > notes.md
-gh release create v0.9.0 --notes-file notes.md
+V=0.9.6
 ```
 
-**Pushing the tag is what publishes the documentation**, so the two settings under
-[The documentation site](#the-documentation-site) have to be right before it goes. The release body
-comes out of both changelogs, English first.
+### 1. A release branch from `develop`
+
+```bash
+git switch develop && git pull --ff-only
+git switch -c release/$V
+```
+
+### 2. The changelog
+
+In `CHANGELOG.md`:
+
+1. Rename `## [Unreleased]` to `## [0.9.6] — 2026-09-27`: the number in brackets, a dash, today's
+   date as year-month-day. `build_release.py` finds the block by exactly that heading.
+2. Directly below the heading, write **one bold sentence that says what the release changes for a
+   museum**, and a plain sentence after it if one is needed. This is the description at the top of
+   the GitHub release. The block of 0.9.0 is the example.
+3. Put a new, empty `## [Unreleased]` above the renamed block.
+4. Read the block as a whole: one line per entry, each linking its issue.
+
+In `CHANGELOG.de.md` the same: `## [Unveröffentlicht]` becomes `## [0.9.6] — 2026-09-27`, with
+the date in the same form, a new empty `## [Unveröffentlicht]` goes above it, and the sentence is
+translated. Then record that the translation matches its source again:
+
+```bash
+python3 tools/check_translations.py --update
+```
+
+### 3. The number in the files
+
+```bash
+make version v=$V
+```
+
+It writes the number to five places at once; which ones, and why the last matters, is in
+[One number, five places](#one-number-five-places).
+
+### 4. Into `develop`
+
+```bash
+make check
+git commit -am "chore: version $V"
+git push -u origin release/$V
+gh pr create --base develop --title "Version $V" --body "Changelog and version number for $V."
+```
+
+Merge the pull request once its check is green, **with a merge commit**. Squash is switched off,
+and the reason is [above](#squash-merge-is-disabled-here-and-there-is-a-reason).
+
+### 5. From `develop` into `main`
+
+```bash
+gh pr create --base main --head develop --title "Release $V" --body "Release $V. See CHANGELOG.md."
+```
+
+Merge it with a merge commit once its check is green. That merge commit is what the tag names.
+
+### 6. The tag, on `main`
+
+```bash
+git switch main && git pull --ff-only
+git log -1 --oneline        # has to be the merge of "Release $V"
+git tag -s v$V -m v$V
+git push origin v$V
+```
+
+**Pushing the tag deploys the documentation site.** Watch the run:
+
+```bash
+gh run watch "$(gh run list --workflow pages.yml --limit 1 --json databaseId -q '.[0].databaseId')"
+```
+
+A green `build` beside a red `deploy` with no step in it means the tag rule is missing from the
+[settings](#two-settings-that-decide-whether-a-deploy-works-and-neither-is-in-this-repository).
+
+### 7. The GitHub release
+
+Still on `main`, on the tag:
+
+```bash
+python3 tools/build_release.py --notes > /tmp/kiekmap-notes.md
+gh release create v$V --verify-tag --notes-file /tmp/kiekmap-notes.md \
+    --title "Kiekmap $V — <what it brings, in a few words>"
+```
+
+- **The title** is written by hand: `Kiekmap`, the number, a dash, a few words. For example
+  `Kiekmap 0.9.0 — two languages, and a documentation site`. It is the one line of a release that
+  is not in the changelog.
+- **The text** is the changelog block of this version, English first, German below a rule, with the
+  bold sentence of step 2 on top. `--notes` refuses when HEAD is not on the tag or when a changelog
+  has no block for the number. It cannot print the text of an older release.
+- The notes file goes to `/tmp`, not into the working tree: step 9 needs a clean tree.
+
+### 8. Back to `develop`
+
+```bash
+git switch develop && git pull --ff-only
+git branch -d release/$V
+```
+
+The next change starts on a branch of its own from here.
+
+### 9. The update stick
+
+Only when a device is to be updated. On the tag, with a clean working tree:
+
+```bash
+git switch --detach v$V
+make release to=/Volumes/STICK/kiekmap-update
+```
+
+`make release` refuses a dirty tree and a HEAD that is not on the tag. What the stick holds and how
+it goes onto the Pi is in [operations.md](../museum/operations.md#updating-without-the-internet).
+
+### When a release went wrong
+
+A tag on the wrong commit, a number that was not raised, an empty release text: **withdraw the
+release and publish the next number.** Do not move a published tag. Whoever fetched it keeps the
+old one, and the documentation site has already been built from it.
+
+```bash
+gh release delete vX.Y.Z --yes        # the release on GitHub
+git push origin :refs/tags/vX.Y.Z     # the tag on GitHub
+git tag -d vX.Y.Z                     # the tag in your clone
+```
+
+Then start again at step 1 with the next number. In both changelogs the withdrawn block becomes
+part of the new one; the withdrawn number does not appear in them. 0.9.5 went this way: it was
+tagged on a feature commit, with the files still at 0.9.0 and no changelog block, and its content
+was released as 0.9.6.
 
 ### One number, five places
 
-```bash
-make version            # show it
-make version v=0.8.0    # set it everywhere
-```
+`make version` shows the number, `make version v=0.9.6` sets it. `tools/set_version.py` writes it
+to `frontend/package.json`, twice to `frontend/package-lock.json` (the root package), to
+`backend/pyproject.toml` and to `backend/app/__init__.py`. `make check` reports when one of them
+steps out of line.
 
-`tools/set_version.py` writes it to `frontend/package.json`, twice to
-`frontend/package-lock.json` (the root package), to `backend/pyproject.toml` and to
-`backend/app/__init__.py`. `make check` reports when one of them steps out of line.
-
-**The fourth is the most important and would have been the one left behind:** `__version__` is what
+**The last is the most important and would have been the one left behind:** `__version__` is what
 `/api/health` answers and what stands in the OpenAPI description — the version the device in the
 museum claims about itself. If it stood still while the image tag counted on, the API would give
 the wrong answer to the one question it exists for.
@@ -716,6 +826,8 @@ the wrong answer to the one question it exists for.
 **The tag is not the source, the files are.** A check against `git describe` would be red exactly
 in the window where the version is already raised but the tag is not yet set — and that is where
 the commit hook runs. The tag has to match instead.
+
+### Signed commits and tags
 
 **All commits are signed** (SSH, not GPG), and so are the tags — including the 185 from before the
 key existed, done retroactively on 25 August 2026. That is unusual, so the trade-off belongs in
@@ -734,6 +846,3 @@ that reported as invalid. Whoever changes the key therefore keeps the old one li
 **It was done with** `git rebase --root --exec` — `filter-repo` does not sign. The run reset the
 committer date from the author date, otherwise all 188 commits would have got 25 August as their
 committer date. One commit previously had ten seconds between the two dates; those were lost.
-
-The museum device is offline. The update path to it (an image tarball on a USB stick) is in
-[operations.md](../museum/operations.md).

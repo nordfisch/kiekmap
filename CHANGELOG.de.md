@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 296a60bdb7811b69bb27cb83b2877f1e1e8a3b8743c389e4c3841eb1dcc41610 -->
+<!-- source-sha: 7b1db24bf57e39f8784a154498a8ad81a69747bf70aa092da9a1f7a768cdf23d -->
 
 # Änderungen
 
@@ -7,11 +7,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unveröffentlicht]
 
-### Hinzugefügt
+## [0.9.6] — 2026-09-27
 
-- **Das Gerät lässt sich aus der Verwaltung ausschalten** ([#21])
-
-## [0.9.5] — 2026-09-26
+**Die Sammlung lässt sich von zu Hause füllen, und das Gerät macht von selbst weiter, solange es
+niemand berührt.** Es läuft online hinter einem Kennwort, zeigt im Leerlauf eine Diashow, blättert
+einen Stapel von selbst um und lässt sich aus der Verwaltung ausschalten. Eine Durchsicht vor dem
+ersten Pi hat die Korrekturen unten gefunden.
 
 ### Hinzugefügt
 
@@ -35,6 +36,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   Rücksicherung, eines Imports oder Hochladens. Siehe [Punkt 81](docs/developer/decisions.md)
 - **Die Kommandozeile für die erste Befüllung einer Sammlung ist dokumentiert** ([#74])
 - **Ein Stapel in der Detailansicht blättert von selbst um**, bis der Besucher ihn berührt ([#52])
+- **Das Gerät lässt sich aus der Verwaltung ausschalten** ([#21])
 
 ### Geändert
 
@@ -93,7 +95,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Die Sprachregel gilt wieder: Bezeichner, Protokollzeilen und Meldungen** ([#83])
 - **Kommentare tragen Grund und Stolperfalle, nicht die datierte Vorgeschichte** ([#84])
 - **mypy prüft das Backend, bevor die Tests laufen** ([#86])
+- **Die Schritte zu einer Fassung stehen in einer Liste, und `build_release.py --notes` verweigert
+  den Text einer falschen Fassung** ([#116])
 
+[#116]: https://github.com/nordfisch/kiekmap/issues/116
 [#21]: https://github.com/nordfisch/kiekmap/issues/21
 [#52]: https://github.com/nordfisch/kiekmap/issues/52
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
@@ -125,7 +130,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#84]: https://github.com/nordfisch/kiekmap/issues/84
 [#86]: https://github.com/nordfisch/kiekmap/issues/86
 
-## [0.9.0] — 2. September 2026
+## [0.9.0] — 2026-09-02
 
 **Das Gerät spricht zwei Sprachen, und die Dokumentation hat eine Adresse.** An der Arbeit eines
 Museums mit seinen Fotos hat sich nichts geändert; geändert hat sich, wer Gerät und Dokumentation
