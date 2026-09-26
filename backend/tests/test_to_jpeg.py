@@ -19,9 +19,9 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
 
-import to_jpeg as tool  # noqa: E402
+import to_jpeg as tool
 
-from app.services.exif import read_image_info  # noqa: E402
+from app.services.exif import read_image_info
 
 
 @pytest.fixture
