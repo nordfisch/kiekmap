@@ -741,7 +741,7 @@ Merge it with a merge commit once its check is green. That merge commit is what 
 
 ```bash
 git switch main && git pull --ff-only
-git log -1 --oneline        # has to be the merge of "Release $V"
+git log -1 --format=%s%n%b  # "Merge pull request #… from nordfisch/develop", then "Release $V"
 git tag -s v$V -m v$V
 git push origin v$V
 ```
