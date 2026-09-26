@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: f721a2a9a135732dd82e8e35a308e24d4882313fc095182d56f214c3fa1cea05 -->
+<!-- source-sha: 510d337ae903a51cd03a5d56af7f877ba5e9583563c55eae257cc2f8e0cd4775 -->
 
 # Änderungen
 
@@ -28,6 +28,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   einbrennt. Ein Tipp auf ein Foto öffnet die Karte um dieses Foto herum, mit dem Foto groß. Die Verwaltung schließt nach zwei Minuten ohne Berührung, außer während einer Sicherung,
   Rücksicherung, eines Imports oder Hochladens. Siehe [Punkt 81](docs/developer/decisions.md)
 - **Die Kommandozeile für die erste Befüllung einer Sammlung ist dokumentiert** ([#74])
+- **Ein Stapel in der Detailansicht blättert von selbst um**, bis der Besucher ihn berührt ([#52])
 
 ### Geändert
 
@@ -87,6 +88,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Kommentare tragen Grund und Stolperfalle, nicht die datierte Vorgeschichte** ([#84])
 - **mypy prüft das Backend, bevor die Tests laufen** ([#86])
 
+[#52]: https://github.com/nordfisch/kiekmap/issues/52
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
 [#61]: https://github.com/nordfisch/kiekmap/issues/61

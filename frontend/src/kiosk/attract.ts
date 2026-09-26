@@ -30,6 +30,17 @@ export const MAX_ZOOM = 1.25;
 /** The pixel width of the largest thumbnail, the one the show loads. */
 export const THUMB_WIDTH = 1200;
 
+/**
+ * Where the largest thumbnail of a photo lies.
+ *
+ * The same address the backend puts into `thumb_url` of a photo's detail (`app/schemas.py`). Built
+ * here as well because the slide show has only markers, and the detail view needs the next photo
+ * of a stack before its detail has been fetched.
+ */
+export function thumbUrl(id: number): string {
+  return `/api/photos/${id}/thumb?size=${THUMB_WIDTH}`;
+}
+
 /** How many photos one request fetches. */
 export const SUPPLY = 24;
 

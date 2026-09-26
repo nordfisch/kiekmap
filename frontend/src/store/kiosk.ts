@@ -21,6 +21,7 @@ import {
   fetchPhotos,
 } from "../api/client";
 import { boundsAround, rangeForPhoto } from "../kiosk/focus";
+import { nextInStack } from "../kiosk/stackAdvance";
 import { useAdmin } from "./admin";
 import { axisBounds, clampRange } from "../kiosk/timeAxis";
 
@@ -152,6 +153,12 @@ type KioskState = {
   openStackAt: (ids: number[], index?: number) => void;
   /** Page through the open stack; stops at either end. */
   stepInStack: (delta: number) => void;
+  /**
+   * The next photo of the open stack, starting again after the last -- the stack paging by itself.
+   *
+   * Separate from `stepInStack`, whose stop at either end is what disables the buttons there.
+   */
+  advanceStack: () => void;
   /**
    * Move only the map somewhere -- for the pin just set, before anything has been contributed.
    *
@@ -435,6 +442,12 @@ export const useKiosk = create<KioskState>((set, get) => {
       const next = openIndex + delta;
       if (next < 0 || next >= openStack.length) return;
       set({ openIndex: next });
+    },
+
+    advanceStack() {
+      const { openStack, openIndex } = get();
+      if (openStack.length <= 1) return;
+      set({ openIndex: nextInStack(openIndex, openStack.length) });
     },
 
     showLocation(lat, lon) {
