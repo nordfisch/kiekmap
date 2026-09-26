@@ -2,7 +2,7 @@
 
 Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning after SemVer.
 
-## [Unreleased]
+## [0.9.5] — 2026-09-26
 
 ### Added
 

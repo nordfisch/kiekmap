@@ -1,11 +1,11 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 510d337ae903a51cd03a5d56af7f877ba5e9583563c55eae257cc2f8e0cd4775 -->
+<!-- source-sha: ba0312a55dbf0b3159a953e2d9c0a35acded9efeb5ba5b2d766e2fffb5537440 -->
 
 # Änderungen
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach SemVer.
 
-## [Unveröffentlicht]
+## [0.9.5] — 2026-09-26
 
 ### Hinzugefügt
 
