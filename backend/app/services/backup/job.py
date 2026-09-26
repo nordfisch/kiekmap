@@ -75,7 +75,8 @@ class Job:
                     self._status.done = self._status.total
             except BackupError as error:
                 self._fail(str(error))
-            except Exception as error:  # noqa: BLE001 -- the screen must not just stop moving
+            except Exception as error:
+                # Broad on purpose: the screen must not just stop moving.
                 log.exception("%s failed", kind)
                 self._fail(texts().backup.something_went_wrong(str(error)))
 

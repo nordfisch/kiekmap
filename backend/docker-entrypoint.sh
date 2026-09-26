@@ -5,7 +5,7 @@
 # on site should have to remember to run a migration by hand afterwards.
 set -eu
 
-echo "Kiekmap: Schemastand pruefen ..."
+echo "Kiekmap: checking the schema ..."
 alembic upgrade head
 
 exec "$@"

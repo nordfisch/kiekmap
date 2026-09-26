@@ -40,9 +40,6 @@ class Settings(BaseSettings):
     #: Where mounted USB sticks are looked for (stage 9).
     media_dir: Path = Path("/media")
 
-    #: Allowed origins for the Vite dev server. Empty in production -- same origin there.
-    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
-
     #: For the admin area from stage 8 on. Empty means the admin API does not answer.
     admin_pin_hash: str = ""
 
@@ -62,6 +59,15 @@ class Settings(BaseSettings):
     #: In the ``.env``: ``KIEKMAP_IMPORT_TAGS=["Gebäude"]``.
     import_tags: list[str] = []
 
+    #: The keywords the kiosk offers as filters in the corner of the map, in this order.
+    #:
+    #: Chosen by hand rather than taken from the most frequent ones. Frequency does not measure
+    #: meaning here: in Holm the three most frequent keywords are the import tag every photo
+    #: carries, a street the map already covers by place, and "Winter". A keyword no published
+    #: photo carries is left out, so a typo does not become a button that empties the map.
+    #: In the ``.env``: ``KIEKMAP_MAP_TAGS=["Gasthof","Winter"]``.
+    map_tags: list[str] = []
+
     #: Credit line for photos whose file names nobody -- "Sammlung Heimatmuseum Holm".
     #:
     #: The last resort, not the rule: whatever the file or the upload form says comes first. Empty
@@ -80,6 +86,46 @@ class Settings(BaseSettings):
     @property
     def db_path(self) -> Path:
         return self.data_dir / "kiekmap.db"
+
+    @property
+    def lock_path(self) -> Path:
+        """Where a restore and the writing CLI commands see each other.
+
+        Never moved and never deleted: a lock sits on the file, and a new file by the same name is
+        a different lock. See ``app.db.collection_lock``.
+        """
+        return self.data_dir / "kiekmap.lock"
+
+    @property
+    def process_lock_path(self) -> Path:
+        """Held exclusively by the one backend process for as long as it runs.
+
+        A file of its own rather than ``lock_path``: the writing CLI commands take that one shared
+        while the backend runs, and an exclusive lock on it would refuse all of them. Never moved
+        and never deleted, for the same reason as ``lock_path``. See ``app.db.process_lock``.
+        """
+        return self.data_dir / "kiekmap-backend.lock"
+
+    @property
+    def shutdown_request_path(self) -> Path:
+        """The note the host reads when the admin area asks the device to switch off.
+
+        This process runs unprivileged in a container and cannot power the host off. The data
+        directory is bind-mounted, so on the Pi this file stands at
+        ``/opt/kiekmap/data/shutdown-requested``, where ``deploy/pi/kiekmap-shutdown.path`` watches
+        for it. See ``app.services.power`` and decisions.md, point 96.
+        """
+        return self.data_dir / "shutdown-requested"
+
+    @property
+    def shutdown_watcher_path(self) -> Path:
+        """The host's promise that something acts on such a request. Written by ``setup-pi.sh``.
+
+        Without it the admin area refuses to offer the shutdown. The same program runs on a
+        development machine and online behind Caddy, and there the screen would say the power may
+        be switched off while the device went on running.
+        """
+        return self.data_dir / "shutdown-watcher"
 
     @property
     def db_url(self) -> str:

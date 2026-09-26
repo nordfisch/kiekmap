@@ -10,14 +10,17 @@ speaks.
 """
 
 import logging
+from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
+from starlette.types import Receive, Scope, Send
 
 from app.api.admin import Admin, Config
 from app.config import Settings
-from app.db import SessionLocal
+from app.db import current_database
 from app.schemas import (
     BackupOnDrive,
     BackupReminder,
@@ -123,7 +126,7 @@ def start(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
 
     def work(report: service.Report) -> str:
         # Its own session: this runs in a thread, and the request's session belongs to the request.
-        with SessionLocal() as session:
+        with current_database().session() as session:
             return service.run_backup(session, settings, drive, report)
 
     if not service.job.start("backup", work):
@@ -142,9 +145,7 @@ def restore(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
     drive = _pick(settings, choice.path)
 
     def work(report: service.Report) -> str:
-        message = service.run_restore(settings, drive, report)
-        _reopen_database()
-        return message
+        return service.run_restore(settings, drive, report)
 
     if not service.job.start("restore", work):
         raise HTTPException(409, texts().backup.busy)
@@ -163,9 +164,7 @@ def restore_from_incoming(choice: IncomingChoice, admin: Admin, settings: Config
     archive = _pick_archive(settings, choice.file)
 
     def work(report: service.Report) -> str:
-        message = service.run_restore_from_archive(settings, archive, report)
-        _reopen_database()
-        return message
+        return service.run_restore_from_archive(settings, archive, report)
 
     if not service.job.start("restore", work):
         raise HTTPException(409, texts().backup.busy)
@@ -188,21 +187,6 @@ def _pick_archive(settings: Settings, name: str) -> Path:
     if service.read_archive_manifest(wanted) is None:
         raise HTTPException(422, texts().backup.not_a_complete_backup)
     return wanted
-
-
-def _reopen_database() -> None:
-    """Point the engine at the file that is now there.
-
-    The database was swapped underneath the running service. Every pooled connection still holds
-    the old, already moved file open -- reads would keep working and writes would land in a file
-    nobody can see any more. Disposing and rebuilding is the same dance the test fixtures do.
-    """
-    import app.db
-
-    app.db.engine.dispose()
-    app.db.engine = app.db.create_db_engine()
-    app.db.SessionLocal.configure(bind=app.db.engine)
-    log.info("Database reopened after restore")
 
 
 @import_router.get("/folders", response_model=ImportFolders, summary="Image folders on a stick")
@@ -237,7 +221,7 @@ def import_from_stick(request: ImportRequest, admin: Admin, settings: Config) ->
     folder = _pick_folder(settings, request.path)
 
     def work(report: service.Report) -> service.JobResult:
-        with SessionLocal() as session:
+        with current_database().session() as session:
             message, outcomes = importer.import_from_folder(
                 session,
                 folder,
@@ -347,21 +331,56 @@ def zip_download(settings: Config, ticket: str = Query(description="From /zip/ti
     if service.job.running:
         raise HTTPException(409, texts().backup.busy)
 
-    def strom():
-        # Its own session: the generator runs on after the request has been answered.
-        with SessionLocal() as session:
-            yield from service.stream_archive(session, settings)
-
     name = service.archive_name(settings)
     log.info("Archive download started: %s", name)
-    return StreamingResponse(
-        strom(),
+    return _ClosingStreamingResponse(
+        archive_download(settings),
         media_type="application/zip",
         # No content length: with ZIP_STORED it could be worked out, but the arithmetic
         # over entry headers, the central directory and ZIP64 extra fields is brittle
         # -- and a wrong number is worse than none. The browser shows no progress.
         headers={"Content-Disposition": f'attachment; filename="{name}"'},
     )
+
+
+class _ClosingStreamingResponse(StreamingResponse):
+    """Closes the generator when the response ends, also when the browser leaves early.
+
+    On a disconnect Starlette cancels the stream and leaves the generator suspended. Without this
+    class only the garbage collector closes it, which took longer than five seconds on an idle
+    uvicorn in a test. Until then the download holds its session, and a restore is refused.
+
+    ``close()`` is safe here: a cancelled ``next()`` in the worker thread still runs to its end
+    before the response ends, so the generator is never executing at this point.
+    """
+
+    def __init__(self, content: Generator[bytes, None, None], **kwargs: Any) -> None:
+        super().__init__(content, **kwargs)
+        self._generator = content
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        try:
+            await super().__call__(scope, receive, send)
+        finally:
+            self._generator.close()
+
+
+def archive_download(settings: Settings) -> Generator[bytes, None, None]:
+    """The archive as the download sends it.
+
+    Its own session, because the generator runs on after the request has been answered. Through
+    the gate, and for the whole transfer: that keeps a restore started *after* the check in
+    ``zip_download`` from swapping the files out halfway. As a lasting session, so that the
+    restore refuses at once instead of closing the gate and waiting; see
+    ``app.db.DatabaseGate.use``.
+
+    The ``with`` block releases the session however the generator ends: exhausted, raising, or
+    closed before its end. A browser that leaves early ends it through
+    ``_ClosingStreamingResponse``.
+    """
+    database = current_database()
+    with database.gate.use(lasting=True), database.session() as session:
+        yield from service.stream_archive(session, settings)
 
 
 @router.get("/status", response_model=JobState, summary="How far along backup or restore is")

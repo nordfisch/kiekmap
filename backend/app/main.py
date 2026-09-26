@@ -2,17 +2,20 @@
 
 import logging
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import ExitStack, asynccontextmanager
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app import __version__
 from app.api import admin, backup, config, contribute, health, photos, places
+from app.api.body_limit import BodyLimit
 from app.config import get_settings
-from app.db import SessionLocal
+from app.db import BackendAlreadyRunning, DatabaseClosed, open_database, process_lock
+from app.services import power
 from app.services.places import load_if_empty as load_places_if_empty
 from app.services.watcher import IncomingWatcher
+from app.text import texts
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s %(name)s: %(message)s")
 log = logging.getLogger("kiekmap")
@@ -24,15 +27,33 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings.ensure_dirs()
     log.info("Data directory: %s", settings.data_dir)
 
-    with SessionLocal() as session:
-        load_places_if_empty(session, settings.places_file)
+    with ExitStack() as held:
+        # Before anything writes: a second process must stop before it reads in places or starts
+        # a watcher of its own. See ``app.db.process_lock``.
+        try:
+            held.enter_context(process_lock(settings))
+        except BackendAlreadyRunning as refusal:
+            # Logged on its own line, so that the reason stands above the traceback.
+            log.error("%s", refusal)
+            raise
 
-    watcher = IncomingWatcher(settings)
-    watcher.start()
-    try:
-        yield
-    finally:
-        watcher.stop()
+        # Opened here and not at import: only now do the settings stand, and only now is this
+        # process the one that may use the data directory.
+        database = open_database(settings)
+
+        # A shutdown request from before this start belongs to nobody -- and left lying it would
+        # switch the device off right after this boot. See services/power.py.
+        power.clear_stale_request(settings)
+
+        with database.session() as session:
+            load_places_if_empty(session, settings.places_file)
+
+        watcher = IncomingWatcher(settings)
+        watcher.start()
+        try:
+            yield
+        finally:
+            watcher.stop()
 
 
 app = FastAPI(
@@ -47,15 +68,22 @@ app = FastAPI(
     redoc_url=None,
 )
 
-# Only needed for the Vite dev server. On the Pi, nginx serves frontend and API from the same
-# origin, so this middleware never applies there.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=get_settings().cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(BodyLimit)
+
+
+@app.exception_handler(DatabaseClosed)
+async def database_closed(request: Request, error: DatabaseClosed) -> JSONResponse:
+    """A restore is swapping the database file -- for seconds, see ``app.db.DatabaseGate``.
+
+    503 rather than a 500: nothing is broken, and the same request succeeds a moment later. The
+    body has the shape of an ``HTTPException``, so the screens show it like any other refusal.
+    """
+    return JSONResponse(
+        status_code=503,
+        content={"detail": texts().backup.restore_swapping},
+        headers={"Retry-After": "10"},
+    )
+
 
 app.include_router(health.router, prefix="/api")
 app.include_router(config.router, prefix="/api")

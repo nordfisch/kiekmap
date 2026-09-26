@@ -1,0 +1,50 @@
+#!/bin/sh
+# Powers the device off after the admin area has asked for it.
+#
+# Started by kiekmap-shutdown.service, which kiekmap-shutdown.path triggers as soon as the backend
+# writes its request. What happened stands in the journal:
+#
+#     journalctl -u kiekmap-shutdown
+#
+# By hand, with a request in place:
+#
+#     sudo /usr/local/sbin/kiekmap-shutdown /opt/kiekmap/data/shutdown-requested
+
+set -eu
+
+REQUEST="${1:-/opt/kiekmap/data/shutdown-requested}"
+
+[ -f "$REQUEST" ] || { echo "No request at $REQUEST -- nothing to do."; exit 0; }
+
+WRITTEN=$(stat -c %Y "$REQUEST")
+NOW=$(date +%s)
+# When this boot began. /proc/uptime counts from it and keeps counting through a clock that jumps.
+BOOTED=$(( NOW - $(cut -d. -f1 /proc/uptime) ))
+
+# **Deleted before anything else, and that is the point of the order.** A PathExists= unit triggers
+# again the moment this service ends while the file is still there -- an endless loop in the middle
+# of a shutdown. And a request that outlives its moment would switch the device off after the next
+# boot.
+rm -f "$REQUEST"
+
+# Written before this boot, or with a clock that has since been set back: the power went between
+# the request and the poweroff, and somebody has switched the device on to use it. A Pi has no
+# clock of its own, so fake-hwclock can put the time back after a power cut -- which is why a
+# request from the future is refused as well, not only an old one.
+if [ "$WRITTEN" -lt "$BOOTED" ] || [ "$WRITTEN" -gt "$NOW" ]; then
+    echo "The request is not from this boot (written $WRITTEN, booted $BOOTED, now $NOW) -- ignored."
+    exit 0
+fi
+
+echo "The admin area asked for the shutdown $(( NOW - WRITTEN ))s ago -- powering off."
+
+# **The containers are deliberately not stopped.** `docker compose stop` marks them as stopped by
+# hand, and `restart: unless-stopped` then leaves them down at the next boot -- a device that comes
+# up with no collection, in an exhibition, with nobody to notice. systemd stops docker.service as
+# part of its own shutdown, and SQLite runs in WAL mode with synchronous=NORMAL
+# (backend/app/db.py), so what the kill costs is at most the last transaction. A backup or a
+# restore cannot be running: the endpoint refuses while the job runs.
+#
+# --no-block, because this service is part of the transaction the poweroff creates. Waiting for
+# that job would mean waiting for ourselves.
+exec systemctl --no-block poweroff

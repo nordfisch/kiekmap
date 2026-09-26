@@ -10,15 +10,11 @@ everything ahead of it has run dry -- not in a case distinction, but in the posi
 a tuple. Locating a photo that has no place at all comes first: it is the only question whose
 photograph is on no map at all.
 
-**Sharpening ranks above dating, and the reason is arithmetic.** Both orders are defensible from
-the armchair -- a year is worth more than a house number. But on the Holm stock the dating question
-holds 612 photographs and the sharpening question 116, and a question is only reached once the ones
-ahead of it are *empty*. Put dating first and sharpening is never reached at all; the panel would
-carry a third question that nobody is ever asked. Rank it above and it runs dry after 116 answers,
-after which dating gets the panel to itself for as long as it takes.
-
-The two counts are of 16 August 2026 and both move with every contribution; what matters is their
-order of magnitude, not the digits. Sharpening grew from 71 that day -- see ``_needs_housenumber``.
+**Sharpening ranks above dating, and the reason is arithmetic.** A question is only reached once
+the ones ahead of it are *empty*, and the dating question holds roughly five times as many
+photographs as the sharpening one. Put dating first and sharpening is never reached at all; the
+panel would carry a third question that nobody is ever asked. Ranked above, it runs dry once its
+own stock is answered, and dating then has the panel to itself.
 """
 
 from typing import Literal, get_args
@@ -54,24 +50,17 @@ def _needs_housenumber() -> ColumnElement[bool]:
     **Not house-precise already.** Where the address is known the question is answered. Note what
     this does *not* say: it says nothing about **where the coordinate came from**.
 
-        Until 16 August 2026 it did, and that was the bug behind backlog point 53. The condition
-        read ``location_accuracy_m == ACCURACY_STREET_M``, which let in only what a curator had
-        placed on a street and left out 53 photographs that carry a street name from the archive
-        folder and a coordinate out of their EXIF. The reason given here was that an EXIF
-        coordinate is a measurement of a different kind -- "the camera knows where the
-        photographer stood, not what they photographed".
-
-        **That premise had been refuted four days earlier** and nobody came back to this file. Of
-        413 EXIF coordinates in the first stock, 278 were shared with another photograph; among
-        these 53, thirty share a point, six of them on one. They are values somebody typed in, not
-        measurements (decisions.md, point 34). A typed-in coordinate on a named street is exactly
-        what this question is for.
+        Testing ``location_accuracy_m == ACCURACY_STREET_M`` instead would let in only what a
+        curator placed on a street, and leave out every photo that carries a street name from the
+        archive folder and a coordinate out of its EXIF. An EXIF coordinate is no measurement
+        here: most of them repeat across photographs, so somebody typed them in (decisions.md,
+        point 34). A typed-in coordinate on a named street is exactly what this question is for.
 
     **No house number in the name.** Where ``place_name`` reads "Hauptstraße 11a", the number is
     already known and only its coordinate is missing -- because the address is not in
     OpenStreetMap, mostly because the house has since been split or renumbered. Offering a picker
     there would offer every number except the right one. Those photos are a machine job, not a
-    visitor question; see backlog, point 41.
+    visitor question.
 
     The digit test is a heuristic and errs towards not asking: a street with a digit in its name
     ("Straße des 17. Juni") is never put up. That is the harmless direction.

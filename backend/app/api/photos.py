@@ -1,7 +1,9 @@
 """Query and serve photos."""
 
 import logging
+from collections.abc import Callable
 from datetime import date
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
@@ -63,6 +65,9 @@ class Viewport:
             bool,
             Query(description="Keep photos that carry no date at all, whatever the time range"),
         ] = True,
+        tag: Annotated[
+            str | None, Query(description="Only photos carrying this keyword", max_length=80)
+        ] = None,
     ) -> None:
         parts = bbox.split(",")
         if len(parts) != 4:
@@ -79,6 +84,7 @@ class Viewport:
             from_year, to_year = to_year, from_year
         self.from_year, self.to_year = from_year, to_year
         self.include_undated = include_undated
+        self.tag = tag
 
     @property
     def time_range(self) -> tuple[date, date] | None:
@@ -87,8 +93,13 @@ class Viewport:
         return (date(self.from_year or 1800, 1, 1), date(self.to_year or 2100, 12, 31))
 
 
+def _tag_filter(viewport: Viewport):
+    """The keyword, as a condition -- none when no keyword is chosen."""
+    return [] if viewport.tag is None else [Photo.tags.any(Tag.name == viewport.tag)]
+
+
 def _viewport_filters(viewport: Viewport):
-    """Conditions for place and time.
+    """Conditions for place, time and keyword.
 
     The time filter queries for **overlap** of the intervals, not containment. Otherwise a photo
     dated "the 1920s" would vanish from the selection 1925-1930 -- precisely the loosely dated
@@ -105,6 +116,7 @@ def _viewport_filters(viewport: Viewport):
         Photo.lat.is_not(None),
         Photo.lat.between(viewport.min_lat, viewport.max_lat),
         Photo.lon.between(viewport.min_lon, viewport.max_lon),
+        *_tag_filter(viewport),
     ]
     if (selection := viewport.time_range) is not None:
         selected_start, selected_end = selection
@@ -164,6 +176,11 @@ def histogram(
     photos the viewport *holds*, not how many are currently shown -- and that count is what the
     switch beside the slider is labelled with. Counted out, the label would disappear along with
     the only way of switching them back on.
+
+    **The keyword stays in.** Bars and the undated count then show what exists *with that keyword*.
+    Without it the slider would draw bars for photos the map does not show, and the switch would
+    count them. The axis ignores the keyword, like the viewport, so it does not move when one is
+    chosen.
     """
     viewport.from_year = viewport.to_year = None
     viewport.include_undated = True
@@ -219,6 +236,7 @@ def histogram(
                 Photo.lat.between(viewport.min_lat, viewport.max_lat),
                 Photo.lon.between(viewport.min_lon, viewport.max_lon),
                 Photo.date_from.is_(None),
+                *_tag_filter(viewport),
             )
         )
         or 0
@@ -233,18 +251,110 @@ def histogram(
     )
 
 
-def _get_photo(session: Session, photo_id: int) -> Photo:
-    photo = session.scalar(
-        select(Photo).where(Photo.id == photo_id).options(selectinload(Photo.tags))
-    )
-    if photo is None:
+def _get_photo(
+    session: Session, photo_id: int, *, deleted_too: bool = False, with_tags: bool = False
+) -> Photo:
+    """One photo -- **a deleted one answers 404 like one that never existed**.
+
+    Every route here answers without a PIN, and ids count up. Deleting takes a photo out of the
+    exhibition, and a curator may do it for a reason that must hold: the rights, or a person who
+    asked to be taken out. Without this check the original stayed one guessed number away.
+
+    Only the detail asks for the tags. The file routes read four columns, and the tag query was a
+    second statement for every thumbnail the browser has not cached yet.
+    """
+    query = select(Photo).where(Photo.id == photo_id)
+    if with_tags:
+        query = query.options(selectinload(Photo.tags))
+    photo = session.scalar(query)
+    if photo is None or (photo.status == PhotoStatus.DELETED and not deleted_too):
         raise HTTPException(404, texts().photos.no_such_photo(photo_id))
     return photo
 
 
+def _file_of(photo: Photo, build: Callable[[], Path]) -> Path | None:
+    """The path of a photo's file, or None when its row carries no SHA-256.
+
+    Such a row did not come from the import. It came in with a restored database, and its answer
+    is the same 404 as a missing file -- with a log line that says which it was.
+    """
+    try:
+        return build()
+    except ValueError:
+        log.error("Photo %s carries no valid SHA-256: %r", photo.id, photo.sha256)
+        return None
+
+
+#: How many photos one showcase answer holds at most.
+SHOWCASE_MAX = 60
+
+#: The thumbnail width from which a photo can carry the slide show's zoom on a 1080p screen. Four
+#: tiles of 960 px each, zoomed to 1.25, need 1200 px. See frontend kiosk/attract.ts.
+SHOWCASE_WIDTH = 1200
+
+
+@router.get("/showcase", response_model=list[PhotoMarker], summary="Photos for the slide show")
+def showcase(
+    session: Annotated[Session, Depends(get_session)],
+    count: Annotated[int, Query(ge=1, le=SHOWCASE_MAX)] = 24,
+) -> list[PhotoMarker]:
+    """Random published photos for the slide show that runs while nobody uses the device.
+
+    Landscape only, because the tiles are landscape and a portrait photo would lose most of its
+    height to the crop. Placed only, because a tap on a tile opens the map around the photo.
+
+    **Large ones first, and no hard minimum.** Below 1200 px a photo cannot carry the full zoom, and
+    the frontend then zooms it less. A hard cut would empty the show for a collection of small
+    scans: the sample collection in ``seed/`` holds nothing wider than about 1000 px.
+    """
+    photos = session.scalars(
+        select(Photo)
+        .where(
+            Photo.status == PhotoStatus.PUBLISHED,
+            Photo.lat.is_not(None),
+            Photo.width > Photo.height,
+        )
+        .order_by((Photo.width >= SHOWCASE_WIDTH).desc(), func.random())
+        .limit(count)
+    ).all()
+    return [PhotoMarker.from_photo(photo) for photo in photos]
+
+
+@router.get("/tags", response_model=list[str], summary="All tags in use")
+def tags(session: Annotated[Session, Depends(get_session)]) -> list[str]:
+    return list(session.scalars(select(Tag.name).order_by(Tag.name)).all())
+
+
+@router.get(
+    "/tags/offered", response_model=list[str], summary="The keywords the map offers as filters"
+)
+def offered_tags(
+    session: Annotated[Session, Depends(get_session)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> list[str]:
+    """``map_tags`` in its configured order, without the keywords no published photo carries.
+
+    A keyword that matches nothing would be a button that empties the map. It comes from a typo in
+    the ``.env`` or from a keyword curated away since, and the log names it.
+    """
+    carried = set(
+        session.scalars(
+            select(Tag.name)
+            .where(Tag.name.in_(settings.map_tags))
+            .where(Tag.photos.any(Photo.status == PhotoStatus.PUBLISHED))
+        ).all()
+    )
+    if missing := [name for name in settings.map_tags if name not in carried]:
+        log.warning("KIEKMAP_MAP_TAGS names keywords no published photo carries: %s", missing)
+    return [name for name in dict.fromkeys(settings.map_tags) if name in carried]
+
+
+# Everything with a path parameter below this line. `photo_id` is an int, and FastAPI matches in
+# declaration order: put `/tags` after it and the parametrised route takes the request, fails to
+# read "tags" as a number and answers 422. The list is then unreachable and nothing says why.
 @router.get("/{photo_id}", response_model=PhotoDetail, summary="Everything known about one photo")
 def detail(photo_id: int, session: Annotated[Session, Depends(get_session)]) -> PhotoDetail:
-    return PhotoDetail.from_photo(_get_photo(session, photo_id))
+    return PhotoDetail.from_photo(_get_photo(session, photo_id, with_tags=True))
 
 
 @router.get("/{photo_id}/thumb", summary="Thumbnail")
@@ -259,11 +369,14 @@ def thumbnail(
             422, f"No thumbnail size {size}; available sizes are {list(THUMBNAIL_SIZES)}"
         )
 
-    photo = _get_photo(session, photo_id)
-    path = thumbnail_path(settings.thumbs_dir, photo.sha256, size)
-    if not path.is_file():
+    # The one exception, kept on purpose. The admin area shows deleted photos in „Gelöscht", in the
+    # editor and in the change log, through this route and plain <img> tags -- and an <img> sends
+    # no X-Admin-Token. See decisions.md, point 83, for why it stays open and when to revisit it.
+    photo = _get_photo(session, photo_id, deleted_too=True)
+    path = _file_of(photo, lambda: thumbnail_path(settings.thumbs_dir, photo.sha256, size))
+    if path is None or not path.is_file():
         # A database row without files points to an incompletely restored backup.
-        log.error("Thumbnail missing: %s", path)
+        log.error("Thumbnail missing: %s", path or photo.id)
         raise HTTPException(404, texts().photos.thumbnail_missing)
 
     return FileResponse(path, media_type="image/webp", headers={"Cache-Control": CACHE_IMMUTABLE})
@@ -284,14 +397,9 @@ def image(
         log.error("Photo %s carries an unknown MIME type: %s", photo.id, photo.mime)
         raise HTTPException(404, texts().photos.original_missing)
 
-    path = original_path(settings.photos_dir, photo.sha256, suffix)
-    if not path.is_file():
-        log.error("Original file missing: %s", path)
+    path = _file_of(photo, lambda: original_path(settings.photos_dir, photo.sha256, suffix))
+    if path is None or not path.is_file():
+        log.error("Original file missing: %s", path or photo.id)
         raise HTTPException(404, texts().photos.original_missing)
 
     return FileResponse(path, media_type=photo.mime, headers={"Cache-Control": CACHE_IMMUTABLE})
-
-
-@router.get("/tags/alle", response_model=list[str], summary="All tags in use")
-def tags(session: Annotated[Session, Depends(get_session)]) -> list[str]:
-    return list(session.scalars(select(Tag.name).order_by(Tag.name)).all())

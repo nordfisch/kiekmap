@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/index.md -->
-<!-- source-sha: 668a8c7604382164bc0476970518ebeda64c84af7c0f4071b6e1546a219bab5b -->
+<!-- source-sha: 6804c83f65bbdb99f2b460d00a1a2376ebd7fb0eb45262274263457884c63372 -->
 
 # Kiekmap
 
@@ -40,6 +40,10 @@ der Bildschirm schwarz bleibt.
 **[Für einen anderen Ort einrichten](adaption.de.md)** — für ein zweites Museum. Kartenausschnitt,
 Ortsverzeichnis, Wappen und Sprache sind Konfiguration; nichts davon steht im Code, und ein Fork
 ist nicht nötig.
+
+**[Die erste Sammlung aufbauen](collection.de.md)** — für die einmalige Arbeit am Anfang. Wie ein
+Archiv aus ein paar tausend Scans über die Kommandozeile in das Gerät kommt, was der Import aus
+einer Datei liest, und was die Zahlen danach bedeuten.
 
 **[Weitergabe](licensing.de.md)** — was weitergegeben werden darf und unter welchen Bedingungen.
 Der Fotobestand fällt nicht unter die Softwarelizenz, und die Kartendaten bringen eine eigene

@@ -1,5 +1,5 @@
 <!-- translated-from: README.md -->
-<!-- source-sha: e131fcc85fa2191eb22026002697a0e3b61d4771f1110e52143bc725863de94c -->
+<!-- source-sha: 37da53e76356ac8a2156f957253f96a050beeacdf248598feede61fa36fed27a -->
 
 # Kiekmap
 
@@ -97,7 +97,8 @@ Einrichtung im Detail, Sprachregelung, Teststrategie und die Fallstricke, die Ze
 
 **Für einen anderen Ort:** Es genügt, `tiles/region.json` anzupassen und `make tiles && make places`
 auszuführen — kein Fork, kein Codeeingriff. Schritt für Schritt in
-[docs/museum/adaption.de.md](docs/museum/adaption.de.md).
+[docs/museum/adaption.de.md](docs/museum/adaption.de.md); wie ein Archiv aus ein paar tausend Scans
+danach hineinkommt, in [docs/museum/collection.de.md](docs/museum/collection.de.md).
 
 **Für eine andere Sprache:** eine Zeile in der `.env`. `KIEKMAP_LANGUAGE=en` stellt Besucheransicht,
 Verwaltung, Meldungen und Datumsbeschriftung um, ohne neuen Bau.

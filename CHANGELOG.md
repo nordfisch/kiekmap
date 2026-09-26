@@ -2,6 +2,125 @@
 
 Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning after SemVer.
 
+## [Unreleased]
+
+## [0.9.6] — 2026-09-27
+
+**The collection can be filled from home, and the device carries on by itself while nobody touches
+it.** It runs online behind one password, shows a slide show when idle, pages through a stack on
+its own, and switches off from the admin area. A review before the first Pi found the fixes below.
+
+### Added
+
+- **The collection can run online, behind one password.** `make prod-web` puts Caddy in front of
+  the two containers that also run on the Pi: HTTPS, and one login for the whole team — over the
+  map and over the API alike. It exists so that the museum can fill the database from home before a
+  device stands in the exhibition room. See [point 76](docs/developer/decisions.md)
+- **The map labels the ground in the language of the place.** `labelLanguage` in `region.json` says
+  what countries, waters and districts are called; `KIEKMAP_LANGUAGE` stays what the device says to
+  its visitors. The two agree in Holm and part company for a museum elsewhere. It takes effect
+  without a new `make tiles`. See [point 79](docs/developer/decisions.md)
+- **The map filters by keyword.** Buttons in its corner name the keywords the museum chose in
+  `KIEKMAP_MAP_TAGS`, one active at a time. A keyword in a photo's detail view filters the map too,
+  with time and place wide open. See [point 80](docs/developer/decisions.md)
+- **A slide show while nobody uses the device.** After five minutes without a touch, or at once
+  after a tap on the coat of arms, four photos drift and zoom slowly, and every five seconds one
+  turns over to the next. The band that invites a tap floats across the screen, so nothing burns
+  in. A tap on a photo opens the map around it with the photo large. The admin
+  area closes after two minutes without a touch, unless a backup, restore, import or upload is
+  running. See [point 81](docs/developer/decisions.md)
+- **The command line for the first fill of a collection is documented** ([#74])
+- **A stack in the detail view pages through itself** until the visitor touches it ([#52])
+- **The device can be switched off from the admin area** ([#21])
+
+### Changed
+
+- **MapLibre 6.** The map now needs WebGL 2, so the device has to be a Raspberry Pi 4 or 5; a Pi 3
+  shows a grey map. See [point 82](docs/developer/decisions.md)
+
+### Fixed
+
+- **Four defects in the Pi setup, found before the first device.** `setup-pi.sh` installed
+  `chromium-browser`, a package Raspberry Pi OS has called `chromium` since Bookworm — under
+  `set -e` the setup died at its opening task. `update.sh` started Compose from `deploy/`, where
+  the `.env` is not read, so the version it had just written went unused and the Pi would have
+  built the frontend itself. `--disable-pinch=false` switched the pinch zoom off, because Chromium
+  reads that switch by its presence. And a stick without a label shifted the arguments of the udev
+  rule, so a FAT stick was mounted without `uid=1000` and the backup failed after somebody pressed
+  the button. See [point 77](docs/developer/decisions.md)
+- **Two German messages in the container start and the frontend build**, both in English now. The
+  language checker reads comments, not the text a script prints, so both had passed every run
+- **The operations manual sent the coat of arms to the Pi**, where nothing reads it, and then asked
+  for a rebuild on the device. It goes into the frontend image on the development machine
+- **The real coat of arms can no longer slip into a commit.** `tools/check_logo.py` runs in the git
+  hook and refuses a staged change to the placeholder unless the generator changed with it. It
+  reads the index, not the working tree — on a machine that sets a device up, the real crest
+  belongs in the tree. It had slipped in twice. See [point 78](docs/developer/decisions.md)
+- **A German segment in an API path.** `/api/photos/tags/alle` is `/api/photos/tags`. The second
+  segment was there because the route stood after `/photos/{photo_id}`, which takes an `int` and
+  swallows `/photos/tags` with a 422 — the route moved above it, and a test holds it there
+- **One unreadable file no longer stops the inbox** ([#59])
+- **A deleted photo is no longer public under its id** ([#60])
+- **A write during a restore is no longer lost** ([#61])
+- **Parallel sign-in attempts no longer get past the lockout** ([#62])
+- **Two imports of the same file at once no longer end in an error** ([#63])
+- **An upload or a restore can no longer fill the SD card** ([#64])
+- **A restored backup can no longer reach files outside the collection** ([#65])
+- **Two visitors answering at once no longer overwrite each other** ([#66])
+- **An impossible visitor date no longer causes a server error** ([#67])
+- **Taking back a visitor's statement no longer overwrites a newer one** ([#68])
+- **A batch accepts only a year or a decade as its precision** ([#69])
+- **The PIN lockout is no longer described as years of guessing; it is about 33 hours** ([#70])
+- **A writing command at the command line can no longer run through a restore** ([#71])
+- **Thumbnails and originals load with one database query instead of two** ([#73])
+- **`make seed` loads the sample collection again** ([#75])
+- **nginx sends security headers** ([#76])
+- **The backend no longer carries a CORS middleware nobody needed** ([#78])
+- **A second backend process on the same data directory stops at startup** ([#79])
+- **Over-long input is refused instead of causing a server error** ([#80])
+- **Large scans are no longer decoded in full for their thumbnails** ([#81])
+- **A running download refuses a restore at once, without 503 on the kiosk** ([#82])
+- **Ruff checks the Python of the repository against security rules** ([#85])
+- **Broken files of every allowed format are answered instead of raising** ([#87])
+- **The database is created at startup instead of when a module is imported** ([#88])
+- **The language rule holds again: identifiers, log lines and messages** ([#83])
+- **Comments carry the reason and the pitfall, not the dated history** ([#84])
+- **mypy checks the backend before the tests run** ([#86])
+- **The release steps are one list, and `build_release.py --notes` refuses to print the text of a
+  wrong release** ([#116])
+
+[#116]: https://github.com/nordfisch/kiekmap/issues/116
+[#21]: https://github.com/nordfisch/kiekmap/issues/21
+[#52]: https://github.com/nordfisch/kiekmap/issues/52
+[#59]: https://github.com/nordfisch/kiekmap/issues/59
+[#60]: https://github.com/nordfisch/kiekmap/issues/60
+[#61]: https://github.com/nordfisch/kiekmap/issues/61
+[#62]: https://github.com/nordfisch/kiekmap/issues/62
+[#63]: https://github.com/nordfisch/kiekmap/issues/63
+[#64]: https://github.com/nordfisch/kiekmap/issues/64
+[#65]: https://github.com/nordfisch/kiekmap/issues/65
+[#66]: https://github.com/nordfisch/kiekmap/issues/66
+[#67]: https://github.com/nordfisch/kiekmap/issues/67
+[#68]: https://github.com/nordfisch/kiekmap/issues/68
+[#69]: https://github.com/nordfisch/kiekmap/issues/69
+[#70]: https://github.com/nordfisch/kiekmap/issues/70
+[#71]: https://github.com/nordfisch/kiekmap/issues/71
+[#73]: https://github.com/nordfisch/kiekmap/issues/73
+[#75]: https://github.com/nordfisch/kiekmap/issues/75
+[#76]: https://github.com/nordfisch/kiekmap/issues/76
+[#78]: https://github.com/nordfisch/kiekmap/issues/78
+[#79]: https://github.com/nordfisch/kiekmap/issues/79
+[#80]: https://github.com/nordfisch/kiekmap/issues/80
+[#81]: https://github.com/nordfisch/kiekmap/issues/81
+[#82]: https://github.com/nordfisch/kiekmap/issues/82
+[#85]: https://github.com/nordfisch/kiekmap/issues/85
+[#87]: https://github.com/nordfisch/kiekmap/issues/87
+[#88]: https://github.com/nordfisch/kiekmap/issues/88
+[#74]: https://github.com/nordfisch/kiekmap/issues/74
+[#83]: https://github.com/nordfisch/kiekmap/issues/83
+[#84]: https://github.com/nordfisch/kiekmap/issues/84
+[#86]: https://github.com/nordfisch/kiekmap/issues/86
+
 ## [0.9.0] — 2026-09-02
 
 **The device speaks two languages, and the documentation has an address.** Nothing changed about

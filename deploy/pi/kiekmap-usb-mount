@@ -13,8 +13,14 @@
 #   2. A FAT or exFAT stick knows no owners. Without "uid=" it belongs to root, and the service in
 #      the container (UID 1000) may not write to it. The backup would then fail only after
 #      somebody has pressed the button.
+#   3. The label comes last, and that is what makes 2. hold. udev fills its placeholders into the
+#      RUN line and only then splits it at the spaces, so an empty ID_FS_LABEL -- and plenty of
+#      sticks carry none -- does not leave a gap behind: it makes the next argument slide up. With
+#      the label in front, "vfat" would arrive as the label, the filesystem would arrive empty, and
+#      a FAT stick would be mounted without "uid=". Exactly the failure of 2., through the back
+#      door. Last, an empty label simply falls off the end.
 #
-# Usage:  kiekmap-usb-mount mount    /dev/sda1 [label] [filesystem]
+# Usage:  kiekmap-usb-mount mount    /dev/sda1 [filesystem] [label]
 #         kiekmap-usb-mount unmount  /dev/sda1
 
 set -eu
@@ -25,11 +31,11 @@ SERVICE_GID=1000
 
 ACTION="${1:-}"
 DEVICE="${2:-}"
-LABEL="${3:-}"
-FILESYSTEM="${4:-}"
+FILESYSTEM="${3:-}"
+LABEL="${4:-}"
 
 [ -n "$ACTION" ] && [ -n "$DEVICE" ] || {
-    echo "Usage: $0 mount|unmount /dev/sdX1 [label] [filesystem]" >&2
+    echo "Usage: $0 mount|unmount /dev/sdX1 [filesystem] [label]" >&2
     exit 2
 }
 

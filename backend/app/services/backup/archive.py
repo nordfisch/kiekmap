@@ -99,8 +99,7 @@ def archive_name(settings: Settings) -> str:
     **Local time, unlike everything that gets stored.** The rule that runs through this module is
     "stored is UTC" (``dates.utc_now``) -- and a file name is not stored, it is read. Whoever
     downloads a backup at half past midnight looks for today's date, not yesterday's. The
-    set-aside folder beside it has always been named this way; since 19 August 2026 the two
-    agree.
+    set-aside folder beside it carries the same local date.
     """
     slug = "".join(c for c in places.normalize(place_name(settings)) if c.isalnum() or c == "-")
     place = f"-{slug}" if slug else ""

@@ -14,7 +14,7 @@
  * street choice just placed -- and with it the promise in ``t.location.hintSet``.
  */
 
-import type maplibregl from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
 import { Marker } from "maplibre-gl";
 import { useEffect, useRef } from "react";
 

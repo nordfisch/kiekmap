@@ -13,6 +13,7 @@ Four promises carry this stage, and all four break silently:
 """
 
 import io
+import shutil
 import sqlite3
 import zipfile
 from datetime import UTC, datetime, timedelta
@@ -80,11 +81,11 @@ class TestRecognisingDrives:
         assert backup.find_drives(settings.media_dir) == []
 
     def test_a_stick_is_found(self, settings, stick: Path):
-        gefunden = backup.find_drives(settings.media_dir)
+        found = backup.find_drives(settings.media_dir)
 
-        assert len(gefunden) == 1
-        assert gefunden[0].name == "SANDISK"
-        assert gefunden[0].free_bytes > 0
+        assert len(found) == 1
+        assert found[0].name == "SANDISK"
+        assert found[0].free_bytes > 0
 
     def test_an_ordinary_folder_is_no_stick(self, settings, stick: Path):
         """The most important case here.
@@ -103,14 +104,14 @@ class TestRecognisingDrives:
     ):
         """Raspberry Pi OS mounts under /media/<user>/<label>."""
         media = tmp_path / "media"
-        tief = media / "pi" / "USB-STICK"
-        tief.mkdir(parents=True)
+        nested = media / "pi" / "USB-STICK"
+        nested.mkdir(parents=True)
         settings.media_dir = media
-        monkeypatch.setattr(backup.drives, "_is_mounted", lambda path: path == tief)
+        monkeypatch.setattr(backup.drives, "_is_mounted", lambda path: path == nested)
 
-        gefunden = backup.find_drives(media)
+        found = backup.find_drives(media)
 
-        assert [drive.name for drive in gefunden] == ["USB-STICK"]
+        assert [drive.name for drive in found] == ["USB-STICK"]
 
     def test_a_symlink_is_no_drive(self, settings, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         """The case that really happened on 14 August 2026.
@@ -124,10 +125,10 @@ class TestRecognisingDrives:
         """
         media = tmp_path / "media"
         media.mkdir()
-        anderswo = tmp_path / "anderswo"
-        mounted = anderswo / "data"
+        elsewhere = tmp_path / "elsewhere"
+        mounted = elsewhere / "data"
         mounted.mkdir(parents=True)
-        (media / "Danger").symlink_to(anderswo)
+        (media / "Danger").symlink_to(elsewhere)
         settings.media_dir = media
         # Compared resolved, not literally: otherwise the check in place does not model the
         # symlink at all, and the test would be green even without the safeguard.
@@ -204,13 +205,13 @@ class TestBackingUp:
     def test_too_little_space_is_said_beforehand(self, session, settings, stick, collection):
         """Better not to start at all than to stop half way."""
         collection(2)
-        laufwerk = _drive(settings)
-        laufwerk.free_bytes = 1
+        drive = _drive(settings)
+        drive.free_bytes = 1
 
-        with pytest.raises(backup.BackupError) as fehler:
-            backup.run_backup(session, settings, laufwerk, _report_nothing)
+        with pytest.raises(backup.BackupError) as error:
+            backup.run_backup(session, settings, drive, _report_nothing)
 
-        assert "zu wenig Platz" in str(fehler.value)
+        assert "zu wenig Platz" in str(error.value)
 
     def test_progress_counts_photos(self, session, settings, stick, collection):
         collection(3)
@@ -249,13 +250,13 @@ class TestRestoring:
         backup.run_backup(session, settings, _drive(settings), _report_nothing)
         return shas
 
-    def test_an_incomplete_backup_is_refused(self, settings, stick):
+    def test_an_incomplete_backup_is_refused(self, database, settings, stick):
         (stick / backup.BACKUP_DIR_NAME).mkdir()
 
-        with pytest.raises(backup.BackupError) as fehler:
+        with pytest.raises(backup.BackupError) as error:
             backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert "nicht komplett" in str(fehler.value)
+        assert "nicht komplett" in str(error.value)
 
     def test_the_collection_is_replaced(self, session, settings, stick, collection):
         shas = self._make_backup(session, settings, stick, collection)
@@ -280,7 +281,7 @@ class TestRestoring:
 
         backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert not path.exists(), "in der Sicherung war es nicht"
+        assert not path.exists(), "it was not in the backup"
         set_aside = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
         assert len(set_aside) == 1
         assert (set_aside[0] / "photos" / later[0:2] / later[2:4] / f"{later}.jpg").is_file()
@@ -304,6 +305,484 @@ class TestRestoring:
 
         backup.run_restore(settings, _drive(settings), _report_nothing)
 
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+
+class TestTheSwap:
+    """The seconds in which the database file changes under the running service.
+
+    Before, the restore renamed the file while the pool held connections open on it, and only
+    reopened the engine afterwards. A request in between wrote into the file that had just been set
+    aside: the device answered 200, and the statement was gone. The database is closed for the swap
+    now; see ``app.db.DatabaseGate``.
+    """
+
+    def _make_backup(self, session, settings, collection):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+
+    def test_a_contribution_during_the_swap_is_refused_not_lost(
+        self, client, session, settings, stick, collection, make_photo, monkeypatch
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        self._make_backup(session, settings, collection)
+
+        answers = []
+        migrate = schema.bring_up_to_date
+
+        def a_visitor_taps_meanwhile(database):
+            # Inside the swap: the old file is set aside, the restored one is in place.
+            answers.append(client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930}))
+            return migrate(database)
+
+        monkeypatch.setattr(schema, "bring_up_to_date", a_visitor_taps_meanwhile)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert answers[0].status_code == 503, "the statement went into the set-aside file"
+        assert answers[0].headers["retry-after"]
+        assert "Sicherung" in answers[0].json()["detail"]
+
+    def test_the_service_answers_again_after_the_swap(
+        self, client, session, settings, stick, collection, make_photo
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        self._make_backup(session, settings, collection)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        response = client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930})
+        assert response.status_code == 200
+
+    def test_the_connections_are_closed_before_the_file_is_moved(
+        self, session, database, settings, stick, collection, monkeypatch
+    ):
+        """SQLite's documentation counts renaming a database file in use as a way to corrupt it.
+
+        A test against SQLite 3.53.4 found no damage from it beyond the lost write. The order still
+        holds, so that the restore does not depend on that. See decisions.md, point 84.
+        """
+        from app.services.backup import restore
+
+        self._make_backup(session, settings, collection)
+        order = []
+        dispose, set_aside = database.engine.dispose, restore._set_aside
+        monkeypatch.setattr(
+            database.engine, "dispose", lambda: (order.append("dispose"), dispose())
+        )
+        monkeypatch.setattr(
+            restore, "_set_aside", lambda s: (order.append("set aside"), set_aside(s))[1]
+        )
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert order == ["dispose", "set aside"]
+
+    def test_a_session_that_stays_in_use_refuses_the_restore_and_changes_nothing(
+        self, client, session, database, settings, stick, collection, monkeypatch
+    ):
+        """An import that outlasts the wait. The restore must not swap under it."""
+        import app.db
+
+        self._make_backup(session, settings, collection)
+        monkeypatch.setattr(app.db, "CLOSE_TIMEOUT_S", 0.1)
+        database_before = settings.db_path.read_bytes()
+
+        with database.gate.use():
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert "in Gebrauch" in str(refusal.value)
+        assert settings.db_path.read_bytes() == database_before
+        assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+        assert client.get("/api/photos/tags").status_code == 200, "the gate is open again"
+
+
+class TestARestoreDuringADownload:
+    """A ZIP download holds its session for its whole transfer, which takes minutes.
+
+    Without a check of its own, the gate closes for the swap and waits 60 seconds for that session.
+    Every visitor request gets 503 during the wait, and the restore gives up at its end. See
+    ``app.db.DatabaseGate.use``.
+    """
+
+    @pytest.fixture
+    def watched(self, database, monkeypatch):
+        """Records whether the gate closed and whether copying began.
+
+        The wait is cut short, so that a broken refusal fails the test instead of stalling it.
+        """
+        import app.db
+        from app.services.backup import restore
+
+        seen: list[str] = []
+        closed, prepare = database.gate.closed, restore._prepare_work_dir
+        monkeypatch.setattr(app.db, "CLOSE_TIMEOUT_S", 0.1)
+        monkeypatch.setattr(
+            database.gate, "closed", lambda timeout_s: (seen.append("closed"), closed(timeout_s))[1]
+        )
+        monkeypatch.setattr(
+            restore,
+            "_prepare_work_dir",
+            lambda s, needed: (seen.append("copying"), prepare(s, needed))[1],
+        )
+        return seen
+
+    def _started_download(self, settings):
+        from app.api.backup import archive_download
+
+        download = archive_download(settings)
+        next(download)
+        return download
+
+    def _assert_refused_untouched(self, client, settings, refusal, seen, database_before) -> None:
+        assert "in Gebrauch" in str(refusal.value)
+        assert seen == [], "the restore copied or closed the gate before it refused"
+        assert settings.db_path.read_bytes() == database_before
+        assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+        assert client.get("/api/photos/tags").status_code == 200
+
+    def test_a_restore_from_the_stick_is_refused_at_once_while_a_download_runs(
+        self, client, session, settings, stick, collection, watched
+    ):
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+        database_before = settings.db_path.read_bytes()
+
+        download = self._started_download(settings)
+        try:
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore(settings, _drive(settings), _report_nothing)
+            self._assert_refused_untouched(client, settings, refusal, watched, database_before)
+        finally:
+            download.close()
+
+    def test_a_restore_from_the_inbox_is_refused_at_once_while_a_download_runs(
+        self, client, session, settings, collection, watched
+    ):
+        collection(2)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        archive = settings.incoming_dir / "kiekmap-backup-holm-2026-08-03.zip"
+        with archive.open("wb") as sink:
+            for chunk in backup.stream_archive(session, settings):
+                sink.write(chunk)
+        database_before = settings.db_path.read_bytes()
+
+        download = self._started_download(settings)
+        try:
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore_from_archive(settings, archive, _report_nothing)
+            self._assert_refused_untouched(client, settings, refusal, watched, database_before)
+        finally:
+            download.close()
+        assert archive.is_file(), "the archive stays in the inbox for the next attempt"
+
+    def test_a_download_closed_before_its_end_lets_the_restore_run(
+        self, session, database, settings, stick, collection
+    ):
+        """A browser that breaks the download off must not block every later restore."""
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+
+        self._started_download(settings).close()
+
+        assert database.gate.lasting_in_use == 0
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+        assert len(list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))) == 1
+
+    def test_a_finished_download_lets_the_restore_run(
+        self, admin_client, session, database, settings, stick, collection
+    ):
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        session.commit()
+        ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
+
+        response = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+
+        assert response.status_code == 200
+        assert database.gate.lasting_in_use == 0
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+        assert len(list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))) == 1
+
+    def test_a_download_that_fails_midway_does_not_stay_counted(
+        self, session, database, settings, collection, monkeypatch
+    ):
+        from app.api.backup import archive_download
+
+        collection(1)
+
+        def breaks_off(session, settings):
+            yield b"PK"
+            raise OSError("a photo could not be read")
+
+        monkeypatch.setattr(backup, "stream_archive", breaks_off)
+        download = archive_download(settings)
+        next(download)
+        with pytest.raises(OSError):
+            next(download)
+
+        assert database.gate.lasting_in_use == 0
+
+    def test_a_browser_that_leaves_midway_does_not_stay_counted(
+        self, session, database, settings, monkeypatch
+    ):
+        """Starlette leaves the generator suspended on a disconnect.
+
+        See ``_ClosingStreamingResponse``. The garbage collector is off here, so that only the
+        response can close the generator.
+        """
+        import gc
+
+        import anyio
+
+        from app.api.backup import zip_download
+        from app.services import auth
+
+        def endless(session, settings):
+            for _ in range(100_000):
+                yield b"x" * 1024
+
+        monkeypatch.setattr(backup, "stream_archive", endless)
+        ticket, _ = auth.tickets.issue()
+        response = zip_download(settings, ticket=ticket)
+
+        async def browser_leaves_after_the_first_chunk() -> None:
+            first_chunk = anyio.Event()
+
+            async def send(message) -> None:
+                if message["type"] == "http.response.body" and message["body"]:
+                    first_chunk.set()
+
+            async def receive() -> dict:
+                await first_chunk.wait()
+                return {"type": "http.disconnect"}
+
+            await response({"type": "http", "asgi": {"spec_version": "2.3"}}, receive, send)
+
+        gc.disable()
+        try:
+            anyio.run(browser_leaves_after_the_first_chunk)
+            assert database.gate.lasting_in_use == 0
+        finally:
+            gc.enable()
+            gc.collect()  # a failure must not leave the count up for the tests after this one
+
+    def test_a_download_that_starts_after_the_check_still_spares_the_kiosk_the_wait(self):
+        """The restore reads the count before copying, and a download can begin after that.
+
+        The gate then refuses the swap without closing, rather than waiting for the download.
+        """
+        import time
+
+        import app.db
+
+        gate = app.db.DatabaseGate()
+        with gate.use(lasting=True):
+            started = time.monotonic()
+            with pytest.raises(app.db.DatabaseInUse):
+                with gate.closed(timeout_s=5):
+                    pass
+            assert time.monotonic() - started < 1, "the gate waited for the download"
+
+            with gate.use():
+                pass  # a visitor request still gets its session
+
+
+class TestACommandLineWriteDuringARestore:
+    """``python -m app.cli`` runs in a process of its own, which the database gate cannot reach.
+
+    A command that wrote through a restore put its rows into the database that was set aside, and
+    reported success. The lock file keeps the two apart; see ``app.db.collection_lock``.
+    """
+
+    def _assert_nothing_changed(self, settings, database_before: bytes) -> None:
+        assert settings.db_path.read_bytes() == database_before
+        assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+    def test_a_restore_from_the_stick_refuses_while_a_command_writes(
+        self, session, settings, stick, collection
+    ):
+        from app.db import collection_lock
+
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        database_before = settings.db_path.read_bytes()
+
+        with collection_lock(settings, exclusive=False):
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert "Kommandozeile" in str(refusal.value)
+        self._assert_nothing_changed(settings, database_before)
+
+    def test_a_restore_from_the_inbox_refuses_while_a_command_writes(
+        self, session, settings, collection
+    ):
+        from app.db import collection_lock
+
+        collection(1)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        archive = settings.incoming_dir / "kiekmap-backup-holm-2026-08-03.zip"
+        with archive.open("wb") as sink:
+            for chunk in backup.stream_archive(session, settings):
+                sink.write(chunk)
+        database_before = settings.db_path.read_bytes()
+
+        with collection_lock(settings, exclusive=False):
+            with pytest.raises(backup.BackupError) as refusal:
+                backup.run_restore_from_archive(settings, archive, _report_nothing)
+
+        assert "Kommandozeile" in str(refusal.value)
+        self._assert_nothing_changed(settings, database_before)
+        assert archive.is_file(), "the archive stays in the inbox for the next attempt"
+
+    def test_the_restore_releases_the_lock_for_the_next_command(
+        self, session, settings, stick, collection
+    ):
+        from app.db import collection_lock
+
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        with collection_lock(settings, exclusive=False):
+            pass
+
+    def test_a_restore_holds_the_lock_while_it_copies(self, session, settings, stick, collection):
+        """A command started during the minutes of copying would still be writing at the swap."""
+        from app.db import CollectionLocked, collection_lock
+
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        refused: list[str] = []
+
+        def try_a_command(done: int, total: int, message: str) -> None:
+            try:
+                with collection_lock(settings, exclusive=False):
+                    refused.append("no")
+            except CollectionLocked:
+                refused.append("yes")
+
+        backup.run_restore(settings, _drive(settings), try_a_command)
+
+        assert refused and set(refused) == {"yes"}
+
+
+class TestLinksOnTheStick:
+    """A stick belongs to anybody, and ``is_file()`` follows a symbolic link.
+
+    A link in the backup's ``photos/`` pointing at a file of the device was copied into the
+    collection as if it were a photo. A linked ``kiekmap.db`` was read in as the database.
+    """
+
+    def test_a_linked_file_is_not_copied(self, session, settings, stick, collection, tmp_path):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        device_file = tmp_path / "device_secret.jpg"
+        device_file.write_bytes(b"private")
+        link = stick / backup.BACKUP_DIR_NAME / "photos" / "ee" / "ee" / f"{'e' * 64}.jpg"
+        link.parent.mkdir(parents=True)
+        link.symlink_to(device_file)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert not original_path(settings.photos_dir, "e" * 64, ".jpg").exists()
+
+    def test_a_linked_photo_folder_counts_as_empty(
+        self, session, settings, stick, collection, tmp_path
+    ):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        elsewhere = tmp_path / "elsewhere"
+        (elsewhere / "ee" / "ee").mkdir(parents=True)
+        (elsewhere / "ee" / "ee" / f"{'e' * 64}.jpg").write_bytes(b"private")
+        photos = stick / backup.BACKUP_DIR_NAME / "photos"
+        shutil.rmtree(photos)
+        photos.symlink_to(elsewhere)
+
+        backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert not original_path(settings.photos_dir, "e" * 64, ".jpg").exists()
+
+    def test_a_linked_database_is_no_backup(self, session, settings, stick, collection, tmp_path):
+        collection(1)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        database = stick / backup.BACKUP_DIR_NAME / "kiekmap.db"
+        real = tmp_path / "somewhere.db"
+        database.replace(real)
+        database.symlink_to(real)
+
+        with pytest.raises(backup.BackupError):
+            backup.run_restore(settings, _drive(settings), _report_nothing)
+
+
+class TestRoomForARestore:
+    """A restore needs room for a second collection beside the first, on the same SD card.
+
+    The check compared free space with the size the manifest states. The manifest is one file
+    among those it describes, and a number in it that was too small let the copy run until the card
+    was full.
+    """
+
+    @staticmethod
+    def _little_room(monkeypatch, free: int):
+        from collections import namedtuple
+
+        from app.services.backup import restore
+
+        usage = namedtuple("usage", "total used free")
+        monkeypatch.setattr(restore.shutil, "disk_usage", lambda path: usage(free, 0, free))
+
+    def test_a_stick_whose_manifest_understates_its_size_is_refused(
+        self, session, settings, stick, collection, monkeypatch
+    ):
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        drive = _drive(settings)
+        manifest = stick / backup.BACKUP_DIR_NAME / backup.MANIFEST_NAME
+        manifest.write_text(manifest.read_text().replace('"bytes": ', '"bytes": 1, "was": '))
+        self._little_room(monkeypatch, free=1_000)
+
+        with pytest.raises(backup.BackupError) as refusal:
+            backup.run_restore(settings, drive, _report_nothing)
+
+        assert "zu wenig Platz" in str(refusal.value)
+        assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
+
+    def test_an_archive_whose_manifest_understates_its_size_is_refused(
+        self, session, settings, collection, monkeypatch
+    ):
+        collection(2)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        honest = settings.data_dir / "honest.zip"
+        with honest.open("wb") as target:
+            for part in backup.stream_archive(session, settings):
+                target.write(part)
+
+        archive = settings.incoming_dir / "kiekmap-backup-holm-2026-08-03.zip"
+        manifest_name = f"{backup.BACKUP_DIR_NAME}/{backup.MANIFEST_NAME}"
+        with zipfile.ZipFile(honest) as source, zipfile.ZipFile(archive, "w") as lying:
+            for entry in source.infolist():
+                data = source.read(entry)
+                if entry.filename == manifest_name:
+                    data = data.replace(b'"bytes": ', b'"bytes": 1, "was": ')
+                lying.writestr(entry, data)
+        self._little_room(monkeypatch, free=1_000)
+
+        with pytest.raises(backup.BackupError) as refusal:
+            backup.run_restore_from_archive(settings, archive, _report_nothing)
+
+        assert "zu wenig Platz" in str(refusal.value)
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
 
 
@@ -362,10 +841,10 @@ class TestSchemaRevisionOnRestore:
         """
         self._backup_at_schema_revision(session, settings, stick, collection, "aus der zukunft")
 
-        with pytest.raises(backup.BackupError) as fehler:
+        with pytest.raises(backup.BackupError) as error:
             backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert "neueren Programmversion" in str(fehler.value)
+        assert "neueren Programmversion" in str(error.value)
 
     def test_on_refusal_the_device_stays_untouched(self, session, settings, stick, collection):
         """The promise the order in the code hangs on.
@@ -383,7 +862,7 @@ class TestSchemaRevisionOnRestore:
         with pytest.raises(backup.BackupError):
             backup.run_restore(settings, _drive(settings), _report_nothing)
 
-        assert path.is_file(), "der Bestand haette nicht angefasst werden duerfen"
+        assert path.is_file(), "the collection must not have been touched"
         assert list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*")) == []
         assert not (settings.data_dir / backup.RESTORE_WORK_DIR).exists()
 
@@ -427,72 +906,72 @@ class TestTheReminder:
 
 class TestTheJob:
     def test_a_second_job_is_rejected(self):
-        auftrag = backup.Job()
+        job = backup.Job()
         running = __import__("threading").Event()
 
-        auftrag.start("backup", lambda report: (running.wait(2), "fertig")[1])
+        job.start("backup", lambda report: (running.wait(2), "fertig")[1])
         try:
-            assert auftrag.start("restore", lambda report: "geht nicht") is False
+            assert job.start("restore", lambda report: "geht nicht") is False
         finally:
             running.set()
 
     def test_an_error_ends_up_in_the_status(self):
-        auftrag = backup.Job()
+        job = backup.Job()
 
         def fails(report):
             raise backup.BackupError("Der Stick ist weg.")
 
-        auftrag.start("backup", fails)
-        _warten(auftrag)
+        job.start("backup", fails)
+        _wait(job)
 
-        assert auftrag.status().phase == "error"
-        assert auftrag.status().error == "Der Stick ist weg."
+        assert job.status().phase == "error"
+        assert job.status().error == "Der Stick ist weg."
 
     def test_an_unexpected_error_does_not_stay_silent(self):
         """Otherwise the progress bar would stand still and nobody would know why."""
-        auftrag = backup.Job()
+        job = backup.Job()
 
         def bursts(report):
             raise RuntimeError("kaputt")
 
-        auftrag.start("backup", bursts)
-        _warten(auftrag)
+        job.start("backup", bursts)
+        _wait(job)
 
-        assert auftrag.status().phase == "error"
-        assert "schiefgegangen" in auftrag.status().error
+        assert job.status().phase == "error"
+        assert "schiefgegangen" in job.status().error
 
     def test_acknowledging_resets(self):
-        auftrag = backup.Job()
-        auftrag.start("backup", lambda report: "fertig")
-        _warten(auftrag)
+        job = backup.Job()
+        job.start("backup", lambda report: "fertig")
+        _wait(job)
 
-        auftrag.reset()
+        job.reset()
 
-        assert auftrag.status().phase == "idle"
+        assert job.status().phase == "idle"
 
 
-def _warten(auftrag: backup.Job, sekunden: float = 3.0) -> None:
+def _wait(job: backup.Job, seconds: float = 3.0) -> None:
     """The job runs in a thread -- wait briefly until it is through."""
     import time
 
-    ende = time.monotonic() + sekunden
-    while auftrag.running and time.monotonic() < ende:
+    deadline = time.monotonic() + seconds
+    while job.running and time.monotonic() < deadline:
         time.sleep(0.01)
 
 
 class TestThroughTheApi:
     """The path the interface takes: query the drives, start, poll the status."""
 
-    def _bis_fertig(self, client, sekunden: float = 5.0) -> dict:
+    def _until_done(self, client, seconds: float = 5.0) -> dict:
         import time
 
-        ende = time.monotonic() + sekunden
-        while time.monotonic() < ende:
+        deadline = time.monotonic() + seconds
+        while time.monotonic() < deadline:
             state = client.get("/api/admin/backup/status").json()
             if state["phase"] != "running":
                 return state
             time.sleep(0.02)
-        raise AssertionError("Der Auftrag wurde nicht fertig")
+        raise AssertionError("the job did not finish")
 
     def test_no_drives_without_signing_in(self, client):
         assert client.get("/api/admin/backup/drives").status_code == 401
@@ -500,31 +979,31 @@ class TestThroughTheApi:
     def test_without_a_stick_the_list_stays_empty(self, admin_client, settings, tmp_path: Path):
         settings.media_dir = tmp_path / "media"
 
-        daten = admin_client.get("/api/admin/backup/drives").json()
+        data = admin_client.get("/api/admin/backup/drives").json()
 
-        assert daten["drives"] == []
+        assert data["drives"] == []
         # Answerable all the same: how much would have to be backed up, and when it last was.
-        assert daten["reminder"]["overdue"] is True
+        assert data["reminder"]["overdue"] is True
 
     def test_the_list_names_the_space_and_what_is_needed(
         self, admin_client, settings, stick, collection
     ):
         collection(2)
 
-        daten = admin_client.get("/api/admin/backup/drives").json()
+        data = admin_client.get("/api/admin/backup/drives").json()
 
-        assert daten["photos"] == 2
-        assert daten["needed_bytes"] > 0
-        assert daten["drives"][0]["name"] == "SANDISK"
-        assert daten["drives"][0]["enough_space"] is True
+        assert data["photos"] == 2
+        assert data["needed_bytes"] > 0
+        assert data["drives"][0]["name"] == "SANDISK"
+        assert data["drives"][0]["enough_space"] is True
 
     def test_the_backup_runs_through(self, admin_client, settings, stick, collection):
         collection(2)
 
-        gestartet = admin_client.post("/api/admin/backup/start", json={"path": str(stick)}).json()
-        assert gestartet["kind"] == "backup"
+        started = admin_client.post("/api/admin/backup/start", json={"path": str(stick)}).json()
+        assert started["kind"] == "backup"
 
-        state = self._bis_fertig(admin_client)
+        state = self._until_done(admin_client)
         assert state["phase"] == "done"
         assert "2 Fotos" in state["message"]
         assert (stick / backup.BACKUP_DIR_NAME / "kiekmap.db").is_file()
@@ -534,7 +1013,7 @@ class TestThroughTheApi:
     ):
         collection(1)
         admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
-        self._bis_fertig(admin_client)
+        self._until_done(admin_client)
 
         overview = admin_client.get("/api/admin/overview").json()
 
@@ -550,7 +1029,7 @@ class TestThroughTheApi:
     def test_acknowledging_clears_the_status(self, admin_client, settings, stick, collection):
         collection(1)
         admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
-        self._bis_fertig(admin_client)
+        self._until_done(admin_client)
 
         state = admin_client.post("/api/admin/backup/acknowledge").json()
 
@@ -560,7 +1039,7 @@ class TestThroughTheApi:
         (stick / backup.BACKUP_DIR_NAME).mkdir()
 
         admin_client.post("/api/admin/backup/restore", json={"path": str(stick)})
-        state = self._bis_fertig(admin_client)
+        state = self._until_done(admin_client)
 
         assert state["phase"] == "error"
         assert "nicht komplett" in state["error"]
@@ -575,17 +1054,17 @@ class TestTheArchive:
     without anyone noticing.
     """
 
-    def _archiv(self, session, settings) -> bytes:
+    def _archive(self, session, settings) -> bytes:
         return b"".join(backup.stream_archive(session, settings))
 
     def test_an_unpacked_archive_can_be_restored(self, session, settings, stick, collection):
         """The most important test of the archive: it ties the two paths together."""
         shas = collection(3)
-        daten = self._archiv(session, settings)
+        data = self._archive(session, settings)
 
         # Unpack onto the stick -- exactly what somebody would do by hand.
-        with zipfile.ZipFile(io.BytesIO(daten)) as archiv:
-            archiv.extractall(stick)
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            archive.extractall(stick)
 
         # And after that the entirely ordinary way back.
         for sha in shas:
@@ -594,14 +1073,14 @@ class TestTheArchive:
 
         for sha in shas:
             assert original_path(settings.photos_dir, sha, ".jpg").is_file(), (
-                "das entpackte Archiv war fuer die Wiederherstellung nicht brauchbar"
+                "the unpacked archive was not usable for the restore"
             )
 
     def test_the_archive_holds_the_same_folder_as_the_stick(self, session, settings, collection):
         collection(2)
 
-        with zipfile.ZipFile(io.BytesIO(self._archiv(session, settings))) as archiv:
-            names = archiv.namelist()
+        with zipfile.ZipFile(io.BytesIO(self._archive(session, settings))) as archive:
+            names = archive.namelist()
 
         assert {name.split("/")[0] for name in names} == {backup.BACKUP_DIR_NAME}
         assert f"{backup.BACKUP_DIR_NAME}/kiekmap.db" in names
@@ -613,10 +1092,10 @@ class TestTheArchive:
         """JPEG and WebP are already compressed -- a second pass only costs the Pi time."""
         collection(2)
 
-        with zipfile.ZipFile(io.BytesIO(self._archiv(session, settings))) as archiv:
-            verfahren = {entry.compress_type for entry in archiv.infolist()}
+        with zipfile.ZipFile(io.BytesIO(self._archive(session, settings))) as archive:
+            methods = {entry.compress_type for entry in archive.infolist()}
 
-        assert verfahren == {zipfile.ZIP_STORED}
+        assert methods == {zipfile.ZIP_STORED}
 
     def test_the_archive_is_built_as_a_stream(self, session, settings, collection):
         """Otherwise it would sit entirely in memory -- on a Pi with 2 GB not a good idea."""
@@ -624,21 +1103,21 @@ class TestTheArchive:
 
         pieces = list(backup.stream_archive(session, settings))
 
-        assert len(pieces) > 1, "der Erzeuger hat alles auf einmal geliefert"
+        assert len(pieces) > 1, "the generator delivered everything at once"
 
     def test_an_aborted_download_does_not_count_as_a_backup(self, session, settings, collection):
         """What the browser did not receive protects nobody -- so it does not count either."""
         collection(3)
-        strom = backup.stream_archive(session, settings)
-        next(strom)  # started, but not read to the end
-        strom.close()
+        stream = backup.stream_archive(session, settings)
+        next(stream)  # started, but not read to the end
+        stream.close()
 
         assert backup.read_state(settings).last_backup_at is None
 
     def test_a_complete_download_resets_the_reminder(self, session, settings, collection):
         collection(2)
 
-        self._archiv(session, settings)
+        self._archive(session, settings)
 
         state = backup.read_state(settings)
         assert state.last_backup_at is not None
@@ -652,7 +1131,7 @@ class TestTheArchive:
 
         assert name.startswith("kiekmap-backup-holm-")
         assert name.endswith(".zip")
-        assert name.isascii(), "der Name steht in einem HTTP-Kopf"
+        assert name.isascii(), "the name stands in an HTTP header"
 
 
 class TestTheArchiveThroughTheApi:
@@ -668,11 +1147,11 @@ class TestTheArchiveThroughTheApi:
         collection(1)
         ticket = admin_client.post("/api/admin/backup/zip/ticket").json()["ticket"]
 
-        erste = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
-        zweite = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+        first = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
+        second = admin_client.get("/api/admin/backup/zip", params={"ticket": ticket})
 
-        assert erste.status_code == 200
-        assert zweite.status_code == 401, "ein Ticket darf sich nicht wiederverwenden lassen"
+        assert first.status_code == 200
+        assert second.status_code == 401, "a ticket must not be reusable"
 
     def test_a_ticket_only_for_signed_in_users(self, client):
         assert client.post("/api/admin/backup/zip/ticket").status_code == 401
@@ -685,8 +1164,8 @@ class TestTheArchiveThroughTheApi:
 
         assert response.headers["content-type"] == "application/zip"
         assert "attachment" in response.headers["content-disposition"]
-        with zipfile.ZipFile(io.BytesIO(response.content)) as archiv:
-            assert archiv.testzip() is None
+        with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
+            assert archive.testzip() is None
 
     def test_a_running_job_blocks_the_download(self, admin_client, settings):
         """A restore would swap the files out from under the running stream."""
@@ -715,8 +1194,8 @@ class TestABackupFromTheInbox:
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         target = settings.incoming_dir / name
         with target.open("wb") as file_name:
-            for teil in backup.stream_archive(session, settings):
-                file_name.write(teil)
+            for part in backup.stream_archive(session, settings):
+                file_name.write(part)
         return target
 
     def test_a_downloaded_archive_comes_back_through_the_inbox(self, session, settings, collection):
@@ -729,9 +1208,9 @@ class TestABackupFromTheInbox:
         for sha in shas:
             original_path(settings.photos_dir, sha, ".jpg").unlink()
 
-        gefunden = backup.waiting_archive(settings)
-        assert gefunden is not None, "die abgelegte Sicherung wurde nicht erkannt"
-        backup.run_restore_from_archive(settings, gefunden[0], _report_nothing)
+        found = backup.waiting_archive(settings)
+        assert found is not None, "the backup put down there was not recognised"
+        backup.run_restore_from_archive(settings, found[0], _report_nothing)
 
         for sha in shas:
             assert original_path(settings.photos_dir, sha, ".jpg").is_file()
@@ -745,10 +1224,10 @@ class TestABackupFromTheInbox:
         collection(2)
         self._put_down(session, settings)
 
-        gefunden = backup.waiting_archive(settings)
+        found = backup.waiting_archive(settings)
 
-        assert gefunden is not None
-        _, info = gefunden
+        assert found is not None
+        _, info = found
         assert info.photos == 2
         assert info.created_at is not None
 
@@ -756,8 +1235,8 @@ class TestABackupFromTheInbox:
         """A truncated ZIP has no central directory -- it fails of its own accord."""
         collection(2)
         path = self._put_down(session, settings)
-        daten = path.read_bytes()
-        path.write_bytes(daten[: len(daten) // 2])
+        data = path.read_bytes()
+        path.write_bytes(data[: len(data) // 2])
 
         assert backup.waiting_archive(settings) is None
 
@@ -765,8 +1244,8 @@ class TestABackupFromTheInbox:
         """A matching name, no manifest -- the name only decides whether to look inside."""
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         foreign = settings.incoming_dir / "kiekmap-backup-fremd.zip"
-        with zipfile.ZipFile(foreign, "w") as archiv:
-            archiv.writestr("irgendwas.txt", "kein Bestand")
+        with zipfile.ZipFile(foreign, "w") as archive:
+            archive.writestr("irgendwas.txt", "kein Bestand")
 
         assert backup.waiting_archive(settings) is None
 
@@ -783,7 +1262,7 @@ class TestABackupFromTheInbox:
         watcher.scan_once()
         watcher.scan_once()
 
-        assert path.is_file(), "der Watcher hat die Sicherung angefasst"
+        assert path.is_file(), "the watcher touched the backup"
         assert not (settings.incoming_dir / "_problem").exists()
 
     def test_a_photo_beside_it_is_still_taken_in(self, session, settings, collection, sample_image):
@@ -798,9 +1277,9 @@ class TestABackupFromTheInbox:
 
         watcher = IncomingWatcher(settings)
         watcher.scan_once()
-        aufgenommen = watcher.scan_once()
+        taken_in = watcher.scan_once()
 
-        assert aufgenommen == 1
+        assert taken_in == 1
 
     def test_the_previous_state_is_set_aside(self, session, settings, collection):
         collection(2)
@@ -810,7 +1289,7 @@ class TestABackupFromTheInbox:
         backup.run_restore_from_archive(settings, path, _report_nothing)
 
         set_aside = list(settings.data_dir.glob(f"{backup.SET_ASIDE_PREFIX}*"))
-        assert len(set_aside) == 1, "der bisherige Stand wurde nicht beiseitegelegt"
+        assert len(set_aside) == 1, "the previous state was not set aside"
         assert before <= {p.name for p in set_aside[0].rglob("*") if p.is_file()}
 
     def test_the_archive_moves_to_the_done_folder(self, session, settings, collection):
@@ -819,39 +1298,39 @@ class TestABackupFromTheInbox:
 
         backup.run_restore_from_archive(settings, path, _report_nothing)
 
-        assert not path.exists(), "die Datei liegt noch im Eingang"
+        assert not path.exists(), "the file is still in the inbox"
         assert (settings.incoming_dir / "_done" / path.name).is_file()
         assert backup.waiting_archive(settings) is None
 
-    def test_an_incomplete_file_is_refused(self, settings):
+    def test_an_incomplete_file_is_refused(self, database, settings):
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         broken = settings.incoming_dir / "kiekmap-backup-kaputt.zip"
         broken.write_bytes(b"kein zip")
 
-        with pytest.raises(backup.BackupError) as fehler:
+        with pytest.raises(backup.BackupError) as error:
             backup.run_restore_from_archive(settings, broken, _report_nothing)
 
-        assert "keine vollstaendige Sicherung" in str(fehler.value)
+        assert "keine vollstaendige Sicherung" in str(error.value)
 
 
-class TestEingangUeberDieApi:
-    def _bis_fertig(self, client, sekunden: float = 5.0) -> dict:
+class TestTheInboxThroughTheApi:
+    def _until_done(self, client, seconds: float = 5.0) -> dict:
         import time
 
-        ende = time.monotonic() + sekunden
-        while time.monotonic() < ende:
+        deadline = time.monotonic() + seconds
+        while time.monotonic() < deadline:
             state = client.get("/api/admin/backup/status").json()
             if state["phase"] != "running":
                 return state
             time.sleep(0.02)
-        raise AssertionError("Der Auftrag wurde nicht fertig")
+        raise AssertionError("the job did not finish")
 
     def _put_down(self, session, settings) -> str:
         settings.incoming_dir.mkdir(parents=True, exist_ok=True)
         name = "kiekmap-backup-holm-2026-08-03.zip"
         with (settings.incoming_dir / name).open("wb") as file_name:
-            for teil in backup.stream_archive(session, settings):
-                file_name.write(teil)
+            for part in backup.stream_archive(session, settings):
+                file_name.write(part)
         return name
 
     def test_the_drive_list_reports_the_waiting_backup(
@@ -860,11 +1339,11 @@ class TestEingangUeberDieApi:
         collection(2)
         name = self._put_down(session, settings)
 
-        daten = admin_client.get("/api/admin/backup/drives").json()
+        data = admin_client.get("/api/admin/backup/drives").json()
 
-        assert daten["incoming"] is not None
-        assert daten["incoming"]["file"] == name
-        assert daten["incoming"]["photos"] == 2
+        assert data["incoming"] is not None
+        assert data["incoming"]["file"] == name
+        assert data["incoming"]["photos"] == 2
 
     def test_without_a_file_the_list_reports_nothing(self, admin_client, settings):
         assert admin_client.get("/api/admin/backup/drives").json()["incoming"] is None
@@ -877,7 +1356,7 @@ class TestEingangUeberDieApi:
 
         response = admin_client.post("/api/admin/backup/incoming/restore", json={"file": name})
         assert response.status_code == 200
-        state = self._bis_fertig(admin_client)
+        state = self._until_done(admin_client)
 
         assert state["phase"] == "done", state
         assert "_done" in state["message"]

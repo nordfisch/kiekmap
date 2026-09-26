@@ -1,0 +1,25 @@
+# The doorman in front of the online instance. Used only together with docker-compose.web.yml,
+# most easily through `make prod-web`.
+#
+# What it does, and nothing beyond it: HTTPS and one password over the whole application. Behind
+# it stand the same two containers as on the Pi -- the same images, the same nginx configuration,
+# the same entrypoint. So what runs online is what will run on the device.
+#
+# The three values come out of the .env and are read from the environment at startup.
+
+{$KIEKMAP_WEB_DOMAIN} {
+	# Over everything, the map included -- not only over the admin area. Whoever has no password
+	# sees nothing: not the visitor view, not /api/. That is the point of the instance: the
+	# collection is not public while the museum is still building it.
+	#
+	# The directive is called `basic_auth` from Caddy 2.8 on; up to 2.7 it was `basicauth`. The
+	# version is pinned in docker-compose.web.yml, so the two match.
+	basic_auth {
+		{$KIEKMAP_WEB_USER} {$KIEKMAP_WEB_PASSWORD_HASH}
+	}
+
+	# No `encode` here, on purpose. The map file is read tile by tile through HTTP range
+	# requests, which is why no tile server is needed -- and a compressing proxy in front of it
+	# would take the ranges away. nginx switches gzip off for /tiles/ for the same reason.
+	reverse_proxy frontend:80
+}

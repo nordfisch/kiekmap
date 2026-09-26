@@ -79,8 +79,8 @@ admin view (`src/admin/`). On a device without an address bar a router would be 
 somebody leaves behind by accident would be a risk.
 
 In production **nginx** serves the built page and proxies `/api` to the backend. Both therefore
-come from the same origin; the CORS setting in the backend exists for the Vite development server
-and never applies on the Pi.
+come from the same origin. In development the Vite server proxies `/api` the same way, so the
+backend needs no CORS configuration.
 
 nginx does more here than serve files: it answers **HTTP range requests** on the map file. That is
 exactly why the project needs no tile server — MapLibre reads single tile ranges out of a static
@@ -224,6 +224,12 @@ each other and only the topmost would be reachable.
 These three share **one** job (`Job` in `app/services/backup/job.py`). They run in a thread,
 report their progress, and only one can run at a time — two concurrent write runs against the same
 SQLite file would be a source of errors for no gain. The frontend polls the status once a second.
+
+**A restore closes the database for the swap.** Every session of the running service goes through
+the `gate` of the `Database` in `app/db.py`. The restore closes it, waits until no session is in
+use, closes every connection, moves the files and reopens. Requests meanwhile get a 503. The job's
+own sessions skip the gate, because only one job runs at a time. See
+[decisions.md](decisions.md), point 84.
 
 ---
 

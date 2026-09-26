@@ -79,31 +79,58 @@ class TestSessions:
 
 
 class TestAttemptGuard:
-    def test_locks_after_too_many_failed_attempts(self):
+    def test_locks_after_too_many_attempts(self):
         guard = auth.AttemptGuard(max_attempts=3, lockout_s=60)
 
-        assert guard.record_failure() == 0
-        assert guard.record_failure() == 0
-        assert guard.record_failure() == 60
+        assert guard.admit() == 0
+        assert guard.admit() == 0
+        assert guard.admit() == 0, "the attempt that reaches the limit is still checked"
         assert guard.locked_for() == 60
+        assert guard.admit() == 60
+
+    def test_an_attempt_counts_before_its_outcome_is_known(self):
+        """The race: the PIN hash takes a tenth of a second, and parallel requests overlap in it.
+
+        Counted only once a PIN had turned out wrong, every request inside that tenth of a second
+        found the pad open. Here no outcome is ever reported, as with requests still being checked,
+        and the limit holds all the same.
+        """
+        guard = auth.AttemptGuard(max_attempts=5, lockout_s=60)
+
+        admitted = [guard.admit() for _ in range(20)].count(0)
+
+        assert admitted == 5
 
     def test_the_lockout_expires_on_its_own(self, monkeypatch: pytest.MonkeyPatch):
         clock = [1000.0]
         monkeypatch.setattr(auth.time, "monotonic", lambda: clock[0])
         guard = auth.AttemptGuard(max_attempts=1, lockout_s=60)
-        guard.record_failure()
+        guard.admit()
 
         clock[0] += 61
 
         assert guard.locked_for() == 0
+        assert guard.admit() == 0
+
+    def test_the_last_fraction_of_a_second_is_still_locked(self, monkeypatch: pytest.MonkeyPatch):
+        """``round`` makes 0.4 seconds a 0 -- which must not read as "open"."""
+        clock = [1000.0]
+        monkeypatch.setattr(auth.time, "monotonic", lambda: clock[0])
+        guard = auth.AttemptGuard(max_attempts=1, lockout_s=60)
+        guard.admit()
+
+        clock[0] += 59.6
+
+        assert guard.admit() == 1
 
     def test_a_successful_sign_in_resets_the_counter(self):
         """Otherwise typing errors would add up over months into a lockout."""
         guard = auth.AttemptGuard(max_attempts=3, lockout_s=60)
-        guard.record_failure()
-        guard.record_failure()
+        guard.admit()
+        guard.admit()
 
         guard.reset()
 
-        assert guard.record_failure() == 0
+        assert guard.admit() == 0
+        assert guard.admit() == 0
         assert guard.locked_for() == 0

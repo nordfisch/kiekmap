@@ -16,6 +16,9 @@ software and says so nowhere.
 
     python3 tools/build_release.py --notes             the release text, both languages
 
+Both are run on the release tag, after it is set; see docs/developer/development.md, "Making a
+release".
+
 **What it refuses to do**, because a stick that does not match a commit is worse than no stick:
 build from a dirty working tree, or from a tree whose version does not match the tag it claims to
 release. There is no ``--force``; the fix is to commit and to tag.
@@ -37,7 +40,8 @@ IMAGES = (("kiekmap-backend", ROOT / "backend"), ("kiekmap-frontend", ROOT / "fr
 
 
 def run(*command: str) -> str:
-    result = subprocess.run(command, capture_output=True, text=True, cwd=ROOT)
+    # S603: every caller passes a literal git command; nothing here comes from outside.
+    result = subprocess.run(command, capture_output=True, text=True, cwd=ROOT)  # noqa: S603
     if result.returncode != 0:
         raise SystemExit(f"Failed: {' '.join(command)}\n{result.stderr.strip()}")
     return result.stdout.strip()
@@ -58,6 +62,16 @@ def check_tree(tag: str) -> None:
             "The working tree is not clean.\n"
             "  A stick that belongs to no commit cannot be traced back later."
         )
+    check_tag(tag)
+
+
+def check_tag(tag: str) -> None:
+    """HEAD has to be the commit the tag names.
+
+    For the stick, and for the release text as well: the version comes from the files, so a run on
+    a tree whose number was never raised prints the notes of the *previous* release, and nothing
+    about them looks wrong.
+    """
     tags = run("git", "tag", "--list", tag)
     if not tags:
         raise SystemExit(
@@ -98,15 +112,25 @@ def notes(version: str) -> str:
     """The body of a GitHub release: English first, German below it.
 
     One field, no language variants -- so both go into it, and the English half comes first
-    because the repository speaks English. A missing half is named rather than passed over: a
-    release whose German notes are silently absent is worse than one that says they are.
+    because the repository speaks English.
+
+    **A changelog without a block for this version aborts the run.** It used to print a placeholder
+    and exit 0, and the release of 0.9.5 went out with that placeholder as its whole text: the
+    version heading had not been written yet. A body that says nothing is a failed step, and the
+    step has to say so while it can still be repeated.
     """
     parts = []
     for path, heading in ((CHANGELOG, None), (CHANGELOG_DE, "## Auf Deutsch")):
         found = section(path, version)
+        if not found:
+            raise SystemExit(
+                f"{path.name} has no block ## [{version}].\n"
+                f"  Rename its ## [Unreleased] block to ## [{version}] -- <date> first; see\n"
+                '  docs/developer/development.md, "Making a release".'
+            )
         if heading:
             parts.append("---\n\n" + heading + "\n")
-        parts.append(found or f"*({path.name} names no {version}.)*")
+        parts.append(found)
     return "\n\n".join(parts).strip() + "\n"
 
 
@@ -127,6 +151,7 @@ def main() -> int:
     tag = f"v{number}"
 
     if args.notes:
+        check_tag(tag)
         print(notes(number), end="")
         return 0
 
@@ -138,12 +163,18 @@ def main() -> int:
 
     for name, context in IMAGES:
         print(f"== building {name}:{tag}")
-        subprocess.run(["docker", "build", "-t", f"{name}:{tag}", str(context)], check=True)
+        # S603, S607: a literal list without a shell, and docker comes from PATH -- Docker
+        # Desktop and a package manager put it in different places.
+        subprocess.run(  # noqa: S603
+            ["docker", "build", "-t", f"{name}:{tag}", str(context)],  # noqa: S607
+            check=True,
+        )
 
     print("== saving the images")
     archive = target / "images.tar"
-    subprocess.run(
-        ["docker", "save", *(f"{name}:{tag}" for name, _ in IMAGES), "-o", str(archive)],
+    saved = [f"{name}:{tag}" for name, _ in IMAGES]
+    subprocess.run(  # noqa: S603
+        ["docker", "save", *saved, "-o", str(archive)],  # noqa: S607
         check=True,
     )
 

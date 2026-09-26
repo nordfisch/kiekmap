@@ -5,14 +5,25 @@
 
 ## Getting into the admin area
 
-The **coat of arms** sits at the top left of the map. Tap it once, enter the **PIN** and tap
-"Continue".
+Tap the **title** at the top left, beside the coat of arms, once. Enter the **PIN** and tap
+"Continue". A tap on the coat of arms itself starts the slide show.
 
 Whoever does not know the PIN does not get in — that is deliberate. After five wrong entries the
 device waits a minute before it takes the next one.
 
 You can go back to the map at any time with **"Leave the admin area"** at the top right. If you
-forget, the device signs itself out after half an hour.
+forget, the device leaves the admin area by itself after **two minutes without a touch**. While a
+backup, a restore, an import from a stick or an upload is running, that time does not count: the
+two minutes start when the work is done.
+
+## What the device does when nobody uses it
+
+After five minutes without a touch the screen shows a **slide show**: four photos from the
+collection that move slowly, and every five seconds one of them turns over to the next. A tap on a
+photo opens the map around it, with the photo large. A tap beside the photos returns to the map.
+Either way the page loads fresh, so whatever the last visitor left open is gone.
+
+The slide show never starts over the admin area.
 
 ## Adding photos
 
@@ -169,6 +180,11 @@ What was on the device before is **not deleted** but set aside into a folder wit
 So whoever reads the wrong backup in by mistake has lost nothing — tell somebody in that case who
 can get at the device.
 
+At the very end the device swaps the records. For a few seconds the map loads no photos then, and
+the contribution panel saves nothing; after that everything works again. If a download of the
+backup is running at the same time, the restore stops with a message and changes nothing. Start it
+again once the download has finished.
+
 ### When the backup is older than the program
 
 That is the normal case, and **you need do nothing for it**. A backup holds the records in the
@@ -189,6 +205,21 @@ Then **reading it back in breaks off** and tells you so:
 
 **The collection on the device stays untouched** — nothing is half replaced. Tell somebody who can
 update the program; the same backup can be read in afterwards.
+
+## Switching the device off
+
+Admin area → **Overview**, at the foot of the page on the right: **"Switch the device off"**. The
+device asks once more, then the screen says that it is shutting down.
+
+**Wait until the screen stays dark**, then switch the power off at the socket. Switching on again is
+the plug: after about twenty seconds the map is back by itself. Nothing in the collection changes,
+and nothing has to be closed beforehand.
+
+Pulling the plug without this is not a catastrophe — the device is built for it — but this is the
+gentle way, and the one for the end of a day.
+
+While a backup, a restore or an import from a stick is running, the button refuses and says so. Let
+the work finish first.
 
 ## What to do when the screen stays black
 

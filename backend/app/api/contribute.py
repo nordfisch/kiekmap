@@ -13,10 +13,11 @@ Three things catch the abuse case without slowing down the normal one:
 """
 
 import logging
+import re
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
@@ -38,6 +39,34 @@ from app.text import texts
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/contribute", tags=["contribute"])
+
+#: How many ids of ``exclude`` are read. The rest is ignored.
+#:
+#: The panel remembers the last 20 skipped photos (``SKIP_MEMORY`` in
+#: ``frontend/src/store/contribute.ts``), so a real visitor never comes near this. Ten times that
+#: leaves room for another client. Each id becomes one bound parameter of the query, and 200 stays
+#: well below the 999 that older SQLite versions allow.
+EXCLUDE_MAX = 200
+
+#: The largest id SQLite can hold. A longer run of digits raised ``OverflowError`` in the driver.
+_SQLITE_INTEGER_MAX = 2**63 - 1
+_ID = re.compile(r"[0-9]{1,19}")
+
+
+def _skipped(exclude: str) -> set[int]:
+    """The ids in ``exclude`` that can name a photo, the most recent ``EXCLUDE_MAX`` of them.
+
+    The panel appends each skipped photo at the end, so the ids at the end are the ones a visitor
+    has just seen. Those are kept when the list is too long.
+
+    A pattern rather than ``isdigit``: ``"²".isdigit()`` is true and ``int("²")`` raises, and so
+    does ``int()`` on more than 4,300 digits. The largest id has nineteen digits; the range check
+    catches the nineteen-digit numbers above it.
+    """
+    parts = (part.strip() for part in exclude.split(","))
+    ids = [int(part) for part in parts if _ID.fullmatch(part)]
+    valid = [i for i in ids if 1 <= i <= _SQLITE_INTEGER_MAX]
+    return set(valid[-EXCLUDE_MAX:])
 
 
 @router.get("/next", response_model=TaskResponse, summary="A photo that is missing something")
@@ -67,7 +96,7 @@ def next_task(
     ``exclude`` does *not* apply to it. Whoever asks for a photo by name may well have waved it
     away earlier and has now thought better of it.
     """
-    skipped = {int(part) for part in exclude.split(",") if part.strip().isdigit()}
+    skipped = _skipped(exclude)
 
     filters = [Photo.status == PhotoStatus.PUBLISHED, open_filter(need)]
     open_count = session.scalar(select(func.count()).select_from(Photo).where(*filters)) or 0
@@ -142,9 +171,7 @@ def photo_housenumbers(
     picker when this list is not empty and needs no second rule of its own. A rule that lives in
     two places is a rule that will disagree with itself.
     """
-    photo = session.get(Photo, photo_id)
-    if photo is None:
-        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    photo = _get_published_photo(session, photo_id)
     if not _refinable(session, photo):
         return []
     return [
@@ -179,12 +206,45 @@ def _require_empty(photo: Photo, field: str) -> None:
         raise HTTPException(409, texts().contribute.already_stated)
 
 
-def _get_open_photo(session: Session, photo_id: int, field: str) -> Photo:
+def _get_published_photo(session: Session, photo_id: int) -> Photo:
+    """A deleted photo answers 404 here, as in ``api/photos.py``.
+
+    ``next_task`` never offers one, but the write routes take any id. A visitor's statement on a
+    photo the curator took out would sit in the change log and wait for a moderator who never
+    looks under „Gelöscht".
+    """
     photo = session.get(Photo, photo_id)
-    if photo is None:
+    if photo is None or photo.status == PhotoStatus.DELETED:
         raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    return photo
+
+
+def _get_open_photo(session: Session, photo_id: int, field: str) -> Photo:
+    photo = _get_published_photo(session, photo_id)
     _require_empty(photo, field)
     return photo
+
+
+def _write_if(session: Session, photo: Photo, still: list, values: dict, refusal: str) -> None:
+    """Write ``values`` only if the photo still is as the checks above found it.
+
+    **The checks read the photo, and the write came a moment later.** Two visitors could both find
+    the field empty -- at the kiosk and on the web instance, or through the API directly -- and the
+    second one wrote over the first while both got a thank-you and both landed in the change log.
+    That is the one thing ``_require_empty`` exists to prevent.
+
+    So the condition travels into the UPDATE itself. SQLite writes one transaction at a time, and
+    the second UPDATE sees what the first committed: it matches no row, and the route answers with
+    the same 409 as if its check had caught it.
+    """
+    result = session.execute(
+        update(Photo)
+        .where(Photo.id == photo.id, Photo.status == PhotoStatus.PUBLISHED, *still)
+        .values(**values)
+        .execution_options(synchronize_session=False)
+    )
+    if result.rowcount == 0:
+        raise HTTPException(409, refusal)
 
 
 def _log_change(
@@ -227,13 +287,12 @@ def add_location(
     photo = _get_open_photo(session, photo_id, "location")
     _require_in_region(settings, contribution.lat, contribution.lon)
 
-    photo.lat = contribution.lat
-    photo.lon = contribution.lon
-    photo.location_source = Source.VISITOR
+    values = {"lat": contribution.lat, "lon": contribution.lon, "location_source": Source.VISITOR}
     if contribution.place_name:
-        photo.place_name = contribution.place_name
+        values["place_name"] = contribution.place_name
     if contribution.accuracy_m is not None:
-        photo.location_accuracy_m = contribution.accuracy_m
+        values["location_accuracy_m"] = contribution.accuracy_m
+    _write_if(session, photo, [Photo.lat.is_(None)], values, texts().contribute.already_stated)
 
     _log_change(
         session,
@@ -265,17 +324,15 @@ def add_housenumber(
     """Move a photo from the middle of its street to one of its houses.
 
     **The exception to "visitors only fill what is empty"** (decisions.md, point 5) -- and it goes
-    through its own door rather than loosening that check. ``_require_empty`` still reads exactly
-    as it did; what stands beside it is a narrower rule: only street-precise, only to an address
-    of that same street, and never the other way round.
+    through its own door rather than loosening that check. ``_require_empty`` stays as it is; what
+    stands beside it is a narrower rule: only street-precise, only to an address of that same
+    street, and never the other way round.
 
     Curator statements may be sharpened too. That is a real widening, and it is why the change log
     carries the previous source: taking the contribution back has to give a curator's statement
     back to the curator.
     """
-    photo = session.get(Photo, photo_id)
-    if photo is None:
-        raise HTTPException(404, texts().photos.no_such_photo(photo_id))
+    photo = _get_published_photo(session, photo_id)
     if not _refinable(session, photo):
         raise HTTPException(409, texts().contribute.already_more_precise)
 
@@ -290,12 +347,29 @@ def add_housenumber(
     street = photo.place_name
     previous_source = photo.location_source
 
-    # Everything from the gazetteer row, nothing from the request.
-    photo.lat = address.lat
-    photo.lon = address.lon
-    photo.place_name = address.name
-    photo.location_accuracy_m = ACCURACY_ADDRESS_M
-    photo.location_source = Source.VISITOR
+    # Everything from the gazetteer row, nothing from the request. The condition is the statement
+    # the checks above found, whole: the street, its accuracy, its coordinate and whose it was.
+    # Anything less, and a second sharpening would log the street as the old value while it
+    # replaced the first one's house.
+    _write_if(
+        session,
+        photo,
+        [
+            Photo.place_name == street,
+            Photo.location_accuracy_m.is_distinct_from(ACCURACY_ADDRESS_M),
+            Photo.location_source.is_not_distinct_from(previous_source),
+            Photo.lat.is_not_distinct_from(photo.lat),
+            Photo.lon.is_not_distinct_from(photo.lon),
+        ],
+        {
+            "lat": address.lat,
+            "lon": address.lon,
+            "place_name": address.name,
+            "location_accuracy_m": ACCURACY_ADDRESS_M,
+            "location_source": Source.VISITOR,
+        },
+        texts().contribute.already_more_precise,
+    )
 
     _log_change(
         session,
@@ -321,14 +395,30 @@ def add_date(
 ) -> PhotoDetail:
     photo = _get_open_photo(session, photo_id, "date")
 
-    start, end, precision = date_range(
-        contribution.year,
-        contribution.month,
-        contribution.day,
-        DatePrecision(contribution.precision),
+    # The schema checks each part on its own -- a day from 1 to 31, a month from 1 to 12 -- and
+    # not whether they make a date. 31 February passes it, and ``date()`` then raises a
+    # ValueError, which without this would reach the client as a 500.
+    try:
+        start, end, precision = date_range(
+            contribution.year,
+            contribution.month,
+            contribution.day,
+            DatePrecision(contribution.precision),
+        )
+    except ValueError:
+        raise HTTPException(422, texts().contribute.no_such_date) from None
+    _write_if(
+        session,
+        photo,
+        [Photo.date_from.is_(None)],
+        {
+            "date_from": start,
+            "date_to": end,
+            "date_precision": precision,
+            "date_source": Source.VISITOR,
+        },
+        texts().contribute.already_stated,
     )
-    photo.date_from, photo.date_to, photo.date_precision = start, end, precision
-    photo.date_source = Source.VISITOR
 
     _log_change(
         session, photo, "date", None, format_label(start, end, precision), contribution.session_id

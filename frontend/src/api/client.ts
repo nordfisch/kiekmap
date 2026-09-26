@@ -1,5 +1,7 @@
 /** Backend access. The types mirror backend/app/schemas.py. */
 
+import { t } from "../text";
+
 export type PhotoMarker = {
   id: number;
   lat: number;
@@ -121,15 +123,26 @@ export type Place = {
 
 export type Precision = "day" | "month" | "year" | "decade";
 
+/** One entry of the list FastAPI sends with a 422 when a field fails the schema. */
+type ValidationIssue = { type?: string; ctx?: { max_length?: number } };
+
 /** The backend's `detail` if there is one -- it is written for the reader, the status code is not. */
 export async function readError(response: Response): Promise<string> {
   try {
-    const body = (await response.json()) as { detail?: string };
+    const body = (await response.json()) as { detail?: string | ValidationIssue[] };
+    // A refusal from the schema is a list of English records, not a sentence. Handed to
+    // `new Error()` as it is, the screen read "[object Object]".
+    if (Array.isArray(body.detail)) return validationMessage(body.detail);
     if (body.detail) return body.detail;
   } catch {
     /* response without JSON -- the status code has to do */
   }
   return `HTTP ${response.status}`;
+}
+
+function validationMessage(issues: ValidationIssue[]): string {
+  const limit = issues.find((issue) => issue.type === "string_too_long")?.ctx?.max_length;
+  return limit === undefined ? t.errors.notAccepted : t.errors.tooLong(limit);
 }
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
@@ -159,6 +172,7 @@ export function fetchPhotos(
   timeRange: TimeRange | null,
   limit: number,
   showUndated: boolean,
+  tag: string | null,
   signal?: AbortSignal,
 ): Promise<PhotoList> {
   const params = new URLSearchParams({ bbox: bboxParam(bbox), limit: String(limit) });
@@ -169,12 +183,41 @@ export function fetchPhotos(
   // Sent even when it is on, which is the default: the parameter is what the switch beside the
   // slider stands for, and a request that leaves it out says nothing about it either way.
   params.set("include_undated", String(showUndated));
+  if (tag !== null) params.set("tag", tag);
   return getJson<PhotoList>(`/api/photos?${params}`, signal);
 }
 
-/** Without a time range: the slider should show where anything is at all. */
-export function fetchHistogram(bbox: Bbox, signal?: AbortSignal): Promise<Histogram> {
-  return getJson<Histogram>(`/api/photos/histogram?bbox=${bboxParam(bbox)}`, signal);
+/**
+ * Without a time range: the slider should show where anything is at all.
+ *
+ * With the keyword, though. The bars should count what the map can show.
+ */
+export function fetchHistogram(
+  bbox: Bbox,
+  tag: string | null,
+  signal?: AbortSignal,
+): Promise<Histogram> {
+  const params = new URLSearchParams({ bbox: bboxParam(bbox) });
+  if (tag !== null) params.set("tag", tag);
+  return getJson<Histogram>(`/api/photos/histogram?${params}`, signal);
+}
+
+/**
+ * The keywords for the corner of the map, in the order the museum configured them.
+ *
+ * Keywords no published photo carries are already left out -- see `api/photos.py`.
+ */
+export function fetchOfferedTags(signal?: AbortSignal): Promise<string[]> {
+  return getJson<string[]>("/api/photos/tags/offered", signal);
+}
+
+/**
+ * Random photos for the slide show: landscape, placed, the large ones first.
+ *
+ * See `showcase` in `api/photos.py` for why there is no hard minimum size.
+ */
+export function fetchShowcase(count: number, signal?: AbortSignal): Promise<PhotoMarker[]> {
+  return getJson<PhotoMarker[]>(`/api/photos/showcase?count=${count}`, signal);
 }
 
 export function fetchPhoto(id: number, signal?: AbortSignal): Promise<PhotoDetail> {

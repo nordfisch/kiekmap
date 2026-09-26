@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.config import Settings, get_settings
@@ -29,10 +29,11 @@ from app.models import (
     Photo,
     PhotoStatus,
     Source,
-    Tag,
 )
 from app.schemas import (
+    LONG_TEXT_MAX,
     BackupReminder,
+    BatchPrecision,
     ChangeItem,
     ChangeList,
     ImportLogItem,
@@ -48,17 +49,19 @@ from app.schemas import (
     UploadItem,
     UploadResult,
 )
-from app.services import auth, dates, places
+from app.services import auth, dates, places, power
+from app.services import backup as backup_service
 from app.services.backup import read_state as read_backup_state
 from app.services.dates import date_range, format_label
 from app.services.importer import apply_batch_defaults, import_upload, upload_name
 from app.services.places import ACCURACY_STREET_M
+from app.services.tags import tag_named
 from app.text import texts
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-TOKEN_HEADER = "X-Admin-Token"
+TOKEN_HEADER = "X-Admin-Token"  # noqa: S105 -- the name of the header, not a token
 
 #: Page size of the photo list. Large enough that scrolling beats paging on a touchscreen.
 DEFAULT_PAGE = 60
@@ -88,11 +91,13 @@ def login(request: LoginRequest, settings: Config) -> LoginResponse:
     if not settings.admin_pin_hash:
         raise HTTPException(503, texts().admin.no_pin_configured)
 
-    if (locked := auth.attempts.locked_for()) > 0:
+    if locked := auth.attempts.admit():
         raise HTTPException(429, texts().admin.too_many_attempts(locked))
 
     if not auth.verify_pin(request.pin, settings.admin_pin_hash):
-        if locked := auth.attempts.record_failure():
+        # Already counted by ``admit``. If this attempt was the last one, say so now rather than
+        # letting the next one find out.
+        if locked := auth.attempts.locked_for():
             raise HTTPException(429, texts().admin.too_many_attempts(locked))
         raise HTTPException(401, texts().admin.wrong_pin)
 
@@ -343,9 +348,7 @@ def update_photo(photo_id: int, update: PhotoUpdate, admin: Admin, session: Db) 
             ", ".join(sorted(tag.name for tag in photo.tags)) or None,
             ", ".join(sorted(names)) or None,
         )
-        photo.tags = [
-            session.scalar(select(Tag).where(Tag.name == name)) or Tag(name=name) for name in names
-        ]
+        photo.tags = [tag_named(session, name) for name in names]
 
     if "status" in supplied and update.status is not None:
         _record(session, photo, "status", photo.status, update.status)
@@ -393,9 +396,9 @@ def _is_newest(session: Session, change: Change) -> bool:
     **Newer means a higher id, not a later timestamp**, and that is not laziness. ``created_at``
     carries a SQLite server default, which writes whole seconds ("14:24:37"); a bound Python
     datetime renders with microseconds ("14:24:37.000000"). SQLite compares those as text and the
-    shorter string loses -- so ``created_at >= created_at`` matched **nothing at all**, not even
-    its own row. The guard was silently doing nothing. A log is only ever appended to, so the id
-    says "newer" with no format to get wrong.
+    shorter string loses, so ``created_at >= created_at`` matches **nothing at all**, not even its
+    own row -- a guard that silently does nothing. A log is only ever appended to, so the id says
+    "newer" with no format to get wrong.
     """
     fields = LOCATION_FIELDS if change.field in LOCATION_FIELDS else {change.field}
     newer = (
@@ -412,6 +415,24 @@ def _is_newest(session: Session, change: Change) -> bool:
         or 0
     )
     return newer == 0
+
+
+def _as_checked(photo: Photo, field: str) -> list:
+    """The conditions that the photo's fields for ``field`` still hold what was read from it."""
+    if field in LOCATION_FIELDS:
+        return [
+            Photo.location_source == Source.VISITOR,
+            Photo.lat.is_not_distinct_from(photo.lat),
+            Photo.lon.is_not_distinct_from(photo.lon),
+            Photo.place_name.is_not_distinct_from(photo.place_name),
+            Photo.location_accuracy_m.is_not_distinct_from(photo.location_accuracy_m),
+        ]
+    return [
+        Photo.date_source == Source.VISITOR,
+        Photo.date_from.is_not_distinct_from(photo.date_from),
+        Photo.date_to.is_not_distinct_from(photo.date_to),
+        Photo.date_precision == photo.date_precision,
+    ]
 
 
 @router.get("/changes", response_model=ChangeList, summary="Visitor contributions")
@@ -471,8 +492,7 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail
     """Undo what the visitor wrote -- which usually means clearing, but not always.
 
     For ``location`` and ``date`` the previous value really is "nothing": those routes may only
-    fill what was empty (see api/contribute.py), so clearing is restoring. This docstring used to
-    say exactly that, and it stopped being the whole truth when sharpening arrived.
+    fill what was empty (see api/contribute.py), so clearing is restoring.
 
     ``housenumber`` **replaces**. Its log entry therefore carries the street it displaced and where
     that came from, and taking it back puts the photo back on the middle of that street. Clearing
@@ -498,24 +518,60 @@ def revert_change(change_id: int, admin: Admin, session: Db) -> PhotoAdminDetail
         street = places.street_named(session, change.old_value or "")
         if street is None:
             raise HTTPException(409, texts().admin.street_gone_from_the_index)
-        photo.lat = street.lat
-        photo.lon = street.lon
-        photo.place_name = street.name
-        photo.location_accuracy_m = ACCURACY_STREET_M
-        # Back to whoever it belonged to. Without this a curator's statement would come back as a
-        # visitor's -- and the next visitor could sharpen it again.
-        photo.location_source = change.old_source
+        values = {
+            "lat": street.lat,
+            "lon": street.lon,
+            "place_name": street.name,
+            "location_accuracy_m": ACCURACY_STREET_M,
+            # Back to whoever it belonged to. Without this a curator's statement would come back as
+            # a visitor's -- and the next visitor could sharpen it again.
+            "location_source": change.old_source,
+        }
     elif change.field == "location":
-        photo.lat = photo.lon = None
-        photo.place_name = None
-        photo.location_accuracy_m = None
-        photo.location_source = None
+        values = {
+            "lat": None,
+            "lon": None,
+            "place_name": None,
+            "location_accuracy_m": None,
+            "location_source": None,
+        }
     else:
-        photo.date_from = photo.date_to = None
-        photo.date_precision = DatePrecision.UNKNOWN
-        photo.date_source = None
+        values = {
+            "date_from": None,
+            "date_to": None,
+            "date_precision": DatePrecision.UNKNOWN,
+            "date_source": None,
+        }
 
-    change.reverted_at = dates.utc_now()
+    # **The checks above read the photo and the log, and the write comes a moment later.** A
+    # visitor could sharpen the photo in between, or another curator take the same entry back;
+    # the revert then wrote over the newer statement and marked the entry taken back twice. So both
+    # writes carry what the checks found, as the contribution routes do (``_write_if`` in
+    # api/contribute.py): the entry is claimed first, and the photo only changes if its fields
+    # still hold exactly what they held when checked.
+    claimed = session.execute(
+        update(Change)
+        .where(Change.id == change.id, Change.reverted_at.is_(None))
+        .values(reverted_at=dates.utc_now())
+        .execution_options(synchronize_session=False)
+    )
+    if claimed.rowcount == 0:
+        session.rollback()
+        raise HTTPException(409, texts().admin.already_taken_back)
+
+    written = session.execute(
+        update(Photo)
+        .where(Photo.id == photo.id, *_as_checked(photo, change.field))
+        .values(**values)
+        .execution_options(synchronize_session=False)
+    )
+    if written.rowcount == 0:
+        # Rolled back, which also releases the entry. Read afresh to say what changed.
+        session.rollback()
+        if not _still_from_visitor(photo, change.field):
+            raise HTTPException(409, texts().admin.edited_by_hand)
+        raise HTTPException(409, texts().admin.a_newer_statement_exists)
+
     session.commit()
     session.refresh(photo)
     log.info("Curator reverted visitor contribution %s on photo %s", change.id, photo.id)
@@ -557,12 +613,12 @@ def upload(
     settings: Config,
     files: Annotated[list[UploadFile], File(description="One or more image files")],
     year: Annotated[int | None, Form(ge=1800, le=2100)] = None,
-    precision: Annotated[DatePrecision, Form()] = DatePrecision.YEAR,
+    precision: Annotated[BatchPrecision, Form()] = "year",
     lat: Annotated[float | None, Form(ge=-90, le=90)] = None,
     lon: Annotated[float | None, Form(ge=-180, le=180)] = None,
     place_name: Annotated[str | None, Form(max_length=300)] = None,
     credit: Annotated[str | None, Form(max_length=200)] = None,
-    provenance: Annotated[str | None, Form()] = None,
+    provenance: Annotated[str | None, Form(max_length=LONG_TEXT_MAX)] = None,
     tags: Annotated[str | None, Form(max_length=200)] = None,
 ) -> UploadResult:
     """Take in a batch, optionally dating and locating all of it at once.
@@ -623,3 +679,31 @@ def upload(
         duplicates=counts[ImportResult.DUPLICATE],
         rejected=counts[ImportResult.REJECTED],
     )
+
+
+# --- switching the device off -----------------------------------------------
+
+
+@router.post("/shutdown", status_code=204, summary="Switch the device off")
+def shut_down(admin: Admin, settings: Config) -> None:
+    """Ask the host to power the device off.
+
+    The museum switches the device off at the wall, and that is the normal case (issue #21). This
+    is the orderly way: the request goes into the data directory, the host acts on it, and the
+    screen says when the power may go. Why a file and not a privilege is in decisions.md, point 96.
+
+    **204, although 202 would be the more precise word:** there is nothing to hand back, and
+    ``adminFetch`` in the frontend reads a body for every status but 204. Pressing twice renews the
+    request rather than being refused -- that is what a second press means.
+    """
+    if not power.host_can_switch_off(settings):
+        raise HTTPException(503, texts().admin.cannot_switch_off)
+
+    # A poweroff in the middle of a restore leaves the collection half moved (see the swap in
+    # services/backup/restore.py), and a backup half written on the stick. Same refusal as the
+    # archive download.
+    if backup_service.job.running:
+        raise HTTPException(409, texts().backup.busy)
+
+    power.request_shutdown(settings)
+    log.info("Shutdown requested through the admin area")

@@ -12,6 +12,16 @@ import { type PhotoDetail, readError } from "./client";
 
 export type AdminSession = { token: string; expires_in_s: number };
 
+/**
+ * The longest description or provenance the backend takes, in characters: `LONG_TEXT_MAX` in
+ * backend/app/schemas.py, where the measurement behind it stands.
+ *
+ * It is the `maxLength` of those fields, so a volunteer cannot type past it and only then be
+ * refused. `maxLength` counts UTF-16 units and the backend counts characters, so the field is the
+ * stricter of the two.
+ */
+export const LONG_TEXT_MAX = 4000;
+
 export type BackupReminder = {
   last_backup_at: string | null;
   last_drive: string;
@@ -227,6 +237,16 @@ export async function signIn(pin: string): Promise<AdminSession> {
   return (await response.json()) as AdminSession;
 }
 
+/**
+ * Ask the device to power off. 204 means the request is written, not that the device is off.
+ *
+ * Refused with 503 where nothing on the host would act on it -- a development machine, the online
+ * instance -- and with 409 while a backup, a restore or an import is running.
+ */
+export function requestShutdown(): Promise<void> {
+  return adminFetch<void>("/shutdown", { method: "POST" });
+}
+
 export function signOut(): Promise<void> {
   return adminFetch<void>("/logout", { method: "POST" });
 }
@@ -412,6 +432,25 @@ export async function downloadBackupZip(): Promise<void> {
  * show nothing at all for minutes.
  */
 export function uploadPhoto(file: File, defaults: BatchDefaults): Promise<UploadResult> {
+  uploading += 1;
+  return sendPhoto(file, defaults).finally(() => {
+    uploading -= 1;
+  });
+}
+
+let uploading = 0;
+
+/**
+ * How many uploads the browser is still sending.
+ *
+ * The admin area stays open while this is above zero. An upload is the one piece of work that runs
+ * in the browser rather than as a job in the backend, so only the browser can tell.
+ */
+export function uploadsInFlight(): number {
+  return uploading;
+}
+
+function sendPhoto(file: File, defaults: BatchDefaults): Promise<UploadResult> {
   const form = new FormData();
   form.append("files", file, file.name);
   if (defaults.year !== undefined) {

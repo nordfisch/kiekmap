@@ -128,7 +128,9 @@ def resolve(name: str, version: str, spdx: str, folder: Path) -> tuple[str, bool
 def npm_packages() -> list[tuple[str, str, str, Path]]:
     """Everything that ends up in the bundle -- production dependencies, transitively."""
     result = subprocess.run(
-        ["npm", "ls", "--omit=dev", "--all", "--parseable"],
+        # S607: npm comes from PATH by intent -- nvm puts it under the home directory, so an
+        # absolute path would tie the tool to one machine.
+        ["npm", "ls", "--omit=dev", "--all", "--parseable"],  # noqa: S607
         cwd=FRONTEND,
         capture_output=True,
         text=True,

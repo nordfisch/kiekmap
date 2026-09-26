@@ -21,8 +21,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO
 
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 from sqlalchemy import select
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
 
 from app.config import Settings
@@ -90,6 +91,51 @@ def _free_name(target: Path) -> Path:
     raise RuntimeError(f"no free name for {target.name} in {target.parent}")
 
 
+def _duplicate(
+    session: Session, path: Path, existing: Photo, sha256: str, move_aside: bool, inbox: Path
+) -> ImportOutcome:
+    outcome = ImportOutcome(
+        ImportResult.DUPLICATE,
+        texts().imports.same_content_as(existing.id, existing.original_filename),
+        photo=existing,
+    )
+    _log_outcome(session, path, outcome, sha256)
+    if move_aside:
+        _move_aside(path, inbox, DONE_DIR)
+    return outcome
+
+
+def _copy_into_place(source: Path, target: Path, scratch: Path) -> None:
+    """Copy under a temporary name, then rename it into place.
+
+    A rename on one filesystem is atomic. A reader -- the thumbnail step of a parallel import of
+    the same file -- therefore sees the whole file or none, never its first megabytes. ``scratch``
+    is the data directory: on the same filesystem as ``photos/``, and outside what a backup copies.
+    """
+    with tempfile.NamedTemporaryFile(dir=scratch, prefix="partial-", delete=False) as handle:
+        partial = Path(handle.name)
+    try:
+        shutil.copy2(source, partial)
+        partial.replace(target)
+    except BaseException:
+        partial.unlink(missing_ok=True)
+        raise
+
+
+def _column_values(photo: Photo) -> dict:
+    """A transient ``Photo`` as values for an INSERT. Unset columns take their defaults."""
+    return {
+        column.key: value
+        for column in Photo.__table__.columns
+        if (value := getattr(photo, column.key)) is not None
+    }
+
+
+def _reason(error: Exception) -> str:
+    """The exception as the import log shows it. Without a message, its type says what it was."""
+    return str(error) or type(error).__name__
+
+
 def _move_aside(path: Path, inbox: Path, subfolder: str) -> None:
     """File a finished photo away under ``_done/`` or ``_problem/`` -- **keeping its folders**.
 
@@ -132,10 +178,9 @@ TITLE_MAX = 60
 
 #: What the scanning software says about itself, standing in the title field.
 #:
-#: "Intel(R) JPEG Library, version [1.51.12.44]" arrived as the title of 35 photographs of the
-#: newer archive stand, "OLYMPUS DIGITAL CAMERA" as the description of others. It is not a
-#: shortened caption and does not belong in the description either -- it says nothing about the
-#: picture. Punkt 41 removed eighteen of these by hand; they came back with the next import.
+#: "Intel(R) JPEG Library, version [1.51.12.44]" arrives as the title of a scan, "OLYMPUS DIGITAL
+#: CAMERA" as the description. It is not a shortened caption and does not belong in the
+#: description either -- it says nothing about the picture.
 _SOFTWARE = re.compile(
     r"^\s*(intel\(r\)|olympus digital camera|lead technologies|picasa|hp scanjet|epson scan)",
     re.I,
@@ -196,12 +241,11 @@ def import_file(
     below it as statements about the photo -- street, house number, name; see
     app/services/foldermeta.py. Without one it reads only the file itself.
 
-    **That this decision sits here and not at the call site is the point.** It used to be a line
-    each caller had to remember, and the busiest of them -- the watched inbox, which CLAUDE.md
-    calls the museum team's usual route -- did not have it. 929 photographs came in with their
-    street standing in the path and nowhere in the database. A fifth import route now has to
-    *answer* the question "what is this file's root?" rather than silently skip it; the browser
-    upload answers it with ``None``, because a browser sends no path.
+    **That this decision sits here and not at the call site is the point.** A caller that forgets
+    the root takes photographs in with their street standing in the path and nowhere in the
+    database, and nothing says so. As a parameter here every import route has to *answer* the
+    question "what is this file's root?"; the browser upload answers it with ``None``, because a
+    browser sends no path.
     """
     inbox = settings.incoming_dir
 
@@ -213,23 +257,26 @@ def import_file(
         _log_outcome(session, path, outcome)
         return outcome
 
-    existing = session.scalar(select(Photo).where(Photo.sha256 == sha256))
-    if existing:
-        outcome = ImportOutcome(
-            ImportResult.DUPLICATE,
-            texts().imports.same_content_as(existing.id, existing.original_filename),
-            photo=existing,
-        )
-        _log_outcome(session, path, outcome, sha256)
-        if move_aside:
-            _move_aside(path, inbox, DONE_DIR)
-        return outcome
+    # The cheap answer for the common case. It is not the guard: see step 4.
+    if existing := session.scalar(select(Photo).where(Photo.sha256 == sha256)):
+        return _duplicate(session, path, existing, sha256, move_aside, inbox)
 
     # 2. Read the image.
+    #
+    # Every exception, not a list of the expected ones. The file is input from outside, and Pillow
+    # raises more than ``OSError`` and ``ValueError`` for input it cannot read:
+    # ``DecompressionBombError`` derives from ``Exception`` directly, and its parsers also raise
+    # ``SyntaxError``, ``TypeError`` and ``struct.error``. One that got past a narrower list was not
+    # rejected but raised out of the watcher, left the file in the inbox, and was tried again on
+    # every sweep -- and every file sorted after it never came in.
     try:
         info = exif_service.read_image_info(path)
-    except (UnidentifiedImageError, OSError, ValueError) as error:
-        message = texts().imports.no_readable_image(str(error))
+    except Exception as error:  # noqa: BLE001 -- whatever the file does, it is rejected
+        if isinstance(error, exif_service.TooManyPixels):
+            # The scan is readable, only too large. The volunteer can fix that, if told how.
+            message = texts().imports.too_many_pixels(Image.MAX_IMAGE_PIXELS // 1_000_000)
+        else:
+            message = texts().imports.no_readable_image(_reason(error))
         outcome = ImportOutcome(ImportResult.REJECTED, message)
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
@@ -255,15 +302,24 @@ def import_file(
     #    can exist whose files are missing.
     target = original_path(settings.photos_dir, sha256, suffix)
     target.parent.mkdir(parents=True, exist_ok=True)
-    if not target.exists():
-        shutil.copy2(path, target)
+    # Whether this call wrote the file decides whether it may remove it again. The upload, the
+    # inbox and a stick import run side by side, and the file under this name may belong to a
+    # photo another of them has just recorded.
+    wrote_it = not target.exists()
+    if wrote_it:
+        _copy_into_place(path, target, settings.data_dir)
 
+    # The same reasoning as for reading: decoding the pixels is where the rest of Pillow's
+    # exceptions surface.
     try:
         thumbnails.create_thumbnails(target, settings.thumbs_dir, sha256)
-    except (OSError, ValueError, Image.DecompressionBombError) as error:
-        target.unlink(missing_ok=True)
-        thumbnails.remove_thumbnails(settings.thumbs_dir, sha256)
-        outcome = ImportOutcome(ImportResult.REJECTED, f"Vorschaubild fehlgeschlagen: {error}")
+    except Exception as error:  # noqa: BLE001 -- whatever the file does, it is rejected
+        if wrote_it:
+            target.unlink(missing_ok=True)
+            thumbnails.remove_thumbnails(settings.thumbs_dir, sha256)
+        outcome = ImportOutcome(
+            ImportResult.REJECTED, texts().imports.thumbnail_failed(_reason(error))
+        )
         _log_outcome(session, path, outcome, sha256)
         if move_aside:
             _move_aside(path, inbox, PROBLEM_DIR)
@@ -300,10 +356,24 @@ def import_file(
         photo.lat, photo.lon = info.lat, info.lon
         photo.location_source = Source.EXIF
 
-    session.add(photo)
-    session.flush()  # assigns the id for the log entry
+    # **The unique index is the guard, not the query in step 1.** The upload, the inbox and a
+    # stick import run side by side, and another import of the same content can commit between
+    # that query and this line. A plain INSERT then raised an IntegrityError: a 500 for the
+    # upload, an aborted stick import, and a session that needed a rollback before anything else.
+    # ``ON CONFLICT DO NOTHING`` turns the race into what it is -- a duplicate -- and leaves the
+    # session as it was.
+    photo_id = session.scalar(
+        sqlite_insert(Photo)
+        .values(_column_values(photo))
+        .on_conflict_do_nothing(index_elements=[Photo.sha256])
+        .returning(Photo.id)
+    )
+    if photo_id is None:
+        existing = session.scalar(select(Photo).where(Photo.sha256 == sha256))
+        return _duplicate(session, path, existing, sha256, move_aside, inbox)
+    photo = session.get(Photo, photo_id)
 
-    # After the flush, not before: add_tags writes a new tag out at once, and doing that while
+    # After the insert, not before: add_tags writes a new tag out at once, and doing that while
     # the photo is still transient would drop the link between the two.
     add_tags(session, photo, [*info.keywords, *settings.import_tags])
 
@@ -434,9 +504,8 @@ def batch_tags(text: str | None) -> list[str]:
     """The batch keyword field, split into keywords.
 
     Commas separate, because somebody who knows the box holds "Feuerwehr, Neubau" should not need
-    a second field for it. That this is the same split that once turned whole sentences into
-    keywords (see backlog, point 1) is not the same case: there a machine cut up a caption, here
-    a person types into a field labelled "Schlagwörter".
+    a second field for it. Splitting a caption the same way would turn whole sentences into
+    keywords; here a person types into a field labelled "Schlagwörter", and the commas are theirs.
     """
     return [word.strip() for word in (text or "").split(",") if word.strip()]
 
@@ -445,7 +514,7 @@ def apply_batch_defaults(
     session: Session,
     photo: Photo,
     year: int | None,
-    precision: DatePrecision,
+    precision: DatePrecision | str,
     lat: float | None,
     lon: float | None,
     place_name: str | None,

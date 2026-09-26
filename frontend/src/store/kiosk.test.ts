@@ -6,7 +6,8 @@ vi.mock("../api/client", () => ({
 }));
 
 import { fetchHistogram, fetchPhotos } from "../api/client";
-import { queryTimeFilter, sameViewport, useKiosk } from "./kiosk";
+import { useAdmin } from "./admin";
+import { HANDOFF_COVER_MAX_MS, queryTimeFilter, sameViewport, useKiosk } from "./kiosk";
 
 describe("queryTimeFilter", () => {
   const fullRange = { from: 1900, to: 1980 };
@@ -186,6 +187,8 @@ describe("focus after a contribution", () => {
       timeRange: { from: 1950, to: 1959 },
       focus: null,
       rangeBefore: null,
+      tag: null,
+      tagBefore: null,
     });
   });
 
@@ -220,5 +223,234 @@ describe("focus after a contribution", () => {
 
     expect(useKiosk.getState().focus).toBeNull();
     expect(useKiosk.getState().timeRange).toEqual({ from: 1950, to: 1959 });
+  });
+});
+
+describe("the keyword", () => {
+  const bbox = [9.6, 53.57, 9.75, 53.67] as [number, number, number, number];
+  const histogram = { bars: [], step: 10, undated: 0, collection_from: 1920, collection_to: 1980 };
+
+  beforeEach(() => {
+    vi.mocked(fetchPhotos).mockClear();
+    vi.mocked(fetchPhotos).mockResolvedValue({ photos: [], total: 0, truncated: false });
+    vi.mocked(fetchHistogram).mockClear();
+    vi.mocked(fetchHistogram).mockResolvedValue(histogram);
+    useKiosk.setState({
+      bbox,
+      fullRange: { from: 1920, to: 1980 },
+      histogram,
+      timeRange: { from: 1950, to: 1959 },
+      showUndated: false,
+      undatedByHand: true,
+      tag: null,
+      tagBefore: null,
+      focus: null,
+      rangeBefore: null,
+      openStack: [],
+      openIndex: 0,
+      overview: 0,
+    });
+  });
+
+  it("switches off on a second tap and goes out with the query", async () => {
+    useKiosk.getState().setTag("Winter");
+    await vi.waitFor(() => expect(fetchPhotos).toHaveBeenCalled());
+    expect(vi.mocked(fetchPhotos).mock.lastCall?.[4]).toBe("Winter");
+
+    vi.mocked(fetchPhotos).mockClear();
+    useKiosk.getState().setTag("Winter");
+    await vi.waitFor(() => expect(fetchPhotos).toHaveBeenCalled());
+
+    expect(useKiosk.getState().tag).toBeNull();
+    expect(vi.mocked(fetchPhotos).mock.lastCall?.[4]).toBeNull();
+  });
+
+  it("replaces the one before instead of adding to it", () => {
+    useKiosk.getState().setTag("Winter");
+    useKiosk.getState().setTag("Gasthof");
+
+    expect(useKiosk.getState().tag).toBe("Gasthof");
+  });
+
+  it("takes the histogram along", async () => {
+    // Bars counted without the keyword would show photos the map hides.
+    useKiosk.getState().setTag("Winter");
+
+    await vi.waitFor(() =>
+      expect(fetchHistogram).toHaveBeenCalledWith(bbox, "Winter", expect.anything()),
+    );
+  });
+
+  it("opens time and place wide from the detail view", () => {
+    /**
+     * A decade and the undated switch left off from before would hide most photos with the
+     * keyword. Whoever taps a keyword asks what else carries it, not what else carries it in the
+     * 1950s.
+     */
+    useKiosk.setState({ openStack: [7], openIndex: 0 });
+
+    useKiosk.getState().filterByTag("Winter");
+
+    const state = useKiosk.getState();
+    expect(state.tag).toBe("Winter");
+    expect(state.timeRange).toEqual({ from: 1920, to: 1990 });
+    expect(queryTimeFilter(state.timeRange, state.fullRange)).toBeNull();
+    expect(state.showUndated).toBe(true);
+    expect(state.openStack).toEqual([]);
+    expect(state.overview).toBe(1);
+  });
+
+  it("is not taken back by a focus that was still running", () => {
+    // The end of the thank-you would otherwise restore the decade and undo the visitor's choice.
+    useKiosk.setState({
+      focus: {
+        bounds: [
+          [0, 0],
+          [1, 1],
+        ],
+        seq: 1,
+      },
+      rangeBefore: { from: 1930, to: 1939 },
+    });
+
+    useKiosk.getState().filterByTag("Winter");
+    useKiosk.getState().releaseFocus();
+
+    expect(useKiosk.getState().timeRange).toEqual({ from: 1920, to: 1990 });
+    expect(useKiosk.getState().tag).toBe("Winter");
+  });
+
+  describe("and the focus after a contribution", () => {
+    function photo(tags: string[]) {
+      return {
+        id: 1,
+        lat: 53.62,
+        lon: 9.676,
+        date_from: "1932-01-01",
+        tags,
+      } as never;
+    }
+
+    it("steps aside while the photo does not carry it, and comes back after", () => {
+      // The thank-you says the photo is on the map. A filter that hides it makes that untrue.
+      useKiosk.setState({ tag: "Winter" });
+
+      useKiosk.getState().showPhoto(photo(["Gasthof"]));
+      expect(useKiosk.getState().tag).toBeNull();
+
+      useKiosk.getState().releaseFocus();
+      expect(useKiosk.getState().tag).toBe("Winter");
+    });
+
+    it("stays while the photo carries it", () => {
+      useKiosk.setState({ tag: "Winter" });
+
+      useKiosk.getState().showPhoto(photo(["Winter"]));
+
+      expect(useKiosk.getState().tag).toBe("Winter");
+      expect(useKiosk.getState().tagBefore).toBeNull();
+    });
+
+    it("comes back after two contributions too", () => {
+      useKiosk.setState({ tag: "Winter" });
+
+      useKiosk.getState().showPhoto(photo(["Gasthof"]));
+      useKiosk.getState().showPhoto(photo(["Hof"]));
+      useKiosk.getState().releaseFocus();
+
+      expect(useKiosk.getState().tag).toBe("Winter");
+    });
+
+    it("gives way to a keyword the visitor chose meanwhile", () => {
+      useKiosk.setState({ tag: "Winter" });
+
+      useKiosk.getState().showPhoto(photo(["Gasthof"]));
+      useKiosk.getState().setTag("Hof");
+      useKiosk.getState().releaseFocus();
+
+      expect(useKiosk.getState().tag).toBe("Hof");
+    });
+  });
+});
+
+describe("the slide show", () => {
+  beforeEach(() => {
+    useAdmin.setState({ view: "kiosk" });
+    useKiosk.setState({
+      attract: false,
+      openStack: [],
+      openIndex: 0,
+      pulse: null,
+      pulsePending: null,
+      handoff: null,
+    });
+  });
+
+  it("does not start over the admin area", () => {
+    useAdmin.setState({ view: "admin" });
+    useKiosk.getState().startAttract();
+
+    expect(useKiosk.getState().attract).toBe(false);
+  });
+
+  it("does not start over the number pad either", () => {
+    // Somebody is typing a PIN. A slide show over the pad would end in a reload.
+    useAdmin.setState({ view: "pin" });
+    useKiosk.getState().startAttract();
+
+    expect(useKiosk.getState().attract).toBe(false);
+  });
+
+  it("starts in the visitor view", () => {
+    useKiosk.getState().startAttract();
+
+    expect(useKiosk.getState().attract).toBe(true);
+  });
+
+  it("pulses the marker only once the detail view is closed", () => {
+    // A pulse under the detail view runs unseen, and by the time the view closes it is over.
+    useKiosk.getState().openFromShowcase(7);
+    expect(useKiosk.getState().openStack).toEqual([7]);
+    expect(useKiosk.getState().pulse).toBeNull();
+
+    useKiosk.getState().openPhoto(null);
+    expect(useKiosk.getState().pulse).toBe(7);
+  });
+
+  it("pulses once, not on every later close", () => {
+    useKiosk.getState().openFromShowcase(7);
+    useKiosk.getState().openPhoto(null);
+    useKiosk.getState().openPhoto(9);
+    useKiosk.setState({ pulse: null });
+
+    useKiosk.getState().openPhoto(null);
+
+    expect(useKiosk.getState().pulse).toBeNull();
+  });
+
+  it("keeps the screen covered until photo and map are both drawn", () => {
+    // Either one alone is the flash this exists against: the bare map, or a dark screen with a
+    // detail view that has no picture yet.
+    useKiosk.getState().openFromShowcase(7);
+
+    useKiosk.getState().handoffReady("photo");
+    expect(useKiosk.getState().handoff).not.toBeNull();
+
+    useKiosk.getState().handoffReady("map");
+    expect(useKiosk.getState().handoff).toBeNull();
+  });
+
+  it("does not leave the screen covered when something never arrives", () => {
+    vi.useFakeTimers();
+    try {
+      useKiosk.getState().openFromShowcase(7);
+      useKiosk.getState().handoffReady("map");
+
+      vi.advanceTimersByTime(HANDOFF_COVER_MAX_MS);
+
+      expect(useKiosk.getState().handoff).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

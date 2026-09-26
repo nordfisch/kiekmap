@@ -84,10 +84,15 @@ de = Texts(
         a_newer_statement_exists=(
             "Zu diesem Foto gibt es eine neuere Angabe. Bitte diese zuerst zuruecknehmen."
         ),
+        cannot_switch_off=(
+            "Dieses System kann sich nicht selbst abschalten. Das ist nur auf dem Rechner "
+            "im Museum eingerichtet."
+        ),
         street_gone_from_the_index=(
             "Die Strasse aus dieser Angabe steht nicht mehr im Ortsverzeichnis. "
             "Der Ort bleibt daher stehen."
         ),
+        body_too_large=lambda limit: f"Die Anfrage ist zu gross. Die Obergrenze liegt bei {limit}.",
     ),
     photos=PhotoTexts(
         no_such_photo=lambda photo_id: f"Kein Foto mit der Nummer {photo_id}",
@@ -107,10 +112,15 @@ de = Texts(
         ),
         housenumber_unknown="Diese Hausnummer steht nicht im Ortsverzeichnis.",
         housenumber_wrong_street="Diese Hausnummer gehoert nicht zu dieser Strasse.",
+        no_such_date="Dieses Datum gibt es nicht.",
     ),
     backup=BackupTexts(
         stick_gone="Dieser Stick ist nicht mehr da. Bitte neu einstecken.",
         busy="Es ist schon etwas im Gange. Bitte warten, bis es fertig ist.",
+        restore_swapping=(
+            "Gerade wird eine Sicherung eingespielt. Bitte einen Moment warten und es dann "
+            "noch einmal versuchen."
+        ),
         file_gone_from_inbox="Diese Datei liegt nicht mehr im Eingangsordner.",
         not_a_complete_backup="Diese Datei ist keine vollstaendige Sicherung.",
         folder_gone_from_stick="Diesen Ordner gibt es auf dem Stick nicht mehr.",
@@ -146,6 +156,14 @@ de = Texts(
             "Bitte erst das Programm aktualisieren, dann die Sicherung einspielen. "
             "Auf dem Geraet wurde nichts veraendert."
         ),
+        database_in_use=(
+            "Die Angaben sind noch in Gebrauch, vielleicht durch ein laufendes Herunterladen. "
+            "Auf dem Geraet wurde nichts veraendert. Bitte erneut versuchen, sobald es fertig ist."
+        ),
+        command_line_writing=(
+            "Ein Befehl auf der Kommandozeile veraendert gerade die Sammlung. "
+            "Auf dem Geraet wurde nichts veraendert. Bitte erneut versuchen, sobald er fertig ist."
+        ),
         unexpected_entry="Die Datei enthaelt einen unerwarteten Eintrag.",
         something_went_wrong=lambda reason: f"Es ist etwas schiefgegangen: {reason}",
     ),
@@ -155,6 +173,12 @@ de = Texts(
             f"Inhaltsgleich mit Foto {photo_id} ({filename})"
         ),
         no_readable_image=lambda reason: f"Kein lesbares Bild: {reason}",
+        too_many_pixels=lambda megapixels: (
+            f"Das Bild hat zu viele Pixel. Die Obergrenze liegt bei {megapixels} Megapixeln. "
+            "Den Scan bitte mit weniger dpi speichern."
+        ),
+        thumbnail_failed=lambda reason: f"Vorschaubild fehlgeschlagen: {reason}",
+        upload_too_large=lambda limit: f"Die Datei ist zu gross. Die Obergrenze liegt bei {limit}.",
         unknown_format="unbekannt",
         format_not_allowed=lambda found, allowed: (
             f"Format {found} passt nicht (erlaubt sind: {allowed})"

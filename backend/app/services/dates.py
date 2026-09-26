@@ -95,9 +95,8 @@ def format_label(start: date | None, end: date | None, precision: str | DatePrec
 
     Formatted here and not in the browser, although it reaches a screen: the label is part of the
     photo the API hands out, and the map, the detail view and the contribution panel all show the
-    same one. ``docs/adaption.md`` used to name this as what stood in the way of a second language.
-    That was true while the backend had no notion of one; ``KIEKMAP_LANGUAGE`` removed the
-    premise.
+    same one. The backend knows which language the device speaks (``KIEKMAP_LANGUAGE``), so the
+    label costs nothing in a second one.
     """
     dates = texts().dates
     if start is None:

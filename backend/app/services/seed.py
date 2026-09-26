@@ -31,6 +31,7 @@ from app.config import Settings
 from app.models import Change, ImportLog, Photo, PhotoTag, Tag
 from app.services.importer import import_file
 from app.services.storage import original_path, suffix_for_mime
+from app.services.tags import tag_named
 
 log = logging.getLogger(__name__)
 
@@ -107,7 +108,7 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
     """Write every photo and its contributions to ``target``. Returns (photos, contributions).
 
     Deleted photos come along: that two of them are in the collection is part of the state, not a
-    leftover -- otherwise the "Geloescht" list is empty and nobody can check it.
+    leftover -- otherwise the „Gelöscht" list is empty and nobody can check it.
     """
     images = target / IMAGE_DIR_NAME
     images.mkdir(parents=True, exist_ok=True)
@@ -119,7 +120,7 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
     for photo in session.scalars(select(Photo).order_by(Photo.id)):
         suffix = suffix_for_mime(photo.mime)
         if suffix is None:
-            log.warning("Foto %s: unbekanntes Format %s -- uebersprungen", photo.id, photo.mime)
+            log.warning("Photo %s: unknown format %s -- skipped", photo.id, photo.mime)
             continue
 
         source = original_path(settings.photos_dir, photo.sha256, suffix)
@@ -153,8 +154,8 @@ def export(session: Session, settings: Settings, target: Path) -> tuple[int, int
         )
 
     # What is no longer in the collection has no business here. Without this tidying every photo
-    # ever deleted would stay behind as a file -- and a folder that only grows is no
-    # Abbild eines Zustands mehr.
+    # ever deleted would stay behind as a file, and a folder that only grows no longer holds a
+    # state that can be restored.
     for file_name in images.iterdir():
         if file_name.is_file() and file_name.name not in taken:
             file_name.unlink()
@@ -209,7 +210,7 @@ def load(session: Session, settings: Settings, source: Path) -> tuple[int, int]:
     for entry in index.get("photos", []):
         path = images / entry["file"]
         if not path.exists():
-            log.warning("%s fehlt -- uebersprungen", path)
+            log.warning("%s is missing -- skipped", path)
             continue
 
         outcome = import_file(session, path, settings)
@@ -227,9 +228,7 @@ def load(session: Session, settings: Settings, source: Path) -> tuple[int, int]:
             if field in entry:
                 setattr(photo, field, _from_json(field, entry[field]))
 
-        photo.tags.clear()
-        for name in dict.fromkeys(entry.get("tags", [])):
-            photo.tags.append(session.scalar(select(Tag).where(Tag.name == name)) or Tag(name=name))
+        photo.tags = [tag_named(session, name) for name in dict.fromkeys(entry.get("tags", []))]
 
         for change in entry.get("changes", []):
             session.add(

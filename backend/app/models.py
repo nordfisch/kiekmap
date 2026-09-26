@@ -52,9 +52,9 @@ class PhotoStatus(StrEnum):
     """Whether a photo belongs to the collection.
 
     ``DELETED`` means *taken out of the exhibition*, not *removed from the disk*: the row stays,
-    the image file stays, and "Wiederherstellen" brings both back. The status used to be called
-    ``hidden`` -- but nobody on the museum team looks under "hide" for deleting, and a botched
-    scan wants deleting, not hiding.
+    the image file stays, and "Wiederherstellen" brings both back. It is deliberately not called
+    ``hidden``: nobody on the museum team looks under "hide" for deleting, and a botched scan
+    wants deleting, not hiding.
     """
 
     PUBLISHED = "published"
@@ -150,10 +150,9 @@ class Photo(Base):
     # class they are a SQL condition. That is what lets the query for the next open task and the
     # flag in the API payload come from **one** sentence.
     #
-    # They used to be plain properties, and ``api/contribute.py`` carried a second, parallel
-    # formulation for the query. Two definitions of "what is missing" that look right on their own
-    # are the kind of pair that drifts without anyone noticing -- see the test that holds them
-    # together.
+    # As plain properties they would force a second formulation of the query, in
+    # ``api/contribute.py``. Two definitions of "what is missing" that look right on their own
+    # drift apart without anyone noticing -- see the test that holds them together.
     @hybrid_property
     def needs_location(self) -> bool:
         return self.lat is None

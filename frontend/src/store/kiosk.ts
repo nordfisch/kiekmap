@@ -3,7 +3,7 @@
  *
  * Two loops run here at different speeds:
  *
- *   slow  viewport or time range changes -> one query after a short pause
+ *   slow  viewport, time range or keyword changes -> one query after a short pause
  *   fast  the map is panned -> the photos already loaded are re-clustered
  *
  * Without that separation every twitch on the touchscreen would fire a request.
@@ -21,6 +21,8 @@ import {
   fetchPhotos,
 } from "../api/client";
 import { boundsAround, rangeForPhoto } from "../kiosk/focus";
+import { nextInStack } from "../kiosk/stackAdvance";
+import { useAdmin } from "./admin";
 import { axisBounds, clampRange } from "../kiosk/timeAxis";
 
 /** How long the map has to stand still before loading. */
@@ -59,6 +61,14 @@ type KioskState = {
    */
   undatedByHand: boolean;
 
+  /**
+   * The keyword the map is filtered by, or null.
+   *
+   * One at most. Combining keywords with "and" or "or" is a question nobody at a touchscreen
+   * wants to answer. See decisions.md, point 80.
+   */
+  tag: string | null;
+
   photos: PhotoMarker[];
   total: number;
   truncated: boolean;
@@ -88,15 +98,67 @@ type KioskState = {
   } | null;
   /** The time range the visitor had set before the focus moved it. */
   rangeBefore: TimeRange | null;
+  /** The keyword the focus took away because the photo does not carry it, or null. */
+  tagBefore: string | null;
+
+  /**
+   * Counts up whenever the map should show the whole region -- and stay there.
+   *
+   * Not ``focus``: a focus travels back when it ends. A counter rather than a flag, so the same
+   * request twice moves the map twice.
+   */
+  overview: number;
+
+  /** Is the slide show running? See kiosk/AttractMode.tsx. */
+  attract: boolean;
+  /**
+   * The photo whose marker pulses once the detail view closes, and the one waiting for that.
+   *
+   * Set after a tap in the slide show: the detail view opens over the map, and when the visitor
+   * closes it the marker shows where the photo lies. It waits in `pulsePending` because a pulse
+   * under the detail view would run unseen.
+   */
+  pulse: number | null;
+  pulsePending: number | null;
+  /**
+   * While the page after a tap in the slide show is still building, what is ready -- or null.
+   *
+   * The screen stays covered until both the detail view's photo and the map behind it are drawn.
+   * Without the cover the visitor saw the start view and the bare map flash up between the slide
+   * show and the photo they had tapped.
+   */
+  handoff: { map: boolean; photo: boolean } | null;
+
+  /** Start the slide show -- never while the admin area or its number pad is open. */
+  startAttract: () => void;
+  /** After the reload that ended the slide show: open this photo, pulse its marker afterwards. */
+  openFromShowcase: (id: number) => void;
+  /** One part of the page after the reload is drawn. With both, the cover goes. */
+  handoffReady: (part: "map" | "photo") => void;
 
   setViewport: (bbox: Bbox) => void;
   setTimeRange: (timeRange: TimeRange) => void;
   setShowUndated: (on: boolean) => void;
+  /** A keyword from the corner of the map: the same one again switches it off. */
+  setTag: (tag: string) => void;
+  /**
+   * The way in from the detail view: this keyword, with time and place wide open.
+   *
+   * Wide open because the visitor asks "what else is there with this keyword", not "what else is
+   * there with this keyword here and in this decade". Closes the detail view.
+   */
+  filterByTag: (tag: string) => void;
   /** A single photo -- the short form for a stack of length one. */
   openPhoto: (id: number | null) => void;
   openStackAt: (ids: number[], index?: number) => void;
   /** Page through the open stack; stops at either end. */
   stepInStack: (delta: number) => void;
+  /**
+   * The next photo of the open stack, starting again after the last -- the stack paging by itself.
+   *
+   * Separate from `stepInStack`, whose stop at either end is what disables the buttons there.
+   */
+  advanceStack: () => void;
   /**
    * Move only the map somewhere -- for the pin just set, before anything has been contributed.
    *
@@ -122,6 +184,18 @@ type KioskState = {
 let photoAbort: AbortController | null = null;
 let histogramAbort: AbortController | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let pulseTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * The longest the cover may stand, whatever is still missing.
+ *
+ * A photo that fails to load or a map without tiles must not leave the screen dark. After this
+ * the visitor sees whatever there is.
+ */
+export const HANDOFF_COVER_MAX_MS = 6_000;
+
+/** Three pulses of 1.2 s. The CSS animation in global.css has the same numbers. */
+export const PULSE_MS = 3 * 1200;
 
 export function sameViewport(a: Bbox | null, b: Bbox | null): boolean {
   if (!a || !b) return a === b;
@@ -146,7 +220,7 @@ export function queryTimeFilter(
 
 export const useKiosk = create<KioskState>((set, get) => {
   async function loadPhotos() {
-    const { bbox, timeRange, fullRange, showUndated } = get();
+    const { bbox, timeRange, fullRange, showUndated, tag } = get();
     if (!bbox) return;
 
     // Discard superseded requests: on a touchscreen people swipe in quick succession, and the
@@ -162,6 +236,7 @@ export const useKiosk = create<KioskState>((set, get) => {
         queryTimeFilter(timeRange, fullRange),
         MAX_PHOTOS,
         showUndated,
+        tag,
         signal,
       );
       set({
@@ -182,7 +257,7 @@ export const useKiosk = create<KioskState>((set, get) => {
     const signal = histogramAbort.signal;
 
     try {
-      const histogram = await fetchHistogram(bbox, signal);
+      const histogram = await fetchHistogram(bbox, get().tag, signal);
       if (signal.aborted) return;
 
       const { timeRange } = get();
@@ -238,6 +313,35 @@ export const useKiosk = create<KioskState>((set, get) => {
     openIndex: 0,
     focus: null,
     rangeBefore: null,
+    tagBefore: null,
+    overview: 0,
+    tag: null,
+    attract: false,
+    pulse: null,
+    pulsePending: null,
+    handoff: null,
+
+    startAttract() {
+      if (useAdmin.getState().view !== "kiosk") return;
+      set({ attract: true });
+    },
+
+    openFromShowcase(id) {
+      set({
+        openStack: [id],
+        openIndex: 0,
+        pulsePending: id,
+        handoff: { map: false, photo: false },
+      });
+      setTimeout(() => set({ handoff: null }), HANDOFF_COVER_MAX_MS);
+    },
+
+    handoffReady(part) {
+      const { handoff } = get();
+      if (!handoff) return;
+      const next = { ...handoff, [part]: true };
+      set({ handoff: next.map && next.photo ? null : next });
+    },
 
     setViewport(bbox) {
       if (sameViewport(get().bbox, bbox)) return;
@@ -280,8 +384,53 @@ export const useKiosk = create<KioskState>((set, get) => {
       scheduleLoad();
     },
 
+    setTag(tag) {
+      // A choice made during the thank-you is the visitor's, so the end of the focus must not
+      // bring back the keyword it had taken away.
+      set((state) => ({ tag: state.tag === tag ? null : tag, tagBefore: null }));
+      scheduleLoad();
+      const { bbox } = get();
+      if (bbox) void loadHistogram(bbox);
+    },
+
+    filterByTag(tag) {
+      const { fullRange, histogram } = get();
+      const axis = axisBounds(fullRange, histogram?.step);
+      set((state) => ({
+        tag,
+        tagBefore: null,
+        // The whole axis sends no time filter, and the undated photos belong to "wide open".
+        // ``undatedByHand`` stays as it is: this is not the visitor touching the switch.
+        timeRange: axis ? { from: axis.min, to: axis.max } : state.timeRange,
+        showUndated: true,
+        // A focus still running would take range and camera back at its end and undo this.
+        focus: null,
+        rangeBefore: null,
+        openStack: [],
+        openIndex: 0,
+        pulsePending: null,
+        overview: state.overview + 1,
+      }));
+      // The map reports its new viewport when it arrives. This load covers the case where the
+      // region was already on screen and no "moveend" follows.
+      void loadPhotos();
+      const { bbox } = get();
+      if (bbox) void loadHistogram(bbox);
+    },
+
     openPhoto(id) {
-      set({ openStack: id === null ? [] : [id], openIndex: 0 });
+      const { pulsePending } = get();
+      if (id !== null || pulsePending === null) {
+        set({ openStack: id === null ? [] : [id], openIndex: 0 });
+        return;
+      }
+      // Closing the photo the slide show opened: now the marker can be seen, so now it pulses.
+      set({ openStack: [], openIndex: 0, pulse: pulsePending, pulsePending: null });
+      if (pulseTimer) clearTimeout(pulseTimer);
+      pulseTimer = setTimeout(() => {
+        pulseTimer = null;
+        set({ pulse: null });
+      }, PULSE_MS);
     },
 
     openStackAt(ids, index = 0) {
@@ -293,6 +442,12 @@ export const useKiosk = create<KioskState>((set, get) => {
       const next = openIndex + delta;
       if (next < 0 || next >= openStack.length) return;
       set({ openIndex: next });
+    },
+
+    advanceStack() {
+      const { openStack, openIndex } = get();
+      if (openStack.length <= 1) return;
+      set({ openIndex: nextInStack(openIndex, openStack.length) });
     },
 
     showLocation(lat, lon) {
@@ -309,10 +464,16 @@ export const useKiosk = create<KioskState>((set, get) => {
      * Map and time range are moved together and taken back together by ``releaseFocus``. A photo
      * without a place leaves both alone: it is on no map, and moving the slider would only hide
      * other photos.
+     *
+     * **The keyword goes too, if the photo does not carry it.** Otherwise the thank-you promises a
+     * photo on the map that the filter hides. It comes back with the range.
      */
     showPhoto(photo) {
       const range = rangeForPhoto(photo, get().fullRange);
       if (photo.lat === null || photo.lon === null) return;
+
+      const { tag, bbox } = get();
+      const hidesIt = tag !== null && !photo.tags.includes(tag);
 
       set((state) => ({
         focus: {
@@ -324,14 +485,23 @@ export const useKiosk = create<KioskState>((set, get) => {
         // visitor would end up with a decade they never set.
         rangeBefore: state.rangeBefore ?? state.timeRange,
         timeRange: range ?? state.timeRange,
+        ...(hidesIt ? { tag: null, tagBefore: state.tagBefore ?? tag } : {}),
       }));
       void loadPhotos();
+      if (hidesIt && bbox) void loadHistogram(bbox);
     },
 
     releaseFocus() {
-      const { rangeBefore } = get();
-      set({ focus: null, rangeBefore: null, ...(rangeBefore ? { timeRange: rangeBefore } : {}) });
-      if (rangeBefore) void loadPhotos();
+      const { rangeBefore, tagBefore, bbox } = get();
+      set({
+        focus: null,
+        rangeBefore: null,
+        tagBefore: null,
+        ...(rangeBefore ? { timeRange: rangeBefore } : {}),
+        ...(tagBefore !== null ? { tag: tagBefore } : {}),
+      });
+      if (rangeBefore || tagBefore !== null) void loadPhotos();
+      if (tagBefore !== null && bbox) void loadHistogram(bbox);
     },
 
     /**

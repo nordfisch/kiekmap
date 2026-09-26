@@ -1,7 +1,7 @@
 """API payload shapes."""
 
 from datetime import UTC, date, datetime
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
@@ -31,6 +31,19 @@ def _as_utc(value: datetime) -> datetime:
 #: all. Reading it as local time is exactly right; stamping UTC on it would move a scan of 14:00
 #: to 16:00 and invent a fact.
 UtcDatetime = Annotated[datetime, AfterValidator(_as_utc)]
+
+#: The longest ``description`` or ``provenance`` the API takes, in characters.
+#:
+#: **Measured, not chosen.** In the initial collection of 1,324 photos the longest description has
+#: 855 characters and the longest provenance 580; the 99th percentiles are 467 and 217. The change
+#: log holds one longer value, a description of 942 characters that was shortened since.
+#:
+#: Four thousand is more than four times that. It also covers what the importer can bring along: an
+#: IPTC caption holds at most 2,000 bytes, and a title too long to be one is put in front of it (see
+#: ``importer.TITLE_MAX``). A photo straight from an import therefore stays editable.
+#:
+#: ``frontend/src/api/admin.ts`` repeats the number for the ``maxLength`` of its fields.
+LONG_TEXT_MAX = 4_000
 
 
 class PhotoMarker(BaseModel):
@@ -66,7 +79,9 @@ class PhotoMarker(BaseModel):
     def from_photo(cls, photo: Photo) -> "PhotoMarker":
         return cls(
             id=photo.id,
-            lat=photo.lat,  # type: ignore[arg-type] -- the query excludes NULL
+            # The query excludes NULL. Nothing may follow the bracket: the text that stood here
+            # made the whole comment invalid, so it suppressed nothing.
+            lat=photo.lat,  # type: ignore[arg-type]
             lon=photo.lon,  # type: ignore[arg-type]
             title=photo.title,
             place_name=photo.place_name,
@@ -248,6 +263,15 @@ class PlaceOut(BaseModel):
         )
 
 
+#: How precise a date for a whole batch can be -- the upload form and the stick import.
+#:
+#: The batch form holds a year and nothing finer. "month" and "day" need parts it does not have, and
+#: ``dates.date_range`` raised a ValueError for them: a 500 for the upload, after the file was
+#: already stored, and an aborted stick import. "unknown" beside a year raised nothing and marked
+#: the photo as dated by a curator while leaving it undated. The admin area only ever sends the two.
+BatchPrecision = Literal["year", "decade"]
+
+
 class DateInput(BaseModel):
     """What a visitor or curator may state as a date."""
 
@@ -338,9 +362,9 @@ class PhotoUpdate(BaseModel):
     """
 
     title: str | None = Field(default=None, max_length=300)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=LONG_TEXT_MAX)
     credit: str | None = Field(default=None, max_length=200)
-    provenance: str | None = None
+    provenance: str | None = Field(default=None, max_length=LONG_TEXT_MAX)
     date: DateInput | None = None
     location: LocationUpdate | None = None
     tags: list[str] | None = None
@@ -527,13 +551,13 @@ class ImportRequest(DriveChoice):
     """Which folder to take in, and what applies to all of it."""
 
     year: int | None = Field(default=None, ge=1800, le=2100)
-    precision: DatePrecision = DatePrecision.YEAR
+    precision: BatchPrecision = "year"
     lat: float | None = Field(default=None, ge=-90, le=90)
     lon: float | None = Field(default=None, ge=-180, le=180)
     place_name: str | None = Field(default=None, max_length=300)
     #: A box of scans usually comes from one person -- so both of these belong to the whole batch.
     credit: str | None = Field(default=None, max_length=200)
-    provenance: str | None = None
+    provenance: str | None = Field(default=None, max_length=LONG_TEXT_MAX)
     #: Keywords for the whole batch, separated by commas. Unlike the fields above they are *added*
     #: to what the file itself brought, because a keyword list is a set -- see
     #: ``importer.apply_batch_defaults``.

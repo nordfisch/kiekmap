@@ -7,7 +7,10 @@ run. See docs/decisions.md, point 3.
 """
 
 import hashlib
+import re
 from pathlib import Path
+
+_SHA256 = re.compile(r"[0-9a-f]{64}")
 
 #: Sizes of the pre-rendered thumbnails in pixels (longer edge).
 THUMBNAIL_SIZES = (240, 1200)
@@ -38,11 +41,11 @@ _SUFFIX_BY_MIME = {mime: suffix for mime, suffix in ALLOWED_FORMATS.values()}
 def suffix_for_mime(mime: str) -> str | None:
     """The file ending belonging to a stored MIME type, or None for one we never wrote.
 
-    Its own function because three callers need it and each of them used to answer it for itself.
-    One of the three answered it by arithmetic on the string -- ``mime.split("/")[-1]`` with
-    ``jpeg`` and ``tiff`` patched back by hand -- which happened to agree with the table and would
-    have stopped agreeing the moment a format arrived whose ending is not the tail of its MIME
-    type. A rule that lives in two places is a rule that will disagree with itself.
+    Its own function because three callers need it. Working the ending out by arithmetic on the
+    string -- ``mime.split("/")[-1]`` with ``jpeg`` and ``tiff`` patched back by hand -- agrees
+    with the table today and stops agreeing the moment a format arrives whose ending is not the
+    tail of its MIME type. A rule that lives in two places is a rule that will disagree with
+    itself.
     """
     return _SUFFIX_BY_MIME.get(mime)
 
@@ -61,7 +64,15 @@ def _fanned_out(sha256: str) -> Path:
 
     Irrelevant at a few thousand files, but the difference between a directory that opens and one
     that does not once the collection grows.
+
+    **The value is checked, because it is not always ours.** The import computes it, but a restore
+    brings in a whole database from a stick or a ZIP, and from then on every row is whatever that
+    file says. A hash starting with ``../.`` puts ``/.`` into the second segment, which makes the
+    path absolute. The photo routes, which answer without a PIN, then served any file on the device
+    whose name ends in the photo's suffix.
     """
+    if not _SHA256.fullmatch(sha256):
+        raise ValueError(f"not a SHA-256: {sha256!r}")
     return Path(sha256[0:2]) / sha256[2:4]
 
 

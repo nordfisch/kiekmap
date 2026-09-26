@@ -10,7 +10,7 @@
  * lines up through the same grid rather than "roughly".
  */
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { type Selection, fetchOverview } from "../api/admin";
 import { useAdmin } from "../store/admin";
@@ -67,6 +67,10 @@ function Figure({
 export function Overview({ onNavigate }: { onNavigate: (target: Target) => void }) {
   const { data, error, loading } = useLoaded(useCallback(() => fetchOverview(), []));
   const leave = useAdmin((s) => s.leave);
+  const switchOff = useAdmin((s) => s.switchOff);
+  const busy = useAdmin((s) => s.busy);
+  const offError = useAdmin((s) => s.error);
+  const [confirming, setConfirming] = useState(false);
 
   if (loading && !data) return <p className="admin__note">{t.admin.loading}</p>;
   if (error) return <p className="admin__error">{error}</p>;
@@ -132,18 +136,57 @@ export function Overview({ onNavigate }: { onNavigate: (target: Target) => void 
         />
       </div>
 
-      {/* The kiosk has no browser controls -- no reload button, no address bar, no
-          keyboard. Without this button a stuck display would leave only the power plug (or five
-          minutes of waiting until the idle reset reloads).
+      {/* The display on the left, the device on the right. Both are about the running of it
+          rather than the collection, and both are rare -- hence the quiet block at the foot.
 
-          Since "Verwaltung beenden" reloads by itself, it technically does the same thing. It
-          stays anyway: whoever wants to fix a stuck display looks for "neu laden", not for
-          "beenden". The button is the name for the route, not a second route. */}
+          The kiosk has no browser controls -- no reload button, no address bar, no keyboard.
+          Without the left one a stuck display would leave only the power plug (or five minutes of
+          waiting until the idle reset reloads). Since "Verwaltung beenden" reloads by itself, it
+          technically does the same thing. It stays anyway: whoever wants to fix a stuck display
+          looks for "neu laden", not for "beenden". The button is the name for the route, not a
+          second route. */}
       <div className="overview__repair">
-        <button type="button" className="button" onClick={() => void leave()}>
-          {t.admin.overview.reload}
-        </button>
-        <p className="admin__note">{t.admin.overview.reloadHint}</p>
+        <div className="overview__repair-item">
+          <button type="button" className="button" onClick={() => void leave()}>
+            {t.admin.overview.reload}
+          </button>
+          <p className="admin__note">{t.admin.overview.reloadHint}</p>
+        </div>
+
+        {/* The orderly way off, for a device that is otherwise switched off at the wall. The
+            confirmation replaces the button rather than opening a dialog, the way the restore
+            asks -- see Backup.tsx. */}
+        <div className="overview__repair-item">
+          {confirming ? (
+            <div className="overview__confirm">
+              <p className="overview__confirm-title">{t.admin.shutdown.confirmTitle}</p>
+              <p>{t.admin.shutdown.confirm}</p>
+              <div className="overview__actions">
+                <button
+                  type="button"
+                  className="button button--primary"
+                  disabled={busy}
+                  onClick={() => void switchOff()}
+                >
+                  {t.admin.shutdown.yes}
+                </button>
+                <button type="button" className="button" onClick={() => setConfirming(false)}>
+                  {t.admin.shutdown.no}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <button type="button" className="button" onClick={() => setConfirming(true)}>
+                {t.admin.shutdown.button}
+              </button>
+              <p className="admin__note">{t.admin.shutdown.hint}</p>
+            </>
+          )}
+          {/* A refusal -- no watcher on this host, or a job running -- leaves the confirmation
+              standing with the backend's own sentence under it. */}
+          {offError && <p className="admin__error">{offError}</p>}
+        </div>
       </div>
     </div>
   );

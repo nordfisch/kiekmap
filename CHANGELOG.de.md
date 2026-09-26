@@ -1,11 +1,136 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 3ceeb9548830f3fc5e53e96a6c67658e4ba084f6ad12d3c7597d674d8cba4a54 -->
+<!-- source-sha: 7b1db24bf57e39f8784a154498a8ad81a69747bf70aa092da9a1f7a768cdf23d -->
 
 # Änderungen
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach SemVer.
 
-## [0.9.0] — 2. September 2026
+## [Unveröffentlicht]
+
+## [0.9.6] — 2026-09-27
+
+**Die Sammlung lässt sich von zu Hause füllen, und das Gerät macht von selbst weiter, solange es
+niemand berührt.** Es läuft online hinter einem Kennwort, zeigt im Leerlauf eine Diashow, blättert
+einen Stapel von selbst um und lässt sich aus der Verwaltung ausschalten. Eine Durchsicht vor dem
+ersten Pi hat die Korrekturen unten gefunden.
+
+### Hinzugefügt
+
+- **Die Sammlung kann online laufen, hinter einem Kennwort.** `make prod-web` stellt Caddy vor die
+  beiden Container, die auch auf dem Pi laufen: HTTPS und eine Anmeldung für das ganze Team — über
+  der Karte ebenso wie über der API. Damit kann das Museum die Datenbank von zu Hause aus füllen,
+  bevor ein Gerät im Ausstellungsraum steht. Siehe [Punkt 76](docs/developer/decisions.md)
+- **Die Karte beschriftet den Boden in der Sprache des Ortes.** `labelLanguage` in der
+  `region.json` sagt, wie Länder, Gewässer und Landkreise heißen; `KIEKMAP_LANGUAGE` bleibt das,
+  was das Gerät seinen Besuchern sagt. Beides stimmt in Holm überein und geht für ein Museum
+  anderswo auseinander. Wirkt ohne neues `make tiles`. Siehe
+  [Punkt 79](docs/developer/decisions.md)
+- **Die Karte filtert nach Stichwort.** Knöpfe in ihrer Ecke nennen die Stichwörter, die das Museum
+  in `KIEKMAP_MAP_TAGS` gewählt hat, immer eines aktiv. Ein Stichwort in der Detailansicht eines
+  Fotos filtert die Karte ebenfalls, mit weit geöffneter Zeit und ganzem Ort. Siehe
+  [Punkt 80](docs/developer/decisions.md)
+- **Eine Diashow, wenn niemand das Gerät benutzt.** Nach fünf Minuten ohne Berührung, oder sofort
+  nach einem Tipp auf das Wappen, bewegen sich vier Fotos langsam, und alle fünf Sekunden blättert
+  eines zum nächsten um. Das Band, das zum Tippen einlädt, wandert über den Bildschirm, damit nichts
+  einbrennt. Ein Tipp auf ein Foto öffnet die Karte um dieses Foto herum, mit dem Foto groß. Die Verwaltung schließt nach zwei Minuten ohne Berührung, außer während einer Sicherung,
+  Rücksicherung, eines Imports oder Hochladens. Siehe [Punkt 81](docs/developer/decisions.md)
+- **Die Kommandozeile für die erste Befüllung einer Sammlung ist dokumentiert** ([#74])
+- **Ein Stapel in der Detailansicht blättert von selbst um**, bis der Besucher ihn berührt ([#52])
+- **Das Gerät lässt sich aus der Verwaltung ausschalten** ([#21])
+
+### Geändert
+
+- **MapLibre 6.** Die Karte braucht jetzt WebGL 2, das Gerät muss also ein Raspberry Pi 4 oder 5
+  sein; ein Pi 3 zeigt eine graue Karte. Siehe [Punkt 82](docs/developer/decisions.md)
+
+### Behoben
+
+- **Vier Fehler in der Pi-Einrichtung, gefunden vor dem ersten Gerät.** `setup-pi.sh` installierte
+  `chromium-browser`, ein Paket, das Raspberry Pi OS seit Bookworm `chromium` nennt — unter `set -e`
+  starb die Einrichtung an ihrer ersten Aufgabe. `update.sh` startete Compose aus `deploy/`, wo die
+  `.env` nicht gelesen wird, sodass die eben geschriebene Version ungenutzt blieb und der Pi das
+  Frontend selbst gebaut hätte. `--disable-pinch=false` schaltete den Pinch-Zoom ab, weil Chromium
+  diesen Schalter über seine Anwesenheit liest. Und ein Stick ohne Bezeichnung verschob die
+  Argumente der udev-Regel, sodass ein FAT-Stick ohne `uid=1000` eingehängt wurde und die Sicherung
+  scheiterte, nachdem jemand den Knopf gedrückt hatte. Siehe
+  [Punkt 77](docs/developer/decisions.md)
+- **Zwei deutsche Meldungen im Containerstart und im Frontend-Bau**, jetzt beide englisch. Der
+  Sprachprüfer liest Kommentare, nicht den Text, den ein Skript ausgibt — beide waren durch jeden
+  Lauf gekommen
+- **Das Betriebshandbuch schickte das Wappen auf den Pi**, wo es niemand liest, und verlangte
+  danach einen Neubau auf dem Gerät. Es geht auf dem Entwicklungsrechner ins Frontend-Abbild
+- **Das echte Wappen kann nicht mehr in einen Commit rutschen.** `tools/check_logo.py` läuft im
+  Git-Hook und lehnt eine vorgemerkte Änderung am Platzhalter ab, solange der Generator nicht
+  mitgeändert wurde. Es liest den Index, nicht das Arbeitsverzeichnis — auf einem Rechner, der ein
+  Gerät einrichtet, gehört das echte Wappen ins Arbeitsverzeichnis. Zweimal war es hineingerutscht.
+  Siehe [Punkt 78](docs/developer/decisions.md)
+- **Ein deutsches Segment in einem API-Pfad.** Aus `/api/photos/tags/alle` wird
+  `/api/photos/tags`. Das zweite Segment gab es, weil die Route hinter `/photos/{photo_id}` stand,
+  die einen `int` nimmt und `/photos/tags` mit einer 422 verschluckt — die Route ist nach oben
+  gewandert, und ein Test hält sie dort
+- **Eine unlesbare Datei hält den Eingangsordner nicht mehr an** ([#59])
+- **Ein gelöschtes Foto ist unter seiner Nummer nicht mehr öffentlich** ([#60])
+- **Eine Angabe während einer Wiederherstellung geht nicht mehr verloren** ([#61])
+- **Gleichzeitige Anmeldeversuche kommen nicht mehr an der Sperre vorbei** ([#62])
+- **Zwei gleichzeitige Importe derselben Datei enden nicht mehr mit einem Fehler** ([#63])
+- **Hochladen oder Wiederherstellen kann die SD-Karte nicht mehr füllen** ([#64])
+- **Eine eingespielte Sicherung erreicht keine Dateien außerhalb der Sammlung mehr** ([#65])
+- **Zwei gleichzeitig antwortende Besucher überschreiben sich nicht mehr** ([#66])
+- **Ein unmögliches Datum eines Besuchers führt nicht mehr zu einem Serverfehler** ([#67])
+- **Das Zurücknehmen einer Besucherangabe überschreibt keine neuere mehr** ([#68])
+- **Ein Stapel nimmt als Genauigkeit nur Jahr oder Jahrzehnt an** ([#69])
+- **Die PIN-Sperre gilt nicht mehr als jahrelanger Schutz; es sind etwa 33 Stunden** ([#70])
+- **Ein Befehl auf der Kommandozeile schreibt nicht mehr in eine Wiederherstellung** ([#71])
+- **Vorschaubilder und Originale laden mit einer Datenbankabfrage statt zwei** ([#73])
+- **`make seed` lädt die Beispielsammlung wieder** ([#75])
+- **nginx sendet Sicherheits-Header** ([#76])
+- **Das Backend hat keine CORS-Middleware mehr, die niemand brauchte** ([#78])
+- **Ein zweiter Backend-Prozess auf demselben Datenverzeichnis bricht beim Start ab** ([#79])
+- **Überlange Eingaben werden abgewiesen statt einen Serverfehler auszulösen** ([#80])
+- **Große Scans werden für Vorschaubilder nicht mehr vollständig dekodiert** ([#81])
+- **Ein laufender Download lehnt eine Wiederherstellung sofort ab, ohne 503 am Kiosk** ([#82])
+- **Ruff prüft das Python des Projekts gegen Sicherheitsregeln** ([#85])
+- **Kaputte Dateien jedes erlaubten Formats werden beantwortet statt zu scheitern** ([#87])
+- **Die Datenbank entsteht beim Start statt beim Import eines Moduls** ([#88])
+- **Die Sprachregel gilt wieder: Bezeichner, Protokollzeilen und Meldungen** ([#83])
+- **Kommentare tragen Grund und Stolperfalle, nicht die datierte Vorgeschichte** ([#84])
+- **mypy prüft das Backend, bevor die Tests laufen** ([#86])
+- **Die Schritte zu einer Fassung stehen in einer Liste, und `build_release.py --notes` verweigert
+  den Text einer falschen Fassung** ([#116])
+
+[#116]: https://github.com/nordfisch/kiekmap/issues/116
+[#21]: https://github.com/nordfisch/kiekmap/issues/21
+[#52]: https://github.com/nordfisch/kiekmap/issues/52
+[#59]: https://github.com/nordfisch/kiekmap/issues/59
+[#60]: https://github.com/nordfisch/kiekmap/issues/60
+[#61]: https://github.com/nordfisch/kiekmap/issues/61
+[#62]: https://github.com/nordfisch/kiekmap/issues/62
+[#63]: https://github.com/nordfisch/kiekmap/issues/63
+[#64]: https://github.com/nordfisch/kiekmap/issues/64
+[#65]: https://github.com/nordfisch/kiekmap/issues/65
+[#66]: https://github.com/nordfisch/kiekmap/issues/66
+[#67]: https://github.com/nordfisch/kiekmap/issues/67
+[#68]: https://github.com/nordfisch/kiekmap/issues/68
+[#69]: https://github.com/nordfisch/kiekmap/issues/69
+[#70]: https://github.com/nordfisch/kiekmap/issues/70
+[#71]: https://github.com/nordfisch/kiekmap/issues/71
+[#73]: https://github.com/nordfisch/kiekmap/issues/73
+[#75]: https://github.com/nordfisch/kiekmap/issues/75
+[#76]: https://github.com/nordfisch/kiekmap/issues/76
+[#78]: https://github.com/nordfisch/kiekmap/issues/78
+[#79]: https://github.com/nordfisch/kiekmap/issues/79
+[#80]: https://github.com/nordfisch/kiekmap/issues/80
+[#81]: https://github.com/nordfisch/kiekmap/issues/81
+[#82]: https://github.com/nordfisch/kiekmap/issues/82
+[#85]: https://github.com/nordfisch/kiekmap/issues/85
+[#87]: https://github.com/nordfisch/kiekmap/issues/87
+[#88]: https://github.com/nordfisch/kiekmap/issues/88
+[#74]: https://github.com/nordfisch/kiekmap/issues/74
+[#83]: https://github.com/nordfisch/kiekmap/issues/83
+[#84]: https://github.com/nordfisch/kiekmap/issues/84
+[#86]: https://github.com/nordfisch/kiekmap/issues/86
+
+## [0.9.0] — 2026-09-02
 
 **Das Gerät spricht zwei Sprachen, und die Dokumentation hat eine Adresse.** An der Arbeit eines
 Museums mit seinen Fotos hat sich nichts geändert; geändert hat sich, wer Gerät und Dokumentation

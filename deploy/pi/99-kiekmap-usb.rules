@@ -9,8 +9,14 @@
 # ID_FS_USAGE=="filesystem" lets through only partitions that really carry a filesystem: the disk
 # itself (/dev/sda) and empty partition tables stay outside.
 
+# The filesystem comes before the label, and not the other way round. udev fills the placeholders
+# in and splits at the spaces afterwards, so an empty ID_FS_LABEL -- plenty of sticks carry none --
+# leaves no gap: the following argument slides up. With the label in front, "vfat" would arrive as
+# the label and the filesystem empty, and the stick would be mounted without "uid=1000". The
+# backup would then fail after somebody had pressed the button. Last, an empty label falls off the
+# end and changes nothing.
 ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{ID_FS_USAGE}=="filesystem", \
-    RUN+="/usr/local/sbin/kiekmap-usb-mount mount %E{DEVNAME} %E{ID_FS_LABEL} %E{ID_FS_TYPE}"
+    RUN+="/usr/local/sbin/kiekmap-usb-mount mount %E{DEVNAME} %E{ID_FS_TYPE} %E{ID_FS_LABEL}"
 
 ACTION=="remove", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", \
     RUN+="/usr/local/sbin/kiekmap-usb-mount unmount %E{DEVNAME}"

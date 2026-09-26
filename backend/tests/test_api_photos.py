@@ -5,6 +5,8 @@ the selection 1925-1930. With a query for containment instead of overlap it drop
 and with it most of a local history museum's collection.
 """
 
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -63,7 +65,7 @@ class TestTimeFilter:
             "/api/photos", params={"bbox": BBOX, "from_year": 1925, "to_year": 1930}
         )
 
-        assert response.json()["total"] == 1, "1920er-Foto muss in 1925-1930 erscheinen"
+        assert response.json()["total"] == 1, "a photo of the 1920s has to appear in 1925-1930"
 
     def test_a_decade_outside_does_not_appear(self, client: TestClient, session, make_photo):
         make_photo(year=1920, precision=DatePrecision.DECADE)
@@ -84,7 +86,7 @@ class TestTimeFilter:
             response = client.get(
                 "/api/photos", params={"bbox": BBOX, "from_year": start, "to_year": end}
             )
-            assert response.json()["total"] == 1, f"{start}-{end} muss 1932 enthalten"
+            assert response.json()["total"] == 1, f"{start}-{end} has to contain 1932"
 
     def test_swapped_years_are_turned_around(self, client: TestClient, session, make_photo):
         make_photo(year=1932)
@@ -223,7 +225,7 @@ class TestTheLimit:
 
         assert len(response["photos"]) == 2
         assert response["total"] == 5
-        assert response["truncated"] is True, "die Karte soll zum Hineinzoomen auffordern koennen"
+        assert response["truncated"] is True, "the map has to be able to ask for a closer zoom"
 
     def test_no_notice_without_a_limit(self, client: TestClient, session, make_photo):
         make_photo()
@@ -326,8 +328,8 @@ class TestHistogram:
 
         data = client.get("/api/photos/histogram", params={"bbox": BBOX}).json()
 
-        assert data["bars"] == [{"year": 1930, "count": 1}], "Balken zeigen den Ausschnitt"
-        assert data["collection_from"] == 1890, "die Achse zeigt den ganzen Bestand"
+        assert data["bars"] == [{"year": 1930, "count": 1}], "the bars show the current section"
+        assert data["collection_from"] == 1890, "the axis shows the whole collection"
 
     def test_the_width_belongs_to_the_collection_too(self, client: TestClient, session, make_photo):
         """Otherwise the meaning of the bars would change while panning the map.
@@ -440,6 +442,77 @@ class TestServingFiles:
         assert response.headers["content-type"] == "image/jpeg"
         assert response.content[:2] == b"\xff\xd8", "JPEG marker"
 
+    def test_a_deleted_photo_hands_out_neither_details_nor_original(
+        self, client: TestClient, session, imported_photo
+    ):
+        """Every route here answers without a PIN, and the ids count up.
+
+        The lists filtered deleted photos out, the routes by id did not. A photo taken out for its
+        rights stayed downloadable at full size under a number anybody could guess.
+        """
+        imported_photo.status = PhotoStatus.DELETED
+        session.commit()
+
+        assert client.get(f"/api/photos/{imported_photo.id}").status_code == 404
+        assert client.get(f"/api/photos/{imported_photo.id}/image").status_code == 404
+
+    def test_a_deleted_photo_still_has_a_thumbnail(
+        self, client: TestClient, session, imported_photo
+    ):
+        """Open on purpose: „Gelöscht" in the admin area shows it through this route.
+
+        An <img> sends no X-Admin-Token. Whoever closes this route has to give the admin area
+        another way to its images first -- this test says so before the list goes blank. See
+        decisions.md, point 83.
+        """
+        imported_photo.status = PhotoStatus.DELETED
+        session.commit()
+
+        assert client.get(f"/api/photos/{imported_photo.id}/thumb").status_code == 200
+
+    @pytest.fixture
+    def statements(self, session):
+        """The SQL statements the engine sends, collected while a test runs."""
+        from sqlalchemy import event
+
+        import app.db
+
+        sent: list[str] = []
+
+        def record(conn, cursor, statement, parameters, context, executemany):
+            sent.append(statement)
+
+        engine = app.db.current_database().engine
+        event.listen(engine, "before_cursor_execute", record)
+        yield sent
+        event.remove(engine, "before_cursor_execute", record)
+
+    @pytest.mark.parametrize("route", ["thumb", "image"])
+    def test_a_file_request_does_not_load_the_tags(
+        self, client: TestClient, session, imported_photo, statements, route
+    ):
+        """A tag query here was a second statement for every thumbnail the map loads first."""
+        from app.services.tags import add_tags
+
+        add_tags(session, imported_photo, ["Gebäude", "Schule"])
+        session.commit()
+        statements.clear()
+
+        response = client.get(f"/api/photos/{imported_photo.id}/{route}")
+
+        assert response.status_code == 200
+        assert len(statements) == 1, statements
+
+    def test_the_detail_still_carries_the_tags(self, client: TestClient, session, imported_photo):
+        from app.services.tags import add_tags
+
+        add_tags(session, imported_photo, ["Gebäude", "Schule"])
+        session.commit()
+
+        data = client.get(f"/api/photos/{imported_photo.id}").json()
+
+        assert sorted(data["tags"]) == ["Gebäude", "Schule"]
+
     def test_an_imported_photo_appears_on_the_map(self, client: TestClient, imported_photo):
         """The GPS test image lies in Holm and carries a capture date of 1975."""
         response = client.get(
@@ -448,6 +521,53 @@ class TestServingFiles:
 
         assert response["total"] == 1
         assert response["photos"][0]["date_label"] == "21. Juni 1975"
+
+
+class TestAHashThatIsNoHash:
+    """The hash becomes a path, and after a restore the hash comes from somebody else's database.
+
+    A value starting with ``../.`` put ``/.`` into the second segment and made the path absolute.
+    The routes served any file on the device whose name ends like a photo, without a PIN.
+    """
+
+    def _pointing_at(self, session, make_photo, target: Path):
+        photo = make_photo()
+        photo.sha256 = "../../" + str(target.with_suffix("")).lstrip("/")
+        session.commit()
+        return photo
+
+    def test_the_original_route_does_not_leave_the_photo_folder(
+        self, client: TestClient, session, settings, make_photo
+    ):
+        outside = settings.data_dir / "not_a_photo.jpg"
+        outside.write_bytes(b"\xff\xd8 private")
+        photo = self._pointing_at(session, make_photo, outside)
+
+        response = client.get(f"/api/photos/{photo.id}/image")
+
+        assert response.status_code == 404
+        assert b"private" not in response.content
+
+    def test_the_thumbnail_route_does_not_leave_the_thumbnail_folder(
+        self, client: TestClient, session, settings, make_photo
+    ):
+        outside = settings.data_dir / "not_a_thumbnail.webp"
+        outside.write_bytes(b"RIFF private")
+        photo = self._pointing_at(session, make_photo, outside)
+
+        response = client.get(f"/api/photos/{photo.id}/thumb")
+
+        assert response.status_code == 404
+        assert b"private" not in response.content
+
+    def test_the_path_builders_refuse_it(self, settings):
+        from app.services.storage import original_path, thumbnail_path
+
+        for value in ("../." + "a" * 60, "A" * 64, "a" * 63, "a" * 64 + "/"):
+            with pytest.raises(ValueError):
+                original_path(settings.photos_dir, value, ".jpg")
+            with pytest.raises(ValueError):
+                thumbnail_path(settings.thumbs_dir, value, 240)
 
 
 class TestFileSuffix:
@@ -468,7 +588,7 @@ class TestFileSuffix:
         from app.services.storage import ALLOWED_FORMATS, suffix_for_mime
 
         for mime, suffix in ALLOWED_FORMATS.values():
-            assert suffix_for_mime(mime) == suffix, f"{mime} findet seine Endung nicht"
+            assert suffix_for_mime(mime) == suffix, f"{mime} does not find its suffix"
 
     def test_an_unknown_type_yields_no_suffix(self):
         from app.services.storage import suffix_for_mime
@@ -492,3 +612,197 @@ class TestFileSuffix:
 
         assert response.status_code == 404
         assert response.json()["detail"] == "Originaldatei fehlt"
+
+
+class TestTheTagList:
+    """`/photos/tags` -- and why the route sits where it sits."""
+
+    def test_the_tag_list_answers_under_its_own_path(self, client: TestClient, session):
+        from app.models import Tag
+
+        session.add_all([Tag(name="Winter"), Tag(name="Fest")])
+        session.commit()
+
+        response = client.get("/api/photos/tags")
+
+        assert response.status_code == 200
+        assert response.json() == ["Fest", "Winter"]
+
+    def test_the_photo_route_does_not_swallow_it(self, client: TestClient):
+        """The trap that shaped this path, and the reason for a test with no data in it.
+
+        ``/photos/{photo_id}`` takes an ``int``. Declared before the tag list it matches
+        ``/photos/tags`` first, fails to read "tags" as a number and answers 422 -- the list is
+        then unreachable and nothing says why. Until 10 September 2026 the path avoided this by
+        carrying a second segment, and that segment was German: ``/photos/tags/alle``.
+        """
+        assert client.get("/api/photos/tags").status_code == 200
+
+
+@pytest.fixture
+def tagged(session, make_photo):
+    """A photo with keywords -- ``make_photo`` builds none."""
+    from app.services.tags import add_tags
+
+    def create(names: list[str], **fields):
+        photo = make_photo(**fields)
+        session.flush()
+        add_tags(session, photo, names)
+        return photo
+
+    return create
+
+
+class TestKeywordFilter:
+    """The third sieve beside place and time. Only one keyword at a time."""
+
+    def test_a_photo_without_the_keyword_drops_out(self, client: TestClient, session, tagged):
+        tagged(["Gasthof"], title="Gasthof Petersen")
+        tagged(["Hof"], title="Hof Sieveking")
+        session.commit()
+
+        data = client.get("/api/photos", params={"bbox": BBOX, "tag": "Gasthof"}).json()
+
+        assert data["total"] == 1
+        assert data["photos"][0]["title"] == "Gasthof Petersen"
+
+    def test_keyword_and_time_range_hold_together(self, client: TestClient, session, tagged):
+        """The keyword narrows the time filter, it does not replace it -- and overlap still counts.
+
+        A decade photo has to stay in a selection that starts in the middle of its decade, keyword
+        or not.
+        """
+        tagged(["Winter"], year=1920, precision="decade", sha="a" * 64)
+        tagged(["Winter"], year=1960, sha="b" * 64)
+        tagged(["Gasthof"], year=1925, sha="c" * 64)
+        session.commit()
+
+        data = client.get(
+            "/api/photos",
+            params={
+                "bbox": BBOX,
+                "tag": "Winter",
+                "from_year": 1925,
+                "to_year": 1930,
+                "include_undated": False,
+            },
+        ).json()
+
+        assert data["total"] == 1
+
+    def test_an_unknown_keyword_yields_an_empty_map_not_an_error(
+        self, client: TestClient, session, tagged
+    ):
+        tagged(["Winter"])
+        session.commit()
+
+        response = client.get("/api/photos", params={"bbox": BBOX, "tag": "Sommer"})
+
+        assert response.status_code == 200
+        assert response.json()["total"] == 0
+
+    def test_the_histogram_counts_only_photos_with_the_keyword(
+        self, client: TestClient, session, tagged
+    ):
+        """Bars and the undated count follow the keyword.
+
+        Otherwise the slider would show bars for photos the map hides, and the switch beside it
+        would offer undated photos that do not appear when switched on.
+        """
+        tagged(["Winter"], year=1932, sha="a" * 64)
+        tagged(["Winter"], year=None, sha="b" * 64)
+        tagged(["Gasthof"], year=1950, sha="c" * 64)
+        tagged(["Gasthof"], year=None, sha="d" * 64)
+        session.commit()
+
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX, "tag": "Winter"}).json()
+
+        assert data["bars"] == [{"year": 1932, "count": 1}]
+        assert data["undated"] == 1
+
+    def test_the_axis_ignores_the_keyword(self, client: TestClient, session, tagged):
+        """The axis stays put when a keyword is chosen, as it does when the map moves."""
+        tagged(["Winter"], year=1932, sha="a" * 64)
+        tagged(["Gasthof"], year=1890, sha="b" * 64)
+        session.commit()
+
+        data = client.get("/api/photos/histogram", params={"bbox": BBOX, "tag": "Winter"}).json()
+
+        assert data["collection_from"] == 1890
+
+
+class TestTheOfferedKeywords:
+    """`/photos/tags/offered` -- the buttons in the corner of the map."""
+
+    def test_the_configured_order_holds(self, client: TestClient, session, settings, tagged):
+        """Curated means the museum decides the order too. Alphabetical would undo that."""
+        tagged(["Winter", "Gasthof", "Hof"])
+        session.commit()
+        settings.map_tags = ["Winter", "Hof", "Gasthof"]
+
+        assert client.get("/api/photos/tags/offered").json() == ["Winter", "Hof", "Gasthof"]
+
+    def test_a_keyword_no_published_photo_carries_is_left_out(
+        self, client: TestClient, session, settings, tagged
+    ):
+        """A typo, or a keyword only a deleted photo still carries, would empty the map."""
+        from app.models import PhotoStatus
+
+        tagged(["Winter"], sha="a" * 64)
+        tagged(["Laden"], status=PhotoStatus.DELETED, sha="b" * 64)
+        session.commit()
+        settings.map_tags = ["Winter", "Laden", "Wintr"]
+
+        assert client.get("/api/photos/tags/offered").json() == ["Winter"]
+
+    def test_nothing_configured_offers_nothing(self, client: TestClient, session, tagged):
+        tagged(["Winter"])
+        session.commit()
+
+        assert client.get("/api/photos/tags/offered").json() == []
+
+
+class TestTheShowcase:
+    """`/photos/showcase` -- the photos for the slide show while the device is idle."""
+
+    def test_portrait_unplaced_and_deleted_photos_stay_out(
+        self, client: TestClient, session, make_photo
+    ):
+        """A portrait photo loses most of itself to a landscape tile, and a tap on an unplaced one
+        would open a map with nothing to show."""
+        make_photo(title="Landscape", sha="a" * 64)
+        portrait = make_photo(title="Portrait", sha="b" * 64)
+        make_photo(title="Unplaced", lat=None, lon=None, sha="c" * 64)
+        make_photo(title="Deleted", status=PhotoStatus.DELETED, sha="d" * 64)
+        session.flush()
+        portrait.width, portrait.height = 640, 900
+        session.commit()
+
+        titles = [photo["title"] for photo in client.get("/api/photos/showcase").json()]
+
+        assert titles == ["Landscape"]
+
+    def test_large_photos_come_before_small_ones(self, client: TestClient, session, make_photo):
+        """Only the large ones carry the full zoom. The small ones fill up, they do not lead."""
+        for n in range(1, 6):
+            make_photo(title=f"Small {n}", sha=f"{n:064d}")
+        large = make_photo(title="Large", sha="f" * 64)
+        session.flush()
+        large.width, large.height = 1600, 1067
+        session.commit()
+
+        data = client.get("/api/photos/showcase", params={"count": 1}).json()
+
+        assert [photo["title"] for photo in data] == ["Large"]
+
+    def test_a_small_collection_still_has_a_show(self, client: TestClient, session, make_photo):
+        make_photo(title="Small")
+        session.commit()
+
+        assert len(client.get("/api/photos/showcase").json()) == 1
+
+    def test_the_count_is_bounded(self, client: TestClient):
+        assert client.get("/api/photos/showcase", params={"count": 1000}).status_code == 422
+
+    def test_the_photo_route_does_not_swallow_it(self, client: TestClient):
+        assert client.get("/api/photos/showcase").status_code == 200

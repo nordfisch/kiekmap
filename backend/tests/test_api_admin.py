@@ -7,7 +7,8 @@ Two promises carry this area, and both break silently when they break:
   2. Uploaded photos are in the database at once, not only after "Uebernehmen". A closed browser
      must not cost uploads."""
 
-from datetime import UTC, datetime
+import json
+from datetime import UTC, date, datetime
 
 import pytest
 from fastapi.testclient import TestClient
@@ -67,6 +68,53 @@ class TestSigningIn:
 
         assert response.status_code == 429
         assert "Sekunden" in response.json()["detail"]
+
+    def test_parallel_attempts_do_not_get_past_the_limit(
+        self, client: TestClient, admin_pin, monkeypatch
+    ):
+        """Twenty requests at once, each held in the PIN check for as long as the hash takes.
+
+        The lock used to be checked before the hash and the failure counted after it. All twenty
+        found the pad open, and twenty PINs were checked where five are allowed.
+        """
+        import threading
+        import time
+
+        from app.services import auth
+
+        checked = []
+
+        def slow_and_wrong(pin, stored):
+            checked.append(pin)
+            time.sleep(0.2)
+            return False
+
+        monkeypatch.setattr(auth, "verify_pin", slow_and_wrong)
+        answers = []
+
+        def attempt():
+            answers.append(client.post("/api/admin/login", json={"pin": "0000"}).status_code)
+
+        threads = [threading.Thread(target=attempt) for _ in range(20)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        assert len(checked) == auth.MAX_ATTEMPTS
+        # Which of the checked ones answer 401 and which 429 depends on whether the pad locked
+        # while they were being checked. That none got in does not.
+        assert sorted(set(answers)) in ([401, 429], [429])
+
+    def test_the_right_pin_on_the_last_attempt_still_signs_in(self, client: TestClient, admin_pin):
+        """The attempt that reaches the limit is admitted and checked, so a right PIN still wins."""
+        from app.services import auth
+
+        for _ in range(auth.MAX_ATTEMPTS - 1):
+            client.post("/api/admin/login", json={"pin": "0000"})
+
+        assert client.post("/api/admin/login", json={"pin": admin_pin}).status_code == 200
+        assert client.post("/api/admin/login", json={"pin": admin_pin}).status_code == 200
 
     def test_richtige_pin_gibt_ein_token(self, client: TestClient, admin_pin):
         response = client.post("/api/admin/login", json={"pin": admin_pin})
@@ -326,7 +374,7 @@ class TestPaging:
         for number in range(4):
             session.add(
                 ImportLog(
-                    path=f"/tmp/{number}.jpg",
+                    path=f"/tmp/{number}.jpg",  # noqa: S108 -- a stored path, no file is opened
                     result=ImportResult.IMPORTED,
                     created_at=datetime(2026, 3, number + 1, 12, 0),
                 )
@@ -586,6 +634,36 @@ class TestBatchUpload:
         assert data["imported"] == 2
         assert [entry["photo"]["date_label"] for entry in data["items"]] == ["1932", "1932"]
 
+    @pytest.mark.parametrize("precision", ["month", "day", "unknown"])
+    def test_a_precision_finer_than_a_year_is_refused_before_anything_is_stored(
+        self, admin_client: TestClient, session, settings, fixtures_dir, precision
+    ):
+        """The batch form holds a year and nothing finer.
+
+        "month" and "day" need parts it does not have. The file was stored and its thumbnails made
+        before ``date_range`` raised, and the upload answered 500 with the files left behind.
+        """
+        response = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
+            data={"year": "1932", "precision": precision},
+        )
+
+        assert response.status_code == 422
+        assert session.scalars(select(Photo)).all() == []
+        assert list(settings.photos_dir.rglob("*.*")) == []
+
+    def test_a_decade_applies_to_the_whole_batch(
+        self, admin_client: TestClient, session, fixtures_dir
+    ):
+        response = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
+            data={"year": "1934", "precision": "decade"},
+        )
+
+        assert response.json()["items"][0]["photo"]["date_label"] == "1930er"
+
     def test_the_place_applies_to_the_whole_batch(
         self, admin_client: TestClient, session, fixtures_dir
     ):
@@ -691,6 +769,405 @@ class TestBatchUpload:
         assert log["entries"][0]["result"] == "imported"
 
 
+class TestTheUploadLimit:
+    """Starlette writes every uploaded file to a temporary file before any endpoint runs.
+
+    Without a limit in front of that, one request filled the SD card, and it did not even need a
+    PIN: the body was spooled in full before the 401. nginx has a limit, the development server
+    does not, and nginx answers with a page the admin area cannot show.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _small_limit(self, monkeypatch):
+        from app.api import body_limit
+
+        monkeypatch.setattr(body_limit, "MAX_UPLOAD_BYTES", 1_000)
+
+    def test_a_declared_size_over_the_limit_is_refused_before_reading(
+        self, admin_client: TestClient, session
+    ):
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("big.tif", b"x" * 5_000, "image/tiff"))]
+        )
+
+        assert response.status_code == 413
+        assert "zu gross" in response.json()["detail"]
+        assert session.scalars(select(Photo)).all() == []
+
+    def test_a_body_without_a_declared_size_is_counted_and_broken_off(
+        self, admin_client: TestClient, session
+    ):
+        """Chunked transfer sends no Content-Length, so the header alone cannot be the limit."""
+        boundary = "kiekmap"
+        head = (
+            f'--{boundary}\r\nContent-Disposition: form-data; name="files"; filename="big.tif"\r\n'
+            "Content-Type: image/tiff\r\n\r\n"
+        ).encode()
+
+        def chunks():
+            yield head
+            for _ in range(10):
+                yield b"x" * 500
+            yield f"\r\n--{boundary}--\r\n".encode()
+
+        response = admin_client.post(
+            "/api/admin/upload",
+            content=chunks(),
+            headers={"content-type": f"multipart/form-data; boundary={boundary}"},
+        )
+
+        assert response.status_code == 413
+        assert session.scalars(select(Photo)).all() == []
+
+    def test_the_limit_holds_before_the_pin(self, client: TestClient):
+        """A body over the limit is refused without being spooled, whoever sends it."""
+        response = client.post(
+            "/api/admin/upload", files=[("files", ("big.tif", b"x" * 5_000, "image/tiff"))]
+        )
+
+        assert response.status_code == 413
+
+    def test_an_upload_under_the_limit_is_not_touched(
+        self, admin_client: TestClient, monkeypatch, fixtures_dir
+    ):
+        from app.api import body_limit
+
+        monkeypatch.setattr(body_limit, "MAX_UPLOAD_BYTES", 10_000_000)
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("scan.jpg", _image(fixtures_dir), "image/jpeg"))]
+        )
+
+        assert response.status_code == 200
+        assert response.json()["imported"] == 1
+
+    def test_the_upload_limit_does_not_apply_to_other_routes(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        from app.schemas import LONG_TEXT_MAX
+
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}", json={"description": "x" * LONG_TEXT_MAX}
+        )
+
+        assert response.status_code == 200
+
+
+class TestTheBodyLimitOfOtherRoutes:
+    """Every other route read its JSON body into memory whole, however large.
+
+    Only nginx's 128 MB limit stood in front of that, and the development server had none. A body
+    of that size can take the Pi's memory before a single field is validated.
+    """
+
+    @staticmethod
+    def _two_megabytes() -> bytes:
+        return json.dumps({"description": "x" * 2_000_000}).encode()
+
+    def test_a_large_json_body_is_refused_before_the_route_reads_it(
+        self, admin_client: TestClient, session, make_photo
+    ):
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
+            content=self._two_megabytes(),
+            headers={"content-type": "application/json"},
+        )
+
+        assert response.status_code == 413
+        assert "Anfrage ist zu gross" in response.json()["detail"]
+        session.expire_all()
+        assert session.get(Photo, photo.id).description is None
+        assert session.scalars(select(Change)).all() == []
+
+    def test_the_limit_holds_before_the_pin(self, client: TestClient, session, make_photo):
+        """A 401 would mean the body had been accepted first."""
+        photo = make_photo()
+        session.commit()
+
+        response = client.patch(
+            f"/api/admin/photos/{photo.id}",
+            content=self._two_megabytes(),
+            headers={"content-type": "application/json"},
+        )
+
+        assert response.status_code == 413
+
+    def test_the_visitor_routes_are_limited_too(self, client: TestClient, session, make_photo):
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        body = {**HOLM, "session_id": "x", "padding": "x" * 2_000_000}
+
+        response = client.post(f"/api/contribute/{photo.id}/location", json=body)
+
+        assert response.status_code == 413
+        session.expire_all()
+        assert session.get(Photo, photo.id).lat is None
+
+    def test_a_body_without_a_declared_size_is_counted_and_broken_off(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        """Chunked transfer sends no Content-Length, so the header alone cannot be the limit."""
+        from app.api import body_limit
+
+        monkeypatch.setattr(body_limit, "MAX_BODY_BYTES", 1_000)
+        photo = make_photo()
+        session.commit()
+
+        def chunks():
+            yield b'{"description": "'
+            for _ in range(10):
+                yield b"x" * 500
+            yield b'"}'
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
+            content=chunks(),
+            headers={"content-type": "application/json"},
+        )
+
+        assert response.status_code == 413
+        session.expire_all()
+        assert session.get(Photo, photo.id).description is None
+
+    def test_the_upload_keeps_its_own_limit(self, admin_client: TestClient, fixtures_dir):
+        """The file is larger than the limit for JSON, and it is taken in."""
+        from app.api import body_limit
+
+        image = _image(fixtures_dir, "cmyk.tif")
+        assert len(image) > body_limit.MAX_BODY_BYTES
+
+        response = admin_client.post(
+            "/api/admin/upload", files=[("files", ("scan.tif", image, "image/tiff"))]
+        )
+
+        assert response.status_code == 200
+        assert response.json()["imported"] == 1
+
+    def test_an_ordinary_edit_passes(self, admin_client: TestClient, session, make_photo):
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
+            json={"title": "Gasthof Petersen", "description": "Saal im Winter", "tags": ["Saal"]},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["description"] == "Saal im Winter"
+
+
+class TestRevertingWhileSomethingElseHappens:
+    """The revert checked the photo and the log, and wrote a moment later.
+
+    Whatever was committed in between was overwritten: a curator's correction, a visitor's newer
+    house number, or the same revert by a second curator. Each test commits that at exactly this
+    moment, after the checks and before the write.
+    """
+
+    @staticmethod
+    def _meanwhile(monkeypatch, commit):
+        from app.api import admin
+
+        is_newest = admin._is_newest
+
+        def after_the_checks(session, change):
+            answer = is_newest(session, change)
+            commit()
+            return answer
+
+        monkeypatch.setattr(admin, "_is_newest", after_the_checks)
+
+    @staticmethod
+    def _other_session():
+        import app.db
+
+        return app.db.current_database().session()
+
+    def test_a_correction_by_hand_meanwhile_is_not_thrown_away(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        photo = make_photo(year=None)
+        session.commit()
+        admin_client.post(f"/api/contribute/{photo.id}/date", json={"year": 1930})
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def a_curator_corrects_it():
+            with self._other_session() as other:
+                edited = other.get(Photo, photo.id)
+                edited.date_from, edited.date_to = date(1950, 1, 1), date(1950, 12, 31)
+                edited.date_source = Source.CURATOR
+                other.commit()
+
+        self._meanwhile(monkeypatch, a_curator_corrects_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "von Hand" in response.json()["detail"]
+        session.expire_all()
+        assert session.get(Photo, photo.id).date_from == date(1950, 1, 1)
+        assert session.get(Change, entry).reverted_at is None, "the entry was marked taken back"
+
+    def test_a_newer_house_number_meanwhile_is_not_thrown_away(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        """Taken back in the wrong order, the location revert cleared the house as well."""
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        admin_client.post(
+            f"/api/contribute/{photo.id}/location",
+            json={**HOLM, "place_name": "Am Kamp", "accuracy_m": 150},
+        )
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def a_visitor_sharpens_it():
+            with self._other_session() as other:
+                sharpened = other.get(Photo, photo.id)
+                sharpened.place_name, sharpened.location_accuracy_m = "Am Kamp 2", 15
+                other.add(
+                    Change(
+                        photo_id=photo.id,
+                        field="housenumber",
+                        old_value="Am Kamp",
+                        old_source=Source.VISITOR,
+                        new_value="Am Kamp 2",
+                        source=Source.VISITOR,
+                    )
+                )
+                other.commit()
+
+        self._meanwhile(monkeypatch, a_visitor_sharpens_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "neuere Angabe" in response.json()["detail"]
+        session.expire_all()
+        assert session.get(Photo, photo.id).place_name == "Am Kamp 2"
+
+    def test_a_second_curator_taking_it_back_meanwhile_does_not_take_it_back_twice(
+        self, admin_client: TestClient, session, make_photo, monkeypatch
+    ):
+        photo = make_photo(lat=None, lon=None)
+        session.commit()
+        admin_client.post(f"/api/contribute/{photo.id}/location", json=HOLM)
+        entry = admin_client.get("/api/admin/changes").json()["changes"][0]["id"]
+
+        def another_curator_reverts_it():
+            with self._other_session() as other:
+                reverted = other.get(Photo, photo.id)
+                reverted.lat = reverted.lon = reverted.location_source = None
+                other.get(Change, entry).reverted_at = datetime(2026, 9, 14, tzinfo=UTC)
+                other.commit()
+
+        self._meanwhile(monkeypatch, another_curator_reverts_it)
+
+        response = admin_client.post(f"/api/admin/changes/{entry}/revert")
+
+        assert response.status_code == 409
+        assert "bereits" in response.json()["detail"]
+
+
+class TestSwitchingTheDeviceOff:
+    """The orderly way off, for a device that is otherwise switched off at the wall.
+
+    The backend cannot power the host off -- it runs unprivileged in a container. It writes a
+    request into the data directory, and a root script on the Pi acts on it. See decisions.md,
+    point 96.
+    """
+
+    @pytest.fixture
+    def host_can_switch_off(self, settings):
+        """What ``setup-pi.sh`` leaves behind on a device that can carry out the request."""
+        settings.shutdown_watcher_path.write_text("a test\n", encoding="utf-8")
+
+    def test_no_shutdown_without_signing_in(
+        self, client: TestClient, settings, host_can_switch_off
+    ):
+        """The route must not be a way to switch a museum device off without the PIN."""
+        response = client.post("/api/admin/shutdown")
+
+        assert response.status_code == 401
+        assert not settings.shutdown_request_path.exists()
+
+    def test_a_host_that_cannot_switch_off_says_so_instead_of_pretending(
+        self, admin_client: TestClient, settings
+    ):
+        """A development machine, and the online instance: nothing there acts on a request.
+
+        Announcing that the power may be switched off while the device runs on would be worse than
+        a sentence saying this machine cannot do it.
+        """
+        response = admin_client.post("/api/admin/shutdown")
+
+        assert response.status_code == 503
+        assert "nicht selbst abschalten" in response.json()["detail"]
+        assert not settings.shutdown_request_path.exists()
+
+    def test_a_running_job_refuses_the_shutdown(
+        self, admin_client: TestClient, settings, host_can_switch_off
+    ):
+        """A poweroff during a restore leaves the collection half moved."""
+        import threading
+
+        from app.services import backup
+
+        breakpoint_ = threading.Event()
+        backup.job.start("restore", lambda report: (breakpoint_.wait(2), "fertig")[1])
+        try:
+            response = admin_client.post("/api/admin/shutdown")
+        finally:
+            breakpoint_.set()
+
+        assert response.status_code == 409
+        assert not settings.shutdown_request_path.exists()
+
+    def test_the_request_lands_in_the_data_directory(
+        self, admin_client: TestClient, settings, host_can_switch_off
+    ):
+        response = admin_client.post("/api/admin/shutdown")
+
+        assert response.status_code == 204
+        written = settings.shutdown_request_path.read_text(encoding="utf-8").strip()
+        # UTC without the marker saying so, like everything this program stores -- see
+        # services/dates.utc_now. The host judges by the file's mtime; the line is for whoever
+        # reads it.
+        stated = datetime.fromisoformat(written)
+        assert stated.tzinfo is None
+        assert (datetime.now(UTC).replace(tzinfo=None) - stated).total_seconds() < 60
+
+    def test_asking_twice_only_renews_the_request(
+        self, admin_client: TestClient, settings, host_can_switch_off
+    ):
+        """A second press means "yes, really", not an error."""
+        assert admin_client.post("/api/admin/shutdown").status_code == 204
+        first = settings.shutdown_request_path.read_text(encoding="utf-8")
+
+        assert admin_client.post("/api/admin/shutdown").status_code == 204
+
+        assert settings.shutdown_request_path.read_text(encoding="utf-8") >= first
+
+    def test_a_request_left_over_is_cleared_when_the_backend_starts(self, database, settings):
+        """Otherwise the watcher on the Pi switches the device off seconds after the next boot.
+
+        It stays lying there when the power goes between the request and the poweroff, or on a host
+        where nothing acts on it at all. The client is entered here rather than taken as a fixture,
+        because entering it is what runs the lifespan -- and ``database`` rather than ``client``,
+        because the tables have to stand before the lifespan reads the gazetteer.
+        """
+        from app.main import app
+
+        settings.shutdown_request_path.write_text("from before the power cut\n", encoding="utf-8")
+
+        with TestClient(app):
+            assert not settings.shutdown_request_path.exists()
+
+
 class TestTheImportLog:
     def test_only_the_rejected_ones_on_request(
         self, admin_client: TestClient, session, fixtures_dir
@@ -713,7 +1190,7 @@ class TestTheImportLog:
         for number, tag in enumerate([1, 2, 3], start=1):
             session.add(
                 ImportLog(
-                    path=f"/tmp/{number}.jpg",
+                    path=f"/tmp/{number}.jpg",  # noqa: S108 -- a stored path, no file is opened
                     result=ImportResult.IMPORTED,
                     created_at=datetime(2026, 3, tag, 12, 0),
                 )
@@ -769,8 +1246,8 @@ class TestCreditAndProvenance:
 
         data = admin_client.get(f"/api/photos/{photo.id}").json()
 
-        assert data["credit"] == "Sammlung Heimatmuseum Holm", "der Nachweis gehoert ans Bild"
-        assert "provenance" not in data, "die Herkunft darf den Kiosk nie erreichen"
+        assert data["credit"] == "Sammlung Heimatmuseum Holm", "the credit belongs on the picture"
+        assert "provenance" not in data, "the provenance must never reach the kiosk"
         assert "Meyer" not in str(data)
 
     def test_an_empty_field_clears_the_credit(self, admin_client: TestClient, session, make_photo):
@@ -796,6 +1273,63 @@ class TestCreditAndProvenance:
         photo = session.scalars(select(Photo)).one()
         assert photo.credit == "Sammlung Heimatmuseum Holm"
         assert photo.provenance == "Kiste Dachboden Petersen"
+
+
+class TestLongTexts:
+    """``description`` and ``provenance`` had no upper bound: a PATCH with 2 MB in each was stored.
+
+    The limit is ``LONG_TEXT_MAX``; schemas.py says how it was measured.
+    """
+
+    @pytest.mark.parametrize("field", ["description", "provenance"])
+    def test_an_over_long_text_is_refused_and_nothing_is_stored(
+        self, admin_client: TestClient, session, make_photo, field
+    ):
+        from app.schemas import LONG_TEXT_MAX
+
+        photo = make_photo()
+        session.commit()
+
+        response = admin_client.patch(
+            f"/api/admin/photos/{photo.id}",
+            json={"title": "Neu", field: "x" * (LONG_TEXT_MAX + 1)},
+        )
+
+        assert response.status_code == 422
+        session.expire_all()
+        stored = session.get(Photo, photo.id)
+        assert getattr(stored, field) is None
+        assert stored.title == "Test photo", "the valid field beside it is not stored either"
+        assert session.scalars(select(Change)).all() == []
+
+    @pytest.mark.parametrize("field", ["description", "provenance"])
+    def test_a_text_of_exactly_the_limit_is_stored(
+        self, admin_client: TestClient, session, make_photo, field
+    ):
+        from app.schemas import LONG_TEXT_MAX
+
+        photo = make_photo()
+        session.commit()
+        text = "ä" * LONG_TEXT_MAX  # characters, not bytes
+
+        response = admin_client.patch(f"/api/admin/photos/{photo.id}", json={field: text})
+
+        assert response.status_code == 200
+        assert response.json()[field] == text
+
+    def test_an_upload_with_an_over_long_provenance_stores_no_photo(
+        self, admin_client: TestClient, session, fixtures_dir
+    ):
+        from app.schemas import LONG_TEXT_MAX
+
+        response = admin_client.post(
+            "/api/admin/upload",
+            files=[("files", ("a.jpg", _image(fixtures_dir), "image/jpeg"))],
+            data={"provenance": "x" * (LONG_TEXT_MAX + 1)},
+        )
+
+        assert response.status_code == 422
+        assert session.scalars(select(Photo)).all() == []
 
 
 class TestSearchingByHash:
@@ -875,7 +1409,7 @@ class TestRevertingARefinement:
 
         data = admin_client.post(f"/api/admin/changes/{contribution}/revert").json()
 
-        assert data["lat"] is not None, "das Foto behaelt seinen Ort"
+        assert data["lat"] is not None, "the photo keeps its place"
         assert data["place_name"] == "Am Kamp"
         assert data["location_accuracy_m"] == 150
 
@@ -929,7 +1463,7 @@ class TestRevertingARefinement:
         assert response.status_code == 409
         entries = admin_client.get("/api/admin/changes").json()["changes"]
         older_entry = next(e for e in entries if e["id"] == older_one)
-        assert older_entry["revertable"] is False, "kein Knopf, der nur 409 liefert"
+        assert older_entry["revertable"] is False, "no button that only ever yields a 409"
 
     def test_without_the_street_in_the_place_index_nothing_is_reverted(
         self, admin_client: TestClient, place_index, make_photo
@@ -949,7 +1483,7 @@ class TestRevertingARefinement:
 
         assert response.status_code == 409
         place_index.refresh(photo)
-        assert photo.place_name == "Am Kamp 2", "die Angabe bleibt stehen"
+        assert photo.place_name == "Am Kamp 2", "the entry stays as it is"
 
     def test_a_house_number_edited_by_hand_stays(
         self, admin_client: TestClient, place_index, make_photo

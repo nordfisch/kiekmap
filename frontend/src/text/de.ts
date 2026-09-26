@@ -64,7 +64,8 @@ export const de = {
      * Says what happens, not what it is: whoever hovers over a coat of arms and reads "Wappen"
      * learns nothing they could not see.
      */
-    resetHint: "Von vorn beginnen",
+    /** The coat of arms starts the slide show. */
+    resetHint: "Diashow starten",
     loadingMap: "Karte wird geladen …",
 
     /**
@@ -83,6 +84,14 @@ export const de = {
 
   map: {
     noPhotos: "Hier gibt es noch keine Fotos im gewählten Zeitraum.",
+    noPhotosWithTag: (tag: string) => `Hier gibt es keine Fotos zu „${tag}“ im gewählten Zeitraum.`,
+    /** The group of keyword buttons in the corner of the map -- read out, not shown. */
+    keywords: "Stichwörter",
+    /**
+     * A keyword in the detail view. The keyword is its visible caption; this label says what a
+     * tap does, because it closes the view.
+     */
+    filterByKeyword: (tag: string) => `Karte nach „${tag}“ filtern`,
     tooMany: (count: number) =>
       `${count} Fotos in diesem Ausschnitt — für mehr Übersicht näher heranzoomen`,
     /**
@@ -121,6 +130,13 @@ export const de = {
      */
     attribution:
       '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, ODbL',
+  },
+
+  attract: {
+    /** The band under the slide show. The place name comes from region.json. */
+    band: (place: string) => `Bilder aus ${place} — tippen Sie auf ein Foto`,
+    label: "Diashow",
+    tileLabel: (caption: string) => `${caption} — auf der Karte zeigen`,
   },
 
   overlay: {
@@ -269,6 +285,9 @@ export const de = {
   errors: {
     regionMissing: (status: number) =>
       `Die Region konnte nicht geladen werden (HTTP ${status}). Wurde "make tiles" ausgeführt?`,
+    /** The backend's schema refused a field. Its own message is English and not for this screen. */
+    notAccepted: "Die Eingabe wurde nicht angenommen. Bitte die Felder prüfen.",
+    tooLong: (limit: number) => `Ein Text ist zu lang. Erlaubt sind höchstens ${limit} Zeichen.`,
   },
 
   /**
@@ -326,6 +345,24 @@ export const de = {
       reloadHint:
         "Hilft, wenn die Besucheransicht sich verhakt hat. Am Bestand ändert sich dabei nichts. " +
         "Von allein passiert dasselbe, sobald das Gerät fünf Minuten unberührt bleibt.",
+    },
+
+    /* Read in two views: the button on the overview, the last message in App.tsx. */
+    shutdown: {
+      button: "Gerät ausschalten",
+      hint:
+        "Fährt das Gerät geordnet herunter. Danach kann der Strom abgeschaltet werden — " +
+        "schonender, als einfach den Stecker zu ziehen.",
+      confirmTitle: "Gerät jetzt ausschalten?",
+      confirm:
+        "Die Besucheransicht bleibt dunkel, bis das Gerät wieder eingeschaltet wird. " +
+        "Am Bestand ändert sich nichts.",
+      yes: "Ja, ausschalten",
+      no: "Abbrechen",
+      offTitle: "Das Gerät fährt herunter.",
+      offHint:
+        "Sobald der Bildschirm dunkel bleibt, kann der Strom abgeschaltet werden. " +
+        "Beim nächsten Einschalten startet die Karte von allein.",
     },
 
     photos: {

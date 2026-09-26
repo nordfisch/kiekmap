@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/usermanual.md -->
-<!-- source-sha: f1bd28600e0930cb0ed0678b6fffe6d5ca6a839c70aadb2b117fcee3bd77bb0a -->
+<!-- source-sha: f0c140f92b43bb942260d8cdde9594e791bc49d986afadbdc4aee0a1c462f667 -->
 
 # Anleitung für das Museumsteam
 
@@ -8,14 +8,26 @@
 
 ## In den Verwaltungsbereich kommen
 
-Oben links auf der Karte liegt das **Wappen**. Einmal darauf tippen, dann die **PIN** eingeben und
-auf „Weiter" tippen.
+Oben links, neben dem Wappen, einmal auf den **Titel** tippen. Dann die **PIN** eingeben und auf
+„Weiter" tippen. Ein Tipp auf das Wappen selbst startet die Diashow.
 
 Wer die PIN nicht kennt, kommt nicht hinein — das ist Absicht. Nach fünf falschen Eingaben wartet
 das Gerät eine Minute, bevor es die nächste annimmt.
 
 Zurück zur Karte kommen Sie jederzeit über **„Verwaltung beenden"** oben rechts. Wenn Sie das
-vergessen, meldet sich das Gerät nach einer halben Stunde von selbst ab.
+vergessen, verlässt das Gerät die Verwaltung nach **zwei Minuten ohne Berührung** von selbst.
+Während eine Sicherung, eine Rücksicherung, ein Import vom Stick oder ein Hochladen läuft, zählt
+diese Zeit nicht: Die zwei Minuten beginnen, wenn die Arbeit fertig ist.
+
+## Was das Gerät tut, wenn niemand es benutzt
+
+Nach fünf Minuten ohne Berührung zeigt der Bildschirm eine **Diashow**: vier Fotos aus der
+Sammlung, die sich langsam bewegen, und alle fünf Sekunden blättert eines davon zum nächsten um.
+Ein Tipp auf ein Foto öffnet die Karte um dieses Foto herum, mit dem Foto groß. Ein Tipp neben die
+Fotos führt zur Karte zurück. In beiden Fällen lädt die Seite neu; was der letzte Besucher offen
+gelassen hat, ist dann weg.
+
+Über der Verwaltung startet die Diashow nie.
 
 ## Fotos hinzufügen
 
@@ -176,6 +188,11 @@ Was vorher auf dem Gerät war, wird **nicht gelöscht**, sondern in einen Ordner
 Datum beiseitegelegt. Wer also versehentlich die falsche Sicherung einspielt, hat nichts verloren
 — sagen Sie in dem Fall jemandem Bescheid, der an das Gerät kann.
 
+Ganz am Ende tauscht das Gerät die Angaben aus. Für einige Sekunden lädt die Karte dann keine Fotos,
+und das Mitmachen speichert nichts; danach geht alles wieder. Läuft zur selben Zeit ein
+Herunterladen der Sicherung, bricht die Wiederherstellung mit einer Meldung ab und ändert nichts.
+Starten Sie sie erneut, sobald das Herunterladen fertig ist.
+
 ### Wenn die Sicherung älter ist als das Programm
 
 Das ist der Normalfall, und **Sie müssen dafür nichts tun**. Eine Sicherung enthält die Angaben in
@@ -197,6 +214,21 @@ nicht aktualisiert wurde. Dann **bricht das Zurückspielen ab** und sagt Ihnen d
 **Der Bestand auf dem Gerät bleibt dabei unangetastet** — es wird nichts halb ersetzt. Sagen Sie
 jemandem Bescheid, der das Programm aktualisieren kann; danach lässt sich dieselbe Sicherung
 einspielen.
+
+## Das Gerät ausschalten
+
+Verwaltung → **Übersicht**, unten auf der Seite rechts: **„Gerät ausschalten"**. Das Gerät fragt
+noch einmal nach, danach meldet der Bildschirm, dass es herunterfährt.
+
+**Warten, bis der Bildschirm dunkel bleibt**, dann den Strom an der Steckdose abschalten. Das
+Einschalten ist der Stecker: Nach etwa zwanzig Sekunden ist die Karte von allein wieder da. Am
+Bestand ändert sich nichts, und es muss vorher nichts geschlossen werden.
+
+Einfach den Stecker zu ziehen ist keine Katastrophe — dafür ist das Gerät gebaut —, aber dies ist
+der schonende Weg und der für den Feierabend.
+
+Während einer Sicherung, einer Wiederherstellung oder eines Imports vom Stick verweigert der Knopf
+den Dienst und sagt das auch. Erst die Arbeit fertig laufen lassen.
 
 ## Was tun, wenn der Bildschirm schwarz bleibt
 

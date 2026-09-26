@@ -21,13 +21,24 @@ from collections import Counter
 from pathlib import Path
 
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.db import SessionLocal
+from app.db import CollectionLocked, collection_lock, open_database
 from app.models import ImportResult, Photo, PhotoStatus
 from app.services.importer import import_directory
 
 log = logging.getLogger("kiekmap.cli")
+
+
+def _session() -> Session:
+    """A session on the database of this command.
+
+    Opened here rather than at import, and only by the commands that read or write the collection:
+    ``pin`` needs no database and creates none. ``DatabaseGate`` does not reach this process at
+    all; ``collection_lock`` keeps a writing command and a restore apart instead.
+    """
+    return open_database(get_settings()).session()
 
 
 def _cmd_import(args: argparse.Namespace) -> int:
@@ -39,7 +50,7 @@ def _cmd_import(args: argparse.Namespace) -> int:
     settings = get_settings()
     settings.ensure_dirs()
 
-    with SessionLocal() as session:
+    with _session() as session:
         outcomes = import_directory(session, directory, settings)
         session.commit()
 
@@ -76,7 +87,7 @@ def _cmd_stats(_: argparse.Namespace) -> int:
     # the admin overview, so that the two never disagree in front of the same person.
     alive = Photo.status != PhotoStatus.DELETED
 
-    with SessionLocal() as session:
+    with _session() as session:
         total = count(alive)
         without_location = count(alive, Photo.lat.is_(None))
         without_date = count(alive, Photo.date_from.is_(None))
@@ -100,7 +111,7 @@ def _cmd_duplicates(args: argparse.Namespace) -> int:
     from app.services.similar import candidate_groups
 
     settings = get_settings()
-    with SessionLocal() as session:
+    with _session() as session:
         groups = candidate_groups(session, settings, limit=args.distance)
 
     total = sum(len(group) for group in groups)
@@ -125,7 +136,7 @@ def _cmd_places(_: argparse.Namespace) -> int:
     from app.services.places import load_from_file
 
     settings = get_settings()
-    with SessionLocal() as session:
+    with _session() as session:
         count = load_from_file(session, settings.places_file)
 
     if count:
@@ -142,7 +153,7 @@ def _cmd_seed_export(_: argparse.Namespace) -> int:
     settings = get_settings()
     target = seed.seed_dir(settings)
 
-    with SessionLocal() as session:
+    with _session() as session:
         photos, contributions = seed.export(session, settings, target)
 
     print(f"{photos} photos and {contributions} visitor contributions written to {target}.")
@@ -161,7 +172,7 @@ def _cmd_seed_load(_: argparse.Namespace) -> int:
     settings.ensure_dirs()
     source = seed.seed_dir(settings)
 
-    with SessionLocal() as session:
+    with _session() as session:
         try:
             photos, contributions = seed.load(session, settings, source)
         except FileNotFoundError:
@@ -190,7 +201,7 @@ def _cmd_empty(args: argparse.Namespace) -> int:
     settings = get_settings()
     settings.ensure_dirs()
 
-    with SessionLocal() as session:
+    with _session() as session:
         photos = session.scalar(select(func.count()).select_from(Photo)) or 0
         contributions = session.scalar(select(func.count()).select_from(Change)) or 0
 
@@ -257,10 +268,10 @@ def main(argv: list[str] | None = None) -> int:
 
     p_import = commands.add_parser("import", help="take in a directory")
     p_import.add_argument("path")
-    p_import.set_defaults(handler=_cmd_import)
+    p_import.set_defaults(handler=_cmd_import, writes=True)
 
     p_scan = commands.add_parser("scan", help="sweep the inbox folder once")
-    p_scan.set_defaults(handler=_cmd_scan)
+    p_scan.set_defaults(handler=_cmd_scan, writes=True)
 
     p_stats = commands.add_parser("stats", help="the collection and its gaps")
     p_stats.set_defaults(handler=_cmd_stats)
@@ -275,7 +286,7 @@ def main(argv: list[str] | None = None) -> int:
     p_duplicates.set_defaults(handler=_cmd_duplicates)
 
     p_places = commands.add_parser("places", help="reload the gazetteer")
-    p_places.set_defaults(handler=_cmd_places)
+    p_places.set_defaults(handler=_cmd_places, writes=True)
 
     p_pin = commands.add_parser("pin", help="set the PIN for the admin area")
     p_pin.set_defaults(handler=_cmd_pin)
@@ -284,7 +295,7 @@ def main(argv: list[str] | None = None) -> int:
     p_seed_export.set_defaults(handler=_cmd_seed_export)
 
     p_seed_load = commands.add_parser("seed-load", help="restore the collection from seed/")
-    p_seed_load.set_defaults(handler=_cmd_seed_load)
+    p_seed_load.set_defaults(handler=_cmd_seed_load, writes=True)
 
     p_empty = commands.add_parser("empty", help="delete the whole collection")
     p_empty.add_argument(
@@ -292,10 +303,22 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="delete without asking -- for scripts only",
     )
-    p_empty.set_defaults(handler=_cmd_empty)
+    p_empty.set_defaults(handler=_cmd_empty, writes=True)
 
     args = parser.parse_args(argv)
-    return args.handler(args)
+    if not getattr(args, "writes", False):
+        return args.handler(args)
+
+    # A writing command holds the lock for its whole run, the question of ``empty`` included: the
+    # number it asks for belongs to the collection a restore would replace. See
+    # ``app.db.collection_lock``.
+    try:
+        with collection_lock(get_settings(), exclusive=False):
+            return args.handler(args)
+    except CollectionLocked:
+        print("A restore is running. Nothing was changed.", file=sys.stderr)
+        print("Run the command again once the restore has finished.", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

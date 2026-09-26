@@ -15,11 +15,8 @@ Four decisions shape what happens here:
   * **Restoring never destroys the running collection.** Everything is copied in beside it and
     only swapped at the very end; what was there is set aside, not deleted.
 
-This used to be one file of 938 lines doing six different things. The split follows the comment
-bars that were already in it -- and this module is the door, so that ``from app.services import
-backup`` keeps meaning what it always meant. That was the condition under which the split was
-worth doing at all: the 908 lines of tests beside it had to stay as they were, because they are
-the proof that nothing changed. Where to look:
+This module is the door: ``from app.services import backup`` reaches everything below it, so how
+the work is split across files stays invisible from outside. Where to look:
 
     common.py      names, errors, the shared vocabulary
     manifest.py    what a backup says about itself, on a stick and inside an archive

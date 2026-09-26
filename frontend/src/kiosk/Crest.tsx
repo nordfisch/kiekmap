@@ -2,12 +2,12 @@
  * The village arms over the top left corner of the map -- and the way back to the start.
  *
  * **It used to be the door to the admin area; since 9 August 2026 the title beside it is.** See
- * decisions.md, point 26. A tap reloads the page, which puts map, time range, contribution panel
- * and any open photo back where the device stands each morning.
+ * decisions.md, point 26. A tap starts the slide show, and every way out of the slide show
+ * reloads the page. That puts map, time range, contribution panel and any open photo back where
+ * the device stands each morning. Until September 2026 the tap reloaded directly; see point 81.
  *
- * A reload rather than a state reset in code: it is the same mechanism the idle timer has used
- * all along (`kiosk/idle.ts`), it cannot forget a piece of state somebody adds later, and the
- * device fetches everything it needs from the next room.
+ * A reload rather than a state reset in code: it cannot forget a piece of state somebody adds
+ * later, and the device fetches everything it needs from the next room.
  *
  * **The objection is real and was weighed rather than dismissed:** a button almost nobody needs
  * gets pressed anyway -- by children first -- and it throws away whatever somebody had just
@@ -20,15 +20,17 @@
  * docs/adaption.md.
  */
 
+import { useKiosk } from "../store/kiosk";
 import { t } from "../text";
 
 export function Crest({ regionName }: { regionName: string }) {
+  const startAttract = useKiosk((s) => s.startAttract);
   return (
     <button
       type="button"
       className="crest"
       title={t.app.resetHint}
-      onClick={() => window.location.reload()}
+      onClick={startAttract}
       onContextMenu={(event) => event.preventDefault()}
     >
       <img className="crest__logo" src="/logo.png" alt={t.admin.logoLabel(regionName)} />

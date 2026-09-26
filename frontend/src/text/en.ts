@@ -24,7 +24,7 @@ export const en: Texts = {
   app: {
     titleLead: "Pictures from",
     documentTitle: "Pictures from our village",
-    resetHint: "Start again",
+    resetHint: "Start the slide show",
     loadingMap: "The map is loading …",
 
     crashTitle: "One moment, please",
@@ -35,6 +35,10 @@ export const en: Texts = {
 
   map: {
     noPhotos: "There are no photos here yet in the selected period.",
+    noPhotosWithTag: (tag: string) =>
+      `There are no photos about “${tag}” here in the selected period.`,
+    keywords: "Keywords",
+    filterByKeyword: (tag: string) => `Filter the map by “${tag}”`,
     tooMany: (count: number) =>
       `${count} photos in this view — zoom in closer for a better overview`,
     markerLabel: (caption: string) => `${caption} — show large`,
@@ -48,6 +52,12 @@ export const en: Texts = {
     photoAlt: "Historic photo",
     attribution:
       '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL',
+  },
+
+  attract: {
+    band: (place: string) => `Pictures from ${place} — tap a photo`,
+    label: "Slide show",
+    tileLabel: (caption: string) => `${caption} — show on the map`,
   },
 
   overlay: {
@@ -143,6 +153,8 @@ export const en: Texts = {
   errors: {
     regionMissing: (status: number) =>
       `The region could not be loaded (HTTP ${status}). Was "make tiles" run?`,
+    notAccepted: "The input was not accepted. Please check the fields.",
+    tooLong: (limit: number) => `A text is too long. At most ${limit} characters are allowed.`,
   },
 
   admin: {
@@ -190,6 +202,23 @@ export const en: Texts = {
       reloadHint:
         "Helps when the visitor view has got stuck. Nothing in the collection changes. " +
         "The same happens by itself once the device is untouched for five minutes.",
+    },
+
+    shutdown: {
+      button: "Switch the device off",
+      hint:
+        "Shuts the device down in an orderly way. The power can be switched off afterwards — " +
+        "gentler than simply pulling the plug.",
+      confirmTitle: "Switch the device off now?",
+      confirm:
+        "The visitor view stays dark until the device is switched on again. " +
+        "Nothing in the collection changes.",
+      yes: "Yes, switch off",
+      no: "Cancel",
+      offTitle: "The device is shutting down.",
+      offHint:
+        "Once the screen stays dark, the power can be switched off. " +
+        "The map comes back by itself the next time the device is switched on.",
     },
 
     photos: {

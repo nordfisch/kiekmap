@@ -70,6 +70,7 @@ plugins:
             - Adding photos and backing them up: usermanual.md
             - Running the device: operations.md
             - Setting it up for another place: adaption.md
+            - Building the first collection: collection.md
             - Passing it on: licensing.md
         - locale: de
           name: Deutsch
@@ -80,4 +81,5 @@ plugins:
             - Fotos hinzufügen und sichern: usermanual.md
             - Das Gerät betreiben: operations.md
             - Für einen anderen Ort einrichten: adaption.md
+            - Die erste Sammlung aufbauen: collection.md
             - Weitergabe: licensing.md

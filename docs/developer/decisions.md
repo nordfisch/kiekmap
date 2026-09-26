@@ -157,9 +157,13 @@ out of curiosity sees a keypad and goes back.
 **Why a PIN and not a password.** Input happens with a finger on a touchscreen, often by older
 people. A keypad with large keys beats an on-screen keyboard for that.
 
-**What carries a four-digit PIN is the lockout, not the length.** A script tries ten thousand
-possibilities in seconds. After five failed attempts the device locks for a minute, which stretches
-the same attack to a good two years. The hash is PBKDF2 with 200,000 rounds.
+**The lockout stretches guessing to hours, not years.** A script tries ten thousand four-digit
+PINs in seconds. After five failed attempts the device locks for a minute, so the same attack takes
+about 33 hours, 17 on average. The hash is PBKDF2 with 200,000 rounds; its tenth of a second per
+attempt does not change that figure. What protects the PIN is where the device stands: the museum
+device runs offline, and its only input is a touchscreen without a keyboard. The online instance
+puts a password in front of everything, and its PIN gets more than four digits
+([point 76](#76-the-online-instance-is-a-doorman-in-front-not-a-login-inside)).
 
 **Sessions live in memory, not in the database.** A restart therefore ends every session — on a
 device that boots every morning, the cheapest guarantee that no login survives the night. Time is
@@ -650,6 +654,7 @@ settled on exactly one way.*
 | A pencil beside the title in the detail view | straight into editing **this** photo |
 
 **The coat of arms loses that job** and gets another: a tap on it reloads and resets the filters.
+Since point 81 it starts the slide show, whose end reloads.
 
 **Point 7 is not weakened by this.** What was decided there was not „exactly one way" but **„visible
 instead of hidden"**. Both new ways are visible and protected by the same PIN.
@@ -2010,3 +2015,680 @@ before it could bite: the table of headings was keyed by file name, so two files
 would have silently checked each other's anchors — see the commit that fixed it. It repaid a
 third of `tools/mkdocs_hooks.py`: with the site reduced to one directory, "every link that leaves
 it points at the repository" replaced three separate rules.
+
+---
+
+## 76. The online instance is a doorman in front, not a login inside
+
+The museum needs to fill the database from home, months before a Pi stands in the exhibition room.
+`deploy/docker-compose.web.yml` is the third overlay for that, beside the one of the Pi and the one
+of the development Mac: it puts Caddy in front of the two containers and changes nothing about
+them.
+
+**The protection stands in front of the application, not inside it.** Caddy asks for one password
+over everything — the visitor view, the map, `/api/`. The alternative would have been a login in
+the application, and that would have bent the visitor view permanently for an operating mode that
+lasts a few months. The kiosk has no login by design: whoever stands in front of the device is
+standing in the museum.
+
+**The admin PIN stays as it is**, and so does the lockout in `backend/app/services/auth.py`. Behind
+one password there is no attacker to defend against. What changes is a line in the manual: online,
+the PIN gets more than four digits. `is_valid_pin` allows up to twelve, so no code is involved.
+
+**`ports: !reset []` on the frontend is the security-critical line, and `ports: []` is not enough.**
+Compose merges `ports` instead of replacing them. Measured on 7 September 2026 against the merged
+configuration: base alone publishes `80->80` on the frontend, base plus the overlay publishes
+nothing there and `80` and `443` only on Caddy — with a plain `ports: []` in the overlay the
+`80->80` stays. The doorman would then stand beside the door instead of in it, and
+`http://<address>/` would reach nginx directly. The failure is silent: everything works, and the
+password protects nothing.
+
+**Every `$` of the password hash is written twice in the `.env`.** Measured the same day: the value
+`$2a$14$abcDEF/ghi` arrives at the container as `$2a$14/ghi` — Compose read `$abcDEF` as a variable
+name and replaced it with nothing. Nothing fails, no message appears, and the password simply never
+matches. The doubling is in `deploy/.env.example` and in the manual.
+
+**The backup of the online instance is the ZIP download.** A server has no USB ports, `find_drives`
+returns an empty list, and the backup button has no target. That is not a defect and no reason to
+change the overlay — the manual says who downloads the archive and how often. The stick path
+belongs to the device in the museum.
+
+**The whole thing was proved on the development machine, before any capacity was booked.** With
+`KIEKMAP_WEB_DOMAIN=localhost` Caddy issues its own certificate and needs neither a domain nor a
+public address, so the two things the overlay exists for can be checked today. Measured on
+8 September 2026 against the running stack: the page answers 401 without a password and 200 with
+it, `/api/photos` answers 401 without one, a wrong password answers 401, `http://` answers 308 to
+HTTPS, and a range request on `map.pmtiles` still answers 206 — the map is read tile by tile, and
+a proxy that compressed would take that away. `docker compose ps` shows host ports on Caddy alone.
+
+**Not Traefik and not Keycloak.** Both were weighed in issue #22 and dropped: Traefik buys dynamic
+routing for a single fixed service, Keycloak buys user management for one shared password. Caddy is
+two files and one image.
+
+---
+
+## 77. Compose is started from the project root, with `-f` and `--env-file`
+
+Compose reads the `.env` from the directory it is started in. The `.env` lies in the project root,
+the compose file one level down in `deploy/` — so a `docker compose up -d` started from `deploy/`
+does not see it. Measured on 8 September 2026 with a probe of the same shape: from `deploy/` the
+image resolves to `kiekmap-backend:dev`, from the root with `--env-file .env` to the version the
+`.env` names.
+
+**What that costs on the device.** `update.sh` writes the new `KIEKMAP_VERSION` into the `.env` and
+then started Compose from `deploy/`. The value went unread, `${KIEKMAP_VERSION:-dev}` fell back to
+`dev`, and the freshly loaded image was not the one that started. On a device that has never seen a
+`dev` image, `build:` in the compose file would have taken over and the Pi would have built the
+frontend itself — npm, on four cores, from a stick. The update would have looked as if it had
+worked.
+
+`env_file: ../.env` is not affected: it is resolved against the compose file and delivers the
+settings either way. Only the `${…}` substitution goes wrong, and only for the two values that
+steer Compose itself. That is what makes the failure quiet.
+
+**Hence one form, everywhere:** `docker compose -f deploy/docker-compose.yml --env-file .env …`,
+started from the project root. The `Makefile` already did it that way; the Pi scripts and the
+operations manual now do too, `ps` and `logs` included. A short form that works for four commands
+and silently breaks the fifth is worse than a long one that always works.
+
+**This came out of a pass over `deploy/pi/` before the first device** (issue #38). It found four
+defects that need no hardware, and the first of them stopped the setup at its opening task:
+`setup-pi.sh` installed `chromium-browser`, which Raspberry Pi OS has called `chromium` since
+Bookworm, under `set -e`. The other three were this one, `--disable-pinch=false` — Chromium reads
+that switch by its presence, so it switched off the pinch zoom the map lives on — and an argument
+order in the udev rule that a stick without a label would have shifted, mounting a FAT stick
+without `uid=1000` so the backup failed after somebody pressed the button.
+
+**It replaces nothing.** [Issue #18](https://github.com/nordfisch/kiekmap/issues/18) stays: what
+needs a device is found on a device. `shellcheck` over all five scripts is clean, and that says
+nothing about whether they work.
+
+---
+
+## 78. The coat of arms is guarded at the index, not in the tree
+
+`frontend/public/logo.png` ships as a placeholder from `tools/build_logo.py`. A museum replaces it
+with its own arms, and from that moment it is a modified tracked file on that machine.
+
+**Why that matters:** a municipal coat of arms is free of copyright as an official work, but its
+use is governed by the municipality. Permission for the local museum is not permission for
+everybody who clones a public repository. [Point 21](#21-no-municipal-coat-of-arms-in-the-repository) settles
+that; this point is about why a written rule was not enough.
+
+**It happened twice.** `6d47d36` is titled "Wappen aus der Historie entfernt". On 8 September 2026
+it happened again: a `git add -A` swept the real crest into a commit that was pushed to the public
+repository, and it had to be taken back out and force-pushed. The warning in `adaption.md`
+prevented neither occasion. **A rule that only a document states is a rule that gets broken while
+somebody is doing something else** — which is the argument for every checker in `tools/`.
+
+**The check reads the index, not the working tree, and that is the whole design.** On a machine
+that sets a device up, the tree *should* hold the real crest: `make release` bakes it into the
+frontend image from there, and the manual says so. A check on the tree would refuse every commit on
+that machine and be switched off within the day. `tools/check_logo.py` therefore asks
+`git diff --cached` what the commit carries.
+
+**The way past it needs no exception.** A staged change to the file is allowed when
+`tools/build_logo.py` is staged with it — the one legitimate reason for the placeholder to change
+is that somebody improved the generator. The alternatives were worse: a recorded hash is a value to
+keep in step, and regenerating the PNG in the hook to compare bytes would break on the next Pillow
+release, since nothing promises byte-identical output across versions.
+
+**It guards against the accident, not against intent.** `git commit --no-verify` was always there,
+and staging both files deliberately would pass. That is the right level: the failure being
+prevented is a sweep of `git add -A`, twice now, not a decision.
+
+**It is the one check that is not in `make check`.** The other seven answer whether the tree is
+right, and they run in `make docs-check` and in the hook alike. This one answers what a commit
+carries, so it needs an index and lives in the hook alone.
+
+---
+
+## 79. The map label language belongs to the place, not to the reading language
+
+`tiles/region.json` gained `labelLanguage`. Until then the style asked Protomaps for German labels,
+hard-wired, so an instance with `KIEKMAP_LANGUAGE=en` turned every text on the screen English and
+went on naming its countries, waters and districts in German.
+
+**Why not simply the interface language.** The two are different questions. `KIEKMAP_LANGUAGE` says
+what the device says to its visitors; the label language says what the ground is called. They agree
+in Holm, and they part company for a museum in a place whose surroundings are named in one language
+while the museum speaks another. So the setting sits with the extent and the zoom levels, in the
+file that describes the place — the rule from CLAUDE.md, that nothing place-specific belongs in the
+code.
+
+**It changes little in Holm, and that is not an argument against it.** Protomaps coalesces the
+asked-for language with English and falls through to the local name, so `Mühlenweg` reads the same
+whatever is set: OpenStreetMap holds no `name:de` for it and no English name either. What changes
+are the objects that do carry translated names. The case this exists for is the second museum, which
+is what `adaption.md` is for.
+
+**Missing, it falls back to the interface language, and that choice is deliberate.** A device set up
+before the field existed carries a `region.json` without it, and an update must not take the labels
+off a running map. The interface language reproduces exactly what Holm has today.
+
+**`lang` is never left out.** Measured on 10 September 2026 against
+`@protomaps/basemaps`: with a language the library returns 71 layers of which 13 carry a text field;
+without one it returns 57 and **not a single label**. Nothing raises and nothing logs — the map
+would simply come up with no words on it, and on a kiosk nobody would trace that back to a missing
+setting. `frontend/src/kiosk/mapStyle.test.ts` holds that shut.
+
+**A trap in testing it.** Asserting that the style asks for `name:en` proves nothing: the library
+coalesces every language with English, so `name:en` stands in the expression whatever was asked
+for, a hard-wired `de` included. The test therefore asserts the **absence** of `name:de` under an
+English interface. Measured: `de` yields `name:de` and `name:en`, `en` only `name:en`, `fr`
+`name:fr` and `name:en`.
+
+## 80. The keyword filter is curated, and holds one keyword
+
+The map gained a third filter beside place and time (#23): buttons with keywords in its top left
+corner, and the keywords in the detail view as a second way in.
+
+**The buttons come from a list, not from the collection.** The decades beside the slider are
+derived from the photos (`frontend/src/kiosk/decades.ts`), and the same rule was the obvious one
+here: offer the most frequent keywords. Counted on 8 September 2026 over the 1279 published photos,
+that yields the import tag every photo carries, a street name the map already covers through place,
+and "Winter". Frequency does not measure meaning in this collection. `KIEKMAP_MAP_TAGS` therefore
+names the buttons and their order. It sits beside `KIEKMAP_IMPORT_TAGS` and not in `region.json`,
+because it describes the collection and not the place.
+
+**A configured keyword no published photo carries is left out.** `/api/photos/tags/offered` drops
+it and logs a warning. Otherwise a typo in the `.env`, or a keyword curated away since, becomes a
+button that empties the map.
+
+**One keyword at a time.** A second tap on the active one switches it off, a tap on another replaces
+it. "And" and "or" are questions a visitor at a touchscreen should not have to answer, and a list of
+boxes to tick is not a kiosk control.
+
+**The detail view opens time and place wide.** The visitor who taps a keyword there asks what else
+carries it, not what else carries it in the current decade and viewport. The time range goes to the
+whole axis, the undated photos come back, and the map zooms out to the region, as far as `minZoom`
+allows. A keyword chosen this
+way that is not configured stands beside the configured buttons until it is switched off or
+replaced, so the filtered map always has a button that names the filter.
+
+**The histogram follows the keyword; the axis does not.** Bars and the undated count without the
+keyword would show photos the map hides. The axis stays the collection's, for the same reason it
+ignores the viewport.
+
+**A contribution's focus takes the keyword away if the photo does not carry it**, and gives it back
+with the time range. The thank-you says the photo is on the map now; a filter that hides it makes
+that untrue.
+
+**Whether the Holm collection carries the filter is curation.** 217 of 279 keywords sit on fewer than
+ten photos. The code does not change that; the choice of the list does.
+
+## 81. The idle device shows a wall of four turning photos, and the reload moved to its end
+
+After five minutes without a touch the device reloaded and waited on its start view. Now it shows
+a slide show (#16): four tiles, each photo on its own slow camera path, and every five seconds one
+tile turns over to the next photo. A tap on the coat of arms starts it at once.
+
+**Four tiles, not one photo on the whole screen.** Measured on 12 September 2026 over the 1279
+published photos: 606 cover 1920×1080 without any zoom, and a camera path needs room to zoom into.
+One photo on the whole screen therefore needs a thumbnail larger than the 1200 px one, which means
+recomputing every thumbnail and decoding several megabytes per photo on the Pi. A tile of 960×540
+is covered by the existing thumbnail with room for a zoom of 1.25 (960 × 1.25 = 1200), and 807
+landscape photos with a place qualify. A photo too small for the full zoom zooms less, down to
+drifting only; it never turns soft.
+
+**The timing.** A tile turns every 5 seconds, four tiles make a round of 20 seconds, and one camera
+path lasts 20 seconds. A photo moves from the moment it appears until it turns over. The turn itself
+takes 1.6 seconds, soft at both ends, and goes crosswise over the wall rather than in reading order.
+All of it stands as constants in `frontend/src/kiosk/attract.ts`, so it can be adjusted on the
+device.
+
+**Every camera path uses the whole room the zoom frees.** It goes into a corner, out of one, or
+across the photo at full zoom. The first version drew a random point inside the room; most such
+points lie near the middle, and the motion was too small to see.
+
+**Nothing bright stands in one place for long.** The band with "tippen Sie auf ein Foto" floats
+across the screen on two periods of 71 and 47 seconds. How far it may travel is measured against
+the screen and the band, so it stays whole on any screen and in any language. The year and place
+under a photo fade in after the turn and out after ten seconds, in a corner that changes per photo.
+The whole wall shifts by a few pixels over four minutes, so the dark joints move as well. All of it
+runs on `transform` and `opacity`.
+
+**The reload moved from the start of the idle time to the end of the slide show.** Every way out of
+the show reloads: a tap on a photo leaves a note in `sessionStorage` and reloads, and the new page
+opens the map 300 m around that photo with its detail view; a tap beside the photos lands on the
+start view. The self-healing stays: a stuck state heals with the next touch. What the
+show discards is what the reload after five minutes discarded before, no more.
+
+**The page after a tap stays dark until the detail view is ready.** The reload first drew the
+loading screen and the bare map, and the detail view opened only once the map had loaded: a flash
+between the slide show and the photo. Now `main.tsx` opens the detail view before the first render,
+and a cover in the slide show's colour stands until the photo and the map behind it are drawn. It
+gives up after six seconds, so a photo that fails to load does not leave the screen dark. Measured
+in the browser: dark after 55 ms, the photo after 820 ms, and no frame with the bare map between.
+
+**A tapped photo opens 300 m around it, and its marker pulses when the detail view closes.** The
+focus after a contribution uses 100 m. That suits a pin that was just set and is too close for
+somebody who has not looked at the map yet. The pulse waits for the detail view to close, because a
+pulse under it would run unseen.
+
+**The admin area closes after two minutes without a touch.** It stands on the screen visitors walk
+up to, and left open it offers the next one the photo editor with no PIN in between. The half-hour
+session was the only limit until now. **Time during a job does not count:** a backup,
+restore or import from a stick runs for minutes with nobody touching the screen, and closing means
+reloading in the middle of it. The backend runs all three as one job, and the watcher asks for its
+phase every five seconds; uploads run in the browser and are counted there. The two minutes start
+when the work ends, so a result on the screen stays readable. The number pad closes after two
+minutes as well, so that it cannot keep the slide show from starting.
+
+**Open for the device (#18):** four moving tiles and a 3D turn over hours on a Pi. If the turn
+stutters, a crossfade is the fallback. A 4K screen doubles the tile, and then the 1200 px thumbnail
+only drifts; a 1600 px size would have to follow.
+
+## 82. MapLibre 6, with its worker bundled by hand
+
+MapLibre went from 5.24 to 6. Dependabot's pull request (#48) changed only the version and was
+closed: the update needs two changes in the code, and without the second the map stays grey with
+no message anywhere.
+
+**The default export is gone.** `import maplibregl from "maplibre-gl"` became
+`import * as maplibregl from "maplibre-gl"` in the five files that use it.
+
+**The worker has to be named.** MapLibre does its tile and font work in a web worker. Since version
+6 the worker is a file of its own, which MapLibre looks for beside its main module under a path it
+builds at runtime. Vite cannot follow such a path: in the dev server the file answered 404, and the
+production build did not contain it at all. Typecheck, tests and build all passed while the map
+showed no tiles, no labels and no photos. `maplibregl.setWorkerUrl()` in
+`frontend/src/kiosk/MapView.tsx` now takes a URL that Vite produces with `?worker&url`, bundling
+the worker with its imports. The frontend's Dockerfile refuses a build without the worker file, so
+the same mistake cannot reach a device unnoticed.
+
+**WebGL 2 is required.** MapLibre 6 dropped WebGL 1. A Raspberry Pi 4 or 5 offers WebGL 2; a Pi 3
+does not, and its map stays grey. The recommendation for the device was a Pi 4 or 5 already (#18);
+since this update it is a requirement, and `operations.md` says so.
+
+**Not checked one by one:** version 6 also changed how labels behave at strong overzoom
+(`zoomLevelsToOverscale`), how overlapping transparent lines render, and how icons with an offset
+scale. The map was looked at in the browser and showed no difference that stood out; the first Pi
+is the real test.
+
+---
+
+## 83. A deleted photo is gone from the public API, except for its thumbnail
+
+Every route under `/api/photos/` and `/api/contribute/` answers without a PIN, and photo ids count
+up. Until this point only the lists filtered deleted photos out. The routes by id served the
+details and the original of a deleted photo, and the contribution routes wrote to it. A curator
+deletes a photo for a reason that has to hold, such as its rights or a person who asked to be taken
+out. [Point 16](#16-deleting-means-taken-out-of-the-exhibition-not-removed-from-disk) keeps the file;
+it does not say the file stays reachable.
+
+**The routes by id now answer 404 for a deleted photo**, the same answer as for an id that does not
+exist, so the answer does not reveal that the photo exists. That covers `/api/photos/{id}`,
+`/api/photos/{id}/image` and all four routes under `/api/contribute/{id}/`.
+
+**`/api/photos/{id}/thumb` stays open, on purpose.** The admin area shows deleted photos in
+„Gelöscht", in the editor and in the change log. It loads them through this route with plain
+`<img>` tags, and an `<img>` sends no `X-Admin-Token`. Closing the route needs a second way to
+authenticate an image: a cookie limited to admin image routes, or `fetch()` with the header and a
+blob URL in the frontend. Neither is worth its code for the risk that remains.
+
+**The risk is small because of who reaches the API, not because the route is hard to use.** Ids
+count up, so whoever reaches it can list every thumbnail, up to 1200 px wide. The museum device runs
+offline and has no keyboard. The online instance lets only the team past its password
+([point 76](#76-the-online-instance-is-a-doorman-in-front-not-a-login-inside)). Checking the status
+would cost nothing: the route loads the row anyway.
+
+**Revisit it when the collection becomes reachable without that password**, such as a public web
+version. From then on the thumbnail of a photo deleted for its rights is visible to anybody. A test
+in `tests/test_api_photos.py` keeps the route open, so that nobody closes it before the admin area
+has another way to its images.
+
+---
+
+## 84. A restore closes the database for the swap
+
+A restore renames `kiekmap.db` and moves the restored file into its place. Until this point it did
+that while the connection pool held connections open on the old file, and it rebuilt the engine
+only afterwards.
+
+**A write in between was lost.** A request that arrived during the swap used a pooled connection
+and wrote into the file that had just been set aside. The device answered 200. A test reproduced
+it with a visitor's dating.
+
+**Renaming a database file while a connection holds it is also on SQLite's list of ways to corrupt
+a database.** This point first said that closing the old connections afterwards would delete the
+restored file's `-wal` by its name. A test against SQLite 3.53.4 refuted that: the old connection
+was closed after the swap, and the `-wal` of the restored file and a write made after the swap both
+survived. No damage beyond the lost write is known. The connections are still closed before the
+rename, so that the restore does not depend on how SQLite handles the case its documentation warns
+about.
+
+**The swap now runs with the database closed.** `DatabaseGate` in `app/db.py` counts the sessions in
+use. `Database.closed_for_swap` refuses new sessions, waits until none is in use, disposes the
+engine, lets the restore move the files and migrate, and calls `reopen()`. Only after the wait is
+every connection back in the pool, so only then does `dispose()` close all of them.
+
+`reopen()` builds a new engine on the configured path and binds the sessions of the `Database` to
+it. Until #88 the engine was a module-level name that `closed_for_swap` rebound with `global`, and
+the sessionmaker beside it was reconfigured to match. Engine, sessions and gate belong to one
+object now, which startup creates and `current_database()` hands out.
+
+**The gate closes for seconds, not for the whole restore.** Copying from the stick takes minutes and
+runs with the database open. Requests during the swap get a 503 with `Retry-After`. The progress
+bar keeps working, because the job status needs no database.
+
+**What goes through the gate:** every request session, the readiness probe, the inbox watcher and
+the ZIP download. The watcher now opens one session per file, so that a restore waits for one
+import at most. The ZIP download holds its session for the whole transfer, which also stops a
+restore from swapping the photos out halfway through a download.
+
+**A running download refuses the restore at once** (#82). Without that, the gate closes for the
+swap, waits the full 60 seconds for the download with the kiosk at 503, and then gives up. The
+download marks its session as lasting (`gate.use(lasting=True)`). Both restore routes read that
+count before they copy anything. The gate itself refuses a swap without closing while a lasting
+session is in use, which covers a download that starts after that first check. The download
+response closes its generator when the browser leaves early. Starlette leaves the generator
+suspended on a disconnect, and only the garbage collector would close it.
+
+**What does not, and why.** Backup and stick import open their sessions without the gate, because
+they share the one job with the restore and cannot run beside it. The CLI runs in a process of its
+own, which the gate does not reach.
+
+**The CLI is kept apart by a lock file instead** (#71). `collection_lock` in `app/db.py` takes
+`flock` on `data/kiekmap.lock`: shared for `import`, `scan`, `places`, `seed-load` and `empty` for
+their whole run, exclusive for the whole restore, on both routes. Neither side waits; a command
+ends with a message, a restore fails the job with one. The restore holds the lock from its start,
+not only for the swap, so that a running command stops it before minutes of copying rather than
+after them. `flock` rather than a marker file, because the kernel releases it when the process
+ends, after a crash or a power cut too; a marker file outlives both. A test with two containers on
+one volume showed the lock between them, and its release after `docker kill`. Docker Desktop's
+file sharing on the Mac ignores `flock`, even inside one container; there the lock does nothing.
+The reading commands take no lock.
+
+**The price:** a session that stays in use for 60 seconds (`CLOSE_TIMEOUT_S`) makes the restore
+give up, before anything was moved. A running download makes it give up at once. The admin area
+then says so, and the restore can be started again.
+
+---
+
+## 85. The lockout stays a flat minute
+
+A backend review in September 2026 proposed a lockout that grows with every lock. **It stays as it
+is:** five wrong PINs lock the keypad for 60 seconds, every time.
+
+**The real figure is hours, not years.** Five attempts a minute try all ten thousand four-digit
+PINs in about 33 hours, 17 on average. [Point 7](#7-the-way-into-the-admin-view-is-visible-the-pin-protects-it)
+and the docstring of `backend/app/services/auth.py` said "a good two years" and "years" until #70
+corrected both.
+
+**What protects the PIN is where the device stands.** The museum device runs offline, and its only
+input is a touchscreen without a keyboard. The online instance puts one password in front of
+everything, and its PIN gets more than four digits
+([point 76](#76-the-online-instance-is-a-doorman-in-front-not-a-login-inside)). Neither leaves an
+outside attacker with thirty hours of unhindered attempts.
+
+**A growing lockout would have its own price.** `AttemptGuard` counts for the whole device, not per
+caller, because every request comes through nginx from the same address. A lockout that doubles
+would let anybody who reaches the keypad lock the volunteers out for hours.
+
+What the review did change stays: an attempt counts before its PIN is checked (#62), so parallel
+requests do not multiply the five attempts.
+
+---
+
+## 86. Security headers go into each nginx location
+
+nginx passes a server-level `add_header` only to locations that define no `add_header` of their
+own. `/assets/`, `/basemaps/` and `/tiles/` set `Cache-Control`, so a server-level header would be
+missing exactly there. **`X-Content-Type-Options: nosniff` therefore comes from an included
+snippet, `frontend/nginx/nosniff.conf`, in every location.** It carries `always`; without it the
+header is missing on error responses such as the 502 of `/api/` (#76).
+
+The Content-Security-Policy applies to the page only. It allows `data:` images, because MapLibre
+draws its controls with them and `admin.css` its select arrow. It stays off `/api/`: `/api/docs`
+loads Swagger UI from a CDN, and the policy would block it.
+
+Whoever adds a location includes the snippet in it.
+
+---
+
+## 87. The backend runs as exactly one process
+
+Admin sessions, download tickets, the PIN lockout, the backup job and `DatabaseGate` live in the
+memory of one process. A second worker would drop sign-ins at random, allow the lockout's attempts
+once per process, run two jobs at once and leave the gate without effect.
+
+**At startup `lifespan` takes an exclusive, non-blocking `flock` on `data/kiekmap-backend.lock`**
+(`process_lock` in `app/db.py`) and holds it while the process runs. A second process on the same
+data directory logs the reason and stops. Under `uvicorn --workers 2` the parent stops with it
+(#79).
+
+**The file is not `kiekmap.lock`.** The writing CLI commands take that one shared while the backend
+runs ([point 84](#84-a-restore-closes-the-database-for-the-swap)). An exclusive lock there would
+refuse all of them.
+
+`uvicorn --reload` is unaffected, because the reloader ends the old process before it starts the
+new one. The Dockerfile names `--workers 1`, which takes precedence over `WEB_CONCURRENCY`. Docker
+Desktop's file sharing on the Mac ignores `flock`; there the lock does nothing.
+
+---
+
+## 88. Input from the API has an upper bound, measured against the collection
+
+**`exclude` reads ids from 1 to 2⁶³−1, and the last 200 of them** (`EXCLUDE_MAX`). A longer run of
+digits reached SQLite and gave a 500. The panel remembers 20 skipped photos, so a visitor never
+reaches the limit. The panel appends at the end, so the newest skips are the ones kept. 200 bound
+parameters also stay below the 999 that older SQLite versions allow.
+
+**`description` and `provenance` take at most 4,000 characters** (`LONG_TEXT_MAX` in
+`schemas.py`). In the initial collection of 1,324 photos the longest description has 855
+characters and the longest provenance 580; the 99th percentiles are 467 and 217. The longest value
+the change log holds is 942 characters. An IPTC caption holds at most 2,000 bytes, so a photo
+straight from an import stays editable. The admin fields carry the same `maxLength`, and a refusal
+from the schema reaches the screen as a sentence from the text catalogue (#80).
+
+**Every `/api/` route other than the upload takes a body of at most 1 MB.** A JSON body is read
+into memory whole before validation. The largest legitimate one is a photo edit: 8,800 characters
+of text, at most 105.6 kB even escaped as surrogate pairs. `BodyLimit` checks `Content-Length` or
+counts a chunked body, as it does for the upload, which keeps its 128 MB.
+
+---
+
+## 89. A thumbnail decodes only what it needs, and the pixel limit is a decision
+
+Pillow warns above 89.5 MP, refuses only above 179 MP, and decodes everything below in full. An RGB
+image of 34.8 MP, the size of the largest scan in the collection (A4 at 600 dpi), peaked at 475 to
+546 MB while its thumbnails were made (#81).
+
+**A JPEG decodes at reduced size.** `draft()` decodes at 1/2, 1/4 or 1/8. Other formats decode in
+full and are shrunk with `reduce()` before any copy. Both stop at twice the long side of the
+largest thumbnail. That is the gap Pillow's own `thumbnail()` keeps: reduction by whole factors
+blurs, and Lanczos over the last factor of two does not. Compared on the 73 scans large enough to
+be reduced, old and new thumbnails differ less than the WebP encoding changes them (median 51 dB
+against 35 dB PSNR).
+
+**The limit is 70 MP**, set in `services/exif.py`. It admits A3 at 600 dpi (69.6 MP). At that size
+an RGB image peaks at about 340 MB as JPEG, PNG or TIFF, less than the A4 scan cost before. An
+image above the limit is rejected before a pixel is read, also where Pillow only warns, and the
+import log names the limit.
+
+**WebP is the exception.** Pillow decodes it only in full, 1.2 GB at the limit. No scan of the
+collection is WebP. The Pi's free memory is not measured yet; the first device (#18) can correct
+the number.
+
+---
+
+## 90. Ruff checks for security, and the rules stand in two places
+
+`S` (bandit) and `BLE` are selected. **Both selections have to be written twice**, in
+`backend/pyproject.toml` and in `ruff.toml`: ruff always takes the nearest configuration, the first
+governs `backend/`, the second `tiles/` and `tools/`. A rule selected in only one of them leaves
+half the Python of the repository unchecked (#85).
+
+`S101` is ignored for test files: an assert is what a test is made of, and the rule hits a thousand
+lines. Everything else a rule finds is marked in place, with a `noqa` and its reason beside it.
+None of the findings was real except one, an `assert` used as a runtime check in
+`tools/build_register.py`, which `python -O` strips. The rest are a header name read as a password,
+subprocess calls with a literal argument list and no shell, and a seeded random generator for
+generated data.
+
+**A `noqa` without a reason is not allowed here.** Whoever cannot name why a finding is wrong has
+not understood it and must not silence it.
+
+The rules earn their place against the code that comes later: a subprocess with a shell, `pickle`,
+`tempfile.mktemp`, a secret in the source.
+
+---
+
+## 91. Broken input files are generated, not collected
+
+The import takes its files from the inbox, the browser upload and somebody's stick, so no file can
+be assumed whole. `tests/test_importer.py` generates every allowed format damaged in five named
+ways -- truncated after the header, truncated after half the data, random bytes behind a valid
+signature, a header claiming more pixels than the limit, an EXIF block with values of the wrong
+type -- and requires one of the three outcomes for each: imported, duplicate or rejected, never an
+exception (#87).
+
+**Generated rather than stored.** A fixture file in a folder would not say how it was made, and it
+would cost repository space. A generator says it in its own name.
+
+The single reproduction of #59 thereby became 25 cases, and one more test puts all of them into one
+inbox with a whole image sorted last. That is the failure #59 was.
+
+---
+
+## 92. The language checker reads what the program says, not only what it explains
+
+Reading comments alone left the log line, the command line and the browser console unwatched, and
+German survived there through the switch to English (#83). `tools/language_check.py` now reads the
+strings handed to `log.*`, `print` and `console.*`, in Python through the AST and in TypeScript by
+pattern.
+
+**Two questions per string, because a log line is short.** The word list alone lets
+`"Foto %s: unbekanntes Format %s -- uebersprungen"` pass: it carries no function word of either
+language. The transcribed-umlaut list of the prose check settles it.
+
+Over the 170 output strings of the repository the second question costs no false alarm, which is
+the condition for keeping it: a check that cries wolf gets switched off.
+
+**Shell and Dockerfile literals stay unread.** There a literal is more often a path or a flag than
+a sentence. That gap is #41, and `development.md` names it.
+
+---
+
+## 93. History belongs in the commit, the pitfall in the code
+
+A comment says why the code is the way it is. It does not say what the code used to be, on which
+day that changed, or which backlog point paid for it. Those answers stand in the commit and in the
+closed issue, and `git log` on the line finds them (#84).
+
+What a comment keeps is the warning and its reason: the SQLite text comparison that makes a
+`created_at` guard match nothing, the EXIF coordinate that repeats across photographs and is
+therefore no measurement. Both read the same way without a date, and a date makes neither truer.
+
+**Two kinds of number are not the same.** A `decisions.md` point is a reference a reader still
+needs, and it stays. A backlog point resolves to `history.de.md`, which is how the work went, and
+it goes.
+
+**A measurement of the collection stays, its date goes.** "141 of 486 streets hold no addresses at
+all" is the reason for a condition. "Measured on 14 August 2026" only says when somebody looked.
+
+---
+
+## 94. mypy, not pyright, and with a baseline
+
+The first run over `backend/app/` found 19 errors in 11 files; pyright found 24 in the same code.
+The count did not decide it (#86). **mypy honours the `# type: ignore` comments the code already
+carries** -- six of pyright's errors sit on lines in `models.py` that carry one -- and it installs
+from `pyproject.toml` like ruff and pytest, while the `pyright` package fetches a Node runtime of
+its own.
+
+**Two findings were real, and both were suppressions that suppressed nothing:** a
+`# type: ignore[arg-type]` with explanatory text after the bracket, which makes the whole comment
+invalid, and a `# type: ignore[misc]` naming a code the line does not produce. That is the kind of
+defect no test finds.
+
+The other 17 are the types of a library rather than of this code. They stand in a baseline in
+`backend/mypy.ini`, per module and per error code, each with its reason. **The form has a price:**
+`disable_error_code` switches a code off for the whole module, so a second finding of the same kind
+stays silent there. It was chosen because the alternative was 17 ignore comments spread through
+`app/`. The baseline shrinks by deleting a code.
+
+mypy runs in `make test-backend`, in front of pytest, as `tsc` runs in front of vitest in
+`make test-frontend`. The CI workflow needed no change, because it calls `make check`. It costs
+4.6 seconds cold and 0.15 with its cache. Not `strict`: that would demand an annotation on every
+function and bury the findings that matter.
+
+## 95. A stack in the detail view pages through itself, every eight seconds, and starts again
+
+Nearly every tap on the map opens a stack. Photos placed through the place search share the
+coordinate of their street, and on 26 September 2026 that put **1184 of the 1275 photos on the map
+into 143 stacks**; half of them hold six photos or more, the largest 73. A visitor who does not find
+the paging buttons sees the first photo of each and nothing else (#52).
+
+**Eight seconds, not the five of the slide show.** Five seconds suit a picture with a one-line
+caption; the detail view has title, year, place and a description beside the picture. The clock
+starts when a photo is drawn, not when it is asked for, so a slow load does not shorten the time
+to look at it.
+
+**It starts again after the last photo** rather than stopping on it. Whoever walks up in the middle
+of a stack still sees its beginning. A short stack flipping back and forth for a few minutes is the
+price, and it ends with the idle slide show.
+
+**A fade, no zoom.** The detail view already shows the 1200 px thumbnail at nearly the height of
+the screen, so a camera path would scale it up and turn it soft. A larger thumbnail size would mean
+recomputing every thumbnail, on the Pi as well; the original would mean several megabytes per step.
+The fade is a CSS animation rather than a transition: the next thumbnail is decoded before the
+step, arrives complete, and a transition would have no painted start to leave from. Paging by hand
+fades the same way. Whoever asks for reduced motion gets the cut.
+
+**The first touch inside the view ends it** until a stack is opened again, and the arrow keys count
+as a touch. From then on the visitor turns the pages.
+
+**Paging by itself is not somebody at the device.** It goes through the store and dispatches no
+event, and the idle timer listens to events only. On a long stack the slide show therefore starts
+after five minutes in the middle of it. Measured in the browser: no `pointerdown`, `keydown`,
+`wheel` or `touchstart` on `window` across three automatic steps.
+---
+
+## 96. The device switches itself off through a file, not through a privilege
+
+The admin area has a button that powers the device down, beside „Anzeige neu laden". It is the whole
+answer to [issue #21](https://github.com/nordfisch/kiekmap/issues/21) for now: no read-only overlay
+and no shutdown at closing time. What was asked for is that losing power must not keep the device
+from starting again; an orderly way off addresses that without making the card read-only, and the
+overlay can still follow if the card turns out to suffer.
+
+**The risk was weighed rather than assumed.** The database survives a cut — WAL with
+`synchronous=NORMAL` costs at most the last transaction — and ext4 journals the filesystem
+structure. What remains is the card's own wear-levelling, which no setting reaches, and the metadata
+database of containerd: a cut during a write can leave it corrupt, and then the containers do not
+start. That is exactly the failure #21 fears, and the window is widest during an update.
+
+**Why a file.** The backend runs as uid 1000 in a container, with no docker socket, no sudo line and
+no host mount beyond `../data:/data`. Each of those would buy the poweroff with a privilege that the
+whole admin area then carries — and that area stands behind four digits. So: `data/shutdown-requested`,
+a path unit, and one root script that can do exactly one thing. The USB mounter is the same shape,
+one step further out.
+
+**Two guards, because a request that outlives its moment would switch the device off after the next
+boot.** The script deletes the request before anything else — a `PathExists=` unit triggers again
+the moment the service ends while the file is still there, an endless loop inside a shutdown — and
+it powers off only for a request written during this boot, never one from the future, because a Pi
+has no clock of its own and `fake-hwclock` can set the time back. The backend deletes any request it
+finds while starting: it is the only writer, so one that is already there belongs to nobody. That
+guard also holds on a host where no script is installed.
+
+**`data/shutdown-watcher` decides whether the button is offered at all**, and the refusal is the
+point: a screen saying the power may be switched off while the device runs on is worse than a
+sentence saying this machine cannot do it. `setup-pi.sh` writes the file; a development machine and
+the online instance have none.
+
+**Refused while a job runs**, with the backup's own „busy" text, for the same reason the archive
+download refuses: a poweroff during the swap of a restore leaves the collection half moved.
+
+**The containers are not stopped.** `docker compose stop` marks them as stopped by hand, and
+`restart: unless-stopped` would leave them down at the next boot — a device that comes up with no
+collection, in an exhibition, with nobody to notice. systemd stops `docker.service` in its own
+shutdown.
+
+**The price:** whatever can write the data directory can power the device off — uid 1000 and the
+backend container. That is a denial of service, not an escalation: the script reads no content and
+takes no argument from the file. And the part that cannot be checked without the device is whether
+a container's write into the bind mount reaches the path unit at all; the fallback is a timer that
+polls, with the same script ([issue #18](https://github.com/nordfisch/kiekmap/issues/18)).

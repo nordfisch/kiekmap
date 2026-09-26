@@ -75,10 +75,14 @@ en = Texts(
         a_newer_statement_exists=(
             "There is a newer statement for this photo. Please take that one back first."
         ),
+        cannot_switch_off=(
+            "This system cannot switch itself off. Only the device in the museum is set up for it."
+        ),
         street_gone_from_the_index=(
             "The street from this statement is no longer in the gazetteer. "
             "The place therefore stays."
         ),
+        body_too_large=lambda limit: f"The request is too large. The limit is {limit}.",
     ),
     photos=PhotoTexts(
         no_such_photo=lambda photo_id: f"No photo with the number {photo_id}",
@@ -96,10 +100,12 @@ en = Texts(
         ),
         housenumber_unknown="This house number is not in the gazetteer.",
         housenumber_wrong_street="This house number does not belong to this street.",
+        no_such_date="There is no such date.",
     ),
     backup=BackupTexts(
         stick_gone="This stick is gone. Please plug it in again.",
         busy="Something is already under way. Please wait until it is finished.",
+        restore_swapping="A backup is being read in. Please wait a moment and try again.",
         file_gone_from_inbox="This file is no longer in the inbox folder.",
         not_a_complete_backup="This file is not a complete backup.",
         folder_gone_from_stick="This folder is no longer on the stick.",
@@ -132,6 +138,14 @@ en = Texts(
             "Please update the program first, then read the backup in. "
             "Nothing on the device was changed."
         ),
+        database_in_use=(
+            "The records are still in use, perhaps by a download that is running. "
+            "Nothing on the device was changed. Please try again once it has finished."
+        ),
+        command_line_writing=(
+            "A command at the command line is changing the collection. "
+            "Nothing on the device was changed. Please try again once it has finished."
+        ),
         unexpected_entry="The file holds an unexpected entry.",
         something_went_wrong=lambda reason: f"Something went wrong: {reason}",
     ),
@@ -139,6 +153,12 @@ en = Texts(
         unreadable_file=lambda reason: f"File not readable: {reason}",
         same_content_as=lambda photo_id, filename: f"Same content as photo {photo_id} ({filename})",
         no_readable_image=lambda reason: f"No readable image: {reason}",
+        too_many_pixels=lambda megapixels: (
+            f"The image has too many pixels. The limit is {megapixels} megapixels. "
+            "Please save the scan at a lower dpi."
+        ),
+        thumbnail_failed=lambda reason: f"No preview could be made: {reason}",
+        upload_too_large=lambda limit: f"The file is too large. The limit is {limit}.",
         unknown_format="unknown",
         format_not_allowed=lambda found, allowed: (
             f"Format {found} does not fit (allowed are: {allowed})"

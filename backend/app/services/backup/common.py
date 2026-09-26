@@ -51,8 +51,8 @@ def stamp() -> str:
 
     One clock for the whole device. A state file in local time next to a database in UTC would
     make every difference computed across the two wrong by the offset -- enough to turn last
-    night's backup into "vorgestern". Since 19 August 2026 that clock has a name of its own, so
-    that a third place cannot pick a different one; see ``dates.utc_now``.
+    night's backup into "vorgestern". The clock has a name of its own, ``dates.utc_now``, so that
+    a third place cannot pick a different one.
     """
     return dates.utc_now().isoformat(timespec="seconds")
 

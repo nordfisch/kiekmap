@@ -26,9 +26,18 @@ One file only: [`tiles/region.json`](../../tiles/region.json).
   "defaultZoom": 14.8,
   "minZoom": 13,
   "maxZoom": 15,
-  "streetChoice": 80
+  "streetChoice": 80,
+  "labelLanguage": "de"
 }
 ```
+
+`labelLanguage` is **what the ground is called** — the language the map labels countries, waters and
+districts in. It is not the language of the interface: that is `KIEKMAP_LANGUAGE` in the `.env`. The
+two agree in Holm and part company elsewhere, so **a museum outside the German-speaking area sets
+two things, not one**. It takes effect at once, without a new `make tiles` — the tiles carry the
+names in every language and the style picks one. Where a place has no name in the chosen language,
+the local name is used, which is why the streets read the same either way. If the key is missing,
+the interface language applies.
 
 `streetChoice` is the number of streets the contribution panel offers as buttons — the ones nearest
 to `center`. The place index may reach further; whatever lies beyond it is tapped on the map. **A
@@ -219,6 +228,9 @@ KIEKMAP_ADMIN_PIN_HASH=...        # PIN for the admin area
 KIEKMAP_IMPORT_TAGS=["Gebäude"]                 # keywords for every imported photo
 KIEKMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # credit where the file names nobody
 KIEKMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
+
+# The keyword buttons on the map. Empty by default: no buttons.
+KIEKMAP_MAP_TAGS=["Gasthof","Winter"]
 ```
 
 Raise `exif_date_max_year` if the collection also holds genuine digital photographs — otherwise
@@ -232,9 +244,19 @@ JSON list; in Holm the stock is buildings, elsewhere it is costumes or ships.
 therefore carries its own separator at the end — so the provenance of a photo leads back to the
 file in your own archive.
 
+`KIEKMAP_MAP_TAGS` names the keywords a visitor can filter the map by, in the order they appear.
+Choose them by hand. The most frequent keywords are usually the wrong ones: a keyword every photo
+carries filters nothing, and a street name repeats what the map already shows. A keyword that no
+published photo carries gets no button, and the backend log names it. Visitors reach every other
+keyword through the detail view of a photo.
+
 Whether the import reads the **folder names** need not be set anywhere: a path element counts as a
 street when the place index knows it. An archive filed by street and house number is placed by
 itself; one filed differently is simply left alone.
+
+These values apply at the moment of the import. **Setting them before the first photo comes in is
+the whole point** — changing them afterwards changes nothing about what is already in. How the
+archive then gets in is [Building the first collection](collection.md).
 
 The PIN hash is produced by:
 

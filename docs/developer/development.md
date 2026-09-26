@@ -7,8 +7,9 @@ still open is in the [issues](https://github.com/nordfisch/kiekmap/issues); how 
 
 ## Setup
 
-Requirements: Python 3.12+, Node 18+ (22 recommended), Git. Optionally Docker for the reality
-check, and `pmtiles` (via Homebrew) for building the map.
+Requirements: Python 3.12+, Node 22+, Git. Optionally Docker for the reality check, and `pmtiles`
+(via Homebrew) for building the map. Vitest 5 needs Node 22: under an older Node the frontend tests
+time out instead of reporting the version.
 
 ```bash
 git clone <repo> && cd kiekmap
@@ -109,11 +110,29 @@ switch yet — a file that is half of each is checked in neither language. It wa
 of [issue #31](https://github.com/nordfisch/kiekmap/issues/31) and is empty again, kept for the
 next conversion.
 
+**It reads what the program says, in Python and TypeScript.** The strings handed to `log.*`,
+`print` and `console.*` are program output, and the rule puts them in English. They are judged
+twice: by the word list, and by the transcribed-umlaut list from the prose check. Twice, because a
+log line is short — `"Foto %s: unbekanntes Format %s -- uebersprungen"` carries no function word of
+either language, so the word list alone lets it pass, while `uebersprungen` settles it. Measured
+over the 170 log and output strings in the repository, the second question costs no false alarm.
+See `german_output` in the script.
+
+**What it still does not read: string literals in the `#` formats.** There it classifies comments,
+not the text a script prints. `backend/docker-entrypoint.sh` and `frontend/Dockerfile` carried
+English comments and a German `echo` beside them for weeks, and every run stayed green — a file can
+be half of each and pass. Both messages are translated now; the gap is not closed, and
+[issue #41](https://github.com/nordfisch/kiekmap/issues/41) records it. A shell literal is often a
+path, a flag or a single word, and a check that cries wolf gets switched off. Whoever writes a
+message into a script writes it in English with nothing to remind them.
+
 ### The documentation site
 
-`mkdocs.yml` builds everything under `docs/` into
-[nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in both languages. The
-plugin is `mkdocs-static-i18n`, and its configuration is one line: `docs_structure: suffix`. It
+`mkdocs.yml` builds everything under `docs/museum` into
+[nordfisch.github.io/kiekmap](https://nordfisch.github.io/kiekmap/), in both languages —
+`docs/developer` is read in the repository and not published, see
+[decisions.md](decisions.md#75-the-documentation-splits-by-audience-and-only-one-half-is-published).
+The plugin is `mkdocs-static-i18n`, and its configuration is one line: `docs_structure: suffix`. It
 reads the file name exactly as `language_check.py` does — `operations.de.md` is the German half of
 `operations.md` — so there is no second list to keep in step.
 
@@ -131,18 +150,32 @@ mkdocs build --strict
 second lives at `/kiekmap/de/usermanual/`. The hook rewrites both at build time, so the markdown
 stays correct for whoever reads it on GitHub — which is most people.
 
-**`docs/archive/` is not published.** The history is a closed German record of how the thing was
-built, and the directory name carries that: `exclude_docs` names the directory, not the file.
-Links into it become links to the repository, like `../LICENSE`.
+**`docs/developer/` is not published**, the history included. `docs_dir` names `docs/museum/` and
+nothing else, so there is no exclusion list to keep. Links out of it become links to the
+repository, like `../../LICENSE`.
 
 **The site builds from the newest tag**, not from `develop` — the museum reads the documentation
 for the version it is running. `.github/workflows/pages.yml` does that on a `v*` tag; a
 `workflow_dispatch` builds a preview from any ref, and a pull request touching the docs builds
-without deploying. Only `develop` may deploy: the `github-pages` environment allows that one
-branch, so a pull request cannot publish anything.
+without deploying.
 
-**Until v0.9.0 the newest tag has no `mkdocs.yml`**, and a dispatch without a ref stops with a
-message saying so. Run it with `ref: develop` until then.
+#### Two settings that decide whether a deploy works, and neither is in this repository
+
+They live in the repository's settings on GitHub. Nothing here can check them, so they are written
+down instead — and both have already cost a failed deploy.
+
+| Setting | Has to be |
+|---|---|
+| Pages source | **GitHub Actions**, not a branch. A branch source would build with Jekyll, and Jekyll cannot do i18n here |
+| `github-pages` environment, deployment branches | **`develop`** (branch) **and `v*`** (tag) |
+
+**The tag rule is the one that gets forgotten.** The environment starts out allowing the default
+branch alone, and a tag is not a branch — so the release path this workflow is built for could not
+deploy at all. The build succeeds, the deploy job fails before its first step, and the run says
+only that the branch is not allowed. The symptom is a green `build` beside a red `deploy` with no
+step in it; the cause is here. Found on 2 September 2026, when v0.9.0 was tagged.
+
+The `develop` rule is what keeps a pull request from publishing anything, and it stays.
 
 ### The two catalogues
 
@@ -266,11 +299,21 @@ nobody from the collection; the git history and `history.de.md` still do.
 ```bash
 make check         # everything: style, checks, tests -- the target before a commit
 make test          # tests only
-make test-backend  # pytest
+make test-backend  # mypy and pytest
 make test-frontend # typecheck and vitest
 make lint          # ruff
 make docs-check    # only the checks below
 ```
+
+**Both halves are type-checked**, the frontend by `tsc`, the backend by mypy. Each runs in its
+test target, in front of the tests. The backend is configured in `backend/mypy.ini`, without
+`strict`.
+
+That file carries a baseline: per module the error codes the first run found and that are not
+fixed. Almost all of them are the types of a library rather than of this code — SQLAlchemy knows
+no `rowcount` on a `Result`, Pillow declares `MAX_IMAGE_PIXELS` as `int | None`. The form has a
+price: `disable_error_code` switches a code off for the whole module, so a second finding of the
+same kind stays silent there. The baseline shrinks by deleting a code and is meant to reach zero.
 
 **These checks run beside the tests, because they read files no test ever sees:**
 
@@ -291,13 +334,24 @@ packages and evaluates their environment markers with `packaging`, so it runs wi
 Python. `make notices` and `make check` know that.
 
 **And they hang in the git hook**, because "by hand" meant "not at all" in practice.
-`.githooks/pre-commit` runs exactly these, **not** the test suite: that one runs anyway, these
-were the ones being forgotten, and together they take under a second. Enable it once per clone;
+`.githooks/pre-commit` runs these and **not** the test suite: that one runs anyway, these were the
+ones being forgotten, and together they take under a second. Enable it once per clone;
 `--no-verify` bypasses it:
 
 ```bash
 git config core.hooksPath .githooks
 ```
+
+**One more runs only there: `tools/check_logo.py`.** It reads the **index**, not the working tree,
+and that is why it cannot join the list above. `frontend/public/logo.png` is a placeholder, and a
+machine that sets a device up replaces it with the real municipal coat of arms — rightly, because
+`make release` bakes it into the frontend image from there. What must not happen is that it travels
+into a commit: the municipality governs the use of its arms, and permission for one museum is not
+permission for everybody who clones this. A check on the tree would refuse every commit on that
+machine and be switched off within the day. So the check refuses a *staged* change to the file
+unless `tools/build_logo.py` is staged with it — the one legitimate reason for the placeholder to
+change. Nothing to keep in step, and no exception to remember. See
+[decisions.md](decisions.md#78-the-coat-of-arms-is-guarded-at-the-index-not-in-the-tree).
 
 **`check_settings.py` exists since 14 August 2026, and it has an occasion.** The compose file
 passed only four of eight settings through; the rest silently fell back to their defaults in the
@@ -328,10 +382,6 @@ renders front matter as a table at the top of the page, and these files are read
 as well as on the documentation site. What it reports is drift, not wrongness -- a typo fixed in
 the English source turns it red although the German needs no change. Somebody has to look, decide,
 and then run `--update`.
-
-`tools/build_release.py --notes` assembles the body of a GitHub release out of both changelogs:
-English first, German below a rule. A release has one text field and no language variants, so both
-go into it.
 
 **`build_register.py` joined on 21 August 2026**, together with the register at the top of
 [archive/history.de.md](archive/history.de.md). It is really a generator — `make register` writes the table, `--check`
@@ -427,29 +477,24 @@ photographs belong to the museum and are not in the repository. The rest is in
 
 ## Taking in an archive delivery
 
-When the museum sends a new delivery, two steps come before the import — and both have been
-skipped once, with consequences.
+The procedure itself — conversion, import, checking — is
+[Building the first collection](../museum/collection.md). It is written for a museum filling an
+empty device, and a delivery to a collection that already exists takes the same steps. What is not
+in it, because it belongs to this side, is here.
 
-**First: everything becomes JPEG.**
-
-```bash
-python3 tools/to_jpeg.py "~/Museum/Neuer Stand" "~/Museum/Neuer Stand zwecks Import/Straßen"
-```
-
-The tree is copied and the source is left untouched. TIFF, PNG and WEBP are converted, JPEG is
-passed through. **The setting inside is measured and is not readjusted** — why, is in
+**The conversion setting is measured and is not readjusted** — why, is in
 [decisions.md](decisions.md), point 46. The target folder is called `Straßen` so that the
 provenance takes the same shape as for the initial collection (`KIEKMAP_IMPORT_PROVENANCE` puts
 the prefix in front of it).
 
-**Second: count what is really new.** Even a delivery described as a delta contains images that
-are long since in the collection — the comparison ran over bytes, and those change as soon as
+**Count what is really new before importing.** Even a delivery described as a delta contains images
+that are long since in the collection — the comparison ran over bytes, and those change as soon as
 somebody rewrites the metadata. On 16 August 2026 that was **223 of 619 files**.
 [decisions.md](decisions.md), point 47, describes the way: exact pixel comparison first where the
 edge lengths match, then a coarse pass over downscaled greyscale images.
 
-Only then `python -m app.cli import <folder>`. Take a copy of `data/` first, **including the
-`-wal` and `-shm` files** — without them the copy is at the state of the last checkpoint.
+And take a copy of `data/` first, **including the `-wal` and `-shm` files** — without them the copy
+is at the state of the last checkpoint.
 
 ## Layout
 
@@ -563,27 +608,6 @@ without fixed versions; `make deps-lock` then pulls the lock file's versions ove
 second step `tools/build_notices.py` aborts — **and that is exactly right**, because the licence
 notices would then not be those of the image.
 
-## Building a release
-
-```bash
-make version v=0.9.0                 # set the number
-git commit -am "chore: version 0.9.0"
-git tag -s v0.9.0 -m v0.9.0          # signed, tag.gpgsign is set
-make release to=/Volumes/STICK/kiekmap-update
-```
-
-`tools/build_release.py` builds both images, saves them as `images.tar`, writes the `version`
-file next to them and on request (`map=1`) takes the map file and place index along — exactly
-the folder `deploy/pi/update.sh` expects.
-
-**It aborts on a dirty working tree or a missing tag**, and there is no `--force` against that: a
-stick that belongs to no commit cannot be identified a year later — and a year is exactly the
-interval at which such a device is touched.
-
-**The `version` file is the line that gets forgotten by hand.** Without it `KIEKMAP_VERSION` stays
-as it is in the Pi's `.env`, the next start pulls the old image back up, and the device runs the
-old software without saying so anywhere.
-
 ## Branches and merges
 
 Two long-lived branches, and `main` means something specific:
@@ -593,6 +617,7 @@ Two long-lived branches, and `main` means something specific:
 | `main` | **What runs in the museum.** Every commit on it carries a tag. | merges from `develop` only |
 | `develop` | Everyday work. The default branch. | merges from `feature/*` and `fix/*` |
 | `feature/<short>`, `fix/<short>` | short-lived, one topic | by pull request into `develop`, deleted afterwards |
+| `release/<version>` | the changelog and version commit of one release | by pull request into `develop`, deleted afterwards |
 
 **This is not GitHub Flow**, even though it looks like it. GitHub Flow has exactly one long-lived
 branch and is built for services that ship several times a day. This device stands offline and is
@@ -600,9 +625,11 @@ updated once or twice a year from a stick; there, a `main` of its own answers a 
 really gets asked in the museum: *what is actually running on the device?* The reasoning is in
 [decisions.md](decisions.md).
 
-**No `release/*`, no `hotfix/*`.** With one maintainer that is ballast. An urgent bug becomes a
-`fix/` branch, goes into `develop` and from there straight into `main` — the same road, driven
-faster.
+**`release/<version>` is not the release branch of git-flow.** It lives for one pull request and
+carries the changelog and the version number; nothing is stabilised on it. There is no
+`hotfix/*`: an urgent bug becomes a `fix/` branch, goes into `develop` and from there into `main`
+with the next patch number — the same road, driven faster. The steps are in
+[Making a release](#making-a-release).
 
 ### Squash merge is disabled here, and there is a reason
 
@@ -626,24 +653,172 @@ the follow-up work was half the job.
 The Conventional Commits prefixes apply unchanged (`feat:`, `fix:`, `docs:` …). Transcribing
 umlauts no longer applies to new messages.
 
-## Releasing
+## Making a release
 
-SemVer tags, Conventional Commits, one repository for frontend and backend. Frontend and backend
-are versioned together — for a single-device system separate versioning is only ballast, and API
-compatibility is guaranteed by it.
+A release is four things under one number: the number in the files, a merge of `develop` into
+`main`, a signed tag on that merge, and a GitHub release whose text comes from the two changelogs.
+Pushing the tag also deploys the documentation site. The update stick for a device is built from
+the tag afterwards.
+
+Frontend and backend carry the same number. Do the steps in this order: each one depends on the
+one before it.
+
+**Before you start:**
+
+- Everything that belongs in the release is merged into `develop`, and its check is green.
+- Your clone signs commits and tags: `git config --get tag.gpgsign` answers `true`.
+- The two GitHub settings under [The documentation site](#the-documentation-site) are right.
+  Nothing in the repository can check them.
+
+**Choose the number.** SemVer, while the major version is 0: a new ability raises the middle
+number (0.9.6 → 0.10.0), fixes alone raise the last one (0.9.6 → 0.9.7). **A number that was
+published once is never used again**, even when its release is withdrawn — see
+[When a release went wrong](#when-a-release-went-wrong).
+
+Set it once in the shell. Every command below uses it:
+
+```bash
+V=0.9.6
+```
+
+### 1. A release branch from `develop`
+
+```bash
+git switch develop && git pull --ff-only
+git switch -c release/$V
+```
+
+### 2. The changelog
+
+In `CHANGELOG.md`:
+
+1. Rename `## [Unreleased]` to `## [0.9.6] — 2026-09-27`: the number in brackets, a dash, today's
+   date as year-month-day. `build_release.py` finds the block by exactly that heading.
+2. Directly below the heading, write **one bold sentence that says what the release changes for a
+   museum**, and a plain sentence after it if one is needed. This is the description at the top of
+   the GitHub release. The block of 0.9.0 is the example.
+3. Put a new, empty `## [Unreleased]` above the renamed block.
+4. Read the block as a whole: one line per entry, each linking its issue.
+
+In `CHANGELOG.de.md` the same: `## [Unveröffentlicht]` becomes `## [0.9.6] — 2026-09-27`, with
+the date in the same form, a new empty `## [Unveröffentlicht]` goes above it, and the sentence is
+translated. Then record that the translation matches its source again:
+
+```bash
+python3 tools/check_translations.py --update
+```
+
+### 3. The number in the files
+
+```bash
+make version v=$V
+```
+
+It writes the number to five places at once; which ones, and why the last matters, is in
+[One number, five places](#one-number-five-places).
+
+### 4. Into `develop`
+
+```bash
+make check
+git commit -am "chore: version $V"
+git push -u origin release/$V
+gh pr create --base develop --title "Version $V" --body "Changelog and version number for $V."
+```
+
+Merge the pull request once its check is green, **with a merge commit**. Squash is switched off,
+and the reason is [above](#squash-merge-is-disabled-here-and-there-is-a-reason).
+
+### 5. From `develop` into `main`
+
+```bash
+gh pr create --base main --head develop --title "Release $V" --body "Release $V. See CHANGELOG.md."
+```
+
+Merge it with a merge commit once its check is green. That merge commit is what the tag names.
+
+### 6. The tag, on `main`
+
+```bash
+git switch main && git pull --ff-only
+git log -1 --oneline        # has to be the merge of "Release $V"
+git tag -s v$V -m v$V
+git push origin v$V
+```
+
+**Pushing the tag deploys the documentation site.** Watch the run:
+
+```bash
+gh run watch "$(gh run list --workflow pages.yml --limit 1 --json databaseId -q '.[0].databaseId')"
+```
+
+A green `build` beside a red `deploy` with no step in it means the tag rule is missing from the
+[settings](#two-settings-that-decide-whether-a-deploy-works-and-neither-is-in-this-repository).
+
+### 7. The GitHub release
+
+Still on `main`, on the tag:
+
+```bash
+python3 tools/build_release.py --notes > /tmp/kiekmap-notes.md
+gh release create v$V --verify-tag --notes-file /tmp/kiekmap-notes.md \
+    --title "Kiekmap $V — <what it brings, in a few words>"
+```
+
+- **The title** is written by hand: `Kiekmap`, the number, a dash, a few words. For example
+  `Kiekmap 0.9.0 — two languages, and a documentation site`. It is the one line of a release that
+  is not in the changelog.
+- **The text** is the changelog block of this version, English first, German below a rule, with the
+  bold sentence of step 2 on top. `--notes` refuses when HEAD is not on the tag or when a changelog
+  has no block for the number. It cannot print the text of an older release.
+- The notes file goes to `/tmp`, not into the working tree: step 9 needs a clean tree.
+
+### 8. Back to `develop`
+
+```bash
+git switch develop && git pull --ff-only
+git branch -d release/$V
+```
+
+The next change starts on a branch of its own from here.
+
+### 9. The update stick
+
+Only when a device is to be updated. On the tag, with a clean working tree:
+
+```bash
+git switch --detach v$V
+make release to=/Volumes/STICK/kiekmap-update
+```
+
+`make release` refuses a dirty tree and a HEAD that is not on the tag. What the stick holds and how
+it goes onto the Pi is in [operations.md](../museum/operations.md#updating-without-the-internet).
+
+### When a release went wrong
+
+A tag on the wrong commit, a number that was not raised, an empty release text: **withdraw the
+release and publish the next number.** Do not move a published tag. Whoever fetched it keeps the
+old one, and the documentation site has already been built from it.
+
+```bash
+gh release delete vX.Y.Z --yes        # the release on GitHub
+git push origin :refs/tags/vX.Y.Z     # the tag on GitHub
+git tag -d vX.Y.Z                     # the tag in your clone
+```
+
+Then start again at step 1 with the next number. In both changelogs the withdrawn block becomes
+part of the new one; the withdrawn number does not appear in them. 0.9.5 went this way: it was
+tagged on a feature commit, with the files still at 0.9.0 and no changelog block, and its content
+was released as 0.9.6.
 
 ### One number, five places
 
-```bash
-make version            # show it
-make version v=0.8.0    # set it everywhere
-```
+`make version` shows the number, `make version v=0.9.6` sets it. `tools/set_version.py` writes it
+to `frontend/package.json`, twice to `frontend/package-lock.json` (the root package), to
+`backend/pyproject.toml` and to `backend/app/__init__.py`. `make check` reports when one of them
+steps out of line.
 
-`tools/set_version.py` writes it to `frontend/package.json`, twice to
-`frontend/package-lock.json` (the root package), to `backend/pyproject.toml` and to
-`backend/app/__init__.py`. `make check` reports when one of them steps out of line.
-
-**The fourth is the most important and would have been the one left behind:** `__version__` is what
+**The last is the most important and would have been the one left behind:** `__version__` is what
 `/api/health` answers and what stands in the OpenAPI description — the version the device in the
 museum claims about itself. If it stood still while the image tag counted on, the API would give
 the wrong answer to the one question it exists for.
@@ -651,6 +826,8 @@ the wrong answer to the one question it exists for.
 **The tag is not the source, the files are.** A check against `git describe` would be red exactly
 in the window where the version is already raised but the tag is not yet set — and that is where
 the commit hook runs. The tag has to match instead.
+
+### Signed commits and tags
 
 **All commits are signed** (SSH, not GPG), and so are the tags — including the 185 from before the
 key existed, done retroactively on 25 August 2026. That is unusual, so the trade-off belongs in
@@ -669,6 +846,3 @@ that reported as invalid. Whoever changes the key therefore keeps the old one li
 **It was done with** `git rebase --root --exec` — `filter-repo` does not sign. The run reset the
 committer date from the author date, otherwise all 188 commits would have got 25 August as their
 committer date. One commit previously had ten seconds between the two dates; those were lost.
-
-The museum device is offline. The update path to it (an image tarball on a USB stick) is in
-[operations.md](../museum/operations.md).

@@ -59,10 +59,10 @@ def find_drives(media_dir: Path) -> list[Drive]:
     therefore look like an ordinary folder, the descent one level down would follow it, and
     whatever mounts lie behind it would be offered as backup targets.
 
-    **On macOS that was the rule, not an accident:** /Volumes always holds a symlink to ``/``
-    named after the internal volume. Measured on 14 August 2026 -- the panel offered the data
-    directory itself, and the backup landed inside the very folder it was backing up, with a
-    manifest that made it look real. Exactly the failure the mount check above exists to prevent.
+    **On macOS that is the rule, not an accident:** /Volumes always holds a symlink to ``/`` named
+    after the internal volume. Without this check the panel offers the data directory itself, the
+    backup lands inside the very folder it is backing up, and its manifest makes it look real.
+    Exactly the failure the mount check above exists to prevent.
     """
     if not media_dir.is_dir():
         return []

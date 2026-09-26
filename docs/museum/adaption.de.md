@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/adaption.md -->
-<!-- source-sha: 27b574c8eca3f392fd888c07fb2f081a2750728a919124f784d7e48acb36c1ba -->
+<!-- source-sha: 9545e58a5e7393b6a241efc6d9447f2714c4340a5fc20a6a718f0815b8448a11 -->
 
 # Kiekmap für einen anderen Ort oder eine andere Sprache
 
@@ -29,9 +29,18 @@ Nur eine Datei: [`tiles/region.json`](../../tiles/region.json).
   "defaultZoom": 14.8,
   "minZoom": 13,
   "maxZoom": 15,
-  "streetChoice": 80
+  "streetChoice": 80,
+  "labelLanguage": "de"
 }
 ```
+
+`labelLanguage` ist, **wie der Boden heißt** — die Sprache, in der die Karte Länder, Gewässer und
+Landkreise beschriftet. Nicht die Sprache der Oberfläche: Die ist `KIEKMAP_LANGUAGE` in der `.env`.
+Beide stimmen in Holm überein und gehen anderswo auseinander, deshalb stellt **ein Museum außerhalb
+des deutschen Sprachraums zwei Dinge ein, nicht eines**. Es wirkt sofort, ohne neues `make tiles` —
+die Kacheln tragen die Namen in jeder Sprache, der Stil greift eine heraus. Wo ein Ort in der
+gewählten Sprache keinen Namen hat, steht der ortsübliche, weshalb die Straßen so oder so gleich
+heißen. Fehlt der Schlüssel, gilt die Sprache der Oberfläche.
 
 `streetChoice` ist die Anzahl der Straßen, die der „Hilf mit"-Bereich als Knöpfe zur Wahl stellt —
 die dem `center` nächsten. Der Ortsindex darf weiter reichen; was darüber hinaus liegt, wird auf
@@ -225,6 +234,9 @@ KIEKMAP_ADMIN_PIN_HASH=...        # PIN für den Admin-Bereich
 KIEKMAP_IMPORT_TAGS=["Gebäude"]                 # Schlagwörter für jedes importierte Foto
 KIEKMAP_IMPORT_CREDIT=Sammlung Heimatmuseum Holm # Bildnachweis, wo die Datei niemanden nennt
 KIEKMAP_IMPORT_PROVENANCE=Online-Archiv des Museums, Verzeichnis 01 Orte/
+
+# Die Stichwort-Knöpfe auf der Karte. Leer voreingestellt: keine Knöpfe.
+KIEKMAP_MAP_TAGS=["Gasthof","Winter"]
 ```
 
 `exif_date_max_year` hochsetzen, falls die Sammlung auch echte Digitalfotos enthält — sonst
@@ -238,9 +250,20 @@ aus Trachten oder Schiffen. `KIEKMAP_IMPORT_PROVENANCE` wird wörtlich vor den D
 Import-Ordner gesetzt und trägt darum sein eigenes Trennzeichen am Ende — so führt die
 Herkunftsangabe eines Fotos zurück auf die Datei im eigenen Archiv.
 
+`KIEKMAP_MAP_TAGS` nennt die Stichwörter, nach denen Besucher die Karte filtern können, in der
+Reihenfolge ihrer Knöpfe. Sie werden von Hand gewählt. Die häufigsten Stichwörter sind meist die
+falschen: Eines, das jedes Foto trägt, filtert nichts, und ein Straßenname wiederholt, was die
+Karte ohnehin zeigt. Ein Stichwort, das kein veröffentlichtes Foto trägt, bekommt keinen Knopf, und
+das Backend-Log nennt es. Alle übrigen Stichwörter erreichen Besucher über die Detailansicht eines
+Fotos.
+
 Ob der Import die **Ordnernamen** auswertet, muss nirgends eingestellt werden: Ein Pfadteil gilt
 als Straße, wenn der Ortsindex sie kennt. Ein Archiv, das nach Straße und Hausnummer abgelegt
 ist, wird damit von selbst verortet; eines mit anderer Ablage bleibt einfach unberührt.
+
+Diese Werte wirken im Augenblick des Imports. **Sie vor dem ersten Foto zu setzen ist der ganze
+Punkt** — sie danach zu ändern ändert nichts an dem, was schon drin ist. Wie das Archiv dann
+hineinkommt, steht in [Die erste Sammlung aufbauen](collection.de.md).
 
 Den PIN-Hash erzeugt:
 

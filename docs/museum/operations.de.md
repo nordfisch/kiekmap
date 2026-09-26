@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 5a2df922ffca1d488dcfbc17fca46b3c1cfa5c4a522fd2a47a146052ffac8830 -->
+<!-- source-sha: 92641ad18288dc83654e61217d9b090c9b7fe96b2f2041e8418d35c607e5d9a0 -->
 
 # Betriebshandbuch
 
@@ -14,6 +14,9 @@ Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bed
 
 ## Einen neuen Pi einrichten
 
+Ein **Raspberry Pi 4 oder 5**. Die Karte braucht WebGL 2, und ein Pi 3 bietet das nicht: Die Karte
+bliebe dort grau.
+
 Raspberry Pi OS **Lite** (64 Bit), kein Desktop. Dann:
 
 ```bash
@@ -23,8 +26,8 @@ sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh
 
 Das Skript installiert cage, Chromium und Docker, legt den Benutzer `kiekmap` an, richtet den
 Kiosk-Dienst und die USB-Regel ein und schaltet die Bildschirmabschaltung ab. Danach nennt es die
-vier Schritte, die es nicht selbst tun kann: `.env` anlegen, PIN setzen, Kartendaten kopieren,
-Container starten.
+Schritte, die es nicht selbst tun kann: `.env` anlegen, Abbilder und Kartendaten vom
+Entwicklungsrechner herüberholen, PIN setzen, neu starten.
 
 **Kartendaten kommen vom Entwicklungsrechner**, nicht vom Pi. `make tiles` und `make places`
 brauchen Internet und Rechenzeit; auf den Pi gehören nur die Ergebnisse:
@@ -34,18 +37,19 @@ rsync -a frontend/public/tiles/ pi:/opt/kiekmap/frontend/public/tiles/
 rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
 ```
 
-**Das Wappen kommt denselben Weg.** Im Repo liegt nur ein Platzhalter — ein Gemeindewappen darf
-dort nicht liegen, siehe [decisions.md](../developer/decisions.md), Punkt 21. Auf dem Gerät gehört das echte
-hin:
+**Das Wappen kommt nicht denselben Weg — es geht ins Abbild.** Im Repo liegt nur ein Platzhalter;
+ein Gemeindewappen darf dort nicht liegen, siehe [decisions.md](../developer/decisions.md),
+Punkt 21. Das echte wird beim Bau in das Frontend-Abbild aufgenommen und nicht zur Laufzeit
+gelesen, gehört also auf den **Entwicklungsrechner**, bevor die Abbilder gebaut werden:
 
 ```bash
-rsync -a wappen.png pi:/opt/kiekmap/frontend/public/logo.png
+cp ~/Developer/Museum/Wappen/holm-wappen.png frontend/public/logo.png
 ```
 
-Danach das Frontend neu bauen (`make prod` baut die Images ohnehin neu) — die Datei wird beim Bau
-in das Abbild aufgenommen, nicht zur Laufzeit gelesen. Das Holmer Wappen liegt unter
-`~/Developer/Museum/Wappen/holm-wappen.png` auf dem Entwicklungsrechner; Quelle und
-Rechtelage stehen in [adaption.de.md](adaption.de.md), Abschnitt „Wappen einsetzen".
+Das nächste `make release` trägt es dann im Abbild auf das Gerät. **Auf den Pi kopiert bewirkt es
+nichts**: Die Compose-Datei hängt `tiles/` wieder in den Container ein und sonst nichts, eine
+danebenliegende `logo.png` liest also niemand. Quelle und Rechtelage stehen in
+[adaption.de.md](adaption.de.md), Abschnitt „Wappen einsetzen".
 
 ---
 
@@ -68,9 +72,41 @@ Woran man erkennt, dass etwas hakt:
 ```bash
 systemctl status kiekmap-kiosk       # läuft der Kiosk?
 journalctl -u kiekmap-kiosk -n 50    # warum nicht?
-cd /opt/kiekmap/deploy && docker compose ps
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env ps
 curl -sf http://localhost/api/health && echo " API antwortet"
 ```
+
+---
+
+## Ausschalten aus der Verwaltung
+
+Der Knopf unten auf der Startseite der Verwaltung, und die drei Teile dahinter:
+
+1. Das Backend schreibt `data/shutdown-requested`, mit der Uhrzeit darin. Es läuft ohne Rechte in
+   einem Container und kann nicht mehr als das.
+2. `kiekmap-shutdown.path` sieht die Datei und startet `kiekmap-shutdown.service`.
+3. `/usr/local/sbin/kiekmap-shutdown` löscht die Anforderung, prüft, ob sie aus diesem Start
+   stammt, und ruft `systemctl --no-block poweroff` auf.
+
+```bash
+systemctl status kiekmap-shutdown.path      # läuft die Überwachung?
+journalctl -u kiekmap-shutdown -n 20        # was bei der letzten Anforderung geschah
+```
+
+**`data/shutdown-watcher` ist es, was den Knopf wirken lässt.** `setup-pi.sh` schreibt die Datei;
+ohne sie verweigert das Backend, denn dasselbe Programm läuft auch auf einem Entwicklungsrechner und
+online, wo niemand die Anforderung ausführen würde. Ein Gerät, das nur vom Stick aktualisiert wurde,
+braucht deshalb einmal `sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh` — das Skript darf beliebig oft
+laufen.
+
+**Die Container werden absichtlich nicht gestoppt.** `docker compose stop` markiert sie als von Hand
+gestoppt, und `restart: unless-stopped` ließe sie beim nächsten Start unten. systemd hält Docker
+selbst an, und die Datenbank übersteht das: WAL mit `synchronous=NORMAL` kostet höchstens die letzte
+Transaktion.
+
+**Den Stecker zu ziehen bleibt überstehbar**, und darum geht es in [Issue #21](https://github.com/nordfisch/kiekmap/issues/21):
+Der Knopf ist der geordnete Weg, keine Reparatur. Nicht abgedeckt ist der Fall, dass ihn niemand
+drückt.
 
 ---
 
@@ -94,6 +130,7 @@ hochladen, sichern. SSH braucht man für Updates und Fehlersuche.
 Auf dem Entwicklungsrechner einen Ordner für den Stick bauen:
 
 ```bash
+git switch --detach v0.9.6                            # die auszuliefernde Fassung
 make release to=/Volumes/STICK/kiekmap-update
 make release to=/Volumes/STICK/kiekmap-update map=1   # falls sich die Region geändert hat
 ```
@@ -102,7 +139,8 @@ Das Ziel baut beide Abbilder, sichert sie als `images.tar` und schreibt die `ver
 daneben. **Es bricht ab, wenn der Arbeitsbaum nicht sauber ist oder der passende Tag fehlt** — ein
 Stick, der zu keinem Commit gehört, ist ein Jahr später nicht mehr zuzuordnen.
 
-Vorher also: `make version v=0.9.0`, committen, `git tag -s v0.9.0 -m v0.9.0`.
+**Ein Stick wird aus einer Fassung gebaut, auf ihrem Tag.** Wie eine Fassung entsteht, steht in
+[development.md](../developer/development.md#making-a-release) (englisch).
 
 Von Hand waren das vier Befehle. Der, den man vergisst, schreibt die `version`-Datei: Die Abbilder
 laden, `KIEKMAP_VERSION` bleibt in der `.env` stehen, und der nächste Start zieht das **alte**
@@ -148,7 +186,8 @@ In dieser Reihenfolge:
    heißt: Die Sitzung hat kein Ausgabegerät. Dann fehlt eine der vier Zeilen `PAMName`,
    `TTYPath`, `StandardInput`, `UtmpIdentifier` in der Unit, oder der Benutzer ist nicht in den
    Gruppen `video` und `render`.
-3. `docker compose ps` — laufen die Container? Wenn nicht: `docker compose logs backend`.
+3. `docker compose ... ps` — laufen die Container? Wenn nicht: `... logs backend`. Der vollständige
+   Befehl steht unter [Einstellungen im Containerbetrieb](#einstellungen-im-containerbetrieb).
 4. Nach zehn Minuten schwarz, obwohl vorher alles lief: `consoleblank=0` fehlt in der
    `cmdline.txt` (setzt `setup-pi.sh`, wirkt erst nach einem Neustart).
 
@@ -164,6 +203,7 @@ In dieser Reihenfolge:
 | „Hilf mit" meldet stumm Fehler | Regionsprüfung ohne `data/region.json` — `make tiles` legt sie mit ab |
 | **Anzeige normal, aber nichts lässt sich speichern** | **Schema veraltet. Seit August 2026 zieht die Wiederherstellung es selbst nach — [siehe unten](#der-schemastand-einer-zurückgespielten-sicherung)** |
 | USB-Stick erscheint nicht | udev-Regel oder `:rshared` — siehe unten |
+| Der Knopf meldet, das Gerät könne sich nicht abschalten | `data/shutdown-watcher` fehlt — `setup-pi.sh` noch einmal laufen lassen |
 | Anmeldung lehnt jede PIN ab | `KIEKMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
 | Importierte Fotos ohne Schlagwort oder Bildnachweis | Eine Einstellung erreicht den Container nicht — [siehe unten](#einstellungen-im-containerbetrieb) |
 
@@ -173,6 +213,15 @@ In dieser Reihenfolge:
 
 ```bash
 cd backend && .venv/bin/python -m app.cli pin
+```
+
+Das ist der Entwicklungsrechner. **Auf dem Gerät gibt es keine virtuelle Umgebung** — der Pi trägt
+die Software als Abbild, nicht als Python-Installation, deshalb läuft derselbe Befehl dort im
+Container:
+
+```bash
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env \
+    run --rm backend python -m app.cli pin
 ```
 
 Der Befehl fragt die PIN zweimal ab und gibt die Zeile aus, die in die `.env` gehört. Die PIN
@@ -192,8 +241,14 @@ in [`deploy/docker-compose.yml`](../../deploy/docker-compose.yml) als `env_file`
 etwas ändert, startet danach die Container neu:
 
 ```bash
-cd /opt/kiekmap && docker compose up -d
+cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env up -d
 ```
+
+**Aus `/opt/kiekmap` und mit `--env-file`, nicht aus `deploy/`.** Compose liest die `.env` aus dem
+Verzeichnis, in dem es gestartet wird, und die `.env` liegt eine Ebene über der Compose-Datei. Aus
+`deploy/` heraus fände es sie nicht: `KIEKMAP_VERSION` fiele auf `dev` zurück, und weil die
+Compose-Datei ein `build:` trägt, würde der Pi bei fehlendem Abbild das Frontend selbst bauen. Jeder
+`docker compose`-Befehl auf dem Gerät hat diese Form.
 
 **Die Sprache des Geräts** steht ebenfalls hier:
 
@@ -206,8 +261,8 @@ nicht nötig** — nach dem Neustart der Container gilt der neue Wert. Ein ander
 `en` bricht den Start ab, statt still auf Deutsch zurückzufallen; im Protokoll steht dann eine
 Zeile von Pydantic. Mehr in [adaption.de.md](adaption.de.md#andere-sprache).
 
-**Vier Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
-`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR`, `KIEKMAP_CORS_ORIGINS` und der Ort des PIN-Hashes. Sie
+**Drei Werte setzt die Compose-Datei selbst**, und die gewinnen über die `.env`:
+`KIEKMAP_DATA_DIR`, `KIEKMAP_MEDIA_DIR` und der Ort des PIN-Hashes. Sie
 beschreiben den Container, nicht den Ort — innen heißen die Verzeichnisse immer `/data` und
 `/media`, gleichgültig wo sie außen liegen. Ein `KIEKMAP_MEDIA_DIR=/Volumes` in der `.env` des
 Entwicklungsmacs stört den Betrieb deshalb nicht.
@@ -275,8 +330,9 @@ hdiutil create -size 200m -fs "HFS+" -volname TESTSTICK teststick.dmg && hdiutil
 
 **Warum es überhaupt eine Frage ist.** Eine Sicherung enthält `kiekmap.db` genau so, wie die Datei
 damals aussah — mitsamt ihrem Schemastand in der Tabelle `alembic_version`. Beim Zurückspielen wird
-die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`); danach hängt
-sich das laufende Programm nur neu an sie (`_reopen_database`). Migrationen laufen dabei nicht von
+die Datei **im Ganzen** ausgetauscht (`_swap_in` in `services/backup/restore.py`). Für diese
+Sekunden schließt das Programm die Datenbank und hängt sich danach an die neue Datei
+(`closed_for_swap` in `app/db.py`). Migrationen laufen dabei nicht von
 selbst: Sie laufen beim *Start* (`backend/docker-entrypoint.sh`), und eine Wiederherstellung ist
 kein Start.
 
@@ -298,8 +354,8 @@ das Archiv weiterhin im Eingangsordner, der Arbeitsordner ist aufgeräumt.
 ### Nachsehen, wo etwas steht
 
 ```bash
-docker compose exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
-docker compose exec backend alembic heads
+docker compose -f deploy/docker-compose.yml --env-file .env exec backend python -c "import sqlite3; print(sqlite3.connect('/data/kiekmap.db').execute('select * from alembic_version').fetchone())"
+docker compose -f deploy/docker-compose.yml --env-file .env exec backend alembic heads
 ```
 
 Stimmen die beiden Werte nicht überein, ist das Schema nicht auf Stand. Das ist bei
@@ -317,6 +373,68 @@ Und die Reparatur von Hand:
 ```bash
 make migrate
 ```
+
+## Die Online-Instanz
+
+Neben dem Pi gibt es einen zweiten Weg, dies zu betreiben: auf einem Webserver, von überall
+erreichbar, hinter einem Kennwort. Er ist für die Monate da, in denen das Museumsteam die Datenbank
+von zu Hause aus füllt, bevor ein Gerät im Ausstellungsraum steht.
+
+Dort laufen dieselben zwei Container wie auf dem Pi — dieselben Abbilder, dieselbe
+nginx-Konfiguration. Nur Caddy steht davor und kümmert sich um HTTPS und das Kennwort:
+
+```
+Internet --HTTPS--> Caddy --HTTP--> nginx (frontend) --> uvicorn (backend)
+```
+
+**Drei Zeilen in der `.env`**, sonst ist nichts anders:
+
+```bash
+KIEKMAP_WEB_DOMAIN=fotos.example.org
+KIEKMAP_WEB_USER=museum
+KIEKMAP_WEB_PASSWORD_HASH=$$2a$$14$$...
+```
+
+Der Hash entsteht auf dem Entwicklungsrechner:
+
+```bash
+docker run --rm caddy:2.11.4-alpine caddy hash-password --plaintext '<Kennwort>'
+```
+
+**Jedes `$` darin muss in der `.env` doppelt geschrieben werden.** Compose liest ein einzelnes als
+Anfang eines Variablennamens und verwirft, was darauf folgt — das Kennwort passt dann nie, und
+nichts sagt, warum. Danach:
+
+```bash
+make prod-web
+```
+
+**Das Kennwort schützt alles**, die Karte eingeschlossen und `/api/` ebenso. Wer es nicht hat,
+bekommt eine 401 und sieht nichts. Genau dafür ist diese Instanz da: Die Sammlung ist nicht
+öffentlich, solange sie aufgebaut wird.
+
+**Die Abbilder werden auf dem Entwicklungsrechner gebaut, nicht auf dem Server.** Ein kleiner
+Server hat zwei Kerne, und der Frontend-Bau ist ein npm-Bau — derselbe Weg wie beim Pi, mit
+`docker save` und `docker load`. Siehe [Update ohne Internet](#update-ohne-internet).
+
+**Die Sicherung ist der ZIP-Download.** Ein Server hat keine USB-Anschlüsse, der Sicherungsknopf im
+Admin-Bereich findet dort also kein Ziel. Stattdessen lädt jemand das Archiv im Admin-Bereich
+herunter, regelmäßig, und bewahrt es anderswo auf. Der Stick ist für das Gerät im Museum.
+
+**Die PIN bekommt mehr Ziffern.** Auf dem Pi reichen vier — wer davorsteht, steht im Museum. Online
+reichen vier nicht; die PIN erlaubt bis zu zwölf.
+
+**Vorher ausprobieren:** Mit `KIEKMAP_WEB_DOMAIN=localhost` stellt Caddy ein eigenes Zertifikat aus
+und braucht weder Domain noch öffentliche Adresse. Der Browser warnt einmal vor diesem Zertifikat.
+Das prüft Kennwort und Wegführung; es prüft nicht das Zertifikat von Let's Encrypt. Auf einem Mac
+muss die Überlagerung des Entwicklungsrechners mitkommen, weil es dort kein `/media` gibt:
+
+```bash
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.mac.yml \
+    -f deploy/docker-compose.web.yml --env-file .env up --build
+```
+
+---
 
 ## Wo die Sicherung liegt
 
@@ -343,5 +461,16 @@ rm -rf data/before-2026-07-29-1115
 ```
 
 Das ist der einzige Ort, an dem die SD-Karte unbemerkt volllaufen kann.
+
+**Eine Wiederherstellung und ein schreibender Befehl schließen einander aus.** `import`, `scan`,
+`places`, `seed-load` und `empty` halten während ihres Laufs eine Sperre auf `data/kiekmap.lock`.
+Eine Wiederherstellung, die in dieser Zeit beginnt, bricht sofort ab, verändert nichts und meldet
+das im Admin-Bereich. Ein Befehl, der während einer Wiederherstellung beginnt, schreibt nichts und
+endet mit `A restore is running`. `stats`, `duplicates`, `pin` und `seed-export` lesen nur und
+laufen jederzeit. Die Sperre erreicht auch Befehle über `docker compose exec` oder `run --rm`, weil
+jeder Container dasselbe `data/` sieht. Der Kernel gibt sie frei, wenn ein Prozess endet, auch nach
+einem Absturz oder Stromausfall; die Datei selbst bleibt liegen und darf nicht gelöscht werden.
+**Nicht auf dem Mac mit `make prod-mac`:** Die Dateifreigabe von Docker Desktop übergeht die
+Sperre, sogar innerhalb eines Containers.
 
 Das Gerät für einen anderen Ort einrichten: [adaption.de.md](adaption.de.md).
