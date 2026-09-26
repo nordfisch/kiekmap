@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 086df676476f7a4a81a36a366c2d3e5fd2f23944102fc11c46044d24bb2b3cea -->
+<!-- source-sha: 377d8cb9a315e683072fbb15304c58f868ab9ec0e4898f132d075a2562f4af12 -->
 
 # Betriebshandbuch
 
@@ -75,6 +75,38 @@ journalctl -u kiekmap-kiosk -n 50    # warum nicht?
 cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env ps
 curl -sf http://localhost/api/health && echo " API antwortet"
 ```
+
+---
+
+## Ausschalten aus der Verwaltung
+
+Der Knopf unten auf der Startseite der Verwaltung, und die drei Teile dahinter:
+
+1. Das Backend schreibt `data/shutdown-requested`, mit der Uhrzeit darin. Es läuft ohne Rechte in
+   einem Container und kann nicht mehr als das.
+2. `kiekmap-shutdown.path` sieht die Datei und startet `kiekmap-shutdown.service`.
+3. `/usr/local/sbin/kiekmap-shutdown` löscht die Anforderung, prüft, ob sie aus diesem Start
+   stammt, und ruft `systemctl --no-block poweroff` auf.
+
+```bash
+systemctl status kiekmap-shutdown.path      # läuft die Überwachung?
+journalctl -u kiekmap-shutdown -n 20        # was bei der letzten Anforderung geschah
+```
+
+**`data/shutdown-watcher` ist es, was den Knopf wirken lässt.** `setup-pi.sh` schreibt die Datei;
+ohne sie verweigert das Backend, denn dasselbe Programm läuft auch auf einem Entwicklungsrechner und
+online, wo niemand die Anforderung ausführen würde. Ein Gerät, das nur vom Stick aktualisiert wurde,
+braucht deshalb einmal `sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh` — das Skript darf beliebig oft
+laufen.
+
+**Die Container werden absichtlich nicht gestoppt.** `docker compose stop` markiert sie als von Hand
+gestoppt, und `restart: unless-stopped` ließe sie beim nächsten Start unten. systemd hält Docker
+selbst an, und die Datenbank übersteht das: WAL mit `synchronous=NORMAL` kostet höchstens die letzte
+Transaktion.
+
+**Den Stecker zu ziehen bleibt überstehbar**, und darum geht es in [Issue #21](https://github.com/nordfisch/kiekmap/issues/21):
+Der Knopf ist der geordnete Weg, keine Reparatur. Nicht abgedeckt ist der Fall, dass ihn niemand
+drückt.
 
 ---
 
@@ -169,6 +201,7 @@ In dieser Reihenfolge:
 | „Hilf mit" meldet stumm Fehler | Regionsprüfung ohne `data/region.json` — `make tiles` legt sie mit ab |
 | **Anzeige normal, aber nichts lässt sich speichern** | **Schema veraltet. Seit August 2026 zieht die Wiederherstellung es selbst nach — [siehe unten](#der-schemastand-einer-zurückgespielten-sicherung)** |
 | USB-Stick erscheint nicht | udev-Regel oder `:rshared` — siehe unten |
+| Der Knopf meldet, das Gerät könne sich nicht abschalten | `data/shutdown-watcher` fehlt — `setup-pi.sh` noch einmal laufen lassen |
 | Anmeldung lehnt jede PIN ab | `KIEKMAP_ADMIN_PIN_HASH` leer; der Bereich sagt das im Klartext |
 | Importierte Fotos ohne Schlagwort oder Bildnachweis | Eine Einstellung erreicht den Container nicht — [siehe unten](#einstellungen-im-containerbetrieb) |
 

@@ -53,6 +53,22 @@ install -m 755 "$ROOT/deploy/pi/kiekmap-usb-mount" /usr/local/sbin/
 install -m 644 "$ROOT/deploy/pi/99-kiekmap-usb.rules" /etc/udev/rules.d/
 udevadm control --reload
 
+echo "== switching off from the admin area"
+install -m 755 "$ROOT/deploy/pi/kiekmap-shutdown" /usr/local/sbin/
+install -m 644 "$ROOT/deploy/pi/kiekmap-shutdown.path" /etc/systemd/system/
+install -m 644 "$ROOT/deploy/pi/kiekmap-shutdown.service" /etc/systemd/system/
+# The two units carry the default path; a unit file cannot read KIEKMAP_ROOT.
+if [ "$ROOT" != /opt/kiekmap ]; then
+    sed -i "s#/opt/kiekmap#$ROOT#g" /etc/systemd/system/kiekmap-shutdown.path \
+        /etc/systemd/system/kiekmap-shutdown.service
+fi
+# What the backend asks about before it offers to switch anything off. The same program runs on a
+# development machine and online behind Caddy, and there nothing would act on the request. Readable
+# for everyone, so the service in the container (UID 1000) sees it without owning it.
+mkdir -p "$ROOT/data"
+printf 'kiekmap-shutdown.path is installed on this host.\n' > "$ROOT/data/shutdown-watcher"
+chmod 644 "$ROOT/data/shutdown-watcher"
+
 echo "== the screen stays on"
 # Two different blankings, and both have to go: the one of the text console (consoleblank) and the
 # one the kernel does while booting. Without this the screen is black after ten minutes, and
@@ -67,6 +83,9 @@ fi
 echo "== switching the services on"
 systemctl daemon-reload
 systemctl enable kiekmap-kiosk
+# --now, so that running this script again on a device already in service makes the button in the
+# admin area work without a restart.
+systemctl enable --now kiekmap-shutdown.path
 
 cat <<'END'
 

@@ -76,6 +76,36 @@ curl -sf http://localhost/api/health && echo " the API answers"
 
 ---
 
+## Switching off from the admin area
+
+The button at the foot of the admin area's start page, and the three pieces behind it:
+
+1. The backend writes `data/shutdown-requested`, with the time in it. It runs unprivileged in a
+   container and can do no more than that.
+2. `kiekmap-shutdown.path` sees the file and starts `kiekmap-shutdown.service`.
+3. `/usr/local/sbin/kiekmap-shutdown` deletes the request, checks that it is from this boot, and
+   calls `systemctl --no-block poweroff`.
+
+```bash
+systemctl status kiekmap-shutdown.path      # is the watcher running?
+journalctl -u kiekmap-shutdown -n 20        # what happened on the last request
+```
+
+**`data/shutdown-watcher` is what makes the button work.** `setup-pi.sh` writes it; without it the
+backend refuses, because the same program also runs on a development machine and online, where
+nothing would act on the request. A device that was only updated from a stick therefore needs
+`sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh` once — it may run as often as you like.
+
+**The containers are deliberately not stopped.** `docker compose stop` marks them as stopped by
+hand, and `restart: unless-stopped` would then leave them down at the next boot. systemd stops
+Docker itself, and the database survives that: WAL with `synchronous=NORMAL` costs at most the last
+transaction.
+
+**Pulling the plug stays survivable**, and that is the point of [issue #21](https://github.com/nordfisch/kiekmap/issues/21):
+the button is the orderly way, not a repair. What it does not cover is the moment nobody presses it.
+
+---
+
 ## The way out for maintenance
 
 The kiosk knows no key combination for quitting — that is deliberate, so that a visitor does not
@@ -167,6 +197,7 @@ In this order:
 | The contribution panel fails silently | The region check without `data/region.json` — `make tiles` puts it there too |
 | **Display normal, but nothing can be saved** | **The schema is out of date. Since August 2026 the restore brings it forward itself — [see below](#the-schema-of-a-restored-backup)** |
 | The USB stick does not appear | The udev rule or `:rshared` — see below |
+| The button says the device cannot switch itself off | `data/shutdown-watcher` is missing — run `setup-pi.sh` once more |
 | The login rejects every PIN | `KIEKMAP_ADMIN_PIN_HASH` is empty; the area says so in plain words |
 | Imported photos without a keyword or a credit | A setting does not reach the container — [see below](#settings-in-container-operation) |
 

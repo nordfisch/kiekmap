@@ -421,9 +421,18 @@ select.field__input {
 /* The emergency exit when the visitor view is stuck. At the bottom and quiet: it is rarely
  * needed, and whoever looks for it looks here. */
 .overview__repair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
   margin-top: 2rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--line);
+}
+
+/* Two columns, so that each hint stays under its own button. `.button` fills its width, so
+ * without them the two would sit above one another. */
+.overview__repair-item {
+  flex: 1 1 18rem;
 }
 
 .overview__repair .button {
@@ -817,7 +826,8 @@ select.field__input {
   margin: 0;
 }
 
-.backup__confirm {
+.backup__confirm,
+.overview__confirm {
   padding: 1rem 1.25rem;
   border: 2px solid #a33;
   border-radius: 12px;
@@ -825,14 +835,16 @@ select.field__input {
   line-height: 1.45;
 }
 
-.backup__confirm-title {
+.backup__confirm-title,
+.overview__confirm-title {
   margin: 0 0 0.5rem;
   font-size: 1.15rem;
   font-weight: 700;
   color: #a33;
 }
 
-.backup__actions {
+.backup__actions,
+.overview__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;

@@ -206,6 +206,21 @@ Then **reading it back in breaks off** and tells you so:
 **The collection on the device stays untouched** — nothing is half replaced. Tell somebody who can
 update the program; the same backup can be read in afterwards.
 
+## Switching the device off
+
+Admin area → **Overview**, at the foot of the page on the right: **"Switch the device off"**. The
+device asks once more, then the screen says that it is shutting down.
+
+**Wait until the screen stays dark**, then switch the power off at the socket. Switching on again is
+the plug: after about twenty seconds the map is back by itself. Nothing in the collection changes,
+and nothing has to be closed beforehand.
+
+Pulling the plug without this is not a catastrophe — the device is built for it — but this is the
+gentle way, and the one for the end of a day.
+
+While a backup, a restore or an import from a stick is running, the button refuses and says so. Let
+the work finish first.
+
 ## What to do when the screen stays black
 
 First: is the plug in, is the screen on? If so, a restart usually helps — switch the device off,

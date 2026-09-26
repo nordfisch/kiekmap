@@ -24,6 +24,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
   area closes after two minutes without a touch, unless a backup, restore, import or upload is
   running. See [point 81](docs/developer/decisions.md)
 - **The command line for the first fill of a collection is documented** ([#74])
+- **The device can be switched off from the admin area** ([#21])
 
 ### Changed
 
@@ -79,6 +80,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **Comments carry the reason and the pitfall, not the dated history** ([#84])
 - **mypy checks the backend before the tests run** ([#86])
 
+[#21]: https://github.com/nordfisch/kiekmap/issues/21
 [#59]: https://github.com/nordfisch/kiekmap/issues/59
 [#60]: https://github.com/nordfisch/kiekmap/issues/60
 [#61]: https://github.com/nordfisch/kiekmap/issues/61

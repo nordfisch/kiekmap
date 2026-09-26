@@ -1,11 +1,12 @@
 /**
  * The admin session.
  *
- * Three states, and the device is in the first of them almost always:
+ * Four states, and the device is in the first of them almost always:
  *
  *   kiosk  the visitor view -- the corner press is the only way out of it
  *   pin    the number pad is up
  *   admin  signed in
+ *   off    the device is powering off; nothing leads back from here
  *
  * The token is kept in sessionStorage as well, so an accidental reload does not demand the PIN
  * again. sessionStorage and not localStorage: it dies with the browser tab, and on the Pi that
@@ -19,13 +20,14 @@ import {
   onAdminActivity,
   onAdminSignedOut,
   setAdminToken,
+  requestShutdown,
   signIn as postPin,
   signOut as postSignOut,
 } from "../api/admin";
 
 const STORAGE_KEY = "kiekmap.admin.token";
 
-type View = "kiosk" | "pin" | "admin";
+type View = "kiosk" | "pin" | "admin" | "off";
 
 type AdminState = {
   view: View;
@@ -54,6 +56,8 @@ type AdminState = {
   /** Called once the target has been acted on -- otherwise it would fire again on every render. */
   clearTarget: () => void;
   signIn: (pin: string) => Promise<void>;
+  /** Ask the device to switch off. Shows the last screen once the request is taken. */
+  switchOff: () => Promise<void>;
   /** Deliberately leaving the admin area. Signs out **and reloads** -- see the action. */
   leave: () => Promise<void>;
   /** Session ended by the backend or by the countdown -- no request left to make. */
@@ -114,6 +118,30 @@ export const useAdmin = create<AdminState>((set, get) => ({
     } catch (e) {
       set({ busy: false, error: e instanceof Error ? e.message : String(e) });
     }
+  },
+
+  /**
+   * Ask the device to switch off, and show the last screen once it has taken the request.
+   *
+   * **Only a successful answer changes the view.** Where nothing acts on the request the backend
+   * refuses, and a screen saying the power may be switched off would be a lie.
+   *
+   * Deliberately no reload, unlike ``leave``: the map would come up behind the message and the
+   * idle watcher would start again, both pointless on a device whose power is about to go. The
+   * token is dropped **after** the call, so that nothing in flight answers 401 and sends the view
+   * back to the kiosk.
+   */
+  async switchOff() {
+    set({ busy: true, error: null });
+    try {
+      await requestShutdown();
+    } catch (e) {
+      set({ busy: false, error: e instanceof Error ? e.message : String(e) });
+      return;
+    }
+    setAdminToken(null);
+    remember(null);
+    set({ view: "off", busy: false, error: null, expiresAt: null, editPhotoId: null });
   },
 
   async leave() {

@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/usermanual.md -->
-<!-- source-sha: c01c6c871fb2adcce33e883f56f77be7444f13afc2dffa91e39cb6c6c532f7ae -->
+<!-- source-sha: f0c140f92b43bb942260d8cdde9594e791bc49d986afadbdc4aee0a1c462f667 -->
 
 # Anleitung für das Museumsteam
 
@@ -214,6 +214,21 @@ nicht aktualisiert wurde. Dann **bricht das Zurückspielen ab** und sagt Ihnen d
 **Der Bestand auf dem Gerät bleibt dabei unangetastet** — es wird nichts halb ersetzt. Sagen Sie
 jemandem Bescheid, der das Programm aktualisieren kann; danach lässt sich dieselbe Sicherung
 einspielen.
+
+## Das Gerät ausschalten
+
+Verwaltung → **Übersicht**, unten auf der Seite rechts: **„Gerät ausschalten"**. Das Gerät fragt
+noch einmal nach, danach meldet der Bildschirm, dass es herunterfährt.
+
+**Warten, bis der Bildschirm dunkel bleibt**, dann den Strom an der Steckdose abschalten. Das
+Einschalten ist der Stecker: Nach etwa zwanzig Sekunden ist die Karte von allein wieder da. Am
+Bestand ändert sich nichts, und es muss vorher nichts geschlossen werden.
+
+Einfach den Stecker zu ziehen ist keine Katastrophe — dafür ist das Gerät gebaut —, aber dies ist
+der schonende Weg und der für den Feierabend.
+
+Während einer Sicherung, einer Wiederherstellung oder eines Imports vom Stick verweigert der Knopf
+den Dienst und sagt das auch. Erst die Arbeit fertig laufen lassen.
 
 ## Was tun, wenn der Bildschirm schwarz bleibt
 

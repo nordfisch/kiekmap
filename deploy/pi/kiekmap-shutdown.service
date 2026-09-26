@@ -1,0 +1,11 @@
+# Powers the device off, because the admin area asked for it.
+#
+# Triggered by kiekmap-shutdown.path and never enabled on its own -- hence no [Install] section.
+
+[Unit]
+Description=Switch the device off (asked for in the admin area)
+
+[Service]
+Type=oneshot
+# The path of the request travels as the argument, so setup-pi.sh rewrites one path in both files.
+ExecStart=/usr/local/sbin/kiekmap-shutdown /opt/kiekmap/data/shutdown-requested

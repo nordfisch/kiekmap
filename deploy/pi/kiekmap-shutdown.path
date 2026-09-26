@@ -1,0 +1,19 @@
+# Watches for the shutdown request the admin area writes.
+#
+# The backend runs unprivileged in a container and cannot power the host off. It writes a file into
+# the data directory, which is bind-mounted; this unit is the other half. See
+# docs/developer/decisions.md, point 95.
+#
+# Copy to /etc/systemd/system/, then:  sudo systemctl enable --now kiekmap-shutdown.path
+
+[Unit]
+Description=Watch for the shutdown request from the admin area
+
+[Path]
+# The default checkout. setup-pi.sh rewrites this line for another KIEKMAP_ROOT -- a unit file
+# cannot read a variable.
+PathExists=/opt/kiekmap/data/shutdown-requested
+Unit=kiekmap-shutdown.service
+
+[Install]
+WantedBy=multi-user.target
