@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 5da6786680b8fa75b6337a39a236d79b7fcd45b4bac8aa0a5684117210d2f0dc -->
+<!-- source-sha: 47a380bf94045aeb9036ac9f07019bab8efc68a44bc274edb573c0f90e1b849a -->
 
 # Betriebshandbuch
 
@@ -514,10 +514,11 @@ git restore frontend/public/logo.png
 `version`-Datei. Die letzte Zeile legt den Platzhalter zurück, damit das echte Wappen nie in einen
 Commit gerät.
 
-**3. Auf den Server:**
+**3. Auf den Server**, in das Heimatverzeichnis des Server-Benutzers — `/opt` gehört root, und
+übergeben wurde nur `/opt/kiekmap`:
 
 ```bash
-rsync -a --progress $HOME/kiekmap-update/ kiekmap-web:/opt/kiekmap-update/
+rsync -a --progress $HOME/kiekmap-update/ kiekmap-web:kiekmap-update/
 ```
 
 **4. Auf dem Server**, nach `ssh kiekmap-web`:
@@ -525,7 +526,7 @@ rsync -a --progress $HOME/kiekmap-update/ kiekmap-web:/opt/kiekmap-update/
 ```bash
 cd /opt/kiekmap
 git fetch --tags && git switch --detach v0.9.6
-docker load -i /opt/kiekmap-update/images.tar
+docker load -i ~/kiekmap-update/images.tar
 sed -i 's/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=v0.9.6/' .env
 docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.web.yml --env-file .env up -d
 ```
@@ -555,7 +556,7 @@ curl fragt nach dem Kennwort und muss mit der neuen Version antworten.
 **6. Aufräumen**, sobald die neue Version läuft:
 
 ```bash
-rm -r /opt/kiekmap-update
+rm -r ~/kiekmap-update
 docker image ls 'kiekmap-*'
 docker image rm kiekmap-backend:<alte Version> kiekmap-frontend:<alte Version>
 ```

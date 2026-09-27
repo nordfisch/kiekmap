@@ -506,10 +506,11 @@ git restore frontend/public/logo.png
 `version` file. The last line puts the placeholder back, so that the real coat of arms never gets
 into a commit.
 
-**3. Onto the server:**
+**3. Onto the server**, into the home directory of the server's user — `/opt` belongs to root, and
+only `/opt/kiekmap` was handed over:
 
 ```bash
-rsync -a --progress $HOME/kiekmap-update/ kiekmap-web:/opt/kiekmap-update/
+rsync -a --progress $HOME/kiekmap-update/ kiekmap-web:kiekmap-update/
 ```
 
 **4. On the server**, after `ssh kiekmap-web`:
@@ -517,7 +518,7 @@ rsync -a --progress $HOME/kiekmap-update/ kiekmap-web:/opt/kiekmap-update/
 ```bash
 cd /opt/kiekmap
 git fetch --tags && git switch --detach v0.9.6
-docker load -i /opt/kiekmap-update/images.tar
+docker load -i ~/kiekmap-update/images.tar
 sed -i 's/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=v0.9.6/' .env
 docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.web.yml --env-file .env up -d
 ```
@@ -548,7 +549,7 @@ curl asks for the password and has to answer with the new version.
 **6. Tidying up**, once the new version runs:
 
 ```bash
-rm -r /opt/kiekmap-update
+rm -r ~/kiekmap-update
 docker image ls 'kiekmap-*'
 docker image rm kiekmap-backend:<old version> kiekmap-frontend:<old version>
 ```
