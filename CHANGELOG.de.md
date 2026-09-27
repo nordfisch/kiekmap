@@ -1,11 +1,18 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 7b1db24bf57e39f8784a154498a8ad81a69747bf70aa092da9a1f7a768cdf23d -->
+<!-- source-sha: 81bee1ee87faef8e33909bed5fe03195a6fcdaea9223de8abe971f3ad900cb2c -->
 
 # Änderungen
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach SemVer.
 
 ## [Unveröffentlicht]
+
+### Behoben
+
+- **Einrichten und Aktualisieren der Online-Instanz sind beschrieben, und `make release` nimmt das
+  echte Wappen hin** ([#120])
+
+[#120]: https://github.com/nordfisch/kiekmap/issues/120
 
 ## [0.9.6] — 2026-09-27
 

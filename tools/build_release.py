@@ -55,12 +55,30 @@ def version() -> str:
     return values.pop()
 
 
+#: The one file that may differ from the commit: the real coat of arms in place of the placeholder.
+#: It must never be committed (``tools/check_logo.py`` guards that), and it has to be in the tree
+#: when the frontend image is built, because the image carries it. A clean-tree rule without this
+#: exception made the documented way -- copy the coat of arms in, then ``make release`` --
+#: impossible to follow.
+LOGO = "frontend/public/logo.png"
+
+
 def check_tree(tag: str) -> None:
-    """A stick has to correspond to a commit, and to the tag that names it."""
-    if run("git", "status", "--porcelain"):
+    """A stick has to correspond to a commit, and to the tag that names it.
+
+    Three questions rather than one parse of ``git status --porcelain``: its lines begin with a
+    space when a file is changed but not staged, and ``run`` strips its output -- the first line
+    would lose the very column that tells the two apart.
+    """
+    changed = run("git", "diff", "--name-only").splitlines()
+    staged = run("git", "diff", "--cached", "--name-only").splitlines()
+    untracked = run("git", "ls-files", "--others", "--exclude-standard").splitlines()
+    stray = [name for name in changed if name != LOGO] + staged + untracked
+    if stray:
         raise SystemExit(
             "The working tree is not clean.\n"
-            "  A stick that belongs to no commit cannot be traced back later."
+            "  A stick that belongs to no commit cannot be traced back later.\n"
+            f"  Only {LOGO} may differ, and only unstaged.\n    " + "\n    ".join(stray)
         )
     check_tag(tag)
 
