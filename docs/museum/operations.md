@@ -380,35 +380,9 @@ Only Caddy stands in front of them and takes care of HTTPS and the password:
 Internet --HTTPS--> Caddy --HTTP--> nginx (frontend) --> uvicorn (backend)
 ```
 
-**Three lines in the `.env`**, and nothing else differs:
-
-```bash
-KIEKMAP_WEB_DOMAIN=fotos.example.org
-KIEKMAP_WEB_USER=museum
-KIEKMAP_WEB_PASSWORD_HASH=$$2a$$14$$...
-```
-
-The hash is produced on the development machine:
-
-```bash
-docker run --rm caddy:2.11.4-alpine caddy hash-password --plaintext '<password>'
-```
-
-**Every `$` in the result has to be written twice** in the `.env`. Compose reads a single one as
-the start of a variable name and drops what follows it — the password then never matches, and
-nothing says why. Then:
-
-```bash
-make prod-web
-```
-
 **The password protects everything**, the map included and `/api/` as well. Whoever does not have
 it gets a 401 and sees nothing. That is the purpose of this instance: the collection is not public
 while it is being built.
-
-**Build the images on the development machine, not on the server.** A small server has two cores,
-and the frontend build is an npm build — the same way as for the Pi, with `docker save` and
-`docker load`. See [Updating without the internet](#updating-without-the-internet).
 
 **The backup is the ZIP download.** A server has no USB ports, so the backup button of the admin
 area finds no target there. Instead somebody downloads the archive from the admin area, regularly,
@@ -417,11 +391,174 @@ and keeps it somewhere else. The stick is for the device in the museum.
 **Give the PIN more digits.** Four are enough on the Pi — whoever stands in front of it is standing
 in the museum. Online, four are not; the PIN allows up to twelve.
 
-**Trying it out beforehand:** with `KIEKMAP_WEB_DOMAIN=localhost` Caddy issues its own certificate
-and needs neither a domain nor a public address. The browser warns about that certificate once.
-This checks the password and the routing; it does not check the certificate from Let's Encrypt. On
-a Mac the overlay of the development machine has to come along, because `/media` does not exist
-there:
+**Two commands never run on the server.** `deploy/pi/update.sh` starts the containers without
+Caddy: nginx then answers on port 80, and nobody is asked for a password. `make prod-web` builds
+the images on the server itself and stays in the foreground. The images come from the development
+machine, as for the Pi.
+
+### What the server needs
+
+- **A Linux machine with a public address and SSH access.** The commands below are written for
+  Oracle Linux 9 on an Oracle Cloud Ampere instance. Another distribution differs in how Docker is
+  installed and in how the firewall is opened.
+- **A domain name whose A record points at that address.** Caddy asks Let's Encrypt for a
+  certificate for this name.
+- **The processor of the development machine, or a flag.** The images are built there and only
+  run on the same architecture. A Mac with Apple silicon and an Ampere instance are both `arm64`
+  and fit together. For an `x86_64` server, put `DOCKER_DEFAULT_PLATFORM=linux/amd64` in front of
+  `make release`. `uname -m` on the server says which it is.
+
+**One name for the server, on the development machine.** Every command below reaches the server
+through an SSH alias, so its address stands in one place. In `~/.ssh/config`:
+
+```
+Host kiekmap-web
+    HostName <address of the server>
+    User opc
+```
+
+`opc` is the user Oracle creates. Other providers name it differently. Afterwards `ssh kiekmap-web`
+has to open a shell on the server.
+
+### Setting up the server
+
+Once. The first four steps on the server, after `ssh kiekmap-web`.
+
+**1. Open the ports.** 80 for the certificate, 443 for the site. In the provider's console — for
+Oracle Cloud an ingress rule for TCP 80 and 443 in the security list of the instance's subnet —
+and in the firewall of the machine:
+
+```bash
+sudo firewall-cmd --permanent --add-service=http --add-service=https && sudo firewall-cmd --reload
+```
+
+**2. Docker and git:**
+
+```bash
+sudo dnf -y install dnf-plugins-core git
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+```
+
+Log out and back in, so that the group applies. `docker run --rm hello-world` then has to work
+without `sudo`.
+
+**3. The repository and the `.env`:**
+
+```bash
+sudo mkdir -p /opt/kiekmap && sudo chown $USER:$USER /opt/kiekmap
+git clone https://github.com/nordfisch/kiekmap.git /opt/kiekmap
+mkdir -p /opt/kiekmap/data
+cp /opt/kiekmap/deploy/.env.example /opt/kiekmap/.env
+```
+
+**4. What the `.env` needs.** The three lines of the online instance, the PIN, and the settings of
+the collection from [step 5 of the adaption](adaption.md#5-checking-what-belongs-to-the-collection):
+
+```bash
+KIEKMAP_WEB_DOMAIN=fotos.example.org
+KIEKMAP_WEB_USER=museum
+KIEKMAP_WEB_PASSWORD_HASH=$$2a$$14$$...
+KIEKMAP_ADMIN_PIN_HASH=...
+```
+
+The password hash, on the development machine:
+
+```bash
+docker run --rm caddy:2.11.4-alpine caddy hash-password --plaintext '<password>'
+```
+
+**Every `$` in it has to be written twice** in the `.env`. Compose reads a single one as the start
+of a variable name and drops what follows it — the password then never matches, and nothing says
+why. The PIN hash comes from `cd backend && .venv/bin/python -m app.cli pin` on the development
+machine; see [Setting up the PIN](#setting-up-the-pin-for-the-admin-area).
+
+**5. The map data**, on the development machine, from `make tiles` and `make places`:
+
+```bash
+rsync -a frontend/public/tiles/ kiekmap-web:/opt/kiekmap/frontend/public/tiles/
+rsync -a data/places.json       kiekmap-web:/opt/kiekmap/data/places.json
+```
+
+**6. The software:** the steps of [Updating the server](#updating-the-server). On a fresh server
+they are the first start. The collection is empty afterwards; it is filled through the admin area,
+or by reading in a backup there.
+
+### Updating the server
+
+Every release. The version in the commands is an example; take the one being installed.
+
+**1. A backup.** Download the ZIP from the admin area of the online instance.
+
+**2. The images, on the development machine.** Built from the release, with the museum's coat of
+arms, which only reaches the frontend image this way:
+
+```bash
+git switch --detach v0.9.6
+cp ~/Developer/Museum/Wappen/holm-wappen.png frontend/public/logo.png
+make release to=$HOME/kiekmap-update
+git restore frontend/public/logo.png
+```
+
+`make release` accepts the coat of arms as the one changed file. It writes `images.tar` and a
+`version` file. The last line puts the placeholder back, so that the real coat of arms never gets
+into a commit.
+
+**3. Onto the server:**
+
+```bash
+rsync -a --progress $HOME/kiekmap-update/ kiekmap-web:/opt/kiekmap-update/
+```
+
+**4. On the server**, after `ssh kiekmap-web`:
+
+```bash
+cd /opt/kiekmap
+git fetch --tags && git switch --detach v0.9.6
+docker load -i /opt/kiekmap-update/images.tar
+sed -i 's/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=v0.9.6/' .env
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.web.yml --env-file .env up -d
+```
+
+- The clone follows the release, because the compose files and the `Caddyfile` come from it.
+- `KIEKMAP_VERSION` names the images Compose starts. Without the new value it starts the old ones
+  again, and nothing says so.
+- `up -d` replaces the containers whose image changed and returns. On its first start the backend
+  brings the database schema forward by itself.
+- A coat of arms lying in the server's tree does no harm and does nothing: the image carries its
+  own.
+
+**5. The check**, still on the server:
+
+```bash
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.web.yml --env-file .env ps
+```
+
+Three containers, all `Up`, the backend `healthy`, and the two Kiekmap images tagged with the new
+version. The version the backend itself reports, from anywhere:
+
+```bash
+curl -u museum https://fotos.example.org/api/health
+```
+
+curl asks for the password and has to answer with the new version.
+
+**6. Tidying up**, once the new version runs:
+
+```bash
+rm -r /opt/kiekmap-update
+docker image ls 'kiekmap-*'
+docker image rm kiekmap-backend:<old version> kiekmap-frontend:<old version>
+```
+
+### Trying it out beforehand
+
+With `KIEKMAP_WEB_DOMAIN=localhost` Caddy issues its own certificate and needs neither a domain nor
+a public address. The browser warns about that certificate once. This checks the password and the
+routing; it does not check the certificate from Let's Encrypt. On a Mac the overlay of the
+development machine has to come along, because `/media` does not exist there:
 
 ```bash
 docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.mac.yml \

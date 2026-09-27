@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 92641ad18288dc83654e61217d9b090c9b7fe96b2f2041e8418d35c607e5d9a0 -->
+<!-- source-sha: 5da6786680b8fa75b6337a39a236d79b7fcd45b4bac8aa0a5684117210d2f0dc -->
 
 # Betriebshandbuch
 
@@ -387,35 +387,9 @@ nginx-Konfiguration. Nur Caddy steht davor und kümmert sich um HTTPS und das Ke
 Internet --HTTPS--> Caddy --HTTP--> nginx (frontend) --> uvicorn (backend)
 ```
 
-**Drei Zeilen in der `.env`**, sonst ist nichts anders:
-
-```bash
-KIEKMAP_WEB_DOMAIN=fotos.example.org
-KIEKMAP_WEB_USER=museum
-KIEKMAP_WEB_PASSWORD_HASH=$$2a$$14$$...
-```
-
-Der Hash entsteht auf dem Entwicklungsrechner:
-
-```bash
-docker run --rm caddy:2.11.4-alpine caddy hash-password --plaintext '<Kennwort>'
-```
-
-**Jedes `$` darin muss in der `.env` doppelt geschrieben werden.** Compose liest ein einzelnes als
-Anfang eines Variablennamens und verwirft, was darauf folgt — das Kennwort passt dann nie, und
-nichts sagt, warum. Danach:
-
-```bash
-make prod-web
-```
-
 **Das Kennwort schützt alles**, die Karte eingeschlossen und `/api/` ebenso. Wer es nicht hat,
 bekommt eine 401 und sieht nichts. Genau dafür ist diese Instanz da: Die Sammlung ist nicht
 öffentlich, solange sie aufgebaut wird.
-
-**Die Abbilder werden auf dem Entwicklungsrechner gebaut, nicht auf dem Server.** Ein kleiner
-Server hat zwei Kerne, und der Frontend-Bau ist ein npm-Bau — derselbe Weg wie beim Pi, mit
-`docker save` und `docker load`. Siehe [Update ohne Internet](#update-ohne-internet).
 
 **Die Sicherung ist der ZIP-Download.** Ein Server hat keine USB-Anschlüsse, der Sicherungsknopf im
 Admin-Bereich findet dort also kein Ziel. Stattdessen lädt jemand das Archiv im Admin-Bereich
@@ -424,10 +398,174 @@ herunter, regelmäßig, und bewahrt es anderswo auf. Der Stick ist für das Ger�
 **Die PIN bekommt mehr Ziffern.** Auf dem Pi reichen vier — wer davorsteht, steht im Museum. Online
 reichen vier nicht; die PIN erlaubt bis zu zwölf.
 
-**Vorher ausprobieren:** Mit `KIEKMAP_WEB_DOMAIN=localhost` stellt Caddy ein eigenes Zertifikat aus
-und braucht weder Domain noch öffentliche Adresse. Der Browser warnt einmal vor diesem Zertifikat.
-Das prüft Kennwort und Wegführung; es prüft nicht das Zertifikat von Let's Encrypt. Auf einem Mac
-muss die Überlagerung des Entwicklungsrechners mitkommen, weil es dort kein `/media` gibt:
+**Zwei Befehle laufen nie auf dem Server.** `deploy/pi/update.sh` startet die Container ohne Caddy:
+nginx antwortet dann auf Port 80, und niemand wird nach einem Kennwort gefragt. `make prod-web`
+baut die Abbilder auf dem Server selbst und bleibt im Vordergrund. Die Abbilder kommen vom
+Entwicklungsrechner, wie beim Pi.
+
+### Was der Server braucht
+
+- **Einen Linux-Rechner mit öffentlicher Adresse und SSH-Zugang.** Die Befehle unten sind für
+  Oracle Linux 9 auf einer Ampere-Instanz von Oracle Cloud geschrieben. Eine andere Distribution
+  unterscheidet sich darin, wie Docker installiert und die Firewall geöffnet wird.
+- **Einen Domainnamen, dessen A-Eintrag auf diese Adresse zeigt.** Caddy fragt bei Let's Encrypt
+  ein Zertifikat für diesen Namen an.
+- **Den Prozessor des Entwicklungsrechners, oder einen Schalter.** Die Abbilder werden dort gebaut
+  und laufen nur auf derselben Architektur. Ein Mac mit Apple-Chip und eine Ampere-Instanz sind
+  beide `arm64` und passen zusammen. Für einen `x86_64`-Server gehört
+  `DOCKER_DEFAULT_PLATFORM=linux/amd64` vor `make release`. `uname -m` auf dem Server sagt, welcher
+  es ist.
+
+**Ein Name für den Server, auf dem Entwicklungsrechner.** Jeder Befehl unten erreicht den Server
+über einen SSH-Alias, damit seine Adresse an einer Stelle steht. In `~/.ssh/config`:
+
+```
+Host kiekmap-web
+    HostName <Adresse des Servers>
+    User opc
+```
+
+`opc` ist der Benutzer, den Oracle anlegt. Andere Anbieter nennen ihn anders. Danach muss
+`ssh kiekmap-web` eine Shell auf dem Server öffnen.
+
+### Den Server einrichten
+
+Einmal. Die ersten vier Schritte auf dem Server, nach `ssh kiekmap-web`.
+
+**1. Die Ports öffnen.** 80 für das Zertifikat, 443 für die Seite. In der Konsole des Anbieters —
+bei Oracle Cloud eine Eingangsregel für TCP 80 und 443 in der Security List des Subnetzes der
+Instanz — und in der Firewall des Rechners:
+
+```bash
+sudo firewall-cmd --permanent --add-service=http --add-service=https && sudo firewall-cmd --reload
+```
+
+**2. Docker und git:**
+
+```bash
+sudo dnf -y install dnf-plugins-core git
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+```
+
+Ab- und wieder anmelden, damit die Gruppe gilt. `docker run --rm hello-world` muss danach ohne
+`sudo` funktionieren.
+
+**3. Das Repository und die `.env`:**
+
+```bash
+sudo mkdir -p /opt/kiekmap && sudo chown $USER:$USER /opt/kiekmap
+git clone https://github.com/nordfisch/kiekmap.git /opt/kiekmap
+mkdir -p /opt/kiekmap/data
+cp /opt/kiekmap/deploy/.env.example /opt/kiekmap/.env
+```
+
+**4. Was in die `.env` gehört.** Die drei Zeilen der Online-Instanz, die PIN und die Einstellungen
+der Sammlung aus [Schritt 5 der Übernahme](adaption.de.md#5-sammlungsspezifisches-prüfen):
+
+```bash
+KIEKMAP_WEB_DOMAIN=fotos.example.org
+KIEKMAP_WEB_USER=museum
+KIEKMAP_WEB_PASSWORD_HASH=$$2a$$14$$...
+KIEKMAP_ADMIN_PIN_HASH=...
+```
+
+Der Kennwort-Hash, auf dem Entwicklungsrechner:
+
+```bash
+docker run --rm caddy:2.11.4-alpine caddy hash-password --plaintext '<Kennwort>'
+```
+
+**Jedes `$` darin muss in der `.env` doppelt geschrieben werden.** Compose liest ein einzelnes als
+Anfang eines Variablennamens und verwirft, was darauf folgt — das Kennwort passt dann nie, und
+nichts sagt, warum. Der PIN-Hash kommt von `cd backend && .venv/bin/python -m app.cli pin` auf dem
+Entwicklungsrechner; siehe [Die PIN einrichten](#die-pin-für-den-admin-bereich-einrichten).
+
+**5. Die Kartendaten**, auf dem Entwicklungsrechner, aus `make tiles` und `make places`:
+
+```bash
+rsync -a frontend/public/tiles/ kiekmap-web:/opt/kiekmap/frontend/public/tiles/
+rsync -a data/places.json       kiekmap-web:/opt/kiekmap/data/places.json
+```
+
+**6. Die Software:** die Schritte von [Den Server aktualisieren](#den-server-aktualisieren). Auf
+einem frischen Server sind sie der erste Start. Die Sammlung ist danach leer; sie wird im
+Admin-Bereich gefüllt, oder indem dort eine Sicherung eingelesen wird.
+
+### Den Server aktualisieren
+
+Bei jeder Fassung. Die Version in den Befehlen ist ein Beispiel; es gilt die, die installiert wird.
+
+**1. Eine Sicherung.** Das ZIP im Admin-Bereich der Online-Instanz herunterladen.
+
+**2. Die Abbilder, auf dem Entwicklungsrechner.** Gebaut aus der Fassung, mit dem Wappen des
+Museums, das nur auf diesem Weg in das Frontend-Abbild kommt:
+
+```bash
+git switch --detach v0.9.6
+cp ~/Developer/Museum/Wappen/holm-wappen.png frontend/public/logo.png
+make release to=$HOME/kiekmap-update
+git restore frontend/public/logo.png
+```
+
+`make release` nimmt das Wappen als einzige geänderte Datei hin. Es schreibt `images.tar` und eine
+`version`-Datei. Die letzte Zeile legt den Platzhalter zurück, damit das echte Wappen nie in einen
+Commit gerät.
+
+**3. Auf den Server:**
+
+```bash
+rsync -a --progress $HOME/kiekmap-update/ kiekmap-web:/opt/kiekmap-update/
+```
+
+**4. Auf dem Server**, nach `ssh kiekmap-web`:
+
+```bash
+cd /opt/kiekmap
+git fetch --tags && git switch --detach v0.9.6
+docker load -i /opt/kiekmap-update/images.tar
+sed -i 's/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=v0.9.6/' .env
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.web.yml --env-file .env up -d
+```
+
+- Der Klon folgt der Fassung, weil die Compose-Dateien und das `Caddyfile` aus ihm kommen.
+- `KIEKMAP_VERSION` nennt die Abbilder, die Compose startet. Ohne den neuen Wert startet es wieder
+  die alten, und nichts sagt es.
+- `up -d` ersetzt die Container, deren Abbild sich geändert hat, und kehrt zurück. Beim ersten Start
+  bringt das Backend das Datenbankschema selbst nach vorn.
+- Ein Wappen im Baum des Servers schadet nicht und bewirkt nichts: Das Abbild trägt sein eigenes.
+
+**5. Die Prüfung**, noch auf dem Server:
+
+```bash
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.web.yml --env-file .env ps
+```
+
+Drei Container, alle `Up`, das Backend `healthy`, und die beiden Kiekmap-Abbilder mit der neuen
+Version im Tag. Die Version, die das Backend selbst meldet, von überall:
+
+```bash
+curl -u museum https://fotos.example.org/api/health
+```
+
+curl fragt nach dem Kennwort und muss mit der neuen Version antworten.
+
+**6. Aufräumen**, sobald die neue Version läuft:
+
+```bash
+rm -r /opt/kiekmap-update
+docker image ls 'kiekmap-*'
+docker image rm kiekmap-backend:<alte Version> kiekmap-frontend:<alte Version>
+```
+
+### Vorher ausprobieren
+
+Mit `KIEKMAP_WEB_DOMAIN=localhost` stellt Caddy ein eigenes Zertifikat aus und braucht weder Domain
+noch öffentliche Adresse. Der Browser warnt einmal vor diesem Zertifikat. Das prüft Kennwort und
+Wegführung; es prüft nicht das Zertifikat von Let's Encrypt. Auf einem Mac muss die Überlagerung
+des Entwicklungsrechners mitkommen, weil es dort kein `/media` gibt:
 
 ```bash
 docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.mac.yml \

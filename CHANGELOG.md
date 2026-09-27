@@ -4,6 +4,13 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 
 ## [Unreleased]
 
+### Fixed
+
+- **Setting up and updating the online instance are documented, and `make release` accepts the
+  real coat of arms** ([#120])
+
+[#120]: https://github.com/nordfisch/kiekmap/issues/120
+
 ## [0.9.6] — 2026-09-27
 
 **The collection can be filled from home, and the device carries on by itself while nobody touches

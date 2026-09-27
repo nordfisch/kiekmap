@@ -239,7 +239,10 @@ prod-mac: .env  ## like prod, but with the paths of the development Mac
 # The online instance (issue #22). The three KIEKMAP_WEB_* stand in the .env; without them Compose
 # stops and says which one is missing. For a trial run on the development machine
 # KIEKMAP_WEB_DOMAIN=localhost is enough -- Caddy then issues the certificate itself.
-prod-web: .env  ## like prod, but behind Caddy with HTTPS and a password (web server)
+#
+# Not for the server itself: it builds there and stays in the foreground. A server gets the images
+# from the development machine -- docs/museum/operations.md, "Updating the server".
+prod-web: .env  ## like prod, but behind Caddy with HTTPS and a password (trial run)
 	$(COMPOSE) -f deploy/docker-compose.web.yml up --build
 
 prod-down: .env
