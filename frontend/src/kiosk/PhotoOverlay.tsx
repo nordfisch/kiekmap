@@ -1,9 +1,13 @@
 /**
- * The photo shown full screen.
+ * The detail view of a photo: the picture beside its text.
  *
  * What is shown is the 1200 px thumbnail, not the original: a scan can be 80 MB, and on a display
  * 1080 or 2160 pixels tall none of that is visible. The difference is between instant and several
  * seconds -- and in a museum a visitor gives up after two.
+ *
+ * **A tap on the picture shows it on the whole screen**, and another tap leads back here. That
+ * view asks for the original after all, because there the visitor has asked to look closer; the
+ * thumbnail stands in until it is decoded. See `FullScreenPhoto` below and decisions.md, point 97.
  *
  * It closes everywhere: tapping beside it, the button, Escape. Whoever is stuck taps somewhere,
  * and that has to lead back.
@@ -54,6 +58,8 @@ export function PhotoOverlay() {
   const stepInStack = useKiosk((s) => s.stepInStack);
   const advanceStack = useKiosk((s) => s.advanceStack);
   const filterByTag = useKiosk((s) => s.filterByTag);
+  const fullScreen = useKiosk((s) => s.fullScreen);
+  const setFullScreen = useKiosk((s) => s.setFullScreen);
   const [detail, setDetail] = useState<PhotoDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   /**
@@ -131,6 +137,12 @@ export function PhotoOverlay() {
   useEffect(() => {
     if (openPhotoId === null) return;
     function onKey(event: KeyboardEvent) {
+      // Full screen, Escape steps back one level and the arrows do nothing: paging there would
+      // change the picture without the pager in sight.
+      if (fullScreen) {
+        if (event.key === "Escape") setFullScreen(false);
+        return;
+      }
       if (event.key === "Escape") openPhoto(null);
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") setAutoPaging(false);
       if (event.key === "ArrowLeft") stepInStack(-1);
@@ -138,7 +150,7 @@ export function PhotoOverlay() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [openPhotoId, openPhoto, stepInStack]);
+  }, [openPhotoId, openPhoto, stepInStack, fullScreen, setFullScreen]);
 
   // A new stack -- a new array from the store -- pages by itself again.
   useEffect(() => setAutoPaging(true), [openStack]);
@@ -155,7 +167,7 @@ export function PhotoOverlay() {
    */
   const shown = openPhotoId !== null && loadedId === openPhotoId;
   useEffect(() => {
-    if (!autoPaging || !shown || openStack.length <= 1) return;
+    if (!autoPaging || fullScreen || !shown || openStack.length <= 1) return;
 
     let cancelled = false;
     const timer = setTimeout(() => {
@@ -174,11 +186,20 @@ export function PhotoOverlay() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [autoPaging, shown, openStack, openIndex, advanceStack]);
+  }, [autoPaging, fullScreen, shown, openStack, openIndex, advanceStack]);
 
   if (openPhotoId === null) return null;
 
   const close = () => openPhoto(null);
+
+  /**
+   * Whoever enlarges a photo is looking at it, so the stack stops paging -- also after the way
+   * back. The pointer on the content switches that off as well; a key on the button does not.
+   */
+  function enlarge() {
+    setAutoPaging(false);
+    setFullScreen(true);
+  }
 
   /**
    * Hand this photo and this question over to the panel, and get out of the way.
@@ -228,31 +249,42 @@ export function PhotoOverlay() {
         </div>
 
         <div className="overlay__figure">
+          {/* The whole picture is the button, so there is no small target to find. It sits as
+              tightly round the picture as the image did, and the image keeps its own size. */}
           {detail && (
-            <img
-              // A new element for every photo: the fade-in is an animation, and an animation
-              // plays when an element appears -- see `.overlay__image` for why not a transition.
-              key={detail.id}
-              className={
-                loadedId === detail.id ? "overlay__image" : "overlay__image overlay__image--loading"
-              }
-              src={detail.thumb_url}
-              alt={detail.title ?? t.map.photoAlt}
-              style={{ aspectRatio: `${detail.width} / ${detail.height}` }}
-              onLoad={() => {
-                setLoadedId(detail.id);
-                handoffReady("photo");
-              }}
-              // Out of the cache the image may be complete before React can attach ``onLoad`` --
-              // then it would stay invisible. Setting the same value again is a no-op for React,
-              // so this does not loop.
-              ref={(node) => {
-                if (node?.complete && node.naturalWidth > 0) {
+            <button
+              type="button"
+              className="overlay__enlarge"
+              aria-label={t.overlay.showFullScreen}
+              onClick={enlarge}
+            >
+              <img
+                // A new element for every photo: the fade-in is an animation, and an animation
+                // plays when an element appears -- see `.overlay__image` for why not a transition.
+                key={detail.id}
+                className={
+                  loadedId === detail.id
+                    ? "overlay__image"
+                    : "overlay__image overlay__image--loading"
+                }
+                src={detail.thumb_url}
+                alt={detail.title ?? t.map.photoAlt}
+                style={{ aspectRatio: `${detail.width} / ${detail.height}` }}
+                onLoad={() => {
                   setLoadedId(detail.id);
                   handoffReady("photo");
-                }
-              }}
-            />
+                }}
+                // Out of the cache the image may be complete before React can attach ``onLoad`` --
+                // then it would stay invisible. Setting the same value again is a no-op for React,
+                // so this does not loop.
+                ref={(node) => {
+                  if (node?.complete && node.naturalWidth > 0) {
+                    setLoadedId(detail.id);
+                    handoffReady("photo");
+                  }
+                }}
+              />
+            </button>
           )}
 
           {/* Paging through the photos that lie at the same spot -- centred below the picture,
@@ -349,6 +381,50 @@ export function PhotoOverlay() {
           )}
         </div>
       </div>
+
+      {fullScreen && detail && (
+        <FullScreenPhoto key={detail.id} detail={detail} onLeave={() => setFullScreen(false)} />
+      )}
     </div>
+  );
+}
+
+/**
+ * The open photo on the whole screen, on black, fitted and never cropped.
+ *
+ * **The original, with the thumbnail underneath.** The thumbnail is in the cache already and
+ * stands at once; the original is drawn over it once it is decoded. A browser cannot show every
+ * original -- the import accepts TIFF -- and then the thumbnail simply stays. On 2 November 2026
+ * the 1324 originals were all JPEG, 4.3 megapixels on average and 35 at most.
+ *
+ * **Back on click, not on pointerdown.** A touch fires pointerdown, pointerup and click in that
+ * order. Closing on the first would leave the click to land on the picture underneath, and that
+ * opens this view again.
+ *
+ * It lies inside the detail view's layer, so the slide show and the cover after it stay above it
+ * (`.attract` in global.css). The slide show ends with a reload, which takes this state with it.
+ */
+function FullScreenPhoto({ detail, onLeave }: { detail: PhotoDetail; onLeave: () => void }) {
+  const [sharp, setSharp] = useState(false);
+
+  return (
+    <button
+      type="button"
+      className="fullscreen"
+      aria-label={t.overlay.leaveFullScreen}
+      onClick={(e) => {
+        // The detail view's own layer closes on a click; this one only leads back to it.
+        e.stopPropagation();
+        onLeave();
+      }}
+    >
+      <img className="fullscreen__image" src={detail.thumb_url} alt="" />
+      <img
+        className={sharp ? "fullscreen__image" : "fullscreen__image fullscreen__image--loading"}
+        src={detail.image_url}
+        alt={detail.title ?? t.map.photoAlt}
+        onLoad={() => setSharp(true)}
+      />
+    </button>
   );
 }

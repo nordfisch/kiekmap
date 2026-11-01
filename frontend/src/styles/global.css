@@ -1170,6 +1170,43 @@ button.timeline__undated:hover {
   }
 }
 
+/* The picture as the button that enlarges it. No frame of its own: it is exactly as large as the
+ * image inside, so the tap target is the picture and nothing beside it. */
+.overlay__enlarge {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  line-height: 0;
+  cursor: zoom-in;
+}
+
+/* The photo full screen, over the detail view and under the slide show (`.attract`, z-index 30),
+ * which lies above the detail view's whole layer. */
+.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  background: #000;
+  cursor: zoom-out;
+}
+
+/* Both images fill the screen and `contain` fits each into it whole, so the original lies exactly
+ * over the thumbnail. Cropping (`cover`) or stretching (`fill`) is what this must never do. */
+.fullscreen__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.fullscreen__image--loading {
+  visibility: hidden;
+}
+
 .overlay__text {
   /* A lot of text scrolls inside its column instead of running under the edge of the screen. The
    * limit is the same as for the picture, only without the footer -- the text reaches below the

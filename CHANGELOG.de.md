@@ -1,11 +1,15 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 131413e228c08213d4246754b025253a80fa10ea3b1d1aa611c2b170bff9c1cf -->
+<!-- source-sha: dd78b7617eeff24f2cd88986b9cde642ba789ecabed4383b92156bb101104fe3 -->
 
 # Änderungen
 
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach SemVer.
 
 ## [Unveröffentlicht]
+
+### Hinzugefügt
+
+- **Ein Tipp auf das Foto in der Detailansicht zeigt es bildschirmfüllend**, ein weiterer führt zurück ([#129])
 
 ### Behoben
 
@@ -19,6 +23,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
 [#125]: https://github.com/nordfisch/kiekmap/issues/125
 [#127]: https://github.com/nordfisch/kiekmap/issues/127
+[#129]: https://github.com/nordfisch/kiekmap/issues/129
 
 ## [0.9.6] — 2026-09-27
 
