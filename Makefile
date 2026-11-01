@@ -2,7 +2,7 @@
 .PHONY: help venv node-check deps dev dev-backend dev-frontend test test-backend test-frontend \
         migrate revision seed seed-save empty lint docs-check notices notices-check check \
         tiles places build prod docs-serve docs-build \
-        prod-mac prod-web prod-down clean
+        prod-mac prod-web prod-down clean release deploy pin
 
 PYTHON  ?= python3.12
 VENV    := backend/.venv
@@ -213,10 +213,32 @@ notices-check: deps
 # after two seconds and not after ten.
 check: lint docs-check notices-check test  ## check everything that should run before a commit
 
-# The folder deploy/pi/update.sh expects. Aborts on a dirty working tree or a missing tag: a stick
-# that belongs to no commit cannot be traced back later.
-release:  ## build the update stick: make release [to=/Volumes/STICK/kiekmap-update] [map=1]
-	@python3 tools/build_release.py $(if $(to),--to "$(to)") $(if $(map),--with-map)
+# The images for the online server. Aborts on a dirty working tree or a missing tag: images that
+# belong to no commit cannot be traced back later.
+release:  ## build the server images: make release [to=~/kiekmap-update]
+	@python3 tools/build_release.py $(if $(to),--to "$(to)")
+
+# Everything a Pi needs, built here: both images with the coat of arms from local/, the map, the
+# place index, the scripts and local/pi.env. Copied into the home directory of the SSH user, so
+# that no root is needed on the far side; setup-pi.sh or update.sh then run there. With to= the
+# same bundle goes onto a stick instead, for a device without a network.
+host ?= kiekmap-pi
+deploy:  ## build the Pi bundle and copy it over: make deploy [host=kiekmap-pi] [to=/Volumes/STICK/kiekmap]
+	@python3 tools/build_release.py --pi $(if $(to),--to "$(to)")
+ifeq ($(to),)
+	rsync -a --delete release/kiekmap/ "$(host):kiekmap/"
+	@echo ""
+	@echo "On the Pi, after ssh $(host):"
+	@echo "  first installation:  sudo sh ~/kiekmap/deploy/pi/setup-pi.sh"
+	@echo "  update:              sudo sh ~/kiekmap/deploy/pi/update.sh"
+else
+	@echo ""
+	@echo "On the Pi, with the stick plugged in:"
+	@echo "  sudo sh /media/<name of the stick>/$(notdir $(to))/deploy/pi/update.sh"
+endif
+
+pin: $(VENV)  ## print the PIN line for a .env (local/pi.env for the Pi)
+	@cd backend && .venv/bin/python -m app.cli pin
 
 build: frontend/node_modules notices  ## build the frontend bundle (result in frontend/dist)
 	cd frontend && npm run build

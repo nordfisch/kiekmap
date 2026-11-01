@@ -1,23 +1,32 @@
 #!/bin/sh
-# Sets up a fresh Raspberry Pi as the museum kiosk.
+# Sets up a fresh Raspberry Pi as the museum kiosk, from a bundle.
 #
-#     sudo sh deploy/pi/setup-pi.sh
+#     sudo sh ~/kiekmap/deploy/pi/setup-pi.sh
 #
-# Expects Raspberry Pi OS **Lite** (64 bit) and the project already checked out under
-# /opt/kiekmap. Runs once; a second call does no harm.
+# The bundle comes from the development machine: `make deploy` builds it and copies it into the
+# home directory of the SSH user. Expects Raspberry Pi OS **Lite** (64 bit) and no installation in
+# /opt/kiekmap yet. For a device that already runs, update.sh is the script.
 #
-# What is different afterwards: the Pi boots into the map without a keyboard, mounts USB sticks
-# under /media, and the screen stays on.
+# What is different afterwards: the software lies in /opt/kiekmap, the containers run, the Pi
+# boots into the map without a keyboard, mounts USB sticks under /media, and the screen stays on.
+# The collection is empty. It is filled by restoring a backup in the admin area.
 
 set -eu
 
-ROOT="${KIEKMAP_ROOT:-/opt/kiekmap}"
-USER_NAME="${KIEKMAP_USER:-kiekmap}"
+. "$(dirname "$0")/common.sh"
 
-[ "$(id -u)" -eq 0 ] || { echo "Please start with sudo." >&2; exit 1; }
-[ -d "$ROOT" ] || { echo "$ROOT does not exist -- clone the project there first." >&2; exit 1; }
+require_root
+check_bundle
 
-echo "== packages"
+# A database means a device in service. Setting it up again would leave the collection alone, but
+# it would also replace the .env with the one from the bundle -- and whoever runs the wrong script
+# should learn that here, not after the PIN changed.
+if [ -e "$ROOT/data/kiekmap.db" ]; then
+    fail "$ROOT already holds a collection. For an update:
+  sudo sh $BUNDLE/deploy/pi/update.sh"
+fi
+
+say "packages"
 apt-get update
 # cage instead of a desktop, chromium as the display, curl for the health query.
 #
@@ -28,48 +37,34 @@ BROWSER_PACKAGE=chromium
 apt-cache show chromium >/dev/null 2>&1 || BROWSER_PACKAGE=chromium-browser
 apt-get install -y --no-install-recommends cage "$BROWSER_PACKAGE" curl ca-certificates
 
-echo "== Docker"
+say "Docker"
 if ! command -v docker >/dev/null 2>&1; then
     curl -fsSL https://get.docker.com | sh
 fi
 systemctl enable --now docker
 
-echo "== user $USER_NAME"
-# UID 1000 has to match the one in backend/Dockerfile, otherwise the service may not write into
-# ./data. On a fresh Pi OS the first user already carries that number.
+say "user $USER_NAME"
+# Runs the kiosk. It need not carry UID 1000: data/ is handed to the number, see common.sh.
 if ! id "$USER_NAME" >/dev/null 2>&1; then
-    useradd --uid 1000 --create-home --shell /bin/bash "$USER_NAME" 2>/dev/null \
-        || useradd --create-home --shell /bin/bash "$USER_NAME"
+    useradd --create-home --shell /bin/bash "$USER_NAME"
 fi
 usermod -aG docker,video,input,render,tty "$USER_NAME"
-chown -R "$USER_NAME":"$USER_NAME" "$ROOT/data" 2>/dev/null || true
 
-echo "== kiosk service"
-install -m 755 "$ROOT/deploy/pi/kiekmap-kiosk" /usr/local/bin/
-install -m 644 "$ROOT/deploy/pi/kiekmap-kiosk.service" /etc/systemd/system/
+say "software to $ROOT"
+mkdir -p "$ROOT"
+install_software
+cp "$BUNDLE/env" "$ROOT/.env"
+set_version
+protect_env
 
-echo "== USB sticks (for the backup)"
-install -m 755 "$ROOT/deploy/pi/kiekmap-usb-mount" /usr/local/sbin/
-install -m 644 "$ROOT/deploy/pi/99-kiekmap-usb.rules" /etc/udev/rules.d/
-udevadm control --reload
-
-echo "== switching off from the admin area"
-install -m 755 "$ROOT/deploy/pi/kiekmap-shutdown" /usr/local/sbin/
-install -m 644 "$ROOT/deploy/pi/kiekmap-shutdown.path" /etc/systemd/system/
-install -m 644 "$ROOT/deploy/pi/kiekmap-shutdown.service" /etc/systemd/system/
-# The two units carry the default path; a unit file cannot read KIEKMAP_ROOT.
-if [ "$ROOT" != /opt/kiekmap ]; then
-    sed -i "s#/opt/kiekmap#$ROOT#g" /etc/systemd/system/kiekmap-shutdown.path \
-        /etc/systemd/system/kiekmap-shutdown.service
-fi
-# What the backend asks about before it offers to switch anything off. The same program runs on a
-# development machine and online behind Caddy, and there nothing would act on the request. Readable
-# for everyone, so the service in the container (UID 1000) sees it without owning it.
+say "the place index"
+# The backend reads it in at startup while its table is empty -- which on a new device it is.
 mkdir -p "$ROOT/data"
-printf 'kiekmap-shutdown.path is installed on this host.\n' > "$ROOT/data/shutdown-watcher"
-chmod 644 "$ROOT/data/shutdown-watcher"
+cp "$BUNDLE/places.json" "$ROOT/data/places.json"
 
-echo "== the screen stays on"
+install_system
+
+say "the screen stays on"
 # Two different blankings, and both have to go: the one of the text console (consoleblank) and the
 # one the kernel does while booting. Without this the screen is black after ten minutes, and
 # nobody in the museum can tell whether the device is still running.
@@ -80,33 +75,17 @@ if [ -f "$CMDLINE" ] && ! grep -q consoleblank=0 "$CMDLINE"; then
     echo "  consoleblank=0 added -- takes effect after the next restart."
 fi
 
-echo "== switching the services on"
-systemctl daemon-reload
-systemctl enable kiekmap-kiosk
-# --now, so that running this script again on a device already in service makes the button in the
-# admin area work without a restart.
-systemctl enable --now kiekmap-shutdown.path
+load_images
+start
 
-cat <<'END'
+cat <<END
 
-Done. What is still missing:
+Done. $VERSION runs, with an empty collection.
 
-  1. Create the .env:
-       cd /opt/kiekmap && cp deploy/.env.example .env
-  2. Bring images, map data and place index over from the development machine. The same stick as
-     for an update, built there with `make release map=1`, and here:
-       sudo sh /opt/kiekmap/deploy/pi/update.sh /media/STICK/kiekmap-update
-     It loads the images, takes over the map data and starts the containers.
-  3. Set the PIN and put the printed line into the .env:
-       cd /opt/kiekmap
-       docker compose -f deploy/docker-compose.yml --env-file .env \
-           run --rm backend python -m app.cli pin
-       docker compose -f deploy/docker-compose.yml --env-file .env up -d
-  4. Restart and watch:
-       sudo reboot
+  1. Restart:  sudo reboot
+     The Pi should land in the map without a keyboard.
+  2. Fill the collection: plug in the stick with the backup, open the admin area through the
+     coat of arms, and restore the backup there.
 
-Compose is started from /opt/kiekmap and not from deploy/, and with --env-file: it reads the .env
-from the directory it is started in, and the .env lies one above the compose file.
-
-After the restart the Pi should land in the map without a keyboard.
+The folder $BUNDLE is no longer needed and can be deleted.
 END
