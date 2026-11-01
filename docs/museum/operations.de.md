@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 4775298d553d33ed239899d31ddc32aae60d97b118f0f385959f0223e82a9612 -->
+<!-- source-sha: 942bb3f7a37e578a460c3e4a05f7cb23568214aeb5ae72015d4699368c0fa914 -->
 
 # Betriebshandbuch
 
@@ -80,7 +80,8 @@ bliebe dort grau.
 **1. Das Betriebssystem.** Mit dem Raspberry Pi Imager: Raspberry Pi OS **Lite** (64 Bit), ohne
 Desktop. In den Einstellungen des Imagers: der Rechnername `kiekmap`, ein Benutzer mit Kennwort,
 SSH eingeschaltet, und das WLAN, falls kein Kabel steckt. Der Pi braucht beim Einrichten das
-Internet, denn er installiert Chromium und Docker.
+Internet, denn er installiert Chromium und Docker. **Ein Netzwerkkabel ist besser als WLAN:**
+Chromium allein hat 120 MB, und beim ersten Pi brauchte das WLAN dafür eine Viertelstunde.
 
 **2. Das Paket, auf dem Entwicklungsrechner:**
 
@@ -101,6 +102,9 @@ Das Paket trägt die Version des Commits, aus dem es gebaut ist: `v0.9.6` auf de
 ```bash
 sudo sh ~/kiekmap/deploy/pi/setup-pi.sh
 ```
+
+`sudo` fragt nach dem Kennwort des im Imager angelegten Benutzers. Direkt vom Entwicklungsrechner
+aus gestartet, braucht diese Abfrage das `-t`: `ssh -t kiekmap-pi 'sudo sh ~/kiekmap/deploy/pi/setup-pi.sh'`.
 
 Das Skript installiert cage, Chromium und Docker und legt den Benutzer `kiekmap` an, der den Kiosk
 betreibt. Es kopiert die Software nach `/opt/kiekmap`, richtet den Kiosk-Dienst, die USB-Regel und

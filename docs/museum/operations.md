@@ -77,7 +77,8 @@ grey there.
 **1. The operating system.** With the Raspberry Pi Imager: Raspberry Pi OS **Lite** (64 bit), no
 desktop. In the Imager's settings: the host name `kiekmap`, a user with a password, SSH switched on,
 and the Wi-Fi if no cable is plugged in. The Pi needs the internet while it is set up, because it
-installs Chromium and Docker.
+installs Chromium and Docker. **A network cable is better than Wi-Fi:** Chromium alone is 120 MB,
+and on the first Pi the Wi-Fi took a quarter of an hour for it.
 
 **2. The bundle, on the development machine:**
 
@@ -98,6 +99,9 @@ The bundle carries the version of the commit it was built from: `v0.9.6` on the 
 ```bash
 sudo sh ~/kiekmap/deploy/pi/setup-pi.sh
 ```
+
+`sudo` asks for the password of the user set in the Imager. Run directly from the development
+machine, the `-t` is needed for that prompt: `ssh -t kiekmap-pi 'sudo sh ~/kiekmap/deploy/pi/setup-pi.sh'`.
 
 The script installs cage, Chromium and Docker and creates the user `kiekmap`, who runs the kiosk.
 It copies the software to `/opt/kiekmap`, sets up the kiosk service, the USB rule and the off
