@@ -85,6 +85,14 @@ type KioskState = {
    */
   openStack: number[];
   openIndex: number;
+  /**
+   * Is the open photo shown on the whole screen, without the text column?
+   *
+   * In the store rather than in the detail view, because `advanceStack` has to see it: a photo
+   * changing while the visitor looks at it full screen would take the picture out from under them.
+   * Every way that opens or closes a photo switches it off, so the next photo never opens into it.
+   */
+  fullScreen: boolean;
 
   /**
    * Where the map travels for the duration of the thank-you, or null.
@@ -159,6 +167,8 @@ type KioskState = {
    * Separate from `stepInStack`, whose stop at either end is what disables the buttons there.
    */
   advanceStack: () => void;
+  /** Show the open photo full screen, or go back to the detail view. */
+  setFullScreen: (on: boolean) => void;
   /**
    * Move only the map somewhere -- for the pin just set, before anything has been contributed.
    *
@@ -311,6 +321,7 @@ export const useKiosk = create<KioskState>((set, get) => {
     error: null,
     openStack: [],
     openIndex: 0,
+    fullScreen: false,
     focus: null,
     rangeBefore: null,
     tagBefore: null,
@@ -330,6 +341,7 @@ export const useKiosk = create<KioskState>((set, get) => {
       set({
         openStack: [id],
         openIndex: 0,
+        fullScreen: false,
         pulsePending: id,
         handoff: { map: false, photo: false },
       });
@@ -408,6 +420,7 @@ export const useKiosk = create<KioskState>((set, get) => {
         rangeBefore: null,
         openStack: [],
         openIndex: 0,
+        fullScreen: false,
         pulsePending: null,
         overview: state.overview + 1,
       }));
@@ -421,11 +434,17 @@ export const useKiosk = create<KioskState>((set, get) => {
     openPhoto(id) {
       const { pulsePending } = get();
       if (id !== null || pulsePending === null) {
-        set({ openStack: id === null ? [] : [id], openIndex: 0 });
+        set({ openStack: id === null ? [] : [id], openIndex: 0, fullScreen: false });
         return;
       }
       // Closing the photo the slide show opened: now the marker can be seen, so now it pulses.
-      set({ openStack: [], openIndex: 0, pulse: pulsePending, pulsePending: null });
+      set({
+        openStack: [],
+        openIndex: 0,
+        fullScreen: false,
+        pulse: pulsePending,
+        pulsePending: null,
+      });
       if (pulseTimer) clearTimeout(pulseTimer);
       pulseTimer = setTimeout(() => {
         pulseTimer = null;
@@ -434,7 +453,7 @@ export const useKiosk = create<KioskState>((set, get) => {
     },
 
     openStackAt(ids, index = 0) {
-      set({ openStack: ids, openIndex: index });
+      set({ openStack: ids, openIndex: index, fullScreen: false });
     },
 
     stepInStack(delta) {
@@ -445,9 +464,15 @@ export const useKiosk = create<KioskState>((set, get) => {
     },
 
     advanceStack() {
-      const { openStack, openIndex } = get();
-      if (openStack.length <= 1) return;
+      const { openStack, openIndex, fullScreen } = get();
+      if (fullScreen || openStack.length <= 1) return;
       set({ openIndex: nextInStack(openIndex, openStack.length) });
+    },
+
+    setFullScreen(on) {
+      // Nothing open, nothing to enlarge: the flag would wait for the next photo and open it full
+      // screen.
+      set({ fullScreen: on && get().openStack.length > 0 });
     },
 
     showLocation(lat, lon) {

@@ -67,6 +67,8 @@ export const en: Texts = {
     next: "Next",
     position: (current: number, count: number) => `${current} of ${count}`,
     edit: "Edit in the admin area — asks for the PIN",
+    showFullScreen: "Show the photo full screen",
+    leaveFullScreen: "Back to the description",
   },
 
   timeline: {
