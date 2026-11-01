@@ -235,6 +235,10 @@ cd /opt/kiekmap && sudo docker compose -f deploy/docker-compose.yml --env-file .
 
 **The script refuses a device that is not set up**; for that one there is `setup-pi.sh`.
 
+**A connection that drops does not stop it.** Both scripts start themselves again as a systemd unit,
+`kiekmap-update` and `kiekmap-setup-pi`, and the terminal only shows its output. After a new
+`ssh kiekmap-pi`, `journalctl -u kiekmap-update` shows how far it got.
+
 **Going back.** The script prints the commands for it at its end. The image of the previous
 version stays on the device, and the database before the update lies in `pre-update/`. Whatever
 was entered after the update is lost that way.

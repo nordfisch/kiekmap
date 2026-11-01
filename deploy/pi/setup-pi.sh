@@ -26,6 +26,8 @@ if [ -e "$ROOT/data/kiekmap.db" ]; then
   sudo sh $BUNDLE/deploy/pi/update.sh"
 fi
 
+detach
+
 say "packages"
 apt-get update
 # cage instead of a desktop, chromium as the display, curl for the health query.

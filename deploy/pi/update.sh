@@ -21,6 +21,8 @@ check_bundle
     fail "$ROOT is not set up yet. For a first installation:
   sudo sh $BUNDLE/deploy/pi/setup-pi.sh"
 
+detach
+
 OLD="$(installed_version)"
 echo "Updating from ${OLD:-unknown} to $VERSION."
 

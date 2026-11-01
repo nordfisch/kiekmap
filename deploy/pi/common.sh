@@ -33,6 +33,45 @@ require_root() {
     [ "$(id -u)" -eq 0 ] || fail "Please start with sudo."
 }
 
+# Run the script again as a transient systemd unit, and follow its output from here.
+#
+# Started over SSH, a script dies with the connection. On the first Pi the Wi-Fi dropped during an
+# update, and the shell went with it. Cut off between `compose stop` and `compose up`, a script
+# leaves the containers stopped, and a stopped container stays down at the next boot. As a unit it
+# runs to the end whatever happens to the connection; this terminal only reads the journal.
+#
+# Called after the checks that refuse at once, so that a refusal is printed straight away.
+detach() {
+    [ -n "${KIEKMAP_DETACHED:-}" ] && return 0
+    UNIT="kiekmap-$(basename "$0" .sh)"
+    SCRIPT="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+    systemctl is-active -q "$UNIT" &&
+        fail "$UNIT is running already. Its output: journalctl -fu $UNIT"
+    systemctl stop "$UNIT" 2>/dev/null || true
+    systemctl reset-failed "$UNIT" 2>/dev/null || true
+
+    SINCE="$(date +%s)"
+    # RemainAfterExit keeps the unit, and with it the exit status, after the script has ended.
+    systemd-run --quiet --unit="$UNIT" --property=RemainAfterExit=yes \
+        --setenv=KIEKMAP_DETACHED=1 --setenv=KIEKMAP_ROOT="$ROOT" \
+        --setenv=KIEKMAP_USER="$USER_NAME" --setenv=DEBIAN_FRONTEND=noninteractive \
+        /bin/sh "$SCRIPT"
+    echo "Runs as $UNIT and carries on if this connection drops."
+    echo "Its output, later or from another shell:  journalctl -u $UNIT"
+    echo
+    journalctl -f -o cat -u "$UNIT" --since "@$SINCE" &
+    FOLLOWER=$!
+    while [ "$(systemctl show -p MainPID --value "$UNIT")" != 0 ]; do sleep 1; done
+    # The last lines need a moment to reach the journal.
+    sleep 2
+    kill "$FOLLOWER" 2>/dev/null || true
+
+    STATUS="$(systemctl show -p ExecMainStatus --value "$UNIT")"
+    systemctl stop "$UNIT" 2>/dev/null || true
+    systemctl reset-failed "$UNIT" 2>/dev/null || true
+    exit "${STATUS:-1}"
+}
+
 check_bundle() {
     for f in version images.tar env places.json tiles deploy/docker-compose.yml; do
         [ -e "$BUNDLE/$f" ] || fail "$BUNDLE/$f is missing -- this is not a complete bundle.

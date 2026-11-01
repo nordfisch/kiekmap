@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: fbac5abfc727949bd4b21a36c40bf70ac35c8f558cdd969b6b3ab6d53f595a77 -->
+<!-- source-sha: 55d08925f6ff0271aaac3289870a579baf84b9c35c0435d01a86de71118f54f6 -->
 
 # Betriebshandbuch
 
@@ -239,6 +239,10 @@ cd /opt/kiekmap && sudo docker compose -f deploy/docker-compose.yml --env-file .
 ```
 
 **Ein Gerät, das nicht eingerichtet ist, verweigert das Skript**; dafür gibt es `setup-pi.sh`.
+
+**Eine abreißende Verbindung hält es nicht auf.** Beide Skripte starten sich selbst noch einmal als
+systemd-Unit, `kiekmap-update` und `kiekmap-setup-pi`, und das Terminal zeigt nur deren Ausgabe.
+Nach einem neuen `ssh kiekmap-pi` zeigt `journalctl -u kiekmap-update`, wie weit es gekommen ist.
 
 **Zurück.** Das Skript gibt die Befehle dafür am Ende aus. Das Abbild der vorigen Version bleibt
 auf dem Gerät, und die Datenbank von vor dem Update liegt in `pre-update/`. Was nach dem Update
