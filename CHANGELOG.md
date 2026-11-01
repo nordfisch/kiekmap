@@ -11,6 +11,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **The admin view counts whole days across a change of the clocks** — after one, the day count
   was off by one for an hour every evening ([#125])
 - **An empty device no longer overwrites the backup on the stick** ([#127])
+- **Backup and restore skip `.DS_Store` and `._*` files** — they were counted as photos ([#127])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
 [#125]: https://github.com/nordfisch/kiekmap/issues/125

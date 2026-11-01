@@ -8,7 +8,7 @@ run. See docs/decisions.md, point 3.
 
 import hashlib
 import re
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 
@@ -57,6 +57,17 @@ def sha256_of_file(path: Path, block_size: int = 1024 * 1024) -> str:
         while block := handle.read(block_size):
             hasher.update(block)
     return hasher.hexdigest()
+
+
+def is_stored_name(name: str) -> bool:
+    """Whether a file name under ``photos/`` or ``thumbs/`` is one this program wrote.
+
+    Every file there is named after its SHA-256. What else turns up was put there by an operating
+    system: ``.DS_Store`` from the Finder, ``._<name>`` AppleDouble files from unpacking a ZIP onto
+    an exFAT stick on a Mac. Counted as photos, they made a backup of 1,324 photos announce 1,568;
+    carried along, they spread from one collection to the next. They are skipped, not deleted.
+    """
+    return _SHA256.fullmatch(PurePosixPath(name).stem) is not None
 
 
 def _fanned_out(sha256: str) -> Path:

@@ -330,6 +330,121 @@ class TestNotOverwritingABiggerBackup:
         assert self._photos_on_stick(stick) == 3
 
 
+def _litter(folder: Path) -> list[Path]:
+    """What a Mac leaves in a folder: a ``.DS_Store`` per folder, a ``._<name>`` per file.
+
+    The first comes from the Finder, the second from unpacking a downloaded ZIP onto an exFAT
+    stick. Measured on the first Pi: 244 of the one and 8,935 of the other.
+    """
+    left = []
+    for path in sorted(folder.rglob("*")):
+        if path.is_file():
+            left.append(path.with_name(f"._{path.name}"))
+    for path in [folder, *sorted(p for p in folder.rglob("*") if p.is_dir())]:
+        left.append(path / ".DS_Store")
+    for path in left:
+        path.write_bytes(b"finder")
+    return left
+
+
+def _strays(folder: Path) -> list[Path]:
+    return [path for path in folder.rglob("*") if path.name.startswith(".")]
+
+
+class TestFilesTheSystemLeftBehind:
+    """Only files named after their SHA-256 are photos or thumbnails.
+
+    The failure is quiet: a backup of 1,324 photos announced 1,568 on the stick card and in the
+    restore question, and carried the extra files into the next collection.
+    """
+
+    def test_they_are_not_counted_as_photos(self, settings, collection):
+        collection(3)
+        _litter(settings.photos_dir)
+        _litter(settings.thumbs_dir)
+
+        photos, _ = backup.collection_size(settings, max_age_s=0)
+
+        assert photos == 3
+
+    def test_they_do_not_travel_onto_the_stick(self, session, settings, stick, collection):
+        collection(3)
+        _litter(settings.photos_dir)
+        _litter(settings.thumbs_dir)
+
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        target = stick / backup.BACKUP_DIR_NAME
+        assert backup.read_manifest(target).photos == 3
+        assert _strays(target / "photos") == []
+        assert _strays(target / "thumbs") == []
+
+    def test_they_stay_where_they_are_in_the_collection(self, session, settings, stick, collection):
+        """Skipped, not deleted: the backup only reads the collection."""
+        collection(2)
+        left = _litter(settings.photos_dir)
+
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        assert all(path.is_file() for path in left)
+
+    def test_they_do_not_travel_into_the_archive(self, session, settings, collection):
+        collection(3)
+        _litter(settings.photos_dir)
+        _litter(settings.thumbs_dir)
+
+        data = b"".join(backup.stream_archive(session, settings))
+
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            names = archive.namelist()
+        assert not [name for name in names if name.rsplit("/", 1)[-1].startswith(".")]
+        assert len([name for name in names if "/photos/" in name]) == 3
+
+    def test_a_stick_unpacked_on_a_mac_restores_only_the_photos(
+        self, session, settings, stick, collection
+    ):
+        shas = collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        target = stick / backup.BACKUP_DIR_NAME
+        _litter(target / "photos")
+        _litter(target / "thumbs")
+        for sha in shas:
+            original_path(settings.photos_dir, sha, ".jpg").unlink()
+
+        message = backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert "3 Fotos" in message
+        assert _strays(settings.photos_dir) == []
+        assert _strays(settings.thumbs_dir) == []
+        assert all(original_path(settings.photos_dir, sha, ".jpg").is_file() for sha in shas)
+
+    def test_an_archive_packed_on_a_mac_restores_only_the_photos(
+        self, session, settings, collection, tmp_path: Path
+    ):
+        """Unpacked and packed again on a Mac, the archive carries the litter inside."""
+        shas = collection(3)
+        data = b"".join(backup.stream_archive(session, settings))
+        unpacked = tmp_path / "unpacked"
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            archive.extractall(unpacked)
+        _litter(unpacked / backup.BACKUP_DIR_NAME)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        repacked = settings.incoming_dir / "kiekmap-backup-holm-2026-11-02.zip"
+        with zipfile.ZipFile(repacked, "w") as archive:
+            for path in sorted(unpacked.rglob("*")):
+                if path.is_file():
+                    archive.write(path, path.relative_to(unpacked).as_posix())
+        for sha in shas:
+            original_path(settings.photos_dir, sha, ".jpg").unlink()
+
+        message = backup.run_restore_from_archive(settings, repacked, _report_nothing)
+
+        assert "3 Fotos" in message
+        assert _strays(settings.photos_dir) == []
+        assert _strays(settings.thumbs_dir) == []
+        assert not (settings.data_dir / "._kiekmap.db").exists()
+
+
 class TestRestoring:
     def _make_backup(self, session, settings, stick, collection, count=2):
         shas = collection(count)

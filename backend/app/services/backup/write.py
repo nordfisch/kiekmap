@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.services.backup.collection import (
+    collection_files,
     collection_size,
     copy_if_new,
     thumbnails_of,
@@ -59,9 +60,7 @@ def run_backup(
 
     written = 0
     done = 0
-    for source in sorted(settings.photos_dir.rglob("*")):
-        if not source.is_file():
-            continue
+    for source in collection_files(settings.photos_dir):
         written += copy_if_new(source, target / "photos" / source.relative_to(settings.photos_dir))
         # The thumbnails belong to the same photo, so they travel with it. Without them a restored
         # device would spend an hour rendering them again before showing anything.
