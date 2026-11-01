@@ -67,8 +67,13 @@ detach() {
     kill "$FOLLOWER" 2>/dev/null || true
 
     STATUS="$(systemctl show -p ExecMainStatus --value "$UNIT")"
-    systemctl stop "$UNIT" 2>/dev/null || true
-    systemctl reset-failed "$UNIT" 2>/dev/null || true
+    # Stopping removes the transient unit. Only a failed one needs its state cleared as well;
+    # asking about it once it is gone makes systemd log "Failed to open /run/systemd/transient".
+    if systemctl is-failed -q "$UNIT"; then
+        systemctl reset-failed "$UNIT"
+    else
+        systemctl stop "$UNIT"
+    fi
     exit "${STATUS:-1}"
 }
 
