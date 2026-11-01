@@ -24,6 +24,11 @@ check_bundle
 OLD="$(installed_version)"
 echo "Updating from ${OLD:-unknown} to $VERSION."
 
+# Loaded while the old version still runs. The containers are stopped as late as possible: a
+# container stopped with `compose stop` stays down at the next boot (restart: unless-stopped), so
+# a failure between stop and start would leave a device with no collection after a restart.
+load_images
+
 say "stopping the containers"
 cd "$ROOT"
 $COMPOSE stop
@@ -54,7 +59,6 @@ if ! cmp -s "$BUNDLE/places.json" "$ROOT/data/places.json"; then
 fi
 
 install_system
-load_images
 start
 
 # The place index is loaded at startup only when the table is empty. A new one has to be pulled in.

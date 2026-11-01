@@ -21,8 +21,8 @@ needs no exception.
 
 **What it refuses to do**, because a bundle that does not match a commit is worse than none: build
 from a dirty working tree. The server images and the release text also need HEAD on the release
-tag. A Pi bundle does not: it carries ``git describe`` as its version, which names the commit even
-off a tag. There is no ``--force``; the fix is to commit.
+tag. A Pi bundle does not: off the tag it carries the commit in its version, see ``described``.
+There is no ``--force``; the fix is to commit.
 """
 
 import argparse
@@ -96,12 +96,17 @@ def check_tag(tag: str) -> None:
         raise SystemExit(f"HEAD is not on {tag}. Check out what is being shipped first.")
 
 
-def described() -> str:
-    """``v0.9.6`` on the tag, ``v0.9.6-4-gabc1234`` four commits after it.
+def described(tag: str) -> str:
+    """``v0.9.6`` on the release tag, ``v0.9.6-g0942491`` on any other commit.
 
-    Either is a valid image tag and names exactly one commit.
+    Either is a valid image tag and names exactly one commit. Not ``git describe``: the release
+    tags sit on merge commits in ``main``, which ``develop`` never contains, so on a branch it
+    names a release several versions old.
     """
-    return run("git", "describe", "--tags", "--always", "--match", "v*")
+    head = run("git", "rev-parse", "HEAD")
+    if run("git", "tag", "--list", tag) and head == run("git", "rev-parse", f"{tag}^{{commit}}"):
+        return tag
+    return f"{tag}-g{head[:7]}"
 
 
 def check_pi_env() -> None:
@@ -197,7 +202,7 @@ def prepare(target: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
 
 
-def build_pi(target: Path) -> str:
+def build_pi(target: Path, tag: str) -> str:
     """The folder setup-pi.sh and update.sh read. Returns the version it carries."""
     check_clean()
     check_pi_env()
@@ -210,7 +215,7 @@ def build_pi(target: Path) -> str:
             command = "make tiles" if name == "tiles" else "make places"
             raise SystemExit(f"{source.relative_to(ROOT)} is missing -- run `{command}` first.")
 
-    tag = described()
+    tag = described(tag)
     prepare(target)
     print(f"== {tag} to {target}")
     build_images(tag, PI_PLATFORM, crest_required=True)
@@ -305,7 +310,7 @@ def main() -> int:
 
     if args.pi:
         target = args.to or ROOT / "release" / "kiekmap"
-        tag = build_pi(target)
+        tag = build_pi(target, tag)
     else:
         target = args.to or ROOT / "release" / "kiekmap-update"
         build_server(target, tag)
