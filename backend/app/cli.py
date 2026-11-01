@@ -255,7 +255,10 @@ def _cmd_pin(_: argparse.Namespace) -> int:
         return 1
 
     print("\nPut this line into the .env file, replacing an existing one:\n")
-    print(f"KIEKMAP_ADMIN_PIN_HASH={hash_pin(pin)}\n")
+    # In single quotes, because the hash is full of `$`. Compose reads an unquoted `$600000` as a
+    # variable and drops everything after the algorithm, and the PIN never matches again.
+    # pydantic-settings strips the quotes, so the same line works on the development machine.
+    print(f"KIEKMAP_ADMIN_PIN_HASH='{hash_pin(pin)}'\n")
     print("Then restart the service. The PIN itself is stored nowhere.")
     return 0
 
