@@ -519,6 +519,11 @@ class DriveChoice(BaseModel):
     path: str
 
 
+class BackupChoice(DriveChoice):
+    #: Confirmed that a backup with more photos than the device has may be replaced.
+    replace_larger: bool = False
+
+
 class IncomingChoice(BaseModel):
     """Which file from the inbox is to be restored."""
 

@@ -130,6 +130,14 @@ en = Texts(
         no_room_on_the_stick=lambda needed, free: (
             f"There is not enough room on the stick. {needed} is needed, {free} is free."
         ),
+        nothing_to_back_up=(
+            "This device holds no photos yet, so there is nothing to back up. "
+            "A backup now would empty the one on the stick."
+        ),
+        stick_holds_more=lambda on_stick, here: (
+            f"The backup on the stick holds {on_stick} photos, this device only {here}. "
+            "It is only replaced once that has been confirmed."
+        ),
         no_room_here=lambda needed, free: (
             f"There is not enough room here. {needed} is needed, {free} is free."
         ),

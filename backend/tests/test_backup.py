@@ -244,6 +244,92 @@ class TestBackingUp:
         assert (settings.data_dir / backup.STATE_FILE).is_file()
 
 
+class TestNotOverwritingABiggerBackup:
+    """A fresh device has an empty collection and is filled from the stick.
+
+    The database on the stick is replaced, not merged. A backup made before the restore -- the
+    first button on the card -- would turn the only backup into an empty one. The photos stay on
+    the stick, their records do not, and nothing on the screen says so.
+    """
+
+    def _photos_on_stick(self, stick: Path) -> int:
+        info = backup.read_manifest(stick / backup.BACKUP_DIR_NAME)
+        assert info is not None
+        return info.photos
+
+    def test_an_empty_device_does_not_empty_the_backup_on_the_stick(
+        self, session, settings, stick, collection
+    ):
+        collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        database = stick / backup.BACKUP_DIR_NAME / "kiekmap.db"
+        before = database.read_bytes()
+        shutil.rmtree(settings.photos_dir)
+
+        with pytest.raises(backup.BackupError, match="nichts zu sichern"):
+            backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        assert database.read_bytes() == before
+        assert self._photos_on_stick(stick) == 3
+
+    def test_an_empty_device_is_refused_even_when_confirmed(
+        self, session, settings, stick, collection
+    ):
+        """The confirmation is for a smaller collection, not for none at all."""
+        collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        shutil.rmtree(settings.photos_dir)
+
+        with pytest.raises(backup.BackupError):
+            backup.run_backup(
+                session, settings, _drive(settings), _report_nothing, replace_larger=True
+            )
+
+        assert self._photos_on_stick(stick) == 3
+
+    def test_an_empty_device_writes_nothing_onto_a_blank_stick(self, session, settings, stick):
+        with pytest.raises(backup.BackupError):
+            backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        assert not (stick / backup.BACKUP_DIR_NAME).exists()
+
+    def test_a_smaller_collection_does_not_replace_a_bigger_backup_unasked(
+        self, session, settings, stick, collection
+    ):
+        shas = collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        original_path(settings.photos_dir, shas[0], ".jpg").unlink()
+
+        with pytest.raises(backup.BackupError) as refused:
+            backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        # Both counts, so that whoever reads it can tell the wrong stick from a smaller collection.
+        assert "3 Fotos" in str(refused.value)
+        assert "nur 2" in str(refused.value)
+        assert self._photos_on_stick(stick) == 3
+
+    def test_a_smaller_collection_replaces_it_once_confirmed(
+        self, session, settings, stick, collection
+    ):
+        shas = collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        original_path(settings.photos_dir, shas[0], ".jpg").unlink()
+
+        backup.run_backup(session, settings, _drive(settings), _report_nothing, replace_larger=True)
+
+        assert self._photos_on_stick(stick) == 2
+
+    def test_a_growing_collection_needs_no_confirmation(self, session, settings, stick, collection):
+        """The question is for the unusual case. Asked on every backup, it would be clicked away."""
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        collection(3)
+
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        assert self._photos_on_stick(stick) == 3
+
+
 class TestRestoring:
     def _make_backup(self, session, settings, stick, collection, count=2):
         shas = collection(count)
@@ -1025,6 +1111,35 @@ class TestThroughTheApi:
 
         assert response.status_code == 404
         assert "nicht mehr da" in response.json()["detail"]
+
+    def test_an_empty_device_cannot_start_a_backup(self, admin_client, settings, stick):
+        """The admin view offers no button for it; the API must not offer a way around that."""
+        response = admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
+
+        assert response.status_code == 409
+        assert "nichts zu sichern" in response.json()["detail"]
+        assert admin_client.get("/api/admin/backup/status").json()["phase"] == "idle"
+        assert not (stick / backup.BACKUP_DIR_NAME).exists()
+
+    def test_a_bigger_backup_on_the_stick_is_replaced_only_when_confirmed(
+        self, admin_client, settings, stick, collection
+    ):
+        shas = collection(3)
+        admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
+        self._until_done(admin_client)
+        admin_client.post("/api/admin/backup/acknowledge")
+        original_path(settings.photos_dir, shas[0], ".jpg").unlink()
+
+        refused = admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
+        assert refused.status_code == 409
+        assert "3 Fotos" in refused.json()["detail"]
+
+        admin_client.post(
+            "/api/admin/backup/start", json={"path": str(stick), "replace_larger": True}
+        )
+        state = self._until_done(admin_client)
+        assert state["phase"] == "done"
+        assert "2 Fotos" in state["message"]
 
     def test_acknowledging_clears_the_status(self, admin_client, settings, stick, collection):
         collection(1)

@@ -32,6 +32,7 @@ import {
   startRestore,
 } from "../api/admin";
 import { t } from "../text";
+import { driveOffer, jobTitle } from "./backupOffer";
 import { formatBytes, formatCount, formatDate } from "./format";
 
 /** While idle: has a stick appeared? While running: how far along is it? */
@@ -167,7 +168,7 @@ export function Backup() {
           <DriveCard
             drive={drive}
             list={drives}
-            onStart={() => void begin(() => startBackup(drive.path))}
+            onStart={(replaceLarger) => void begin(() => startBackup(drive.path, replaceLarger))}
           />
 
           <section className="backup__restore">
@@ -300,8 +301,24 @@ function DriveCard({
 }: {
   drive: DriveItem;
   list: DriveList;
-  onStart: () => void;
+  onStart: (replaceLarger: boolean) => void;
 }) {
+  const [asking, setAsking] = useState(false);
+  const offer = driveOffer(drive, list.photos);
+
+  /* An empty device: no button. A backup now would replace the records on the stick with an
+     empty database -- and restoring from that stick is exactly what a fresh device does next. */
+  if (offer === "nothing") {
+    return (
+      <div className="backup__drive">
+        <p className="backup__drive-name">{drive.name}</p>
+        <p className="backup__drive-space">{t.admin.backup.free(formatBytes(drive.free_bytes))}</p>
+        <p className="admin__note">{t.admin.backup.emptyDevice}</p>
+        {drive.backup && <p className="admin__note">{t.admin.backup.emptyDeviceRestore}</p>}
+      </div>
+    );
+  }
+
   return (
     <div className="backup__drive">
       <p className="backup__drive-name">{drive.name}</p>
@@ -321,15 +338,35 @@ function DriveCard({
         </p>
       )}
 
-      {/* No button that leads nowhere: a stick that is too small cannot be written to. */}
-      <button
-        type="button"
-        className="button button--primary backup__start"
-        onClick={onStart}
-        disabled={!drive.enough_space}
-      >
-        {drive.backup ? t.admin.backup.startAgain : t.admin.backup.start}
-      </button>
+      {asking && drive.backup ? (
+        <div className="backup__confirm">
+          <p className="backup__confirm-title">{t.admin.backup.replaceTitle}</p>
+          <p>
+            {t.admin.backup.replaceConfirm(
+              formatCount(drive.backup.photos),
+              formatCount(list.photos),
+            )}
+          </p>
+          <div className="backup__actions">
+            <button type="button" className="button button--primary" onClick={() => onStart(true)}>
+              {t.admin.backup.replaceYes}
+            </button>
+            <button type="button" className="button" onClick={() => setAsking(false)}>
+              {t.admin.backup.replaceNo}
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* No button that leads nowhere: a stick that is too small cannot be written to. */
+        <button
+          type="button"
+          className="button button--primary backup__start"
+          onClick={() => (offer === "ask" ? setAsking(true) : onStart(false))}
+          disabled={!drive.enough_space}
+        >
+          {drive.backup ? t.admin.backup.startAgain : t.admin.backup.start}
+        </button>
+      )}
     </div>
   );
 }
@@ -339,7 +376,7 @@ function JobView({ job, onFinish }: { job: JobState; onFinish: () => void }) {
 
   return (
     <div className="backup">
-      <h3 className="admin__heading">{t.admin.backup.title}</h3>
+      <h3 className="admin__heading">{jobTitle(job.kind)}</h3>
 
       {job.phase === "running" && (
         <>

@@ -148,6 +148,14 @@ de = Texts(
         no_room_on_the_stick=lambda needed, free: (
             f"Auf dem Stick ist zu wenig Platz. Gebraucht werden {needed}, frei sind {free}."
         ),
+        nothing_to_back_up=(
+            "Auf diesem Geraet sind noch keine Fotos, es gibt also nichts zu sichern. "
+            "Eine Sicherung jetzt wuerde die auf dem Stick leeren."
+        ),
+        stick_holds_more=lambda on_stick, here: (
+            f"Die Sicherung auf dem Stick hat {on_stick} Fotos, dieses Geraet nur {here}. "
+            "Sie wird erst ersetzt, wenn das bestaetigt ist."
+        ),
         no_room_here=lambda needed, free: (
             f"Hier ist zu wenig Platz. Gebraucht werden {needed}, frei sind {free}."
         ),
