@@ -3,9 +3,10 @@
 Everything somebody needs to know who keeps the device running in the museum. How to use it is in
 the [guide for the museum team](usermanual.md); the technology is here.
 
-> **Not yet tried on a real Pi.** The files under `deploy/pi/` are written carefully and checked
-> for syntax, but have never run — there was no device while they were built. Whatever sticks
-> first belongs in this file, as soon as the Pi stands there.
+> **Tried on a Raspberry Pi 4 with Raspberry Pi OS on Debian 13, on 1 and 2 November 2026:**
+> setting up from the bundle, the kiosk after a restart, touch, restoring a backup from a USB
+> stick, and updating with the collection on the device. **Not yet tried:** a power cut, and a
+> backup onto a stick from the device.
 
 ---
 

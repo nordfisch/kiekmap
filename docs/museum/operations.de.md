@@ -1,14 +1,15 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 55d08925f6ff0271aaac3289870a579baf84b9c35c0435d01a86de71118f54f6 -->
+<!-- source-sha: 4775298d553d33ed239899d31ddc32aae60d97b118f0f385959f0223e82a9612 -->
 
 # Betriebshandbuch
 
 Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung steht in der
 [Anleitung für das Museumsteam](usermanual.de.md); hier steht die Technik.
 
-> **Auf einem echten Pi noch nicht erprobt.** Die Dateien unter `deploy/pi/` sind sorgfältig
-> geschrieben und syntaktisch geprüft, aber nie gelaufen — es gab beim Bauen kein Gerät. Was
-> davon zuerst hakt, gehört in diese Datei, sobald der Pi dasteht.
+> **Erprobt auf einem Raspberry Pi 4 mit Raspberry Pi OS auf Debian 13, am 1. und 2. November
+> 2026:** das Einrichten aus dem Paket, der Kiosk nach einem Neustart, Touch, das Zurückspielen
+> einer Sicherung vom USB-Stick und das Aktualisieren mit der Sammlung auf dem Gerät. **Noch nicht
+> erprobt:** ein Stromausfall und eine Sicherung vom Gerät auf einen Stick.
 
 ---
 
