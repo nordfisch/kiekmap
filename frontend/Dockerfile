@@ -1,5 +1,12 @@
 # syntax=docker/dockerfile:1
 
+# The coat of arms, as a stage of its own so that a build can swap it without touching the tree.
+# Here it is the placeholder from the repository. `tools/build_release.py` passes
+# `--build-context crest=<folder with logo.png>`, and BuildKit then replaces this stage with that
+# folder. The real crest must never be in the tree: see tools/check_logo.py.
+FROM scratch AS crest
+COPY public/logo.png /logo.png
+
 FROM node:22-alpine AS build
 WORKDIR /src
 
@@ -12,6 +19,7 @@ COPY src ./src
 # public/tiles/map.pmtiles is excluded by .dockerignore: the map file belongs to the place, not to
 # the software, is large, and is mounted at runtime.
 COPY public ./public
+COPY --from=crest /logo.png public/logo.png
 
 # Fail early and plainly instead of having a map without labels in the museum later.
 RUN test -d public/basemaps/fonts || { \
