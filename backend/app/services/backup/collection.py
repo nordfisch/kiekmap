@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.services.backup.common import LOOSE_FILES
+from app.services.storage import is_stored_name
 
 log = logging.getLogger(__name__)
 
@@ -50,13 +51,11 @@ def collection_size(settings: Settings, *, max_age_s: float = SIZE_CACHE_S) -> t
     photos = 0
     total = 0
 
-    for path in settings.photos_dir.rglob("*"):
-        if path.is_file():
-            photos += 1
-            total += path.stat().st_size
-    for path in settings.thumbs_dir.rglob("*"):
-        if path.is_file():
-            total += path.stat().st_size
+    for path in collection_files(settings.photos_dir):
+        photos += 1
+        total += path.stat().st_size
+    for path in collection_files(settings.thumbs_dir):
+        total += path.stat().st_size
     if settings.db_path.is_file():
         total += settings.db_path.stat().st_size
     for name in LOOSE_FILES:
@@ -65,6 +64,17 @@ def collection_size(settings: Settings, *, max_age_s: float = SIZE_CACHE_S) -> t
 
     _size_cache = (settings.data_dir, time.monotonic(), (photos, total))
     return photos, total
+
+
+def collection_files(folder: Path) -> list[Path]:
+    """The photos or thumbnails below a folder of the collection, in stable order.
+
+    Only files named the way the import names them -- see ``storage.is_stored_name``. Counting,
+    the stick and the archive all walk the collection through here, so that all three agree.
+    """
+    return sorted(
+        path for path in folder.rglob("*") if path.is_file() and is_stored_name(path.name)
+    )
 
 
 def forget_size() -> None:

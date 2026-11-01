@@ -22,7 +22,12 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.services import places
-from app.services.backup.collection import collection_size, thumbnails_of, vacuum_into
+from app.services.backup.collection import (
+    collection_files,
+    collection_size,
+    thumbnails_of,
+    vacuum_into,
+)
 from app.services.backup.common import (
     ARCHIVE_CHUNK,
     BACKUP_DIR_NAME,
@@ -130,9 +135,7 @@ def stream_archive(session: Session, settings: Settings) -> Iterator[bytes]:
         with zipfile.ZipFile(stream, "w", zipfile.ZIP_STORED, allowZip64=True) as archive:
             yield from _add_to_archive(archive, stream, database, f"{BACKUP_DIR_NAME}/kiekmap.db")
 
-            for source in sorted(settings.photos_dir.rglob("*")):
-                if not source.is_file():
-                    continue
+            for source in collection_files(settings.photos_dir):
                 relative = source.relative_to(settings.photos_dir).as_posix()
                 yield from _add_to_archive(
                     archive, stream, source, f"{BACKUP_DIR_NAME}/photos/{relative}"

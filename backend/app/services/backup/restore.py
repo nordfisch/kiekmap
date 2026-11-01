@@ -12,7 +12,7 @@ import shutil
 import zipfile
 from collections.abc import Callable
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from app import db
 from app.config import Settings
@@ -30,6 +30,7 @@ from app.services.backup.common import (
 )
 from app.services.backup.drives import Drive
 from app.services.backup.manifest import is_restorable, read_archive_manifest
+from app.services.storage import is_stored_name
 from app.text import texts
 
 log = logging.getLogger(__name__)
@@ -113,6 +114,18 @@ def run_restore(settings: Settings, drive: Drive, report: Report) -> str:
     return _swap_in(settings, work, total, report)
 
 
+def _wanted(relative: str) -> bool:
+    """Whether an entry of the archive belongs to the collection.
+
+    Under ``photos/`` and ``thumbs/`` only what is named after its SHA-256, as on the stick. The
+    archive was written by this program, but a ZIP is easily unpacked and packed again on a Mac,
+    and then holds a ``.DS_Store`` or ``._<name>`` in every folder.
+    """
+    if relative.startswith(("photos/", "thumbs/")):
+        return is_stored_name(relative)
+    return not PurePosixPath(relative).name.startswith(".")
+
+
 def _linked(path: Path) -> bool:
     return path.is_symlink()
 
@@ -124,10 +137,17 @@ def _files_on_stick(folder: Path) -> list[Path]:
     as if it were a photo, and ``is_file()`` does not tell the two apart, because it follows the
     link. ``rglob`` does not descend into a linked folder, but it starts in one: a linked
     ``photos/`` itself counts as missing.
+
+    Only files named after their SHA-256: a stick unpacked on a Mac carries a ``._<name>`` beside
+    every file, and none of them is a photo -- see ``storage.is_stored_name``.
     """
     if _linked(folder) or not folder.is_dir():
         return []
-    return sorted(path for path in folder.rglob("*") if path.is_file() and not _linked(path))
+    return sorted(
+        path
+        for path in folder.rglob("*")
+        if path.is_file() and not _linked(path) and is_stored_name(path.name)
+    )
 
 
 def _size_on_stick(source: Path) -> int:
@@ -227,7 +247,13 @@ def run_restore_from_archive(settings: Settings, archive: Path, report: Report) 
     prefix = f"{BACKUP_DIR_NAME}/"
 
     with zipfile.ZipFile(archive) as opened:
-        entries = [e for e in opened.infolist() if not e.is_dir() and e.filename.startswith(prefix)]
+        entries = [
+            e
+            for e in opened.infolist()
+            if not e.is_dir()
+            and e.filename.startswith(prefix)
+            and _wanted(e.filename[len(prefix) :])
+        ]
         total = sum(1 for e in entries if e.filename.startswith(f"{prefix}photos/"))
 
         # **The room needed is the sum of the entries, not the size in the manifest.** The manifest

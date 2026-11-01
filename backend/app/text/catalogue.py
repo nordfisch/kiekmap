@@ -88,6 +88,9 @@ class BackupTexts:
     #: What goes wrong.
     no_backup_on_the_stick: str
     no_room_on_the_stick: Callable[[str, str], str]
+    nothing_to_back_up: str
+    #: (photos in the backup on the stick, photos on this device)
+    stick_holds_more: Callable[[int, int], str]
     no_room_here: Callable[[str, str], str]
     backup_is_newer: Callable[[str], str]
     database_in_use: str

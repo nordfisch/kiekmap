@@ -244,6 +244,207 @@ class TestBackingUp:
         assert (settings.data_dir / backup.STATE_FILE).is_file()
 
 
+class TestNotOverwritingABiggerBackup:
+    """A fresh device has an empty collection and is filled from the stick.
+
+    The database on the stick is replaced, not merged. A backup made before the restore -- the
+    first button on the card -- would turn the only backup into an empty one. The photos stay on
+    the stick, their records do not, and nothing on the screen says so.
+    """
+
+    def _photos_on_stick(self, stick: Path) -> int:
+        info = backup.read_manifest(stick / backup.BACKUP_DIR_NAME)
+        assert info is not None
+        return info.photos
+
+    def test_an_empty_device_does_not_empty_the_backup_on_the_stick(
+        self, session, settings, stick, collection
+    ):
+        collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        database = stick / backup.BACKUP_DIR_NAME / "kiekmap.db"
+        before = database.read_bytes()
+        shutil.rmtree(settings.photos_dir)
+
+        with pytest.raises(backup.BackupError, match="nichts zu sichern"):
+            backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        assert database.read_bytes() == before
+        assert self._photos_on_stick(stick) == 3
+
+    def test_an_empty_device_is_refused_even_when_confirmed(
+        self, session, settings, stick, collection
+    ):
+        """The confirmation is for a smaller collection, not for none at all."""
+        collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        shutil.rmtree(settings.photos_dir)
+
+        with pytest.raises(backup.BackupError):
+            backup.run_backup(
+                session, settings, _drive(settings), _report_nothing, replace_larger=True
+            )
+
+        assert self._photos_on_stick(stick) == 3
+
+    def test_an_empty_device_writes_nothing_onto_a_blank_stick(self, session, settings, stick):
+        with pytest.raises(backup.BackupError):
+            backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        assert not (stick / backup.BACKUP_DIR_NAME).exists()
+
+    def test_a_smaller_collection_does_not_replace_a_bigger_backup_unasked(
+        self, session, settings, stick, collection
+    ):
+        shas = collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        original_path(settings.photos_dir, shas[0], ".jpg").unlink()
+
+        with pytest.raises(backup.BackupError) as refused:
+            backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        # Both counts, so that whoever reads it can tell the wrong stick from a smaller collection.
+        assert "3 Fotos" in str(refused.value)
+        assert "nur 2" in str(refused.value)
+        assert self._photos_on_stick(stick) == 3
+
+    def test_a_smaller_collection_replaces_it_once_confirmed(
+        self, session, settings, stick, collection
+    ):
+        shas = collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        original_path(settings.photos_dir, shas[0], ".jpg").unlink()
+
+        backup.run_backup(session, settings, _drive(settings), _report_nothing, replace_larger=True)
+
+        assert self._photos_on_stick(stick) == 2
+
+    def test_a_growing_collection_needs_no_confirmation(self, session, settings, stick, collection):
+        """The question is for the unusual case. Asked on every backup, it would be clicked away."""
+        collection(2)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        collection(3)
+
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        assert self._photos_on_stick(stick) == 3
+
+
+def _litter(folder: Path) -> list[Path]:
+    """What a Mac leaves in a folder: a ``.DS_Store`` per folder, a ``._<name>`` per file.
+
+    The first comes from the Finder, the second from unpacking a downloaded ZIP onto an exFAT
+    stick. Measured on the first Pi: 244 of the one and 8,935 of the other.
+    """
+    left = []
+    for path in sorted(folder.rglob("*")):
+        if path.is_file():
+            left.append(path.with_name(f"._{path.name}"))
+    for path in [folder, *sorted(p for p in folder.rglob("*") if p.is_dir())]:
+        left.append(path / ".DS_Store")
+    for path in left:
+        path.write_bytes(b"finder")
+    return left
+
+
+def _strays(folder: Path) -> list[Path]:
+    return [path for path in folder.rglob("*") if path.name.startswith(".")]
+
+
+class TestFilesTheSystemLeftBehind:
+    """Only files named after their SHA-256 are photos or thumbnails.
+
+    The failure is quiet: a backup of 1,324 photos announced 1,568 on the stick card and in the
+    restore question, and carried the extra files into the next collection.
+    """
+
+    def test_they_are_not_counted_as_photos(self, settings, collection):
+        collection(3)
+        _litter(settings.photos_dir)
+        _litter(settings.thumbs_dir)
+
+        photos, _ = backup.collection_size(settings, max_age_s=0)
+
+        assert photos == 3
+
+    def test_they_do_not_travel_onto_the_stick(self, session, settings, stick, collection):
+        collection(3)
+        _litter(settings.photos_dir)
+        _litter(settings.thumbs_dir)
+
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        target = stick / backup.BACKUP_DIR_NAME
+        assert backup.read_manifest(target).photos == 3
+        assert _strays(target / "photos") == []
+        assert _strays(target / "thumbs") == []
+
+    def test_they_stay_where_they_are_in_the_collection(self, session, settings, stick, collection):
+        """Skipped, not deleted: the backup only reads the collection."""
+        collection(2)
+        left = _litter(settings.photos_dir)
+
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+
+        assert all(path.is_file() for path in left)
+
+    def test_they_do_not_travel_into_the_archive(self, session, settings, collection):
+        collection(3)
+        _litter(settings.photos_dir)
+        _litter(settings.thumbs_dir)
+
+        data = b"".join(backup.stream_archive(session, settings))
+
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            names = archive.namelist()
+        assert not [name for name in names if name.rsplit("/", 1)[-1].startswith(".")]
+        assert len([name for name in names if "/photos/" in name]) == 3
+
+    def test_a_stick_unpacked_on_a_mac_restores_only_the_photos(
+        self, session, settings, stick, collection
+    ):
+        shas = collection(3)
+        backup.run_backup(session, settings, _drive(settings), _report_nothing)
+        target = stick / backup.BACKUP_DIR_NAME
+        _litter(target / "photos")
+        _litter(target / "thumbs")
+        for sha in shas:
+            original_path(settings.photos_dir, sha, ".jpg").unlink()
+
+        message = backup.run_restore(settings, _drive(settings), _report_nothing)
+
+        assert "3 Fotos" in message
+        assert _strays(settings.photos_dir) == []
+        assert _strays(settings.thumbs_dir) == []
+        assert all(original_path(settings.photos_dir, sha, ".jpg").is_file() for sha in shas)
+
+    def test_an_archive_packed_on_a_mac_restores_only_the_photos(
+        self, session, settings, collection, tmp_path: Path
+    ):
+        """Unpacked and packed again on a Mac, the archive carries the litter inside."""
+        shas = collection(3)
+        data = b"".join(backup.stream_archive(session, settings))
+        unpacked = tmp_path / "unpacked"
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            archive.extractall(unpacked)
+        _litter(unpacked / backup.BACKUP_DIR_NAME)
+        settings.incoming_dir.mkdir(parents=True, exist_ok=True)
+        repacked = settings.incoming_dir / "kiekmap-backup-holm-2026-11-02.zip"
+        with zipfile.ZipFile(repacked, "w") as archive:
+            for path in sorted(unpacked.rglob("*")):
+                if path.is_file():
+                    archive.write(path, path.relative_to(unpacked).as_posix())
+        for sha in shas:
+            original_path(settings.photos_dir, sha, ".jpg").unlink()
+
+        message = backup.run_restore_from_archive(settings, repacked, _report_nothing)
+
+        assert "3 Fotos" in message
+        assert _strays(settings.photos_dir) == []
+        assert _strays(settings.thumbs_dir) == []
+        assert not (settings.data_dir / "._kiekmap.db").exists()
+
+
 class TestRestoring:
     def _make_backup(self, session, settings, stick, collection, count=2):
         shas = collection(count)
@@ -1025,6 +1226,35 @@ class TestThroughTheApi:
 
         assert response.status_code == 404
         assert "nicht mehr da" in response.json()["detail"]
+
+    def test_an_empty_device_cannot_start_a_backup(self, admin_client, settings, stick):
+        """The admin view offers no button for it; the API must not offer a way around that."""
+        response = admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
+
+        assert response.status_code == 409
+        assert "nichts zu sichern" in response.json()["detail"]
+        assert admin_client.get("/api/admin/backup/status").json()["phase"] == "idle"
+        assert not (stick / backup.BACKUP_DIR_NAME).exists()
+
+    def test_a_bigger_backup_on_the_stick_is_replaced_only_when_confirmed(
+        self, admin_client, settings, stick, collection
+    ):
+        shas = collection(3)
+        admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
+        self._until_done(admin_client)
+        admin_client.post("/api/admin/backup/acknowledge")
+        original_path(settings.photos_dir, shas[0], ".jpg").unlink()
+
+        refused = admin_client.post("/api/admin/backup/start", json={"path": str(stick)})
+        assert refused.status_code == 409
+        assert "3 Fotos" in refused.json()["detail"]
+
+        admin_client.post(
+            "/api/admin/backup/start", json={"path": str(stick), "replace_larger": True}
+        )
+        state = self._until_done(admin_client)
+        assert state["phase"] == "done"
+        assert "2 Fotos" in state["message"]
 
     def test_acknowledging_clears_the_status(self, admin_client, settings, stick, collection):
         collection(1)

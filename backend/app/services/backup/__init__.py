@@ -57,7 +57,7 @@ from app.services.backup.manifest import (
 )
 from app.services.backup.restore import run_restore, run_restore_from_archive
 from app.services.backup.state import BackupState, read_state, record_backup
-from app.services.backup.write import run_backup
+from app.services.backup.write import check_backup, run_backup
 
 __all__ = [
     "BACKUP_DIR_NAME",
@@ -77,6 +77,7 @@ __all__ = [
     "JobStatus",
     "Report",
     "archive_name",
+    "check_backup",
     "collection_size",
     "find_drive",
     "find_drives",

@@ -412,6 +412,16 @@ export const en: Texts = {
 
       start: "Start the backup",
       startAgain: "Renew the backup",
+      emptyDevice: "This device holds no photos yet, so there is nothing to back up.",
+      emptyDeviceRestore: "It can be filled from this stick with “Restore” below.",
+      replaceTitle: "The stick holds more photos than this device",
+      replaceConfirm: (onStick: string, here: string) =>
+        `The backup on the stick has ${onStick} photos, this device only ${here}. ` +
+        "Renewing the backup replaces it with the smaller collection. " +
+        "If this device is new, read the backup back in instead.",
+      replaceYes: "Yes, replace it",
+      replaceNo: "Cancel",
+      restoreRunningTitle: "Reading a backup back in",
       done: "Done",
       cancelHint: "Please do not pull the stick out while the backup is running.",
 

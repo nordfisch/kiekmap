@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: da7c5849ab007740ce6f8507ed623788e29e157087f3e49af97ef8cfceab1b5f -->
+<!-- source-sha: cedb6942bbe90f53d5aa6ae298c8e55742a0cf818ef7e40f50a37e1b77da9273 -->
 
 # Änderungen
 
@@ -17,9 +17,17 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Einrichten und Aktualisieren der Online-Instanz sind beschrieben** ([#120])
 - **Die nach dem Handbuch eingerichtete PIN passt auf dem Gerät**; Compose schneidet ihren Hash
   nicht mehr ab ([#124])
+- **Der Kiosk startet nach einem Neustart**; die Anmeldung auf tty1 hielt sein Terminal ([#124])
+- **Die Verwaltung zählt ganze Tage auch über eine Zeitumstellung hinweg** — danach lag die
+  Tageszahl abends eine Stunde lang um einen Tag daneben ([#125])
+- **Ein leeres Gerät überschreibt die Sicherung auf dem Stick nicht mehr** ([#127])
+- **Sicherung und Zurückspielen übergehen `.DS_Store`- und `._*`-Dateien** — sie zählten als
+  Fotos ([#127])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
 [#124]: https://github.com/nordfisch/kiekmap/issues/124
+[#125]: https://github.com/nordfisch/kiekmap/issues/125
+[#127]: https://github.com/nordfisch/kiekmap/issues/127
 
 ## [0.9.6] — 2026-09-27
 
