@@ -8,8 +8,11 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 
 - **Setting up and updating the online instance are documented, and `make release` accepts the
   real coat of arms** ([#120])
+- **The admin view counts whole days across a change of the clocks** — after one, the day count
+  was off by one for an hour every evening ([#125])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
+[#125]: https://github.com/nordfisch/kiekmap/issues/125
 
 ## [0.9.6] — 2026-09-27
 

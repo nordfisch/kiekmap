@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 81bee1ee87faef8e33909bed5fe03195a6fcdaea9223de8abe971f3ad900cb2c -->
+<!-- source-sha: fdfebba462974023ae9edd160f6049bb5018d8580e8614479674769b5381c901 -->
 
 # Änderungen
 
@@ -11,8 +11,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 - **Einrichten und Aktualisieren der Online-Instanz sind beschrieben, und `make release` nimmt das
   echte Wappen hin** ([#120])
+- **Die Verwaltung zählt ganze Tage auch über eine Zeitumstellung hinweg** — danach lag die
+  Tageszahl abends eine Stunde lang um einen Tag daneben ([#125])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
+[#125]: https://github.com/nordfisch/kiekmap/issues/125
 
 ## [0.9.6] — 2026-09-27
 
