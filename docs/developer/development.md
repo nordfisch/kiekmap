@@ -343,14 +343,13 @@ git config core.hooksPath .githooks
 ```
 
 **One more runs only there: `tools/check_logo.py`.** It reads the **index**, not the working tree,
-and that is why it cannot join the list above. `frontend/public/logo.png` is a placeholder, and a
-machine that sets a device up replaces it with the real municipal coat of arms — rightly, because
-`make release` bakes it into the frontend image from there. What must not happen is that it travels
-into a commit: the municipality governs the use of its arms, and permission for one museum is not
-permission for everybody who clones this. A check on the tree would refuse every commit on that
-machine and be switched off within the day. So the check refuses a *staged* change to the file
-unless `tools/build_logo.py` is staged with it — the one legitimate reason for the placeholder to
-change. Nothing to keep in step, and no exception to remember. See
+and that is why it cannot join the list above. `frontend/public/logo.png` is a placeholder. The
+real municipal coat of arms lies in the git-ignored `local/logo.png`, and the image build takes it
+from there through a build context. What must not happen is that it travels into a commit: the
+municipality governs the use of its arms, and permission for one museum is not permission for
+everybody who clones this. The check is the guard for whoever copies it over the placeholder after
+all. It refuses a *staged* change to the file unless `tools/build_logo.py` is staged with it — the
+one legitimate reason for the placeholder to change. See
 [decisions.md](decisions.md#78-the-coat-of-arms-is-guarded-at-the-index-not-in-the-tree).
 
 **`check_settings.py` exists since 14 August 2026, and it has an occasion.** The compose file
@@ -782,17 +781,20 @@ git branch -d release/$V
 
 The next change starts on a branch of its own from here.
 
-### 9. The update stick
+### 9. Onto the devices
 
-Only when a device is to be updated. On the tag, with a clean working tree:
+Only when a device or the server is to be updated. On the tag, with a clean working tree:
 
 ```bash
 git switch --detach v$V
-make release to=/Volumes/STICK/kiekmap-update
+make deploy                                 # the Pi
+make release to=$HOME/kiekmap-update        # the online server
 ```
 
-`make release` refuses a dirty tree and a HEAD that is not on the tag. What the stick holds and how
-it goes onto the Pi is in [operations.md](../museum/operations.md#updating-without-the-internet).
+Both refuse a dirty tree; `make release` also refuses a HEAD that is not on the tag. `make deploy`
+off the tag carries the commit in its version. How the bundle goes onto the Pi is in
+[operations.md](../museum/operations.md#updating), the server in
+[operations.md](../museum/operations.md#updating-the-server).
 
 ### When a release went wrong
 

@@ -2107,6 +2107,10 @@ nothing about whether they work.
 
 ## 78. The coat of arms is guarded at the index, not in the tree
 
+**In part superseded by [point 97](#97-the-pi-gets-a-bundle-not-a-clone)**: the real crest no longer
+lies in the tree but in `local/logo.png`. The check stays, as the guard for whoever copies it over
+the placeholder after all.
+
 `frontend/public/logo.png` ships as a placeholder from `tools/build_logo.py`. A museum replaces it
 with its own arms, and from that moment it is a modified tracked file on that machine.
 
@@ -2692,3 +2696,47 @@ backend container. That is a denial of service, not an escalation: the script re
 takes no argument from the file. And the part that cannot be checked without the device is whether
 a container's write into the bind mount reaches the path unit at all; the fallback is a timer that
 polls, with the same script ([issue #18](https://github.com/nordfisch/kiekmap/issues/18)).
+
+---
+
+## 97. The Pi gets a bundle, not a clone
+
+`make deploy` builds one folder on the development machine and copies it into the home directory of
+the SSH user: both images, the map, the place index, `deploy/` and the Pi's `.env`. On the Pi
+`setup-pi.sh` installs from it once and `update.sh` for every update. The Pi has no clone and needs
+no git ([issue #124](https://github.com/nordfisch/kiekmap/issues/124)).
+
+**Why.** The first Pi set up along the manual failed twice. The real coat of arms had to be in the
+tree for the image build, and the release refused a tree that was not clean. And a clone made with
+`sudo git clone` belongs to root, so the steps after it — the `.env`, the map, the PIN — failed for
+the user who ran them. Each of those steps was a place where something could be forgotten. The bundle
+leaves one command on each side.
+
+**The coat of arms comes in through a named build context.** `frontend/Dockerfile` takes `logo.png`
+from a stage `crest` that holds the placeholder; `build_release.py` replaces that stage with a
+folder holding `local/logo.png`. The tree never carries the real crest, and the clean-tree rule
+needs no exception. The exception it had for `logo.png` is gone.
+
+**The Pi's `.env` is kept on the development machine**, in `local/pi.env`. A second device is set
+up from the same file. An update leaves the `.env` on the Pi alone except for `KIEKMAP_VERSION`:
+it may hold a PIN set on the device, and a bundle that overwrote it would take that PIN back.
+
+**Two scripts that refuse each other's case**, rather than one that decides. `setup-pi.sh` refuses a
+device that holds a database, `update.sh` a device that is not set up. The person running the
+wrong one is told which is right, before anything changes.
+
+**`update.sh` copies the database before the new version migrates it**, into
+`pre-update/<old version>/`, two of them kept. The migrations run forward only, and the previous
+image does not read a schema it does not know. The photos are not copied: no update changes them,
+and they would fill the card. The images load before the containers stop, because a container
+stopped with `compose stop` stays down at the next boot.
+
+**`data/` is handed to UID 1000 by number.** The backend writes as 1000 in its container. A chown to
+the name `kiekmap` pointed at 1001 when the first user of the Pi already had 1000.
+
+**The version of a bundle is the version in the files**, plus the commit when HEAD is not on the
+release tag: `v0.9.6-g0942491`. `git describe` named `v0.8.0` on `develop`, because the release tags
+sit on merge commits in `main`, which `develop` never contains.
+
+**The price:** the bundle carries the whole image archive every time, about 110 MB, where an update
+of one file would need less. rsync over a network handles that in seconds, a stick in a minute.

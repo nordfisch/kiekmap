@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: 81bee1ee87faef8e33909bed5fe03195a6fcdaea9223de8abe971f3ad900cb2c -->
+<!-- source-sha: da7c5849ab007740ce6f8507ed623788e29e157087f3e49af97ef8cfceab1b5f -->
 
 # Änderungen
 
@@ -7,12 +7,19 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unveröffentlicht]
 
+### Geändert
+
+- **Ein Pi wird aus einem Paket eingerichtet und aktualisiert, das der Entwicklungsrechner baut**:
+  `make deploy`, dann ein Skript auf dem Pi ([#124])
+
 ### Behoben
 
-- **Einrichten und Aktualisieren der Online-Instanz sind beschrieben, und `make release` nimmt das
-  echte Wappen hin** ([#120])
+- **Einrichten und Aktualisieren der Online-Instanz sind beschrieben** ([#120])
+- **Die nach dem Handbuch eingerichtete PIN passt auf dem Gerät**; Compose schneidet ihren Hash
+  nicht mehr ab ([#124])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
+[#124]: https://github.com/nordfisch/kiekmap/issues/124
 
 ## [0.9.6] — 2026-09-27
 

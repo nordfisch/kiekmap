@@ -183,17 +183,18 @@ name and do not find it, the `bbox` is the first suspicion, not the code.
 [`tools/build_logo.py`](../../tools/build_logo.py). Why not a real one is in
 [decisions.md](../developer/decisions.md), point 21.
 
-Replace [`frontend/public/logo.png`](../../frontend/public/logo.png) with your own — same file name,
-nothing else. The picture lies over the top left corner of the map and is at the same time the way
+Put your own as `local/logo.png` — a folder git ignores. `make deploy` and `make release` take it
+into the frontend image from there; [`frontend/public/logo.png`](../../frontend/public/logo.png)
+stays the placeholder. The picture lies over the top left corner of the map and is at the same time the way
 into the admin area. Nowhere in the code does it say what is on it; the label for screen readers is
 put together from `name` in the `region.json`.
 
 Portrait or landscape makes no difference, the picture is fitted into a square of 4.5 rem. About
 400 px on a side is sensible; PNG with transparency looks best on the map.
 
-> **Do not commit the replaced file.** It carries the same name as the placeholder, so it turns up
-> as a changed file. On your own device that is right; in a repository somebody can clone, it
-> passes the coat of arms on — see below.
+> **Do not copy it over the placeholder.** The file would then turn up as a changed file, and in a
+> repository somebody can clone, it passes the coat of arms on — see below. `local/` keeps it out
+> of every commit.
 
 #### On the law: two questions that often get merged into one
 
@@ -261,10 +262,11 @@ archive then gets in is [Building the first collection](collection.md).
 The PIN hash is produced by:
 
 ```bash
-cd backend && .venv/bin/python -m app.cli pin
+make pin
 ```
 
-The PIN itself is stored nowhere. If `KIEKMAP_ADMIN_PIN_HASH` is empty, the admin area says so in
+It prints the line in single quotes, and they stay: the hash contains `$` signs, and Compose cuts
+an unquoted one at the first. The PIN itself is stored nowhere. If `KIEKMAP_ADMIN_PIN_HASH` is empty, the admin area says so in
 plain words instead of rejecting every entry.
 
 ### 6. Checking it all together

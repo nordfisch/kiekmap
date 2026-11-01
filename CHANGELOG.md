@@ -4,12 +4,18 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 
 ## [Unreleased]
 
+### Changed
+
+- **A Pi is set up and updated from one bundle the development machine builds**: `make deploy`,
+  then one script on the Pi ([#124])
+
 ### Fixed
 
-- **Setting up and updating the online instance are documented, and `make release` accepts the
-  real coat of arms** ([#120])
+- **Setting up and updating the online instance are documented** ([#120])
+- **The PIN set up along the manual matches on a device**; Compose no longer cuts its hash ([#124])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
+[#124]: https://github.com/nordfisch/kiekmap/issues/124
 
 ## [0.9.6] — 2026-09-27
 
