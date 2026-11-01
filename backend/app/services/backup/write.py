@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.services.backup.collection import (
+    collection_files,
     collection_size,
     copy_if_new,
     thumbnails_of,
@@ -33,12 +34,20 @@ from app.text import texts
 log = logging.getLogger(__name__)
 
 
-def run_backup(session: Session, settings: Settings, drive: Drive, report: Report) -> str:
+def run_backup(
+    session: Session,
+    settings: Settings,
+    drive: Drive,
+    report: Report,
+    *,
+    replace_larger: bool = False,
+) -> str:
     """Write the collection onto the stick. Returns the closing message for the screen."""
+    photos, needed = collection_size(settings, max_age_s=0)
+    check_backup(photos, drive, replace_larger=replace_larger)
+
     target = drive.path / BACKUP_DIR_NAME
     target.mkdir(parents=True, exist_ok=True)
-
-    photos, needed = collection_size(settings, max_age_s=0)
     if drive.free_bytes < needed:
         # Checked against the full size, not against what is still missing: an incremental backup
         # that only just fits today has no room for next year's photographs.
@@ -51,9 +60,7 @@ def run_backup(session: Session, settings: Settings, drive: Drive, report: Repor
 
     written = 0
     done = 0
-    for source in sorted(settings.photos_dir.rglob("*")):
-        if not source.is_file():
-            continue
+    for source in collection_files(settings.photos_dir):
         written += copy_if_new(source, target / "photos" / source.relative_to(settings.photos_dir))
         # The thumbnails belong to the same photo, so they travel with it. Without them a restored
         # device would spend an hour rendering them again before showing anything.
@@ -76,6 +83,22 @@ def run_backup(session: Session, settings: Settings, drive: Drive, report: Repor
     # The database is rewritten every time -- the statements about the photos change even when the
     # photos do not. Only the images are incremental, and only about them can we say "nothing new".
     return texts().backup.backup_done(photos, human_size(written) if written else None)
+
+
+def check_backup(photos: int, drive: Drive, *, replace_larger: bool) -> None:
+    """Refuse a backup that would leave the stick with less than it holds.
+
+    The database on the stick is replaced, not merged. A fresh device with an empty collection
+    would turn the only backup into an empty one, at exactly the step a new device goes through:
+    set up, plug in the stick, restore. The photos would stay on the stick, their records not.
+
+    A smaller collection than the stick's is refused only until somebody confirms it. That can be
+    right -- photos withdrawn on purpose -- more often it is the wrong stick or the wrong device.
+    """
+    if photos == 0:
+        raise BackupError(texts().backup.nothing_to_back_up)
+    if drive.backup and drive.backup.photos > photos and not replace_larger:
+        raise BackupError(texts().backup.stick_holds_more(drive.backup.photos, photos))
 
 
 def _backup_database(session: Session, settings: Settings, target: Path) -> None:

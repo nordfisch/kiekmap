@@ -321,11 +321,12 @@ export function fetchDrives(): Promise<DriveList> {
   return adminFetch<DriveList>("/backup/drives");
 }
 
-export function startBackup(path: string): Promise<JobState> {
+/** `replaceLarger`: confirmed that a backup with more photos than the device may be replaced. */
+export function startBackup(path: string, replaceLarger = false): Promise<JobState> {
   return adminFetch<JobState>("/backup/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path }),
+    body: JSON.stringify({ path, replace_larger: replaceLarger }),
   });
 }
 

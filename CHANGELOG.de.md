@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: fdfebba462974023ae9edd160f6049bb5018d8580e8614479674769b5381c901 -->
+<!-- source-sha: 131413e228c08213d4246754b025253a80fa10ea3b1d1aa611c2b170bff9c1cf -->
 
 # Änderungen
 
@@ -13,9 +13,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
   echte Wappen hin** ([#120])
 - **Die Verwaltung zählt ganze Tage auch über eine Zeitumstellung hinweg** — danach lag die
   Tageszahl abends eine Stunde lang um einen Tag daneben ([#125])
+- **Ein leeres Gerät überschreibt die Sicherung auf dem Stick nicht mehr** ([#127])
+- **Sicherung und Zurückspielen übergehen `.DS_Store`- und `._*`-Dateien** — sie zählten als Fotos ([#127])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
 [#125]: https://github.com/nordfisch/kiekmap/issues/125
+[#127]: https://github.com/nordfisch/kiekmap/issues/127
 
 ## [0.9.6] — 2026-09-27
 

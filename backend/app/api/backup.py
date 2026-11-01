@@ -22,6 +22,7 @@ from app.api.admin import Admin, Config
 from app.config import Settings
 from app.db import current_database
 from app.schemas import (
+    BackupChoice,
     BackupOnDrive,
     BackupReminder,
     DownloadTicket,
@@ -121,13 +122,25 @@ def _pick(settings: Settings, path: str) -> service.Drive:
 
 
 @router.post("/start", response_model=JobState, summary="Start a backup")
-def start(choice: DriveChoice, admin: Admin, settings: Config) -> JobState:
+def start(choice: BackupChoice, admin: Admin, settings: Config) -> JobState:
+    """Refuses an empty collection, and a smaller one than the stick's until it is confirmed.
+
+    Checked here as well as in the job, so that the refusal comes back as an answer to the click
+    rather than as a job that fails -- see ``check_backup``.
+    """
     drive = _pick(settings, choice.path)
+    photos, _ = service.collection_size(settings, max_age_s=0)
+    try:
+        service.check_backup(photos, drive, replace_larger=choice.replace_larger)
+    except service.BackupError as refusal:
+        raise HTTPException(409, str(refusal)) from None
 
     def work(report: service.Report) -> str:
         # Its own session: this runs in a thread, and the request's session belongs to the request.
         with current_database().session() as session:
-            return service.run_backup(session, settings, drive, report)
+            return service.run_backup(
+                session, settings, drive, report, replace_larger=choice.replace_larger
+            )
 
     if not service.job.start("backup", work):
         raise HTTPException(409, texts().backup.busy)

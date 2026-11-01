@@ -591,6 +591,16 @@ export const de = {
 
       start: "Sicherung starten",
       startAgain: "Sicherung erneuern",
+      emptyDevice: "Auf diesem Gerät sind noch keine Fotos, es gibt also nichts zu sichern.",
+      emptyDeviceRestore: "Mit „Zurückspielen“ unten lässt es sich von diesem Stick füllen.",
+      replaceTitle: "Auf dem Stick sind mehr Fotos als auf diesem Gerät",
+      replaceConfirm: (onStick: string, here: string) =>
+        `Die Sicherung auf dem Stick hat ${onStick} Fotos, dieses Gerät nur ${here}. ` +
+        "Beim Erneuern wird sie durch den kleineren Bestand ersetzt. " +
+        "Ist das Gerät neu, die Sicherung stattdessen zurückspielen.",
+      replaceYes: "Ja, ersetzen",
+      replaceNo: "Abbrechen",
+      restoreRunningTitle: "Sicherung wird zurückgespielt",
       done: "Fertig",
       cancelHint: "Bitte den Stick nicht abziehen, solange die Sicherung läuft.",
 
