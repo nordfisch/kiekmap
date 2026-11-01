@@ -176,7 +176,14 @@ def days_since(when: datetime, now: datetime | None = None) -> int:
     Stored timestamps are UTC throughout (``func.now()`` in SQLite, ``datetime.now(UTC)`` in the
     JSON state files). The day boundary that counts, however, is the local one -- so both sides are
     converted before their dates are compared.
+
+    Both sides use today's UTC offset, not each its own. Across a change between summer and
+    winter time the offsets differ by an hour. Converted separately, a stamp from 00:15 CEST
+    could land on a day 34 x 24 hours before 23:15 CET and still count as 33. One offset keeps a
+    whole number of days whole. The price is that a stamp within an hour of midnight from before
+    the switch can land on a neighbouring calendar date. For a reminder that counts to 30, that
+    hour does not matter; a count that changes with the hour of reading does.
     """
-    then = when.replace(tzinfo=UTC).astimezone()
     today = (now or datetime.now(UTC)).astimezone()
+    then = when.replace(tzinfo=UTC).astimezone(today.tzinfo)
     return (today.date() - then.date()).days

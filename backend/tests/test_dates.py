@@ -1,3 +1,4 @@
+import time
 from datetime import UTC, date, datetime, timedelta
 
 import pytest
@@ -191,3 +192,26 @@ class TestDaysSince:
         shortly_after = late + timedelta(minutes=15)
 
         assert days_since(self._stored(late), shortly_after.astimezone(UTC)) == 0
+
+    @pytest.mark.parametrize(
+        "now",
+        [
+            datetime(2026, 11, 1, 22, 15, tzinfo=UTC),  # 23:15 CET, after the switch
+            datetime(2026, 3, 30, 22, 15, tzinfo=UTC),  # 00:15 CEST, after the switch to summer
+        ],
+    )
+    def test_whole_days_across_the_time_change_do_not_lose_or_gain_a_day(self, now, monkeypatch):
+        """34 x 24 hours are 34 days, even when the clocks changed in between.
+
+        Converting each side with its own offset counted 33 here: 28 Sep 22:15 UTC is 00:15 CEST
+        on the 29th, 1 Nov 22:15 UTC is 23:15 CET on the 1st. The backup reminder in the admin
+        view showed that for one hour every evening, for five weeks a year.
+        """
+        monkeypatch.setenv("TZ", "Europe/Berlin")
+        time.tzset()
+        try:
+            then = (now - timedelta(days=34)).replace(tzinfo=None)
+            assert days_since(then, now) == 34
+        finally:
+            monkeypatch.undo()
+            time.tzset()
