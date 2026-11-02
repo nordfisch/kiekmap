@@ -9,16 +9,23 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 - **A tap on the photo in the detail view shows it full screen**, and another tap leads back ([#129])
 - **No mouse cursor in the visitor view on the device**; the admin area keeps it ([#131])
 
+### Changed
+
+- **A Pi is set up and updated from one bundle the development machine builds**: `make deploy`,
+  then one script on the Pi ([#124])
+
 ### Fixed
 
-- **Setting up and updating the online instance are documented, and `make release` accepts the
-  real coat of arms** ([#120])
+- **Setting up and updating the online instance are documented** ([#120])
+- **The PIN set up along the manual matches on a device**; Compose no longer cuts its hash ([#124])
+- **The kiosk starts after a restart**; the login prompt on tty1 held its terminal ([#124])
 - **The admin view counts whole days across a change of the clocks** — after one, the day count
   was off by one for an hour every evening ([#125])
 - **An empty device no longer overwrites the backup on the stick** ([#127])
 - **Backup and restore skip `.DS_Store` and `._*` files** — they were counted as photos ([#127])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
+[#124]: https://github.com/nordfisch/kiekmap/issues/124
 [#125]: https://github.com/nordfisch/kiekmap/issues/125
 [#127]: https://github.com/nordfisch/kiekmap/issues/127
 [#129]: https://github.com/nordfisch/kiekmap/issues/129

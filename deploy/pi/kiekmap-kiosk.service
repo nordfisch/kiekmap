@@ -12,6 +12,11 @@ Description=Kiekmap kiosk (cage + Chromium)
 # been started at all yet.
 After=docker.service systemd-user-sessions.service
 Wants=docker.service
+# The login prompt on tty1 holds the terminal the kiosk needs. Without these two lines the service
+# fails at once with "Failed to set up standard input: Operation not permitted" (status 208/STDIN)
+# and restarts every five seconds into the same failure. Found on the first Pi, 1 November 2026.
+Conflicts=getty@tty1.service
+After=getty@tty1.service
 
 [Service]
 Type=simple
@@ -25,6 +30,10 @@ PAMName=login
 TTYPath=/dev/tty1
 StandardInput=tty-fail
 UtmpIdentifier=tty1
+# A clean terminal on every start, so that a restart after a crash finds it as the first start did.
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
 
 StandardOutput=journal
 StandardError=journal

@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: a96c022f298efa32ea43e0b6fcec216a52c427952c76bb1404dabfb06fd76b9c -->
+<!-- source-sha: 206f1c4bd02fec2aecf3f909fda11f089c8a0f3ef142599f146b551d5cf1b167 -->
 
 # Änderungen
 
@@ -12,16 +12,25 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - **Ein Tipp auf das Foto in der Detailansicht zeigt es bildschirmfüllend**, ein weiterer führt zurück ([#129])
 - **Kein Mauszeiger in der Besucheransicht auf dem Gerät**; die Verwaltung behält ihn ([#131])
 
+### Geändert
+
+- **Ein Pi wird aus einem Paket eingerichtet und aktualisiert, das der Entwicklungsrechner baut**:
+  `make deploy`, dann ein Skript auf dem Pi ([#124])
+
 ### Behoben
 
-- **Einrichten und Aktualisieren der Online-Instanz sind beschrieben, und `make release` nimmt das
-  echte Wappen hin** ([#120])
+- **Einrichten und Aktualisieren der Online-Instanz sind beschrieben** ([#120])
+- **Die nach dem Handbuch eingerichtete PIN passt auf dem Gerät**; Compose schneidet ihren Hash
+  nicht mehr ab ([#124])
+- **Der Kiosk startet nach einem Neustart**; die Anmeldung auf tty1 hielt sein Terminal ([#124])
 - **Die Verwaltung zählt ganze Tage auch über eine Zeitumstellung hinweg** — danach lag die
   Tageszahl abends eine Stunde lang um einen Tag daneben ([#125])
 - **Ein leeres Gerät überschreibt die Sicherung auf dem Stick nicht mehr** ([#127])
-- **Sicherung und Zurückspielen übergehen `.DS_Store`- und `._*`-Dateien** — sie zählten als Fotos ([#127])
+- **Sicherung und Zurückspielen übergehen `.DS_Store`- und `._*`-Dateien** — sie zählten als
+  Fotos ([#127])
 
 [#120]: https://github.com/nordfisch/kiekmap/issues/120
+[#124]: https://github.com/nordfisch/kiekmap/issues/124
 [#125]: https://github.com/nordfisch/kiekmap/issues/125
 [#127]: https://github.com/nordfisch/kiekmap/issues/127
 [#129]: https://github.com/nordfisch/kiekmap/issues/129

@@ -31,7 +31,7 @@ make seed         # build the invented sample collection
 ```
 
 In full in [development.md](docs/developer/development.md). The admin view needs a PIN:
-`cd backend && .venv/bin/python -m app.cli pin` produces the line for the `.env`.
+`make pin` produces the line for the `.env`.
 
 ## The rules of this repository
 

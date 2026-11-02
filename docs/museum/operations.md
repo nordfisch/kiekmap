@@ -3,9 +3,69 @@
 Everything somebody needs to know who keeps the device running in the museum. How to use it is in
 the [guide for the museum team](usermanual.md); the technology is here.
 
-> **Not yet tried on a real Pi.** The files under `deploy/pi/` are written carefully and checked
-> for syntax, but have never run — there was no device while they were built. Whatever sticks
-> first belongs in this file, as soon as the Pi stands there.
+> **Tried on a Raspberry Pi 4 with Raspberry Pi OS on Debian 13, on 1 and 2 November 2026:**
+> setting up from the bundle, the kiosk after a restart, touch, restoring a backup from a USB
+> stick, and updating with the collection on the device. **Not yet tried:** a power cut, and a
+> backup onto a stick from the device.
+
+---
+
+## What the development machine needs
+
+Once, before the first Pi. Everything the device gets is put together on the development machine;
+after setting up, the Pi needs neither git nor the internet.
+
+**The map and the place index**, from `make tiles` and `make places`. Both need the internet and
+processing time, which is why they run here and not on the Pi.
+
+**The folder `local/`.** It holds what belongs to this museum and must not go into the
+repository. Git ignores it.
+
+| File | Content |
+|---|---|
+| `local/logo.png` | the coat of arms of the place |
+| `local/pi.env` | the `.env` of the Pi |
+
+The coat of arms:
+
+```bash
+mkdir -p local
+cp ~/Developer/Museum/Wappen/holm-wappen.png local/logo.png
+```
+
+It goes into the frontend image when the image is built. `frontend/public/logo.png` stays the
+placeholder, and nothing is to be changed there. Source and rights are in
+[adaption.md](adaption.md), section "Putting the coat of arms in". A museum without a coat of arms
+copies the placeholder to `local/logo.png`.
+
+**`local/pi.env`** is created by the first `make deploy` from the template, which then stops. Two
+things go into it:
+
+- **The PIN line.** `make pin` asks for the PIN twice and prints the line
+  `KIEKMAP_ADMIN_PIN_HASH='…'`. **Keep the single quotes.** The hash contains `$` signs, and
+  without the quotes Compose cuts it at the first one: the PIN then never matches.
+- **The settings of the collection**, from
+  [step 5 of the adaption](adaption.md#5-checking-what-belongs-to-the-collection).
+
+`KIEKMAP_VERSION` stays as it is; the scripts on the Pi write it.
+
+**A name for the Pi in SSH.** In `~/.ssh/config`:
+
+```
+Host kiekmap-pi
+    HostName kiekmap.local
+    User admin
+```
+
+`kiekmap.local` is the host name set in the Imager, `admin` the user created there. Then the key,
+once:
+
+```bash
+ssh-copy-id kiekmap-pi
+```
+
+Afterwards `ssh kiekmap-pi` has to open a shell without asking for a password. `make deploy` uses
+the name `kiekmap-pi`; another one is passed as `host=`.
 
 ---
 
@@ -14,40 +74,59 @@ the [guide for the museum team](usermanual.md); the technology is here.
 A **Raspberry Pi 4 or 5**. The map needs WebGL 2, and a Pi 3 does not offer it: the map would stay
 grey there.
 
-Raspberry Pi OS **Lite** (64 bit), no desktop. Then:
+**1. The operating system.** With the Raspberry Pi Imager: Raspberry Pi OS **Lite** (64 bit), no
+desktop. In the Imager's settings: the host name `kiekmap`, a user with a password, SSH switched on,
+and the Wi-Fi if no cable is plugged in. The Pi needs the internet while it is set up, because it
+installs Chromium and Docker. **A network cable is better than Wi-Fi:** Chromium alone is 120 MB,
+and on the first Pi the Wi-Fi took a quarter of an hour for it.
+
+**2. The bundle, on the development machine:**
 
 ```bash
-sudo git clone <repo> /opt/kiekmap
-sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh
+make deploy
 ```
 
-The script installs cage, Chromium and Docker, creates the user `kiekmap`, sets up the kiosk
-service and the USB rule, and switches the screen blanking off. It then names the steps it
-cannot do itself: create the `.env`, bring images and map data over from the development machine,
-set the PIN, restart.
+`make deploy` builds both images with the coat of arms. It puts them together with the map, the
+place index, the scripts and `local/pi.env` into `release/kiekmap/` and copies the folder to
+`~/kiekmap` on the Pi. It refuses a working tree that is not clean, and it names whatever is
+missing: map, place index, coat of arms or PIN.
 
-**The map data comes from the development machine**, not from the Pi. `make tiles` and
-`make places` need the internet and processing time; only the results belong on the Pi:
+The bundle carries the version of the commit it was built from: `v0.9.6` on the release tag,
+`v0.9.6-g0942491` on any other commit.
+
+**3. On the Pi**, after `ssh kiekmap-pi`:
 
 ```bash
-rsync -a frontend/public/tiles/ pi:/opt/kiekmap/frontend/public/tiles/
-rsync -a data/places.json       pi:/opt/kiekmap/data/places.json
+sudo sh ~/kiekmap/deploy/pi/setup-pi.sh
 ```
 
-**The coat of arms does not come that way — it goes into the image.** Only a placeholder lies in
-the repository; a municipal coat of arms must not lie there, see
-[decisions.md](../developer/decisions.md), point 21. The real one is taken into the frontend image
-when it is built and is not read at run time, so it belongs on the **development machine** before
-the images are built:
+`sudo` asks for the password of the user set in the Imager. Run directly from the development
+machine, the `-t` is needed for that prompt: `ssh -t kiekmap-pi 'sudo sh ~/kiekmap/deploy/pi/setup-pi.sh'`.
 
-```bash
-cp ~/Developer/Museum/Wappen/holm-wappen.png frontend/public/logo.png
-```
+The script installs cage, Chromium and Docker and creates the user `kiekmap`, who runs the kiosk.
+It copies the software to `/opt/kiekmap`, sets up the kiosk service, the USB rule and the off
+button, and switches the screen blanking off. Then it loads the images, starts them, and waits
+until the API answers. **It refuses a device that already holds a collection**; for that one there
+is the update.
 
-The next `make release` then carries it to the device inside the image. **Copying it onto the Pi
-does nothing**: the compose file mounts `tiles/` back into the container and nothing else, so a
-`logo.png` lying beside it is read by nobody. Its source and the rights to it are in
-[adaption.md](adaption.md), section "Putting the coat of arms in".
+**4. Restart:** `sudo reboot`. The Pi lands in the map without a keyboard.
+
+**5. The collection.** It is empty after setting up. Plug in the stick with the backup, open the
+admin area through the coat of arms, and restore the backup there.
+
+`~/kiekmap` is no longer needed afterwards: `rm -r ~/kiekmap`.
+
+**What lies where on the Pi:**
+
+| Path | Content | Belongs to |
+|---|---|---|
+| `/opt/kiekmap/data/` | the collection: database, photos, place index | UID 1000, the backend in the container |
+| `/opt/kiekmap/.env` | the settings, PIN hash included | root, readable for the group `docker` |
+| `/opt/kiekmap/deploy/` | compose file and scripts | root |
+| `/opt/kiekmap/frontend/public/tiles/` | the map | root |
+| `/opt/kiekmap/pre-update/` | the database before the last two updates | root |
+
+Every `docker compose` command on the Pi therefore runs with `sudo`.
 
 ---
 
@@ -70,7 +149,7 @@ How to tell that something is stuck:
 ```bash
 systemctl status kiekmap-kiosk       # is the kiosk running?
 journalctl -u kiekmap-kiosk -n 50    # why not?
-cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env ps
+cd /opt/kiekmap && sudo docker compose -f deploy/docker-compose.yml --env-file .env ps
 curl -sf http://localhost/api/health && echo " the API answers"
 ```
 
@@ -91,10 +170,9 @@ systemctl status kiekmap-shutdown.path      # is the watcher running?
 journalctl -u kiekmap-shutdown -n 20        # what happened on the last request
 ```
 
-**`data/shutdown-watcher` is what makes the button work.** `setup-pi.sh` writes it; without it the
-backend refuses, because the same program also runs on a development machine and online, where
-nothing would act on the request. A device that was only updated from a stick therefore needs
-`sudo sh /opt/kiekmap/deploy/pi/setup-pi.sh` once — it may run as often as you like.
+**`data/shutdown-watcher` is what makes the button work.** `setup-pi.sh` writes it, and `update.sh`
+writes it again. Without it the backend refuses, because the same program also runs on a
+development machine and online, where nothing would act on the request.
 
 **The containers are deliberately not stopped.** `docker compose stop` marks them as stopped by
 hand, and `restart: unless-stopped` would then leave them down at the next boot. systemd stops
@@ -121,40 +199,73 @@ photos, uploading, backing up. SSH is needed for updates and for troubleshooting
 
 ---
 
-## Updating without the internet
+## Updating
 
-Build a folder for the stick on the development machine:
+**1. A backup**, in the admin area, onto a stick. The update keeps the collection, but a backup is
+the one copy that does not lie on the device.
 
-```bash
-git switch --detach v0.9.6                            # the release to be shipped
-make release to=/Volumes/STICK/kiekmap-update
-make release to=/Volumes/STICK/kiekmap-update map=1   # if the region has changed
-```
-
-The target builds both images, saves them as `images.tar` and writes the `version` file beside
-them. **It aborts when the working tree is not clean or the matching tag is missing** — a stick
-that belongs to no commit cannot be placed a year later.
-
-**A stick is built from a release, on its tag.** How a release is made is in
-[development.md](../developer/development.md#making-a-release).
-
-By hand these were four commands. The one that gets forgotten writes the `version` file: the
-images load, `KIEKMAP_VERSION` stays as it was in the `.env`, and the next start pulls the **old**
-image up again. The device then runs the old software and says so nowhere.
-
-On the Pi:
+**2. The bundle, on the development machine**, from the release being installed:
 
 ```bash
-sudo sh /opt/kiekmap/deploy/pi/update.sh /media/STICK/kiekmap-update
+git switch --detach v0.9.6
+make deploy
 ```
 
-The script reads the images in, enters the version in the `.env`, swaps the map data and the place
-index, restarts the containers and waits until the API answers. **The collection is not touched** —
-photos and records stay where they are.
+**3. On the Pi**, after `ssh kiekmap-pi`:
 
-Two details sit in there: the map data is first put beside the old file and then renamed, so that
-a copy broken off halfway leaves no half map file. And the place index is read in explicitly — at
-startup the backend loads it only when the table is empty.
+```bash
+sudo sh ~/kiekmap/deploy/pi/update.sh
+```
+
+The script, in this order:
+
+1. loads the new images while the old version keeps running;
+2. stops the containers and copies the database to `pre-update/<old version>/`. The last two
+   copies are kept;
+3. replaces `deploy/` and the map. Each is copied beside the old one first and then renamed, so
+   that a copy broken off halfway leaves no half map file;
+4. writes the new version into `KIEKMAP_VERSION`;
+5. takes the place index only when it differs from the one on the device, and then reads it in;
+6. starts the containers, waits for the API and checks that the backend runs the new image;
+7. restarts the kiosk and removes the images older than the previous version.
+
+**What stays:** everything in `data/` — photos, database, the state of the backup — and the
+`.env`, except for `KIEKMAP_VERSION`. A change to `local/pi.env` therefore does not reach a device
+that is already set up. A changed setting is entered on the Pi as well:
+
+```bash
+sudo nano /opt/kiekmap/.env
+cd /opt/kiekmap && sudo docker compose -f deploy/docker-compose.yml --env-file .env up -d
+```
+
+**The script refuses a device that is not set up**; for that one there is `setup-pi.sh`.
+
+**A connection that drops does not stop it.** Both scripts start themselves again as a systemd unit,
+`kiekmap-update` and `kiekmap-setup-pi`, and the terminal only shows its output. After a new
+`ssh kiekmap-pi`, `journalctl -u kiekmap-update` shows how far it got.
+
+**Going back.** The script prints the commands for it at its end. The image of the previous
+version stays on the device, and the database before the update lies in `pre-update/`. Whatever
+was entered after the update is lost that way.
+
+### Updating by stick
+
+The Pi in the museum hangs on no network. The same bundle then goes onto a stick, on the
+development machine:
+
+```bash
+make deploy to=/Volumes/STICK/kiekmap
+```
+
+`to=` names a folder of its own on the stick, not the stick itself: an earlier bundle in it is
+replaced, anything else is refused. On the Pi, with the stick plugged in:
+
+```bash
+ls /media
+sudo sh /media/<name of the stick>/kiekmap/deploy/pi/update.sh
+```
+
+The script finds the bundle beside itself and does the same as above.
 
 ---
 
@@ -199,7 +310,7 @@ In this order:
 | The contribution panel fails silently | The region check without `data/region.json` — `make tiles` puts it there too |
 | **Display normal, but nothing can be saved** | **The schema is out of date. Since August 2026 the restore brings it forward itself — [see below](#the-schema-of-a-restored-backup)** |
 | The USB stick does not appear | The udev rule or `:rshared` — see below |
-| The button says the device cannot switch itself off | `data/shutdown-watcher` is missing — run `setup-pi.sh` once more |
+| The button says the device cannot switch itself off | `data/shutdown-watcher` is missing — run `update.sh` once more |
 | The login rejects every PIN | `KIEKMAP_ADMIN_PIN_HASH` is empty; the area says so in plain words |
 | Imported photos without a keyword or a credit | A setting does not reach the container — [see below](#settings-in-container-operation) |
 
@@ -211,17 +322,21 @@ In this order:
 cd backend && .venv/bin/python -m app.cli pin
 ```
 
-That is the development machine. **On the device there is no virtual environment** — the Pi
-carries the software as an image, not as a Python installation, so there the same command runs in
-the container:
+`make pin` does the same. That is the development machine. **On the device there is no virtual
+environment** — the Pi carries the software as an image, not as a Python installation, so there the
+same command runs in the container:
 
 ```bash
-cd /opt/kiekmap && docker compose -f deploy/docker-compose.yml --env-file .env \
+cd /opt/kiekmap && sudo docker compose -f deploy/docker-compose.yml --env-file .env \
     run --rm backend python -m app.cli pin
 ```
 
-The command asks for the PIN twice and prints the line that belongs in the `.env`. The PIN itself
-is stored nowhere; forgetting it means setting a new one. Restart the service afterwards.
+The command asks for the PIN twice and prints the line that belongs in the `.env`, in single
+quotes. The quotes stay: without them Compose cuts the hash at its first `$`. The PIN itself is
+stored nowhere; forgetting it means setting a new one.
+
+On a device the line goes into `/opt/kiekmap/.env` (`sudo nano`), followed by the `up -d` from
+[Updating](#updating). It also goes into `local/pi.env`, so that the next device set up gets it.
 
 If no PIN is set up, the number pad says exactly that — it does not silently reject every entry.
 After five wrong attempts it locks for a minute. The session ends after 30 minutes without use;
@@ -342,7 +457,7 @@ must not leave the device half replaced. After the refusal the archive still lie
 folder, and the working directory is tidied up.
 
 **With a backup that is too new: update the program first, then read it in.** See
-[Updating without the internet](#updating-without-the-internet).
+[Updating](#updating).
 
 ### Looking up where things stand
 
@@ -472,8 +587,8 @@ docker run --rm caddy:2.11.4-alpine caddy hash-password --plaintext '<password>'
 
 **Every `$` in it has to be written twice** in the `.env`. Compose reads a single one as the start
 of a variable name and drops what follows it — the password then never matches, and nothing says
-why. The PIN hash comes from `cd backend && .venv/bin/python -m app.cli pin` on the development
-machine; see [Setting up the PIN](#setting-up-the-pin-for-the-admin-area).
+why. The PIN hash comes from `make pin` on the development machine, in single quotes, which
+protect it the same way; see [Setting up the PIN](#setting-up-the-pin-for-the-admin-area).
 
 **5. The map data**, on the development machine, from `make tiles` and `make places`:
 
@@ -492,19 +607,16 @@ Every release. The version in the commands is an example; take the one being ins
 
 **1. A backup.** Download the ZIP from the admin area of the online instance.
 
-**2. The images, on the development machine.** Built from the release, with the museum's coat of
-arms, which only reaches the frontend image this way:
+**2. The images, on the development machine**, built from the release:
 
 ```bash
 git switch --detach v0.9.6
-cp ~/Developer/Museum/Wappen/holm-wappen.png frontend/public/logo.png
 make release to=$HOME/kiekmap-update
-git restore frontend/public/logo.png
 ```
 
-`make release` accepts the coat of arms as the one changed file. It writes `images.tar` and a
-`version` file. The last line puts the placeholder back, so that the real coat of arms never gets
-into a commit.
+`make release` writes `images.tar` and a `version` file. The coat of arms comes from
+`local/logo.png`, as for the Pi; see [What the development machine needs](#what-the-development-machine-needs).
+Without that file the image carries the placeholder.
 
 **3. Onto the server**, into the home directory of the server's user — `/opt` belongs to root, and
 only `/opt/kiekmap` was handed over:

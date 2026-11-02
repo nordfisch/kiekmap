@@ -104,9 +104,10 @@ but no labels.
 ### Kiosk layer on the Pi
 
 Everything under `deploy/pi/`, and all of it **unverified** (see [issue #18](https://github.com/nordfisch/kiekmap/issues/18)):
-`setup-pi.sh` sets up a fresh device, `kiekmap-kiosk.service` waits for `/api/health` and then
-starts `cage` with Chromium in full screen, `update.sh` applies an update from a USB stick, and a
-udev rule mounts USB sticks — Pi OS Lite has no automounter.
+`setup-pi.sh` sets up a fresh device and `update.sh` updates it, both from the bundle
+`make deploy` builds on the development machine (`tools/build_release.py`); `common.sh` holds what
+they share. `kiekmap-kiosk.service` waits for `/api/health` and then starts `cage` with Chromium in
+full screen, and a udev rule mounts USB sticks — Pi OS Lite has no automounter.
 
 ---
 

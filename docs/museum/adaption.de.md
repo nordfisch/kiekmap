@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/adaption.md -->
-<!-- source-sha: 9545e58a5e7393b6a241efc6d9447f2714c4340a5fc20a6a718f0815b8448a11 -->
+<!-- source-sha: bd095ffdad9d7a3a74aee0012b90b67dd875a99a2fdcdcf16332489655019e00 -->
 
 # Kiekmap für einen anderen Ort oder eine andere Sprache
 
@@ -188,17 +188,18 @@ und findet ihn nicht, ist die `bbox` der erste Verdacht, nicht der Code.
 [`tools/build_logo.py`](../../tools/build_logo.py). Warum kein echtes, steht in
 [decisions.md](../developer/decisions.md), Punkt 21.
 
-[`frontend/public/logo.png`](../../frontend/public/logo.png) durch das eigene ersetzen — gleicher
-Dateiname, sonst nichts. Das Bild liegt über der linken oberen Ecke der Karte und ist zugleich der
+Das eigene als `local/logo.png` ablegen — in einem Ordner, den git übergeht. `make deploy` und
+`make release` nehmen es von dort in das Frontend-Abbild;
+[`frontend/public/logo.png`](../../frontend/public/logo.png) bleibt der Platzhalter. Das Bild liegt über der linken oberen Ecke der Karte und ist zugleich der
 Weg in den Admin-Bereich. Im Code steht nirgends, was darauf zu sehen ist; die Beschriftung für
 Vorlesewerkzeuge setzt sich aus `name` in der `region.json` zusammen.
 
 Hochkant oder quer ist gleich, das Bild wird in ein Quadrat von 4,5 rem eingepasst. Sinnvoll sind
 etwa 400 px Kantenlänge; PNG mit Transparenz sieht auf der Karte am besten aus.
 
-> **Die ersetzte Datei nicht committen.** Sie trägt denselben Namen wie der Platzhalter, taucht
-> also als geänderte Datei auf. Auf dem eigenen Gerät ist das richtig; in einem Repo, das jemand
-> klonen kann, gibt sie das Wappen weiter — siehe unten.
+> **Es nicht über den Platzhalter kopieren.** Die Datei tauchte dann als geänderte Datei auf, und in
+> einem Repo, das jemand klonen kann, gibt sie das Wappen weiter — siehe unten. `local/` hält es aus
+> jedem Commit heraus.
 
 #### Zum Recht: zwei Fragen, die oft zu einer verschmolzen werden
 
@@ -268,10 +269,12 @@ hineinkommt, steht in [Die erste Sammlung aufbauen](collection.de.md).
 Den PIN-Hash erzeugt:
 
 ```bash
-cd backend && .venv/bin/python -m app.cli pin
+make pin
 ```
 
-Die PIN selbst wird nirgends gespeichert. Ist `KIEKMAP_ADMIN_PIN_HASH` leer, sagt der
+Es gibt die Zeile in einfachen Anführungszeichen aus, und die bleiben: der Hash enthält
+`$`-Zeichen, und Compose schneidet einen Wert ohne Anführungszeichen am ersten ab. Die PIN selbst
+wird nirgends gespeichert. Ist `KIEKMAP_ADMIN_PIN_HASH` leer, sagt der
 Admin-Bereich das im Klartext, statt jede Eingabe abzulehnen.
 
 ### 6. Alles zusammen prüfen

@@ -46,3 +46,7 @@ node_modules/
 .idea/
 .vscode/
 *.swp
+
+# What belongs to this museum and must not go into the repository: the real coat of arms
+# (logo.png) and the .env of the Pi (pi.env). Read by `make deploy`; see docs/museum/operations.md.
+/local/

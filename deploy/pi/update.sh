@@ -1,92 +1,96 @@
 #!/bin/sh
-# Update without the internet -- from a USB stick.
+# Updates a device that is already set up, from a bundle.
 #
-#     sudo sh /opt/kiekmap/deploy/pi/update.sh /media/STICK/kiekmap-update
+#     sudo sh ~/kiekmap/deploy/pi/update.sh                     copied over by `make deploy`
+#     sudo sh /media/STICK/kiekmap/deploy/pi/update.sh          from a stick
 #
-# The Pi in the museum hangs on no network. An update therefore arrives as a folder on a stick:
-# the images as a tar file, plus the new map data if the region has changed.
+# The bundle is built on the development machine with `make deploy` (or `make deploy
+# to=/Volumes/STICK/kiekmap` for a stick). This script finds it beside itself.
 #
-# Such a folder is built on the development machine with:
-#
-#     make release to=/Volumes/STICK/kiekmap-update
-#
-# The collection is not touched. Whoever wants photos back takes the backup in the admin area --
-# this only swaps the software.
+# **The collection stays.** data/ is not touched beyond the place index, and the .env not beyond
+# KIEKMAP_VERSION. Before anything changes, the database is copied to pre-update/<old version>/.
 
 set -eu
 
-SOURCE="${1:-}"
-ROOT="${KIEKMAP_ROOT:-/opt/kiekmap}"
+. "$(dirname "$0")/common.sh"
 
-[ "$(id -u)" -eq 0 ] || { echo "Please start with sudo." >&2; exit 1; }
-[ -n "$SOURCE" ] && [ -d "$SOURCE" ] || {
-    echo "Usage: $0 /media/STICK/kiekmap-update" >&2
-    exit 1
-}
+require_root
+check_bundle
 
-IMAGES="$SOURCE/images.tar"
-[ -f "$IMAGES" ] || { echo "$IMAGES is missing." >&2; exit 1; }
+[ -f "$ROOT/.env" ] && [ -d "$ROOT/data" ] ||
+    fail "$ROOT is not set up yet. For a first installation:
+  sudo sh $BUNDLE/deploy/pi/setup-pi.sh"
 
-echo "== loading the images"
-docker load -i "$IMAGES"
+detach
 
-# Take the version from the stick, if it came along. Otherwise the old one stays in the .env --
-# and a "docker compose up" would pull the old image back up.
-if [ -f "$SOURCE/version" ]; then
-    VERSION="$(cat "$SOURCE/version")"
-    echo "== writing version $VERSION"
-    if grep -q '^KIEKMAP_VERSION=' "$ROOT/.env" 2>/dev/null; then
-        sed -i "s/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=$VERSION/" "$ROOT/.env"
-    else
-        echo "KIEKMAP_VERSION=$VERSION" >>"$ROOT/.env"
-    fi
-fi
+OLD="$(installed_version)"
+echo "Updating from ${OLD:-unknown} to $VERSION."
 
-if [ -d "$SOURCE/tiles" ]; then
-    echo "== taking over the map data"
-    # Beside it first, then rename: an aborted copy must not leave half a map file behind for the
-    # device to start with.
-    rm -rf "$ROOT/frontend/public/tiles.new"
-    cp -r "$SOURCE/tiles" "$ROOT/frontend/public/tiles.new"
-    rm -rf "$ROOT/frontend/public/tiles.old"
-    [ -d "$ROOT/frontend/public/tiles" ] &&
-        mv "$ROOT/frontend/public/tiles" "$ROOT/frontend/public/tiles.old"
-    mv "$ROOT/frontend/public/tiles.new" "$ROOT/frontend/public/tiles"
-fi
+# Loaded while the old version still runs. The containers are stopped as late as possible: a
+# container stopped with `compose stop` stays down at the next boot (restart: unless-stopped), so
+# a failure between stop and start would leave a device with no collection after a restart.
+load_images
 
-if [ -f "$SOURCE/places.json" ]; then
-    echo "== taking over the place index"
-    cp "$SOURCE/places.json" "$ROOT/data/places.json"
-fi
-
-# From the project root and with --env-file, not from deploy/: Compose reads the .env from the
-# directory it is started in, and the .env lies one above the compose file. Started from deploy/
-# the KIEKMAP_VERSION just written would go unread, ${KIEKMAP_VERSION:-dev} would fall back to
-# `dev` -- and since the compose file carries a `build:`, a missing image would make the Pi build
-# the frontend itself, npm and all. Measured on 8 September 2026.
-COMPOSE="docker compose -f $ROOT/deploy/docker-compose.yml --env-file $ROOT/.env"
-
-echo "== restarting"
+say "stopping the containers"
 cd "$ROOT"
-$COMPOSE up -d
+$COMPOSE stop
 
-echo "== waiting for the API to answer"
-ATTEMPT=0
-until curl -sf --max-time 3 http://localhost/api/health >/dev/null 2>&1; do
-    ATTEMPT=$((ATTEMPT + 1))
-    [ "$ATTEMPT" -gt 60 ] && { echo "The API does not come up -- see: $COMPOSE logs" >&2; exit 1; }
-    sleep 2
+# A copy of the database before the new version migrates it. The migrations run forward only, and
+# the previous image cannot read a schema it does not know. Photos are not copied: no update
+# changes them, and they would fill the card. Two snapshots are kept.
+say "a snapshot of the database"
+SNAPSHOT="$ROOT/pre-update/${OLD:-unknown}"
+mkdir -p "$SNAPSHOT"
+for f in kiekmap.db kiekmap.db-wal kiekmap.db-shm; do
+    if [ -f "$ROOT/data/$f" ]; then cp -p "$ROOT/data/$f" "$SNAPSHOT/"; fi
+done
+# shellcheck disable=SC2012 -- the names are version numbers, no spaces in them
+ls -1t "$ROOT/pre-update" | tail -n +3 | while read -r stale; do
+    rm -rf "$ROOT/pre-update/$stale"
 done
 
-# The place index is loaded at startup only when the table is empty. After an update with a new
-# places.json it has to be pulled in explicitly.
-if [ -f "$SOURCE/places.json" ]; then
-    echo "== reading the place index in again"
+install_software
+set_version
+protect_env
+
+PLACES_CHANGED=
+if ! cmp -s "$BUNDLE/places.json" "$ROOT/data/places.json"; then
+    say "a new place index"
+    cp "$BUNDLE/places.json" "$ROOT/data/places.json"
+    PLACES_CHANGED=1
+fi
+
+install_system
+start
+
+# The place index is loaded at startup only when the table is empty. A new one has to be pulled in.
+if [ -n "$PLACES_CHANGED" ]; then
+    say "reading the place index in again"
     $COMPOSE exec -T backend python -m app.cli places
 fi
 
-echo "== restarting the kiosk"
-systemctl restart kiekmap-kiosk
+restart_kiosk
 
-echo
-echo "Done. The stick can be removed."
+say "removing old images"
+# The new version and the one before it stay, so that going back needs no bundle.
+for name in kiekmap-backend kiekmap-frontend; do
+    docker image ls "$name" --format '{{.Tag}}' | while read -r tag; do
+        [ "$tag" = "$VERSION" ] || [ "$tag" = "$OLD" ] || docker image rm "$name:$tag" >/dev/null
+    done
+done
+
+cat <<END
+
+Done. $VERSION runs, the collection is unchanged.
+
+Going back to ${OLD:-the previous version}, should it be needed -- its image is still here:
+  cd $ROOT && sudo $COMPOSE stop
+  sudo rm -f data/kiekmap.db-wal data/kiekmap.db-shm
+  sudo cp -p $SNAPSHOT/kiekmap.db* data/
+  sudo sed -i 's/^KIEKMAP_VERSION=.*/KIEKMAP_VERSION=$OLD/' .env
+  sudo $COMPOSE up -d
+Whatever was entered after the update is lost that way. The rm matters: a newer -wal file beside
+the older database would damage it.
+
+The folder $BUNDLE is no longer needed and can be deleted.
+END
