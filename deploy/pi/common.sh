@@ -45,10 +45,20 @@ detach() {
     [ -n "${KIEKMAP_DETACHED:-}" ] && return 0
     UNIT="kiekmap-$(basename "$0" .sh)"
     SCRIPT="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
-    systemctl is-active -q "$UNIT" &&
-        fail "$UNIT is running already. Its output: journalctl -fu $UNIT"
-    systemctl stop "$UNIT" 2>/dev/null || true
-    systemctl reset-failed "$UNIT" 2>/dev/null || true
+    # A unit left from an earlier run. One whose script still runs refuses. One whose script has
+    # ended stays "active (exited)" through RemainAfterExit when its follower was lost with the
+    # connection, and is cleared, or every later run would refuse. list-units asks about loaded
+    # units only: a query by name for a unit that does not exist makes systemd log "Failed to open
+    # /run/systemd/transient", and that line would open the output.
+    if [ -n "$(systemctl list-units --all --no-legend "$UNIT.service")" ]; then
+        [ "$(systemctl show -p MainPID --value "$UNIT")" = 0 ] ||
+            fail "$UNIT is running already. Its output: journalctl -fu $UNIT"
+        if systemctl is-failed -q "$UNIT"; then
+            systemctl reset-failed "$UNIT"
+        else
+            systemctl stop "$UNIT"
+        fi
+    fi
 
     SINCE="$(date +%s)"
     # RemainAfterExit keeps the unit, and with it the exit status, after the script has ended.
