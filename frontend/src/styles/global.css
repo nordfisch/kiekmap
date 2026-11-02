@@ -1647,3 +1647,22 @@ html[data-handoff] body,
 .cluster.marker--pulse::after {
   border-radius: 50%;
 }
+
+/* No mouse cursor in the visitor view on the device: the screen is touched there, and a cursor
+ * left over a photo is in the way. cage has no switch for it, and it stays while a mouse is plugged
+ * in for maintenance. Set by `?kiosk`, see kiosk/kioskMode.ts; the PIN pad and the admin area keep
+ * their cursor.
+ *
+ * `!important`, because the pin layer sets the map canvas's cursor as an inline style
+ * (PinLayer.tsx), and an inline style beats any selector. */
+html[data-kiosk] .app,
+html[data-kiosk] .app *,
+html[data-kiosk] .overlay,
+html[data-kiosk] .overlay *,
+html[data-kiosk] .fullscreen,
+html[data-kiosk] .fullscreen *,
+html[data-kiosk] .attract,
+html[data-kiosk] .attract *,
+html[data-kiosk] .handoff-cover {
+  cursor: none !important;
+}

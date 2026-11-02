@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { takeHandoff } from "./kiosk/handoff";
+import { isKiosk } from "./kiosk/kioskMode";
 import { useKiosk } from "./store/kiosk";
 import { setLanguage, t } from "./text";
 import type { Language } from "./text";
@@ -44,6 +45,10 @@ async function language(): Promise<Language> {
  * bundle, and the browser this has to run in is the Chromium on the Pi.
  */
 async function start(): Promise<void> {
+  // Before the first render, so the cursor is never drawn over the map. The rule is in
+  // styles/global.css at :root[data-kiosk].
+  if (isKiosk(window.location.search)) document.documentElement.dataset.kiosk = "";
+
   // A photo tapped in the slide show before this reload. Its detail view opens before the first
   // render, and the page stays dark until photo and map are drawn -- see `HandoffCover` in App.tsx.
   // The attribute darkens the page before React has drawn anything at all.

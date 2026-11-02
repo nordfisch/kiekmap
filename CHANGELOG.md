@@ -7,6 +7,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 ### Added
 
 - **A tap on the photo in the detail view shows it full screen**, and another tap leads back ([#129])
+- **No mouse cursor in the visitor view on the device**; the admin area keeps it ([#131])
 
 ### Fixed
 
@@ -21,6 +22,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 [#125]: https://github.com/nordfisch/kiekmap/issues/125
 [#127]: https://github.com/nordfisch/kiekmap/issues/127
 [#129]: https://github.com/nordfisch/kiekmap/issues/129
+[#131]: https://github.com/nordfisch/kiekmap/issues/131
 
 ## [0.9.6] — 2026-09-27
 
