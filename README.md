@@ -15,19 +15,13 @@ history museum: it runs offline on a Raspberry Pi, adapts to any place, and the 
 what is missing. A spare-time project by Kalle Erlhoff for the Heimatmuseum Holm, built together
 with Anthropic Claude Code.
 
-> **Careful: work in progress.** What lies here is the state that came out of **building the
-> initial collection** — 929 historic photos, taken in, cleaned up and looked through. So far it
-> has run **locally only**: as a development server and in containers, both on a Mac.
->
-> **It has not yet been installed on a Raspberry Pi or on a web server.** Everything under
-> `deploy/pi/` was written without a device — the syntax is right, nothing has been run. Kiosk
-> operation, the USB path of the backup and the behaviour after a restart or a power cut are
-> therefore unverified. The first real setup is at the same time the acceptance test:
-> [issue #18](https://github.com/nordfisch/kiekmap/issues/18) and
-> [issue #22](https://github.com/nordfisch/kiekmap/issues/22).
->
-> What can be checked without a device is checked: the containers build and run, the page requests
-> nothing from a foreign origin, and the test suite is green.
+> **Careful: work in progress, before release 1.0.** Kiekmap runs on a Raspberry Pi 4 with a
+> 14-inch touch display (1920 × 1200, landscape), and online on a web server, with the collection
+> of the Heimatmuseum Holm. On the Pi it has been set up and updated from the bundle the
+> development machine builds, filled from a backup of the online instance, and has come up again
+> after a power cut ([issue #18](https://github.com/nordfisch/kiekmap/issues/18)). Acceptance
+> testing in the museum follows in the coming weeks; what turns up goes into the
+> [issues](https://github.com/nordfisch/kiekmap/issues).
 
 The device is meant to stand in the museum, run **entirely offline** in kiosk mode, and be backed
 up by plugging in a USB stick and pressing one button.

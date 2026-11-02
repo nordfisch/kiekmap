@@ -225,14 +225,11 @@ the [issues](https://github.com/nordfisch/kiekmap/issues). Only what you would *
 while working is here.
 
 **Stages 0 to 10 are built** — backend, map, time slider, contribution panel, admin view, backup,
-kiosk operation. The initial collection is imported, cleaned and reviewed. **All of that has run
-locally only**, as a development server and in containers on a Mac; nothing stands in the museum
-yet.
-
-**But everything under `deploy/pi/` is unverified.** It was built without a device; the syntax is
-right, nothing has run. The first Pi is also the acceptance test. Unverified for the same reason
-are the **USB path of the backup** and the behaviour after **restart and power cut** — neither can
-be checked on a Mac. The containers, by contrast, are verified, if only there.
+kiosk operation. The initial collection is imported, cleaned and reviewed. **It runs on a
+Raspberry Pi 4** with a 14-inch touch display, 1920 × 1200, landscape, and online behind Caddy.
+The Pi was set up and updated from the bundle `make deploy` builds, filled by restoring a backup
+of the online instance, backed up onto a stick, and came up again after a power cut (November
+2026, #18 to #21). **Acceptance testing in the museum comes next**, then release 1.0.
 
 **To develop on a Mac**, set `KIEKMAP_MEDIA_DIR=/Volumes` and create a test volume with `hdiutil` —
 see [docs/museum/operations.md](docs/museum/operations.md). Container operation runs there with `make prod-mac`.

@@ -3,10 +3,11 @@
 Everything somebody needs to know who keeps the device running in the museum. How to use it is in
 the [guide for the museum team](usermanual.md); the technology is here.
 
-> **Tried on a Raspberry Pi 4 with Raspberry Pi OS on Debian 13, on 1 and 2 November 2026:**
-> setting up from the bundle, the kiosk after a restart, touch, restoring a backup from a USB
-> stick, and updating with the collection on the device. **Not yet tried:** a power cut, and a
-> backup onto a stick from the device.
+> **Tried on a Raspberry Pi 4 with Raspberry Pi OS on Debian 13 and a 14-inch touch display
+> (1920 × 1200, landscape), in November 2026:** setting up from the bundle, the kiosk after a
+> restart, touch, restoring the backup of the online instance from a USB stick, a backup from the
+> device onto a stick, updating with the collection on the device, over SSH and from a stick, and a
+> power cut. The acceptance test in the museum follows before release 1.0.
 
 ---
 

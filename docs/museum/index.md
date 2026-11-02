@@ -46,8 +46,7 @@ from a file, and what the numbers afterwards mean.
 collection is not covered by the software licence, and the map data brings an obligation of its
 own.
 
-> **None of this has been tried on a real Raspberry Pi.** Everything about the device itself was
-> built without one. Kiosk operation, the USB path of the backup and the behaviour after a power
-> cut are therefore unverified, and the first real setup is at the same time the acceptance test.
-> What can be checked without a device is checked: the containers build and run, and the page
-> requests nothing from a foreign origin.
+> **Tried on a Raspberry Pi 4** with a 14-inch touch display (1920 × 1200), in November 2026:
+> setting up, updating, a backup onto a USB stick and restoring one from it, and a power cut. The
+> acceptance test in the museum follows before release 1.0. Details are in the
+> [operations manual](operations.md).
