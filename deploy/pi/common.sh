@@ -101,6 +101,8 @@ install_software() {
 swap() {
     rm -rf "$2.new" "$2.old"
     cp -r "$1" "$2.new"
+    # A stick touched by a Mac carries a ._<name> file beside every file; none belongs on the Pi.
+    find "$2.new" -name '._*' -type f -delete
     [ -e "$2" ] && mv "$2" "$2.old"
     mv "$2.new" "$2"
     rm -rf "$2.old"

@@ -228,7 +228,20 @@ def build_pi(target: Path, tag: str) -> str:
     shutil.copy2(ROOT / "deploy" / "docker-compose.yml", target / "deploy" / "docker-compose.yml")
     shutil.copytree(ROOT / "deploy" / "pi", target / "deploy" / "pi")
     shutil.copy2(PI_ENV, target / "env")
+    remove_apple_double(target)
     return tag
+
+
+def remove_apple_double(target: Path) -> None:
+    """The ``._<name>`` files macOS writes beside every file on a stick without extended attributes.
+
+    On exFAT or FAT, macOS keeps a file's extended attributes in a file of its own. A bundle
+    written onto a stick from a Mac had twenty of them, and ``update.sh`` copied them onto the
+    device. Removing them drops the attributes, which nothing on the Pi reads.
+    """
+    for path in sorted(target.rglob("._*"), reverse=True):
+        if path.is_file():
+            path.unlink()
 
 
 def build_server(target: Path, tag: str) -> None:
