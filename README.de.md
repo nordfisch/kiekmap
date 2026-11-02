@@ -1,5 +1,5 @@
 <!-- translated-from: README.md -->
-<!-- source-sha: 37da53e76356ac8a2156f957253f96a050beeacdf248598feede61fa36fed27a -->
+<!-- source-sha: b231b48fbd83b00c372413b68eb413e964435eb51fb4583fbcd8deb2442b66cb -->
 
 # Kiekmap
 
@@ -17,19 +17,13 @@ fürs Heimatmuseum: Läuft offline auf einem Raspberry Pi, lässt sich an jeden 
 Besucher ergänzen, was fehlt. Ein Freizeitprojekt von Kalle Erlhoff für das Heimatmuseum Holm,
 erstellt in Zusammenarbeit mit Anthropic Claude Code.
 
-> **Achtung: Arbeitsstand.** Was hier liegt, ist der Stand, der beim **Aufbau des Erstbestands**
-> entstanden ist — 929 historische Fotos, eingelesen, bereinigt und durchgesehen. Gelaufen ist das
-> bisher **ausschließlich lokal**: als Entwicklungsserver und in Containern, beides auf einem Mac.
->
-> **Auf einem Raspberry Pi oder einem Webserver wurde es bisher noch nicht installiert.** Alles
-> unter `deploy/pi/` ist ohne Gerät geschrieben — die Syntax stimmt, ausgeführt wurde nichts.
-> Ungeprüft sind damit der Kiosk-Betrieb, der USB-Weg der Sicherung und das Verhalten nach
-> Neustart und Stromausfall. Der erste echte Aufbau ist zugleich die Abnahme:
-> [Issue #18](https://github.com/nordfisch/kiekmap/issues/18) und
-> [Issue #22](https://github.com/nordfisch/kiekmap/issues/22).
->
-> Geprüft ist, was sich ohne Gerät prüfen lässt: Die Container bauen und laufen, die Seite fragt
-> nichts Fremdes an, und die Testreihe ist grün.
+> **Achtung: Arbeitsstand vor der Fassung 1.0.** Kiekmap läuft auf einem Raspberry Pi 4 mit einem
+> 14-Zoll-Touchdisplay (1920 × 1200, quer) und online auf einem Webserver, mit der Sammlung des
+> Heimatmuseums Holm. Auf dem Pi wurde es aus dem Paket eingerichtet und aktualisiert, das der
+> Entwicklungsrechner baut, aus einer Sicherung der Online-Instanz gefüllt, und es ist nach einem
+> Stromausfall wieder hochgekommen ([Issue #18](https://github.com/nordfisch/kiekmap/issues/18)).
+> In den kommenden Wochen folgt die Abnahme im Museum; was sich dabei zeigt, kommt in die
+> [Issues](https://github.com/nordfisch/kiekmap/issues).
 
 Das Gerät soll im Museum stehen, **vollständig offline** im Kiosk-Modus laufen und gesichert
 werden, indem man einen USB-Stick einsteckt und einen Knopf drückt.

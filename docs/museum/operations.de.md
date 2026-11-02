@@ -1,15 +1,17 @@
 <!-- translated-from: docs/museum/operations.md -->
-<!-- source-sha: 942bb3f7a37e578a460c3e4a05f7cb23568214aeb5ae72015d4699368c0fa914 -->
+<!-- source-sha: ff8c828e95c6610e5f775ac227928b9d95f5a8a0bfc63e7cee000ce7658b7624 -->
 
 # Betriebshandbuch
 
 Alles, was jemand wissen muss, der das Gerät im Museum am Laufen hält. Die Bedienung steht in der
 [Anleitung für das Museumsteam](usermanual.de.md); hier steht die Technik.
 
-> **Erprobt auf einem Raspberry Pi 4 mit Raspberry Pi OS auf Debian 13, am 1. und 2. November
-> 2026:** das Einrichten aus dem Paket, der Kiosk nach einem Neustart, Touch, das Zurückspielen
-> einer Sicherung vom USB-Stick und das Aktualisieren mit der Sammlung auf dem Gerät. **Noch nicht
-> erprobt:** ein Stromausfall und eine Sicherung vom Gerät auf einen Stick.
+> **Erprobt auf einem Raspberry Pi 4 mit Raspberry Pi OS auf Debian 13 und einem
+> 14-Zoll-Touchdisplay (1920 × 1200, quer), im November 2026:** das Einrichten aus dem Paket, der
+> Kiosk nach einem Neustart, Touch, das Zurückspielen der Sicherung der Online-Instanz vom
+> USB-Stick, eine Sicherung vom Gerät auf einen Stick, das Aktualisieren mit der Sammlung auf dem
+> Gerät, per SSH und vom Stick, und ein Stromausfall. Die Abnahme im Museum folgt vor der
+> Fassung 1.0.
 
 ---
 

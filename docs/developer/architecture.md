@@ -103,7 +103,7 @@ but no labels.
 
 ### Kiosk layer on the Pi
 
-Everything under `deploy/pi/`, and all of it **unverified** (see [issue #18](https://github.com/nordfisch/kiekmap/issues/18)):
+Everything under `deploy/pi/`, tried on a Raspberry Pi 4 (see [issue #18](https://github.com/nordfisch/kiekmap/issues/18)):
 `setup-pi.sh` sets up a fresh device and `update.sh` updates it, both from the bundle
 `make deploy` builds on the development machine (`tools/build_release.py`); `common.sh` holds what
 they share. `kiekmap-kiosk.service` waits for `/api/health` and then starts `cage` with Chromium in

@@ -1,5 +1,5 @@
 <!-- translated-from: docs/museum/index.md -->
-<!-- source-sha: 6804c83f65bbdb99f2b460d00a1a2376ebd7fb0eb45262274263457884c63372 -->
+<!-- source-sha: dad6fd4eea9ff35c3aa593556d9f7525a0f3ac2315bf57792030ac59ab005d03 -->
 
 # Kiekmap
 
@@ -49,8 +49,7 @@ einer Datei liest, und was die Zahlen danach bedeuten.
 Der Fotobestand fällt nicht unter die Softwarelizenz, und die Kartendaten bringen eine eigene
 Pflicht mit.
 
-> **Nichts davon ist auf einem echten Raspberry Pi erprobt.** Alles, was das Gerät selbst betrifft,
-> wurde ohne eines gebaut. Kioskbetrieb, der USB-Weg der Sicherung und das Verhalten nach einem
-> Stromausfall sind deshalb ungeprüft, und der erste echte Aufbau ist zugleich die Abnahme. Was
-> sich ohne Gerät prüfen lässt, ist geprüft: Die Container bauen und laufen, und die Seite fragt
-> nichts Fremdes an.
+> **Erprobt auf einem Raspberry Pi 4** mit einem 14-Zoll-Touchdisplay (1920 × 1200), im November
+> 2026: das Einrichten, das Aktualisieren, eine Sicherung auf einen USB-Stick und das Zurückspielen
+> einer Sicherung von dort, und ein Stromausfall. Die Abnahme im Museum folgt vor der Fassung 1.0.
+> Einzelheiten stehen im [Betriebshandbuch](operations.de.md).
