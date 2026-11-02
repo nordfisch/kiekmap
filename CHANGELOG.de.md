@@ -1,5 +1,5 @@
 <!-- translated-from: CHANGELOG.md -->
-<!-- source-sha: d7d03e45bdcc0b6ca47e8352137e2358ef6624206771021a8df858f507af605a -->
+<!-- source-sha: 206f1c4bd02fec2aecf3f909fda11f089c8a0f3ef142599f146b551d5cf1b167 -->
 
 # Änderungen
 
@@ -10,6 +10,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 ### Hinzugefügt
 
 - **Ein Tipp auf das Foto in der Detailansicht zeigt es bildschirmfüllend**, ein weiterer führt zurück ([#129])
+- **Kein Mauszeiger in der Besucheransicht auf dem Gerät**; die Verwaltung behält ihn ([#131])
 
 ### Geändert
 
@@ -33,6 +34,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 [#125]: https://github.com/nordfisch/kiekmap/issues/125
 [#127]: https://github.com/nordfisch/kiekmap/issues/127
 [#129]: https://github.com/nordfisch/kiekmap/issues/129
+[#131]: https://github.com/nordfisch/kiekmap/issues/131
 
 ## [0.9.6] — 2026-09-27
 

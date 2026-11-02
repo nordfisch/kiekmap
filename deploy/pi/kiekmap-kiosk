@@ -42,7 +42,9 @@ BROWSER=chromium
 command -v "$BROWSER" >/dev/null 2>&1 || BROWSER=chromium-browser
 
 exec cage -- "$BROWSER" \
-    --kiosk "$ADDRESS" \
+    `# The marker hides the mouse cursor in the visitor view, see frontend/src/kiosk/kioskMode.ts.` \
+    `# Not in ADDRESS: the health query above is built from it.` \
+    --kiosk "${ADDRESS%/}/?kiosk" \
     --ozone-platform=wayland \
     --user-data-dir="$PROFILE" \
     --no-first-run \
