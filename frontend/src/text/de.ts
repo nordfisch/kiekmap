@@ -152,6 +152,13 @@ export const de = {
      * PIN first. Somebody who reads it should not be surprised by a number pad.
      */
     edit: "In der Verwaltung bearbeiten — fragt die PIN ab",
+    /**
+     * The photo in the detail view is a button: a tap shows it full screen. Only a label -- the
+     * picture itself is what one taps.
+     */
+    showFullScreen: "Foto bildschirmfüllend zeigen",
+    /** The full-screen photo, which a tap leads back from. */
+    leaveFullScreen: "Zurück zur Beschreibung",
   },
 
   timeline: {

@@ -4,6 +4,10 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 
 ## [Unreleased]
 
+### Added
+
+- **A tap on the photo in the detail view shows it full screen**, and another tap leads back ([#129])
+
 ### Changed
 
 - **A Pi is set up and updated from one bundle the development machine builds**: `make deploy`,
@@ -23,6 +27,7 @@ Format after [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionin
 [#124]: https://github.com/nordfisch/kiekmap/issues/124
 [#125]: https://github.com/nordfisch/kiekmap/issues/125
 [#127]: https://github.com/nordfisch/kiekmap/issues/127
+[#129]: https://github.com/nordfisch/kiekmap/issues/129
 
 ## [0.9.6] — 2026-09-27
 

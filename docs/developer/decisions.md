@@ -2107,7 +2107,7 @@ nothing about whether they work.
 
 ## 78. The coat of arms is guarded at the index, not in the tree
 
-**In part superseded by [point 97](#97-the-pi-gets-a-bundle-not-a-clone)**: the real crest no longer
+**In part superseded by [point 98](#98-the-pi-gets-a-bundle-not-a-clone)**: the real crest no longer
 lies in the tree but in `local/logo.png`. The check stays, as the guard for whoever copies it over
 the placeholder after all.
 
@@ -2699,7 +2699,33 @@ polls, with the same script ([issue #18](https://github.com/nordfisch/kiekmap/is
 
 ---
 
-## 97. The Pi gets a bundle, not a clone
+## 97. The full-screen photo shows the original, with the thumbnail underneath
+
+A tap on the photo in the detail view shows it on the whole screen, on black, fitted and never
+cropped. Another tap leads back to the detail view (#129).
+
+**The original, not the 1200 px thumbnail.** Point 95 kept the original out of the detail view
+because a stack would load several megabytes per step. Full screen is one photo the visitor asked to
+see closer, so the cost falls once and on purpose. On 2 November 2026 the 1324 originals were all
+JPEG, 4.3 megapixels on average and 35 at most. The thumbnail stands underneath from the first
+moment and stays visible if the browser cannot show the original — the import accepts TIFF.
+
+**A stack does not page while the photo is full screen.** The flag lives in the store, and
+`advanceStack` does nothing while it is set. The detail view could not guard this alone: a key on
+the photo opens full screen without the touch that otherwise stops the paging.
+
+**Every way that opens or closes a photo switches it off.** Otherwise the next photo would open
+straight into full screen.
+
+**Back on click, not on pointerdown.** A touch fires pointerdown before click. Closing on the first
+would let the click land on the photo underneath and open full screen again.
+
+**The slide show still takes over.** The full-screen view lies inside the detail view's layer, below
+`.attract`, and the slide show ends with a reload that clears the flag.
+
+---
+
+## 98. The Pi gets a bundle, not a clone
 
 `make deploy` builds one folder on the development machine and copies it into the home directory of
 the SSH user: both images, the map, the place index, `deploy/` and the Pi's `.env`. On the Pi
